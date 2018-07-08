@@ -72,7 +72,7 @@ nelle mail ricordare matricola\\
 Libro: Cormen, Leiserson, Rivest, Stein "Introduzione agli algoritmi e alle strutture dati" (circa i primi 13 capitoli)\\
 Eserciziario: Sedgewick\\
 Esame: scritto (circa 4 esercizi di scrittura di algoritmi e domande di teoria), ci sono i parziali, a Luglio posso recuperarne uno. No orale \\
-Nel corso si ricerca l'efficienza in a termini di tempo di esecuzione e spazio nella memoria (questa è la parte di strutture dati).\\\textbf{Questi appunti sono presi a lezione con il professor Claudio Zandron. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto}
+Nel corso si ricerca l'efficienza in a termini di tempo di esecuzione e spazio nella memoria (questa è la parte di strutture dati).
 \chapter{Iterazione}
 \begin{definizione}
 Un algoritmo è una sequenza di istruzioni elementari che consentono di risolvere un problema computazionale. Elementari perché l'esecutore (nel nostro caso il compilatore) può comprendere i vari step dell'algoritmo. Un algoritmo prende un input ed elabora i dati, dando un output.\\
@@ -2182,6 +2182,223 @@ HeapSort(A[])
     heapify(A, 1)
 \end{verbatim}
 l'heapsize andrebbe decrementato fino a 0, quindi alla fine di tutto bisogna dare un ulteriore \textit{heapsize--}. Si ha che $T(n)=O(n\cdot \log n)$ e che è in loco ma non stabile.
+\subsubsection{Rappresentazione dell'heapsort}
+Si ha la seguente sequenza di numeri:
+$$[70,100,30,20,90,80]$$
+mediante l'heap viene così rappresentata:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {70};
+ 	\node (a) at(-0.95,-0.95) {100};	
+  	\node (b) at(0.95,-0.95) {30};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {90};	
+  	\node (e) at(0.45,-1.9) {80};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+    \draw (b) -- (e);
+\end{tikzpicture}
+\end{center}
+\textbf{partiamo col buildheap}:\\
+Abbiamo quindi 6 cifre e quindi avremo $\frac{heapsize}{2}=3$.\\
+Pariamo quindi con \textit{heapify(3)}, ovvero selezionando 30 come pivot. Tra i figli abbiamo che esiste un valore maggiore, 80, quindi effettuiamo lo scambia
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {70};
+ 	\node (a) at(-0.95,-0.95) {100};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {90};	
+  	\node (e) at(0.45,-1.9) {30};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+    \draw (b) -- (e);
+\end{tikzpicture}
+\end{center}
+Non avendo 30 figli passiamo direttamente a \textit{heapify(2)} selezionando 100 che come prima non ha valori superiori tra i figli quindi non si effettua nessun cambiamento.
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {70};
+ 	\node (a) at(-0.95,-0.95) {100};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {90};	
+  	\node (e) at(0.45,-1.9) {30};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+    \draw (b) -- (e);
+\end{tikzpicture}
+\end{center}
+Arriviamo infine a \textit{heapify(1)}, avendo come pivot 70. In questo caso abbiamo innanzitutto lo scambio col valore 100:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {100};
+ 	\node (a) at(-0.95,-0.95) {70};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {90};	
+  	\node (e) at(0.45,-1.9) {30};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+    \draw (b) -- (e);
+\end{tikzpicture}
+\end{center}
+inoltre dato che 70, ora in posizione 2, ha un figlio con un valore maggiore, 90, provvedo ad effettuar lo scambio facendo \textit{heapify(2)}:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {100};
+ 	\node (a) at(-0.95,-0.95) {90};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {70};	
+  	\node (e) at(0.45,-1.9) {30};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+    \draw (b) -- (e);
+\end{tikzpicture}
+\end{center}
+Siamo giunti alla fine del \textit{buildheap}, avendo così un \textit{heap} che presente il valore maggiore come radice e il valore minore come una delle foglie.\\
+\textbf{Heapsort}: \\
+Partiamo invertendo primo e ultimo valore:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {30};
+ 	\node (a) at(-0.95,-0.95) {90};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {70};	
+  	\node (e) at(0.45,-1.9) {100};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+    \draw (b) -- (e);
+\end{tikzpicture}
+\end{center}
+riduciamo l'\textit{heapsize} di uno e quindi rimuoviamo "virtualmente" 100 dall'\textit{heap}:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {30};
+ 	\node (a) at(-0.95,-0.95) {90};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {70};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+\end{tikzpicture}
+\end{center}
+procediamo con \textit{heapify(1)}, avendo 30 come pivot. Scambio prima con 90:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {90};
+ 	\node (a) at(-0.95,-0.95) {30};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {70};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+\end{tikzpicture}
+\end{center}
+e poi 30 con 70:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {90};
+ 	\node (a) at(-0.95,-0.95) {70};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {30};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) -- (a) -- (d);
+\end{tikzpicture}
+\end{center}
+l'\textit{heapify} è finito quindi posso nuovamente invertire il primo e l'ultimo valore. infine posso ridurre l'\textit{heapsize} di 1 e rimuovere "virtualmente" 90:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {30};
+ 	\node (a) at(-0.95,-0.95) {70};	
+  	\node (b) at(0.95,-0.95) {80};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) ;
+\end{tikzpicture}
+\end{center}
+procedo nuovamente con l'\textit{heapify(1)}. Prendo come pivot 30 e lo inverto con  80:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {80};
+ 	\node (a) at(-0.95,-0.95) {70};	
+  	\node (b) at(0.95,-0.95) {30};
+  	\node (c) at(-1.45,-1.9) {20};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b);
+    \draw (a) -- (c) ;
+\end{tikzpicture}
+\end{center}
+l'\textit{heapify} è finito quindi nuovamente inverto il primo e l'ultimo valore, rimuovendo "virtualmente" 80:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {20};
+ 	\node (a) at(-0.95,-0.95) {70};	
+  	\node (b) at(0.95,-0.95) {30};
+  	\node (c) at(-1.45,-1.9) {(80)};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b); 
+\end{tikzpicture}
+\end{center}
+procedo nuovamente con l'\textit{heapify(1)}, avendo 20 come pivot. Scambio 20 con 70:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {70};
+ 	\node (a) at(-0.95,-0.95) {20};	
+  	\node (b) at(0.95,-0.95) {30};
+  	\node (c) at(-1.45,-1.9) {(80)};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) -- (top) -- (b); 
+\end{tikzpicture}
+\end{center}
+l'\textit{heapify} è finito quindi nuovamente inverto il primo e l'ultimo valore, rimuovendo "virtualmente" 70:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {30};
+ 	\node (a) at(-0.95,-0.95) {20};	
+  	\node (b) at(0.95,-0.95) {(70)};
+  	\node (c) at(-1.45,-1.9) {(80)};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) ; 
+\end{tikzpicture}
+\end{center}
+effetto quindi nuovamente l'\textit{heapify(1)}, con pivot 30. Non avviene alcuno scambio:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {30};
+ 	\node (a) at(-0.95,-0.95) {20};	
+  	\node (b) at(0.95,-0.95) {(70)};
+  	\node (c) at(-1.45,-1.9) {(80)};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)};
+  	\draw (top) -- (a) ; 
+\end{tikzpicture}
+\end{center}
+l'\textit{heapify} è finito quindi nuovamente inverto il primo e l'ultimo valore, rimuovendo "virtualmente" 30:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {20};
+ 	\node (a) at(-0.95,-0.95) {(30)};	
+  	\node (b) at(0.95,-0.95) {(70)};
+  	\node (c) at(-1.45,-1.9) {(80)};		
+  	\node (d) at(-0.45,-1.9) {(90)};	
+  	\node (e) at(0.45,-1.9) {(100)}; 
+\end{tikzpicture}
+\end{center}
+Abbiamo così ottenuto il vettore riordinato dal minore al maggiore:
+$$[20,30,70,80,90,100]$$ 
 \subsection{altro sullo heap}
 Funzione per trovare il massimo:
 \begin{verbatim}

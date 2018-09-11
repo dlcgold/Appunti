@@ -59,8 +59,6 @@
 \markboth{\chaptername
 \ \thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
-\chapter{Disclaimer}
-\textbf{Si avverte che il seguente testo NON è stato prodotto con appunti presi a lezione bensì da parti del libro di testo (sia italiano che inglese) che dagli appunti "Scazzo" presenti sul solito MEGA. Potrebbero (e lo faranno) contenere errori, parecchi. Buono Studio}
 \chapter{Rappresentazione dell'informazione}
 Innanzitutto si ha che quando si hanno $n$ bit si possono avere $2^n$ configurazioni diverse di bit. Quando dichiaro una variabile sto dichiarando una zona di memoria che contiene i bit di quel valore. Il numero di bit è finito.
 \begin{nota}
@@ -453,7 +451,7 @@ Le parti principali di un computer sono costruite da circuiti digitali che elabo
 \item \textbf{Negazione NOT:} l'uscita sarà la variabile opposta a quella d'ingresso:\\
 \\
 \includegraphics[scale=0.5]{img/not.jpg}\\
-Essa può essere aggiunta alle porte NOR e AND ottenendo NOR e NAND che avranno le uscite opposte a OR e AND. Per il NOR si ha che se almeno una variabile di ingresso è $1$ la variabile di uscita sarà $0$ e per il NAND che la variabile di uscita è $0$ sse entrambe quelle di ingresso sono $1$. Si ha inoltre la porta XOR (\textit{OR esclusivo}) che ha come uscita $1$ sse le variabili d'ingresso sono diverse:\\
+Essa può essere aggiunta alle porte NOR e AND ottenendo NOR e NAND che avranno le uscite opposte a OR e AND. Per il NOR si ha che se almeno una variabile di ingresso è $1$ la variabile di uscita sarà $0$ e per il NAND che la variabile di uscita è $0$ sse entrambe quelle di ingresso sono $1$ (usando solo la porta NAND si possono ottenere le porte AND, OR e NOT, si chiama \textit{universalità di NAND}). Si ha inoltre la porta XOR (\textit{OR esclusivo}) che ha come uscita $1$ sse le variabili d'ingresso sono diverse:\\
 \\
 \includegraphics[scale=0.57]{img/nornand.jpg}\\
 \end{itemize}
@@ -491,7 +489,6 @@ $$E=(A\cdot B\cdot \overline{C})+(A\cdot C\cdot \overline{B})+(B\cdot C\cdot \ov
 $$E=(\overline{(\overline{A}+\overline{B}+C)\cdot (\overline{A}+\overline{C}+B)\cdot (\overline{B}+\overline{C}+A) })$$
 \end{enumerate}
 \newpage
-
 Si userà soprattutto la \textit{Somma di Prodotti} che viene rappresentata dalla PLA. Una PLA ha un insieme di inputs e i relativi complementi (ottenuti grazie a degli invertitori) e due stadi di logica. Il primo stadio è un array di porte AND che formano un insieme di \textit{termini prodotto} (detti \textit{ninterms}), ciascuno dei quali può consistere in uno qualsiasi degli input o dei loro complementi. Il secondo stadio è un array di porte OR ciascuna delle quali effettua una somma logica di un certo numero di \textit{termini prodotto}. Ecco una rappresentazione schematica:\\
 \begin{center}\includegraphics[scale=0.65]{img/pla.png}\end{center}
 Una PLA può implementare direttamente la tavola di verità di una certa funzione logica, con molteplici input e output. Dato che ogni ingresso per il quale l'output è true richiede un \textit{termine prodotto} ci sarà una riga corrispondente nella PLA. Ogni output corrisponde ad una certa riga di porte OR nel secondo stadio. La grandezza della PLA è data dalla somma delle lunghezze dei due array di porte AND e OR (dette \textit{AND plane} e \textit{OR plane}. La \textit{AND plane} sarà pari a $numero\,\, input\,\, \times \,\, numero\,\, ninterms\,\, differenti$ mentre la \textit{OR plane} sarà pari a $numero\,\, output\,\, \times \,\, numero\,\, ninterms\,\, differenti$. Nella PLA solo la tavola di verità che produce true ha delle porte logiche associate e esiste un solo ingresso per ogni minterm differente (due \textit{termini prodotto} uguali non hanno due ingressi diversi).
@@ -622,11 +619,212 @@ La DRAM usa un decoder a due livelli, prima un accesso sulla riga e poi uno sull
 \end{center}
 L'entrata sulle righe sceglie un numero di righe e attiva il corrispondente \textit{word line}, il contenuto di tutte le colonne nelle righe attive viene salvato nei Latch. Due segnali, il RAS, \textit{Row Access Strobe}, e il CAS, \textit{Columns Access Strobe}, segnalano quando righe e colonne sono state rifornite con i dati. Questo sistema rende l'accesso alla DRAM più lungo, tra i $50$ e 9 $70$ \textit{ns}. Una DRAM 64M$\times$4 tiene 8K accessi su ogni riga, ma ne salva solo 4 con l'accesso alle colonne
 \end{itemize}
+\section{ALU}
+\textit{arithmetic logic unit} è l'unità che esegue le operazioni aritemica (\textit{add, sub, etc...}) e quelle logiche (\textit{and, or}). La ALU è composta da porte OR, porte NAD, multiplexor e inverter.
+\subsection{ALU a 1bit}
+ovviamente le operazioni logiche sono più semplici, come si può qui vedere:
+\begin{center}
+\includegraphics[scale=0.7]{img/alu.png}
+\end{center}
+si ha un multiplexor a destra che sceglie AND o OR in base al valore di \textit{operation}, 0 per AND e 1 per OR. \\
+Vediamo l'addizione. Un sommatore deve avere 2 input e un bit di output per la somma. C'è poi un secondo output, il \textit{CarryOut}, contenente il resto della somma che è collegato come terzo input, \textit{CarryIn}, ad un sommatore vicino (schema in figura). CarryOut e somma possono essere espresse come espressioni logiche, secondo la seguente tabella:
+\begin{center}
+\includegraphics[scale=0.6]{img/alu2.png}
+\end{center}
+Si ha la seguente espressione dalla tabella per il CarryOut:
+$$CarryOut=(b\cdot CarryIn)+(a\cdot CarryIn)+(a\cdot b)+(a\cdot b\cdot CarryIn)$$
+Se $a\cdot b\cdot CarryIn$ è true allora anche gli altri tre termini devono esserlo quindi possiamo semplificare:
+$$CarryOut=(b\cdot CarryIn)+(a\cdot CarryIn)+(a\cdot b)$$
+ottenendo questo circuito per ottenere il CarryOut:
+\begin{center}
+\includegraphics[scale=0.6]{img/alu3.png}
+\end{center}
+\newpage
+La somma normale invece è settata in modo da avere 1 in ouput solo se 1 o 3 ingressi sono 1 con la seguente equazione:
+$$sum=(a\cdot \overline{b}\cdot \overline{CarryIn})+(\overline{a}\cdot b\cdot \overline{CarryIn})+(\overline{a}\cdot \overline{b}\cdot CarryIn)+(a\cdot b\cdot CarryIn)$$
+Aggiungendo quindi il sommatore del CarryOut allo schema per le equazioni logiche si ottiene:
+\begin{center}
+\includegraphics[scale=0.7]{img/alu4.png}
+\end{center}
+\subsection{ALU a 32bit}
+Si ottiene collegando 32 ALU a 1bit ottenendo così 32 risultati possibili. Si può per esempio avere la sottrazione, che consiste nel sommare l'inverso di un operando, aggiungendo 1 per il \textit{complemento a 1}. Per invertire l'operando si aggiunge semplicemente un multiplexor 2:1 che sceglie, per esempio tra $b$ e $\overline{b}$, ottenendo:
+\begin{center}
+\includegraphics[scale=0.5]{img/alu5.png}
+\end{center}
+e nel complesso la seguente rappresentazione dell'ALU a 32bit:
+\begin{center}
+\includegraphics[scale=0.6]{img/alu6.png}
+\end{center}
+Aggiungiamo ora un'operazione di comparazione, la \textit{slt}, che ha 1 come output se rs<rt o 0 se viceversa. Per farlo si aggiunge l'input \textit{Less} usato solo per questa istruzione, e si connette 0 al bit meno significativo della ALU, si usa così il bit meno significativo unicamente per questa istruzione. Inoltre ora si può calcolare anche un valore negativo, usando il bit più significativo per identificarlo, 1 per un numero negativo e 0 per uno positivo. Dato che il bit più significativo per la slt non è l'output del sommatore si dovrà usare il valore di input Less. Si necessita quindi di un bit aggiuntivo per il bit più significativo che ha un extra output: l'output del sommatore. Si crea quindi un nuovo output del sommatore, detto \textit{set}, usato solo dalla slt. Inoltre si aggiunge l'\textit{overflow detector} apposta per questo bit Più significativo della ALU. Si ha quindi:
+\begin{center}
+\includegraphics[scale=0.7]{img/alu7.png}
+\end{center} 
+e nel complesso ecco l'ALU a 32bit, con l'aggiunta del controllo che il risultato sia zero, per testare l'uguaglianza ($zero=\sum_{i=0}^{31} \overline{result-i}$):
+\begin{center}
+\includegraphics[scale=0.6]{img/alu8.png}
+\end{center}
+solitamente indicata col seguente simbolo:
+\begin{center}
+\includegraphics[scale=0.7]{img/alu9.png}
+\end{center}
+\section{Esercizi}
+\begin{esercizio}
+Dato il seguente circuito con la seguente tabella di ingressi definire l'output:
+\begin{center}
+\includegraphics[scale=0.7]{img/es1.png}
+\end{center}
+Si ha la seguente tabella della verità:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline 
+& & & & & & &\\
+$A$ & $B$ & $\overline{A}$ & $\overline{B}$ & $A\wedge\overline{B}$  & $\overline{A}\wedge B$ & $A\wedge B$1 & final $\vee$\\
+\hline
+0 & 0 & 1 & 1 & 0 & 0 & 0 & 0\\
+\hline
+0 & 1 & 1 & 0 & 0 & 1 & 0 & 1\\
+\hline
+1 & 0 & 0 & 1 & 1 & 0 & 0 & 1\\
+\hline
+1 & 1 & 0 & 0 & 0 & 0 & 1 & 1\\
+\hline
+\end{tabular}
+\end{center}
+Quindi come output si avrà in ordine $M=[0,1,1,1]$
+\end{esercizio}
+\begin{esercizio}
+Dato il seguente circuito con la seguente tabella di ingressi definire l'output:
+\begin{center}
+\includegraphics[scale=0.6]{img/es2.png}
+\end{center}
+Si ha la seguente tabella della verità:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline 
+& & & & & & & & & & \\
+$A$ & $B$ & $C$ & $\overline{A}$ & $\overline{B}$ & $\overline{C}$ & $\overline{A}\wedge B\wedge C$  & $A\wedge \overline{B}\wedge C$ & $A\wedge B\wedge\overline{C}$ & $A\wedge B\wedge C$ & final $\vee$\\
+\hline
+0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0\\
+\hline
+0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+\hline
+0 & 1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+\hline
+0 & 1 & 1 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 1\\
+\hline
+1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0\\
+\hline
+1 & 0 & 1 & 0 & 1 & 0 & 0 & 1 & 0 & 0 & 1\\
+\hline
+1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 & 0 & 1\\
+\hline
+1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
+\hline
+\end{tabular}
+\end{center}
+Quindi come output si avrà in ordine $M=[0,0,0,1,0,1,1,1]$
+\end{esercizio}
+\newpage
+\begin{esercizio}
+Data la seguente tabella con input e output definire la funzione di D (usando gli OR di AND) e disegnare il circuito:
+\begin{center}
+\includegraphics[scale=0.7]{img/es3.png}
+\end{center}
+Iniziamo scrivendo la tabella di verità con ciò che conosciamo:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline 
+& & & & & & & & & \\
+$A$ & $B$ & $C$ & $\overline{A}$ & $\overline{B}$ & $\overline{C}$ & $\wedge \wedge $  & $\wedge \wedge $ & $\wedge \wedge$ & final $\vee$\\
+\hline
+0 & 0 & 0 & 1 & 1 & 1 &  &  &  &  0\\
+\hline
+0 & 0 & 1 & 1 & 1 & 0 &  &  &  &  1\\
+\hline
+0 & 1 & 0 & 1 & 0 & 1 &  &  &  &  1\\
+\hline
+0 & 1 & 1 & 1 & 0 & 0 &  &  &  &  0\\
+\hline
+1 & 0 & 0 & 0 & 1 & 1 &  &  &  &  1\\
+\hline
+1 & 0 & 1 & 0 & 1 & 0 &  &  &  &  0\\
+\hline
+1 & 1 & 0 & 0 & 0 & 1 &  &  &  &  0\\
+\hline
+1 & 1 & 1 & 0 & 0 & 0 &  &  &  &  0\\
+\hline
+\end{tabular}
+\end{center}
+si avranno 3 doppi AND tra 3 degli elementi delle prime 6 colonne. Dato che l'uscita è formata dall'OR delle prime tre colonne posso intuire che per avere 0 devo avere tutti e tre i campi 0, si ottiene quindi:
+ \begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline 
+& & & & & & & & & \\
+$A$ & $B$ & $C$ & $\overline{A}$ & $\overline{B}$ & $\overline{C}$ & $\wedge \wedge $  & $\wedge \wedge $ & $\wedge \wedge$ & final $\vee$\\
+\hline
+0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 &  0\\
+\hline
+0 & 0 & 1 & 1 & 1 & 0 &  &  &  &  1\\
+\hline
+0 & 1 & 0 & 1 & 0 & 1 &  &  &  &  1\\
+\hline
+0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 &  0\\
+\hline
+1 & 0 & 0 & 0 & 1 & 1 &  &  &  &  1\\
+\hline
+1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 &  0\\
+\hline
+1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &  0\\
+\hline
+1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 &  0\\
+\hline
+\end{tabular}
+\end{center}
+quelli con 1 in uscita comportano la presenza di almeno un 1 come risultato di uno dei tre doppi and, per avere 1 in uscita da un doppio end si necessita di avere le 3 entrate uguali a 1. Si nota così che per la seconda riga servono $\overline{A},\overline{B},C$, ottenendo $1,0,0$  per la terza $\overline{A}, B, \overline{C}$, ottenendo $0,1,0$ per la quinta $A, \overline{B}, C$ , ottenendo $0,0,1$ e avendo infine:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline 
+& & & & & & & & & \\
+$A$ & $B$ & $C$ & $\overline{A}$ & $\overline{B}$ & $\overline{C}$ & $\overline{A}\wedge \overline{B}\wedge C$  & $\overline{A}\wedge B\wedge\overline{C} $ & $A\wedge \overline{B}\wedge\overline{C}$ & final $\vee$\\
+\hline
+0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 &  0\\
+\hline
+0 & 0 & 1 & 1 & 1 & 0 & 1 & 0 & 0 &  1\\
+\hline
+0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 &  1\\
+\hline
+0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 &  0\\
+\hline
+1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 1 &  1\\
+\hline
+1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 &  0\\
+\hline
+1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &  0\\
+\hline
+1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 &  0\\
+\hline
+\end{tabular}
+\end{center}
+\newpage
+Ed ecco il circuito:
+\begin{center}
+\includegraphics[scale=0.65]{img/es4.png}
+\end{center}
+\end{esercizio}
+\begin{esercizio}
+\begin{itemize}
+\item un multiplexor a 32 ingressi quanti ingressi di selezione deve avere?\\
+Si devono avere $log_2(32)=5$ ingressi di selezione
+\item un decoder con 1024 possibili uscite ha un ingresso di quanti bit?\\
+Si ha $2^x=1024$ quindi $x=10$ bit in ingresso
+
+\end{itemize}
+\end{esercizio}
 \chapter{Assembly}
 Prima di tutto analizziamo cosa accadde quando si compila un programma di alto livello:
 \begin{itemize} 
 \item il compilatore trasforma il programma in linguaggio assembler, una forma simbolica di ciò che il calcolatore è in grado di interpretare 
-\item l'assemblatore traduce il linguaggio assembler in linguaggio macchina. L'hardware MIPS si assicura che \$zero contenga sempre il valore 0 e permette il caricamento di un registro di costanti a 32bit, nonostante il limite a 16bit per le I-Type. L'assemblatore accetta numeri in diverse basi. SI converte quindi il programma assembler in un \textit{file oggetto}, ovvero una sequenza di istruzioni in linguaggio macchina, dati e informazioni necessarie a collocare le istruzioni in memoria nella posizione corretta. L'assemblatore deve determinare gli indirizzi corripsondenti a tutte le etichette, e ne tiene traccia nei salti e nei trasferimenti dati scrivendole in una \textit{tabella dei simboli} che conterrà coppie di tipo \textit{simbolo-indirizzo}
+\item l'assemblatore traduce il linguaggio assembler in linguaggio macchina. L'hardware MIPS si assicura che \$zero contenga sempre il valore 0 e permette il caricamento di un registro di costanti a 32bit, nonostante il limite a 16bit per le I-Type. L'assemblatore accetta numeri in diverse basi. SI converte quindi il programma assembler in un \textit{file oggetto}, ovvero una sequenza di istruzioni in linguaggio macchina, dati e informazioni necessarie a collocare le istruzioni in memoria nella posizione corretta. L'assemblatore deve determinare gli indirizzi corrispondenti a tutte le etichette, e ne tiene traccia nei salti e nei trasferimenti dati scrivendole in una \textit{tabella dei simboli} che conterrà coppie di tipo \textit{simbolo-indirizzo}
 \item per evitare di dover ripetere da 0 tutte le operazioni indicate ogni volta che si cambia qualcosa nel sorgente. Per ovviare a questo problema si è deciso di compilare separatamente ogni procedura e si è creato un programma di sistema chiamato \textit{Linker (Link Editor)} che prende tutte le procedure e le unisce. Avvengono 3 passaggi:
 \begin{enumerate}
 \item il Linker inserisce in memoria in modo simbolico il codice e i moduli dati

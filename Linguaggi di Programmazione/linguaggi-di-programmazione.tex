@@ -138,10 +138,292 @@ Si analizza un esempio di codice in \textit{Lisp}:
 \end{minted}
 Si ha che tutto è rappresentato da una lista, si hanno delle funzioni standard (\textit{defun, equal, first, rest e list}) e \textit{member} che viene definita dal programmatore. L'ultima linea definisce il numero da cercare e la lista, sempre con la logica di funzioni dentro ad altre. L'esecuzione è la seguente: Si definisce, nella prima riga, la funzione che cerca un valore (\textit{item}) in una lista (\textit{list}). Nella seconda riga cominciano le condizioni: 
 \begin{enumerate}
-\item prima si controlla se la lista è nulla con \textit{nil} (che sarebbe falso) si ha il risultato di questo controllo. Questo rappresenta anche il caso base della nostra funzione ricorsiva.
-\item si controlla se l'elemento cercato è uguale al primo della lista e con \textit{T} si indica \textit{true}
+\item \textit{cond} definisce una condizione su liste formate da coppie
+\item prima si controlla se la lista è nulla con \textit{nil} (che sarebbe falso). Se \textit{nil} si esce. Questo rappresenta anche il caso base della nostra funzione ricorsiva.
+\item si controlla se l'elemento cercato è uguale al primo della lista e con \textit{T} si indica \textit{true}. Se \textit{T} si esce.
 \item con l'ultima parte si ha la vera e propria ricorsione, forzata da \textit{T} iniziale, che ripete l'operazione togliendo ogni volta il primo elemento, facendo ricominciare i controlli con l'elemento successivo finché non si trova o non si ha il caso base della lista vuota
 \end{enumerate}
 Si nota l'assenza di assegnamenti.
 \end{enumerate}
+\section{Richiami di Architettura e Programmazione}
+Per eseguire un programma in un qualsiasi linguaggio il sistema (ovvero il sistema operativo) deve mettere a disposizione un ambiente \textit{run time}, che fornisca almeno due funzionalità:
+\begin{itemize}
+\item mantenimento dello stato della computazione (program counter, limiti di memoria etc)
+\item gestione della memoria disponibile (fisica e virtuale)
+\end{itemize}
+inoltre l'ambiente run time può essere una macchina virtuale (come la \textit{JVM}, \textit{Java Virtual Machine}, per Java).\\
+La gestione della memoria avviene usando due aree concettualmente ben distinte con funzioni diverse:
+\begin{itemize}
+\item lo \textit{Stack} dell’ambiente run time serve per la gestione delle chiamate (soprattutto ricorsive) a procedure, metodi, funzioni etc...
+\item lo \textit{Heap} dell’ambiente run time serve per la gestione di strutture dati dinamiche (liste, alberi etc...)
+\end{itemize}
+I linguaggi logici e funzionali (ma anche Java) utilizzano
+pesantemente lo Heap dato che forniscono come strutture dati
+\textit{built in} liste e, spesso, vettori di dimensione variabile.\\
+La valutazione di procedure avviene mediante la costruzione (sullo stack di sistema) di \textit{activation frames}. I parametri formali di una procedura vengono associati ai valori. Il corpo della procedura viene valutato (ricorsivamente) tenendo conto di questi legami in maniera \textit{statica}. Ad ogni sotto-espressione del corpo si sostituisce il valore che essa denota (computa).
+Il valore (valori) restituito dalla procedura in un'espressione return o con meccanismi analoghi è il valore del corpo della procedura (che non è altro che una sotto-espressione). Quando il valore finale viene ritornato i legami temporanei ai parametri formali spariscono (lo stack di sistema subisce una \textit{pop} e l’activation
+frame viene rimosso).
+\begin{esempio}
+Vediamo un banale esempio in \textit{C}
+\begin{minted}{C}
+/* procedura/metodo */
+int doppio(int x) { 
+	return 2 * x; 
+}
+
+/* main con la chiamata al metodo*/
+	int d=doppio(3)
+\end{minted}
+la chiamata:
+\begin{itemize}
+\item estende l’ambiente corrente, dove è stata dichiarata la variabile \textit{d}, con quello locale che contiene i legami tra parametri formali e valori dei parametri attuali; un activation frame viene inserito in cima allo stack di valutazione
+\item valuta il corpo della procedura
+\item ripristina l'ambiente di partenza:
+\begin{itemize}
+\item Il risultato della chiamata viene salvato nella variabile \textit{d}
+\item l’activation frame viene rimosso dalla cima dello stack di valutazione
+\end{itemize}
+\end{itemize}
+\end{esempio}
+Per l'esecuzione di una procedura un programma deve eseguire i seguenti sei passi:
+\begin{enumerate}
+\item mettere i parametri in un posto dove la procedura possa recuperarli
+\item trasferire il controllo alla procedura
+\item allocare le risorse (di memorizzazione dei dati) necessarie alla procedura
+\item effettuare la computazione della procedura
+\item mettere i risultati in un posto accessibile al chiamante
+\item restituire il controllo al chiamante
+\end{enumerate}
+Queste operazioni agiscono sui registri a disposizione e sullo stack utilizzato dal runtime (esecutore) del linguaggio.\\
+Lo spazio richiesto per salvare (sullo stack) tutte le informazioni necessarie all'esecuzione di una procedura ed al ripristino dello stato precedente alla chiamata è quindi costituito da:
+\begin{itemize}
+\item Spazio per i registri da salvare prima della chiamata di una sotto procedura
+\item Spazio per l'indirizzo di ritorno (nel codice del corpo della procedura)
+\item Spazio per le variabili, definizioni locali, e valori di ritorno
+\item Spazio per i valori degli argomenti
+\item Spazio per il riferimento statico (\textit{static link})
+\item Spazio per il riferimento dinamico (\textit{dynamic link})
+\item Altro spazio dipendente dal particolare linguaggio e/o politiche di allocazione del compilatore
+\end{itemize}
+Analizziamo meglio l'\textit{activation frame} di una procedura mediante la seguente immagine:
+\begin{center}
+\includegraphics[scale=0.6]{img/act.png}
+\end{center}
+\newpage
+Partiamo ora dal seguente codice in \textit{C}, e analizziamo i passaggi che avvengono nello stack:
+\begin{minted}{C}
+/* prima procedura */
+int doppio(x) { 
+	return 2 * x; 
+}
+
+/* seconda procedura, che chiama la prima */
+int doppio_42(z) { 
+	return doppio(z) - 42; 
+}
+
+/* chiamata nel main */
+int r = doppio_42(42)
+\end{minted} 
+vediamo cosa accade nello stack:
+si definiscono in ordine \textit{global frame e doppio\_42}, con i collegamenti di static link e dynamic link:
+\begin{center}
+\includegraphics[scale=0.4]{img/sta1.png}
+\quad 
+\includegraphics[scale=0.4]{img/sta2.png}
+\quad
+\includegraphics[scale=0.4]{img/sta3.png}
+\end{center}
+\newpage
+Si aggiunge poi \textit{doppio}, con i collegamenti di static link e dynamic link:
+\begin{center}
+\includegraphics[scale=0.4]{img/sta4.png}
+\quad 
+\includegraphics[scale=0.4]{img/sta5.png}
+\end{center}
+infine vengono risolti a partire da \textit{doppio}, salvando ogni volta i vari risultati nelle \textit{local definitions}:
+\begin{center}
+\includegraphics[scale=0.4]{img/sta6.png}
+\quad
+\includegraphics[scale=0.4]{img/sta7.png}
+\end{center}
+L'area di memoria per la manipolazione di strutture dati dinamiche verrà spiegata meglio al momento dell'introduzione delle primitive per la costruzione delle liste in Prolog e Lisp.\\
+Il componente software che si occupa della gestione automatica della memoria in \textit{Lisp, Prolog, Java, C\#}, ed altri linguaggi è il \textit{garbage collector} (il servizio di raccolta rifiuti). \textit{C} e \textit{C++} non hanno un garbage collector standard.
+\section{Logica}
+Si ricordano le seguenti due definizioni:
+\begin{enumerate}
+\item \textbf{Implicazione}, indicata dal simbolo $\to$, è un connettivo logico che si usa per costruire forme logiche complesse. In una frase il \textit{se} comporta un'implicazione logica.
+\item \textbf{Inferenza} è un meccanismo per il ragionamento. Detta anche \textit{modus ponens}, è una manipolazione sintattica (quindi non rappresentabile con tabelle di verità)
+\end{enumerate}
+Partiamo con l'esempio di una semplice dimostrazione geometrica effettuata con le regole della logica:
+\begin{teorema}
+Dato un triangolo isoscele (con $\overline{AB}=\overline{BC}$) si ha che $\angle A$, ovvero l'angolo in $A$, e $\angle C$, ovvero l'angolo in $C$, sono uguali.
+\begin{center}
+\includegraphics[scale=0.5]{img/tri.png}
+\end{center}
+\end{teorema}
+\begin{proof}
+Si comincia la dimostrazione con l'elenco delle conoscenze pregresse: 
+\begin{enumerate}
+\item se due triangoli sono uguali essi hanno lati e angoli uguali
+\item se due triangoli hanno due lati e l'angolo sotteso uguale allora i due triangoli sono uguali
+\item se viene definita la bisettrice di $\angle B$, $\overline{BH}$, si ha che $\angle ABH = \angle HBC$
+\begin{center}
+\includegraphics[scale=0.5]{img/tri2.png}
+\end{center}
+\end{enumerate}
+Procediamo ora coi passi della dimostrazione:
+\begin{enumerate}
+\item $\overline{AB}=\overline{BC}$ per ipotesi
+\item $\angle ABH = \angle HBC$ per la terza conoscenza pregressa
+\item $\triangle HBC = \triangle ABH$ per la seconda conoscenza pregressa (dal secondo passo si ha che l'angolo tra la bisettrice, per forza uguale tra i due triangoli, e i due lati obliqui, uguali per ipotesi, è uguale per entrambi)
+\item $\angle A= \angle C$ per la prima conoscenza pregressa (essendo uguali i triangoli per il passo precedente si ha che anche gli angoli sono uguali)
+\end{enumerate}
+Siamo così giunti alla fine della dimostrazione. Bisogna ora rappresentarla con gli strumenti della logica.\\
+Sono stati svolti i seguenti passaggi:
+\begin{itemize}
+\item si è trasformata la seconda conoscenza pregressa in:\\\textbf{se} $\overline{AB}=\overline{BC}$ \textbf{e} $\overline{BH}=\overline{BH}$ \textbf{e} $\angle ABH = \angle HBC$ \textbf{allora} $\triangle ABH=\triangle HBC$
+\item si è trasformata la prima conoscenza pregressa in:\\
+\textbf{se} $\triangle ABH=\triangle HBC$ \textbf{allora} $\overline{AB}=\overline{BC}$ \textbf{e} $\overline{BH}=\overline{BH}$ \textbf{e} $\overline{AH}=\overline{HC}$ \textbf{e} $\angle ABH = \angle HBC$ \textbf{e} $\angle AHB = \angle CBH$ \textbf{e} $\angle A=\angle C$
+\end{itemize}
+Possiamo ora procedere col processo di \textbf{formalizzazione}, ovvero razionalizzare il processo per poter affermare:
+$$\overline{AB}=\overline{BC}\,\vdash \angle A = \angle C$$
+con $\vdash$ che è il simbolo di \textit{derivazione logica} e significa "consegue", "allora" etc...\\
+Quindi per ottenere:
+$$\overline{AB}=\overline{BC}\,\vdash \angle A = \angle C$$
+abbiamo assunto:
+$$P=\{\overline{AB}=\overline{BC},\,\angle ABH = \angle HBC,\,\overline{BH}=\overline{BH}\}$$
+con queste conoscenze pregresse:
+\begin{enumerate}
+\item $\overline{AB}=\overline{BC}\wedge\overline{BH}=\overline{BH}\wedge\angle ABH = \angle HBC\to\triangle ABH=\triangle HBC$
+\item  $\triangle ABH=\triangle HBC\to\overline{AB}=\overline{BC}\wedge\overline{BH}=\overline{BH}\wedge\overline{AH}=\overline{HC}\wedge\angle ABH = \angle HBC\wedge\angle AHB = \angle CBH\wedge\angle A=\angle C$
+\end{enumerate}
+Si ha quindi una catena di formule (\textbf{P} sono le ipotesi iniziali):
+\begin{enumerate}
+\item \textbf{P1:} $\overline{AB}=\overline{BC}$ preso da \textbf{P}
+\item \textbf{P2:} $\angle ABH = \angle HBC$ preso da \textbf{P}
+\item \textbf{P3:} $\overline{BH}=\overline{BH}$ preso da \textbf{P}
+\item \textbf{P4:} $\overline{AB}=\overline{BC}\wedge\overline{BH}=\overline{BH}\wedge\angle ABH = \angle HBC$ preso da \textbf{P1, P2, P3} e dalla regola di inferenza detta \textbf{introduzione della congiunzione}
+\item \textbf{P5:} $\triangle ABH=\triangle HBC$ da \textbf{P4}, dalla \textbf{regola 2} (\textit{se due triangoli hanno due lati e l'angolo sotteso uguale allora i due triangoli sono uguali}) e dalla regola di inferenza detta \textbf{modus ponens}
+\item \textbf{P6:} $\overline{AB}=\overline{BC}\wedge\overline{BH}=\overline{BH}\wedge\overline{AH}=\overline{HC}\wedge\angle ABH = \angle HBC\wedge\angle AHB = \angle CBH\wedge\angle A=\angle C$ da \textbf{P5}, dalla \textbf{regola 1} (\textit{se due triangoli sono uguali essi hanno lati e angoli uguali}) e dalla regola di inferenza detta \textbf{modus ponens}
+\item \textbf{P7:} $\angle A=\angle C$ da \textbf{P6} e dalla regola d'inferenza detta \textit{eliminazione della congiunzione} (date più asserzioni collegate da $\wedge$ posso eliderne un numero a piacere)
+\end{enumerate}
+Abbiamo così dimostrato tutto anche per mezzo dei costrutti della logica
+\end{proof}
+\begin{definizione}
+Una dimostrazione del tipo \textit{F è conseguenza di S}, \textbf{dim}, si indica con:
+$$S\,\,\vdash\,\, F$$
+ed è una sequenza:
+$$dim=<P_1,P_2,...,P_n>$$
+con:
+\begin{itemize}
+\item $P_n=F$
+\item $P_i\in S$ o con $P_i$ ottenibile dalle $P_1,...,P_{i-1}$ applicando una regola di inferenza
+\end{itemize}
+\end{definizione}
+Un insieme di regole di inferenza costituisce la base di un calcolo logico e diversi insiemi di regole danno vita a diversi calcoli logici. Un calcolo logico ha lo scopo di manipolare le formule in modo unicamente sintattico, stabilendo una connessione tra un'insieme di formule di partenza, dette \textit{assiomi}, e un insieme di conclusioni.
+\subsection{Logica Proporzionale}
+La logica proposizionale si occupa delle conclusioni che si possono trarre da un insieme di proposizioni, che definiscono \textit{sintatticamente} la logica proposizionale (l'ultima parte della dimostrazione sopra è fatta da costrutti della logica proposizionale).\\
+All'insieme \textbf{P} è associata una funzione di \textit{verità}, o di \textit{valutazione}, \textbf{V} (spesso indicata con \textbf{T} o \textbf{I}):
+$$V:P\to\{vero,\,\,falso\}$$
+che associa un valore di verità ad ogni eleemnto di \textbf{P}. La funzione di valutazione è il ponte di connessione tra sintassi e semantica in un linguaggio logico.\\
+Le proposizione si combinano con i seguenti connettivi:
+\begin{itemize}
+\item \textbf{congiunzione:} $\wedge$
+\item \textbf{disgiunzione:} $\vee$
+\item \textbf{negazione:} $\neg$
+\item \textbf{implicazione:} $\to$
+\end{itemize}
+L'insieme di tutte le formule formate dagli elementi di \textbf{P} e dalle loro combinazioni è detto: \textbf{Formule Ben Formate (FBF)}.\\
+Le formule atomiche e i loro negativi vengono detti \textbf{letterali}. Il valore di verità di proposizione dipende dalla funzione di verità \textbf{V} e questa definizione può essere estesa sul dominio \textbf{FBF}:
+\begin{itemize}
+\item $V(\neg s)=non\,V(s)$
+\item $V(a\wedge b)=V(a)\,\ e\,\, V(b)$
+\item $V(a\vee b)=V(a)\,\ o\,\, V(b)$
+\item $V(a\to b)=(non\,V(a))\,\ o\,\, V(b)$
+\end{itemize}
+ovvero, secondo la tavola di verità (con $1=vero$ e $0=falso$):
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+$a$ & $b$ & $\neg a$ & $\neg b$ & $a\wedge b$ & $a\vee b$ & $a\to b$\\
+\hline
+1 & 1 & 0 & 0 & 1 & 1 & 1\\
+\hline
+1 & 0 & 0 & 1 & 0 & 1 & 1\\
+\hline
+0 & 1 & 1 & 0 & 0 & 1 & 0\\
+\hline
+0 & 0 & 1 & 1 & 0 & 0 & 1\\
+\hline
+\end{tabular}
+\end{center}
+La tavola di verità costituisce la semantica di un insieme di proposizioni mentre un calcolo logico dice come generare nuove formule logiche, ovvero espressioni sintattiche, a partire dagli assiomi. Questo calcolo deve garantire che le nuove formule generate siano vere se gli assiomi sono veri. Questo processo di generazione si chiama \textbf{dimostrazione}.\\
+Per ottenere nuove formule dagli assiomi si usa il calcolo proposizionale, che si base su regole di inferenza. Una regola di inferenza ha la seguente forma:
+$$\frac{F_1,F_2,...,F_N}{R}\,\,[\mbox{nome regola}]$$
+con $F_i$ formula vera in \textbf{FBF} e $R$ è la formula vera generata da inserire in \textbf{FBF}. Vediamo qualche esempio:
+\begin{esempio}[Modus Ponens]
+$$\frac{a\to b,\,\,a}{b}$$
+ovvero:
+\begin{itemize}
+\item Se piove, la strada è bagnata
+\item Piove
+\item Allora la strada è bagnata
+\end{itemize}
+Ovvero, la regola sintattica del modus ponens ci permette di
+aggiungere le conclusioni di una “regola” al nostro insieme di formule ben formate “vere”
+\end{esempio}
+\begin{esempio}[Modus Tollens]
+$$\frac{a\to b, \neg b}{\neg a}$$
+ovvero:
+\begin{itemize}
+\item Se piove, la strada è bagnata
+\item La strada non è bagnata
+\item Allora non piove
+\end{itemize}
+Ovvero, la regola sintattica del modus tollens ci permette di
+aggiungere la premessa negata di una “regola” al nostro insieme di formule ben formate “vere”
+\end{esempio}
+\begin{esempio}[Eliminazione e Introduzione di $\wedge$]
+$$\frac{P_1\wedge P_2 \wedge ... \wedge P_n}{P_i}\,\,[\mbox{Eliminazione di }\wedge]$$
+ovvero:
+\begin{itemize}
+\item Piove e la strada è bagnata
+\item Piove
+\end{itemize}
+$$\frac{P_1, P_2,...,P_n}{P_1\wedge P_2 \wedge ... \wedge P_n}\,\,[\mbox{Introduzione di }\wedge]$$
+ovvero:
+\begin{itemize}
+\item Piove
+\item La strada è bagnata
+\item Piove e la strada è bagnata
+\end{itemize}
+Ovvero, la regola sintattica dell’eliminazione della congiunzione ci permette di aggiungere all’insieme \textbf{FBF} i singoli componenti di una formula complessa. \\
+Queste regole si chiamano anche, rispettivamente, \textit{di congiunzione} e \textit{di disgiunzione}
+\end{esempio}
+\begin{esempio}[Introduzione di $\vee$]
+$$\frac{a}{a\vee b}$$
+ovvero:
+\begin{itemize}
+\item Piove
+\item Piove o c'è vita su Marte
+\end{itemize}
+Ovvero, la regola sintattica dell’introduzione della disgiunzione ci permette di aggiungere i singoli componenti di una formula.\\
+Questa regola è detta anche \textit{di addizione}
+complessa
+\end{esempio}
+\begin{esempio}
+Ecco altre regole utili:
+\begin{itemize}
+\item \textbf{Terzo Escluso:}
+$$\frac{a\vee\neg a}{vero}$$
+\item \textbf{Eliminazione di} $\neg$:
+$$\frac{\neg\neg a}{a}$$
+\item \textbf{Eliminazione di} $\vee$:
+$$\frac{a\vee vero}{a}$$
+\item \textbf{Contraddizione:}
+$$\frac{a\wedge\neg a}{b}$$
+ovvero da una contraddizione posso trarre qualsiasi conseguenza
+\end{itemize}
+\end{esempio}
 \end{document}

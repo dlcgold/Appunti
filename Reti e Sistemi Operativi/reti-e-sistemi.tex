@@ -62,7 +62,7 @@
 \textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
 
-\chapter{Reti}
+\section{Reti}
 %11
 Una rete è visualizzabile come un grafo, con punti terminali uniti in maniera efficiente. Questi punti terminali sono chiamati \textbf{nodi}. Le reti di cui parliamo sono le moderne reti \textit{TCP/IP}, con regole chiamate \textit{protocolli}. Internet è una rete che connette miliardi di punti terminali, con regole \textit{end to end} comuni. Internet significa infatti \textit{interconnected networks}, \textit{reti interconnesse}. Internet è costituita da tante componenti gestite autonomamente (chiamate \textbf{AS}, \textit{autonomus system}) collegate tra loro. Ci sono regole per lo scambio di informazioni tra i vari AS. un po' di terminologia:
 \begin{itemize}
@@ -86,4 +86,64 @@ Quanto detto si può vedere nella seguente immagine:
 \begin{center}
 \includegraphics[scale=0.5]{img/reti.png}
 \end{center}
+\section{Sistemi Operativi}
+Un sistema operativo gestisce le risorse virtuali, ormai non gestisce più direttamente l'hardware. Inoltre ora si hanno quasi solo sistemi con cpu multicore (o anche multiprocessing, ovvero con più cpu a più core). Gestisce anche la memoria, sia RAM che memoria di massa (HDD e SSD). Attualmente molti sistemi sono eterogenei (con più GPU etc...). Alcune CPU hanno core a diverse prestazioni e consumi e questa cosa va gestita dal sistema operativo. Ormai si ha inoltre molta virtualizzazione, con più macchine virtuali su una stessa macchina. Questo comporta maggior versatilità, meno rischi, comodità nel cloud, comodità di trasferimento di macchine virtuali etc.... Questo mondo è continuamente in evoluzione. Un sistema operativo quindi è un ambiente software che consente a più utenti di lavorare correttamente gestendo le risorse. Quindi:
+\begin{itemize}
+\item l'os deve coordinare le varie attività, mediante sincronizzazione etc.... Ogni os fornisce delle \textit{primitive di sincronizzazione}
+\item l'os deve occuparsi dello \textit{scheduling delle risorse}, ovvero di gestione delle risorse. Ad ogni programma  si lasciano tot risorse e non per sempre
+\item l'os gestisce le \textit{interfacce di programmazione}, permettendo maggior astrazione al developer. Riducendo ancora i rischi. I programmi lavoreranno in un ambiente "protetto" e scriverà dati in un altro processo solo in maniera estremamente controllata. 
+\item l'os impedisce l'accesso diretto dei software ai driver fisici. Si occupa anche di sicurezza, impedendo ad un software di distruggere un altro processo. Lavora anche in termini di \textit{Cyber Security}. 
+\item l'os si occupa anche di performance, gestendo le risorse in maniera ottimizzata. Si ha quindi la gestione di \textit{priorità} e di \textit{timer}
+\item l'os gestisce infine, in maniera trasparente e automatica, le risorse. Per esempio alimentazione, ventole etc.... 
+\end{itemize}
+Esiste anche un altro punto di vista. L'os fornisce API e System Call. Da questo punto di vista l'os è un fornitore di servizi, interfacce (grafiche o testuali). Un software viene gestito in maniera diverso da un os per PC/Workstation (dove si ha multiprogrammazione, gestione della sicurezza, una GUI ma non si ha gestione di molte applicazioni identiche) e uno da server (non si ha una GUI ma si ha un'ottima efficienza di throughput e ottima gestione di software identico e delle risorse) e uno per smartphone (dove si ha la gestione del touchscreeen, la presenza di molti sensori etc...). Si hanno poi i sistemi embedded con la gestione \textit{real time}. \\
+Un paio di concetti:
+\begin{itemize}
+\item un \textit{processo} è un codice in esecuzione che vive in un proprio spazio di memoria virtuale (che è la memoria fisica vista in maniera astratta). Un \textit{thread} è un flusso di esecuzione indipendente, ma tanti thread possono condividere lo stesso spazio di memoria virtuale
+\item esistono più modalità di esecuzione:
+\begin{itemize}
+\item \textit{user mode} con limiti di accesso alle risorse fisiche. Si ha una "zona" più sicura. Si può accedere alle risorse di sistema con le system call (che interfacciano la user mode alla kernel mode), codice dell'os che si presume funzionante. La gestione delle eccezioni è una syscall. Con le syscall si accede alle APi del sistema operativo.  
+\item \textit{kernel mode} con accesso completo alle risorse del sistema, scrivere codice a livello kernel è molto delicato. Qui si ha il codice per lo scheduling, gestione della memoria, gestione della rete etc...
+\item nel caso di macchina virtuale si hanno tre livelli:
+\begin{itemize}
+\item Os Host
+\item Os guest
+\item livello applicativo
+\end{itemize}
+\end{itemize}
+\end{itemize}
+Ci sono poche possibilità per strutturare un sistema operativo. Molti os hanno un kernel \textit{monolitico}, con un kernel unico (un solo blocco di codice), per esempio Linux. Questa è una soluzione efficiente perché la comunicazione tra le componenti è semplice e veloce. Un'altra opzione è un os stratificato, ma è talmente poco ottimizzato (si ha un overhead, un insieme di istruzioni inutili, estremo) che non viene usata come soluzione, anche se il sistema dei driver di Windows è stratificato. l'altro modello è quello del \textit{micro-kernel}, che consiste in poche funzionalità essenziali nel kernel e tutto il resto viene spostato in modalità utente (anche cose come il file system). Questa soluzione è efficiente e sicura, e parzialmente viene usata da Apple in MacOS. \\
+Ecco una lista delle principali famiglie di syscall Unix:
+\begin{itemize}
+\item controllo dei processi:
+\begin{itemize}
+\item creazione e terminazione dei processi
+\item sincronizzazione dei processi (con le primitive \textit{wait} e \textit{signal})
+\item gestione di attributi e priorità
+\end{itemize}
+\item comunicazione dei processi:
+\begin{itemize}
+\item memoria comune
+\item messaggistica
+\item connessioni (creazione di flussi di byte tra due processi, \textit{bytestream})
+\end{itemize}
+\item file management:
+\begin{itemize}
+\item creazione e cancellazione di un file
+\item apertura e chiusura di un file
+\item operazioni di \textit{read, write, append, etc...}
+\item gestione di attributi e permessi di accesso
+\end{itemize}
+\item device management:
+\begin{itemize}
+\item installazione e disinstallazione di un device, con riconoscimento del device tramite i driver
+\item apertura, chiusura, scrittura, gestione attributi etc... Queste cose sono simili al file management infatti alcuni os (basati su Unix, per esempio) vedono i device come file, ad un certo livello di astrazione.
+\end{itemize}
+\item gestione delle informazioni statistiche e di sistema:
+\begin{itemize}
+\item calcolo dell'uso delle risorse etc...
+\item numero processi attivi e controllo del loro uso di risorse
+\end{itemize}
+\end{itemize}
+\chapter{Reti}
 \end{document}

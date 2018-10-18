@@ -27,7 +27,7 @@
 \usepackage{framed}
 \usepackage{pdfpages}
 \usepackage{pgfplots}
-\usepackage{minted}
+\usepackage[cache=false]{minted}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -639,5 +639,171 @@ antenato(x, y) :- genitore(z, y), antenato(x, z).
 su più righe*/
 \end{minted}
 \item il prompt ci chiede una FBF di Horn con "?-" (senza variabili) e prende l'input e come output si avrà \textit{yes}. Interrogare il programma è richiedere una dimostrazione. Se si chiede una formula presente direttamente si avrà subito \textit{yes} (se il goal è una clausola (un fatto) quindi si applica il principio di risoluzione e si ha la dimostrazione effettuata). In un'interrogazione si possono avere \textit{variabili esistenziali}. Tutte le variabili istanziate sono mostrate in risposta
+\item l'operatore di istanziazione di variabili durante la prova di un predicato è il risultato di una procedura particolare, detta \textit{unificazione}
+\item dati due termini la procedura di unificazione crea un insieme di sostituzioni delle variabili. Questo insieme permette di rendere uguali i due termini. Tradizionalmente si ha il \textit{most general unifier (Mgu)}. Una sostituzione è indicata come una sequenza ordinata di coppie \textit{variabile/valore}:
+\begin{minted}{prolog}
+Mgu(42, 42) % ->{} non serve nessuna sostituzione
+Mgu(42, X) % ->{X/42} ovvero X deve essere 42
+Mgu(X,42) % ->{X/42} ovvero X deve essere 42
+Mgu(foo(bar, 42), foo(bar, X)) % ->{X/42} ovvero X deve essere 42
+Mgu(foo(X, 42), foo(bar, X)) % ->{Y/bar, X/42} ovvero X deve essere 42
+
+Mgu(foo(bar(42), baz), foo(X, Y))  /* ->{X/bar (42), Y/baz}
+ ovvero X deve essere  bar(42) e Y baz*/
+Mgu(foo(X), foo(bar(Y))) 
+Mgu(foo(bar(42), baz), foo(X, Y))  /* ->{X/bar (y), Y_:G001}
+ ovvero non si ha soluzione */
+\end{minted}
+L'Mgu non è altro che il risultato finale della procedura di valutazione del Prolog. Il modo più semplice per vedere se l'unificazione funziona è usare "=", ovvero, ricollegandoci al codice sopra:
+\begin{minted}{prolog}
+?- 42 = 42.
+Yes
+
+?- 42 = X.
+X = 42 % per rendere vera l'affermazione serve x = 42
+Yes
+
+?- foo(bar, 42) = foo(bar, X).
+X = 42
+Yes
+
+?- foo(Y, 42) = foo(bar, X).
+Y = bar
+X = 42
+Yes
+
+?- foo(bar(42), baz) = foo(X, Y).
+X = bar(42)
+Y = baz
+Yes
+
+?- foo(X) = foo(bar(Y)).
+X = bar(Y)
+Y = _G001
+Yes
+
+?- foo(42, bar(X), trillian) = foo(Y, bar(Y), X).
+No
+\end{minted}
+\begin{esempio}
+\textit{Si descrive un insieme di fatti riguardanti i corsi offerti:}\\
+Tutte le informazioni sono concentrate in una relazione a 6 campi:
+\begin{minted}{prolog}
+corso(linguaggi, lunedì, ’9:30’, ’U4’, 3, antoniotti).
+corso(biologia_computazionale, lunedì, ’14:30’, ’U14’, t023, antoniotti).
+\end{minted}
+a partire da qui costruisco altri predicati:
+\begin{minted}{prolog}
+aula(Corso, Edificio, Aula) :-
+	corso(Corso, _, _, Edificio, Aula, _).
+docente(Corso, Docente) :-
+	corso(Corso, _, _, _, _, Docente).
+\end{minted}
+oppure posso concentrare le informazioni in una relazione con 4 campi; le informazioni sono concentrate in termini funzionali che rappresentano le informazioni raggruppate logicamente;
+\begin{minted}{prolog}
+corso(linguaggi, orario(lunedì, ’9:30’), aula(’U4’, 3), antoniotti).
+corso(biologia_computazionale,
+	orario(lunedì, ’14:30’),
+	aula(’U4’, 3),
+	antoniotti).
+\end{minted}
+posso quindi definire altri predicati:
+\begin{minted}{prolog}
+aula(Corso, Edificio, Aula) :- corso(Corso, _, aula(Edificio, Aula), _).
+docente(Corso, Docente) :- corso(Corso, _, _, Docente).
+
+% oppure...
+
+aula(Corso, Luogo) :- corso(Corso, _, Luogo, _).
+\end{minted}
+oppure ancora i predicati che abbiamo definito a partire dalle relazioni con 6 o 4 campi possono essere ricodificate con predicati binari:
+\begin{minted}{prolog}
+giorno(linguaggi, martedì).
+orario(linguaggi, ’9:30’).
+edificio(linguaggi, ’U4’).
+aula(linguaggi, 3).
+docente(linguaggi, antoniotti).
+\end{minted}
+La relazioni a 6 o 4 argomenti possono essere ricostruite in a partire da queste relazioni binarie. La costruzione di schemi \textit{RDF/XML} (e, a volte,\textit{ SQL}) corrisponde a questa operazione di ri-rappresentazione
+\end{esempio}
+\item Si definisce una lista in Prolog racchiudendo gli elementi (termini e/o variabili logiche) della lista tra parentesi quadre \textit{[} e \textit{]} e separandoli da virgole. Gli elementi di una lista in Prolog possono essere termini
+qualsiasi o liste. La lista vuota si indica con \textit{[]}. Una coda non vuota si può dividere in \textit{testa} e \textit{coda}:
+\begin{itemize}
+\item la testa è il primo elemento della lista
+\item la coda rappresenta tutto il resto ed è sempre una lista
+\end{itemize}
+\begin{minted}{prolog}
+[a, b, c] % a è la testa e [b, c] la coda
+[a, b] % a è la testa e [b] la coda
+[a] % a è la testa e [] la coda
+[[a]] % [a] è la testa e [] la coda
+[[a, b], c] % [a, b] è la testa e [c] la coda
+[[a, b], [c], d] % [a, b] è la testa e [[c], d] la coda
+\end{minted}
+Prolog possiede uno speciale operatore usato per distinguere tra l'inizio e la coda di una lista: l'operatore \textit{|}:
+\begin{minted}{prolog}
+?- [X | Ys] = [mia, vincent, jules, yolanda].
+X = mia
+Ys = [vincent, jules, yolanda]
+Yes
+
+?- [X, Y | Zs] = [the, answer, is, 42].
+X = the
+Y = answer
+Zs = [is, 42]
+Yes
+
+?- [X, 42 | _] = [41, 42, 43, foo(bar)].
+X = 41
+Yes
+\end{minted}
+La lista vuota \textit{[]} in prolog è gestita come una lista speciale:
+\begin{minted}{prolog}
+?- [X | Ys] = [].
+No
+\end{minted}
+\item La base di conoscenza è nascosta ed è accessibile solo tramite opportuni comandi o tramite ambiente di programmazione. Bisogna poter caricare un insieme di fatti e regole. Per farlo si ha il comando \textit{consult}, che appare come un predicato da valutare (un goal) e prende almeno un termine che denota un file come argomento, file che deve contenere fatti e regole
+\begin{minted}{prolog}
+?- consult(’guida-astrostoppista.pl’).
+Yes
+
+?- consult(’Projects/Lang/Prolog/Code/esempi-liste.pl’).
+Yes
+\end{minted}
+\item il predicato \textit{consult} può essere usato anche per inserire fatti e regole direttamente alla console usando il termine speciale \textit{user}:
+\begin{minted}{prolog}
+?- reconsult(’guida-astrostoppista.pl’).
+Yes
+% A questo punto la base di dati Prolog contiene il
+% nuovo contenuto del file.
+\end{minted}
+il predicato \textit{reconsult} deve invece essere usato quando si vuole ricaricare un file (ovvero un data o knowledge base) nell'ambiente Prolog. L’effetto è di prendere i predicati presenti nel file, rimuoverli completamente dal data base interno e di reinstallarli utilizzando le nuove definizioni:
+\begin{minted}{prolog}
+?- reconsult(user). % Notare il sotto-prompt.
+|- foo(42).
+|- friends(zaphod, trillian).
+|- ^D
+Yes
+
+% A questo punto la base di dati Prolog contiene i due
+% fatti inseriti manualmente.
+?- friends(zaphod, W).
+W = trillian
+Yes
+\end{minted}
+\item Prolog lavora anche su strutture ad albero e anche i programmi sono strutture dati manipolabili con predicati \textit{extra-logici}. Si ha la ricorsione e non l'assegnamento. Un programma Prolog è un insieme di clausole di Horn che rappresentano:
+\begin{itemize}
+\item fatti riguardanti gli oggetti in esame e le relazioni che intercorrono tra di loro
+\item regole sugli oggetti e sulle relazioni (se ... allora ...)
+\item interrogazioni (goals o queries; clausole senza testa), sulla base della conoscenza definita
+\end{itemize}
+\item si ha l'implicazione: 
+$$\neg B \vee A \mbox{corrisponde a } B\to A$$
+data una clausola $A\vee ... \vee A_n\vee \neg B_1\vee ... \vee\neg B_n$, usando De Morgan si ottiene:
+$$(A\vee ... \vee A_n)\vee \neg (B_1\vee ... \vee B_n)$$
+$$\downarrow$$
+$$(B\vee ... \vee B_n)\to (A_1\vee ... \vee A_n)$$
+\textit{si può fare anche l'inverso}.\\
+
 \end{itemize}
 \end{document}

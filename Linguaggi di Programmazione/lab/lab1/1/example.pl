@@ -86,4 +86,5 @@ somma_lista([H|T], X) :-  somma_lista(T, N),
 duplico([], []).
 duplico([H|T], [H, H|X]) :- duplico(T, X). /* a priori dublico H riscivendpo nelk risultato
                                               poi dublico il tail, dove di volta in volta
-                                              ogni head verrà dublicato */
+                                              ogni head verrà dublicato. Se inverto e metto
+                                             ( x, [lista]) mi toglie i duplicati*/

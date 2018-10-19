@@ -122,14 +122,141 @@ $$S\to \varepsilon|o|1|0S0|1S1$$
 Non si fanno sostituzioni in parallelo, prima una $S$ e poi un'altra
 \end{esempio}
 %aggiungi esempio parentesi
-Si hanno 4 grammatiche formali:
+Si hanno 4 grammatiche formali, \textit{gerarchia di Chomsky}:
 \begin{itemize}
 \item \textbf{tipo 0:} non si hanno restrizioni sulle regole di produzione, $\alpha\to\beta$. Sono linguaggi ricorsivamente numerabili e sono rappresentati dalle \textit{macchine di Turing}, deterministiche o non deterministiche (la macchina di Turing è un automa)
 \item \textbf{tipo 1:}  il lato sinistro della produzione (\textit{testo}) ha lunghezza uguale a quello destro (\textit{corpo}). Sono grammatiche dipendenti dal contesto (\textit{contestuali}) e come automa hanno\textit{ la macchina di Turing che lavora in spazio lineare}:
 $$\alpha_1A\alpha_2\to \alpha_1B\alpha_2$$
 con $\alpha_1$ e $\alpha_2$ detti \textit{contesto} e $\alpha_1,\,\alpha_2,\, \beta\in (V\cup T)^*$
 \item \textbf{tipo 2:} sono quelle libere dal contesto, context free. Come regola ha $A\to\beta$ con $A\in V$ e $\beta\in V\cup T)^*$ e come automa ha gli \textit{automi a pila non deterministici}
-\item \textit{tipo 3:} sono le grammatiche \textit{regolari}. Come regole ha $A\to\alpha B$ e $A\to\alpha$  con $A,B\in V$ e $\alpha\in T$. Come automi ha gli \textit{automi a stato finito deterministici o non deterministici}
+\item \textbf{tipo 3:} sono le grammatiche \textit{regolari}. Come regole ha $A\to\alpha B$ (o $A\to B\alpha$) e $A\to\alpha$  con $A,B\in V$ e $\alpha\in T$. Come automi ha gli \textit{automi a stato finito deterministici o non deterministici}
 \end{itemize}
 %aggiungi esercizio
+\newpage
+\begin{esempio}
+Sia $G=(V,T,O,E)$, con $V=\{E,I\}$ e $T=\{a,b,0,1,(,),+,*\}$ 
+quindi ho le seguenti regole, è di tipo 3:
+\begin{enumerate}
+\item $E\to I$
+\item $E\to E+E$
+\item $E\to E*E$
+\item $E\to (E)$
+\item $I\to a$
+\item $I\to b$
+\item $I\to Ia$
+\item $I\to Ib$
+\item $I\to I0$
+\item $I\to I1$
+\end{enumerate}
+voglio ottenere $a*(a+b00)$ 
+sostituisco sempre a destra (right most derivation)
+$$E\to E*E\to E*(E)\to E*(E+E)\to E*(E+I)\to E+(E+I0)$$
+$$\to R+(I+b00)\to E*(a+b00)\to I*(a+b00)\to a*(a+b00)$$
+
+usiamo ora \textit{l'inferenza ricorsiva}:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+passo & stringa ricorsiva & var & prod & passo stringa impiegata\\
+1 & a & I & 5 & $\backslash$ \\
+\hline
+2 & b & I & 6 & $\backslash$ \\ 
+\hline
+3 & b0 & I & 9 & 2\\
+\hline
+4 & b00 & I & 9 & 3\\
+\hline
+5 & a & E & 1 & 1 \\
+\hline
+6 & b00 & E & 1 & 4\\
+\hline
+7 & a+b00 & E & 2 & 5,6\\
+\hline
+8 & (a+b00) & E & 4 & 7\\
+\hline
+9 &a*(a+b00) & E & 3 & 5, 8\\
+\hline
+\end{tabular}
+\end{center}
+\end{esempio}
+definisco formalmente la derivazione $\to$:
+\begin{definizione}
+Prendo una grammatica $G=(V,T,P,S)$, grammatica CFG. Se $\alpha A \beta$ è una stringa tale che $\alpha,\beta\in (V\cup T)^*$, appartiene sia a variabili che terminali. Sia $A\in V$ e sia $a\to \gamma$ una produzione di $G$. Allora 
+scriviamo:
+$$\alpha A \beta \to \alpha\gamma\beta$$
+con $\gamma\in (V\cup T)^*$.\\
+Le sostituzioni si fanno indipendentemente da $\alpha$ e $\beta$.
+Questa è quindi la definizione di derivazione.
+\end{definizione}
+\begin{definizione}
+Definisco il simbolo $\to +$, ovvero il simbolo di \textit{derivazioni in 0 o più passi}. Può essere definito in modo ricorsivo. Per induzione sul numero di passi. 
+
+\begin{itemize}
+\item la base dice che  $\forall \alpha\in (V\cup T)^*,\, \alpha\to * \,\alpha$
+\item il passo è: se $\alpha\to_G * \,\beta $ e $ \beta \to_G * \,\gamma$ allora $\alpha\to * \,\gamma$
+\end{itemize}
+Si può anche dire che $\alpha\to_G +\, \beta$ sse esiste una sequenza di stringhe $\gamma_1,...,\gamma_n$ con $n\geq 1$ tale che $\alpha=\gamma_1$, $\beta=\gamma_n$ e $\forall i,\, 1<i<n-1$ si ha che $\gamma_1\to \gamma_{i+1}$
+la derivazione in 0 o più passi è la chiusura transitiva della derivazione
+\end{definizione}
+\begin{definizione}
+avendo ora definito questi simboli possiamo definire una forma sentenziale. Infatti è una stringa $\alpha$ tale che:
+$$\forall \alpha\in (V\cup T)^* \mbox{ tale che }S\to_G *\, \alpha$$
+\end{definizione}
+\begin{definizione}
+data $G=(V,T,P,S)$ si ha che $L(G)=\{w\in T^* |\, S\to_G *\, w\}$ ovvero composto da stringhe terminali che sono derivabili o 0 o più passi.
+\end{definizione}
+\begin{esempio}
+formare una grammatica CFG per il linguaggio:
+$$L=\{0^n 1^n| n\geq 1\}=\{01, 0011, 000111,...\}$$
+con $x^n$ intendo una concatenazione di $n$ volte $x$ (che nel nostro caso sono 0 e 1).\\
+posso scrivere:
+$$0^n 1^n =00^{n-1} 1^{n-1}1$$
+il nostro caso base sarà la stringa $01$, Poi si ha:
+$G=/V,T,P,S)$, $T=\{0,1\}$, $V=\{S\}$, il caso base $S\to 01$  e $S\to 0S1$
+il caso passo è quindi: se $w= 0^{n-1}1^{n-1}\in L$ allora $0w1\in L$.\\
+Ora voglio dimostare che $000111\in L$, ovvero $S\to*\, 000111$:\\
+$$S\to\, 0S1 \to 00S11\to 000S111$$
+\end{esempio}
+\begin{teorema}
+data la grammatica $G=\{V,T,P,S)$ CFG e $\alpha\in (V\cup T)^*$. Si ha che vale $S\to*\, \alpha$ sse $S\to_{lm}*\, \alpha$ sse $S\to_{rm}*\, \alpha$. Con $to_{lm}*$ simbolo di \textit{left most derivation }e $to_{rm}*$ simbolo di \textit{right most derivation }
+\end{teorema}
+\begin{esempio}
+formare una grammatica CFG per il linguaggio:
+$$L=\{0^n 1^n| n\geq 0\}=\{\varepsilon, 01, 0011, 000111,...\}$$
+stavolta abbiamo anche la stringa vuota. Il caso base stavolta è $S\to\varepsilon| \, 0S1$ 
+\end{esempio}
+\begin{esempio}
+Fornisco una CFG per $L=\{a^n|n\geq 1\}=\{a, aa, aaa,...\}$.
+La base è $a$ \\il passo è che se $a^{n-1}\in L$ allora $a^{n-1}a\in L$ ( o che $aa^{n-1}\in L$).\\
+Si ha la grammatica $G=\{V,T,P,S)$, $V=\{S\}$, $T=\{a\}$ e si hanno $S\to a|\,Sa$ (o  $S\to a|\,aS$). Dimostro che $a^3\in L$.
+$$S\to Sa \to Saa\to aaa$$
+oppure 
+$$S\to aS\to aaS\to aaa$$
+\end{esempio}
+\begin{esempio}
+trovo una CFG per $L=\{(ab)^n|n\geq 1\}=\{ab, abab, ababab,...\}$\\
+La base è $ab$ \\il passo è che se $(ab)^{n-1}\in L$ allora $(ab)^{n-1}ab\in L$.\\
+Si ha la grammatica $G=\{V,T,P,S)$, $V=\{S\}$, $T=\{a,b\}$ (anche se in realtà $T=\{ab\}$) e si hanno $S\to ab|\,Aab$. Poi dimostro come l'esempio sopra
+\end{esempio}
+\begin{esempio}
+trovo una CFG per $L=\{a^n c b^n|n\geq 1\}=acb,aacbb,aaacbbb,...\}$\\
+Il caso base è $acb$ il passo è che se $a^{n-1}cb^{n-1}\in L$ allora $a^{n-1}cb^{n-1}acb\in L$ 
+Si ha la grammatica $G=\{V,T,P,S)$, $V=\{S\}$, $T=\{a,b,c\}$ e si hanno $S\to aSb|acb$.\\
+dimostro che $aaaacbbbbb\in L$:
+$$S\to aSb\to aaSbb\to aaaaSbbb\to aaaacbbbb$$
+
+provo a usare anche una grammatica regolare, con le regole $S\to aS|c$, $c\to cB$ e $B\to bB|b$;
+$$S\to aS\to aaS\to aaC\to aacB\to aacb...$$
+non si può dimostrare in quanto non si può imporre una regola adatta
+\end{esempio}
+\begin{esempio}
+$L=\{a^n c b^{n-1}|n\geq 2\}$, con $a^n c b^{n-1}=a^{n-1}acb^{n-1}$. $S\to aSb|aacb$. Quindi:
+$$S\to aSb\to aaaccbb\in L$$
+\end{esempio}
+\begin{esempio}
+cerco CFG per $L=\{a^n c^k b^n|n,k>0\}$. $a$ e $b$ devono essere uguali, uso quindi una grammatica context free, mentre $c$ genera un linguaggio regolare.\\
+Si ha la grammatica $G=\{V,T,P,S)$, $V=\{S,C\}$, $T=\{a,b,c\}$ e si hanno $S\to aSb|aCb$ e $C\to cC|c$. dimostro che $aaaccbbb\in L, n=3,\, k=2$:
+$$S\to aSb \to aaSbb\to aaaCbbb\to aaacCbbb\to aaaccbbb$$
+\end{esempio}
+
 \end{document}

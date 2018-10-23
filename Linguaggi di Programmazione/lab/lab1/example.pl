@@ -29,10 +29,10 @@ fact(0, 1). % fattoriale di 0 è 1
 fact(N, M) :- N>0,
               N1 is N-1,
               fact(N1, M1),
-              M is N * M1. /* ogni volta salva in M1 il risultato parizale */
+              M is N * M1. % ogni volta salva in M1 il risultato parziale
 
 /* controllo se in testa a lista c'è un certo valore */
- intesta(X, [X|_]). /* | separa tedsta e coda (che non ci interessa e indico con _,                         senza non si sa che la lista può continuare.
+ intesta(X, [X|_]). /* | separa testa e coda (che non ci interessa e indico con _,                         senza non si sa che la lista può continuare.
                     interrogo con, per esempio  intesta(2, [2,3]). */
 
 /* trovo ennesimo elemento*/
@@ -61,7 +61,7 @@ sorted([X, Y| T]) :- X =< Y,
 /* chiedo ultimo elemento */
 
 last([X], X). %lista di un elemento ha come ultimo quell'elemento */
- sommalast([_|T], X) :- last(T, X). /*controllo ricorsivamente la coda della lista finch� non
+sommalast([_|T], X) :- last(T, X). /*controllo ricorsivamente la coda della lista finch� non
                                  ho solo T e posso usare il caso base
                                  posso anche chieder euna lista che finisca con un certo N
                                 per esempio 4  last(X, 4). */

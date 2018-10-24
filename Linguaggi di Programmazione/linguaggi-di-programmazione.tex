@@ -813,5 +813,120 @@ sum(0, X, X).
 sum(s(X), y, s(Z)) -: sum(X, Y, Z).
 \end{minted}
 con $S(n)$ interpretato come il successore ($0=0,\, s(0)=1, \,s(s(0))=2,... $).\\
-Quando viene specificato un goal esso viene confrontato con tutte le clausole di programma, che usa il procedimento di negazione e di trasformazione in sintassi Prolog.
+Quando viene specificato un goal esso viene confrontato con tutte le clausole di programma, che usa il procedimento di negazione e di trasformazione in sintassi Prolog.\\
+Vediamo i passi:
+\begin{itemize}
+\item  interroghiamo il programma:
+$$\exists X\,\,\, sum(s(0),\, 0,\, X)\,\,\,\,\,\{X\,/\, s(0)\}$$
+$$\exists W\,\,\, sum(s(s(0)),\, s(0), \, W)\,\,\,\,\,\{W\,/\, s(s(s(0)))\}$$
+dove $\{X\,/\, s(0)\}$ e $\{W\,/\, s(s(s(0)))\}$ sono le sostituzioni che rappresentano il risultato
+\item usiamo il procedimento di negazione e trasformazione in sintassi:
+\begin{minted}{prolog}
+:- sum(s(0), 0, N).    %{N / s(0)}
+:- sum (s(s(0)), s(0), W).     %{W / s(s(s(0)))}
+\end{minted}
+con $\{N\, /\, s(0)\}$ e $\{W \,/\, s(s(s(0)))\}$ che sono le \textbf{sostituzioni}. Una sostituzione ci dice che valori (che possono essere altre variabili) si può sostituire le variabili di un termine. Una sostituzione si indica con $\sigma=\{X_1\,/\,V_1/,..., X_k\,/\,V_k\}$ e può essere considerata come una funzione ($\sigma: T\to T$) applicabile ad un termine dell'insieme dei termini $T$.
+\begin{esempio}
+data la sostituzione $\sigma=\{X\,/\,42,\,Y\,/\, foo(s(0))\}$ si ha:
+$$\sigma(bar(X,\,Y))=bar(42, \, foo(s(0)))$$
+\end{esempio}
+\end{itemize}
+\newpage
+\textit{Una computazione corrisponde al tentativo di dimostrare, tramite la regola di risoluzione, che una formula segue logicamente da un programma (è un teorema)}. Si ha inoltre che si deve determinare una sostituzione per le variabili del goal (le \textit{query}) per cui la query segue  logicamente dal programma:
+\begin{esempio}
+Sia dato il programma P e la query:
+\begin{minted}{prolog}
+:- p(t1, t2, ..., tm).
+\end{minted}
+se \textbf{X1,..., Xn} sono le variabili in \textbf{t1,..., tm}, il significato della query è:
+$$\exists X1,\,..., \,Xn\, . \,p(t1, t2, ..., tm)$$
+e si cerca una sostituzione:
+$$s=\{X1\,/\,s1,...,\, Xn\,/\,sn$$
+con gli $s\,i$ termini tali per cui:
+$$P\vdash s[p(t1, t2, ..., tm)]$$
+\end{esempio}
+Dato un insieme di clausole di Horn è possibile derivare la clausola vuota solo se c'è almeno una clausola senza testa, ovvero se si ha una query $G_0$ da provare. Ovvero si deve dimostrare che da $P\cup G_0$ si può derivare la clausola vuota. Si dimostra per assurdo col principio di risoluzione.
+\subsubsection{Risoluzione ad Input Lineare (SLD)}
+Il sistema Prolog dimostra la veridicità di un goal eseguendo una sequenza di passi di risoluzione (l'ordine con cui vengono eseguiti questi passi rende i sistemi di prova basati sulla risoluzione più o meno efficienti). In Prolog la risoluzione avviene sempre fra l’ultimo goal derivato in ciascun passo e una \textit{clausola di programma} e mai fra due clausole di programma o fra una clausola di programma ed un goal derivato in precedenza. Questa forma di risoluzione è detta\textit{Risoluzione-SLD}  (\textit{Selection function for Linear and Definite sentences Resolution}), dove le sentenze lineari sono le clausole di Horn.
+\begin{esempio}
+partiamo dal goal $G_i$:
+$$G_i\equiv \,\,\,?-\, A_{i,\, 1}, ...,  A_{i,\, m}.$$
+e dalla regola:
+$$A_r\,\,\,:-\,\,\, B_{r,\,1},..., B_{r,\,k}.$$
+se esiste un unificatore $\sigma$ tale che $\sigma[A_r]=\sigma[A_{i,\,1}]$ allora si ottiene il nuovo goal:
+$$G_{i+1}\equiv\,\,\,B^{'}_{r,\,1},..., B^{'}_{r,\,k},A^{'}_{i,\, 1}, ...,  A^{'}_{i,\, m}.$$
+che è un passo di risoluzione eseguito dal sistema Prolog (con $\sigma[A_{i,\,m}]=A^{'}_{i,\,m}$ 4 $\sigma[B_{i,\,m}]=B^{'}_{i,\,m}$. \textit{La scelta di unificare il primo sottogoal di }$G_i$\textit{ è arbitraria (si sarebbe potuto scegliere, per esempio} $A_{i,\,m}$ \textit{o} $A_{i,\,c}$ \textit{con} $ c\in[1,\,m]$ \textit{)}
+\end{esempio}
+\begin{esempio}
+partiamo dal goal $G_i$:
+$$G_i\equiv \,\,\,?-\, A_{i,\, 1}, ...,  A_{i,\, m}.$$
+e dalla regola (ovvero dal \textbf{fatto}):
+$$A_r.$$
+se esiste un unificatore $\sigma$ tale che $\sigma[A_r]=\sigma[A_{i,\,1}]$ allora si ottiene il nuovo goal:
+$$G_{i+1}\equiv\,\,\,A^{'}_{i,\, 2}, ...,  A^{'}_{i,\, m}.$$
+che ha dimensioni minori di $G_i$ avendo $m-1$ sottogoal
+\end{esempio}
+Nella risoluzione SLD, il passo di risoluzione avviene sempre fra l'ultimo goal e una clausola di programma. SI possono avere i seguenti risultati:
+\begin{itemize}
+\item \textbf{successo:} si genera la clausola vuota, ovvero se per $n$ finito $G_n$ è uguale alla clausola vuota $G_:n\equiv\,\,\,:-$
+\item \textbf{insuccesso finito}: se per $n$ finito $G_n$  non è uguale alla clausola vuota $G_:n\equiv\,\,\,:-$ e non è più possibile derivare un nuovo \textit{risolvente} da $G_n$ ed una clausola d programma
+\item \textbf{successo infinito: }se è sempre possibile derivare nuovi risolventi tutti diversi dalla clausola vuota
+\end{itemize}
+La \textbf{sostituzione di risposta} è la sequenza di unificatori usati; applicata alle variabili nei termini del goal iniziale dà la risposta finale.\\
+Durante il processo di generazione di goal intermedi si costruiscono delle varianti dei letterali e delle clausole coinvolti mediante la\textit{ rinominazione di variabili}. Una variante per una clausola $C$ é la clausola $C^{'}$ ottenuta da $C$ rinominando le sue variabili, \textit{renaming}:
+\begin{esempio}
+\begin{minted}{prolog}
+p(X) :- q(X, g(Z)).
+% è uguale alla clausola con variabili rinominate:
+p(X1) :- q(X1, g(FooFrobboz)).
+\end{minted}
+\end{esempio}
+Possono esserci più clausole di programma utilizzabili per applicare la risoluzione con il goal corrente ed esistono diverse strategie di ricerca:
+\begin{itemize}
+\item \textbf{in profondità (Depth First)}: si sceglie una clausola e si mantiene fissa questa scelta, finché non si arriva alla clausola vuota o alla impossibilità di fare nuove risoluzioni; in questo ultimo caso si riconsiderano le scelte fatte precedentemente
+\item \textbf{in ampiezza (Breadth First)}: si considerano in parallelo tutte le possibili alternative
+\end{itemize}
+\textbf{IL PROLOG ADOTTA UNA STRATEGIA DI RISOLUZIONE IN PROFONDITÀ CON \textit{BACKTRACKING}}.\\
+Si ha così risparmio di memoria anche se non è una strategia completa per le clausole di Horn.\\
+\subsubsection{Alberi di Derivazione}
+Dato un programma logico $P$, un goal $G_i$ e una regola di calcolo $R$ si ha che un \textit{albero SLD} per $P\cup G_i$ via $R$ è definito sulla base del processo di prova visto precedentemente:
+\begin{itemize}
+\item ciascun \textbf{nodo} dell'albero è un goal (possibilmente vuoto)
+\item la \textbf{radice }dell'albero SLD è il goal $G_0$
+\item dato il nodo:
+$$:-\,\,\, A_1,...,A_{m-1},A_m,A_{m+1},...,A_k$$
+se $A_m$ è il sottogoal selezionato dalla regola di calcolo $R$, allora questo nodo (genitore) ha un nodo figlio per ciascuna clausola del tipo:
+$$C_i\equiv A_i\,\,\, :-\,\,\, B_{i,\,1},...,B_{i,\,q}$$
+$$C_k\equiv A_k$$
+di $P$ tale che $A_i$ e $A_M$ ($A_K$ e $A_m$) sono unificabili attraverso la sostituzione più generale $\sigma$.\\
+Il nodo figlio è etichettato con la clausola goal
+$$:-\,\,\,\sigma[A_1,...,A_{m-1},B_{i,\,i},...,B_{i,\,q},A_{m+1},...,A_k]$$
+$$:-\,\,\,\sigma[A_1,...,A_{m-1},A_m,A_{m+1},...,A_k]$$
+e il ramo dal nodo padre al figlio è etichettato dalla sostituzione $\sigma$ e dalla clausola selezionata $C_i$ o $C_k$.\\
+Il nuovo nodo $:-$ non ha figli.
+\end{itemize}
+La regola $R$ è variabile. Si ha:
+\begin{itemize}
+\item \textbf{regola Left-most}: ovvero si ha la scelta del sottogoal più a sinistra 
+\item \textbf{regola Right-most}: ovvero si ha la scelta del sottogoal più a destra
+\item si può avere la scelta di un sottogoal a caso
+\item se si ha un modo per decider il miglior sottogoal  
+\end{itemize}
+\textbf{IL PROLOG ADOTTA UNA REGOLA LEFT-MOST}
+\\
+L'albero SLD (implicito!) generato dal sistema Prolog ordina i figli di un nodo secondo l'ordine dall'alto verso il basso delle regole e dei fatti del programma P. 
+\begin{esempio}
+Ecco un esempio:
+\begin{center}
+\includegraphics[scale=0.7]{img/alb.png}
+\end{center}
+\end{esempio}
+Ad ogni ramo di un albero SLD corrisponde una derivazione
+SLD e o gni ramo che termina con il nodo vuoto $:-$ rappresenta una derivazione SLD di successo. La regola di calcolo influisce sulla struttura dell'albero per quanto riguarda sia l'ampiezza sia la profondità tuttavia non influisce su correttezza e completezza; quindi, qualunque sia $R$, il numero di cammini di successo (se in numero finito) è lo stesso in tutti gli alberi SLD costruibili per $P\cup \{G_0\}$ e $R$ influenza solo il numero di cammini di fallimento (finiti ed infiniti).
+\begin{esempio}
+Ecco un altro esempio, con fallimento infinito, dove la clausola vuota può essere generata ma il Prolog non è in grado di trovare questa soluzione dato che la sua strategia di percorrimento dell’albero (implicito) di soluzioni è depth-first con backtracking :
+\begin{center}
+\includegraphics[scale=0.7]{img/alb2.png}
+\end{center}
+\end{esempio}
 \end{document}

@@ -332,4 +332,127 @@ X = [1, 1, 2, 2, 3, 3].
 \end{lstlisting}
 \end{shaded}
 \end{esercizio}	
+\section{laboratorio 2}
+\begin{esercizio}
+\textit{ancora sulle liste}
+\begin{minted}{prolog}
+/* trovo min lista*/
+
+% la lista da in automatico false
+min([H], H).
+min([H | T], H) :- min(T, X),
+                 H =< X. % fa solo H
+min([H | T], X) :- min(T, X),
+                 H > X. % fa tutto il resto
+
+\end{minted}
+\begin{lstlisting}[language=bash]
+?- min([3, 2, 2], X).
+X = 2 .
+
+?- min([2, 3, 4], X).
+X = 2.
+\end{lstlisting}
+\end{esercizio}
+\begin{esercizio}
+\textit{ancora sulle liste}
+\begin{minted}{prolog}
+/* rimuovo valore (una sola copia) da lista salvando in lista */
+remove_one([], _, []).
+remove_one([H | T], H, T). % se è la testa la rimuovo
+remove_one([H | T], X, [H | S]):- remove_one(T, X, S),
+                                  X \= H.
+ /* la H la tengo e riattacco la nuova S
+       e uso il primo casoi base e non il secondo
+         usando il \=*/
+\end{minted}
+\begin{lstlisting}[language=bash]
+?- remove_one([1, 2, 3, 4], 2, L).
+L = [1, 3, 4] ;
+false.
+
+?- remove_one([1, 1, 2, 3, 4], 1, L).
+L = [1, 2, 3, 4] ;
+false.
+\end{lstlisting}
+\end{esercizio}
+\begin{esercizio}
+\textit{ancora sulle liste}
+\begin{minted}{prolog}
+/* selection sort */
+selection_sort([], []).
+selection_sort(X, [H| T]) :- min(X, H), % minimo in testa
+                             remove_one(X, H, X1), %toglie il minimo
+                             selection_sort(X1, T). % rifa conl T
+
+/* unisco liste in ordine */
+merge([], X, X).
+merge(X, [], X).
+merge([H1 | T1], [H2 | T2], [H1 | T]) :- H1 =< H2,
+                             merge(T1, [H2 | T2], T).
+merge([H1 | T1], [H2 | T2], [H1 | T]) :- H2 =< H1,
+                             merge([H1 | T1], T2, T).
+
+/* spezzo in due lista */
+split_in_two([],[],[]).
+split_in_two([X],[X],[]).
+split_in_two([H1, H2 | T],[H1 | T1],[H2 | T2]) :- split_in_two(T, T1, T2).
+
+/* mergesort */
+/* divide in 2 la lista, fa il mergesort delle due e merge dei risultati*/
+mergesort([], []).
+mergesort([X], [X]).
+mergesort(L1, L2) :-  split_in_two(L1, X1, Y1),
+                        mergesort(X1, X2),
+                        mergesort(Y1, Y2),
+                        merge(X2, Y2, L2).
+\end{minted}
+\begin{lstlisting}[language=bash]
+?- selection_sort([2, 1, 4], L).
+L = [1, 2, 4] ;
+false.
+
+?- merge([2,4], [1,3,5], X).
+X = [1, 2, 3, 4, 5].
+
+?- split_in_two([1,2,3,4],X, Y).
+X = [1, 3],
+Y = [2, 4].
+
+?- split_in_two([1,2,4],X, Y).
+X = [1, 4],
+Y = [2] ;
+
+?- mergesort([2,4,1,7,6,2,12,3], X).
+X = [1, 2, 2, 3, 4, 6, 7, 12] .
+
+\end{lstlisting}
+\end{esercizio}
+\begin{esercizio}
+\textit{ancora sulle liste}
+\begin{minted}{prolog}
+
+/* da più listre annidate a una */
+/* da [[1, 3],[[4]]] */
+/* uso definizione di lista e append */
+listp([]).
+listp([_ | _]). % vero solo se ho lista
+
+append([], X, X).
+append([H|T], L, [H|X]) :- append(T, L, X).
+
+flatten([], []).
+flatten([H | T], L) :- listp(H),
+                       flatten(H, X),
+                       flatten(T, Y),
+                       append(X, Y, L). /* se testa è lista la appiattisco
+                                          e la aggiungo al risultato */
+flatten([H | T], [H | X]) :- flatten(T, X). /* altrimenti appiattisco la tail
+                                              ricorsivamente tenendo la head*/
+\end{minted}
+\begin{lstlisting}[language=bash]
+?- flatten([[1,2,3],[[4]]], X).
+X = [1, 2, 3, 4] 
+\end{lstlisting}
+\end{esercizio}
 \end{document}

@@ -1032,5 +1032,72 @@ clausola seguente. Riscrivo in maniera non simmetrica:
 minimum(X, Y, X) :- X =< Y, !.
 minimum(X, Y, Y).
 \end{minted}
-Qui si ha un red cut dato che taglia solo delle soluzioni, portando anche a risultati errati.
+Qui si ha un red cut dato che taglia solo delle soluzioni, portando anche a risultati errati.\\
+\subsection{Predicati Meta-Logici}
+Vediamo il predicato:
+\begin{minted}{prolog}
+celsius_fahrenheit(C, F) :- C is 5/9 * (F - 32).
+\end{minted}
+Questo predicato non è invertibile. Si deve decidere qual è l'input e qual è l'output. Per questi problemi si hanno i \textit{predicati meta-logici}. La ragione di questo effetto (della non invertibilità) sta nell'uso che abbiamo fatto di vari predicati aritmetici nel corpo dei predicati (>, <, =<, is, etc), per poter usare i predicati aritmetici che usano direttamente l'hardware abbiamo sacrificato la semantica dei
+nostri programmi.\\
+I predicati meta-logici principali trattano le variabili come oggetti del linguaggio e ci permettono di riscrivere molti programmi che usano i predicati aritmetici di sistema come predicati dalla semantica “corretta” ed dal comportamento invertibile. Si hanno due predicati importanti:
+\begin{itemize}
+\item \textit{var(X):}  vero se \textit{X} è una variabile logica
+\item \textit{nonvar(X):}  vero se \textit{X} non è una variabile logica
+\end{itemize}
+ovvero:
+\begin{minted}{prolog}
+?- var(foo).
+No
+?- var(X).
+Yes
+?- nonvar(42).
+Yes
+\end{minted}
+il nostro programma dei gradi diventa:
+\begin{minted}{prolog}
+celsius_fahrenheit(C, F) :- 
+	var(C), nonvar(F), C is 5/9 * (F - 32).
+celsius_fahrenheit(C, F) :- 
+	var(F), nonvar(C), F is (9/5 * C) + 32
+\end{minted}
+con var decido che clausola usare. L'uso di questi predicati ci permette di scrivere programmi efficienti e semanticamente corretti.
+\subsection{Ispezione dei termini}
+Posso chiedere a prolog se ho a che fare con termini atomici o scomposti, con i seguenti predicati:
+\begin{itemize}
+\item \textit{atomic(X): }vero se \textit{X} è un numero od una costante
+\item \textit{compound(X):} vero se non \textit{atomic(X)}
+\end{itemize}
+Ho anche per manipolare un termine \textit{Term}:
+\begin{itemize}
+\item \textit{functor(Term, F, Arity)},
+vero se \textit{Term} è un termine, con\textit{ Arity }argomenti, il cui funtore (simbolo di funzione o di predicato) è \textit{F}
+\item \textit{arg(N, Term, Arg)},
+vero se l’N-esimo argomento di \textit{Term }è \textit{Arg}
+\item \textit{Term =.. L}
+questo predicato, =..,viene chiamato (per motivi storici) \textit{univ}; è vero quando L è una lista il cui primo elemento è il funtore di \textit{Term} ed i rimanenti elementi sono i suoi argomenti
+\end{itemize}
+ovvero:
+\begin{minted}{prolog}
+?- functor(foo(24), foo, 1).
+YES
+?- functor(node(x, _, [], []), F, 4).
+F = node
+Yes
+?- functor(Term, bar, 2).
+Term = bar(_0,_1)
+Yes
+?- arg(3, node(x, _, [], []), X).
+X = []
+Yes
+?- arg(1, father(X, lot), haran).
+X = haran
+Yes
+?- father(haran, lot) =.. Ts.
+Ts = [father, haran, lot]
+Yes
+?- father(X, lot) =.. [father, haran, lot].
+X = haran
+Yes
+\end{minted}
 \end{document}

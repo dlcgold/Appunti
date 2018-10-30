@@ -934,8 +934,103 @@ Ecco un altro esempio, con fallimento infinito, dove la clausola vuota può esse
 %aggiungi esempio
 \end{esempio}
 \subsection{Cut e Backtracking}
-Permette di controllare il backtracking, ovvero si tagliano certe possibilità di backtracking. Si indica con $!$ ed effettua un'interpretazione procedurale. Un esempio:
+Permette di controllare il backtracking, ovvero si tagliano certe possibilità di backtracking. Si indica con $!$ ed effettua un'interpretazione procedurale. \\
+Come abbiamo intuito, le clausole nel data base di un programma
+Prolog vengono considerate “da sinistra, verso destra” e “dall'alto al
+basso”. Se un (sotto)goal fallisce, allora il dimostratore Prolog, sceglie un'alternativa, scandendo “dall'alto” verso “il basso” la lista delle clausole. Questo può essere controllato dal \textit{cut}. Un esempio:
 \begin{minted}{prolog}
 a :- b1, b2, ..., bk, !, ..., bn.
 \end{minted}
+Questo è l'effetto del cut:
+\begin{itemize}
+\item se il goal corrente \textit{G} unifica con \textit{a} e $b_1,...,b_k$ hanno successo, allora il dimostratore si impegna inderogabilmente alla scelta di C per dimostrare G
+\item ogni clausola alternativa (successiva, in basso) per \textit{a} che unifica con \textit{G} viene ignorata
+\item se un qualche $b_j$ con $j > k$ fallisse, il backtracking si fermerebbe al cut e le altre scelte sono rimosse dall'albero di derivazione
+\item quando il backtracking raggiunge il cut, allora il cut fallisce e la ricerca procede dall’ultimo punto di scelta prima che \textit{G} scegliesse \textit{C}
+\end{itemize}
+%aggiungere gestione stack di prolog
+vediamo un albero di derivazione in caso di cut:
+\begin{center}
+	\includegraphics[scale=0.8]{img/cut.png}
+\end{center}
+Si hanno due tipi di cut:
+\begin{itemize}
+\item \textbf{green cut: } utili per esprimere “determinismo” (e quindi per rendere più efficiente il programma)
+\item \textbf{red cut: } usati per soli scopi di efficienza, hanno per caratteristica principale quella di omettere alcune condizioni esplicite in un programma e, soprattutto, quella di modificare la semantica del programma equivalente senza cuts. Sono indesiderabili ma utili
+\end{itemize}
+consideriamo il seguente codice:
+\begin{minted}{prolog}
+/* merge di due liste ordinate*/
+
+merge([X | Xs], [Y | Ys], [X | Zs]) :-
+	X < Y,
+	merge(Xs, [Y | Ys], Zs).
+merge([X | Xs], [Y | Ys], [X, Y | Zs]) :-
+	X = Y,
+	merge(Xs, Ys, Zs).
+merge([X | Xs], [Y | Ys], [Y | Zs]) :-
+	X > Y,
+	merge([X | Xs], Ys, Zs).
+merge([], Ys, Ys).
+merge(Xs, [], Xs).
+
+/+ minimo tra due numeri */
+
+minimum(X, Y, X) :- X =< Y.
+minimum(X, Y, Y) :- Y < X.
+\end{minted}
+vediamo cosa succede:
+\begin{center}
+\includegraphics[scale=0.8]{img/cut2.png}
+\end{center}
+consideriamo la seguente query:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+?- merge([], [], Xs).
+Xs = [];
+Xs = [];
+False.
+\end{lstlisting}
+\end{shaded}
+si ha una soluzione di troppo.\\
+Un programma Prolog si dice \textbf{deterministico} quando una sola delle clausole serve (o si vorrebbe servisse) per provare un dato goal. Si usano quindi i green cuts:
+\begin{minted}{prolog}
+merge([X | Xs], [Y | Ys], [X | Zs]) :-
+	X < Y, !,
+	merge(Xs, [Y | Ys], Zs).
+merge([X | Xs], [Y | Ys], [X, Y | Zs]) :-
+	X = Y, !,
+	merge(Xs, Ys, Zs).
+merge([X | Xs], [Y | Ys], [Y | Zs]) :-
+	X > Y, !,
+	merge([X | Xs], Ys, Zs).
+merge([], Ys, Ys) :- !.
+merge(Xs, [], Xs) :- !.
+\end{minted}
+ottenendo:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+?- merge([], [], Xs).
+Xs = [];
+False.
+\end{lstlisting}
+\end{shaded}
+ovvero:
+\begin{center}
+\includegraphics[scale=0.8]{img/cut3.png}
+\end{center}
+il programma del minimo diventa:
+\begin{minted}{prolog}
+minimum(X, Y, X) :- X =< Y, !.
+minimum(X, Y, Y) :- Y < X, !.
+\end{minted}
+\textit{qui il secondo cut è ridondante ma viene messo per simmetria}.\\
+Una volta che il programma ha fallito la prima clausola (ovvero il
+test X =< Y) al sistema Prolog non rimane che controllare la
+clausola seguente. Riscrivo in maniera non simmetrica:
+\begin{minted}{prolog}
+minimum(X, Y, X) :- X =< Y, !.
+minimum(X, Y, Y).
+\end{minted}
+Qui si ha un red cut dato che taglia solo delle soluzioni, portando anche a risultati errati.
 \end{document}

@@ -1100,4 +1100,55 @@ Yes
 X = haran
 Yes
 \end{minted}
+\subsection{Programmazione di ordine superiore}
+Quando si formula una domanda per il sistema Prolog, ci si
+aspetta una risposta che è un'istanza (individuale) derivabile dalla knowledge base. Col backtracking ne abbiamo una alla folta, se le voglio tutte o voglio altri modi per acceder agli insiemi ho:
+\begin{itemize}
+\item \textit{findall(Template, Goal, Set):} 
+\begin{itemize}
+\item Vero se Set contiene tutte le istanze di Template che soddisfano Goal
+\item \textit{Le istanze di Template vengono ottenute mediante backtracking}
+\end{itemize}
+\item \textit{bagof(Template, Goal, Bag):}
+\begin{itemize}
+\item Vero se Bag contiene tutte le alternative di Template che soddisfano Goal
+\item Le alternative vengono costruite facendo backtracking solo se vi sono delle variabili libere in Goal che non appaiono in Template
+\item È possibile dichiarare quali variabili non vanno considerate libere al fine del backtracking grazie alla sintassi $Var^G$ come Goal; In questo caso Var viene pensata come una variabile esistenziale
+\end{itemize}
+\item \textit{setof(Template, Goal, Set)}, che si comporta come bagof, ma Set non contiene soluzioni duplicate
+\end{itemize}
+\newpage
+ovvero:
+\begin{minted}{prolog}
+/* findall */
+
+?- findall(C, father(X, C), Kids).
+C = _0
+X = _1
+Kids = [abraham, nachor, haran, isaac, lot, milcah, yiscah]
+Yes.
+
+
+/* bagof */
+
+?- bagof(C, father(X, C), Kids).
+C = _0
+X = terach
+KIDS = [abraham, haran, nachor];
+C = _0
+X = haran
+KIDS = [lot, yiscah, milcah];
+C = _0
+X = abraham
+KIDS = [isaac];
+NO.
+
+/* bagof con variabile esistenziale */
+
+?- bagof(C, X^father(X, C), Kids).
+C = _0
+X = _1
+Kids = [abraham, haran, lot, yiscah, nachor, isaac, milcah];
+NO.
+\end{minted}
 \end{document}

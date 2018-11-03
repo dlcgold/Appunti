@@ -28,6 +28,19 @@
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage{fancyhdr}
+
+\usepackage{varwidth,pst-tree,realscripts}
+\usepackage{bidi}
+\psset{showbbox=false,treemode=D,linewidth=0.3pt,treesep=2ex,levelsep=0.5cm}
+\newcommand{\LFTw}[2]{%
+\Tr[ref=#1]{\psframebox[linestyle=none,framesep=4pt]{%
+\begin{varwidth}{15ex}\center #2\end{varwidth}}}}
+\newcommand{\LFTr}[2]{\Tr[ref=#1]{\psframebox[linestyle=none,framesep=4pt]{#2}}}
+
+\def\pstreehooki{\psset{thislevelsep=*0pt}}
+\def\pstreehookiii{\psset{thislevelsep=*0pt}}
+\def\pstreehookv{\psset{thislevelsep=*0pt}}
+
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
 \fancyhead[LO,RE]{\slshape \leftmark}
@@ -396,8 +409,411 @@ vediamo un esempio di derivazione:
 per $n=1$ ho $abc$ ovvero:
 $$S\to aBC\to abC\to abc$$
 con $n=2$ ho $aabbcc$:
-$S\to aSBC\to aaBCBC\to aaBXBC\to aaBXCC\to aaBBCC\to aabBCC\to aabbCC\to aabbcC\to aabbcc$
+$S\to aSBC\to aaBCBC\to aaBXBC\to aaBXCC\to aaBBCC\to aabBCC\to aabbCC\to aabbcC\to aabbcc$\\
+%vedere dimostrazione pag 14 soligo
 \end{esempio}
-%aggiungi lezione del 25 ottobre e del 26 ottobre
+\newpage
+\begin{esempio}
+vediamo un esempio di grammatica dipendente dal contesto:
+$$L=\{a^nb^mc^nd^m|\, n,m\geq 1\}$$
+Si ha:
+$$G=(\{S,X,C,D,Z\},\{a,b,c,d\},P,S)$$
+con le seguenti regole di produzione:
+\begin{itemize}
+\item $S\to aSc|\, aXc$
+\item $X\to bXD|\, bD$
+\item $DC\to CD$
+\item $DC\to DZ$
+\item $DZ\to CZ$
+\item $XZ\to CD$
+\item $bC\to bc$
+\item $cC\to cc$
+\item $cD\to cd$
+\item $dD\to dd$
+\end{itemize}
+provo a derivare $aabbbccddd$ quindi con $n=2,\,m=3$:\\
+$$S\to aSC\to aaXCC\to aabXDCC\to aabbXDDCC\to $$
+$$aabbbDDDCC\to aabbbCCDDD\to aabbbccddd$$
+\end{esempio}
+\begin{esempio}
+Sia $L=\{w\in\{a,b\}^*|\, \mbox{ w contiene lo stesso numero di a e b}\}$:
+$$S\to aSbS|\,bSaS|\, \varepsilon$$
+dimostro per induzione che è corretto:
+\begin{itemize}
+\item \textbf{caso base:} $|w|=0\to w=\varepsilon$
+\item \textbf{caso passo:} si supponga che $G$ produca tutte le stringhe (di lunghezza $<$ di $n$) di $\{a,b\}^*$ con lo stesso numero di \textit{a} e \textit{b} e dimostro che produce anche quelle di lunghezza $n$, sia:
+$$w\in \{a,b\}^* \mid\, |w|=n \mbox{ con\textit{ a} e \textit{b} in egual numero, }m(a)=m(b) \mbox{ con m() che indica il numero di caratteri}$$
+quindi si ha che:
+$$w=aw_1bw_2\mbox{ o } w=bw_1aw_2$$
+sia.
+$$k_1=m(a)\in w_1=m(b)\in w_1$$
+$$k_2=m(a)\in w_2=m(b)\in w_2$$
+allora:
+$$k_1+k_2+1=m(a)\in w= m(b)\in W$$
+sapendo che $|w_1|<n$ e $|w_2|<n$ allora $w_1$ e $w_2$ sono egnerati da G per ipotesi induttiva
+\end{itemize}
+\end{esempio}
+\subsection{Alberi Sintatici}
+\begin{definizione}
+Data una grammatica CFG, $G=\{V,T,P,S\}$ un \textbf{albero sintattico} per $G$ soddisfa le seguenti condizioni:
+\begin{itemize}
+\item ogni nodo interno è etichettato con una variabile
+\item ogni foglia è anch'essa etichettata con una variabile o col simbolo di terminale T o con la stringa vuota $\varepsilon$ (in questo caso la foglia è l'unico figlio del padre)
+\item se un nodo interno è etichettato con A i suoi figli saranno etichettati con X1, ..., Xk e $A\to  X1, ..., Xk$ sarà una produzione di $G$. Se un Xi è $\varepsilon$ sarà l'unica figlio e $A\to \varepsilon$ sarà comunque una produzione di $G$
+\end{itemize}
+La concatenazione in ordine delle foglie viene detto \textbf{prodotto dell'albero}
+\end{definizione}
+\newpage
+\begin{esempio}
+Usiamo l'esempio delle stringhe palindrome:
+$$P\to 0P0|\,1P1|\varepsilon$$
+sia il seguente albero sintatico:
+\begin{center}
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]P}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]0}
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]P}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]1}
+    \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]P}}{\pstree{\Tp[edge=none]}{%
+      \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\varepsilon$}}}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]1}}}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]0}}}}
+\end{center}
+\end{esempio}
+\begin{esempio}
+Si ha:
+$$E\to I|\, E+E|\, E*E|\, (E)$$
+$$I\to a|\,b|\,Ia|\,Ib|\,I0|\,I1$$
+un albero sintattico per $a*(a+b00)$ può essere:
+\begin{center}
 
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+    \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]I}}{\pstree{\Tp[edge=none]}{%
+      \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]a}}}}}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]*}
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin](}
+    \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+      \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+        \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]I}}{\pstree{\Tp[edge=none]}{%
+          \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]a}}}}}
+      \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]+}
+      \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+        \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]I}}{\pstree{\Tp[edge=none]}{%
+          \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]I}}{\pstree{\Tp[edge=none]}{%
+            \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]b}}}
+          \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]0}}}
+        \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]0}}}}}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin])}}}}}}
+\end{center}
+\end{esempio}
+\newpage
+Data una CFG si ha che i seguenti cinque enunciati si equivalgono:
+\begin{enumerate}
+\item la procedura di inferenza ricorsiva stailisce che una stringa $w$ di simboli terminali appartiene al linguaggio $L(A)$ con $A$ variabile
+\item $A\to ^*w$
+\item $A\to^*_{lm}w$
+\item $A\to^*_{rm}w$
+\item esiste un albero sintattico con radice $A$ e prodotto $w$
+\end{enumerate}
+queste 5 proposizioni si implicano l'uni l'altra:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {5};
+ 	\node (a) at(-1,-0.5) {3};
+ 	\node (b) at(0,-1) {4};
+ 	\node (c) at(-2.0,-1.85) {2};
+ 	\node (d) at(1.5,-2) {1};
+    \draw [->] (top) -- (a);
+    \draw [->] (top) -- (b);
+    \draw [->] (a) -- (c);
+    \draw [->] (b) -- (c);
+    \draw [->] (c) -- (d);
+    \draw [->] (d) -- (top);
+\end{tikzpicture}
+\end{center}
+vediamo qualche dimostrazione di implicazione tra queste proposizioni:
+\begin{proof}[da 1 a 5]
+si procede per induzione:
+\begin{itemize}
+\item \textbf{caso base:} ho un livello solo (una sola riga), $\exists A\to w$:
+$$\overset{A}{\overset{\triangle}w}$$
+\item \textbf{caso passo:} suppongo vero per un numero di righe $\leq n$, lo dimsotro per $n+1$ righe:
+$$A\to X_1,X_2,...,X_k$$
+$$w=w_1,w_2,...,w_k$$
+ovvero, in meno di $n+1$ livelli:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]A}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_1}{\overset{\triangle}w_1}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_2}{\overset{\triangle}w_2}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\vdots$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_k}{\overset{\triangle}w_k}$}}}}
+\end{center}
+\end{itemize}
+\end{proof}
+\begin{proof}[da 5 a 3]
+procedo per induzione:
+\begin{itemize}
+\item \textbf{caso base (n=1): }$\exists A\to w\mbox{ quindi } A\to_{lm}w$, come prima si ha un solo livello:
+$$\overset{A}{\overset{\triangle}w}$$
+\item \textbf{caso passo: }suppongo che la proprierà valga per ogni albero di profondità minore uguale a $n$, dimostro che valga per gli alberi profondi $n+1$:
+$$A\to X_1,X_2,...,X_k$$
+$$w=w_1,w_2,...,w_k$$
+ovvero, in meno di $n+1$ livelli:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]A}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_1}{\overset{\triangle}w_1}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_2}{\overset{\triangle}w_2}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\vdots$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_k}{\overset{\triangle}w_k}$}}}}
+\end{center}
+$$A\to_{lm} X_1,X_2,...,X_k$$
+$$x_1\to^*_{lm}w_1 \mbox{ per ipotesi induttiva si ha un albero al più di n livelli}$$
+quindi:
+$$A\to_{lm}X_1,...,X_k\to^*_{lm}w_1,X_2,...,X_k\to^*_{lm}...\to^*_{lm}w_1,...,w_k=w$$
+\end{itemize}
+\begin{esempio}
+$$E\to I\to Ib\to ab$$
+$$\alpha E\beta\to\alpha I\beta\to \alpha Ib\beta\to \alpha ab\beta,\,\,\,\alpha,\beta\in(V\cup T)^*$$
+\end{esempio}
+\end{proof}
+\begin{esempio}
+Mostro l'esistenza di una derivazione sinistra dell'albero sintattico di $a*(a+b00)$:
+$$E\to^*_{lm}E*E\to^*_{lm}I*E\to^*_{lm}a*E\to^*_{lm}a*(E)\to^*_{lm}a*(E+E)\to^*_{lm}$$
+$$a*(I+E)\to^*_{lm}a*(a+E)\to^*_{lm}a*(a+I)\to^*_{lm}a+(a+I0)\to^*_{lm}a*(a+I00)\to^*_{lm}a*(a+b00)$$
+\end{esempio}
+\subsection{Grammatiche ambigue}
+\begin{definizione}
+Una grammatica è definita ambigua se esiste una stringa $w$ di terminali che ha più di un albero sintattico
+\end{definizione}
+\begin{esempio}
+vediamo un esempio:
+\begin{enumerate}
+\item $E\to E+E\to E+E*E$
+ovvero:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]+}
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]*}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}}}}}
+\end{center}
+\item $E\to E*E\to E+E*E$
+ovvero:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]+}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]*}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]E}}}}
+\end{center}
+\end{enumerate}
+si arriva a due stringhe uguali ma con alberi diversi. Introduciamo delle categorie sintatiche, dei vincoli alla produzione delle regole:
+\begin{enumerate}
+\item $E\to T|\, E+T$
+\item $T\to F|\, T+F$
+\item $F\to I|\, (E)$
+\item $I\to a|\,b|\,Ia|,Ib|\,I0|\,I1$
+\end{enumerate}
+\end{esempio}
+Possono esserci più derivazioni di una stringa ma l'importante è che non ci siano alberi sintattici diversi. Capire se una CFG è ambigua è un problema indecidibile
+\begin{esempio}
+vediamo un esempio:
+$$S\to \varepsilon|\,SS|\, iS|\, iSeS$$
+con S=statement, i=if e e=else. Considero due derivazioni:
+\begin{enumerate}
+\item $S\to iSeS\to iiSeS\to iie$:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]i}
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]i}
+    \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+      \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\varepsilon$}}}}}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]e}
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\varepsilon$}}}}}}\end{center}
+\item $S\to iS\to iiSeS\to iieS\to iie$:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]i}
+  \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]i}
+    \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+      \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\varepsilon$}}}
+    \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]e}
+    \pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]S}}{\pstree{\Tp[edge=none]}{%
+      \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\varepsilon$}}}}}}}}
+\end{center}
+\end{enumerate}
+Si ha quindi una grammatica ambigua
+\end{esempio}
+\begin{teorema}
+Per ogni CFG, con $G=(V, T, P, S)$, per ogni stringa $w$ di terminali si ha che $w$ ha due alberi sintattici distinti sse ha due derivazioni sinistre da S distinte.\\
+Se la grammatica non è ambigua allora esiste un'unica derivazione sinistra da $S$
+\end{teorema}
+\subsubsection{Linguaggi inerentemente ambigui}
+\begin{definizione}
+Un linguaggio $L$ è inerentemente ambiguo se tutte le grammatiche CFG per tale linguaggio sono a loro volta ambigue
+\end{definizione}
+\begin{esempio}
+Sia $L=\{a^nb^nc^md^m|\, n,m\geq 1\}\cup \{a^nbmnc^md^n|\, n,m\geq 1\}$\\
+si ha quindi un CFL formato dall'unione di due CFL. $L$ è inerentemente ambiguo e generato dalla seguente grammatica:
+\begin{itemize}
+\item $S\to AB|\,C$
+\item $A\to aAb|\,ab$
+\item $B\to cBd|\, cd$
+\item $C\to aCd|\, aDd$
+\item $D\to bDc|\, bc$
+\end{itemize}
+si possono avere due derivazioni:
+\begin{enumerate}
+\item $S\to_{lm}AB\to_{lm} aAbB\to_{lm} aabbB\to_{lm}aabbcBd\to_{lm}aabbccdd$
+\item $S\to_{lm} C\to_{lm} aCd\to_{lm}aaBdd\to_{lm}aabBcdd\to_{lm}aabbccdd$
+\end{enumerate}
+a generare problemi sono le stringhe con n=m perché possono essere prodotte in due modi diversi da entrambi i sottolinguaggi. Dato che l'intersezione tra i due sottolinguaggi non è buota si ha che $L$ è ambiguo
+\end{esempio}
+\subsection{Grammatiche Regolari}
+Sono le grammatiche che generano i linguaggi regolari (quelli del terzo tipo) che sono casi particolari dei CFL.\\
+Si ha la solita grammatica $G = (V, T, P, S)$ con però vincoli su $P$:
+\begin{itemize}
+\item $\varepsilon$ si può ottenere solo con $S\to \varepsilon$
+\item le produzioni sono tutte lineari a destra ($A\to aA$ o $A\to a$) o a sinistra ($A\to Ba$ o $A\to a$)
+\end{itemize}
+\begin{esempio}
+$I\to a|\,b|\,Ia|\,Ib|\,I0|\,I1$ è una grammatica con le produzioni lineari a sinistra.\\
+Potremmo pensarlo a destra $I\to a|\,b|\,aI|\,bI|\,0I|\,1I$.\\
+Vediamo esempi di produzione con queste grammatiche:
+\begin{itemize}
+\item con $I\to a|\,b|\,Ia|\,Ib|\,I0|\,I1$ possiamo derivare $ab01b0$:
+$$I\to I0\to Ib0\to I1b0\to I01b0\to Ib01b0\to ab01b0$$
+\item con $I\to a|\,b|\,aI|\,bI|\,0I|\,1I$ invece non riusciamo a generare nulla:
+$$I\to 0I\to 0a$$
+\end{itemize}
+definisco quindi un'altra grammatica (con una nuova categoria sintattica):
+$$I\to aJ|\, bJ$$
+$$J\to a|\,b|\,aJ|\,bJ|\,0J|\,1J$$
+che però non mi permette di terminare le stringhe con 0 e 1, la modifico ancora otterdendo:
+$$I\to aJ|\, bJ$$
+$$J\to a|\,b|\,aJ|\,bJ|\,0J|\,1J|\,0|\,1$$
+e questo è il modo corretto per passare da lineare sinistra a lineare destra
+\end{esempio}
+\begin{esempio}
+Sia $G=(\{S\},\{0,1\},P,S)$ con $S\to \varepsilon|\,0|\,1|\,0S|\,1S$. Si ha quindi:
+$$L(G)=\{0,1\}^*$$
+si hanno comunque due proposizioni ridondanti, riducendo trovo:
+$$S\to \varepsilon|\, 0S|\,1S$$
+con solo produzioni lineari a destra. Con produzioni lineari a sinistra ottengo:
+$$S\to \varepsilon|\, S0|\,S1$$
+\end{esempio}
+\begin{esempio}
+Trovo una grammatica lineare destra e una sinistra per $L=\{a^nb^m|\,n,m\geq 0\}$:
+\begin{itemize}
+\item \textbf{lineare a destra:} si ha $G=(\{S,B\},\{a,b\},P,S)$ e quindi:
+$$S\to \varepsilon|\,aS|\,bB$$
+$$B\to bB|\,b$$
+ma non si possono generare stringhe di sole $b$, infatti:
+$$S\to aS\to abB\to abbB\to abbb$$
+ma aggiungere $\varepsilon$ a B \textbf{non è lecito}. posso però produrre la stessa stringa da due derivazioni diverse:
+$$S\to \varepsilon|\,aS|\,bB|\,b$$
+$$B\to bB|\,b$$
+che risulta quindi la nostra lineare a destra
+\item \textbf{lineare a sinistra:} si ha $G=(\{S,A\},\{a,b\},P,S)$ e quindi:
+$$S\to \varepsilon|\,Sb|\,Ab|\,a$$
+$$A\to Aa|\,a$$
+\end{itemize}
+\end{esempio}
+\begin{esempio}
+Trovo una grammatica lineare destra e una sinistra per $L=\{ab^ncd^me|\,n\geq 0\,,m> 0\}$:
+\begin{itemize}
+\item \textbf{lineare a destra:} si ha  si ha $G=(\{S,A,B,E\},\{a,b,c,d,e\},P,S)$ e quindi:
+$$S\to aA$$
+$$A\to bA|\,cB$$
+$$B\to dB|\, dE$$
+$$E\to e$$
+\item \textbf{lineare a sinistra:} si ha  si ha $G=(\{S,X,Y,Z\},\{a,b,c,d,e\},P,S)$ e quindi:
+$$S\to Xe$$
+$$A\to Xd|\,Yd$$
+$$B\to Zc$$
+$$E\to a|\,Zb$$
+\end{itemize}
+quindi se per esempio ho la stringa "ciao" si ha:
+\begin{itemize}
+\item \textbf{lineare a destra:}
+$$S\to Ao$$
+$$A\to Ba$$
+$$B\to Ei$$
+$$E\to c$$
+\item \textbf{lineare a sinistra:} 
+$$S\to cA$$
+$$A\to iB$$
+$$B\to aE$$
+$$E\to o$$
+\end{itemize}
+\end{esempio}
+\begin{esempio}
+A partire da $G=(\{S,T\},\{0,1\},P,S)$ con:
+$$S\to\varepsilon|\,0S|\,1T$$
+$$T\to 0T|\,1S$$
+
+trovo come è fatto $L(G)$:
+$$L(G)=\{w\in\{0,1\}^*|\, w \mbox{ ha un numero di 1 pari}\}$$
+\end{esempio}
+\begin{esempio}
+fornire una grammatica regolare a destra e sinistra per:
+$$L=\{w\in\{0,1\}^*|\, w \mbox{ ha almeno uno 0 o almeno un 1}\}$$
+Si ah che tutte le stringhe tranne quella vuota ciontengono uno 0 o un 1
+quindi  $G=(\{S\},\{0,1\},P,S)$:
+\begin{itemize}
+\item \textbf{lineare a destra:}
+$$S\to 0|\,1|\,0S|\,1S$$
+\item \textbf{lineare a sinistra:} 
+$$S\to 0|\,1|\,S0|\,S1$$
+\end{itemize}
+\end{esempio}
+\subsection{Espressioni Regolari (Regex)}
+le regex sono usate per la ricerca di un pattern in un testo o negli analizzatori lessicali. Una regex denota il linguaggio e non la grammatica. Si hanno le seguenti operazioni tra due linguaggi $L$ e $M$:
+\begin{itemize}
+\item \textbf{unione:} dati $L,\, M\in \Sigma^*$, l'unione $L\cup M$ è l'insieme delle stringhe che si trovano in entrambi i linguaggi o solo in uno dei due
+\begin{esempio}
+$$L=\{001,10,111\}$$
+$$M=\{\varepsilon,001\}$$
+$$L\cup M=\{01,10,111,\varepsilon\}$$
+\end{esempio}
+si ha che:
+$$L\cup M=M\cup L$$
+\item \textbf{concatenazione:} dati $L,\, M\in \Sigma^*$, la concatenazione $L\cdot M$ (o $LM$) è lisieme di tutte le stringhe ottenibili concatenandone una di $L$ a una di $M$
+\begin{esempio}
+$$L=\{001,10,111\}$$
+$$M=\{\varepsilon,001\}$$
+$$L\cdot M=\{001,001001,10,...\}$$
+\end{esempio}
+si ha che:
+$$L\cdot M\neq M\cdot L$$
+\item si definiscono:
+\begin{itemize}
+\item $L\cdot L=L^2$, $L\ cdot L\cdot L=L^3$ etc...
+\item $L^1=L$
+\item $L^0=\varepsilon$
+\end{itemize}
+\item \textbf{chiusura di Kleene:}
+\end{itemize}
 \end{document}

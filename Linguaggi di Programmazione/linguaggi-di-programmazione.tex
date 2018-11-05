@@ -1418,5 +1418,97 @@ What = foo(bar)
 Esiste anche il predicato \textbf{put} che emette un carattere sullo stream ed il predicato nl che mette un ‘newline’ sullo stream.\\
 Il Prolog usa la notazione \textit{0'c} per rappresentare i caratteri come termini
 \subsection{Interpreti in Prolog}
+Il Prolog si presta benissimo alla costruzione di interpreti per la manipolazione di linguaggi specializzati (Domain Specific Languages (DSLs)). Vediamo qualche esempio:
+\begin{itemize}
+\item intepreti per Automi (a Stati Finiti, a Pila, Macchine di Turing)
+\item sistemi per la deduzione automatica
+\item sistemi per la manipolazione del Linguaggio Naturale (Natural
+Language Processing (NLP))
+\end{itemize}
+Vediamo un automa:
+\begin{center}
+\includegraphics[scale=0.8]{img/aut.png}
+\end{center}
+i nodi rappresentano degli stati. Si ha uno stato inziale ($q_0$) e uno finale, denotato con un doppio cerchio, ($q_1$). Gli archi sono le transizioni tra due stati e nel nostro caso si generano caratteri. Nell'esempio ho solo stringhe che iniziano con $a$. In $q_1$ posso fermarmi e generare solo la stringa $a$ o produrre altri caratteri in numero variabile. Le stringhe qui prodotte saranno del tipo $ac^n(ba)^n$, con $n\geq 0$.\\
+\newpage
+Per decidere se una certa sequenza di simboli è riconosciuta dall’automa possiamo costruire il seguente predicato:
+\begin{minted}{prolog}
+/* definisco l'interprete */
+accept([I | Is], S) :-
+  delta(S, I, N),
+  accept(Is, N).
+accept([], Q) :- final(Q). /* è l'uscita, se ho una lista vuota
+                               ho generato tutto */
 
+/* richiesta di riconoscere un automa con stato iniziale S
+    poi si usa l'accept con input che rappresenta la stringa
+     considerando lo stato inziale S */
+recognize(Input) :- initial(S), accept(Input, S).
+
+initial(q0). % stato iniziale
+final(q1). % stato finale
+
+/* definisco le transizioni, con delta a tre argomenti */
+delta(q0, a, q1).
+delta(q1, b, q0).
+delta(q1, c, q1).
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+?- recognize([a, b, a, c, c, b, a]).
+Yes
+
+?- recognize([a, b, a, c, b]).
+No
+\end{lstlisting}
+\end{shaded}
+vediamo cosa succede:\\
+prendo la lista $[a,\,b,\,a,\,c,\,c,\,b,\,a]$, si hanno le seguenti sostituzioni: $I\backslash a$ e $S\backslash q0$. Avrò quindi:
+\begin{minted}{prolog}
+delta(q0, a, N).
+accept([b, ...], N).
+\end{minted}
+ora si hanno le seguenti sostituzoni: $N\backslash q1$:
+\begin{minted}{prolog}
+accept([b, ...], q1). % è il nuovo goal
+\end{minted}
+\newpage
+unifico ancora con le sostituzioni $I2\backslash b$ e $Is\backslash [a,c,c,b,a]$:
+\begin{minted}{prolog}
+delta(q1, b, N2).
+accept([a, c, c, b, a], N2).
+\end{minted}
+ad un certo punto arriveremo alla fine:
+\begin{minted}{prolog}
+accept([], q1).
+\end{minted}
+che unifica con la seconda clausola, sostituendo $q1\backslash Q$, arrivando a:
+\begin{minted}{prolog}
+final(q1).
+\end{minted}
+\subsection{Meta-interpreti}
+Possiamo scrivere degli interpreti più complicati e/o specializzati
+se accettiamo di rappresentare i programmi con una sintassi
+leggermente diversa:
+\begin{minted}{prolog}
+rule(append([], X, X)).
+rule(append([X | Xs], Ys, [X | Zs]), [append(Xs, Ys, Zs)]).
+
+solve(Goal) :- solve(Goal, []).
+solve([], []).
+
+solve([], [G | Goals]) :-
+  solve(G, Goals).
+solve([A | B], Goals) :-
+  append(B, Goals, BGoals),
+  solve(A, BGoals).
+solve(A, Goals) :-
+  rule(A),
+  solve(Goals, []).
+solve(A, Goals) :-
+  rule(A, B),
+  solve(B, Goals).
+\end{minted}
+Il programma solve è un meta-interprete per i predicati rule che compongono
+il nostro sistema (o programma)
 \end{document}

@@ -1046,20 +1046,24 @@ I predicati meta-logici principali trattano le variabili come oggetti del lingua
 \item \textit{nonvar(X):}  vero se \textit{X} non è una variabile logica
 \end{itemize}
 ovvero:
-\begin{minted}{prolog}
+
+\begin{shaded}
+\begin{lstlisting}[language=bash]
 ?- var(foo).
 No
 ?- var(X).
 Yes
 ?- nonvar(42).
 Yes
-\end{minted}
+\end{lstlisting}
+\end{shaded}
+
 il nostro programma dei gradi diventa:
 \begin{minted}{prolog}
 celsius_fahrenheit(C, F) :- 
-	var(C), nonvar(F), C is 5/9 * (F - 32).
+  var(C), nonvar(F), C is 5/9 * (F - 32).
 celsius_fahrenheit(C, F) :- 
-	var(F), nonvar(C), F is (9/5 * C) + 32
+  var(F), nonvar(C), F is (9/5 * C) + 32
 \end{minted}
 con var decido che clausola usare. L'uso di questi predicati ci permette di scrivere programmi efficienti e semanticamente corretti.
 \subsection{Ispezione dei termini}
@@ -1494,8 +1498,10 @@ leggermente diversa:
 rule(append([], X, X)).
 rule(append([X | Xs], Ys, [X | Zs]), [append(Xs, Ys, Zs)]).
 
-solve(Goal) :- solve(Goal, []).
-solve([], []).
+solve(Goal) :- solve(Goal, []). /* lista goal e lista di appoggio 
+                                    dove mettere i goal restanti */
+
+solve([], []). % clausola di uscita
 
 solve([], [G | Goals]) :-
   solve(G, Goals).
@@ -1509,6 +1515,24 @@ solve(A, Goals) :-
   rule(A, B),
   solve(B, Goals).
 \end{minted}
-Il programma solve è un meta-interprete per i predicati rule che compongono
-il nostro sistema (o programma)
+Il programma \textit{solve} è un meta-interprete per i predicati \textit{rule }che compongono il nostro sistema (o programma).\\
+\newpage
+Si può avere incertezza nella conoscenza espressa. Si può avere unsa sorta di statistica:
+\begin{minted}{prolog}
+solve_cf(true, 1) :- !.
+solve_cf((A, B), C) :-
+  !,
+  solve_cf(A, CA),
+  solve_cf(B, CB),
+  minimum(CA, CB, C).
+solve_cf(A, 1) :-
+  builtin(A),
+  !,
+  call(A).
+solve_cf(A, C) :-
+  rule_cf(A, B, CR),
+  solve_cf(B, CB),
+  C is CR * CB.
+\end{minted}
+Il programma \textit{solve}$\_$\textit{cf} è un meta-interprete per stabilire se un goal G è vero e quanto siamo certi che sia vero.
 \end{document}

@@ -1,3 +1,4 @@
+
 \documentclass[a4paper,12pt, oneside]{book}
 
 %\usepackage{fullpage}
@@ -795,7 +796,7 @@ le regex sono usate per la ricerca di un pattern in un testo o negli analizzator
 \begin{esempio}
 $$L=\{001,10,111\}$$
 $$M=\{\varepsilon,001\}$$
-$$L\cup M=\{01,10,111,\varepsilon\}$$
+$$L\cup M=\{\varepsilon,01,10,111,\varepsilon\}$$
 \end{esempio}
 si ha che:
 $$L\cup M=M\cup L$$
@@ -847,10 +848,121 @@ Si riporta la definizione ricorsiva di un'espressione regolare:
 \begin{enumerate}
 \item \textbf{unione:} se $E$ e $F$ sono espressioni regolari allora anche $E+F=E\cup F$ è un'espressione regolare e si ha:
 $$L(E+F)=L(E)\cup L(F)$$
-\item \textbf{concatenazione:} se $E$ e $F$ sono espressioni regolari allora acnhe $EF=E\cdot F$ è un'espressione regolare 
-\item \textbf{chiusura:} se $E$è un'espressione regolare allora $E^*$ è un'espressione regolare 
-\item \textbf{parentesi:} se $E$è un'espressione regolare allora $(E)$ è un'espressione regolare 
+\item \textbf{concatenazione:} se $E$ e $F$ sono espressioni regolari allora anche $EF=E\cdot F$ è un'espressione regolare e si ha:
+$$L(EF)=L(E)\cdot L(F)$$
+\item \textbf{chiusura:} se $E$ è un'espressione regolare allora $E^*$ è un'espressione regolare e si h:
+$$L(E^*)=(L(E))^*$$
+\item \textbf{parentesi:} se $E$è un'espressione regolare allora $(E)$ è un'espressione regolare e si ha:
+$$L((E))=L(E)$$
 \end{enumerate}
 \end{itemize}
+\newpage
+\begin{esempio}
+trovo regex per l'insieme di stringhe in $\{0,1\}^*$ che consistono in 0 e 1 alternati:\\
+$$01\to \{01\}$$
+$$(01)^*\to \{\varepsilon, 01, 0101,010101,...\}$$
+$$(01)^*+(10)^*\to\{\varepsilon, 01,10,0101,1010,...\}$$
+ma posso volere diverse quantità di 0 e 1, sempre mantenendo l'alternanza, metto o uno 0 o un 1 davanti a quanto ottenuto appena sopra:
+$$(01)^*+(10)^*+0(10)^*+1(01)^*\to \{\varepsilon,01,10,010,101,...\}$$
+non è comunque l'unica soluzione, si può avere:
+$$(\varepsilon+1)(01)^*(\varepsilon+0)\to \{\varepsilon,01,10,010,101,...\}$$
+oppure ancora:
+$$(\varepsilon+0)(10)^*(\varepsilon+1)$$
+\end{esempio}
 \end{definizione}
+Si ha una precedenza degli operatori, in ordine di precedenza (si valuta da sinistra a destra):
+\begin{enumerate}
+\item chiusura di Kleene *
+\item concatenazione $\cdot$, che è associativo ($(E\cdot F)\cdot G=E\cdot (F\cdot G)$) ma non è commutativo ($E\cdot F\neq F\cdot E$)
+\item unione + che è associativa ($(E+ F)+ G=E+ (F+ G)$) ed è commutativo ($E+F= F+ E$)
+\item infine le parentesi
+\end{enumerate}
+si hanno anche delle proprietà algebriche:
+\begin{itemize}
+\item due espressioni regolari sono equivalenti se denotano le stesso linguaggio
+\item due espressioni regolari con variaboli sono equivalenti se lo sono $\forall$ assegnamento alle variabili
+\item l'unione è commutativa e associativa, la concatenazione è solo associativa
+\item si definiscono:
+\begin{itemize}
+\item \textbf{identità:} ovvero un valore unito all'identità è pari a se stesso (elemento neutro della somma $0+x=x+0=x$). $\emptyset$ è identità per l'unione ($\emptyset+L=L+\emptyset=L$), $\{\varepsilon\}$ è identità per la concatenazione ($\varepsilon L=L\varepsilon=L$)
+\item \textbf{annichilitore:} ovvero un valore concatenato all'annichilatore da l'annichilitore (l'elemento nullo del prodotto $0x=x0=0$).  $\emptyset$ è l'annichilitore per la concatenazione ($\emptyset L=L\emptyset=\emptyset$)
+\end{itemize}
+\item \textbf{distributività:} dell'unione rispetto alla concatenazione (che non è commutativa):
+\begin{itemize}
+\item \textbf{distributività sinistra:} $L(M+N)=LM+LN$
+\item \textbf{distributività destra:} $(M+N)L=ML+NL$
+\end{itemize}
+\item \textbf{idempotenza:} $L+L=L$
+\item $(L^*)^*=L^*$
+\item $\emptyset^*=\varepsilon$ infatti $L(\emptyset)=\{\varepsilon\}\cup L(\emptyset)\cup L(\emptyset)\cdot L(\emptyset)\cup...=\{\varepsilon\}\cup \emptyset\cup \emptyset...=\varepsilon$
+\item $\varepsilon^*=\varepsilon$ infatti $L(\varepsilon^*)=\{\varepsilon\}\cup L(\varepsilon)\cup L(\varepsilon)=\{\varepsilon\}\cup \{\varepsilon\}\cup ...=\{\varepsilon\}=L(\varepsilon)$
+\item $L^+=L\cdot L^*=L^*\cdot L$ (quindi con almeno un elemento che non sia la stringa vuota)
+\item $L^*=l^++\varepsilon$  
+\end{itemize}
+\begin{esempio}
+Ho $ER=(0+1)^*0^*(01)^*$:
+\begin{itemize}
+\item 001 fa parte del linguaggio? Si: $\varepsilon\cdot 0\cdot 01$
+\item 1001 fa parte del linguaggio? Si: $1\cdot 0\cdot 01$
+\item 0101 fa parte del linguaggio? Si: $\varepsilon\cdot\varepsilon \cdot 0101$
+\item 0 fa parte del linguaggio? Si: $\varepsilon\cdot 0\cdot \varepsilon$
+\item 10 fa parte del linguaggio? Si: $1\cdot 0\cdot \varepsilon$
+\end{itemize}
+$$L((0+1)^*)=(L(0+1))^*=(L(0)+L(1))^*=(\{0\}\cup \{1\})^*=(\{0,1\})^*=\{0,1\}^*$$
+ovvero tutte le combinazioni di 0 e 1
+\end{esempio}
+Si ricorda che:
+$$(0+1)^*\neq 0^*+1^*$$
+\newpage
+\begin{esempio}
+ho $ER=((01)^*\cdot 10\cdot (0+1)^*)^*$
+\begin{itemize}
+\item 0101 fa parte del linguaggio? No
+\item 01000 fa parte del linguaggio? No 
+\item 01011 fa parte del linguaggio? No
+\item 10111 fa parte del linguaggio? Si, $\varepsilon\cdot 10\cdot 111$
+\item 101010 fa parte del linguaggio? Si, prendo $10\cdot 1010$
+\item 101101 fa parte del linguaggio? Si, $\varepsilon\cdot 10\cdot 1$ due volte
+\item 0101100011 fa parte del linguaggio? Si, $0101\cdot 10\cdot 0011$ (0011 lo posso prendere da $(0+1)^*$)
+\end{itemize}
+\end{esempio}
+\begin{esempio}
+ho $ER=((01)^*\cdot 10\cdot (0+1))^*$
+\begin{itemize}
+\item 0101 fa parte del linguaggio? No
+\item 01000 fa parte del linguaggio? No 
+\item 01011 fa parte del linguaggio? No
+\item 10111 fa parte del linguaggio? No
+\item 101010 fa parte del linguaggio? No
+\item 101101 fa parte del linguaggio? Si, $\varepsilon\cdot 10\cdot 1$ due volte
+\item 0101100011 fa parte del linguaggio? No
+\end{itemize}
+\end{esempio}
+\begin{esempio}
+Da $L\subseteq\{0,1\}|\mbox{ stringhe contenenti almeno una volta 01}$
+quindi:
+$$(0+1)^*01(0+1)^*$$
+\end{esempio}
+\begin{esempio}
+ho $ER=(00^*1^*)^*$, quindi:
+$$L=\{\varepsilon,0,01,000,001,010,011\}=\{\varepsilon\}\cup\{w\in\{0,1\}^* |\mbox{ w che inizia con 0}\}$$
+\end{esempio}
+\begin{esempio}
+ho $ER=a(a+b)^*b$, quindi:
+$$L=\{w\in\{a,b\}^*|\mbox{ w inizia con a e termina con b}\}$$
+\end{esempio}
+\begin{esempio}
+ho $ER=(0^*1^*)^*000(0+1)^*$, quindi, sapendo che $\{0,1\}^*$ mi permette tutte le combinazioni che voglio come $(0+1)^*$:
+$$L=\{w\in\{0,1\}^*|\mbox{ w come voglio con tre 0 consecutivi}\}$$
+\end{esempio}
+\begin{esempio}
+ho $ER=a(a+b)^*c(a+b)^*c(a+b)^*b$, quindi:
+$$L=\{w\in\{a,b,c\}^*|\mbox{ w inizia con a, termina con b  e contiene almeno due c, }$$
+$$\mbox{eventtualmente non adiacenti}\}$$
+\end{esempio}
+\begin{esempio}
+Da $L\subseteq\{0,1\}|\mbox{ ogni 1 è seguito da 0, a meno che non sia l'ultimo carattere}$, ovvero 11 non compare
+quindi:
+$$(10+0)^*(\varepsilon+1)^*$$
+\end{esempio}
 \end{document}

@@ -671,4 +671,60 @@ true .
 \end{lstlisting}
 \end{shaded}
 \end{esercizio}
+\newpage
+\section{Laboratorio 4}
+atom\_string fa da variabile a stringa, number\_string da numero a stringa e string\_codes da stringa a ascii. I caratteri si indicano con 0'char.
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+?- atom_string(test, X).
+X = "test".
+
+?- atom_string(test, X), X=test.
+false.
+
+?- number_string(QD, ”42.0”).
+QD = 42.0
+
+?- number_string(X, "10").
+X = 10.
+
+?- number_string(X, "a").
+false.
+
+?- string_codes(”42”, Cs).
+Cs = [52, 50]
+\end{lstlisting}
+\end{shaded}
+\begin{esercizio}
+\begin{minted}{prolog}
+/* data stringa e carattere rimuova tutte le copie di quel carattere */
+
+remove([], _,[]).
+remove([H|T], H, L) :- remove(T, H, L).
+remove([H|T], X, [H|S]) :- H\= X,
+                           remove(T, X, S).
+
+remove_char([], _, []).
+remove_char([X], X, []).
+remove_char(String, Char, NewString) :- atom_string(Char, C),
+                                        string_codes(C, [Charc]),
+                                        string_codes(String, S),
+                                        remove(S, Charc, NewString2),
+                                        string_codes(NewString, NewString2).
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+remove_char([a,b,c,c],c,X).
+X = "ab"
+
+?- remove_char([a,b,c,c],"c",X).
+X = "ab" 
+\end{lstlisting}
+\end{shaded}
+\end{esercizio}
+così uso una libreria
+\begin{minted}{prolog}
+library(readutil).
+\end{minted}
+
 \end{document}

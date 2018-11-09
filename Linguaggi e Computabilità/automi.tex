@@ -702,7 +702,7 @@ cerco DFA per  stringhe di bit che contengono 000 solo una volta
 \end{esempio}
 \newpage
 \begin{esempio}
-%%%%%%aggiungi automa pagina 41 appunti
+Trasformare il seguente NFA in un DFA:
 \begin{center}
 \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
 	\node[state, initial, accepting] (q_0) {$q_0$};
@@ -720,7 +720,13 @@ cerco DFA per  stringhe di bit che contengono 000 solo una volta
 	      edge  [bend right=15] node [above] {a} (q_2);
 \end{tikzpicture}
 \end{center}
-%%%%%%aggiungi conti con delta
+abbiamo quindi:
+$$\delta_D(\{q_0\},a)=\delta_N(q_0,a)=\{q_1,q_2\}$$
+$$\delta_D(\{q_0\},b)=\delta_N(q_1,b)=\emptyset$$
+$$\delta_D(\{q_1,q_2\},a)=\delta_N(q_1,a)\cup \delta_N(q_2,a)=\{q_1,q_2\}cup \emptyset=\{q_1,q_2\}$$
+$$\delta_D(\{q_1,q_2\},b)=\delta_N(q_1,b)\cup \delta_N(q_2,b)=\emptyset\cup \{q_1,q_3\}=\{q_1,q_3\}$$
+$$...$$
+ottengo quindi:
 \begin{center}
 \begin{tabular}{c|c|c}
 DFA & a & b \\
@@ -732,12 +738,94 @@ $*\{q_1,q_2\}$ & $\{q_1,q_2\}$ & $\{q_1,q_3\}$ \\
 $\emptyset$ & $\emptyset$ & $\emptyset$ \\
 \hline
 $*\{q_1,q_3\}$ & $\{q_1,q_2\}$ & $\emptyset$ 
-
 \end{tabular}
 \end{center}
-%%%% aggiungi DFA
+Posso ora rinominare:
+\begin{itemize}
+\item $A=\{q_0\}$
+\item $B=\{q_1,q_2\}$
+\item $C=\emptyset$
+\item $D=\{q_1,q_3\}$
+\end{itemize}
+\newpage
+ottengo quindi il seguente DFA:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$A$};
+	\node[state, accepting] (q_1) [right=of q_0] {$B$};
+	\node[state] (q_2) [below=of q_0] {$C$};
+	\node[state,accepting] (q_3) [right=of q_2] {$D$};
+	\path[->]
+	(q_0) edge  node {a} (q_1)
+	      edge  node {b} (q_2)
+	(q_1) edge  [bend left=25] node {b} (q_3)
+	      edge  [loop] node {a} ()
+	(q_2) edge  [loop below] node {a,b} ()
+	(q_3) edge  [bend left=25] node {a} (q_1)
+	      edge  node  {a} (q_2);
+\end{tikzpicture}
+\end{center}
 \end{esempio}
 \begin{esempio}
-%da gabriele
+Trasformare il seguente $\varepsilon$-NFA in un DFA:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p$};
+	\node[state] (q_1) [right=of q_0] {$q$};
+	\node[state, accepting] (q_2) [below right =of q_0] {$r$};
+	\path[->]
+	(q_0) edge  [bend left=25] node [left] {c} (q_2)
+	      edge  [bend right=25] node {b} (q_1)
+	      edge [loop ] node {a} ()
+	(q_1) edge  [bend right=25] node {$\varepsilon$} (q_0)
+	      edge  [bend right=25] node [left] {b} (q_2)
+	      edge  [loop ] node {a} ()
+	(q_2) edge  [bend left=25] node {c} (q_0)
+	      edge  [bend right=25] node [right] {$\varepsilon$} (q_1)
+	      edge  [loop below] node {a} ();
+\end{tikzpicture}
+\end{center}
+vediamo le ECLOSE:
+$$ECLOSE(p)=\{p\}$$
+$$ECLOSE(q)=\{p,q\}$$
+$$ECLOSE(r)=\{p,q,r\}$$
+si ottiene quindi:
+\begin{center}
+\begin{tabular}{c|c|c|c}
+ & a & b & c\\
+\hline
+$to\,\{p\}$ & $\{p\}$ & $\{p,q\}$ & $\{p,q,r\}$\\
+\hline
+$\{p,q\}$ & $\{p,q\}$ & $\{p,q,r\}$ & $\{p,q,r\}$\\
+\hline
+$*\{p,q,r\}$ & $\{p,q,r\}$ & $\{p,q,r\}$ & $\{p,q,r\}$
+\end{tabular}
+\end{center}
+infatti, per esempio:
+$$\delta_D(\{p\}, a)= ECLOSE (\delta_(p,a))=ECLOSE (\{p\})=ECLOSE (p)=\{p\}$$
+$$\delta_D(\{p,q\}, a)= ECLOSE (\delta_N(p,a)\cup \delta_N(q,a))=$$
+$$ECLOSE (\{p\}\cup \{q\})=ECLOSE(P)\cup ECLOSE(q)=\{p\}\cup\{p,q\}=\{p,q\}$$
+$$...$$
+si hanno quindi le seguenti rinominazioni:
+\begin{itemize}
+\item $A=\{p\}$
+\item $b=\{p,q\}$
+\item $C=\{p,q,r\}$
+\end{itemize}
+ovvero:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$A$};
+	\node[state] (q_1) [right=of q_0] {$B$};
+	\node[state, accepting] (q_2) [below=of q_0] {$C$};
+	\path[->]
+	(q_0) edge  node {b} (q_1)
+	      edge  node {c} (q_2)
+	      edge  [loop] node {a} ()
+	(q_1) edge  node {b,c} (q_2)
+	      edge  [loop] node {a} ()
+	(q_2) edge  [loop below] node {a,b,c} ();
+\end{tikzpicture}
+\end{center}
 \end{esempio}
 \end{document}

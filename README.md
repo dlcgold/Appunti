@@ -25,7 +25,6 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [ ] Fisica
 - [ ] Linguaggi di Programmazione
 - [ ] Linguaggi e Computabilità
-- [ ] Reti e Sistemi Operativi
 
 
 ### Disclaimer

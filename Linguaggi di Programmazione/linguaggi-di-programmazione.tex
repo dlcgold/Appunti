@@ -1535,4 +1535,257 @@ solve_cf(A, C) :-
   C is CR * CB.
 \end{minted}
 Il programma \textit{solve}$\_$\textit{cf} è un meta-interprete per stabilire se un goal G è vero e quanto siamo certi che sia vero.
+\chapter{Lisp}
+Usa il paradigma funzionale. I programmi computano combinando “valori” (rappresentati in memoria) trasformati da chiamate a funzioni. Si ha che i programmi sono funzioni matematiche, funzioni primitive o composte. Si ha il concetto matematico della \textbf{trasparenza referenziale} ovvero:
+\begin{center}
+\textit{il significato del tutto si può determinare dal significato delle parti}
+\end{center}
+questo concetto rende possibile la composizione di funzioni.\\
+Ogni funzione denota un valore ottenuto tramite una mappa a
+partire dagli "argomenti". Nel paradigma funzionale vi sono oggetti di vario tipo e strutture di controllo, ma vengono raggruppati logicamente in modo
+diverso da come invece accade nel paradigma imperativo. In
+particolare è utile pensare in termini di:
+\begin{itemize}
+\item espressioni (funzioni primitive e non)
+\item modi di combinare tali espressioni per ottenerne di più
+complesse (composizione)
+\item modi e metodi di costruzione di “astrazioni” per poter far
+riferimento a gruppi di espressioni per “nome” e per trattarle
+come unità separate
+\item operatori speciali (condizionali ed altri ancora, che verranno
+introdotti in seguito)
+\end{itemize}
+ricordiamo che una funzione è una regola per associare gli elementi di un insieme (\textbf{dominio}) a quelli di un altro insieme (\textbf{codominio}). In un linguaggio funzionale l'argomento della funzione è mappato in particolari locazioni di memoria e non può essere modificato. Le composizioni di funzioni sono spesso organizzate in maniera ricorsiva. Le funzioni sono oggetti di prima classe e possono essere puntatori a una funzione, una struttura dati e possono essere costruite durante l’esecuzione di un programma e ritornate come valore di un’altra funzione. Ilinguaggi funzionali consentono l’uso di funzioni di ordine superiore, cioè funzioni che prendono altre funzioni come argomenti e che possono restituirne come valore, in modo assolutamente generale. Nei linguaggi funzionali puri non esistono strutture di controllo iterative come while e for; questi sostituiti da ricorsione combinata con gli operatori speciali condizionali.\\
+\textbf{Lisp} è una famiglia di linguaggi con due dialetti principali: \textbf{Common Lisp} e \textbf{Scheme}. Lo studio del LISP in una delle sue incarnazioni è importante dato che il linguaggio è uno dei più vecchi rappresentanti del paradigma di programmazione funzionale. Le versioni minimali di Lisp ammettono:
+\begin{itemize}
+\item funzioni primitive su \textbf{liste}
+\item un'operatore speciale \textbf{lambda} per creare funzioni
+\item un'operatore codizionale \textbf{cond}
+\item un piccolo insieme di predicati ed operatori speciali
+\end{itemize}
+Una prima cosa da notare è che in LISP ogni “espressione” denota un
+“valore”.
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> 42
+42
+
+prompt> ”Sapete che cos’e` ’42’?”
+”Sapete che cos’e` ’42’?”
+\end{lstlisting}
+\end{shaded} Si ha la seguente notazione:
+$$/f\,\,\, x_1\,\,\,...\,\,\, x_n)$$
+Le parentesi iniziali e finale sono obbligatorie (vedremo più in là
+che ciò ha conseguenze importanti) e gli spazi (almeno uno)
+sono necessari per separare tra di loro la funzione e gli argomenti.
+le operazioni matematiche elementari sono funzioni:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (+ 40 2)
+42
+
+prompt> (- 84 42)
+42
+
+prompt> (* 2 3 7)
+42
+\end{lstlisting}
+\end{shaded}
+si possono avere più argomenti:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (+ 2 10 10 20)
+42
+\end{lstlisting}
+\end{shaded}
+e per le composte si ha che al posto di un valore posso avere la chiamata ad una funzione: 
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (+ 2 (* 2 10) 20)
+42
+
+prompt> (+ (* 3 (+ (* 2 4) (+ 3 2))) (+ (- 10 8) 1))
+42
+\end{lstlisting}
+\end{shaded}
+solitamente si allinea con gli argomenti (ovvero gli \textbf{operandi}) di una chiamata allineati verticalmente:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (+ (* 3
+              (+ (* 2 4)
+                 (+ 3 2)))
+           (+ (- 10 8)
+              1))
+42
+\end{lstlisting}
+\end{shaded}
+Notiamo come le funzioni aritmetiche elementari + e * in (Common) LISP
+rispettano i vincoli di “campo” algebrico:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (+)
+0
+
+prompt> (*)
+1
+\end{lstlisting}
+\end{shaded}
+Le funzioni aritmetiche elementari - e / in (Common) LISP richiedono almeno
+un argomento e rappresentano in questo caso il “reciproco”, sempre in senso
+algebrico:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (- 42)
+-42
+
+prompt> (/ 42)
+1/42
+\end{lstlisting}
+\end{shaded}
+posso avere:
+\begin{itemize}
+\item numeri interi, numeri in virgola mobile (es. $3.5$ o $6.02E+21$), numeri razionali (es. $-3/42$) o numeri complessi ($\#C (0 1)$)
+\item booleani $T$ e $NIL$
+\item stringhe (es $"sono\,\,\, una \,\,\,stringa"$)
+\item operatiori sui booleani $null,\,\,\,and,\,\,\, or,\,\,\,not$
+\item funzioni sui numeri \textit{+ - / * mod sin cos sqrt tan atan plusp > <= zerop}
+\end{itemize}
+la valutazione delle funzioni va da sinistra a destra e produce i valori $v_1\,\,\,...\,\,\, v_n$ a cui successivamente verrà applicata la funzione in maniera \textit{inerentemente ricorsiva}. Questa valutazione non è seguita da alcuni operatori come \textit{if, cond, defun, defparameter, quote, etc...}.\\
+Le variabili si definiscono con \textit{defparameter}:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (defparameter quarantadue 42)
+quarantadue
+\end{lstlisting}
+\end{shaded}
+ora il simbolo quarantadue ha ora associato il valore 42.\\
+Le funzioni si possono definire usando l’operatore speciale defun (nome (argomenti) (corpo funzione)):
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (defun quadrato (x) (* x x))
+quadrato
+\end{lstlisting}
+\end{shaded}
+L'operatore defun associa il corpo della funzione al nome
+nell’ambiente globale del sistema Common Lisp e restituisce come valore il nome della funzione. Una volta definita, una funzione viene eseguita (o chiamata) usando la regola descritta precedentemente:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (quadrato quarantadue)
+1764
+
+prompt> (- (quadrato (+ 20 22)) 10)
+1754
+
+prompt> (defun somma-di-quadrati (x y)
+           (+ (quadrato x) (quadrato y)))
+somma-di-quadrati
+
+prompt> (- (somma-di-quadrati 6 3) 3)
+42
+\end{lstlisting}
+\end{shaded}
+i nomi delle funzioni possono contenere il carattere "-" in quanto non si cra ambiguità con la funzione "-(...)", questo succede anche con \textit{(, ), \#, ‘, ’, ”} e con la virgola.\\
+Per valutare le funzioni si ha la costruzione di un \textbf{activation frame}, i parametri formali di una funzione vengono associati ai valori (si passa tutto per valore senza effetti collaterali). Il corpo della funzione viene valutato (ricorsivamente) tenendo conto di questi legami in maniera statica, bisogna tener presente cosa accade con variabili che risultano
+“libere” in una sotto-espressione. Ad ogni sotto-espressione del corpo si sostituisce il valore che essa denota (computa). l valore (valori) restituito dalla funzione è il valore del corpo della funzione (che non è altro che una sotto-espressione), Quando il valore finale viene ritornato i legami temporanei ai parametri formali spariscono (lo stack di sistema subisce una “pop” l’activation frame viene rimosso). Per esempio:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (defun doppio (n) (* 2 n))
+doppio
+
+prompt> (doppio 3)
+6
+\end{lstlisting}
+\end{shaded}
+\begin{itemize}
+\item estende l’ambiente globale con il legame tra doppio e la sua definizione
+\item estende l’ambiente globale con quello locale che contiene i legami tra
+parametri formali e valori dei parametri attuali, un activation frame viene inserito in cima allo stack di valutazione
+\item valuta il corpo della funzione
+\item ripristina l’ambiente di partenza, l’activation frame viene rimosso dalla cima dello stack di valutazione
+\end{itemize}
+
+ Per la valutazione di una funzione F, l’ambiente deve eseguire i seguenti sei passi:
+\begin{enumerate}
+\item mettere i parametri in un posto dove la procedura possa recuperarli
+\item trasferire il controllo alla procedura
+\item allocare le risorse (di memorizzazione dei dati) necessarie alla procedura
+\item effettuare la computazione della procedura
+\item mettere i risultati in un posto accessibile al chiamante
+\item restituire il controllo al chiamante
+\end{enumerate}
+
+Queste operazioni agiscono sui registri a disposizione e sullo “stack” utilizzato dal runtime (esecutore) del linguaggio.\\Lo spazio richiesto per salvare (sullo stack) tutte le informazioni necessarie all’esecuzione di
+una funzione F ed al ripristino dello stato precedente alla chiamata è quindi costituito da:
+\begin{itemize}
+\item Spazio per i registri da salvare prima della chiamata di una sotto funzione
+\item Spazio per l’indirizzo di ritorno (nel codice del corpo della funzione)
+\item Spazio per le variabili, definizioni locali, e valori di ritorno
+\item Spazio per i valori degli argomenti
+\item Spazio per il riferimento statico (static link)
+\item Spazio per il riferimento dinamico (dynamic link)
+\item Altro spazio dipendente dal particolare linguaggio e/o politiche di allocazione del compilatore
+\end{itemize}
+% aggiungere disegni
+La gestione dello static link in Common Lisp è in realtà più complicato,
+dato che il linguaggio ammette la creazione a runtime di funzioni che si
+devono ricordare il valore delle loro variabili libere al momento della
+loro creazione. Queste funzioni sono implementate con particolari strutture dati chiamate \textbf{chiusure (closures)}, che chiudiono i valori delle loro variabili libere. Si possono quindi creare funzioni anonime, le \textbf{lambda}:
+\begin{center}
+$$(lambda\,\,(x_1\,\,...\,\,x_n)\,\,<e>)$$
+\end{center}
+con $<e>$ espressione detta \textbf{lambda-expression}:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+(lambda (x) (+ 2 x))
+
+((lambda (x) (+ 2 x)) 40)
+42
+\end{lstlisting}
+\end{shaded}
+pensiamo ora alla creazione come quella per il valore assoluto che presenta più casistiche. Useremo il costrutto \textbf{cond}:
+$$(cond\,\,(c_1\,\,e_1),\,\,...\,\,(c_n\,\,e_n))$$
+ovvero:
+\begin{minted}{lisp}
+(defun valore-assoluto (x)
+   (cond ((> x 0) x)
+         ((= x 0) 0)
+         ((< x 0) (- x))))
+\end{minted}
+l'operatore cond verifica ogni coppia di espressioni e se il risultato è T ritorna il valore della seconda espressione altrimenti passa lal coppia successiva. Se non ci sono più coppie valutabili restituisce NIL
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (valore-assoluto 3)
+3
+
+prompt> (valore-assoluto -42)
+42
+\end{lstlisting}
+\end{shaded}
+potevo anche definirlo come:
+\begin{minted}{lisp}
+(defun valore-assoluto (x)
+    (cond ((> x 0) x)
+          (T (- x))))
+\end{minted}
+e anche con:
+\begin{minted}{lisp}
+(defun valore-assoluto (x)
+   (if (> x 0) x (- x)))
+\end{minted}
+si hanno ovviamente anche gli operatori booleani \textit{and, or e not}:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (and (> 42 0) (< -42 0))
+T
+
+prompt> (not (> 42 0))
+NIL
+
+prompt> (and)
+T
+
+prompt> (or)
+NIL
+\end{lstlisting}
+\end{shaded}
 \end{document}

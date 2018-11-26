@@ -1012,6 +1012,129 @@ con: $q\in Q,\,\,\, w\in \Sigma^*\,\,\,e\,\,\,$\^{$\delta$}$(p,w)=q$
 \end{itemize}
 in un NFA si ha:
 \begin{itemize}
-\item 
+\item \textbf{caso base:}  \^{$\delta$}$(q,\varepsilon=\{q\},\,\,\forall q\in Q$
+\item \textbf{caso passo:} posto $w=ax$ e \^{$\delta$}$(q,a)=\{p_1,...,p_n\`$ allora \^{$\delta$}$(q,w)=\cup$\^{$\delta$}$(p_i, x)0\{r_1,...,r_n\}$.\\
+ \^{$\delta$}$(q,a)=p$\\
+  \^{$\delta$}$(q,w)=$ \^{$\delta$}$(q,xa)=$ \^{$\delta$}$(p,x)=r$
 \end{itemize}
+oppure:
+\begin{itemize}
+\item \textbf{caso base:}  \^{$\delta$}$(q,\varepsilon)=\{q\},\,\forall q\in Q$
+\item \textbf{caso passo:} posto $w=xa$ si ha  \^{$\delta$}$(q,q)=$ \^{$\delta$}$(q,xa)=\cup \delta(p,a)$ con  \^{$\delta$}$(q,x)=\{p_1,...,p_n\}$
+\end{itemize}
+Se ho un NFA $N=(Q_N, \Sigma, \delta_N, q_{0_N}, F_N)$ con $\delta_N: Q\times\Sigma^*\to 2^{Q_N}$ che accetta un lingiaggio $L$ posso ottenere un DFA $D=(Q_D, \Sigma, \delta_D, q_{0_D}, F_D)$ equivalente con $Q_D=2^{Q_N}$  e $q_{0_D}=\{q_{0_N}\}$ che accetta L.\\
+$\forall S\subseteq Q_N$ e $\forall a\in \Sigma$ si ha:
+$$F_D=\{S\subseteq Q_N\,|\, S\cap F_n\neq \emptyset\}$$
+con $\delta_D(S,a)=\cup \delta_N(p,a)$
+ Si ha che:
+$$|Q_D|=|2^{Q_N}|=2^{|Q_N|}$$
+partiamo con un esempio:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+gin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [right=of q_0] {$q_1$}; 
+   \node[state] (q_2) [right=of q_1] {$...$}; 
+   \node[state] (q_3) [right=of q_2] {$q_{n-1}$}; 
+   \node[state, accepting] (q_4) [right=of q_3] {$q_n$}; 
+   \path[->] 
+   (q_0) edge  node {1} (q_1)
+         edge [loop above] node {0,1} ()
+   (q_1) edge  node {0,1} (q_2)
+   (q_2) edge node {0,1} (q_3)
+   (q_3) edge node {0,1} (q_4);
+\end{tikzpicture}
+\end{center}
+che definisce un $L\subseteq\{0,1\}^*$ tale che $w\in L$ sse n-simo elemento della fine è 1. Si ha:
+$$|Q_N|=n+1\to |Q_D|=2^n$$
+Si ha che dato un $\varepsilon$-NFA $E=(Q_E, \Sigma, \delta_E, q_{0_E}, F_E)$ che riconosce $L$ in un NFA $N=(Q_N, \Sigma, \delta_N, q_{0_N}, F_N)$ equivalenti con $Q_N=2^{Q_E}$ stati in $Q_E$ $\varepsilon$-close: \textit{ECLOSE(S)=S} e $q_N=ECLOSE(q_E)$:
+$$F_N\{S\in Q_F,\,\, S\subseteq Q_E | S\cap F_E\neq \emptyset\}$$
+quindi:
+$$\forall a\in \Sigma \mbox{ e } \forall S=\{p_1,...,p_k\}, \forall S\in Q_F \mbox{ e } Q_E$$
+$$\delta_F(S,a) \mbox{ si ottiene }\cup \delta_E(p_i,a)=\{r_1,..., r_n\}$$
+$$\delta_N(S,a)=ECLOSE(\{r_1, ..., r_n\})$$
+\newpage
+\subsection{Da espressioni regolari a automi E-NFA}
+\begin{itemize}
+\item \textbf{caso base}:
+\begin{enumerate}
+\item se $R=\varepsilon$ ovvero $L(R)=\{\varepsilon\}$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state, accepting] (q_1) [right=of q_0] {$q_1$}; 
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1);
+\end{tikzpicture}
+\end{center}
+\item se $R=\emptyset$ ovvero $L(R)=\emptyset$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state, accepting] (q_1) [right=of q_0] {$q_1$}; ;
+\end{tikzpicture}
+\end{center}
+\item se $R=a$ ovvero $L(R)=\{a\}$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state, accepting] (q_1) [right=of q_0] {$q_1$};
+   \path[->]
+   (q_0) edge node {a} (q_1);
+\end{tikzpicture}
+\end{center}
+\end{enumerate}
+\item \textbf{caso passo:}
+\begin{enumerate}
+\item se $R=S+T$ quindi $L(R)=L(S)+L(T)$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [above right =of q_0] {$q_1$};
+   \node[state] (q_2) [below right =of q_0] {$q_2$};
+   \node[draw=none,fill=none] (Q_E) [right = of q_1] {$S$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_2] {$S$};
+   \node[state] (q_3) [right=of Q_E] {$q_3$};
+   \node[state] (q_4) [right=of Q_F] {$q_4$};
+   \node[state, accepting] (q_5) [below right =of q_3] {$q_5$};
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1)
+   (q_0) edge node {$\varepsilon$} (q_2)
+   (q_3) edge node {$\varepsilon$} (q_5)
+   (q_4) edge node {$\varepsilon$} (q_5);
+\end{tikzpicture}
+\end{center}
+\item se $R=ST$ quindi $L(R)=L(S)L(T)$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$};
+   \node[draw=none,fill=none] (Q_E) [right = of q_0] {$S$}; 
+   \node[state] (q_1) [ right =of Q_E] {$q_1$};
+   \node[state] (q_2) [right =of q_1] {$q_2$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_2] {$T$};
+   \node[state] (q_3) [right=of Q_F] {$q_3$};
+   \node[draw=none,fill=none] (Q_G) [right = of q_3] {};
+   \path[->]
+   (q_1) edge node {$\varepsilon$} (q_2)
+   (q_3) edge node {} (Q_G);
+\end{tikzpicture}
+\end{center}
+\item se $R=S^*$ quindi $L(R)=(L(S))^*$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [ right =of Q_E] {$q_1$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_1] {$S$};
+   \node[state] (q_2) [right =of Q_F] {$q_2$};
+   \node[state] (q_3) [right=of q_2] {$q_3$};
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1)
+   (q_2) edge [bend right = 35]  node {$\varepsilon$} (q_1)
+   (q_0) edge [bend right = 25] node  {$\varepsilon$} (q_3)
+   (q_2) edge node {$\varepsilon$} (q_3);
+\end{tikzpicture}
+\end{center}
+\end{enumerate}
+\end{itemize}
+\newpage
 \end{document}

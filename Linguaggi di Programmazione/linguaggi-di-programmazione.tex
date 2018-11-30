@@ -1788,4 +1788,215 @@ prompt> (or)
 NIL
 \end{lstlisting}
 \end{shaded}
+ecco una funzione per approssimare la radice quadrata di un numero:
+\begin{minted}{lisp}
+(defun radice-quadrata (x)
+    (ciclo-radice-quadrata x 1.0))
+
+(defun va-bene? (x c)
+    (< (valore-assoluto (- x (quadrato c)))
+       0.001))
+       
+(defun media (x y) (/ (+ x y) 2.0))
+
+(defun migliora (c x) (media c (/ x c)))
+
+(defun ciclo-radice-quadrata (x c)
+    (if (va-bene? x c)
+        c
+        (ciclo-radice-quadrata x (migliora c x))))
+
+\end{minted}
+che esegue la seguente approssimazione:
+$$1\to \frac{2}{1}=2 \to ((2+1)/2)=1,5$$
+$$1,5 \to \frac{2}{1,5}=1,3333\to ((1,3333+1,5)/2)=1,4167$$
+$$\cdots$$
+con un errore massimo di 0,001. La prima congettura è per il numero 1.\\
+Vediamo una funzione ricoriva come il fattoriale:
+\begin{minted}{lisp}
+(defun fattoriale (n)
+    (if (= n 0)
+        1
+        (* n (fattoriale (- n 1)))))
+\end{minted}
+Questa funzione calcola il fattoriale di un numero utilizzando
+una sequenza di valori intermedi che devono essere salvati da
+qualche parte (ovvero sullo “stack” di attivazione di ogni
+chiamata ricorsiva). \\
+Vediamo anche Fibonacci:
+\begin{minted}{lisp}
+(defun fib (n)
+     (cond ((= n 0) 1)
+           ((= n 1) 1)
+           (T (+ (fib (- n 2)) (fib (- n 1))))
+            ))
+\end{minted}
+possiamo anche scrivere il fattoriale in una forma simile:
+\begin{minted}{lisp}
+(defun fatt-ciclo (n acc)
+      (if (= n 0)
+          acc
+          (fatt-ciclo (- n 1) (* n acc))))
+(defun fattoriale (n)
+    (fatt-ciclo n 1))
+\end{minted}
+ovvero utilizzando uno degli argomenti come accumulatore. Con \textit{fatt-ciclo} si ha un "ciclo in incognito" che è d'aiuto al compilatore che può effettuare una funzione di jump. Una funzione così è detta \textbf{tail-ricorsive}.\\
+Un insieme di funzioni mutualmente ricorsive può rappresentare una
+macchina di Turing quindi, i linguaggi funzionali puri (senza assegnamenti e “salti”) sono Turing-completi.\\
+Creaiamo ora una libreria per fare conti coi razionali. Innanzitutto assumiamo di aver a disposizione una funzione che
+costruisce una rappresentazione di un numero razionale:
+\begin{minted}{lisp}
+(crea-razionale n d) Þ <il razionale n/d>
+\end{minted}
+Assumiamo anche di avere due funzioni numer and denom che
+estraggono rispettivamente il numeratore n ed il denominatore d dalla
+rappresentazione di un numero razionale <razionale n/d>:
+\begin{minted}{lisp}
+(defun somma-raz (r1 r2)
+    (crea-razionale (+ (* (numer r1) (denom r2))
+                       (* (numer r2) (denom r1)))
+                    (* (denom r1) (denom r2))))
+(defun molt-raz (r1 r2)
+    (crea-razionale (* (numer r1) (numer r2))
+                    (* (denom r1) (denom r2)))
+(defun =-raz (r1 r2)
+    (= (* (numer r1) (denom r2))
+       (* (numer r2) (denom r1))))
+       
+...
+\end{minted}
+Una delle strutture più importanti del Lisp è la \textbf{Cons-Cell}, iovvero una coppia di puntatori a due elementi, \textit{car e cdr}:
+\begin{minted}{lisp}
+cons : <oggetto Lisp> x ́<oggetto Lisp> -> <cons-cell>
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (defparameter c (cons 40 2))
+c
+
+prompt> (car c)
+40
+
+prompt> (cdr c)
+2
+\end{lstlisting}
+\end{shaded}
+con questo costrutto si semplifica la libreria per i razionali:
+\begin{minted}{lisp}
+(defun crea-razionale (n d)
+   (cons n d))
+
+(defun numer (r) (car r))
+
+(defun denom (r) (cdr r))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (denom (crea-razionale 42 7))
+7
+\end{lstlisting}
+\end{shaded}
+La funzione cons genera in memoria dei grafi di puntatori
+arbitrariamente complessi. Questi grafi vengono rappresentati in una tradizionale notazione detta \textit{box-and-pointer}:
+\begin{center}
+\includegraphics[scale=0.7]{img/cons.png}
+\end{center}
+Posso inserire anche T e NIL (rappresentato da una sbarra:
+\begin{center}
+\includegraphics[scale=0.7]{img/cons2.png}
+\end{center}
+bediamo qualche esempio:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (cons NIL T)
+(NIL . T) ; Notazione “dotted-pair”
+          ; (“coppia-puntata”). Gli spazi
+          ; sono significativi.
+          
+prompt> (cons 4 2)
+(4 . 2)
+
+prompt> (cons
+\end{lstlisting}
+\end{shaded}
+La notazione “dotted pair” è l’unica “irregolarità sintattica infissa” in Lisp.		
+\\
+Quando si parla di liste in Lisp ci si riferisce a particolari configurazioni di cons-cells dove l’ultimo puntatore è NIL; la costante NIL è equivalente alla lista vuota ():
+\begin{center}
+\includegraphics[scale=0.7]{img/cons3.png}
+\end{center}
+Una lista Lisp corrispondente a questa configurazione di cons-cells viene rappresentata tipograficamente come \textit{((T) 42)} che è uquivalente a \textit{((T . NIL) . (42 . NIL))}. Quindi una cons-cell con NIL come secondo
+elemento (ovvero come cdr) viene stampata senza il punto ed il NIL:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (cons 42 nil)
+(42)
+
+prompt> (cons ”foo bar” nil)
+(”foo bar”)
+\end{lstlisting}
+\end{shaded}
+inoltre una cons-cell con una cons-cell come secondo elemento è stampata in modo “abbreviato”:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (cons 42 (cons 123 666))
+(42 123 . 666)  ; Equivalente a (42 . (123 . 666))
+
+prompt> (cons 42 (cons ”foo bar” nil))
+(42 ”foo bar”)
+;;; To`, una ’lista’.
+\end{lstlisting}
+\end{shaded}
+cons si può usare anche per rappresentare una lista di oggetti:
+\begin{minted}{lisp}
+(defparameter L (cons 1 (cons 2 (cons 3 (cons 4 NIL)))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (car (cdr (cdr L)))
+3
+\end{lstlisting}
+\end{shaded}
+
+\begin{minted}{lisp}
+(defparameter L (list 1 2 3 4))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (car (cdr (cdr L)))
+3
+\end{lstlisting}
+\end{shaded}
+inoltre si ha la funzione list con un numero variabile di elementi:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (list -1 0 1 2 3)
+(-1 0 1 2 3)
+\end{lstlisting}
+\end{shaded}
+vediamo qualche manipolazione di una lista.\\
+estraiamo l'n-esimo elemento:
+\begin{minted}{lisp}
+(defun list-ref (n list)
+    (if (<= n 0)
+        (car list)
+        (list-ref (- n 1) (cdr list)))
+\end{minted}
+calocliamo la lunghezza di una lista:
+\begin{minted}{lisp}
+(defun lunghezza (l)
+    (if (null l)
+        0
+        (+ 1 (lunghezza (cdr l)))))
+\end{minted}
+Si ha la funzione \textbf{nth}. Inoltre funzione cdr ritorna di fatto il “resto” di una lista e lo standard
+Common Lisp fornisce anche l’ovvio sinonimo: rest e la funzione car ritorna il “primo” elemento di una lista; lo standard
+Common Lisp fornisce anche il sinonimo first.\\
+per fare l'append:
+\begin{minted}{lisp}
+(defun appendi (l1 l2)
+    (if (null l1)
+        l2
+        (cons (car l1) (appendi (cdr l1) l2))))
+\end{minted}
 \end{document}

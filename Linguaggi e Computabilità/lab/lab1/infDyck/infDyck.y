@@ -4,6 +4,8 @@
 
 %token OPEN_PAREN;
 %token CLOSE_PAREN;
+%token OPEN_PARENQ;
+%token CLOSE_PARENQ;
 %token <sval> SKIP;
 
 %start s
@@ -12,6 +14,9 @@
 
 parens  : OPEN_PAREN s CLOSE_PAREN
         | OPEN_PAREN CLOSE_PAREN
+
+parensq : OPEN_PARENQ s CLOSE_PARENQ
+        | OPEN_PARENQ CLOSE_PARENQ
 
 exp     : parens
 

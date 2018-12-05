@@ -20,7 +20,15 @@
                         return Parser.OPEN_PAREN; }
 ")"                   { yyparser.yylval = new ParserVal(""+yycharat(0));
                         return Parser.CLOSE_PAREN; }
-[a-z]+            { yyparser.yylval = new ParserVal(yytext());
+"["                   { yyparser.yylval = new ParserVal(""+yycharat(0));
+                        return Parser.OPEN_PARENQ; }
+"]"                   { yyparser.yylval = new ParserVal(""+yycharat(0));
+                        return Parser.CLOSE_PARENQ; }
+[a-z]+                { yyparser.yylval = new ParserVal(yytext());
                         return Parser.SKIP; }
+"::"                  { yyparser.yylval = new ParserVal(yytext());
+                        return Parser.COLPAR; }
+[A-Z]{2}              { yyparser.yylval = new ParserVal(yytext());
+                        return Parser.TWOUP; }
 
 [^] {} /*butta il resto*/

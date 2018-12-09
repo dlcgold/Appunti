@@ -1182,7 +1182,7 @@ da qui ottengo $(0+1)^*$
    (q_4) edge node {$\varepsilon$} (q_5);
 \end{tikzpicture}
 \end{center}
-unisco e aggiungo unio nel mezzo:
+unisco e aggiungo uno nel mezzo:
 \begin{center}
 \begin{tikzpicture}[shorten >=1pt,node distance=1.4cm,on grid,auto] 
    \node[state, initial] (q_i)   {$q_i$}; 
@@ -1191,9 +1191,8 @@ unisco e aggiungo unio nel mezzo:
    \node[state] (q_2) [below right =of q_0] {$q_2$};
    \node[state] (q_3) [right=of q_1] {$q_3$};
    \node[state] (q_4) [right=of q_2] {$q_4$};
-   \node[state] (q_5) [below right =of q_3] {$q_5$};
-   \node[state, initial] (•) {•};] [right of =q_5] (q_f)   {$q_f$}; 
-   
+   \node[state] (q_5) [below right =of q_3] {$q_5$}; 
+   \node[state] (q_f) [below right =of q_5] {$q_f$};
    
    \node[state] (q_m) [right of = q_f]  {$q_m$}; 
    \node[state] (q_n) [right =of q_m] {$q_n$};
@@ -1228,5 +1227,251 @@ unisco e aggiungo unio nel mezzo:
 \end{tikzpicture}
 \end{center}
 \end{esempio}
+Vediamo ora l'algoritmo che trasforma DFA in una ER. Questo algoritmo permette di verificare quale linguaggio è accettato o meno dall'automa:\\
+dato DFA $A=(Q,\Sigma, \delta, q_0,F)$ con $Q$ e $F$ stati non finali e $Q$, $F$, $q_0$ che sono i primi stati da eliminare. L'algoritmo procede per eliminazioni successive. Si costruisce quindi l'automa $B$ che ha solo $q_0$ e $F=\{q_1,...,q_k\}$. Scrivo quindi $K$ espressioni regolari considerando solo $q_0$ e il k-esimo stato finale eliminando pian piano gli altri stati. Alla fine ottengo le varie espressioni regolari da unire: 
+$$E=E1+E2+\cdots+Ek$$
+vediamo ora come eliminare uno stato. Partiamo dal seguente automa:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+   \node[state] (q_1)   {$q_1$}; 
+   \node[state] (s) [below right =of q_1] {$s$};
+   \node[state] (q_k) [below left =of s] {$q_k$};
+   \node[state] (p_1) [above right=of s] {$p_1$};
+   \node[state] (p_m) [below right =of s] {$p_m$};
+   \path[->]
+   (q_1) edge node {$Q_1$} (s)
+   (q_1) edge [bend left =50] node {$R_{11}$} (p_1)
+   (q_1) edge [bend left =100] node {$R_{1m}$} (p_m)
+   (s)   edge node {$p_1$} (p_1)
+   (s)   edge node {$p_m$} (p_m)
+   (s)   edge [loop above] node {$S$} ()
+   (q_k) edge node {$Q_k$} (s)
+   (q_k) edge [bend right =50] node {$R_{k1}$} (p_1)
+   (q_k) edge [bend right =100] node {$R_{km}$} (p_m);
+\end{tikzpicture}
+\end{center}
+\newpage
+ed elimino $s$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+   \node[state] (q_1)   {$q_1$}; 
+   \node[state] (q_k) [below =of q_1] {$q_k$};
+   \node[state] (p_1) [right=of q_1] {$p_1$};
+   \node[state] (p_m) [below  =of p_1] {$p_m$};
+   \path[->]
+   (q_1) edge node {$R_{11}+Q_1S^{*}P_1$} (p_1)
+   (q_1) edge node [right]{$R_{1m}+Q_1S^{*}P_m$} (p_m)
+   (q_k) edge node [left]{$R_{k1}+Q_kS^{*}P_1$} (p_1)
+   (q_k) edge node {$R_{km}+Q_kS^{*}P_m$} (p_m);
+\end{tikzpicture}
+\end{center}
+quindi quando si ha uno stato iniziale $q_0$ e uno finale $q_1$:
+\begin{itemize}
+\item se $q_0\neq q_1$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+   \node[state, initial] (q_0)   {$q_1$}; 
+   \node[state, accepting] (q_1) [right=of q_1] {$q_k$};
+   \path[->]
+   (q_0) edge [bend left =25]node {$S$} (q_1)
+   (q_1) edge [bend left =25]node {$T$} (q_0)
+   (q_0)   edge [loop above] node {$R$} ()
+   (q_1)   edge [loop above] node {$U$} ();
+\end{tikzpicture}
+\end{center}
+rappresenta:
+$$E_i=(R+SU^{*}T)^{*}SU^{*}$$
+\item se $q_0=q$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+   \node[state, initial, accepting] (q_0)   {$q_1$}; 
+   \path[->]
+   (q_0)   edge [loop above] node {$R$} ();
+\end{tikzpicture}
+\end{center}
+rappresenta:
+$$E_i=R^{*}$$
+\end{itemize}
+\newpage
+\begin{esempio}
+passo dall'automa a l'espressione regolare:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+\node[state, initial] (q_0) {$A$};
+	\node[state] (q_1) [right=of q_0] {$B$};
+	\node[state, accepting] (q_2) [right=of q_1] {$C$};
+	\node[state, accepting] (q_3) [right=of q_2] {$D$};
+	\path[->]
+	(q_0) edge  node {1} (q_1)
+	      edge [loop above] node {0,1} ()
+	(q_1) edge  node {0,1} (q_2)
+	(q_2) edge  node {0,1} (q_3);
+\end{tikzpicture}
+\end{center}
+questo automa accetta le stringhe binarie con un uno in penultima o terzultima posizione.\\
+Rietichetto con le ER:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+\node[state, initial] (q_0) {$A$};
+	\node[state] (q_1) [right=of q_0] {$B$};
+	\node[state, accepting] (q_2) [right=of q_1] {$C$};
+	\node[state, accepting] (q_3) [right=of q_2] {$D$};
+	\path[->]
+	(q_0) edge  node {1} (q_1)
+	      edge [loop above] node {0+1} ()
+	(q_1) edge  node {0+1} (q_2)
+	(q_2) edge  node {0+1} (q_3);
+\end{tikzpicture}
+\end{center}
+elimino B che non è iniziale o finale . Il predecessore di B è A e il successore è C. Si ha quindi:
+$$A\to B:1$$
+$$B\to C:0+1$$
+e non ho loop in B ($\emptyset$) e nessun arco tra A e C ($R_{a,c}=\emptyset$). Quindi:
+$$R_{A,C}^{'}=\emptyset+1\emptyset^*(0+1)=1(0+1)$$
+ovvero:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+\node[state, initial] (q_0) {$A$};
+	\node[state, accepting] (q_2) [right=of q_0] {$C$};
+	\node[state, accepting] (q_3) [right=of q_2] {$D$};
+	\path[->]
+	(q_0) edge  node {1(0+1)} (q_2)
+	      edge [loop above] node {0+1} ()
+	(q_2) edge  node {0+1} (q_3);
+\end{tikzpicture}
+\end{center}
+Ho ora solo stati iniziali e finali, quindi $E=E_1+E_2$. 
+Trovo $E1$, elimino quindi C. Si ha:
+$$A\to C:1(0+1)$$
+$$C\to D:0+1$$
+e non ho loop in B ($\emptyset$) e nessun arco tra A e D($R_{A,D}=\emptyset$), ovvero:
+$$R_{A,D}=\emptyset+1(0+1)\emptyset^*(0+1)=1(0+1)(0+1)$$
+che è:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+\node[state, initial] (q_0) {$A$};
+	\node[state, accepting] (q_3) [right=of q_0] {$D$};
+	\path[->]
+	(q_0) edge  node {1(0+1)(0+1)} (q_3)
+	      edge [loop above] node {0+1} ();
+\end{tikzpicture}
+\end{center}
+quindi:
+$$E_1=((0+1)+1(0+1)(0+1)\emptyset^*\emptyset)^*1(0+1)(0+1)\emptyset^*=(0+1)^*1(0+1)(0+1)$$
+ottengo $E2$ eliminando D che non ha successori, quindi:
+$$E_2=(0+1)^*1(0+1)$$
+e quindi infine:
+$$E=E_1+E_2=(0+1)^*1(0+1)(0+1)+(0+1)^*1(0+1)=(0+1)^*1(0+1)(\varepsilon+0+1)$$
+\end{esempio}
+\begin{esempio}
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+\node[state, initial, accepting] (q_0) {$p$};
+	\node[state] (q_1) [right =of q_0] {$s$};
+	\node[state] (q_2) [right=of q_1] {$r$};
+	\node[state] (q_3) [below=of q_1] {$q$};
+	\path[->]
+	(q_0) edge  node {0} (q_1)
+	      edge [loop above] node {1} ()
+	(q_1) edge [bend left = 25] node {0} (q_3)
+    (q_1) edge  node {1} (q_2)
+    (q_2) edge  [bend left = 25] node {1} (q_3)
+	      edge [loop above] node {0} ()
+	(q_3) edge  [bend left = 25] node {1} (q_1)
+	(q_3) edge  [bend left = 25] node {0} (q_0);
+\end{tikzpicture}
+\end{center}
+rimuovo $r$:
+$$s\to r:1$$
+$$r\to q:1$$
+$$loop:0$$
+$$R_{s,q}=0$$
+Si ottiene quindi:
+$$R^{'}_{s,q}=0+10^*1$$
+ovvero:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+\node[state, initial, accepting] (q_0) {$p$};
+	\node[state] (q_1) [right =of q_0] {$s$};
+	\node[state] (q_3) [below=of q_1] {$q$};
+	\path[->]
+	(q_0) edge  node {0} (q_1)
+	      edge [loop above] node {1} ()
+	(q_1) edge [bend left = 25] node {$0+10^*1$} (q_3)
+	(q_3) edge  [bend left = 25] node {1} (q_1)
+	(q_3) edge  [bend left = 25] node {0} (q_0);
+\end{tikzpicture}
+\end{center}
+elimino ora $s$, che ha due predecessori, $p$ e $q$, quindi:
+$$p\to s:0$$
+$$q\to s:1$$
+$$s\to q:0+10^*1$$
+non ha loop e non ha archi diretti tra $p$ e $q$ ($R_{p,q}=\emptyset$). Si ottengono quindi:
+$$R_{p,q}=\emptyset+0\emptyset^*(0+10^*1)=0(0+10^*1)$$
+$$R_{q,q}=\emptyset+10^*(0+10^*1)=1(0+10^*1)$$
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+\node[state, initial, accepting] (q_0) {$p$};
+	\node[state] (q_3) [right=of q_0] {$q$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {$0(0+10^*1)$} (q_3)
+	      edge [loop above] node {1} ()
+	(q_3) edge  [bend left = 25] node {0} (q_0)
+		  edge [loop above] node {$1(0+10^*1)$} ();
+\end{tikzpicture}
+\end{center}
+elimino ora $q$ che ha $p$ sia come predecessore che come successore:
+$$p\to q: 0(0+10^*1)$$
+$$q\to p:0$$
+$$loop: 1(0+10^*1)$$
+$$R_{p,p}:1$$
+ottenendo:
+$$R^{'}_{p,p}=1+0(0+10^*1)(1(0+10^*1))^*0=1+(00+010^*1)(10+110^*1)^*0$$
+\newpage
+ovvero:
 
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+\node[state, initial, accepting] (q_0) {$p$};
+	\path[->]
+	   (q_0)   edge [loop above] node {$1+(00+010^*1)(10+110^*1)^*0$} ();
+\end{tikzpicture}
+\end{center}
+Essendo $p$ sia iniziale che finale si ha:
+$$E=(1+(00+010^*1)(10+110^*1)^*0)^*$$
+\end{esempio}
+\subsection{Chiusura di un Linguaggio regolare}
+Sia $REG$ la classe dei linguaggi regolari (ovvero ogni linguaggio regolare su un alfabeto finito non vuoto). Si ha la seguente proprietà:
+$$L,M\in REG\to L\cup M\in REG$$
+si può dimostrare in due maniere:
+\begin{itemize}
+\item \textbf{con le espressioni regolari:}
+$$L,M\in REG \to \exists R, S \mbox{ ER tali che } L(R)=L \mbox { e } L(S)=M$$
+$$L\cup M=L(R+S) \mbox{ e quindi appartenente a } REG$$
+\item \textbf{con gli automi:}
+$$\mbox{se }L,M\in REG\to \exists \varepsilon-NFA \mbox{ che con L e M va dallo stato iniziale a quello finale}$$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [above right =of q_0] {$q_1$};
+   \node[state] (q_2) [below right =of q_0] {$q_2$};
+   \node[draw=none,fill=none] (Q_E) [right = of q_1] {$L$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_2] {$M$};
+   \node[state] (q_3) [right=of Q_E] {$q_3$};
+   \node[state] (q_4) [right=of Q_F] {$q_4$};
+   \node[state, accepting] (q_5) [below right =of q_3] {$q_5$};
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1)
+   (q_0) edge node {$\varepsilon$} (q_2)
+   (q_3) edge node {$\varepsilon$} (q_5)
+   (q_4) edge node {$\varepsilon$} (q_5);
+\end{tikzpicture}
+\end{center}
+accetta $L\cup M$ che quindi è $REG$
+\end{itemize}
+Inoltre siano due i due alfabeti $\Sigma\subseteq\Gamma$, si ha che:
+$$\mbox{se L è regolare su }\Sigma\to \mbox{L è regolare su }\Gamma$$
+inoltre:
+$$\mbox{se L è REG su }\Sigma_1, \mbox{ M è REG su }\Sigma_2, \mbox{ allora } L\cup M \mbox{ è REG su }\Sigma_1\cup\Sigma_2$$
+%pagina 57
 \end{document}

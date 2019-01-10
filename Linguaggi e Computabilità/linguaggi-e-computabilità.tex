@@ -1484,4 +1484,715 @@ se $L\in REG$ su $\Sigma$ allora $\overline{L}=\Sigma^*-L\in REG$
 \begin{proof}
 se $L\in REG$ allora $\exists$ DFA $A=(Q, \Sigma, \delta, q_0, F)$ tale che $L(A)=L$. Costruisco $B=(Q,\Sigma, \delta,q_0, Q-F),\,	 L(B)=\overline{L}$.\\
 \end{proof}
+si osserva che:
+$$L\in REG\,\,su\,\, \Sigma\,\,e\,\, \Sigma\subseteq \Gamma$$
+inoltre:
+$$\overline{L}=\Sigma^*-L\,\,oppure\,\, \overline{L}=\Gamma^*-L$$
+\textit{Se ho un espressione regolare per L e voglio ottenere un'espressione regolare per }$\overline{L}$\textit{ devo ottenere un }$\varepsilon-NFA$\textit{ che devo convertire in DFA. A quel punto complemento con F e ottengo un'espressione regolare per }$\overline{L}$.\\
+Passiamo ora all'intersezione:
+\begin{teorema}
+se $L$ e $M$ sono regolari allora la loro intersezione è regolare
+\end{teorema}
+\begin{proof}
+$$L,M\in REG\to \exists A_L,A_M(DFA) \mbox{ tali che }L(A_L)=L\,\,e\,\, L(A_M)=M$$
+e quindi:
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-1.6)(9.75,1.6)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](2.0,0.4)(0.0,-0.4)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.0,0.4)(3.6,1.2)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.0,-0.4)(3.6,-1.2)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](5.2,1.6)(3.6,0.8)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](5.2,-0.8)(3.6,-1.6)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(5.2,1.2)(6.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(5.2,-1.2)(6.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(7.52,0.0)(8.72,0.0)
+\rput[bl](0.54,-0.08){$w\in\Sigma^*$}
+\rput[bl](4.24,1.08){$A_L$}
+\rput[bl](4.14,-1.32){$A_M$}
+\rput[bl](6.94,-0.1){$\wedge$}
+\rput[bl](5.74,0.84){$\frac{accetta}{rifiuta}$}
+\rput[bl](5.98,-1.14){$\frac{accetta}{rifiuta}$}
+\rput[bl](8.82,-0.24){$\frac{accetta}{rifiuta}$}
+\psbezier[linecolor=black, linewidth=0.04](6.7660146,-0.39855364)(7.5631223,-0.46652403)(7.6310925,0.33058324)(6.8339853,0.3985536432683381)
+\psline[linecolor=black, linewidth=0.04](6.8,0.4)(6.8,-0.4)
+\end{pspicture}
+}
+\end{center}
+\end{proof}
+Passiamo al problema della \textbf{chiusura dei linguaggi regolari rispetto all'intersezione}, ovvero che due automi che usano entrambi contemporaneamente una certa stringa in input, il ché non è possibile. Si risolve usando l'\textbf{automa prodotto}:
+$$A=(Q_L\times Q_M,\Sigma, \delta, (q_{OL},q_{OM}).F_L\times F_M)$$
+con:
+$$\delta(p,q),a)=(\delta_L(p,a),\delta_M(q,a))$$
+$$A_L=(Q_L,\Sigma,\delta_L,q_{OL},F_L)$$
+$$A_M=(Q_M,\Sigma,\delta_M,q_{OM},F_M)$$
+\begin{esempio}
+Siano:\\
+$A_L$, stringhe binarie con almeno uno zero:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial] (q_0) {$r$};
+	\node[state, accepting] (q_1) [right=of q_0] {$s$};
+	\path[->]
+	(q_0) edge node {0} (q_1)
+	      edge [loop above] node {1} ()
+	(q_1) edge [loop above] node {0,1} ();
+\end{tikzpicture}
+\end{center}
+$A_M$, stringhe binarie con almeno un uno:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p$};
+	\node[state, accepting] (q_1) [right=of q_0] {$q$};
+	\path[->]
+	(q_0) edge node {1} (q_1)
+	      edge [loop above] node {0} ()
+	(q_1) edge [loop above] node {0,1} ();
+\end{tikzpicture}
+\end{center}
+ottengo l'automa prodotto:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p,r$};
+	\node[state] (q_1) [right=of q_0] {$p,s$};
+	\node[state] (q_2) [below=of q_0] {$q,r$};
+	\node[state, accepting] (q_3) [right=of q_2] {$q,s$};
+	\path[->]
+	(q_0) edge  node {1} (q_1)
+	      edge  node {0} (q_2)
+	(q_1) edge  node {0} (q_3)
+	      edge [loop above] node {1} ()
+	(q_2) edge  node {1} (q_3)
+	      edge [loop below] node {0} ()
+	(q_3) edge [loop below] node {0,1} ();
+\end{tikzpicture}
+\end{center}
+$$\delta((p,r),0)=(\delta_L(p,o),\delta_M8r,o))=(q,r)$$
+\end{esempio}
+
+\begin{esempio}
+Siano:\\
+$A$, stringhe contenenti $a$ e $b$ contenenti almeno una $b$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0$};
+	\node[state, accepting] (q_1) [right=of q_0] {$q_1$};
+	\path[->]
+	(q_0) edge node {a} (q_1)
+	      edge [loop above] node {b} ()
+	(q_1) edge [loop above] node {a,b} ();
+\end{tikzpicture}
+\end{center}
+$A_M$, stringhe contenenti $a$ e $b$ contenenti $2n,\,n\geq 0$ $b$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$p_0$};
+	\node[state] (q_1) [right=of q_0] {$p_1$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {b} (q_1)
+	      edge [loop above] node {a} ()
+	(q_1) edge [bend left = 25] node {b} (q_0)
+		  edge [loop above] node {a} ();
+\end{tikzpicture}
+\end{center}
+si ha che $L(A\wedge B)$ è il linguaggio formato da stringhe contenenti $a$ e $b$ contenenti $2n,\,n\geq 1$ $b$:
+faccio la tabella:
+\begin{center}
+\begin{tabular}{c|c|c}
+& a & b \\
+\hline
+$\to (q_0,p_0)$ & $(q_0,p_0)$ & $(q_1,p_1)$\\
+\hline
+$ (q_1,p_1)$ & $(q_1,p_1)$ & $(q_1,p_0)$\\
+\hline
+$* (q_1,p_0)$ & $(q_1,p_0)$ & $(q_1,p_1)$
+\end{tabular}
+\end{center}
+ottengo l'automa prodotto:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0,p_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1,p_1$};
+	\node[state,accepting] (q_2) [right=of q_1] {$q_1,p_0$};
+	\path[->]
+	(q_0) edge  node {b} (q_1)
+	      edge [loop above] node {a} ()
+	(q_1) edge [bend left =25] node {b} (q_2)
+	      edge [loop above] node {a} ()
+	(q_2) edge [bend left =25] node {b} (q_1)
+	      edge [loop above] node {1} ();
+\end{tikzpicture}
+\end{center}
+\end{esempio}
+
+\begin{esempio}
+si hanno due linguaggi $L(A)$ e $L(B)$ tali per cui la loro intersezione non è vuota.\\
+Sia $A$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$a$};
+	\node[state] (q_1) [right=of q_0] {$b$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {1} (q_1)
+	      edge [loop above] node {0} ()
+	(q_1) edge [bend left = 25] node {0} (q_0)
+		  edge [loop above] node {1} ();
+\end{tikzpicture}
+\end{center}
+e $B$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$c$};
+	\node[state, accepting] (q_1) [right=of q_0] {$d$};
+	\node[state] (q_2) [below right=of q_0] {$e$};
+	\path[->]
+	(q_0) edge  node {0} (q_1)
+		  edge [bend left =25] node {1} (q_2)
+	(q_1) edge node {1} (q_2)
+	      edge [loop above] node {0} ()
+	(q_2) edge [bend left =25] node {0} (q_0)
+	      edge [loop below] node {1} ();
+\end{tikzpicture}
+\end{center}
+faccio la tabella:
+\begin{center}
+\begin{tabular}{c|c|c}
+& 0 & 1 \\
+\hline
+$\stackrel{*}{\to} (a,c)$ & $(a,d)$ & $(b,e)$\\
+\hline
+$ *(a,d)$ & $(a,d)$ & $(b,e)$\\
+\hline
+$ (b,e)$ & $(a,c)$ & $(b,e)$
+\end{tabular}
+\end{center}
+e ottengo:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$a,c$};
+	\node[state] (q_1) [right=of q_0] {$b,e$};
+	\node[state, accepting] (q_2) [below =of q_0] {$a,d$};
+	\path[->]
+	(q_0) edge  node {0} (q_2)
+		  edge [bend left =25] node {1} (q_1)
+		  edge [loop above] node {0} ()
+	(q_1) edge [bend left =25] node {0} (q_0)
+	      edge [loop above] node {1} ()
+	(q_2) edge  node {1} (q_1);
+\end{tikzpicture}
+\end{center}
+\end{esempio}
+
+
+\begin{esempio}
+Sia $A$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p_0$};
+	\node[state, accepting] (q_1) [right=of q_0] {$p_1$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {1} (q_1)
+	      edge [loop above] node {0} ()
+	(q_1) edge [bend left = 25] node {0} (q_0)
+		  edge [loop above] node {1} ();
+\end{tikzpicture}
+\end{center}
+e $B$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state] (q_2) [below right=of q_0] {$q_2$};
+	\path[->]
+	(q_0) edge [bend left =25] node {0} (q_1)
+	      edge [bend left =25] node {1} (q_2)
+	(q_1) edge [bend left =25] node {1} (q_2)
+	      edge [loop above] node {0} ()
+	(q_2) edge [bend left =25] node {0} (q_0)
+	       edge [bend left =25] node {1} (q_1);
+\end{tikzpicture}
+\end{center}
+faccio la tabella:
+\begin{center}
+\begin{tabular}{c|c|c}
+& 0 & 1 \\
+\hline
+$\to (p_0,q_0)$ & $(p_0,q_1)$ & $(p_1,q_2)$\\
+\hline
+$(p_0,q_1)$ & $(p_0,q_1)$ & $(p_1,q_2)$\\
+\hline
+$ (p_1,q_2)$ & $(p_0,q_0)$ & $(p_1,q_1)$\\
+\hline
+$ (p_1,q_1)$ & $(p_0,q_1)$ & $(p_1,q_2)$
+\end{tabular}
+\end{center}
+non si raggiungono stati finali quindi $L(A\cap B)=\emptyset$
+\end{esempio}
+\subsection{Minimizzazione}
+definiamo la \textbf{relazione di equivalenza tra stati}:
+\begin{definizione}
+Sia $A$ un $DFA$, $A=()Q,\Sigma,\delta,q_0,F)$. Siano:
+$$p,q\in Q\to p\approx q\mbox{ vale se } \forall w \in \Sigma^*\,\,\, \stackrel{\wedge}{\delta}(p,w)\in F\longleftrightarrow \stackrel{\wedge}{\delta}(q,w)\in F$$
+inoltre $p$ e $q$ sono distinguibili se $p\not\approx q$ ovvero:
+$$\exists w\in \Sigma^*\mbox{ tale che:} $$
+$$\stackrel{\wedge}{\delta}(p,w)\in F \,\,e\,\,\stackrel{\wedge}{\delta}(q,w)\not\in F\,\,o\,\,\stackrel{\wedge}{\delta}(p,w)\not\in F \,\,e\,\,\stackrel{\wedge}{\delta}(q,w)\in F$$
+\end{definizione}
+quindi si ha una \textbf{relazione di equivalenza} e quindi si hanno le tre proprietà:
+\begin{itemize}
+\item \textbf{riflessività:} $\forall p\in Q, p\approx p$
+\item \textbf{simmetricità:} $\forall p,q\in Q, p\approx q\to q\approx p$
+\item \textbf{transitività:} $\forall p,q,r\in Q, p\approx q\vee q\approx r\to p\approx r$
+\end{itemize} 
+e quindi \textbf{in ogni classe di equivalenza ci sono stati tra loro equivalenti}
+due stati, uno finale e uno non finale, sono sicuramente distinguibili, basti pensare alla stringa vuota.
+\begin{esempio}
+Analizziamo il seguente automa:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+	\node[state, initial] (q_0) {$a$};
+	\node[state] (q_1) [right=of q_0] {$b$};
+	\node[state, accepting] (q_2) [right=of q_1] {$c$};
+	\node[state] (q_3) [right=of q_2] {$d$};
+	\node[state] (q_4) [below=of q_0] {$e$};
+	\node[state] (q_5) [right=of q_4] {$f$};
+	\node[state] (q_6) [right=of q_5] {$g$};
+	\node[state] (q_7) [right=of q_6] {$h$};
+	\path[->]
+	(q_0) edge node {1} (q_5)
+	      edge node {0} (q_1)
+	(q_1) edge node {1} (q_2)
+		  edge node [below] {0} (q_6)
+	(q_2) edge [bend right =25] node {0} (q_0)
+	      edge [loop above] node {1} ()
+	(q_3) edge node {0} (q_2)    
+		  edge node [below]{1} (q_6) 
+	(q_4) edge node {1} (q_5)
+	      edge [bend right =45] node {1} (q_7)    
+	(q_5) edge node [above] {0} (q_2)  
+	      edge node {1} (q_6)  
+	(q_6) edge [bend left =25] node {1} (q_4)    
+		  edge [loop below] node {0} ()
+	(q_7) edge node {0} (q_6)    
+		  edge node [above] {1} (q_2);
+\end{tikzpicture}
+\end{center}
+cerco di capire se $a$ e $g$ sono equivalenti:
+\begin{itemize}
+\item $\varepsilon$ non li distingue perché entrambi sono non accettanti
+\item 0 non li distingue perché li porta rispettivamente in \textit{b} e \textit{g}, che non sono accettanti
+\item 1 non li distingue perché li porta rispettivamente in \textit{f} e \textit{e}, che non sono accettanti
+\item 01 li distingue perché $\stackrel{\wedge}{\delta}(a,01)=c$ e $\stackrel{\wedge}{\delta}(g,01)=e$ e il primo è accettante mentre il secondo no, quindi i due stati non sono equivalenti
+\end{itemize}
+si verifica che invece \textit{a} e \textit{e} sono equivalenti
+\end{esempio}
+diamo una definizione ricorsiva dell'equivalenza tra stati:
+\begin{itemize}
+\item \textbf{caso base:} se $p\in F$ e $q\not\in F$ o viceversa si ha che gli stati sono distinguibili
+\item \textbf{caso passo:} se per $a\in \Sigma$ gli stati $r=\delta(p,a)$ e $s=\delta(q,a)$ sono distinguibili allora anche $p$ e $q$ lo sono
+\end{itemize}
+quindi se un certo arco w porta due stati a due diversi di cui uno è accettante essi sono distinti.\\
+Esiste anche un algoritmo detto \textbf{riempi-tabella}:\\
+partiamo dalla seguente tabella
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|}
+\hline
+b &  & / & / & / & / & / & /\\
+\hline
+c &  &  & / & / & / & / & /\\
+\hline
+d &  &  &  & / & / & / & /\\
+\hline
+e &  &  &  &  & / & / & /\\
+\hline
+f &  &  &  &  &  & / & /\\
+\hline
+g &  &  &  &  &  &  & /\\
+\hline
+h &  &  &  &  &  &  & \\
+\hline
+  & a & b & c & d & e & f & g\\
+\hline
+\end{tabular}
+\end{center}
+$c$ è accettante quindi segniamo tutte le caselle relative a $c$ per il caso base:
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|}
+\hline
+b &  & / & / & / & / & / & /\\
+\hline
+c & x & x & / & / & / & / & /\\
+\hline
+d &  &  & x & / & / & / & /\\
+\hline
+e &  &  & x &  & / & / & /\\
+\hline
+f &  &  & x &  &  & / & /\\
+\hline
+g &  &  & x &  &  &  & /\\
+\hline
+h &  &  & x &  &  &  & \\
+\hline
+  & a & b & c & d & e & f & g\\
+\hline
+\end{tabular}
+\end{center}
+poiché, per esempio $c,h$ è distinguibile e gli stati $e$ e $f$ con 0 vanno in $h$ e $c$ si ha che anche $e$ e $f$ sono distinguibili, segno quindi nelle caselle appropriate. Proseguo controllando anche le altre coppie e riempio le caselle. Ottengo:
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|}
+\hline
+b & x & / & / & / & / & / & /\\
+\hline
+c & x & x & / & / & / & / & /\\
+\hline
+d & x & x & x & / & / & / & /\\
+\hline
+e &  & x & x & x & / & / & /\\
+\hline
+f & x &  & x & x & x & / & /\\
+\hline
+g & x & x & x & x & x & x & /\\
+\hline
+h & x &  & x & x & x & x & x\\
+\hline
+  & a & b & c & d & e & f & g\\
+\hline
+\end{tabular}
+\end{center}
+quindi si ha solo che:
+$$a\approx e\,\,b\approx h\,\,d\approx f$$
+si ha che:
+\begin{teorema}
+due stati non distinti dall'algoritmo riempi-tabella sono equivalenti. Se ne calcola la complessità:
+$$|Q|=n\to \frac{n(n-1)}{2}\,\,caselle=O(n^2)$$
+se ho una crocetta a iterazione ho il caso peggiore $n^2n^2=O(n^4)$
+\end{teorema}
+quindi per vedere se due linguaggi regolari sono equivalenti si ha che:
+$$L,M\in REG$$
+$$\exists A_L=(Q_L,\Sigma,\delta_L,q_L,F_L)$$
+$$\exists A_M=(Q_M,\Sigma,\delta_M,q_M,F_M)$$
+costruisco $A=(Q_L\cup Q_M,\Sigma,\delta,q_L,F_L\cup F_M)$
+\\$\delta$ è $\delta_L$ per $Q_L$ e $\delta$ è $\delta_M$ per $Q_M$
+per vedere se $q_L\approx q_M$ uso il riempi tabella e se sono equivalenti si ha che $L=M$
+\begin{esempio}
+Sia $A$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$a$};
+	\node[state] (q_1) [right=of q_0] {$b$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {1} (q_1)
+	      edge [loop above] node {0} ()
+	(q_1) edge [bend left = 25] node {0} (q_0)
+		  edge [loop above] node {1} ();
+\end{tikzpicture}
+\end{center}
+e $B$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$c$};
+	\node[state, accepting] (q_1) [right=of q_0] {$d$};
+	\node[state] (q_2) [below =of q_0] {$e$};
+	\path[->]
+	(q_0) edge node {0} (q_1)
+	      edge [bend right=25] node {1} (q_2)
+	(q_1) edge node {1} (q_2)
+	      edge [loop above] node {0} ()
+	(q_2) edge [bend right =25] node {0} (q_0)
+	      edge [loop below] node {1} ();
+\end{tikzpicture}
+\end{center}
+entrambi i linguaggi accettano $(\varepsilon+(0+1)^*0)$
+applico la tabella:
+\begin{center}
+\begin{tabular}{c|c|c|c|c|}
+\hline
+b & x & / & / & / \\
+\hline
+c &  & x & / & / \\
+\hline
+d &  & x &  & / \\
+\hline
+e & x &  & x & x \\
+\hline
+& a & b & c & d\\
+\hline 
+\end{tabular}
+\end{center}
+e quindi dato che $a\approx c$ si ha che i due linguaggi sono lo stesso linguaggio. \\
+\textbf{CHIEDERE SPIEGAZIONI A RIGUARDO}
+\end{esempio}
+passiamo ora alla \textbf{minimizzazione}, che prende in input un DFA $A$ e restituisce un $DFA$ $A_{min}$ tale che $L(A)=L(A_{min})$ e che $A_{min}$ ha il numero più piccolo possibile di stati per distinguere $L(A)$.\\
+Procedo così:
+\begin{enumerate}
+\item si rimuovono gli stati non raggiungibili
+\item applico la tabella per scoprire le tabelle di equivalenza, gli stati del nuovo automa sono le classi di equivalenza
+\end{enumerate}
+si ha che lo stato iniziale è la classe di equivalenza dello stato finale e gli stati finali sono le classi di equivalenza degli stati finali.\\
+La minimizzazione si dimostra per assurdo:\\
+Sia $M$ il DFA ottenuto dalla tabella. Suppongo esista un DFA $N$ tale che $L(A)=L(N)\,|Q_N|<|Q_M|$. I due stati iniziali sono indistinguibili. Sia $p\in M\,\,q\in N$ tali $p\approx q\,\, \forall a\in\Sigma$ quindi $\delta p,a)=\delta(q,a)$, Ogni stato $p\in Q_;$è quindi indistinguibile da almeno uno stato di $N$. Avendo però $N$ meno stati si avranno almeno due stati di $M$ indistinguibili dallo stesso di $N$ ma non sono indistinguibili per la tabella. SI ha un assurdo.
+\begin{esempio}
+Si ha il seguente automa:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+	\node[state, initial] (q_0) {$a$};
+	\node[state] (q_1) [right=of q_0] {$b$};
+	\node[state, accepting] (q_2) [right=of q_1] {$c$};
+	\node[state] (q_3) [right=of q_2] {$d$};
+	\node[state] (q_4) [below=of q_0] {$e$};
+	\node[state, accepting] (q_5) [right=of q_4] {$f$};
+	\node[state] (q_6) [right=of q_5] {$g$};
+	\node[state] (q_7) [right=of q_6] {$h$};
+	\node[state, accepting] (q_8) [below=of q_5] {$i$};
+	\path[->]
+	(q_0) edge node {1} (q_4)
+	      edge node {0} (q_1)
+	(q_1) edge node {0} (q_2)
+		  edge [bend left =25] node {1} (q_5)
+	(q_2) edge [bend left =25] node {1} (q_7)
+	      edge node {0} (q_3)
+	(q_3) edge node {1} (q_7)    
+		  edge [bend right= 85] node {0} (q_4) 
+	(q_4) edge node {0} (q_5)
+	      edge [bend left =25] node {1} (q_8)    
+	(q_5) edge [bend left = 25] node {0} (q_1)  
+	      edge node {0} (q_6)  
+	(q_6) edge node {1} (q_1)    
+		  edge node {0} (q_7)  
+	(q_7) edge node {0} (q_8)    
+		  edge [bend left = 25] node {1} (q_2)  
+	(q_8) edge [bend left = 25] node {1} (q_4)    
+		  edge [bend left = 85] node {0} (q_0);
+\end{tikzpicture}
+\end{center}
+faccio la tabella
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c|c|c|c|}
+\hline
+b &  & / & / & / & / & / & / & /\\
+\hline
+c & x & x & / & / & / & / & / & /\\
+\hline
+d &  & z & x & / & / & / & / & /\\
+\hline
+e & x &  & x & x & / & / & / & /\\
+\hline
+f & x & x &  & x & x & / & / & /\\
+\hline
+g &  & x & x &  & x & x & / & /\\
+\hline
+h & x &  & x & x &  & x & x & / \\
+\hline
+i & x & x &  & x & x &  & x & x\\
+\hline
+  & a & b & c & d & e & f & g & h\\
+\hline
+\end{tabular}
+\end{center}
+al caso base segno tutte le caselle degli stati accettanti tranne quelle che incrociano con altri stati accettanti e poi completo il resto della tabella. Ottengo:
+$$a\approx d\approx g$$
+$$b\approx e\approx h$$
+$$c\approx f\approx i$$
+
+e quindi ottengo, l'automa minimizzato:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+	\node[state, initial] (q_0) {$\{a,d,g\}$};
+	\node[state] (q_1) [right=of q_0] {$\{b,e,h\}$};
+	\node[state, accepting] (q_2) [below =of q_0] {$\{c,f,i\}$};
+	\path[->]
+	(q_0) edge node {0,1} (q_1)
+	(q_1) edge [bend left =25] node {0,1} (q_2)
+	(q_2) edge [bend left =25] node {1} (q_1)
+	      edge node {0} (q_0);
+\end{tikzpicture}
+\end{center}
+\end{esempio}
+\begin{esempio}
+Sia $A$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$a$};
+	\node[state] (q_1) [right=of q_0] {$b$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {1} (q_1)
+	      edge [loop above] node {0} ()
+	(q_1) edge [bend left = 25] node {0} (q_0)
+		  edge [loop above] node {1} ();
+\end{tikzpicture}
+\end{center}
+e $B$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$c$};
+	\node[state, accepting] (q_1) [right=of q_0] {$d$};
+	\node[state] (q_2) [below =of q_0] {$e$};
+	\path[->]
+	(q_0) edge node {0} (q_1)
+	      edge [bend right=25] node {1} (q_2)
+	(q_1) edge node {1} (q_2)
+	      edge [loop above] node {0} ()
+	(q_2) edge [bend right =25] node {0} (q_0)
+	      edge [loop below] node {1} ();
+\end{tikzpicture}
+\end{center}
+riduco $B$:
+\begin{center}
+\begin{tabular}{c|c|c}
+\hline
+d & & /\\
+\hline
+e & x & x\\
+\hline
+ & c & d\\
+ \hline
+\end{tabular}
+\end{center}
+quindi $c\approx d$. Ottengo quindi:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+	\node[state, initial, accepting] (q_0) {$\{c,d\}$};
+	\node[state] (q_1) [right=of q_0] {$e$};
+	\path[->]
+	(q_0) edge [bend left = 25] node {1} (q_1)
+	      edge [loop above] node {0} ()
+	(q_1) edge [bend left = 25] node {0} (q_0)
+		  edge [loop above] node {1} ();
+\end{tikzpicture}
+\end{center}
+quindi $A$ è $B$ minimizzato, per questo riconoscevano lo stesso linguaggio 
+\end{esempio}
+La tabella non funziona ovviamente por gli NFA
+\subsection{Pumping Lemma per i linguaggi regolari}
+Questo lemma serve a dimostrare che un linguaggio L non è regolare. Si procede per assurdo.\\
+Partiamo da un esempio:
+$$L_{01}=\{0^n1^n|\,n\geq 1\}=\{01,0011,...\}$$
+supponiamo che questo linguaggio sia rappresentabile da un DFA $A$ con $k$ stati ($L(A)=L_{01}$).\\
+$0^k$ implica $k+1$ prefissi: $\varepsilon,0,00,000,...,0^k$ e quindi $\exists i,j$ tali che $0^i$ e $0^j$ finiscono nello stesso stato. Allora l'automa è ingannabile e accetterebbe $0^i0^j$ con $i\neq j$.\\
+Formalmente si ha:
+\begin{teorema}
+Sia $L\in REG$ allora $\exists n$ che dipende da $L$ tale che $\forall w\in L$ con $|w|\geq n$, $w$ può essere scomposta in tre stringhe $w=xyz$ in modo che:
+$$y\neq \varepsilon$$
+$$|xy|\leq n$$
+$$\forall k\geq 0\,\,\, zy^kz\in L$$
+in altre parole posso sempre trovare una stringa non vuota $y$ non troppo distante dall'inizio di $w$, da $replicare$ da ripetere o cancellare ($k=0$) senza uscire dal linguaggio $L$
+\end{teorema}
+\begin{proof}
+essendo $L\in REG$ esiste un DFA $A$ tale che $L=L(A)$. Suppongo $|Q|=n$ e considero $w=a_1a_2...a_n$ con $m\geq n$. Sia:
+$$p_i=\stackrel{\wedge}{\delta}(q_0,a_1,...a_i)\,\,\forall i=0,1,...,n$$
+quindi:
+$$p_0=q_0,p_1,...,p_n\to n+a\,\,stati$$
+allora $\exists i,j$, con $0\leq i<j\leq n$ tali che $p_i=p_j$. Scompongo ora $w$ in $w=xyz$ con:
+$$x=a_1a_2...a_n$$
+$$y=a_{i+1}a_{i+2}...a_j$$
+$$z=a_{j+1}a_{j+2}...a_m$$
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p_0$};
+	\node[state] (q_1) [right=of q_0] {$p_i$};
+	\node[state, accepting] (q_2) [right =of q_1] {$\mbox{ }$} ;
+	\path[->]
+	(q_0) edge node {x} (q_1)
+	(q_1) edge node {z} (q_2)
+	      edge [loop above] node {y} ();
+\end{tikzpicture}
+\end{center}
+\end{proof}
+\begin{esempio}
+mostriamo che L01 non è regolare. Suppongo per assurdo che sia regolare, allora vale il pumping lemma. Sia $n\in\mathbb{N}$ la costante del pumping lemma. Pongo $w=0^n1^n=xyz$ tale che $|xy|=n$, ovvero $|xy|=0^n$, quindi $xy$ è formato da soli 0. Poniamo $x=0^{n-1}\,\,y=0\neq \varepsilon\,\, z=1^n$. Però per il pumping lemma $\forall k\geq 0\,\,\ xy^kz\in L_{01}$.
+$$xy^kz=0^{n-1}0^k1^n=0^{n+k-1}1^n\in L_{01}$$
+ma se $k\neq 1$ ciò non è vero e quindi il linguaggio non è regolare
+\end{esempio}
+\begin{esempio}
+$L=\{w\in\{0,1\}^*|\, w=w^R\}$, linguaggio delle stringhe palindrome, è regolare?\\
+suppongo per assurdo di sì, con $n$ costante del pumping lemma.\\
+$w=0^n10^n$ quindi $x=0^{n-1}\,\,y=0\,\,z=10^n$.
+Per $k=0$ si ha $xy^kz=0^{n-1}10^n\not\in L$, quindi non è regolare
+\end{esempio}
+\begin{esempio}
+$L=\{1^p|\, p\,\,primo\}=\{11,111,11111\}$ è regolare?\\
+$w=1^p=1^{n-1}11^{p-n}$ con:
+$$x=1^{n-1}\,\,y=1\,\,z=1^{p-n}$$
+per $k=0$ si ha $1^{p-1}$ e $p-1$ non è , quindi non è regolare
+\end{esempio}
+\begin{esempio}
+$L=\{0^n1^m|\, n\leq m\}$ è regolare?\\
+$w=0^{n-l}0^l1^{m}$ con:
+$$x=0^{n-l}\,\,y=0^l\,\,z=1^{m}$$
+con $|y|=l$ e $0<l\leq n$\\
+quindi $\forall k\geq 0$ si ha $xy^kz\in L=0^{n-l}0^{kl}1^{m}$ con:
+$$x=0^{n-l}\,\,y=0^{kl}\,\,z=1^{m}$$
+scelgo $k$ tale che $b-l+kl=n+(k-1)l>m\to k> 1+\frac{m-n}{l}$ quindi non è regolare
+\end{esempio}
+\begin{esempio}
+$L=\{0^n1^m|\, n\geq m\}$ è regolare?\\
+$w=0^{n-l}0^l1^{m}$ con:
+$$x=0^{n-l}\,\,y=0^l\,\,z=1^{m}$$
+con $|zy|\leq n\,\,y\neq\varepsilon\,\,|y|=l$ e $0<l\leq n$\\
+scelgo l tale che $n-l<m$ quindi non è regolare
+\end{esempio}
+\textbf{su appunti dispense altri esempi}
+\section{Automi a Pila}
+Si introduce un nuovo tipo di automa, il PDA (push down automata) che può essere pensato come un $\varepsilon-NFA$ col supporto di una pila (stack):
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.04)(5.83,2.04)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](3.2,2.04)(1.58,1.16)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.0,1.58)(1.6,1.58)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(3.2,1.58)(4.8,1.58)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.38)(2.4,-0.42)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.38)(2.4,1.18)
+\psline[linecolor=black, linewidth=0.04](1.6,-0.42)(1.6,-2.02)
+\psline[linecolor=black, linewidth=0.04](3.2,-2.02)(1.6,-2.02)
+\psline[linecolor=black, linewidth=0.04](3.2,-2.02)(3.2,-0.42)
+\psline[linecolor=black, linewidth=0.04](1.6,-0.82)(3.2,-0.82)
+\psline[linecolor=black, linewidth=0.04](1.6,-1.22)(3.2,-1.22)
+\psline[linecolor=black, linewidth=0.04](1.6,-1.62)(3.2,-1.62)
+\rput[bl](4.9,1.32){$\frac{accetta}{rifiuta}$}
+\rput[bl](0.4,1.74){input}
+\rput[bl](3.78,0.22){ stati finiti}
+\rput[bl](3.6,-1.22){stack}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(3.64,0.72)(2.38,1.62)
+\rput[bl](3.78,0.56){controllo a}
+\end{pspicture}
+}
+\end{center}
+e viene definito un PDA $P$ come:
+$$P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$$
+con;
+\begin{itemize}
+\item $Q$: insieme finito e non vuoto di stati
+\item $\Sigma$: alfabeto di simboli di input
+\item $\Gamma$: alfabeto di simboli di stack
+\item $q_0\in Q$: stato iniziale
+\item $z_0\in \Gamma\backslash \Sigma$: simbolo iniziale dello stack
+\item $F\in Q$: insieme degli stati accettanti o finali
+\end{itemize}
+si ha che:
+$$\delta:Q\times(\Sigma\cup\{\varepsilon\}\times \Gamma\to 2^{Q\times \Gamma^*}$$
+quindi:
+$$\delta(q_0,a,X)=\{(p_1,X_1),(p_2,X_2),...\}\,insieme\,\,\,finito\,\,p_i\in Q\,\,X_i\in \Gamma^*$$
+si hanno dei casi particolari:
+\begin{itemize}
+\item lo stato $p$ potrebbe coincidere con $Q$ e si avrebbe un cappio
+\item se $\Gamma=\varepsilon$ si ha il pop di $X$ dallo stack
+\item se $\Gamma=X$ si lascia lo stack invariato
+\item se $\Gamma=Y\neq X$ si ha la sostituzione di $X$ con $Y$ in cima allo stack
+\item se $\Gamma$ è una stringa di simboli si ha il la rimozione di $X$ dallo stack e l'aggiunta a uno a uno dei simboli nello stack
+\end{itemize}
+\newpage
+\begin{esempio}
+Trovo PDA per il linguaggio delle stringhe binarie  palindrome di lunghezza pari: $L=\{ww^R|w\in\{0,1\}^*\}$. Con $R$ che indica rovesciato\\
+Si ha la CFG $G=(\{P\},\{0,1\},Prod,P)$ tale che:
+$$P\to 0P0|1P1|\varepsilon$$
+si hanno quindi tre stati:
+\begin{itemize}
+\item $q_0$ che è quello iniziale che legge $w$ e spinge i dati sullo stack
+\item $q_1$ che letta $w$ legge i simboli di $wR$ e li confronta con quelli dello stack
+\item $q_2$ sarà la stringa accettata
+\end{itemize}
+descriviamo formalmente l'automa con la funzione di transizione $\delta$.
+%pagina 10
+\end{esempio}
 \end{document}

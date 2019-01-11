@@ -2193,6 +2193,114 @@ si hanno quindi tre stati:
 \item $q_2$ sarà la stringa accettata
 \end{itemize}
 descriviamo formalmente l'automa con la funzione di transizione $\delta$.
-%pagina 10
+PDA $P=(\{q_0,q_1,q_2\},\{0,1\}, \{o,1,z_0\},\delta,q_0,z_0,\{q_2\})$
+ovvero:
+$$\delta(q_0,0,z_0)=\{(q_0,1z_0)\}$$
+$$\delta(q_0,1,z_0)=\{(q_0,0z_0)\}$$
+$$\delta(q_0,0,0)=\{(q_0,00)\}$$
+$$\delta(q_0,0,1)=\{(q_0,01)\}$$
+$$\delta(q_0,1,0)=\{(q_0,10)\}$$
+$$\delta(q_0,1,1)=\{(q_0,11)\}$$
+$$\delta(q_0,\varepsilon,z_0)=\{(q_0,z_0)\}$$
+$$\delta(q_0,\varepsilon,0)=\{(q_0,0)\}$$
+$$\delta(q_0,\varepsilon,1)=\{(q_0,1)\}$$
+$$\delta(q_1,0,0)=\{(q_1,\varepsilon)\}$$
+$$\delta(q_2,1,1)=\{(q_1,\varepsilon)\}$$
+$$\delta(q_2,\varepsilon,z_0)=\{(q_2,0z_0)\}$$
+\newpage 
+otteniamo il seguente PDA:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state, accepting] (q_2) [right =of q_1] {$q_2$};
+	\path[->]
+	(q_0) edge node [align=center] {$\varepsilon,0/0$\\$\varepsilon,1/1$\\$\varepsilon,z_0/z_0$} (q_1)
+	      edge [loop below] node [align=center] {$0,z_0/0z_0$\\$1,z_0/1z_0$\\$0,0/00$\\$0,1/01$\\$1,0/10$\\$1,1/11$} ()
+	(q_1) edge [loop below] node [align=center] {$0,0/\varepsilon$\\$1,1/\varepsilon$} ()
+	      edge  node [align=center] {$\varepsilon,z_0/z_0$} (q_2);
+\end{tikzpicture}
+\end{center}
+e si definisce questa notazione per gli archi:
+$$(p,\alpha)\in\delta(q,a,X)$$
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\path[->]
+	(q_0) edge node [align=center] {$a,X/\alpha$} (q_1);
+\end{tikzpicture}
+\end{center}
 \end{esempio}
+analizziamo meglio i PDA. Si ha che la \textbf{descrizione istantanea (ID)} di un PDA è una tripla:
+$$ID:(q,w,\gamma)$$
+con $q\in Q$ stato attuale $w\in\Sigma^*$ input rimanente e $\gamma\in\Gamma^*$ contenuto attuale dello stack.\\
+Definiamo ora il concetto di \textbf{mossa in un passo}
+dato $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ la mossa è una relazione $\stackrel{\vdash}{p}$:
+$$(p,\alpha)\in\delta(q,a,X)\,\,allora\,\,\forall w\in\Sigma^*\,\,e\,\, \forall\beta\in\Gamma^*\to (q,aw,X\beta)\vdash(p,w,\alpha\beta$$
+e
+$$(p,\alpha)\in\delta(q,\varepsilon,X)\,\,allora\,\,\forall w\in\Sigma^*\,\,e\,\, \forall\beta\in\Gamma^*\to (q,w,X\beta)\vdash(p,w,\alpha\beta$$
+\newpage
+ora possiamo anche definire la relazione con 0 o più mosse 
+in forma induttiva $\stackrel{*}{\stackrel{\vdash}{p}}$:
+\begin{itemize}
+\item \textbf{caso base:} $\forall ID\,\,I, I \stackrel{*}{\vdash} I$
+\item \textbf{caso passo:} $I \stackrel{*}{\vdash} J$ se $\exists ID\,\,K$ tale che $ I\vdash K \,\,e\,\, K \stackrel{*}{\vdash} J$
+\end{itemize}
+vediamo un esempio con un PDA che accetta $ww^R|\,w\in\{0,1\}^*$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state, accepting] (q_2) [right =of q_1] {$q_2$};
+	\path[->]
+	(q_0) edge node [align=center] {$\varepsilon,0/0$\\$\varepsilon,1/1$\\$\varepsilon,z_0/z_0$} (q_1)
+	      edge [loop below] node [align=center] {$0,z_0/0z_0$\\$1,z_0/1z_0$\\$0,0/00$\\$0,1/01$\\$1,0/10$\\$1,1/11$} ()
+	(q_1) edge [loop below] node [align=center] {$0,0/\varepsilon$\\$1,1/\varepsilon$} ()
+	      edge  node [align=center] {$\varepsilon,z_0/z_0$} (q_2);
+\end{tikzpicture}
+\end{center}
+e prendiamo la stringa $1111$:\\
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.51)(3.08,2.51)
+\rput[bl](0.0,2.29){$q_0,1111,z_0$}
+\rput[bl](0.0,1.49){$q_0,111,1z_0$}
+\rput[bl](0.0,0.69){$q_0,11,11z_0$}
+\rput[bl](0.0,-0.11){$q_0,1,111z_0$}
+\rput[bl](0.0,-0.91){$q_0,\varepsilon,1111z_0$}
+\rput[bl](0.0,-1.71){$q_1,\varepsilon,1111z_0$}
+\rput[bl](0.25,-2.51){$X$}
+\rput[bl](3.0,1.49){$(q_1,1111,z_0)\to(q_2,1111,z_0)\to X$}
+\rput[bl](3.0,0.69){$(q_1,111,1z_0)\to (q_1,11,z_0)\to(q_2,11,z_0)\to X$}
+\rput[bl](3.0,-0.11){$(q_1,11,11z_0)\to(q_1,1,1z_0)\to(q_1,\varepsilon,z_0)\to(q_2,\varepsilon,z_0)\to V$}
+\rput[bl](3.0,-0.91){$(q_1,1,111z_0)\to(q_1,\varepsilon,11z_0)\to X$}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,2.29)(0.4,1.89)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,1.49)(0.4,1.09)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,0.69)(0.4,0.29)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,-0.11)(0.4,-0.51)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,-0.91)(0.4,-1.31)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,-1.71)(0.4,-2.11)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,1.49)(2.8,1.09)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,2.29)(2.8,1.89)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,0.69)(2.8,0.29)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,-0.11)(2.8,-0.51)
+\end{pspicture}
+}
+chiamiamo \textbf{computazione }una sequenza di mosse, non necessariamente di successo. Si hanno alcune proprietà:
+\begin{itemize}
+\item se una se una sequenza di ID è lecita per un PDA P allora è lecita anche la sequenza di Id ottenuta concatenando $w\in\Sigma^*$ in ogni ID
+\item se una se una sequenza di ID è lecita per un PDA P e resta una coda di input non consumata allora posso rimuovere tale coda in ogni ID e ottenere un'altra sequenza lecita
+\item se una se una sequenza di ID è lecita per un PDA P allora  è lecita la sequenza ottenuta aggiungendo $\gamma\in\Gamma^*$ in coda alla terza sequenza di ogni ID
+\end{itemize}
+del resto però:
+$$(q,Xw,\alpha\gamma) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta\gamma)\not\to (q,X,\alpha) \stackrel{*}{\vdash}(p,y,\beta),\,\,x,w,y\in\Sigma^*\,\,\alpha,\beta,\gamma\in\Gamma^*$$
+per queste proprietà valgono i seguenti teoremi:
+\begin{teorema}
+per la seconda:
+\end{teorema}
+
+\begin{teorema}
+per la prima e la terza:
+\end{teorema}
 \end{document}

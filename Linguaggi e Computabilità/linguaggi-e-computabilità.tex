@@ -2298,9 +2298,290 @@ $$(q,Xw,\alpha\gamma) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta\gamma)\not\
 per queste proprietà valgono i seguenti teoremi:
 \begin{teorema}
 per la seconda:
+Se $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ è un PDA e $(q,Xw,\alpha) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta)$ allora vale anche:
+$$(q,X,\alpha) \stackrel{*}{\stackrel{\vdash}{p}} (p,Y,\beta)$$
 \end{teorema}
-
 \begin{teorema}
 per la prima e la terza:
+Se $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ è un PDA e $(q,X,\alpha) \stackrel{*}{\stackrel{\vdash}{p}} (p,Y,\beta)$ allora:
+$$\forall\gamma\in\Gamma^*\,\,\,vale\,\,\,anche\,\,\,(q,Xw,\alpha\gamma) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta\gamma)$$
 \end{teorema}
+Si definiscono due modalità di accettazione per i PDA:
+\begin{enumerate}
+\item \textbf{per stato finale:} sia $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ si ha che:
+$$L(P)=\{w\in\Sigma^*|\,(q_0,w,z_0) \stackrel{*}{\stackrel{\vdash}{p}} (q,\varepsilon,\alpha)\}$$
+con $q\in F$ e $\forall \alpha\in \Gamma^*$
+\item \textbf{per stack vuoto:} sia $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ si ha che:
+$$N(P)=\{w\in\Sigma^*|\,(q_0,w,z_0) \stackrel{*}{\stackrel{\vdash}{p}} (q,\varepsilon,\varepsilon)\}$$
+con $q\in Q$ e in questo caso l'insieme degli stati finali $F$ non ha alcuna influenza
+\end{enumerate}
+In realtà si ha che la classe di linguaggi accettati dai PDA per stato finale è uguale a quella per stack vuoto, anche se passare da un tipo all'altro di PDA è complesso. SI ha il seguente teorema per la trasformazione:
+\begin{teorema}
+se $L=N(P_N)$ per un PDA  $P_N=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ allora $\exists \,\,PDA\,\,P_F\,\,\,tale\,\,\,che\,\,\,L=L(P_F)$
+\end{teorema}
+\begin{proof}
+Sia $x_0\in\Gamma$, che indica la fine dello stack di $P_F$. Si ha:
+$$\delta(p_0,\varepsilon,x_0)=\{(q_0,z_0x_0\}$$
+e:
+$$\forall q\in Q,\,\forall a\in\Sigma\cup\{\varepsilon\},,\forall y\in\Sigma:\,\,\delta_F(q,a,y)\mbox{ contiene tutte le coppie di }\delta_N(q,a,y)$$
+$$\forall q\in Q,\delta_F(q,\varepsilon,x_0)=\{(P_F,\varepsilon)\}$$
+quindi graficamente:
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-3.2)(13.6,3.2)
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](2.0,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](5.2,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](7.2,0.0){3.2}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,-1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](12.8,0.0){0.4}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.0)(4.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.0,0.0)(1.6,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(5.6,0.0)(12.0,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,1.2)(12.0,0.4)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,-1.2)(12.0,-0.4)
+\rput[bl](0.48,0.3){$start$}
+\rput[bl](6.12,1.84){$P_N$}
+\rput[bl](1.78,-0.1){$p_0$}
+\rput[bl](5.02,-0.16){$q_0$}
+\rput[bl](2.42,0.22){$\varepsilon,x_0/z_0x_0$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](7.44,0.14){$\varepsilon,x_0/\varepsilon$}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](12.8,0.0){0.8}
+\rput[bl](12.58,-0.13){$P_f$}
+\rput[bl](10.4,-1.2){$\varepsilon,x_0/\varepsilon$}
+\end{pspicture}
+}
+\end{center}
+Bisogna dimostrare che effettivamente $w\in L(P_F)\longleftrightarrow\in N(P_N)$.\\
+se $w\in N(P_N)$ $\exists$ una sequenza di $ID\,\,\,(q_0,w,z_0)\stackrel{*}{\stackrel{\vdash}{P_N}}(q,\varepsilon,\varepsilon)$ per un qualche $q\in Q$:
+$$(q_0,w,z_0x_0)\stackrel{*}{\stackrel{\vdash}{P_N}}(q,\varepsilon,x_0)$$
+inoltre:
+$$(q_0,w,z_0x_0)\stackrel{*}{\stackrel{\vdash}{P_F}}(q,\varepsilon,x_0)$$
+e quindi:
+$$(p_0,w,x_0)\stackrel{\vdash}{P_F}(q_0,w,z_0x_0)\stackrel{*}{\stackrel{\vdash}{P_F}}(q,\varepsilon,x_0)\stackrel{\vdash}{P_F}(P_f,\varepsilon,\varepsilon)$$
+solo se togliendo il primo e l'ultimo passo di $P_F$ ripercorro all'indietro quanto scritto sopra.
+\end{proof}
+\begin{esempio}
+trasformazione da accettante per stack vuoto a accettante per stato finale. Siano:
+$$\Sigma=\{i,e\}$$
+$$P_n=(\{q\}, \{i,e\},\{Z\},\delta_M,q,Z)$$
+$$\delta_N(q,i,Z)=\{(q,ZZ)\}$$
+$$\delta_N(q,e,Z)=\{(q,\varepsilon)\}$$
+quindi:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q$};
+	\path[->]
+	(q_0) edge [loop above] node [align=center] {$i,Z/ZZ$\\$e,Z/\varepsilon$} ();
+\end{tikzpicture}
+\end{center}
+quindi inseriamo una $Z$ quando leggiamo $i$ e ne rimuoviamo una se leggiamo $e$ e si parte con una $Z$ nello stack.\\
+Costruisco ora il PDA $P_F$ che accetta lo stesso linguaggio ma per stato finale, introduco lo stato iniziale $p$ e quello  accettante $r$, uso $x_0$ come segnale della fine dello stack:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p$};
+	\node[state] (q_1) [right=of q_0] {$q$};
+	\node[state, accepting] (q_2) [right =of q_1] {$r$} ;
+	\path[->]
+	(q_0) edge  node [align=center] {$\varepsilon x_0/zx_0$} (q_1)
+	(q_1) edge node {$\varepsilon,x_0/\varepsilon$} (q_2)
+	      edge [loop above] node [align=center] {$i,Z/ZZ$\\$e,Z/\varepsilon$} ();
+\end{tikzpicture}
+\end{center}
+e si ha formalmente:
+$$P_F=(\{p,q,r\}, \{i,e\},\{Z,x_0\},\delta_F,p,x_0,\{r\})$$
+con $\delta_F$ che rappresenta le seguenti quattro regole:
+\begin{enumerate}
+\item $\delta_F(p,\varepsilon,x_0)=\{(q,Zx_0)\}$ regola che fa partire $P_F$ con $x_o$ come segnalatore dello stack
+\item $\delta_F(p,i,Z)=\{(q,ZZ)\}$ regola che inserisce $Z$ quando si ha $i$ simulando $P_N$
+\item $\delta_F(p,e,Z)=\{(q,Z\varepsilon)\}$ regola che rimuove $Z$ quando si ha $e$ simulando $P_N$
+\item $\delta_F(p,e,x_0)=\{(r,\varepsilon)\}$ regola che permette a $P_F$ di accettare quando $P_N$ esaurisce lo stack
+\end{enumerate}
+\end{esempio}
+Si può anche effettuare la trasformazione inversa:
+\begin{teorema}
+Sia $P_F=(Q,\Sigma,\Gamma,\delta_f,q_0,Z_0,F)$.\\
+ Si aggiunge una transizione $\varepsilon$  a un nuovo stato $p$ da ogni accettante di $P_F$. quando si ha $p$ $P_N$ svuota lo stack senza consumare input. Quindi se $P:F$ entra in uno stato accettante dopo aver consumato l'input $w$, $P_N$ svuota lo stack dopo aver consumato $w$. Per evitare che si svuoti lo stack per una stringa non accettata uso $x_0$ per indicare il fondo dello stack. Il nuovo $P_N$ parte da $p_0$ che ha il solo scopo di inserire il simbolo iniziale di $P_F$ e passare al suo stato iniziale. Si ottiene quindi:
+\begin{center}
+ \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-3.2)(14.91,3.2)
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](2.0,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](5.2,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](7.2,0.0){3.2}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,-1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](12.8,0.0){0.4}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.0)(4.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.0,0.0)(1.6,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,1.2)(12.38,0.42)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,-1.2)(12.4,-0.38)
+\rput[bl](0.48,0.3){$start$}
+\rput[bl](6.06,1.88){$P_F$}
+\rput[bl](1.78,-0.1){$p_0$}
+\rput[bl](5.02,-0.16){$q_0$}
+\rput[bl](2.42,0.22){$\varepsilon,x_0/z_0x_0$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](12.68,-0.08){$p$}
+\rput[bl](10.4,-1.2){$\varepsilon,x_0/\varepsilon$}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,1.18){0.32}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,-1.22){0.32}
+\rput{-162.98488}(25.685106,3.4421315){\psarc[linecolor=black, linewidth=0.04, dimen=outer, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(13.1,-0.2){0.46}{0.0}{260.0}}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](13.92,-0.38){$\varepsilon,x_0/\varepsilon$}
+\end{pspicture}
+}
+\end{center}
+e si ha formalmente:
+$$P_F=(Q\cup\{p_0,p\}, \Sigma,\Gamma\cup\{x_0\},\delta_N,p_0,x_0)$$
+dove $\delta_N$ è così definita:
+\begin{enumerate}
+\item $\delta_N(p_0,\varepsilon,x_0)=\{(q_0,Z_0x_0)\}$ inserisce il simbolo iniziale di $P_F$ nello stack e va allo stato iniziale di $P_F$
+\item $\forall q\in Q$ ogni simbolo di input $a\in\Sigma$, compreso l'input vuoto, e $\forall y\in \Gamma$, $\delta_N(q,a,y)$  contiene tutte le coppie di $\delta_F(q,a,y)$. Quindi $P_N$ simula $P_F$
+\item per tutti gli stati accettanti $q\in F$ e i simboli di stack $y\in\Gamma$, compreso $x_0$, si ha che $\delta_N(q,\varepsilon,y)$ contiene $(p,\varepsilon)$, quindi ogni volta che $P_F$ accetta $P_N$ inizia scaricare lo stack senza consumare ulteriori input
+\item per tutti  i simboli di stack $y\in\Gamma$, compreso $x_0$, si ha che $\delta_N(q,\varepsilon,y)=\{(p,\varepsilon)\}$, quindi giunti allo stato $p$, ovvero quando $P_F$ ha accettato, $P_N$ elimina ogni simbolo nel suo stack fino a svuotarlo
+\end{enumerate}
+inoltre formalmente voglio dimostrare che:
+$$w\in L(P_F)\to w\in N(P_N)$$
+e quindi ho le seguenti mosse:
+$$(q_0,w,z_0)\stackrel{*}{\stackrel{\vdash}{P_F}}(q,\varepsilon,\alpha)\,\,q\in F,\,\,\alpha\in\Gamma^*$$
+$$(p_o,w,x_0)\vdash(q_0,w,z_0x_0)\stackrel{*}{\stackrel{\vdash}{P_N}}(q,\varepsilon,\alpha,x_0)\stackrel{*}{\stackrel{\vdash}{P_N}}(p,\varepsilon,\varepsilon)$$
+\end{teorema}
+\begin{esempio}
+si ha una CFG $G=(\{i,e\},\{a,b,0,1,*,+,(,)\},P,E)$
+con:
+$$P:I\to a|b|Ia|Ib|I0|I1$$
+$$\,\,E\to E+E|E*E|(E)$$
+si ha il PDA $P_G=(\{q\},\Sigma,\Sigma\cup\{i,e\},\delta,q,E)$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q$};
+	\path[->]
+	(q_0) edge [loop above] node [align=center] {$\mbox{ }$} ();
+\end{tikzpicture}
+\end{center}
+si ha quindi:
+$$\delta(q,\varepsilon, i)=\{(q,a),(q,b),(q,Ia),(q,Ib),(q,I0),(q,I1)\}$$
+$$\delta(q,\varepsilon, E)=\{(q,I),(q,E+E),(q,E*E),(q,I(E))\}$$
+$$\delta(q,a,a)=\{(q,\varepsilon)\}$$
+$$\delta(q,b,b)=\{(q,\varepsilon)\}$$
+$$\cdots=\{(q,\varepsilon)\}$$
+quindi si ha:
+$$E\to E+E\to i+E\to a+(E)\to a+(i)\to a+(i0)\to a+(b0)$$
+$$(q, a+(b0),E)\vdash (q, a+(b0),E+E)\vdash (q, a+(b0),i+E)\vdash (q, a+(b0),a+E)$$
+$$\vdash (q, +(b0),+E)\vdash (q, (b0),E)\vdash (q, (b0),(E))\vdash (q, b0),E))$$
+$$\vdash (q, b0),i))\vdash (q, b0),i0))\vdash (q, b0),b0)\vdash (q, 0),0))$$
+$$\vdash (q, ),))\vdash (q, \varepsilon,\varepsilon)$$
+\end{esempio}
+questo esempio è generalizzabile ad ogni CFG:
+
+$$\exists\,\, PDA\,\,Q=(\{q\},T,V\cup T,\delta,q,S)\mbox{ tale che }N(Q)=L(G)$$
+$$\forall A\in V\,\,\delta(q,\varepsilon,A)=\{(q,\beta)|\,A\to B\mbox{ e' una produzione di G}\}$$
+$$\forall a\in T\,\,\delta(q,a,a)=\{(a,\varepsilon)\}$$
+\begin{teorema}
+sia $G=(V,T,P,S)$ una CFG:
+\end{teorema}
+Questo dimostra che ogni CFL può essere accettato da un PDA accettante per stack vuoto. Per il teorema visto in precedenza, posso sempre costruire un altro PDA accettante per stati finale. I PDA accettano tutti e soli i linguaggi CF. Mostrare che accettano solo linguaggi di tipo 2 è complicato.\\
+Un tipo di PDA interessante, soprattutto per i parse, è il PDA deterministico, il \textbf{DPDA}.\\
+Un PDA $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ è deterministico se:
+\begin{enumerate}
+\item $|\delta(q,a,x)|\leq 1$ $\forall q\in Q,\forall a\in\Sigma\cup\{\varepsilon\},\forall x\in \Gamma$
+\item se $|\delta(q,a,x)|\neq 0$ per qualche $a\in \Sigma$ allora $|\delta(q,\varepsilon,x)|=0$
+\end{enumerate}
+\begin{esempio}
+abbiamo il linguaggio $L_{wcw^R}=\{wcw^R|\,w\in\{0,1\}^*\}$\\
+Gli automi a pila deterministici non riconosco tutti i CFL, ma solo una classe strettamente più piccola. Ad esempio non potrebbero riconoscere il linguaggio delle palindrome senza "il segnalibro" c. SI ha quindi:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state, accepting] (q_2) [right =of q_1] {$q_2$} ;
+	\path[->]
+	(q_0) edge [loop above] node [align=center] {$0,z_0/0z_0$\\$1,z_0/1z_0$\\$0,0/00$\\$0,1/01$\\$1,0/10$\\$1,1/11$} ()
+	      edge node [align=center] {$c,z_0/0z_0$\\$c,0/0$\\$c,1/1$} (q_1)
+	(q_1) edge node {$\varepsilon,z_0/z_0$} (q_2)
+	      edge [loop above] node [align=center] {$0,0/\varepsilon$\\$1,1/\varepsilon$} ();
+\end{tikzpicture}
+\end{center}
+quindi:
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.0)(7.6,2.0)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](7.6,2.0)(0.0,-2.0)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](4.8,0.8)(0.8,-1.2)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](2.4,0.0)(1.2,-0.8)
+\rput[bl](0.4,1.6){CFL}
+\rput[bl](1.46,-0.52){REG}
+\rput[bl](3.68,0.28){DPDA}
+\rput[bl](3.18,1.18){PDA per stato finale}
+\rput[bl](3.2,1.6){PDA per stack vuoto}
+\rput[bl](3.42,-0.86){$Lwcw^R$}
+\rput[bl](5.96,-1.5){$Lww^R$}
+\end{pspicture}
+}
+\end{center}
+\end{esempio}
+si ha infatti il seguente teorema:
+\begin{teorema}
+$L\in REG\to\exists PDA\,\,P\,\,tale\,\,che\,\,L=L(P)$
+\end{teorema}
+\begin{proof}
+$$L\in REG\to\exists DFA\,\,A=(Q,\Sigma,\delta_A,q_0,F)\,\,tale\,\,che\,\, L=L(A)$$
+costruisco il DPDA $P=(Q,\Sigma,\{z_0\},\delta_p,q_0,z_0,F)$ con:
+$$\delta_p(q,a,z_0)=\{p,z_0\}\,\,\forall p,q\in Q\,\,tali\,\,che\,\,\delta_A(q,a)=0$$
+vale:
+$$(q_0,w,z_0)\stackrel{A}{\stackrel{\vdash}{P}}(p,\varepsilon,z_0)\longleftrightarrow \stackrel{\wedge}{\delta_A}(q_0,w)=p$$
+\end{proof}
+si ha inoltre il seguente teorema:
+\begin{teorema}
+$L$ è $N(P)$ per un DPDA $P$ sse $L$ è $L(P^{'})$ per un DPDA $P^{'}$ e $L$ ha le proprietà di prefisso \textbf{prefix-free}
+\end{teorema}
+definiamo così la proprietà di prefisso:
+$$\not\exists x,y\in L\,\,tali\,\,che\,\,x\neq y\,\,e\,\, x \mbox{ è prefisso di } y$$
+per esempio $L=\{0\}^0=\{\varepsilon,0,00,000,...\}$ non ha la proprietà di prefisso. Osserviamo che se la stringa vuota appartiene al linguaggio, tale stringa è prefissa di tutte le altre e quindi il linguaggio non può avere la proprietà di prefisso. Affermiamo che L è regolare, quindi è accettato da un DPDA per stati finali ma non da uno per stack vuoto. Completiamo il diagramma precedente sulle classi di
+linguaggi:
+\begin{center}
+
+
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.0)(7.6,2.0)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](7.6,2.0)(0.0,-2.0)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](5.0,0.76)(0.7,-1.56)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](2.38,-0.02)(0.92,-0.82)
+\rput[bl](0.4,1.6){CFL}
+\rput[bl](1.066,-0.54){REG}
+\rput[bl](2.76,0.36){DPDA}
+\rput[bl](3.18,1.18){PDA per stato finale}
+\rput[bl](3.2,1.6){PDA per stack vuoto}
+\rput[bl](5.96,-1.5){$Lww^R$}
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](4.52,0.28)(2.14,-1.12)
+\rput[bl](2.45,-0.56){$N(DPDA)$}
+\end{pspicture}
+}
+
+\end{center}
+SI ha che $L_{wcw^R}$ gode della proprietà di prefisso:
+$$y=wcw^R\in L\,\, Se\,\,x\neq y,\mbox{ prefisso di } y,x\not\in L$$
+tornando alle grammatiche si hanno ora due teoremi:
+\begin{teorema}
+se $L=N(P)$ per un DPDA P, allora L ha una CFG non ambigua
+\end{teorema}
+\begin{teorema}
+se $L=L(P)$ per un DPDA P, allora L ha una CFG non ambigua
+\end{teorema}
+dimostriamo il secondo:
+\begin{proof}
+$L=L(P)$ per un DPDA P, costruiamo $L^{'}=L$, quindi $L^{'}$ ha la proprietà di prefisso. Esiste quindi un DPDA $P^{'}$ tale che $L^{'}N(P)$, esiste quindi per il teorema sopra una CFG $G^{'}$ tale che $L(G^{'})=L^{'}$ che non è ambigua.\\
+Costruiamo $G$ per $L$ con le stesse produzioni di $G^{'}$ più $\$\to\varepsilon$, applicata solo all'ultimo passo.
+\end{proof}
+Vogliamo scoprire se è vero il viceversa: per ogni L che ha una CFG non ambigua è vero che L è
+accettato da un DPDA? No, mostriamo infatti un controesempio:\\
+$S\to 0S0|1S1|\varepsilon$ produce $L_{ww^R}$ che non è accettato da alcun PDA
 \end{document}

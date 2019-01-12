@@ -2655,4 +2655,98 @@ volendo accettare solo per stack vuoto:
 \end{tikzpicture}
 \end{center}
 \end{esercizio}
+\begin{esercizio}
+Si ha $B\to BB|(B)|()$. La stringa vuota non appartiene al linguaggio ma L non ha la proprietà del prefisso (come abbiamo
+mostrato nell'esercizio precedente). Possiamo quindi realizzare solo un DPDA per stato finale:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state] (q_2) [right =of q_1] {$q_2$};
+	\node[state,accepting] (q_3) [below right =of q_1] {$q_3$};
+	\path[->]
+	(q_0) edge node [align=center] {$(,z_0/(z_0$} (q_1)
+	       
+	(q_1) edge [bend left = 25] node {$),(/\varepsilon$} (q_2)
+	      edge [loop above] node [align=center] {$(,(/(($} ()
+	(q_2) edge [bend left = 25] node {$(,(/(($} (q_1)
+	      edge [loop above] node [align=center] {$),(/\varepsilon$} () 
+	      edge node {$\varepsilon,z_0/z_0$} (q_3)   
+	      (q_3) edge node {$(,z_0/(z_0$} (q_1)  ;
+\end{tikzpicture}
+\end{center}
+\end{esercizio}
+\begin{esercizio}
+Si ha $B\to BB|(B)|\varepsilon$ ho un DPDA per stato finale perché L non ha la proprietà del prefisso:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial,accepting] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state] (q_2) [right =of q_1] {$q_2$};
+	
+	\path[->]
+	(q_0) edge node [align=center] {$(,z_0/(z_0$} (q_1)
+	       
+	(q_1) edge [bend left = 25] node {$),(/\varepsilon$} (q_2)
+	      edge [loop above] node [align=center] {$(,(/(($} ()
+	(q_2) edge [bend left = 25] node {$(,(/(($} (q_1)
+	      edge [loop above] node [align=center] {$),(/\varepsilon$} () 
+	      edge [bend left = 65] node {$\varepsilon,z_0/z_0$} (q_0);
+\end{tikzpicture}
+\end{center}
+\end{esercizio}
+\begin{esercizio}
+sia $L=\{q\in\{a,b\}^*| numero\,\,uguale\,\,di\,\,a\,\,e\,\,b\}$ DPDA per stato finale (L non ha la proprietà di prefisso):
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial,accepting] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\path[->]
+	(q_0) edge [bend left=25] node [align=center] {$b,z_0/bz_0$\\$a,z_0/az_0$} (q_1)
+	       
+	(q_1) edge [bend left = 25] node {$\varepsilon,z_0/z_0$} (q_0)
+	      edge [loop above] node [align=center] {$a,a/aa$\\$b,b/bb$\\$a,b/\varepsilon$ \\$b,a/\varepsilon$} ()
+	;
+\end{tikzpicture}
+\end{center}
+\end{esercizio}
+\newpage
+\begin{esercizio}
+sia dato il CFL $L=\{a^ncb^n|n\geq 0\}$\\
+è generato da :
+$$G=(\{S\},\{a,b,c\},P,S)$$
+$$S\to aSb|c$$
+si ha il seguente automa non deterministico:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial,accepting] (q_0) {$q_0$};
+	\path[->]
+	(q_0) edge [loop above] node [align=center] {$\varepsilon,S/aSb$\\$\varepsilon,S/c$\\$a,a/\varepsilon$\\$b,b/\varepsilon$\\$c,c/\varepsilon$} ();
+\end{tikzpicture}
+\end{center}
+con:
+$$\delta(q,\varepsilon,S)=\{(q,aSb),(q,c)\}$$
+$$\delta(q,a,a)=\{(q,\varepsilon)\}$$
+$$\delta(q,b,b)=\{(q,\varepsilon)\}$$
+$$\delta(q,c,c)=\{(q,\varepsilon)\}$$
+mostro la derivazione per n=3, aaacbbb e il comportamento dell'automa:
+$$(q,aaacbbb,S)\vdash(q,aaacbbb,aSb)\vdash(q,aacbb,Sb)\vdash(q,aacbb,aSb)$$
+$$\vdash(q,acbbb,Sbb)\vdash(q,acbbb,aSbbb)\vdash(q,cbbb,Sbbbb)\vdash(q,cbbb,cbbb)$$
+$$\vdash(q,bbb,bbb)\vdash(q,bb,bb)\vdash(q,b,b)\vdash(q,\varepsilon,\varepsilon)\to \,\, accetta$$
+si ha che vale la proprietà del prefisso e si ha il seguente DPDA:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial,accepting] (q_0) {$q_0$};
+	\node[state] (q_1) [right=of q_0] {$q_1$};
+	\node[state] (q_2) [right =of q_1] {$q_2$};
+	\path[->]
+	(q_0) edge node [align=center] {$c,z_0/cz_0$\\$c,a/a$} (q_1)
+	      edge [loop above] node [align=center] {$a,z_0/az_0$\\$a,a/aa$} () 
+	(q_1) edge  node {$\varepsilon,z_0/z_0$} (q_2)
+	      edge [loop above] node [align=center] {$b,a/\varepsilon$} ();
+\end{tikzpicture}
+\end{center}
+\end{esercizio}
+\newpage
+\section{Macchine di Turing}
 \end{document}

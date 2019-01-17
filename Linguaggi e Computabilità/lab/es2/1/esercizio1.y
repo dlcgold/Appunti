@@ -28,14 +28,18 @@
       
 %token NL          /* newline  */
 %token <dval> NUM  /* a number */
+%token LOG10
+%token LN
 
 %type <dval> exp
 
 %left '-' '+'
-%left '*' '/'
+%left '*' '/' '%'
 %left NEG          /* negation--unary minus */
 %right '^'         /* exponentiation        */
-      
+%left LOG10
+%left LN
+
 %%
 
 input:   /* empty string */
@@ -52,9 +56,12 @@ exp:     NUM                { $$ = $1; }
        | exp '-' exp        { $$ = $1 - $3; }
        | exp '*' exp        { $$ = $1 * $3; }
        | exp '/' exp        { $$ = $1 / $3; }
+       | exp '%' exp        { $$ = $1 % $3; } 
        | '-' exp  %prec NEG { $$ = -$2; }
        | exp '^' exp        { $$ = Math.pow($1, $3); }
        | '(' exp ')'        { $$ = $2; }
+       | LOG10 exp          { $$ = Math.log10($2); }
+       | LN exp             { $$ = Math.log($2); }
        ;
 
 %%

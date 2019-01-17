@@ -34,7 +34,8 @@
 
 NUM = [0-9]+ ("." [0-9]+)?
 NL  = \n | \r | \r\n
-
+LOG10 = ("log10"|"LOG10")
+LN = ("ln"|"LN")
 %%
 
 /* operators */
@@ -42,6 +43,7 @@ NL  = \n | \r | \r\n
 "-" | 
 "*" | 
 "/" | 
+"%" |
 "^" | 
 "(" | 
 ")"    { return (int) yycharat(0); }
@@ -49,8 +51,15 @@ NL  = \n | \r | \r\n
 /* newline */
 {NL}   { return Parser.NL; }
 
+/* log10 */
+{LOG10} { return Parser.LOG10; } 
+
+/* ln */
+{LN} { return Parser.LN; } 
+
+
 /* float */
-{NUM}  { yyparser.yylval = new ParserVal(Double.parseDouble(yytext()));
+{NUM}  { yyparser.yylval = new ParserVal(yytext());
          return Parser.NUM; }
 
 /* whitespace */

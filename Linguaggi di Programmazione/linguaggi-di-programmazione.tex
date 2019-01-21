@@ -1999,4 +1999,731 @@ per fare l'append:
         l2
         (cons (car l1) (appendi (cdr l1) l2))))
 \end{minted}
+La funzione è ricorsiva e presenta una tipica forma di ricorsione “strutturale” sul resto di una lista (detta anche “cdr recursion” o “rest-recursion”).\\
+In LISP si possono manipolare dati simbolici, costruendo liste come:
+\begin{verbatim}
+(a b c d e f g h I)
+((gino 10) (ugo 10) (maria 2) (ettore 20))
+\end{verbatim}
+o anche:
+\begin{minted}{lisp}
+(+ quaranta 2)
+(defun media (x y) (/ (+ x y) 2.0))
+\end{minted}
+Si ha l'operatore \textit{quote} che dice al LISP di non procedere alla valutazione di una (sotto)espressione:
+\begin{minted}{lisp}
+(quote <e>)
+\end{minted}
+con <e> che viene ritornato letteralmente
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (quote 42)
+42
+
+prompt> (quote A)
+A
+
+prompt> (quote (1 B 3))
+(1 B 3)
+
+prompt> (quote (1 2 (3 4) (5 6 ”foo”)))
+(1 2 (3 4) (5 6 ”foo”))
+\end{lstlisting}
+\end{shaded}
+il quote ha anche una forma abbreviata: '<e>:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> ’42 
+42
+
+prompt> ’A
+A
+
+prompt> ’(1 B 3)
+(1 B 3)
+
+prompt> ’(1 2 (3 4) (5 6 ”foo”))
+(1 2 (3 4) (5 6 ”foo”))
+\end{lstlisting}
+\end{shaded}
+il quote non agisce su numeri e stringhe che sono autovalutanti, ovvero essi sono
+espressioni il cui valore ha la stessa rappresentazione tipografica dell'espressione
+tipografica che li denota. I simboli (o identificatori) denotano invece I valori che sono loro associati (ad
+esempio tramite defparameter). Inoltre le liste, se non quotate, rappresentano invece delle espressioni da valutare, ergo la
+necessità di avere l’operatore di quote:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> 42
+42
+
+prompt> ’42
+42
+
+prompt> ’”io sono una stringa”
+”io sono una stringa”
+
+prompt> ”io sono una stringa”
+”io sono una stringa”
+
+prompt> (list ’A ’B)
+(A B)
+
+prompt> ’(A B)
+(A B)
+
+prompt> ’(defun media (x y) (/ (+ x y) 2.0))
+(DEFUN MEDIA (X Y) (/ (+ X Y) 2.0))
+
+prompt> (defun media (x y) (/ (+ x y) 2.0))
+MEDIA
+
+prompt> (defparameter m
+’(defun media (x y) (/ (+ x y) 2.0))
+M
+
+prompt> (third m) ; (car (cdr (cdr m)))
+(X Y)
+\end{lstlisting}
+\end{shaded} 
+e quindi si ha che \textbf{in LISP i programmi e i dati sono esattamente la stessa cosa}\\
+In LISP si ha una ripartizione degli oggetti in due categorie:
+\begin{itemize}
+\item \textbf{atomi:} che sono simboli e numeri (ma non solo; ad esempio le stringhe):
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (atom 3)
+T
+prompt> (atom ’un-simbolo)
+T
+prompt> (atom ”una stringa”)
+T
+prompt> (atom (cons -42 42))
+NIL
+prompt> (atom (list 1 2 3))
+NIL
+\end{lstlisting}
+\end{shaded}
+\item \textbf{cons-cell:} ovvero le liste
+\end{itemize}
+cons-cell più numeri, simboli, stringhe etc... costituiscono le \textbf{Symbolic Expression (sexp's)}\\
+Dato che programmi e sexp’s in Lisp sono equivalenti, possiamo dare le seguenti regole di valutazione (ed implementarle nella funzione \textit{eval}). data un sexp's:
+\begin{itemize}
+\item se è un atomo:
+\begin{itemize}
+\item se è un numero ritorna il valore
+\item se è una stringa ritornala così com'è
+\item se è un simbolo ne estrae il valore dall'ambiente corrente e ne restituisce il valore, se non ha un valore associato da errore
+\end{itemize}
+\item se è una cons-cell si ha:
+\begin{itemize}
+\item Se O è un operatore speciale, allora la lista $(0\, A_1\,...\,A_n)$ viene valutata in modo speciale
+\item Se O è un simbolo che denota una funzione nell'ambiente corrente, allora questa
+funzione viene applicata \textit{apply} alla lista $(VA_1\,...\, VA_n)$ che raccoglie i
+valori delle valutazioni delle espressioni $A_1\,...\,A_n$
+\item Se O è una Lambda Expression la si applica alla lista che $(VA_1\,...\, VA_n)$
+che raccoglie i valori delle valutazioni delle espressioni $A_1\,...\,A_n$
+\item altrimenti segnala errore
+\end{itemize}
+\end{itemize}
+\newpage
+definisco il fattoriale:
+\begin{minted}{lisp}
+(defun fatt (n)
+    (if (zerop n) 1 (* n (fatt (- n 1)))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (fatt 3)
+n diventa associato a 3 (“bound to” 3):
+(eval ‘(fatt 3))
+-> (eval ‘(if (zerop 3) 1 (* 3 (fatt (- 3 1)))))
+     ... -> (eval ‘(* 3 (fatt 2))))
+         ... -> (eval ‘(*3 (* 2 (fatt 1))))
+         ... -> (* 3 (* 2 (* 1 (fatt 0))))
+     ... -> (* 3 (* 2 (* 1 1)))
+... -> ... 6
+\end{lstlisting}
+\end{shaded}
+eval applica la funzione al suo argomento, definendo i legami di N “in cascata” e
+costruendo una espressione che alla fine verrà valutata, a partire dalla sotto-espressione
+più annidata.\\ Questa struttura delle liste si presta bene alla ricorsione. \\
+Vediamo la lunghezza di una lista:
+\begin{minted}{lisp}
+(defun lung (l)
+   (if (null l)
+       0
+       (+ 1 (lung (rest l)))))
+\end{minted}
+\textit{last} restituisce l'ultimo elemento di una lista:
+\begin{minted}{lisp}
+(defun last-l (l)
+    (cond ((null l) nil)
+          ((atom l) ; Notare questo caso.
+           (error ”L’argomento non e` una lista”))
+          ((null (rest l)) (first l))
+          (t (last-l (rest l))))
+\end{minted}
+si ha la ricorsione semplice, \textbf{ricorsione cdr} che è definita sul resto di una lista.\\
+Vediamo come contare gli atomi di una sexp.\\
+al caso base si ha che NIL, "()" conta 0, un atomo conta 1. l'ipotesi ricorsiva effettua il conta sul rest della lista e il caso passo analizza il first della lista e chiama la ricorsione.
+\\
+Esiste anche la ricorsione \textbf{car-cdr} che effettua la ricorsione sul car:
+\begin{minted}{lisp}
+(defun count-atoms(x) ; ‘x’ e` una sexp.
+  (cond ((null x) 0)
+        ((atom x) 1)
+        (T (+ (count-atoms (first x))
+              (count-atoms (rest x))))))
+\end{minted}
+Si definisce \textbf{profondità massima di annidamento} di una sexp come il numero di parentesi sospese (max è definito in Common Lisp:
+\begin{minted}{lisp}
+(defun prof (x)
+   (cond ((null x) 1)
+         ((atom x) 0)
+         (t (max (+ 1 (prof (first x)))
+                 (prof (rest x))))))
+\end{minted}
+vediamo la funzione flatten per appiattire una lista:
+\begin{minted}{lisp}
+(defun flatten (x) ; x e` s-espressione
+    (cond ((null x) x) ; NB: (atom nil) = T
+          ((atom x) (list x)) ; serve per usare
+                    ; append
+          (T (append (flatten (first x))
+                     (flatten (rest x))))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (flatten ‘((((a (b (c d)) e) f)) 
+(a b c d e f)
+
+prompt> (flatten ‘a) 
+(a)
+\end{lstlisting}
+\end{shaded}
+per ottenere un'immagine speculare di una sexp:
+\begin{minted}{lisp}
+(defun mirror (x) ; x e` una sexp
+    (if (atom x)
+        x
+    (append (mirror (rest x))
+            (list (mirror (first x)))))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (flatten ‘((((a (b (c d)) e) f)) 
+(f (e ((d c) b) a)
+\end{lstlisting}
+\end{shaded}
+la funzione per invertire:
+\begin{minted}{lisp}
+(defun inverti (x)
+    (cond ((null x) x)
+          ((atom x) x) ; anche Sexp...
+          (T (cons-end (first x)
+                       (inverti (rest x))))))
+\end{minted}
+funzione circulate:
+\begin{minted}{lisp}
+(defun circulate (lst direction)
+    (cond ((atom lst) lst)
+          ((null lst) nil)
+          ((eq direction 'left)
+           (append (cdr lst) (list (car lst))))
+          ((eq direction 'right)
+           (cons (last-l lst) (but-last lst)))
+          (T lst) ))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (circulate '(1 2 3 4) 'left)
+(2 3 4 1)
+
+prompt> (circulate '(1 2 3 4) 'right)
+(4 1 2 3)
+\end{lstlisting}
+\end{shaded}
+Un problema preliminare che si pone in Lisp è quello di
+controllare se due oggetti sono uguali; il Common Lisp mette a disposizione una pletora di predicati di uguaglianza con
+semantica diversa. Si hanno due soluzioni principali:
+\begin{itemize}
+\item \textbf{eql:} viene usato per controllare l’uguaglianza di simboli, numeri interi e puntatori:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (eql 42 42)
+T
+
+prompt> (eql 42 3)
+NIL
+
+prompt> (eql ’quarantadue ’quarantadue)
+T
+
+prompt> (eql ’quarantadue quarantadue)
+NIL
+
+prompt> (eql ’quarantadue ’fattoriale)
+NIL
+
+prompt> (eql ’(42) ’(42))
+NIL
+\end{lstlisting}
+\end{shaded}
+\item \textbf{equal:} si comporta come \textit{eql}, ma è in grado di controllare se due liste sono uguali; in pratica non fa altro che applicare \textit{eql} ricorsivamente a tutti
+gli atomi di una lista: se un'applicazione di \textit{eql} ritorna il valore NIL allora \textit{equal} fa lo stesso, altrimenti viene ritornato il valore T:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (equal 42 42)
+T
+
+prompt> (equal 42 3)
+NIL
+
+prompt> (equal ’quarantadue ’quarantadue)
+T
+
+prompt> (equal ’(1 2 3 (a s d) 4) 
+                 ’(1 2 3 (a s d) 4))
+T
+
+prompt> (equal ’(1 due tre (a s d) 4) 
+                 ’(1 2 3 (a s d)4))
+NIL
+\end{lstlisting}
+\end{shaded}
+Supponiamo di voler moltiplicare tutti gli elementi di una lista definita per un certo valore e di ritornare una nuova lista con I nuovi elementi; questa
+funzione è semplicemente:
+\begin{minted}{lisp}
+(defparameter pari (list 2 4 6 8 10))
+
+(defun scala-lista (l fattore)
+       (if (null l)
+          nil
+          (cons (* fattore (car l))
+                (scala-lista (cdr l) fattore))))
+\end{minted}
+\end{itemize}
+Si noti che la funzione scala-lista ripete la struttura di appendi e si può astrarre se astraiamo il
+concetto di valore funzionale. L’astrazione “applica la funzione f a tutti gli elementi della lista L e ritorna una
+lista dei valori” è nota come “map”; in Common Lisp la funzione \textit{mapcar }svolge
+questo compito. Questa funzione è già definita ma sarebbe:
+\begin{minted}{lisp}
+(defun mapcar* (funzione lista)
+        (if (null lista)
+            nil
+            (cons (funcall funzione (car lista))
+                  (mapcar* funzione (cdr lista)))))
+\end{minted}
+Dove il nome $mapcar^*$ viene usato per evitare errori nell’ambiente Common Lisp. La funzione \textit{funcall} serve invece chiamare una funzione con un certo argomento.\\
+Definisco queste funzioni:
+\begin{minted}{lisp}
+(defun scala-4 (x) (* x 4))
+(defun scala-10 (x) (* x 10))
+(defun scala-pi (x) (* x pi))
+\end{minted}
+si ha:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (defun scala-lista-10 (lista)
+         (mapcar ’scala-10 lista))
+scala-lista-10
+
+prompt> (scala-lista-10 ’(1 2 3 4 5))
+(10 20 30 40 50)
+\end{lstlisting}
+\end{shaded}
+possiamo quindi definire:
+\begin{minted}{lisp}
+(defun scala-lista (lista funzione-scalante)
+   (mapcar funzione-scalante lista)
+\end{minted}
+Il parametro funzione-scalante è associato alla funzione che ci interessa; ad esempio per scalare di un fattore 10 ora possiamo scrivere:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (scala-lista (list 1 2 3) ’scala-10)
+(10 20 30)
+\end{lstlisting}
+\end{shaded}
+torniamo quindi alle Lambda con cui possiamo creare tutte le funzioni che
+vogliamo senza assegnare loro un nome:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (lambda (x) (+ x 42))
+#<funzione>
+
+prompt> ((lambda (x) (+ x 42)) 42)
+84
+
+prompt> (scala-lista ’(1 2 3)
+                     (lambda (x) (* x 3)))
+(3 6 9)
+\end{lstlisting}
+\end{shaded}
+Possiamo anche creare funzioni che costruiscono delle funzioni e le ritornano come valori:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (defun adder-x (x)
+       (lambda (y) (+ x y)))
+adder-x
+
+prompt> (defparameter adder-42 (adder-x 42))
+adder-42
+
+prompt> adder-42
+#<function>
+
+prompt> (funcall adder-42 42)
+84
+\end{lstlisting}
+\end{shaded}
+riscriviamo quindi lo scala-lista:
+\begin{minted}{lisp}
+(defun scala-lista (lista fattore)
+   (mapcar (lambda (e) (* e fattore)) lista))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (scala-lista (list 1 0 1 0 1) 42)
+(42 0 42 0 42)
+\end{lstlisting}
+\end{shaded}
+considero la funzione:
+$$f(x, y) = x (1 + x y)^2 + y (1 - y) + (1 - y) (1 + x y)$$
+con la lambda diventa:
+\begin{minted}{lisp}
+(defun f (x y)
+   ((lambda (a b)
+      (+ (* x (quadrato a))
+         (* y b)
+         (* a b)))
+      (+ 1 (* x y))
+          (- 1 y)))
+\end{minted}
+Questo tipo di chiamate a funzioni anonime è così utile da essere stato ri-codificato
+con un nuovo operatore speciale: \textit{let}:
+\begin{minted}{lisp}
+(defun f (x y)
+   (let ((a (+ 1 (* x y)))
+         (b (-1 y))
+         )
+    (+ (* x (quadrato a))
+       (* y b)
+       (* a b))))
+\end{minted}
+Ovvero, l'operatore let ci permette di introdurre dei nuovi nomi (variabili) locali da
+poter riutilizzare all'interno di una procedura; la sua sintassi è la seguente:
+\begin{minted}{lisp}
+(let ((n 1 e 1 ) (n 2 e 2 ) ... (n k e k )) espressione)
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (let ((a 40) (b (+ 1 1))) (+ a b))
+42
+\end{lstlisting}
+\end{shaded}
+Le funzioni che prendono una (o più) funzioni come argomenti
+sono dette funzioni di ordine superiore e la loro esistenza è fondamentale nel paradigma funzionale.\\
+La funzione \textit{compose} corrisponde alla nozione matematica di
+composizione di funzioni. \\La semantica della funzione è la seguente: date due funzioni (di
+un solo argomento) f e g come argomenti, ritorna una nuova
+funzione che corrisponde alla composizione f(g(x)):
+\begin{minted}{lisp}
+(defun compose (f g)
+   (lambda (x)
+    (funcall f (funcall g x))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (funcall (compose ’first ’rest)
+                 ’(1 2 3 4 5))
+2
+\end{lstlisting}
+\end{shaded}
+La funzione \textit{filter} rimuove gli elementi della lista che non soddisfano il predicato:
+\begin{minted}{lisp}
+(defun filter (predicato lista)
+   (cond ((null lista) nil)
+        ((funcall predicato (car lista))
+           (cons (car lista)
+                 (filter predicato (cdr lista)))
+         (T (filter predicato (cdr lista)))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (filter ’oddp ’(1 2 3 4 5))
+(1 3 5)
+\end{lstlisting}
+\end{shaded}
+a funzione accumula (detta anche fold o reduce) applica una funzione ad
+un elemento di una lista ed al risultato (ricorsivo) dell'applicazione di accumula
+al resto della lista:
+\begin{minted}{lisp}
+(defun accumula (f iniziale lista)
+    (if (null lista)
+        iniziale
+        (funcall f (car lista)
+             (accumula f iniziale (cdr lista)))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (accumula ’+ 0 ’(1 2 3))
+6
+
+prompt> (accumula ’* 1 ’(1 2 3 4))
+24
+
+prompt> (accumula ’cons NIL ’(1 2 3))
+(1 2 3)
+\end{lstlisting}
+\end{shaded}
+I simboli i cui nomi iniziano con un due punti ":" sono detti
+keywords ed hanno se stessi come valore:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+cl-prompt> :foo
+:foo
+ 
+cl-prompt> :forty-two
+:forty-two
+\end{lstlisting}
+\end{shaded}
+Le keywords sono usate estensivamente in Common Lisp e ci
+servono essenzialmente per definire delle funzioni con una
+sintassi di chiamata più interessante di quella semplice.\\
+per ottenere dei risultati come i seguenti:
+\begin{verbatim}
+(list 1 2 3 4) -> (1 2 3 4)
+(+ 1 1 1 1 1 1) -> 6
+(< 1 2 3 4 55 66 77 100) -> T
+\end{verbatim}
+posso usare le \textit{lambda-list}:
+\begin{minted}{lisp}
+(defun foo (a b c &rest l) (append l (list a b c)))
+\end{minted}
+inoltre si hanno anche:
+\begin{verbatim}
+(subseq ”qwerty” 2) -> ”erty”
+(subseq ”qwerty” 1 4) -> ”wer”
+\end{verbatim}
+definibili con:
+\begin{minted}{lisp}
+(defun foo (a &optional o) (cons a o))
+\end{minted}
+I parametri opzionali possono essere inizializzati con un valore di default:
+\begin{minted}{lisp}
+(defun fattoriale (n &optional (acc 1))
+  (if (zerop n) acc (fattoriale (- n 1) (* n acc))))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+cl-prompt> (fattoriale 4)
+24
+
+cl-prompt> (fattoriale 4 2)
+48
+\end{lstlisting}
+\end{shaded}
+n Common Lisp si possono definire delle funzioni che utilizzano i loro parametri
+associandoli a dei nomi, ovvero delle keywords:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+cl-prompt> (find 2 ’(1 2 3 4 5 6))
+2
+
+cl-prompt> (find 2 ’(1 2 3 4 5 6) :start 3)
+NIL
+
+cl-prompt> (find 2 ’(1 2 3 4 5 6) :end 3 :start 1)
+2
+
+cl-prompt> (sort ’((a 1) (q 2) (d 3) (f 4)) ’string>
+                 :key ’first)
+((Q 2) (F 4) (D 3) (A 1))
+\end{lstlisting}
+\end{shaded}
+Ovviamente si possono definire delle funzioni che accettano parametri a “chiave”: basta usare la seguente
+sintassi nella lista di argomenti con cui si definisce una funzione:
+\begin{minted}{lisp}
+(defun make-point (&key x y)
+   (list x y))
+\end{minted}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+cl-prompt> (make-point)
+(nil nil)
+
+cl-prompt> (make-point :y 42)
+(nil 42)
+
+cl-prompt> (make-point :y 42 :x -123)
+(-123 42)
+\end{lstlisting}
+\end{shaded}
+Parametri opzionali, a chiave e variabili vanno sempre dichiarati dopo quelli “obbligatori”.\\
+\subsection{Input/output}
+Le due funzioni principale del Common Lisp per la gestione
+dell’I/O sono \textbf{READ} e \textbf{PRINT} e ad esse va associata la gestione di files e streams di I/O:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (read)
+(foo 41 (42) 43 45) ; READ aspetta un input.
+(FOO 41 (42) 43 45) ; Valore ritornato da READ
+
+prompt> (third (read))
+(foo 41 (42) 43 45) ; READ aspetta un input.
+(42
+\end{lstlisting}
+\end{shaded}
+Ovvero READ, legge un intero oggetto Lisp,
+riconoscendone la sintassi.\\La funzione PRINT stampa un oggetto Lisp rispettandone la sintassi.'
+Il valore ritornato da PRINT è il valore dell’oggetto la cui rappresentazione tipografica è
+appena stata stampata:
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (print 42)
+42 ; PRINT stampa la rappresentazione di 42
+   ; (preceduta da un a-capo)
+
+42 ; L’ambiente Common Lisp stampa a video il
+   ; valore dell’applicazione della funzione
+   ; PRINT al valore 42
+   
+promtp> (print ”HELLO WORLD!”)
+”HELLO WORLD!”
+”HELLO WORLD!”
+
+prompt> (print (sqrt -1))
+#C(0.0 1.0)
+#C(0.0 1.0) 
+\end{lstlisting}
+\end{shaded}
+Il Common Lisp mette a disposizione la funzione FORMAT (simile alla
+fprintf C/C++, ed ai metodi format di varie classi Java):
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (format t ”Il fattoriale di ~D~%” 3 (fact 3))
+Il fattoriale di 3 e` 6
+NIL
+\end{lstlisting}
+\end{shaded}
+la prima linea è la stampa della stringa “formattata”; il NIL è il valore
+ritornato da FORMAT
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (format t ”~S + ~S = ~S~%” ’(1) ’(2) (append ’(1) ’(2)))
+(1) + (2) = (1 2)
+NIL
+\end{lstlisting}
+\end{shaded}
+Le direttive nella stringa da formattare sono introdotte
+dal carattere ~ (il carattere tilde), la direttiva ~D stampa numeri interi, la direttiva ~\% va a capo, la direttiva ~S stampa un oggetto Lisp secondo la sua sintassi
+standard e la direttiva ~A stampa un oggetto Lisp secondo una sintassi esteticamente “piacevole":
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (format t ”~S e` una stringa!~%” ”foo”)
+”foo” e` una stringa!
+NIL
+
+prompt> (format t ”~A forse non e` una stringa!~%” ”foo”)
+foo forse non e` una stringa!
+NIL
+\end{lstlisting}
+\end{shaded}
+il T che appare come primo argomento a format è l’indicazione di “dove” andare a stampare; nella fattispecie su
+“standard output”.\\
+Si hanno a disposizione tre tipi di stream associati a tre variabili:
+\begin{itemize}
+\item standard input associato a *standard-input*
+\item standard output associato a *standard-output*
+\item standard error associato a *error-output*
+\end{itemize}
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (format *standard-output* ”~S e` 
+                non una stringa!~%” ”foo”)
+”foo” non e` una stringa!
+NIL
+\end{lstlisting}
+\end{shaded}
+Il T passato al posto di *standard-output* è una comodità.\\
+Le funzioni READ, PRINT e FORMAT accettano un numero variabile di argomenti e uno di questi è uno stream (di output per FORMAT e PRINT e di input per
+READ):
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+prompt> (read *standard-input*)
+qwerty
+QWERTY
+
+prompt> (print ’(42 + 2 = 44 gatti) *error-output*)
+(42 + 2 = 44 gatti)
+(42 + 2 = 44 gatti)
+\end{lstlisting}
+\end{shaded}
+Per leggere e scrivere da e su un file si usa
+la macro with-open-file (le macros in (Common) Lisp sono un utile strumento che permette di “estendere” il
+linguaggio; defun è solitamente implementata come una macro):
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+(with-open-file (<var> <file> :direction :input) <codice>)
+(with-open-file (<var> <file> :direction :output) <codice>)
+\end{lstlisting}
+\end{shaded}
+La variabile <var> viene associata allo stream aperto sul <file> e può venire
+utilizzata all’interno di <codice>. La macro with-open-file si preoccupa di chiudere sempre e comunque lo
+stream associato a <var> anche in presenza di errori (cfr., i meccanismi try
+{...} catch () {...} finally {...} in Java, C++, etc. \\
+Vediamo un esempio:
+\begin{minted}{lisp}
+(with-open-file (out ”foo.lisp”
+                     :direction :output
+                     :if-exists :supersede
+                     :if-does-not-exist :create)
+  (mapcar (lambda (e)
+              (format out ”~S” e))
+          ’((1 . A) (2 . B) (42 . QD) (3 . D))))
+          
+(with-open-file (in ”foo.lisp”
+                    :direction :input
+                    :if-does-not-exist :error)
+  (read-list-from in))
+  
+(defun read-list-from (input-stream)
+  (let ((e (read input-stream nil ’eof)))
+    (unless (eq e ’eof)
+      (cons e (read-list-from input-stream)))))
+\end{minted}
+Il secondo argomento a READ stabilisce che nessun errore debba essere generato quando
+si incontra la fine del file; in quel caso va invece ritornato il valore passato come terzo
+elemento (ovvero il simbolo EOF):
+\begin{shaded}
+\begin{lstlisting}[language=bash]
+CL-USER 13 > (defun read-list-from (input-stream)
+               (let ((e (read input-stream nil ’eof)))
+                 (unless (eq e ’eof)
+                   (cons e (read-list-from input-stream)))))
+READ-LIST-FROM
+
+CL-USER 14 > (with-open-file (out "foo.lisp”
+                                  :direction :output
+                                  :if-exists :supersede
+                                  :if-does-not-exist :create)
+               (mapcar (lambda (e)
+                         (format out ”~S” e))
+                       ’((1 . A) (2 . B) (42 . QD) (3 . D))))
+(NIL NIL NIL NIL)
+
+CL-USER 15 > (with-open-file (in "foo.lisp”
+                                 :direction :input
+                                 :if-does-not-exist :error)
+                (read-list-from in))
+((1 . A) (2 . B) (42 . QD) (3 . D))
+\end{lstlisting}
+\end{shaded}
+L'ambiente Lisp, o meglio la sua command-line, esegue tre operazioni fondamentali, ed ora che sappiamo qualcosa in più su input ed output possiamo esplicitarle:
+\begin{itemize}
+\item legge (READ) ciò che viene presentato in input, ciò che viene letto viene rappresentato internamente in strutture dati appropriate (numeri, caratteri, simboli, stringhe, cons-cells, ed altro ancora...) 
+\item la rappresentazione interna viene valutata (EVAL) al fine di produrre un valore (o più valori)
+\item il valore così ottenuto viene stampato (PRINT)
+\item questo è il READ-EVAL-PRINT Loop (REPL)
+\end{itemize}
 \end{document}

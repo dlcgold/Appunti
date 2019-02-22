@@ -1,0 +1,921 @@
+
+\documentclass[a4paper,12pt, oneside]{book}
+
+%\usepackage{fullpage}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{engrec}
+\usepackage{rotating}
+\usepackage[safe,extra]{tipa}
+\usepackage{showkeys}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{enumerate}
+\usepackage{braket}
+\usepackage{marginnote}
+\usepackage{pgfplots}
+\usepackage{cancel}
+\usepackage{polynom}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage{pdfpages}
+\usepackage{pgfplots}
+\usepackage{fancyhdr}
+
+\usepackage{varwidth,pst-tree,realscripts}
+\usepackage{bidi}
+\usetikzlibrary{automata,positioning}
+\psset{showbbox=false,treemode=D,linewidth=0.3pt,treesep=2ex,levelsep=0.5cm}
+\newcommand{\LFTw}[2]{%
+\Tr[ref=#1]{\psframebox[linestyle=none,framesep=4pt]{%
+\begin{varwidth}{15ex}\center #2\end{varwidth}}}}
+\newcommand{\LFTr}[2]{\Tr[ref=#1]{\psframebox[linestyle=none,framesep=4pt]{#2}}}
+
+\def\pstreehooki{\psset{thislevelsep=*0pt}}
+\def\pstreehookiii{\psset{thislevelsep=*0pt}}
+\def\pstreehookv{\psset{thislevelsep=*0pt}}
+
+\pagestyle{fancy}
+\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyhead[LO,RE]{\slshape \leftmark}
+\fancyfoot[C]{\thepage}
+
+
+
+\title{Orale Linguaggi e Computabilità}
+\author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold}}
+\date{}
+
+\pgfplotsset{compat=1.13}
+\begin{document}
+\maketitle
+
+\definecolor{shadecolor}{gray}{0.80}
+
+\newtheorem{teorema}{Teorema}
+\newtheorem{definizione}{Definizione}
+\newtheorem{esempio}{Esempio}
+\newtheorem{corollario}{Corollario}
+\newtheorem{lemma}{Lemma}
+\newtheorem{osservazione}{Osservazione}
+\newtheorem{nota}{Nota}
+\newtheorem{esercizio}{Esercizio}
+\tableofcontents
+\renewcommand{\chaptermark}[1]{%
+\markboth{\chaptername
+\ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+
+\chapter{Linguaggi}
+\begin{itemize}
+\item un \textbf{linguaggio }è un insieme di stringhe che può essere generato mediante un dato meccanismo con delle date caratteristiche; un linguaggio può essere riconosciuto, ovvero dando in input una stringa un meccanismo può dirmi se appartiene o meno ad un linguaggio. I meccanismi che generano linguaggi si chiamano \textit{grammatiche}, quelli che li riconoscono \textit{automi}. I linguaggi formali fanno parte dell'informatica teorica \textit{(TCS)}
+\item si definisce \textbf{alfabeto} come un insieme finito e non vuoto di simbolo (come per esempio il nostro alfabeto o le cifre da 0 a 9). Solitamente si indica con $\Sigma$ o $\Gamma$
+\item si definisce \textbf{stringa} come una sequenza finita di simboli (come per esempio una parola o una sequenza numerica). La stringa vuota è una sequenza di 0 simboli, e si indica con $\varepsilon$ o $\lambda$
+\item si definisce \textbf{lunghezza di una stringa} il numero di simboli che la compone (ovviamente contando ogni molteplicità). Se si ha $w\in \Sigma^*$ è una stringa $w$ con elementi da $\Sigma^*$ (insieme di tutte le stringhe di tutte le lunghezze possibili fatte da $\Sigma$), allora $|w|$ è la lunghezza di $w$, inoltre $|\varepsilon|=0$.
+\item si definisce \textbf{potenza di un alfabeto} $\Sigma^k$ come l'insieme di tutte le sequenze (espressi come stringhe e non simboli) di lunghezza $k\in\mathbb{N},\, k>0$ ottenibili da quell'alfabeto (se $\Sigma^2$ si avranno tutte le sequenza di 2 elementi etc...). Se ho $k=1$ si ha $\Sigma^1\neq \Sigma$ in quanto ora ho stringhe e non simboli. Se ho $k=0$ ho $\Sigma^0=\varepsilon$. Dato $k$ ho $|\Sigma|$ che è la cardinalità dell'insieme $\Sigma$ (e non la sua lunghezza come nel caso delle stringhe); sia $w\in\Sigma^k=a_1,a_2,...,a_k,\,a_i\in\Sigma$ e $|\Sigma|=q$ ora: $$|\Sigma^k|=q^k$$
+\item si definisce $\Sigma^*$ come\textbf{ chiusura di Kleene} che è l'unione infinita di $\Sigma^k$ ovvero $$\Sigma*=\Sigma^0\cup \Sigma^1\cup...\cup \Sigma^k$$
+\item si ha che $\Sigma^+$ è l'unione per $k\geq 1$ di $\Sigma^k$ ovvero:
+$$\Sigma+=\Sigma^1\cup \Sigma^2\cup...\cup \Sigma^k= \Sigma^*-\Sigma^0$$
+\item quindi un \textbf{linguaggio} \textit{L} è un insieme di stringhe e:
+$$L\subseteq \Sigma^*$$ 
+si hanno sottoinsiemi particolari, come l'insieme vuoto, che resta però un linguaggio, il \textbf{linguaggio vuoto} e $\emptyset\in\Sigma^k,\,|\emptyset|=0$ che è diverso dal linguaggio che contiene la stringa vuota $|\varepsilon|=1$ (che conta come una stringa). Inoltre $\Sigma^*\subseteq \Sigma^*$ che ha lunghezza infinita. Posso concatenare due stringhe con un punto: $a\cdot b\cdot c=abc$ e $a\cdot \varepsilon=a$. Ovviamente la stringa concatenata è lunga come la somma delle lunghezze delle stringhe che la compongono. Vediamo qualche esempio di linguaggio:
+\begin{itemize}
+\item $\Sigma^*$ è un linguaggio per ogni alfabeto $\Sigma$
+\item $\emptyset$, il linguaggio vuoto, e $\{\varepsilon\}$ sono un linguaggio rispetto a qualunque alfabeto
+\end{itemize}
+\end{itemize}
+
+Si ha che una grammatica $G$ è una quadrupla $G=(V,\,T,\,P,\,S)$ con:
+\begin{itemize}
+\item $V$ simboli variabili
+\item $T$ simboli terminali, ovvero i simboli con cui si scrivono le stringhe alla fine
+\item $P$ regole di produzione
+\item $S$ variabile di partenza \textit{start}
+\end{itemize}
+Si hanno 4 grammatiche formali, \textit{gerarchia di Chomsky}:
+\begin{itemize}
+\item \textbf{tipo 0:} non si hanno restrizioni sulle regole di produzione, $\alpha\to\beta$. Sono linguaggi ricorsivamente numerabili e sono rappresentati dalle \textit{macchine di Turing}, deterministiche o non deterministiche (la macchina di Turing è un automa)
+\item \textbf{tipo 1:}  il lato destro della produzione ha lunghezza almeno uguale a quello sinistro. Sono grammatiche dipendenti dal contesto (\textit{contestuali}) e come automa hanno\textit{ la macchina di Turing che lavora in spazio lineare}:
+$$\alpha_1A\alpha_2\to \alpha_1B\alpha_2$$
+con $\alpha_1$ e $\alpha_2$ detti \textit{contesto} e $\alpha_1,\,\alpha_2,\, \beta\in (V\cup T)^*$
+\item \textbf{tipo 2:} sono quelle libere dal contesto, context free. Come regola ha $A\to\beta$ con $A\in V$ e $\beta\in (V\cup T)^*$ e come automa ha gli \textit{automi a pila non deterministici}
+\item \textbf{tipo 3:} sono le grammatiche \textit{regolari}. Come regole ha $A\to\alpha B$ (o $A\to B\alpha$) e $A\to\alpha$  con $A,B\in V$ e $\alpha\in T$. Come automi ha gli \textit{automi a stato finito deterministici o non deterministici}
+\end{itemize}
+\begin{definizione}
+Prendo una grammatica $G=(V,T,P,S)$, grammatica CFG. Se $\alpha A \beta$ è una stringa tale che $\alpha,\beta\in (V\cup T)^*$, appartiene sia a variabili che terminali. Sia $A\in V$ e sia $a\to \gamma$ una produzione di $G$. Allora 
+scriviamo:
+$$\alpha A \beta \to \alpha\gamma\beta$$
+con $\gamma\in (V\cup T)^*$.\\
+Le sostituzioni si fanno indipendentemente da $\alpha$ e $\beta$.
+Questa è quindi la definizione di \textbf{derivazione}.
+\end{definizione}
+\begin{definizione}
+Definisco il simbolo $\to _*$, ovvero il simbolo di \textit{derivazioni in 0 o più passi}. Può essere definito in modo ricorsivo. Per induzione sul numero di passi.
+\begin{itemize}
+\item la base dice che  $\forall \alpha\in (V\cup T)^*,\, \alpha\to_* \,\alpha$
+\item il passo è: se $\alpha\to_{G_*} \,\beta $ e $ \beta \to_{G_*} \,\gamma$ allora $\alpha\to_* \,\gamma$
+\end{itemize}
+Si può anche dire che $\alpha\to_{G_*}\, \beta$ sse esiste una sequenza di stringhe $\gamma_1,...,\gamma_n$ con $n\geq 1$ tale che $\alpha=\gamma_1$, $\beta=\gamma_n$ e $\forall i,\, 1<i<n-1$ si ha che $\gamma_1\to \gamma_{i+1}$
+la derivazione in 0 o più passi è la chiusura transitiva della derivazione
+\end{definizione}
+\begin{definizione}
+avendo ora definito questi simboli possiamo definire una forma sentenziale. Infatti è una stringa $\alpha$ tale che:
+$$\forall \alpha\in (V\cup T)^* \mbox{ tale che }S\to_{G_*}\, \alpha$$
+\end{definizione}
+\begin{definizione}
+data $G=(V,T,P,S)$ si ha che $L(G)=\{w\in T^* |\, S\to_{G_*}\, w\}$ ovvero composto da stringhe terminali che sono derivabili o 0 o più passi.
+\end{definizione}
+\begin{teorema}
+data la grammatica $G=\{V,T,P,S)$ CFG e $\alpha\in (V\cup T)^*$. Si ha che vale $S\to_*\, \alpha$ sse $S\to_{lm_*}\, \alpha$ sse $S\to_{rm_*}\, \alpha$. Con $\to_{lm_*}$ simbolo di \textit{left most derivation }e $\to_{rm_*}$ simbolo di \textit{right most derivation}
+\end{teorema}
+\subsection{Alberi Sintatici}
+\begin{definizione}
+Data una grammatica CFG, $G=\{V,T,P,S\}$ un \textbf{albero sintattico} per $G$ soddisfa le seguenti condizioni:
+\begin{itemize}
+\item ogni nodo interno è etichettato con una variabile in $V$ 
+\item ogni foglia è anch'essa etichettata con una variabile o col simbolo di terminale T o con la stringa vuota $\varepsilon$ (in questo caso la foglia è l'unico figlio del padre)
+\item se un nodo interno è etichettato con A i suoi figli saranno etichettati con X1, ..., Xk e $A\to  X1, ..., Xk$ sarà una produzione di $G$ in $P$. Se un $X_i$ è $\varepsilon$ sarà l'unica figlio e $A\to \varepsilon$ sarà comunque una produzione di $G$
+\end{itemize}
+La concatenazione in ordine delle foglie viene detto \textbf{prodotto dell'albero}
+\end{definizione}
+Data una CFG si ha che i seguenti cinque enunciati si equivalgono:
+\begin{enumerate}
+\item la procedura di inferenza ricorsiva stailisce che una stringa $w$ di simboli terminali appartiene al linguaggio $L(A)$ con $A$ variabile
+\item $A\to ^*w$
+\item $A\to^*_{lm}w$
+\item $A\to^*_{rm}w$
+\item esiste un albero sintattico con radice $A$ e prodotto $w$
+\end{enumerate}
+queste 5 proposizioni si implicano l'uni l'altra:
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,0) {5};
+ 	\node (a) at(-1,-0.5) {3};
+ 	\node (b) at(0,-1) {4};
+ 	\node (c) at(-2.0,-1.85) {2};
+ 	\node (d) at(1.5,-2) {1};
+    \draw [->] (top) -- (a);
+    \draw [->] (top) -- (b);
+    \draw [->] (a) -- (c);
+    \draw [->] (b) -- (c);
+    \draw [->] (c) -- (d);
+    \draw [->] (d) -- (top);
+\end{tikzpicture}
+\end{center}
+\begin{proof}[da 1 a 5]
+si procede per induzione:
+\begin{itemize}
+\item \textbf{caso base:} ho un livello solo (una sola riga), $\exists A\to w$:
+$$\overset{A}{\overset{\triangle}w}$$
+\item \textbf{caso passo:} suppongo vero per un numero di righe $\leq n$, lo dimsotro per $n+1$ righe:
+$$A\to X_1,X_2,...,X_k$$
+$$w=w_1,w_2,...,w_k$$
+ovvero, in meno di $n+1$ livelli:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]A}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_1}{\overset{\triangle}w_1}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_2}{\overset{\triangle}w_2}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\vdots$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_k}{\overset{\triangle}w_k}$}}}}
+\end{center}
+\end{itemize}
+\end{proof}
+\begin{proof}[da 5 a 3]
+procedo per induzione:
+\begin{itemize}
+\item \textbf{caso base (n=1): }$\exists A\to w\mbox{ quindi } A\to_{lm}w$, come prima si ha un solo livello:
+$$\overset{A}{\overset{\triangle}w}$$
+\item \textbf{caso passo: }suppongo che la proprierà valga per ogni albero di profondità minore uguale a $n$, dimostro che valga per gli alberi profondi $n+1$:
+$$A\to X_1,X_2,...,X_k$$
+$$w=w_1,w_2,...,w_k$$
+ovvero, in meno di $n+1$ livelli:
+\begin{center}
+
+\psframebox[linestyle=none,framesep=10pt]{%
+\pstree{\LFTw{t}{\fontspec{Noto Sans}[Script=Latin]A}}{\pstree{\Tp[edge=none]}{%
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_1}{\overset{\triangle}w_1}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_2}{\overset{\triangle}w_2}$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\vdots$}
+  \LFTw{t}{\fontspec{Noto Sans}[Script=Latin]$\overset{X_k}{\overset{\triangle}w_k}$}}}}
+\end{center}
+$$A\to_{lm} X_1,X_2,...,X_k$$
+$$x_1\to^*_{lm}w_1 \mbox{ per ipotesi induttiva si ha un albero al più di n livelli}$$
+quindi:
+$$A\to_{lm}X_1,...,X_k\to^*_{lm}w_1,X_2,...,X_k\to^*_{lm}...\to^*_{lm}w_1,...,w_k=w$$
+\end{itemize}
+
+\end{proof}
+\begin{definizione}
+Una grammatica è definita ambigua se esiste una stringa $w$ di terminali che ha più di un albero sintattico.\\
+Possono esserci più derivazioni di una stringa ma l'importante è che non ci siano alberi sintattici diversi. Capire se una CFG è ambigua è un problema indecidibile
+\end{definizione}
+\begin{teorema}
+Per ogni CFG, con $G=(V, T, P, S)$, per ogni stringa $w$ di terminali si ha che $w$ ha due alberi sintattici distinti sse ha due derivazioni sinistre da S distinte.\\
+Se la grammatica non è ambigua allora esiste un'unica derivazione sinistra da $S$
+\end{teorema}
+\begin{definizione}
+Un linguaggio $L$ è inerentemente ambiguo se tutte le grammatiche CFG per tale linguaggio sono a loro volta ambigue
+\end{definizione}
+\subsection{Grammatiche Regolari}
+Sono le grammatiche che generano i linguaggi regolari (quelli del terzo tipo) che sono casi particolari dei CFL.\\
+Si ha la solita grammatica $G = (V, T, P, S)$ con però vincoli su $P$:
+\begin{itemize}
+\item $\varepsilon$ si può ottenere solo con $S\to \varepsilon$
+\item le produzioni sono tutte lineari a destra ($A\to aA$ o $A\to a$) o a sinistra ($A\to Ba$ o $A\to a$)
+\end{itemize}
+\subsubsection{Espressioni Regolari}
+le regex sono usate per la ricerca di un pattern in un testo o negli analizzatori lessicali. Una regex denota il linguaggio e non la grammatica. Si hanno le seguenti operazioni tra due linguaggi $L$ e $M$:
+\begin{itemize}
+\item \textbf{unione:} dati $L,\, M\in \Sigma^*$, l'unione $L\cup M$ è l'insieme delle stringhe che si trovano in entrambi i linguaggi o solo in uno dei due
+
+si ha che:
+$$L\cup M=M\cup L$$
+\item \textbf{concatenazione:} dati $L,\, M\in \Sigma^*$, la concatenazione $L\cdot M$ (o $LM$) è lisieme di tutte le stringhe ottenibili concatenandone una di $L$ a una di $M$
+
+si ha che:
+$$L\cdot M\neq M\cdot L$$
+\item si definiscono:
+\begin{itemize}
+\item $L\cdot L=L^2$, $L\cdot L\cdot L=L^3$ etc...
+\item $L^1=L$
+\item $L^0=\{\varepsilon\}$
+\end{itemize}
+\item \textbf{chiusura di Kleene:} dato $L\subseteq \Sigma^*$ si ha che la chiusura di Kleen di $L$ è:
+$$L^*=\underset{i\geq 0}{\cup}L^i$$
+ricordando che $l^0=\varepsilon$
+vediamo dei casi particolari:
+\begin{itemize}
+\item $L=\{0^n|\,n\geq 0\}$ implica $|L|=\infty$ e quindi, essendo $L^i=L,\, i\geq 1$ e quindi $|L^i|=\infty$, $|L^*|=\infty$. Si ha quindi:
+$$L^*=L^0\cup L^1\cup ... \cup L^i=L$$
+\item $L=\emptyset$ implica $L^0=\{\varepsilon\}$, $L^2=L\cdot L=\emptyset$ e così via per ogni concatenazione di $L$. Si ha quindi:
+$$L^*=L^0=\{\varepsilon\}$$
+\item $L=\{\varepsilon\}$ implica $L^0=\{\varepsilon\}=L=L^1=L^2=...$, si ha quindi:
+$$L^*=\{\varepsilon\}=L$$
+\end{itemize}
+L'insieme vuoto e l'insieme contenente la stringa vuota hanno le uniche chiusure di kleene finite
+\end{itemize}
+Si riporta la definizione ricorsiva di un'espressione regolare:
+\begin{itemize}
+\item \textbf{casi base:} si hanno tre casi base:
+\begin{enumerate}
+\item $\varepsilon$ e $\emptyset$ sono espressioni regolari
+\item se $a\in \Sigma$, con $a$ che è un'esprssione regolare, $L(a)=\{a\}$
+\item le variabili che rappresentano linguaggi regolari sono espressioni regolari, $L(L)=L$
+\end{enumerate}
+\item \textbf{casi passo:} si hanno i 4 casi passo:
+\begin{enumerate}
+\item \textbf{unione:} se $E$ e $F$ sono espressioni regolari allora anche $E+F=E\cup F$ è un'espressione regolare e si ha:
+$$L(E+F)=L(E)\cup L(F)$$
+\item \textbf{concatenazione:} se $E$ e $F$ sono espressioni regolari allora anche $EF=E\cdot F$ è un'espressione regolare e si ha:
+$$L(EF)=L(E)\cdot L(F)$$
+\item \textbf{chiusura:} se $E$ è un'espressione regolare allora $E^*$ è un'espressione regolare e si ha:
+$$L(E^*)=(L(E))^*$$
+\item \textbf{parentesi:} se $E$è un'espressione regolare allora $(E)$ è un'espressione regolare e si ha:
+$$L((E))=L(E)$$
+\end{enumerate}
+\end{itemize}
+Si ha una precedenza degli operatori, in ordine di precedenza (si valuta da sinistra a destra):
+\begin{enumerate}
+\item chiusura di Kleene *
+\item concatenazione $\cdot$, che è associativo ($(E\cdot F)\cdot G=E\cdot (F\cdot G)$) ma non è commutativo ($E\cdot F\neq F\cdot E$)
+\item unione + che è associativa ($(E+ F)+ G=E+ (F+ G)$) ed è commutativo ($E+F= F+ E$)
+\item infine le parentesi
+\end{enumerate}
+si hanno anche delle proprietà algebriche:
+\begin{itemize}
+\item due espressioni regolari sono equivalenti se denotano le stesso linguaggio
+\item due espressioni regolari con variaboli sono equivalenti se lo sono $\forall$ assegnamento alle variabili
+\item l'unione è commutativa e associativa, la concatenazione è solo associativa
+\item si definiscono:
+\begin{itemize}
+\item \textbf{identità:} ovvero un valore unito all'identità è pari a se stesso (elemento neutro della somma $0+x=x+0=x$). $\emptyset$ è identità per l'unione ($\emptyset+L=L+\emptyset=L$), $\{\varepsilon\}$ è identità per la concatenazione ($\varepsilon L=L\varepsilon=L$)
+\item \textbf{annichilitore:} ovvero un valore concatenato all'annichilatore da l'annichilitore (l'elemento nullo del prodotto $0x=x0=0$).  $\emptyset$ è l'annichilitore per la concatenazione ($\emptyset L=L\emptyset=\emptyset$)
+\end{itemize}
+\item \textbf{distributività:} dell'unione rispetto alla concatenazione (che non è commutativa):
+\begin{itemize}
+\item \textbf{distributività sinistra:} $L(M+N)=LM+LN$
+\item \textbf{distributività destra:} $(M+N)L=ML+NL$
+\end{itemize}
+\item \textbf{idempotenza:} $L+L=L$
+\item $(L^*)^*=L^*$
+\item $\emptyset^*=\varepsilon$ infatti $L(\emptyset)=\{\varepsilon\}\cup L(\emptyset)\cup L(\emptyset)\cdot L(\emptyset)\cup...=\{\varepsilon\}\cup \emptyset\cup \emptyset...=\varepsilon$
+\item $\varepsilon^*=\varepsilon$ infatti $L(\varepsilon^*)=\{\varepsilon\}\cup L(\varepsilon)\cup L(\varepsilon)=\{\varepsilon\}\cup \{\varepsilon\}\cup ...=\{\varepsilon\}=L(\varepsilon)$
+\item $L^+=L\cdot L^*=L^*\cdot L$ (quindi con almeno un elemento che non sia la stringa vuota)
+\item $L^*=l^++\varepsilon$  
+\end{itemize}
+\section{Automi}
+un automa a stati finiti ha un insieme di stati e un controllo che si muove da stato a stato in risposta a input esterni. Si ha una distinzione:
+\begin{itemize}
+\item \textbf{automi deterministici:} dove l'automa non può essere in più di uno stato per volta
+\item \textbf{automi non deterministici:} dove l'automa può trovarsi in più stati contemporaneamente
+\end{itemize}
+\subsection{Automi deterministici}
+Un automa a stati finiti deterministico (\textit{DFA}), un automa che dopo aver letto una qualunque sequenza di input si trova in un singolo stato. Il termine \textit{deterministico} concerne il fatto che per ogni input esiste un solo stato verso il quale l'automa passa dal suo stato corrente. Un automa a stati finiti deterministico consiste nelle seguenti parti:
+\begin{itemize}
+\item un insieme finito di stati, spesso indicato con $Q$
+\item un insieme finito di simboli di input , spesso indicato con $\Sigma$
+\item una funzione di transizione, che prende come argomento uno stato e un simbolo di input e restituisce uno stato. La funzione di transizione sarà indicata comunemente con $\delta$. Nella rappresentazione grafica informale di automi $\delta$ è rappresentata dagli archi tra gli stati e dalle etichette sugli archi. Se $q$ è uno stato e $a$ è un simbolo di input, $\delta(q,a)$ è lo stato $p$ tale che esiste un arco etichettato con $a$ da $q$ a $p^2$
+\item uno stato iniziale, uno degli stati in $Q$
+\item un insieme di stati finali, o accettanti , $F$. L'insieme $F$ è un sottoinsieme di $Q$
+\end{itemize}
+Nel complesso un DFA è rappresentato in maniera concisa con l'enumerazione dei suoi elementi, quindi con la quintupla:
+$$A=(Q,\Sigma,\delta,q_0,F)$$
+con $A$ nome del DFA, $Q$ insiem degli stati, $\Sigma$ rappresentante i simboli di input, $\delta$ la sua funzione di transizione, $q_0$ il suo stato iniziale e $F$ l'insieme degli stati accettanti.\\
+Vediamo come decidere se accettare o meno una stringa (sequenza di caratteri) in input mediante un DFA.\\
+Ho una sequenza in input $a_1...a_n$. Parto dallo stato iniziale $q_0$, consultando la funzione di transizione $\delta$, per esempio  $\delta(q_0,a_1)=q_1$ e trovo lo stato in cui il DFA entra dopo aver letto $a_1$. Poi passo a $\delta(q_1,a_2)=q_2$ e così via, $\delta(q_{i-1},a_i)=q_i$ fino a ottenere $q_n$. Se $q_n$ è elemento di $F$ allora $a_1...a_n$ viene accettato, altrimenti viene rifiutato.
+\subsection{Automi non deterministici}
+Un automa a stati finiti non deterministici (\textit{NFA}) può trovarsi in diversi stati contemporaneamente. Come i DFA accettano linguaggi regolari e spesso sono più semplici da trattare rispetto ai DFA.\\
+Un NFA è definito come un NFA ma si ha un diverso tipo di transizione $\delta$, che ha sempre come argomenti uno stato e un simbolo di input ma restituisce zero o più stati.\\
+Definisco quindi un NFA come una quintupla:
+$$A=(Q,\Sigma,\delta,q_0,F)$$
+con, a differenza dei DFA:
+$$\delta:Q\times F\to 2^Q$$
+Possiamo ora definire$\hat{\delta}$, delta cappuccio che prende in ingresso uno stato e l'intera stringa $w$. Definisco ricorsivamente:
+\begin{itemize}
+\item \textbf{caso base:} se $|w|=0$ ovvero se $W=\varepsilon$ si ha:
+$$\hat{\delta}(q,\varepsilon)=\{q\}$$
+\item \textbf{caso passo:} se $|w|>0$, allora $W=xa$, $a\in\Sigma$ e $x\in\Sigma^*$. Posto $\hat{\delta}(q,x)=\{p_1,...,p_k\}$ si ha:
+$$\hat{\delta}(q,w)=\cup \delta(p_i,a)$$
+\end{itemize}
+Per il linguaggio $L$ accettato dall'automa si ha:
+$$L(A)=\{w\in \Sigma^*|\, \hat{\delta}(q_0,q)\cap F\neq \emptyset\}$$
+Troviamo ora un algoritmo che trasformi un NFA in un DFA.\\
+Definiamo questo algoritmo che avrà:
+\begin{itemize}
+\item come input un NFA $N=(Q_n,\Sigma,\delta_N,q_0,F_N)$
+\item come output un DFA $D=(Q_D,\Sigma,\delta_D,\{q_0\},F_D)$ tale che $L(D)=L(N)$
+\end{itemize}
+con:
+\begin{itemize}
+\item $Q_D=2^{Q_N}$ (quindi se $Q_N=n$ si ha $|Q_D|=2^n$) ma gli stati non accessibili possono essere eliminati
+\item $F_D=\{S\subseteq Q_n|\, S\cap F_N\neq \emptyset\}$
+\item $\forall S\subseteq Q_N$ e $ \forall a \in\Sigma$:
+$$\delta_D(S,a)=\cup \delta_n(p,a)$$
+per esempio:
+$$\delta_D(\{q_0,q_1,q_2\},0)=\delta_N(q_0,0)\cup \delta_N(q_1,0) \cup\delta_N(q_2,0) $$ 
+\end{itemize}
+Si definisce l'$\varepsilon-NFA$, l'automa astati finiti non deterministici con $\varepsilon$ transizioni. Con la transizione $\varepsilon$ posso saltare i nodi, ovvero avanza senza aggiungere caratteri. Si definisce la funzione $E\,CLOSE:Q\to 2^Q$, con $E\,CLOSE(q)$ insieme degli stati raggiungibili da $q$ tramite $\varepsilon-mosse$. si ha inoltre che:
+\begin{itemize}
+\item $E\,CLOSE 2^Q\to 2^Q\,\,\, P\subseteq Q$
+\item $E\,CLOSE(P)=\cup E\,CLOSE(p)$
+\item $E\,CLOSE(\emptyset)=\emptyset$
+\end{itemize}
+torniamo a dare bene qualche definizione per $\hat{\delta}$ in un DFA:
+\begin{center}
+  $\hat{\delta}$  $:Q\times \Sigma^* \to Q$
+\end{center}
+con: $q\in Q,\,\,\, w\in \Sigma^*\,\,\,e\,\,\,$ $\hat{\delta}$  $(p,w)=q$
+\begin{itemize}
+\item 
+\textbf{caso base:} $w=\varepsilon\to |w|=0\to$ $\hat{\delta}$  $(q,\varepsilon)=q$
+\\
+\textbf{caso passo:} $|w|\neq0\to w=ax$ con $a\in \Sigma,x\in \Sigma^*$:
+ $\hat{\delta}$  $(q,w)=$ $\hat{\delta}$  $(q,ax)=$  $\hat{\delta}$  $(\delta(q,a),x)$
+\item 
+\textbf{caso base:} $w=\varepsilon\to |w|=0\to \delta(q,w)=\delta(q,\varepsilon)=q$
+\\
+\textbf{caso passo:} $|w|\neq0\to w=xa$ con $a\in \Sigma,x\in \Sigma^*$:
+$\hat{\delta}$  $(q,w)=$ $\hat{\delta}$  $(q,xa)=$ $\hat{\delta}$  $(\delta(q,x),a)$
+\end{itemize}
+in un NFA si ha:
+\begin{itemize}
+\item \textbf{caso base:} $\hat{\delta}$ $(q,\varepsilon)=\{q\},\,\,\forall q\in Q$
+\item \textbf{caso passo:} posto $w=ax$ e $\hat{\delta}$ $(q,a)=\{p_1,...,p_n\}$ allora $\hat{\delta}$ $(q,w)=\cup $ $\hat{\delta}$  $(p_i, x)=\{r_1,...,r_n\}$.\\
+ $\hat{\delta}$ $(q,a)=p$\\
+ $\hat{\delta}$ $(q,w)=$ $\hat{\delta}$ $(q,xa)=$$\hat{\delta}$$(p,x)=r$
+\end{itemize}
+oppure:
+\begin{itemize}
+\item \textbf{caso base:} $\hat{\delta}$ $(q,\varepsilon)=\{q\},\,\forall q\in Q$
+\item \textbf{caso passo:} posto $w=xa$ si ha $\hat{\delta}$$(q,q)=$$(q,xa)=\cup \delta(p,a)$ con $\hat{\delta}$ $(q,x)=\{p_1,...,p_n\}$
+\end{itemize}
+Se ho un NFA $N=(Q_N, \Sigma, \delta_N, q_{0_N}, F_N)$ con $\delta_N: Q\times\Sigma^*\to 2^{Q_N}$ che accetta un lingiaggio $L$ posso ottenere un DFA $D=(Q_D, \Sigma, \delta_D, q_{0_D}, F_D)$ equivalente con $Q_D=2^{Q_N}$  e $q_{0_D}=\{q_{0_N}\}$ che accetta L.\\
+$\forall S\subseteq Q_N$ e $\forall a\in \Sigma$ si ha:
+$$F_D=\{S\subseteq Q_N\,|\, S\cap F_n\neq \emptyset\}$$
+con $\delta_D(S,a)=\cup \delta_N(p,a)$
+ Si ha che:
+$$|Q_D|=|2^{Q_N}|=2^{|Q_N|}$$
+
+Si ha che dato un $\varepsilon$-NFA $E=(Q_E, \Sigma, \delta_E, q_{0_E}, F_E)$ che riconosce $L$ in un NFA $N=(Q_N, \Sigma, \delta_N, q_{0_N}, F_N)$ equivalenti con $Q_N=2^{Q_E}$ stati in $Q_E$ $\varepsilon$-close: \textit{ECLOSE(S)=S} e $q_N=ECLOSE(q_E)$:
+$$F_N\{S\in Q_F,\,\, S\subseteq Q_E | S\cap F_E\neq \emptyset\}$$
+quindi:
+$$\forall a\in \Sigma \mbox{ e } \forall S=\{p_1,...,p_k\}, \forall S\in Q_F \mbox{ e } Q_E$$
+$$\delta_F(S,a) \mbox{ si ottiene }\cup \delta_E(p_i,a)=\{r_1,..., r_n\}$$
+$$\delta_N(S,a)=ECLOSE(\{r_1, ..., r_n\})$$
+\subsection{Da espressioni regolari a automi E-NFA}
+\begin{itemize}
+\item \textbf{caso base}:
+\begin{enumerate}
+\item se $R=\varepsilon$ ovvero $L(R)=\{\varepsilon\}$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state, accepting] (q_1) [right=of q_0] {$q_1$}; 
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1);
+\end{tikzpicture}
+\end{center}
+\item se $R=\emptyset$ ovvero $L(R)=\emptyset$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state, accepting] (q_1) [right=of q_0] {$q_1$}; ;
+\end{tikzpicture}
+\end{center}
+\item se $R=a$ ovvero $L(R)=\{a\}$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state, accepting] (q_1) [right=of q_0] {$q_1$};
+   \path[->]
+   (q_0) edge node {a} (q_1);
+\end{tikzpicture}
+\end{center}
+\end{enumerate}
+\item \textbf{caso passo:}
+\begin{enumerate}
+\item se $R=S+T$ quindi $L(R)=L(S)+L(T)$ allora:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [above right =of q_0] {$q_1$};
+   \node[state] (q_2) [below right =of q_0] {$q_2$};
+   \node[draw=none,fill=none] (Q_E) [right = of q_1] {$S$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_2] {$S$};
+   \node[state] (q_3) [right=of Q_E] {$q_3$};
+   \node[state] (q_4) [right=of Q_F] {$q_4$};
+   \node[state, accepting] (q_5) [below right =of q_3] {$q_5$};
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1)
+   (q_0) edge node {$\varepsilon$} (q_2)
+   (q_3) edge node {$\varepsilon$} (q_5)
+   (q_4) edge node {$\varepsilon$} (q_5);
+\end{tikzpicture}
+\end{center}
+\newpage
+\item se $R=ST$ quindi $L(R)=L(S)L(T)$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$};
+   \node[draw=none,fill=none] (Q_E) [right = of q_0] {$S$}; 
+   \node[state] (q_1) [ right =of Q_E] {$q_1$};
+   \node[state] (q_2) [right =of q_1] {$q_2$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_2] {$T$};
+   \node[state] (q_3) [right=of Q_F] {$q_3$};
+   \node[draw=none,fill=none] (Q_G) [right = of q_3] {};
+   \path[->]
+   (q_1) edge node {$\varepsilon$} (q_2)
+   (q_3) edge node {} (Q_G);
+\end{tikzpicture}
+\end{center}
+\item se $R=S^*$ quindi $L(R)=(L(S))^*$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [ right =of Q_E] {$q_1$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_1] {$S$};
+   \node[state] (q_2) [right =of Q_F] {$q_2$};
+   \node[state] (q_3) [right=of q_2] {$q_3$};
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1)
+   (q_2) edge [bend right = 35]  node {$\varepsilon$} (q_1)
+   (q_0) edge [bend right = 25] node  {$\varepsilon$} (q_3)
+   (q_2) edge node {$\varepsilon$} (q_3);
+\end{tikzpicture}
+\end{center}
+\end{enumerate}
+\end{itemize}
+Vediamo ora l'algoritmo che trasforma DFA in una ER. Questo algoritmo permette di verificare quale linguaggio è accettato o meno dall'automa:\\
+dato DFA $A=(Q,\Sigma, \delta, q_0,F)$ con $Q$ e $F$ stati non finali e $Q$, $F$, $q_0$ che sono i primi stati da eliminare. L'algoritmo procede per eliminazioni successive. Si costruisce quindi l'automa $B$ che ha solo $q_0$ e $F=\{q_1,...,q_k\}$. Scrivo quindi $K$ espressioni regolari considerando solo $q_0$ e il k-esimo stato finale eliminando pian piano gli altri stati. Alla fine ottengo le varie espressioni regolari da unire: 
+$$E=E1+E2+\cdots+Ek$$
+\subsection{Chiusura di un Linguaggio regolare}
+Sia $REG$ la classe dei linguaggi regolari (ovvero ogni linguaggio regolare su un alfabeto finito non vuoto). Si ha la seguente proprietà:
+$$L,M\in REG\to L\cup M\in REG$$
+si può dimostrare in due maniere:
+\begin{itemize}
+\item \textbf{con le espressioni regolari:}
+$$L,M\in REG \to \exists R, S \mbox{ ER tali che } L(R)=L \mbox { e } L(S)=M$$
+$$L\cup M=L(R+S) \mbox{ e quindi appartenente a } REG$$
+\item \textbf{con gli automi:}
+$$\mbox{se }L,M\in REG\to \exists \varepsilon-NFA \mbox{ che con L e M va dallo stato iniziale a quello finale}$$:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+   \node[state,initial] (q_0)   {$q_0$}; 
+   \node[state] (q_1) [above right =of q_0] {$q_1$};
+   \node[state] (q_2) [below right =of q_0] {$q_2$};
+   \node[draw=none,fill=none] (Q_E) [right = of q_1] {$L$};
+   \node[draw=none,fill=none] (Q_F) [right = of q_2] {$M$};
+   \node[state] (q_3) [right=of Q_E] {$q_3$};
+   \node[state] (q_4) [right=of Q_F] {$q_4$};
+   \node[state, accepting] (q_5) [below right =of q_3] {$q_5$};
+   \path[->]
+   (q_0) edge node {$\varepsilon$} (q_1)
+   (q_0) edge node {$\varepsilon$} (q_2)
+   (q_3) edge node {$\varepsilon$} (q_5)
+   (q_4) edge node {$\varepsilon$} (q_5);
+\end{tikzpicture}
+\end{center}
+accetta $L\cup M$ che quindi è $REG$
+\end{itemize}
+Inoltre siano due i due alfabeti $\Sigma\subseteq\Gamma$, si ha che:
+$$\mbox{se L è regolare su }\Sigma\to \mbox{L è regolare su }\Gamma$$
+inoltre:
+$$\mbox{se L è REG su }\Sigma_1, \mbox{ M è REG su }\Sigma_2, \mbox{ allora } L\cup M \mbox{ è REG su }\Sigma_1\cup\Sigma_2$$
+\begin{teorema}
+Si ha che:\\
+Se L e M sono linguaggi regolari allora LM, ovvero la concatenazione è regolare.\\
+Se L è un linguaggio regolare allora $L^*$ è regolare
+\end{teorema}
+\begin{teorema}
+se $L\in REG$ su $\Sigma$ allora $\overline{L}=\Sigma^*-L\in REG$
+\end{teorema}
+\begin{proof}
+se $L\in REG$ allora $\exists$ DFA $A=(Q, \Sigma, \delta, q_0, F)$ tale che $L(A)=L$. Costruisco $B=(Q,\Sigma, \delta,q_0, Q-F),\,	 L(B)=\overline{L}$.\\
+\end{proof}
+si osserva che:
+$$L\in REG\,\,su\,\, \Sigma\,\,e\,\, \Sigma\subseteq \Gamma$$
+inoltre:
+$$\overline{L}=\Sigma^*-L\,\,oppure\,\, \overline{L}=\Gamma^*-L$$
+\textit{Se ho un espressione regolare per L e voglio ottenere un'espressione regolare per }$\overline{L}$\textit{ devo ottenere un }$\varepsilon-NFA$\textit{ che devo convertire in DFA. A quel punto complemento con F e ottengo un'espressione regolare per }$\overline{L}$.\\
+Passiamo ora all'intersezione:
+\begin{teorema}
+se $L$ e $M$ sono regolari allora la loro intersezione è regolare
+\end{teorema}
+\begin{proof}
+$$L,M\in REG\to \exists A_L,A_M(DFA) \mbox{ tali che }L(A_L)=L\,\,e\,\, L(A_M)=M$$
+e quindi:
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-1.6)(9.75,1.6)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](2.0,0.4)(0.0,-0.4)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.0,0.4)(3.6,1.2)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.0,-0.4)(3.6,-1.2)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](5.2,1.6)(3.6,0.8)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](5.2,-0.8)(3.6,-1.6)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(5.2,1.2)(6.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(5.2,-1.2)(6.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(7.52,0.0)(8.72,0.0)
+\rput[bl](0.54,-0.08){$w\in\Sigma^*$}
+\rput[bl](4.24,1.08){$A_L$}
+\rput[bl](4.14,-1.32){$A_M$}
+\rput[bl](6.94,-0.1){$\wedge$}
+\rput[bl](5.74,0.84){$\frac{accetta}{rifiuta}$}
+\rput[bl](5.98,-1.14){$\frac{accetta}{rifiuta}$}
+\rput[bl](8.82,-0.24){$\frac{accetta}{rifiuta}$}
+\psbezier[linecolor=black, linewidth=0.04](6.7660146,-0.39855364)(7.5631223,-0.46652403)(7.6310925,0.33058324)(6.8339853,0.3985536432683381)
+\psline[linecolor=black, linewidth=0.04](6.8,0.4)(6.8,-0.4)
+\end{pspicture}
+}
+\end{center}
+\end{proof}
+Passiamo al problema della \textbf{chiusura dei linguaggi regolari rispetto all'intersezione}, ovvero che due automi che usano entrambi contemporaneamente una certa stringa in input, il ché non è possibile. Si risolve usando l'\textbf{automa prodotto}:
+$$A=(Q_L\times Q_M,\Sigma, \delta, (q_{OL},q_{OM}),F_L\times F_M)$$
+con:
+$$(\delta(p,q),a)=(\delta_L(p,a),\delta_M(q,a))$$
+$$A_L=(Q_L,\Sigma,\delta_L,q_{OL},F_L)$$
+$$A_M=(Q_M,\Sigma,\delta_M,q_{OM},F_M)$$
+\subsection{Minimizzazione}
+definiamo la \textbf{relazione di equivalenza tra stati}:
+\begin{definizione}
+Sia $A$ un $DFA$, $A=(Q,\Sigma,\delta,q_0,F)$. Siano:
+$$p,q\in Q\to p\approx q\mbox{ vale se } \forall w \in \Sigma^*\,\,\, \stackrel{\wedge}{\delta}(p,w)\in F\longleftrightarrow \stackrel{\wedge}{\delta}(q,w)\in F$$
+inoltre $p$ e $q$ sono distinguibili se $p\not\approx q$ ovvero:
+$$\exists w\in \Sigma^*\mbox{ tale che:} $$
+$$\stackrel{\wedge}{\delta}(p,w)\in F \,\,e\,\,\stackrel{\wedge}{\delta}(q,w)\not\in F\,\,o\,\,\stackrel{\wedge}{\delta}(p,w)\not\in F \,\,e\,\,\stackrel{\wedge}{\delta}(q,w)\in F$$
+\end{definizione}
+quindi si ha una \textbf{relazione di equivalenza} e quindi si hanno le tre proprietà:
+\begin{itemize}
+\item \textbf{riflessività:} $\forall p\in Q, p\approx p$
+\item \textbf{simmetricità:} $\forall p,q\in Q, p\approx q\to q\approx p$
+\item \textbf{transitività:} $\forall p,q,r\in Q, p\approx q\vee q\approx r\to p\approx r$
+\end{itemize} 
+e quindi \textbf{in ogni classe di equivalenza ci sono stati tra loro equivalenti}
+due stati, uno finale e uno non finale, sono sicuramente distinguibili, basti pensare alla stringa vuota.
+\begin{teorema}
+due stati non distinti dall'algoritmo riempi-tabella sono equivalenti. Se ne calcola la complessità:
+$$|Q|=n\to \frac{n(n-1)}{2}\,\,caselle=O(n^2)$$
+se ho una crocetta a iterazione ho il caso peggiore $n^2n^2=O(n^4)$
+\end{teorema}
+quindi per vedere se due linguaggi regolari sono equivalenti si ha che:
+$$L,M\in REG$$
+$$\exists A_L=(Q_L,\Sigma,\delta_L,q_L,F_L)$$
+$$\exists A_M=(Q_M,\Sigma,\delta_M,q_M,F_M)$$
+costruisco $A=(Q_L\cup Q_M,\Sigma,\delta,q_L,F_L\cup F_M)$
+\\$\delta$ è $\delta_L$ per $Q_L$ e $\delta$ è $\delta_M$ per $Q_M$
+per vedere se $q_L\approx q_M$ uso il riempi tabella e se sono equivalenti si ha che $L=M$
+passiamo ora alla \textbf{minimizzazione}, che prende in input un DFA $A$ e restituisce un $DFA$ $A_{min}$ tale che $L(A)=L(A_{min})$ e che $A_{min}$ ha il numero più piccolo possibile di stati per distinguere $L(A)$.\\
+Procedo così:
+\begin{enumerate}
+\item si rimuovono gli stati non raggiungibili
+\item applico la tabella per scoprire le tabelle di equivalenza, gli stati del nuovo automa sono le classi di equivalenza
+\end{enumerate}
+si ha che lo stato iniziale è la classe di equivalenza dello stato finale e gli stati finali sono le classi di equivalenza degli stati finali.\\
+La minimizzazione si dimostra per assurdo:\\
+Sia $M$ il DFA ottenuto dalla tabella. Suppongo esista un DFA $N$ tale che $L(A)=L(N)\,|Q_N|<|Q_M|$. I due stati iniziali sono indistinguibili. Sia $p\in M\,\,q\in N$ tali $p\approx q\,\, \forall a\in\Sigma$ quindi $\delta p,a)=\delta(q,a)$, Ogni stato $p\in Q_;$è quindi indistinguibile da almeno uno stato di $N$. Avendo però $N$ meno stati si avranno almeno due stati di $M$ indistinguibili dallo stesso di $N$ ma non sono indistinguibili per la tabella. Si ha un assurdo.
+\subsection{Pumping Lemma per i linguaggi regolari}
+Questo lemma serve a dimostrare che un linguaggio L non è regolare. Si procede per assurdo.\\
+Partiamo da un esempio:
+$$L_{01}=\{0^n1^n|\,n\geq 1\}=\{01,0011,...\}$$
+supponiamo che questo linguaggio sia rappresentabile da un DFA $A$ con $k$ stati ($L(A)=L_{01}$).\\
+$0^k$ implica $k+1$ prefissi: $\varepsilon,0,00,000,...,0^k$ e quindi $\exists i,j$ tali che $0^i$ e $0^j$ finiscono nello stesso stato. Allora l'automa è ingannabile e accetterebbe $0^i0^j$ con $i\neq j$.\\
+Formalmente si ha:
+\begin{teorema}
+Sia $L\in REG$ allora $\exists n$ che dipende da $L$ tale che $\forall w\in L$ con $|w|\geq n$, $w$ può essere scomposta in tre stringhe $w=xyz$ in modo che:
+$$y\neq \varepsilon$$
+$$|xy|\leq n$$
+$$\forall k\geq 0\,\,\, zy^kz\in L$$
+in altre parole posso sempre trovare una stringa non vuota $y$ non troppo distante dall'inizio di $w$, da $replicare$ da ripetere o cancellare ($k=0$) senza uscire dal linguaggio $L$
+\end{teorema}
+\begin{proof}
+essendo $L\in REG$ esiste un DFA $A$ tale che $L=L(A)$. Suppongo $|Q|=n$ e considero $w=a_1a_2...a_n$ con $m\geq n$. Sia:
+$$p_i=\stackrel{\wedge}{\delta}(q_0,a_1,...a_i)\,\,\forall i=0,1,...,n$$
+quindi:
+$$p_0=q_0,p_1,...,p_n\to n+a\,\,stati$$
+allora $\exists i,j$, con $0\leq i<j\leq n$ tali che $p_i=p_j$. Scompongo ora $w$ in $w=xyz$ con:
+$$x=a_1a_2...a_n$$
+$$y=a_{i+1}a_{i+2}...a_j$$
+$$z=a_{j+1}a_{j+2}...a_m$$
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+	\node[state, initial] (q_0) {$p_0$};
+	\node[state] (q_1) [right=of q_0] {$p_i$};
+	\node[state, accepting] (q_2) [right =of q_1] {$\mbox{ }$} ;
+	\path[->]
+	(q_0) edge node {x} (q_1)
+	(q_1) edge node {z} (q_2)
+	      edge [loop above] node {y} ();
+\end{tikzpicture}
+\end{center}
+\end{proof}
+\section{Automi a Pila}
+Si introduce un nuovo tipo di automa, il PDA (push down automata) che può essere pensato come un $\varepsilon-NFA$ col supporto di una pila (stack):
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.04)(5.83,2.04)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](3.2,2.04)(1.58,1.16)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.0,1.58)(1.6,1.58)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(3.2,1.58)(4.8,1.58)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.38)(2.4,-0.42)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.38)(2.4,1.18)
+\psline[linecolor=black, linewidth=0.04](1.6,-0.42)(1.6,-2.02)
+\psline[linecolor=black, linewidth=0.04](3.2,-2.02)(1.6,-2.02)
+\psline[linecolor=black, linewidth=0.04](3.2,-2.02)(3.2,-0.42)
+\psline[linecolor=black, linewidth=0.04](1.6,-0.82)(3.2,-0.82)
+\psline[linecolor=black, linewidth=0.04](1.6,-1.22)(3.2,-1.22)
+\psline[linecolor=black, linewidth=0.04](1.6,-1.62)(3.2,-1.62)
+\rput[bl](4.9,1.32){$\frac{accetta}{rifiuta}$}
+\rput[bl](0.4,1.74){input}
+\rput[bl](3.78,0.22){ stati finiti}
+\rput[bl](3.6,-1.22){stack}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(3.64,0.72)(2.38,1.62)
+\rput[bl](3.78,0.56){controllo a}
+\end{pspicture}
+}
+\end{center}
+e viene definito un PDA $P$ come:
+$$P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$$
+con;
+\begin{itemize}
+\item $Q$: insieme finito e non vuoto di stati
+\item $\Sigma$: alfabeto di simboli di input
+\item $\Gamma$: alfabeto di simboli di stack
+\item $q_0\in Q$: stato iniziale
+\item $z_0\in \Gamma\backslash \Sigma$: simbolo iniziale dello stack
+\item $F\in Q$: insieme degli stati accettanti o finali
+\end{itemize}
+si ha che:
+$$\delta:Q\times(\Sigma\cup\{\varepsilon\}\times \Gamma\to 2^{Q\times \Gamma^*}$$
+quindi:
+$$\delta(q_0,a,X)=\{(p_1,X_1),(p_2,X_2),...\}\,insieme\,\,\,finito\,\,p_i\in Q\,\,X_i\in \Gamma^*$$
+si hanno dei casi particolari:
+\begin{itemize}
+\item lo stato $p$ potrebbe coincidere con $Q$ e si avrebbe un cappio
+\item se $\Gamma=\varepsilon$ si ha il pop di $X$ dallo stack
+\item se $\Gamma=X$ si lascia lo stack invariato
+\item se $\Gamma=Y\neq X$ si ha la sostituzione di $X$ con $Y$ in cima allo stack
+\item se $\Gamma$ è una stringa di simboli si ha il la rimozione di $X$ dallo stack e l'aggiunta a uno a uno dei simboli nello stack
+\end{itemize}
+analizziamo meglio i PDA. Si ha che la \textbf{descrizione istantanea (ID)} di un PDA è una tripla:
+$$ID:(q,w,\gamma)$$
+con $q\in Q$ stato attuale $w\in\Sigma^*$ input rimanente e $\gamma\in\Gamma^*$ contenuto attuale dello stack.\\
+Definiamo ora il concetto di \textbf{mossa in un passo}
+dato $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ la mossa è una relazione $\stackrel{\vdash}{p}$:
+$$(p,\alpha)\in\delta(q,a,X)\,\,allora\,\,\forall w\in\Sigma^*\,\,e\,\, \forall\beta\in\Gamma^*\to (q,aw,X\beta)\vdash(p,w,\alpha\beta$$
+e
+$$(p,\alpha)\in\delta(q,\varepsilon,X)\,\,allora\,\,\forall w\in\Sigma^*\,\,e\,\, \forall\beta\in\Gamma^*\to (q,w,X\beta)\vdash(p,w,\alpha\beta)$$
+ora possiamo anche definire la relazione con 0 o più mosse 
+in forma induttiva $\stackrel{*}{\stackrel{\vdash}{p}}$:
+\begin{itemize}
+\item \textbf{caso base:} $\forall ID\,\,I, I \stackrel{*}{\vdash} I$
+\item \textbf{caso passo:} $I \stackrel{*}{\vdash} J$ se $\exists ID\,\,K$ tale che $ I\vdash K \,\,e\,\, K \stackrel{*}{\vdash} J$
+\end{itemize}
+chiamiamo \textbf{computazione }una sequenza di mosse, non necessariamente di successo. Si hanno alcune proprietà:
+\begin{itemize}
+\item se una se una sequenza di ID è lecita per un PDA P allora è lecita anche la sequenza di Id ottenuta concatenando $w\in\Sigma^*$ in ogni ID
+\item se una se una sequenza di ID è lecita per un PDA P e resta una coda di input non consumata allora posso rimuovere tale coda in ogni ID e ottenere un'altra sequenza lecita
+\item se una se una sequenza di ID è lecita per un PDA P allora  è lecita la sequenza ottenuta aggiungendo $\gamma\in\Gamma^*$ in coda alla terza sequenza di ogni ID
+\end{itemize}
+del resto però:
+$$(q,Xw,\alpha\gamma) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta\gamma)\not\to (q,X,\alpha) \stackrel{*}{\vdash}(p,y,\beta),\,\,x,w,y\in\Sigma^*\,\,\alpha,\beta,\gamma\in\Gamma^*$$
+per queste proprietà valgono i seguenti teoremi:
+\begin{teorema}
+per la seconda:
+Se $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ è un PDA e $(q,Xw,\alpha) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta)$ allora vale anche:
+$$(q,X,\alpha) \stackrel{*}{\stackrel{\vdash}{p}} (p,Y,\beta)$$
+\end{teorema}
+\begin{teorema}
+per la prima e la terza:
+Se $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ è un PDA e $(q,X,\alpha) \stackrel{*}{\stackrel{\vdash}{p}} (p,Y,\beta)$ allora:
+$$\forall\gamma\in\Gamma^*\,\,\,vale\,\,\,anche\,\,\,(q,Xw,\alpha\gamma) \stackrel{*}{\stackrel{\vdash}{p}} (p,Yw,\beta\gamma)$$
+\end{teorema}
+Si definiscono due modalità di accettazione per i PDA:
+\begin{enumerate}
+\item \textbf{per stato finale:} sia $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ si ha che:
+$$L(P)=\{w\in\Sigma^*|\,(q_0,w,z_0) \stackrel{*}{\stackrel{\vdash}{p}} (q,\varepsilon,\alpha)\}$$
+con $q\in F$ e $\forall \alpha\in \Gamma^*$
+\item \textbf{per stack vuoto:} sia $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ si ha che:
+$$N(P)=\{w\in\Sigma^*|\,(q_0,w,z_0) \stackrel{*}{\stackrel{\vdash}{p}} (q,\varepsilon,\varepsilon)\}$$
+con $q\in Q$ e in questo caso l'insieme degli stati finali $F$ non ha alcuna influenza
+\end{enumerate}
+In realtà si ha che la classe di linguaggi accettati dai PDA per stato finale è uguale a quella per stack vuoto, anche se passare da un tipo all'altro di PDA è complesso. SI ha il seguente teorema per la trasformazione:
+\begin{teorema}
+se $L=N(P_N)$ per un PDA  $P_N=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ allora $\exists \,\,PDA\,\,P_F\,\,\,tale\,\,\,che\,\,\,L=L(P_F)$
+\end{teorema}
+\begin{proof}
+Sia $x_0\in\Gamma$, che indica la fine dello stack di $P_F$. Si ha:
+$$\delta(p_0,\varepsilon,x_0)=\{(q_0,z_0x_0\}$$
+e:
+$$\forall q\in Q,\,\forall a\in\Sigma\cup\{\varepsilon\},,\forall y\in\Sigma:\,\,\delta_F(q,a,y)\mbox{ contiene tutte le coppie di }\delta_N(q,a,y)$$
+$$\forall q\in Q,\delta_F(q,\varepsilon,x_0)=\{(P_F,\varepsilon)\}$$
+quindi graficamente:
+\begin{center}
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-3.2)(13.6,3.2)
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](2.0,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](5.2,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](7.2,0.0){3.2}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,-1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](12.8,0.0){0.4}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.0)(4.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.0,0.0)(1.6,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(5.6,0.0)(12.0,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,1.2)(12.0,0.4)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,-1.2)(12.0,-0.4)
+\rput[bl](0.48,0.3){$start$}
+\rput[bl](6.12,1.84){$P_N$}
+\rput[bl](1.78,-0.1){$p_0$}
+\rput[bl](5.02,-0.16){$q_0$}
+\rput[bl](2.42,0.22){$\varepsilon,x_0/z_0x_0$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](7.44,0.14){$\varepsilon,x_0/\varepsilon$}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](12.8,0.0){0.8}
+\rput[bl](12.58,-0.13){$P_f$}
+\rput[bl](10.4,-1.2){$\varepsilon,x_0/\varepsilon$}
+\end{pspicture}
+}
+\end{center}
+Bisogna dimostrare che effettivamente $w\in L(P_F)\longleftrightarrow\in N(P_N)$.\\
+se $w\in N(P_N)$ $\exists$ una sequenza di $ID\,\,\,(q_0,w,z_0)\vdash_{P_N}^* (q,\varepsilon,\varepsilon)$ per un qualche $q\in Q$:
+$$(q_0,w,z_0x_0)\vdash_{P_N}^* (q,\varepsilon,x_0)$$
+inoltre:
+$$(q_0,w,z_0x_0)\vdash_{P_F}^* (q,\varepsilon,x_0)$$
+e quindi:
+$$(p_0,w,x_0)\vdash_{P_F} (q_0,w,z_0x_0)\vdash_{P_F}^*(q,\varepsilon,x_0)\vdash_{P_F} (P_f,\varepsilon,\varepsilon)$$
+solo se togliendo il primo e l'ultimo passo di $P_F$ ripercorro all'indietro quanto scritto sopra.
+\end{proof}
+\begin{teorema}
+Sia $P_F=(Q,\Sigma,\Gamma,\delta_f,q_0,Z_0,F)$.\\
+ Si aggiunge una transizione $\varepsilon$  a un nuovo stato $p$ da ogni accettante di $P_F$. quando si ha $p$ $P_N$ svuota lo stack senza consumare input. Quindi se $P:F$ entra in uno stato accettante dopo aver consumato l'input $w$, $P_N$ svuota lo stack dopo aver consumato $w$. Per evitare che si svuoti lo stack per una stringa non accettata uso $x_0$ per indicare il fondo dello stack. Il nuovo $P_N$ parte da $p_0$ che ha il solo scopo di inserire il simbolo iniziale di $P_F$ e passare al suo stato iniziale. Si ottiene quindi:
+\begin{center}
+ \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-3.2)(14.91,3.2)
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](2.0,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](5.2,0.0){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](7.2,0.0){3.2}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,-1.2){0.4}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](12.8,0.0){0.4}
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(2.4,0.0)(4.8,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.0,0.0)(1.6,0.0)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,1.2)(12.38,0.42)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(8.4,-1.2)(12.4,-0.38)
+\rput[bl](0.48,0.3){$start$}
+\rput[bl](6.06,1.88){$P_F$}
+\rput[bl](1.78,-0.1){$p_0$}
+\rput[bl](5.02,-0.16){$q_0$}
+\rput[bl](2.42,0.22){$\varepsilon,x_0/z_0x_0$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](12.68,-0.08){$p$}
+\rput[bl](10.4,-1.2){$\varepsilon,x_0/\varepsilon$}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,1.18){0.32}
+\pscircle[linecolor=black, linewidth=0.04, dimen=outer](8.0,-1.22){0.32}
+\rput{-162.98488}(25.685106,3.4421315){\psarc[linecolor=black, linewidth=0.04, dimen=outer, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(13.1,-0.2){0.46}{0.0}{260.0}}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](10.8,0.8){$\varepsilon,x_0/\varepsilon$}
+\rput[bl](13.92,-0.38){$\varepsilon,x_0/\varepsilon$}
+\end{pspicture}
+}
+\end{center}
+e si ha formalmente:
+$$P_F=(Q\cup\{p_0,p\}, \Sigma,\Gamma\cup\{x_0\},\delta_N,p_0,x_0)$$
+dove $\delta_N$ è così definita:
+\begin{enumerate}
+\item $\delta_N(p_0,\varepsilon,x_0)=\{(q_0,Z_0x_0)\}$ inserisce il simbolo iniziale di $P_F$ nello stack e va allo stato iniziale di $P_F$
+\item $\forall q\in Q$ ogni simbolo di input $a\in\Sigma$, compreso l'input vuoto, e $\forall y\in \Gamma$, $\delta_N(q,a,y)$  contiene tutte le coppie di $\delta_F(q,a,y)$. Quindi $P_N$ simula $P_F$
+\item per tutti gli stati accettanti $q\in F$ e i simboli di stack $y\in\Gamma$, compreso $x_0$, si ha che $\delta_N(q,\varepsilon,y)$ contiene $(p,\varepsilon)$, quindi ogni volta che $P_F$ accetta $P_N$ inizia scaricare lo stack senza consumare ulteriori input
+\item per tutti  i simboli di stack $y\in\Gamma$, compreso $x_0$, si ha che $\delta_N(q,\varepsilon,y)=\{(p,\varepsilon)\}$, quindi giunti allo stato $p$, ovvero quando $P_F$ ha accettato, $P_N$ elimina ogni simbolo nel suo stack fino a svuotarlo
+\end{enumerate}
+inoltre formalmente voglio dimostrare che:
+$$w\in L(P_F)\to w\in N(P_N)$$
+e quindi ho le seguenti mosse:
+$$(q_0,w,z_0)\vdash_{P_F}^* (q,\varepsilon,\alpha)\,\,q\in F,\,\,\alpha\in\Gamma^*$$
+$$(p_o,w,x_0)\vdash(q_0,w,z_0x_0)\vdash_{P_N}^* (q,\varepsilon,\alpha,x_0)\vdash_{P_N}^* (p,\varepsilon,\varepsilon)$$
+\end{teorema}
+
+\begin{teorema}
+sia $G=(V,T,P,S)$ una CFG:
+$$\exists\,\, PDA\,\,Q=(\{q\},T,V\cup T,\delta,q,S)\mbox{ tale che }N(Q)=L(G)$$
+$$\forall A\in V\,\,\delta(q,\varepsilon,A)=\{(q,\beta)|\,A\to B\mbox{ e' una produzione di G}\}$$
+$$\forall a\in T\,\,\delta(q,a,a)=\{(a,\varepsilon)\}$$
+\end{teorema}
+Questo dimostra che ogni CFL può essere accettato da un PDA accettante per stack vuoto. Per il teorema visto in precedenza, posso sempre costruire un altro PDA accettante per stati finale. I PDA accettano tutti e soli i linguaggi CF. Mostrare che accettano solo linguaggi di tipo 2 è complicato.\\
+Un tipo di PDA interessante, soprattutto per i parse, è il PDA deterministico, il \textbf{DPDA}.\\
+Un PDA $P=(Q,\Sigma,\Gamma,\delta,q_0,z_0,F)$ è deterministico se:
+\begin{enumerate}
+\item $|\delta(q,a,x)|\leq 1$ $\forall q\in Q,\forall a\in\Sigma\cup\{\varepsilon\},\forall x\in \Gamma$
+\item se $|\delta(q,a,x)|\neq 0$ per qualche $a\in \Sigma$ allora $|\delta(q,\varepsilon,x)|=0$
+\end{enumerate}
+\begin{teorema}
+$L\in REG\to\exists PDA\,\,P\,\,tale\,\,che\,\,L=L(P)$
+\end{teorema}
+\begin{proof}
+$$L\in REG\to\exists DFA\,\,A=(Q,\Sigma,\delta_A,q_0,F)\,\,tale\,\,che\,\, L=L(A)$$
+costruisco il DPDA $P=(Q,\Sigma,\{z_0\},\delta_p,q_0,z_0,F)$ con:
+$$\delta_p(q,a,z_0)=\{p,z_0\}\,\,\forall p,q\in Q\,\,tali\,\,che\,\,\delta_A(q,a)=0$$
+vale:
+$$(q_0,w,z_0)\stackrel{A}{\stackrel{\vdash}{P}}(p,\varepsilon,z_0)\longleftrightarrow \stackrel{\wedge}{\delta_A}(q_0,w)=p$$
+\end{proof}
+si ha inoltre il seguente teorema:
+\begin{teorema}
+$L$ è $N(P)$ per un DPDA $P$ sse $L$ è $L(P^{'})$ per un DPDA $P^{'}$ e $L$ ha le proprietà di prefisso \textbf{prefix-free}
+\end{teorema}
+definiamo così la proprietà di prefisso:
+$$\not\exists x,y\in L\,\,tali\,\,che\,\,x\neq y\,\,e\,\, x \mbox{ è prefisso di } y$$
+per esempio $L=\{0\}^0=\{\varepsilon,0,00,000,...\}$ non ha la proprietà di prefisso. Osserviamo che se la stringa vuota appartiene al linguaggio, tale stringa è prefissa di tutte le altre e quindi il linguaggio non può avere la proprietà di prefisso. Affermiamo che L è regolare, quindi è accettato da un DPDA per stati finali ma non da uno per stack vuoto. Completiamo il diagramma precedente sulle classi di
+linguaggi:
+\begin{center}
+
+
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.0)(7.6,2.0)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](7.6,2.0)(0.0,-2.0)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](5.0,0.76)(0.7,-1.56)
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](2.38,-0.02)(0.92,-0.82)
+\rput[bl](0.4,1.6){CFL}
+\rput[bl](1.066,-0.54){REG}
+\rput[bl](2.76,0.36){DPDA}
+\rput[bl](3.18,1.18){PDA per stato finale}
+\rput[bl](3.2,1.6){PDA per stack vuoto}
+\rput[bl](5.96,-1.5){$Lww^R$}
+\psframe[linecolor=black, linewidth=0.04, dimen=outer](4.52,0.28)(2.14,-1.12)
+\rput[bl](2.45,-0.56){$N(DPDA)$}
+\end{pspicture}
+}
+
+\end{center}
+SI ha che $L_{wcw^R}$ gode della proprietà di prefisso:
+$$y=wcw^R\in L\,\, Se\,\,x\neq y,\mbox{ prefisso di } y,x\not\in L$$
+tornando alle grammatiche si hanno ora due teoremi:
+\begin{teorema}
+se $L=N(P)$ per un DPDA P, allora L ha una CFG non ambigua
+\end{teorema}
+\begin{teorema}
+se $L=L(P)$ per un DPDA P, allora L ha una CFG non ambigua
+\end{teorema}
+dimostriamo il secondo:
+\begin{proof}
+$L=L(P)$ per un DPDA P, costruiamo $L^{'}=L$, quindi $L^{'}$ ha la proprietà di prefisso. Esiste quindi un DPDA $P^{'}$ tale che $L^{'}N(P)$, esiste quindi per il teorema sopra una CFG $G^{'}$ tale che $L(G^{'})=L^{'}$ che non è ambigua.\\
+Costruiamo $G$ per $L$ con le stesse produzioni di $G^{'}$ più $\$\to\varepsilon$, applicata solo all'ultimo passo.
+\end{proof}
+Vogliamo scoprire se è vero il viceversa: per ogni L che ha una CFG non ambigua è vero che L è
+accettato da un DPDA? No, mostriamo infatti un controesempio:\\
+$S\to 0S0|1S1|\varepsilon$ produce $L_{ww^R}$ che non è accettato da alcun PDA
+\end{document}

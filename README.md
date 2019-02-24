@@ -25,11 +25,15 @@ Primo anno:
 - [x] Architettura degli Elaboratori
 
 Secondo anno:
+- [ ] Analisi e Progettazione del Software
+- [ ] Basi di Dati
 - [x] Fisica
-- [x] Metodi algebrici per l'informatica
+- [ ] Metodi algebrici per l'informatica
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
+- [ ] Probabilità e Statistica per l'Informatica 
 - [x] Reti e Sistemi Operativi (solo formulario)
+- [ ] Sistemi Distribuiti
 
 
 ### Disclaimer

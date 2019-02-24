@@ -22,11 +22,11 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
 - [x] Architettura degli Elaboratori
-- [ ] Fisica
-- [ ] Metodi algebrici per l'informatica
-- [ ] Linguaggi di Programmazione
+- [x] Fisica
+- [x] Metodi algebrici per l'informatica
+- [x] Linguaggi di Programmazione
 - [ ] Linguaggi e Computabilità
-
+- [x] Reti e Sistemi Operativi (solo formulario)
 
 ### Disclaimer
 La maggior parte di questi appunti sono stati presi durante le lezioni.  

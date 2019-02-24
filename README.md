@@ -19,7 +19,7 @@ git clone https://github.com/dlcgold/Appunti
 Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in fase di stesura.
 
 Primo anno:
-- [x] Algebra lineare e Geometria
+- [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
 - [x] Architettura degli Elaboratori
@@ -28,7 +28,7 @@ Secondo anno:
 - [ ] Analisi e Progettazione del Software
 - [ ] Basi di Dati
 - [x] Fisica
-- [ ] Metodi algebrici per l'informatica (https://github.com/derogab/)
+- [ ] Metodi Algebrici per l'Informatica (https://github.com/derogab/)
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
 - [ ] Probabilità e Statistica per l'Informatica 

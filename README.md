@@ -18,13 +18,13 @@ git clone https://github.com/dlcgold/Appunti
 ### Stato del completamento
 Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in fase di stesura.
 
-Primo anno:
+Primo Anno:
 - [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
 - [x] Architettura degli Elaboratori
 
-Secondo anno:
+Secondo Anno:
 - [ ] Analisi e Progettazione del Software
 - [ ] Basi di Dati
 - [x] Fisica

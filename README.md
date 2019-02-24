@@ -35,7 +35,7 @@ Secondo Anno:
 - [x] Reti e Sistemi Operativi (solo formulario)
 - [ ] Sistemi Distribuiti
 
-
+Per il corso  di Reti e Sistemi Operativi segnalo questa [repo](https://github.com/jack23247/rso-faq) 
 ### Disclaimer
 La maggior parte di questi appunti sono stati presi durante le lezioni.  
 Per quanto sia stata fatta una revisione, è probabile che possano contenere errori, sia di tipo grammaticale che di vero e proprio contenuto.  

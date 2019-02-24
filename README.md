@@ -23,6 +23,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Analisi Matematica
 - [x] Architettura degli Elaboratori
 - [ ] Fisica
+- [ ] Metodi algebrici per l'informatica
 - [ ] Linguaggi di Programmazione
 - [ ] Linguaggi e Computabilità
 

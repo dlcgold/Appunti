@@ -28,7 +28,7 @@ Secondo Anno:
 - [ ] Analisi e Progettazione del Software
 - [ ] Basi di Dati
 - [x] Fisica
-- [ ] Metodi Algebrici per l'Informatica (https://github.com/derogab/)
+- [ ] [Metodi Algebrici per l'Informatica](https://github.com/derogab/unimib/tree/metodi)
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
 - [ ] Probabilità e Statistica per l'Informatica 

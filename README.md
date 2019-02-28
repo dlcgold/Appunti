@@ -14,6 +14,11 @@ Scarica gli appunti con `git` o [cliccando qui](https://github.com/dlcgold/Appun
 ```shell
 git clone https://github.com/dlcgold/Appunti
 ```
+### Compilazione
+Dato che alcuni .tex usano package particlari per disegni, automi etc... per ottenere il .pd usare:
+```shell
+xelatex -synctex=1 -interaction=nonstopmode --shell-escape %.tex
+```
 
 ### Stato del completamento
 Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in fase di stesura.

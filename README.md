@@ -17,7 +17,7 @@ git clone https://github.com/dlcgold/Appunti
 ### Compilazione
 Dato che alcuni `.tex` usano package particolari per disegni, automi etc... per ottenere il `.pdf` usare:
 ```shell
-xelatex -synctex=1 -interaction=nonstopmode --shell-escape *.tex
+xelatex -synctex=1 -interaction=nonstopmode --shell-escape file.tex
 ```
 
 ### Stato del completamento

@@ -15,7 +15,7 @@ Scarica gli appunti con `git` o [cliccando qui](https://github.com/dlcgold/Appun
 git clone https://github.com/dlcgold/Appunti
 ```
 ### Compilazione
-Dato che alcuni .tex usano package particlari per disegni, automi etc... per ottenere il .pd usare:
+Dato che alcuni .tex usano package particlari per disegni, automi etc... per ottenere il .pdf usare:
 ```shell
 xelatex -synctex=1 -interaction=nonstopmode --shell-escape %.tex
 ```

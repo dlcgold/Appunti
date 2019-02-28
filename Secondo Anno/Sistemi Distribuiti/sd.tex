@@ -128,5 +128,106 @@ Ricapitolando il concetto di protocollo:
 \item che possono essere segmentati in messaggi (la politica) definiti da un protocollo condiviso
 \end{itemize}
 \end{itemize}
-%codice finale
+Vediamo un esempio di codice. Partiamo dall'\textit{header.h}
+\begin{minted}{c}
+// definizioni necessarie a client e server 
+
+#define TRUE 1
+#define MAX_PATH 255 // lunghezza massima del nome di un file
+#define BUF_SIZE 1024 // massima grandezza file trasferibili per volta
+#define FILE_SERVER 243 // indirizzo di rete del file del server
+
+// operazioni permesse 
+
+#define CREATE 1 // crea un nuovo file
+#define READ 2 // legge il contenuto di un file e lo restituisce
+#define WRITE 3 // scrive su un file
+#define DELETE 4 // cancella un file
+
+// errori
+
+#define OK 0 // nessun errore
+#define E_BAD_OPCODE -1 // operazione sconosciuta
+#define E_BAD_PARAM -2 // errore in un parametro
+#define E_IO -3 // errore del disco o errore di I/O
+
+// definizione del messaggio
+
+struct message{
+  long source; // identità del mittente
+  long dest; // identità del ricevente
+  long opcode; // operazione richiesta
+  long count; // numero di byte da trasferire
+  long offset; // posizione sul file da cui far partire l'I/O
+  long result; // risultato dell'operazione
+  char name[MAX_PATH]; // nome del file
+  char data[BUF_SIZE]; //informazione da leggere o scrivere
+};
+\end{minted}
+\newpage
+vediamo la struttura di un semplice server che realizza un semplice file server remoto:
+\begin{minted}{c}
+#include <header.h>
+void main(void){
+  struct message m1, m2; // messaggio in entrata e uscita
+  int r; // risultato
+  
+  while(TRUE){ // il server è sempre in esecuzione
+    receive(FILE_SERVER, &m1); // stato di wait in attesa di m1
+    switch(m1.code){ // vari casi in base alla richiesta
+      case CREATE: 
+        r = do_create(&m1, &m2);
+        break;
+      case CREATE: 
+        r = do_read(&m1, &m2);
+        break;
+      case CREATE: 
+        r = do_write(&m1, &m2);
+        break;
+      case CREATE: 
+        r = do_delete(&m1, &m2);
+        break;
+      default:
+        r = E_BAD_OPCODE;
+    }
+    
+    m2.result = r; // ritorna il risultato al client
+    send(m1.source, &m2); // manda la risposta
+    
+  }
+}  
+\end{minted}
+\newpage
+vediamo ora un client che usa il servizio per straferire un file:
+\begin{minted}{c}
+#include <header.h>
+
+int copy(char *src, char *dst){ // copia file usando il server
+  strcut message m1; // buffer del messaggio
+  long position; // attuale posizione del file
+  long client = 110; // indirizzo del client
+  
+  initialize(); // prepara l'esecuzione
+  position = 0; 
+  do{
+    m1.opcode = READ; // operazione settata su READ
+    m1.offset = position; // scelta la posizione nel file
+    m1.count = BUF_SIZE; // byte da leggere
+    strcpy(&m1.name, src); // nome file copiato in m1
+    send(FILESERVER, &m1); // manda il messaggio al file server
+    receive(client, &m1); // aspetta la risposta
+    
+    // scrive quanto ricevuto su un file di destinazione
+    m1.opcode = WRITE; // operazione settata su WRITE
+    m1.offset = position; // scelta la posizione nel file
+    m1.count = BUF_SIZE; // byte da leggere
+    strcpy(&m1.name, dst); // nome del file sul buffer
+    send(FILESERVER, &m1); // manda il messaggio al file server
+    receive(client, &m1); // aspetta la risposta
+    position += m1.result // il risultato sono i byte scritti
+  }while(m1.result > 0); // itera fino alla fine
+  return(m1.result >= 0 ? OK : m1.result); // ritorna OK o l'errore
+}
+
+\end{minted}
 \end{document}

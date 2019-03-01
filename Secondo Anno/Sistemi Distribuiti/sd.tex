@@ -240,4 +240,81 @@ int copy(char *src, char *dst){ // copia file usando il server
 }
 
 \end{minted}
+\subsection{Stream Communication}
+%immagini
+Si ha il modello ISO/OSI, che si basa sull'astrazione. Un informatico dovrebbe conoscere tutti i vari livelli. Gli utenti possono mandare e ricevere stream di byte via TCP mediante API. Poi al livello successivo si hanno datagrammi con i dati che vengono mandai via meccanismi IP. È lo sviluppatore a decidere le varie politiche. I sistemi distribuiti lavorano tra utenti e TCP/UDP. Ovviamente sono i processi che comunicano tra di loro. Ogni processo comunica attraverso canali. Un canale gestisce i flussi di dati in ingresso e uscita e dall'esterno ogni canale è identificato da un intero detto \textbf{porta}. Le \textbf{socket} sono particolari canali per la comunicazione tra processi che non condividono memoria (per esempio perché risiedono su macchine diverse). Per potersi connettere o inviare dati ad un processo A, un processo B deve conoscere la macchina (host) che esegue A e la porta cui A è connesso (well-known port).   TCP è orientato alla connessione (si ha un invio di richiesta di connessione), è affidabile, si ha un controllo di flusso, si ha un controllo della congestione ma non si hanno garanzie di banda e ritardo minimi. UDP non è affidabile e non offre nulla di quanto offerto da TCP ma è comodo, per esempio, nello streaming, che tollera perdite parziali. UDP scompone i messaggi in pacchetti che invia uno per volta ai servizi network. TCP scompone e invia come UDP ma ogni pacchetto viene numerato per garantire riordinamento, duplicazioni e perdite. Nei sistemi distribuiti non è necessario conoscere tutto questo funzionamento ma importa solo lo stream di byte. TCP utilizza variabili e buffer per realizzare il trasferimenti bidirezionale di flussi di bytes (“pipe”) tra processi, prevede ruoli client/server durante la connessione ma non durante la comunicazione. TCP utilizza i servizi dello strato IP per l'invio dei flussi di bytes.\\
+L'interfaccia tra applicazione e strato di trasporto è dato delle API, \textit{Application Programming Interface}  e i socker sono API per accedere a TCP o UDP, due processi comunicano mediante socker nel modello client-server.\\
+Si hanno delle criticità:
+\begin{itemize}
+\item gestione del ciclo di vita di cliente e server, attivazione/terminazione del cliente e del server
+\item identificazione e accesso al server
+\item comunicazione tra client e server
+\item ripartizione dei compiti tra client e server, che dipende dal tipo di applicazioni e la scelta influenza le prestazioni in relazione al carico
+\end{itemize}
+l'indirizzo del server può essere una costante nel codice, può essere chiesto all'utente, come nel browser, posso usare un nameserver o un repository (con DNS, \textit{Domain Name Service}) o adottare altri protocolli, come DHCP. Il naming sarà il nome dell'host, l'indirizzo IP come access point mediante host e porta, il protocollo saranno stream di byte e la sintassi e la semantica saranno definiti dall'applicazione con http, smtp etc...\\
+Tutto questo è a un basso livello di trasparenza in quanto sia utente che sviluppatore lo necessitano.\\
+La comunicazione TCP/IP avviene attraverso flussi di byte
+(byte stream), dopo una connessione esplicita, tramite
+normali system call read/write. Queste due syscall sono sospensive (mettono il sistema in uno stato di \textit{wait}) e usano un buffer per garantire flessibilità (per esempio la read definisce un buffer per leggere N caratteri, ma potrebbe ritornare avendone letti solo k<N)
+%aggiungi immagine
+Ci sono molte chiamate diverse per accedere i servizi TCP e UDP. 
+%aggiungi tabella
+
+Il server crea una nuova socket collegata (binded) a una
+nuova porta per comunicare con il client, in questo modo la well-known port resta dedicata a ricevere richieste di connessione
+%immagine
+Non uso la stessa porta per evitare perché comunicazione e handshake non sarebbero distinguibili//
+
+Quando si parla di socket non c'è il concetto di messaggio e read/write avvengono per un numero arbitrario di bytes. Quindi si devono prevedere cicli di lettura che
+termineranno in base alla dimensione dei “messaggi” come
+stabilito dal formato del protocollo applicativo in uso. \\
+%aggiungi codice in C
+
+Java definisce alcune classi che costituiscono un'interfaccia ad oggetti alle system call:
+\begin{minted}{java}
+java.net.Socket
+java.net.ServerSocket
+\end{minted}
+Queste classi accorpano funzionalità e mascherano alcuni
+dettagli con il vantaggio di semplificarne l'uso.
+Come per ogni framework è necessario conoscerne il modello
+e il funzionamento per poterlo utilizzare in modo efficace.
+Le prossime slide discutono i principali metodi delle due classi. vediamo altro, iniziamo dai costruttori:
+\begin{minted}{java}
+public Socket()
+//Creates an unconnected socket, with the system-default type of SocketImpl
+
+public Socket(String host, int port)
+  throws UnknownHostException, IOException
+/*Creates a stream socket and connects it to the 
+specified port number on the named host. If the
+specified host is null, the loopback address is assumed.
+The UnknownHostException is thrown if the IP address 
+of the host could not be determined*/
+
+public Socket(InetAddress address, int port)
+  throws IOException
+/*Creates a stream socket and connects it to the 
+specified port number at the specified IP address*/
+\end{minted}
+e passiamo ai metodi:
+\begin{minted}{java}
+public void bind(SocketAddress bindpoint) throws IOException
+/*Binds the socket to a local address.
+If the address is null, then the system will pick up an
+ephemeral port and a valid local address to bind the socket*/
+
+public void connect(SocketAddress endpoint) throws IOException
+//Connects this socket to the server
+
+public void connect(SocketAddress endpoint, int timeout)
+  throws IOException
+/*Connects this socket to the server with
+ a specified timeout value (in milliseconds)*/
+
+public void close()
+//Closes this socket.
+\end{minted}
+%aggiungi slide 28
+
 \end{document}

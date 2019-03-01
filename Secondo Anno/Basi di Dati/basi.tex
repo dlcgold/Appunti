@@ -29,6 +29,9 @@
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage[cache=false]{minted}
+
+\usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
+
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -63,7 +66,7 @@
 \chapter{Introduzione}
 \textbf{Questi appunti sono presi a ldurante le esercitazioni in laboratorio. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
-\chapter{Lezione 1}
+\chapter{E-R}
 Il corso si divide in 7 parti:
 \begin{enumerate}
 \item introduzione generale
@@ -209,8 +212,7 @@ inoltre si hanno:
 \begin{itemize}
 \item progettisti e realizzatori di DBMS
 \item progettisti della base di dati e
-amministratori della base di dati (DBA), ersona o gruppo di persone
-responsabile del controllo centralizzato
+amministratori della base di dati (DBA), persona o gruppo di persone responsabile del controllo centralizzato
 e della gestione del sistema, delle
 prestazioni, dell'affidabilità, delle
 autorizzazioni. Le funzioni del DBA includono quelle di
@@ -218,4 +220,101 @@ progettazione, anche se in progetti
 complessi ci possono essere distinzioni
 \item progettisti e programmatori di applicazioni
 \end{itemize}
+%aggiungere immagine pagina 53 slide
+Si hanno le seguenti fasi del ciclo di vita:
+\begin{itemize}
+\item \textbf{studio di fattibilità}, definizione di costi, priorità e competenze per un progetto
+\item\textbf{raccolta e analisi dei requisiti}, ovvero lo studio delle proprietà del sistema
+\item \textbf{progettazione} di dati e funzioni
+\item \textbf{implementazione}
+\item \textbf{validazione e collaudo},che comprendono anche test da parte del cliente
+\item \textbf{funzionamento}, ovvero lo stadio finale dove il sistema diventa effettivamente operativo
+\end{itemize}
+ogni fase può tornare a quella precedente in caso di problemi. Prima di implementare una base di dati bisogna avere delle specifiche ben definite. \\
+Si ha quindi un ciclo di vita con \textbf{modello a spirale}, in quanto ogni software deve avere delle releases, e per ognuna si ripete il ciclo di vita.\\
+In questo processo a rimanere stabili sono prettamente i \textbf{dati}. Prima si progetta la base dati, con una \textbf{metodologia di progetto}, e poi l'applicazione:
+%aggiungi immagini pagina 54
+\\
+Una \textbf{metodologia} è un'articolazione in fasi di guida ad un'attività di progettazione. Per una base dati serve una metodologia che:
+\begin{itemize}
+\item suddivida la progettazione in fasi indipendenti
+\item fornisca strategie e criteri di scelta in caso di alternative
+\item fornisca modelli di riferimento (i linguaggi)
+\item garantisca generalità rispetto al problema
+\item garantisca qualità e facilità d'uso
+\end{itemize}
+Si separa il cosa rappresentare e il come farlo.\\
+Si parte dalla progettazione concettuale, si passa a quella logica e si finisce con quella fisica.
+%aggiungi immagini pagina 57
+Ognuna di queste 3 fasi si basa su un modello che permette di generare una rappresentazione formale, uno schema, delle basi di dati ad un dato livello di astrazione: schema concettuale, schema logico e schema fisico. 
+\\
+% qualche dato sulle progettazioni
+Si hanno dei vantaggi con la progettazione concettuale, prevale infatti l'aspetto intensionale indipendente dalla tecnologia ed è una rappresentazione grafica. È utile per la documentazione.\\
+In uno schema ER abbiamo le entità, in costrutti,  rappresentati da rettangoli e le relazioni da rombi, con indicata l'arità (la cardinalità) (come in un UML). Esistono varie versioni del modello Entità-Relazione \textit{ER}.
+%aggiungere tabella coi costrutti e spigazione degli stessi
+si hanno i seguenti costrutti:
+\begin{itemize}
+\item entità
+\item relazione
+\item attributo semplice
+\item attributo composto
+\item cardinalità
+\item cardinalità di un attributo
+\item identificatore interno
+\item identificatore esterno
+\item generalizzazione
+\item sottoinsieme
+\end{itemize}
+
+Un entità è una classe di oggetti dell'applicazione di interesse con proprietà comune con esistenza "autonoma" e della quale si vogliono specificare fatti specifici. Ogni entità ha un nome che la identifica univocamente, con le seguenti specifiche:
+\begin{itemize}
+\item si hanno nomi espressivi
+\item si usa il singolare
+\end{itemize}
+Un'occorrenza, o istanza, di un'entità, è un oggetto della classe che l'entità rappresenta, ma noi rappresentiamo le entità dello schema concettuale non le singole istanze. Si parla di \textit{ conoscenza astratta} se si parla di entità e di \textit{conoscenza concreta} se si parla di un'istanza di un'entità. Ovviamente un elemento della classe ha degli attributi, rappresentati da dei pallini collegati alla classe. Un attributo ha un dominio che però non viene rappresentato nell'E-R ma nella documentazione. Entità e attributi funzionano con determinate regole, un attributo è una funzione:
+\begin{itemize}
+\item un enità non può avere valori diversi della stesso attributo
+\item due entità possono avere lo stesso valore di un attributo
+\item bisogna sempre specificare il valore di un attributo, si ha una funzione totale
+\end{itemize}
+Si ha che gli \textbf{attributi composti} si ottengono raggruppando attributi di una
+medesima entità o relazione che presentano
+affinità nel loro significato o uso (per esempio per un indirizzo si ha via, comune, cap etc...). Nessuno impone un tipo per un certo attributo, possono essere anche complessi di cui però non ci interessano le informazioni che lo rappresentano (per esempio una foto può essere un attributo, ma se ho bisogno, per esempio, dell'autore della foto, non sarà più un attributo ma un'altra entità). 
+%aggiungi qualche immagine
+Un'associazione, o relazione, è un fatto che descrive un'azione o una situazione e che stabilisce legami logici tra
+istanze di entità (associa, mette in relazione)
+nella realtà che stiamo considerando. Si possono avere legami tra più entità e il numero di entità coinvolte in una relazione ne determina il \textbf{grado}. Valgono le stesse regole delle entità per dare un nome alle relazioni (nomi espressivi e al singolare) ma se ne aggiunge una: si usano sostantivi e non verbi. \\
+Un'\textbf{istanza di associazione} è un a combinazione o aggregazione di istanze di entità che prendono parte all'associazione (per esempio "prof. Schettini" è istanza di associazione per l'entità docente). Dalla semantica delle relazioni segue immediatamente che non possono esistere due istanze della stessa relazione che coinvolgono le stesse istanze di entità.\\
+\textbf{Due entità possono essere coinvolte in più relazioni}
+\\
+Le relazioni possono avere attributi, con valori specificati in un certo dominio. Un attributo di una relazione tra più entità modella una proprietà del legame tra tutte le entità rappresentato dalla relazione. Gli attributi delle relazioni si rappresentano come quelli di entità
+%immagini
+\newpage
+\textit{Descrivere lo schema concettuale della seguente
+realtà:
+I docenti hanno un codice fiscale ed una età. I
+docenti operano nei corsi di laurea (si dice che
+afferiscono ai corsi di laurea). Interessa la data di
+afferenza dei docenti ai corsi di laurea. I corsi di
+laurea hanno un codice ed un nome, ed
+appartengono alle facoltà. Ogni facoltà ha un nome}
+\begin{center}
+\begin{tikzpicture}[node  distance =7em]
+\node[entity] (docente) {docente};
+\node[attribute] (età) [above left of =  docente] {età} edge (docente);
+\node[attribute] (codice) [above of = docente] {codice fiscale} edge (docente);
+\node[relationship] (operatore) [right of = docente] {operatore} edge (docente);
+\node[attribute] (data) [below of = operatore ] {data} edge (operatore);
+\node [entity] (laurea) [right of = operatore] {laurea} edge (operatore);
+\node[attribute] (cod) [above of =  laurea] {nome} edge (laurea);
+\node[attribute] (nome) [above right of = laurea] {codice} edge (laurea);
+\node[relationship] (appartenenza) [below of = laurea] {appartenenza} edge (laurea);
+\node [entity] (facoltà) [below of = appartenenza] {facoltà} edge (appartenenza);
+\node[attribute] (nomee) [below of = facoltà] {nome} edge (facoltà);
+\end{tikzpicture}
+\end{center}
+\newpage
+Una associazione può coinvolgere “due o più volte”
+la stessa entità
+%aggiungere associazioni ad anello
 \end{document}

@@ -63,7 +63,7 @@
 \chapter{Introduzione}
 \textbf{Questi appunti sono presi a le lezioni. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
-\chapter{Lezione 1}
+\chapter{Introduzione ai Sistemi Distribuiti}
 \textit{Un sistema distribuito è un sistema nel quale componenti hardware e software, collocati in computer connessi alla rete, comunicano e coordinano le loro azione solitamente col passaggio di messaggi (a differenza delle chiamate di procedura che si hanno col passaggio di parametri su memoria condivisa)}. Ogni processo ha quindi una parte di logica applicativa e una parte di coordinamento. Altrimenti si ha questa definizione. \textit{un sistema distribuito è un insieme di elementi autonomi di computazione che si interfacciano agli utenti come un singolo sistema "coerente"}.
 \begin{center}
 \includegraphics[scale=2.5]{img/cli.png}
@@ -241,7 +241,9 @@ int copy(char *src, char *dst){ // copia file usando il server
 
 \end{minted}
 \subsection{Stream Communication}
-%immagini
+\begin{center}
+\includegraphics[scale=2.5]{img/sc.png}
+\end{center}
 Si ha il modello ISO/OSI, che si basa sull'astrazione. Un informatico dovrebbe conoscere tutti i vari livelli. Gli utenti possono mandare e ricevere stream di byte via TCP mediante API. Poi al livello successivo si hanno datagrammi con i dati che vengono mandai via meccanismi IP. È lo sviluppatore a decidere le varie politiche. I sistemi distribuiti lavorano tra utenti e TCP/UDP. Ovviamente sono i processi che comunicano tra di loro. Ogni processo comunica attraverso canali. Un canale gestisce i flussi di dati in ingresso e uscita e dall'esterno ogni canale è identificato da un intero detto \textbf{porta}. Le \textbf{socket} sono particolari canali per la comunicazione tra processi che non condividono memoria (per esempio perché risiedono su macchine diverse). Per potersi connettere o inviare dati ad un processo A, un processo B deve conoscere la macchina (host) che esegue A e la porta cui A è connesso (well-known port).   TCP è orientato alla connessione (si ha un invio di richiesta di connessione), è affidabile, si ha un controllo di flusso, si ha un controllo della congestione ma non si hanno garanzie di banda e ritardo minimi. UDP non è affidabile e non offre nulla di quanto offerto da TCP ma è comodo, per esempio, nello streaming, che tollera perdite parziali. UDP scompone i messaggi in pacchetti che invia uno per volta ai servizi network. TCP scompone e invia come UDP ma ogni pacchetto viene numerato per garantire riordinamento, duplicazioni e perdite. Nei sistemi distribuiti non è necessario conoscere tutto questo funzionamento ma importa solo lo stream di byte. TCP utilizza variabili e buffer per realizzare il trasferimenti bidirezionale di flussi di bytes (“pipe”) tra processi, prevede ruoli client/server durante la connessione ma non durante la comunicazione. TCP utilizza i servizi dello strato IP per l'invio dei flussi di bytes.\\
 L'interfaccia tra applicazione e strato di trasporto è dato delle API, \textit{Application Programming Interface}  e i socker sono API per accedere a TCP o UDP, due processi comunicano mediante socker nel modello client-server.\\
 Si hanno delle criticità:
@@ -256,20 +258,38 @@ Tutto questo è a un basso livello di trasparenza in quanto sia utente che svilu
 La comunicazione TCP/IP avviene attraverso flussi di byte
 (byte stream), dopo una connessione esplicita, tramite
 normali system call read/write. Queste due syscall sono sospensive (mettono il sistema in uno stato di \textit{wait}) e usano un buffer per garantire flessibilità (per esempio la read definisce un buffer per leggere N caratteri, ma potrebbe ritornare avendone letti solo k<N)
-%aggiungi immagine
-Ci sono molte chiamate diverse per accedere i servizi TCP e UDP. 
-%aggiungi tabella
+\begin{center}
+\includegraphics[scale=0.7]{img/sc2.png}
+\end{center}
+\newpage
+Ci sono molte chiamate diverse per accedere i servizi TCP e UDP:
+\begin{center}
+\includegraphics[scale=3]{img/sc3.png}
+\end{center}
 
 Il server crea una nuova socket collegata (binded) a una
-nuova porta per comunicare con il client, in questo modo la well-known port resta dedicata a ricevere richieste di connessione
-%immagine
-Non uso la stessa porta per evitare perché comunicazione e handshake non sarebbero distinguibili//
-
+nuova porta per comunicare con il client, in questo modo la well-known port resta dedicata a ricevere richieste di connessione:
+\begin{center}
+\includegraphics[scale=3]{img/sc4.png}
+\end{center}
+Non uso la stessa porta per evitare perché comunicazione e handshake non sarebbero distinguibili\\
 Quando si parla di socket non c'è il concetto di messaggio e read/write avvengono per un numero arbitrario di bytes. Quindi si devono prevedere cicli di lettura che
 termineranno in base alla dimensione dei “messaggi” come
 stabilito dal formato del protocollo applicativo in uso. \\
-%aggiungi codice in C
-
+Il prototipo della read in pseudocodice sarebbe:
+\begin{minted}{c}
+byteLetti read(socket, buffer, dimBuffer);
+\end{minted}
+con:
+\begin{itemize}
+\item byteLetti = byte effettivamente letti
+\item socket = canale da cui leggere
+\item buffer = sapzio di memoria dove trasferire i byte letti
+\item dimBuffer = dimensione del buffer = numero max di caratteri che si possono leggere
+\end{itemize}
+\textbf{Quindi si devono prevedere cicli di lettura che
+termineranno in base alla dimensione dei “messaggi” come
+stabilito dal formato del protocollo applicativo in uso}\\
 Java definisce alcune classi che costituiscono un'interfaccia ad oggetti alle system call:
 \begin{minted}{java}
 java.net.Socket
@@ -282,39 +302,233 @@ e il funzionamento per poterlo utilizzare in modo efficace.
 Le prossime slide discutono i principali metodi delle due classi. vediamo altro, iniziamo dai costruttori:
 \begin{minted}{java}
 public Socket()
-//Creates an unconnected socket, with the system-default type of SocketImpl
+// Creates an unconnected socket, with the system-default type of SocketImpl
 
 public Socket(String host, int port)
   throws UnknownHostException, IOException
-/*Creates a stream socket and connects it to the 
+/* Creates a stream socket and connects it to the 
 specified port number on the named host. If the
 specified host is null, the loopback address is assumed.
 The UnknownHostException is thrown if the IP address 
-of the host could not be determined*/
+of the host could not be determined */
 
 public Socket(InetAddress address, int port)
   throws IOException
-/*Creates a stream socket and connects it to the 
-specified port number at the specified IP address*/
+/* Creates a stream socket and connects it to the 
+specified port number at the specified IP address */
 \end{minted}
 e passiamo ai metodi:
 \begin{minted}{java}
 public void bind(SocketAddress bindpoint) throws IOException
-/*Binds the socket to a local address.
+/* Binds the socket to a local address.
 If the address is null, then the system will pick up an
-ephemeral port and a valid local address to bind the socket*/
+ephemeral port and a valid local address to bind the socket */
 
 public void connect(SocketAddress endpoint) throws IOException
-//Connects this socket to the server
+// Connects this socket to the server
 
 public void connect(SocketAddress endpoint, int timeout)
   throws IOException
-/*Connects this socket to the server with
- a specified timeout value (in milliseconds)*/
+/* Connects this socket to the server with
+ a specified timeout value (in milliseconds) */
 
 public void close()
 //Closes this socket.
 \end{minted}
-%aggiungi slide 28
+abbiamo metodi per modificare i bytes:
+\begin{minted}{java}
+public InputStream getInputStream()!
+  throws IOException
+  
+/* If this socket has an associated channel
+ then the resulting input stream delegates all of its
+operations to the channel. If the channel 
+is in non-blocking mode then the input stream's read
+operations will throw an IllegalBlockingModeException.
+When a broken connection is detected by the 
+network software the following applies to the
+returned input stream:
+The network software may discard bytes that 
+are buffered by the socket. Bytes that aren't
+discarded by the network software can be read using read.
+If there are no bytes buffered on the socket, 
+or all buffered bytes have been consumed by read,
+then all subsequent calls to read will throw an IOException.
+If there are no bytes buffered on the socket, 
+and the socket has not been closed using close, then
+available will return 0 */ 
 
+public OutputStream getOutputStream()
+  throws IOException
+  
+/* Returns an output stream for writing bytes to this socket.
+If this socket has an associated channel then 
+the resulting output stream delegates all of its
+operations to the channel.
+If the channel is in non-blocking mode 
+then the output stream's write operations will throw an
+IllegalBlockingModeException */
+\end{minted}
+Vediamo ora i costruttori:
+\begin{minted}{java}
+public ServerSocket() throws IOException
+// Creates an unbound server socket
+
+public ServerSocket(int port) 
+  throws IOException
+
+/* Creates a server socket, bound to the specified port.
+A port of 0 creates a socket on any free port.
+The maximum queue length for incoming connection 
+indications (a request to connect) is set to 50.
+If a connection indication arrives when the queue
+is full, the connection is refused. */
+ 
+public ServerSocket(int port, int backlog) 
+  throws IOException
+  
+/* Creates a server socket and binds it to the 
+specified local port number, with the specified backlog.
+A port of 0 creates a socket on any free port.
+The maximum queue length for incoming connection
+indications (a request to connect) is set to the
+backlog parameter.
+If a connection indication arrives when the queue
+is full, the connection is refused.
+\end{minted}
+I metodi per gestire le connessioni:
+\begin{minted}{java}
+public void bind(SocketAddress endpoint) 
+  throws IOException
+/* Binds the ServerSocket to a specific address 
+(IP address and port number).If the address is null, 
+then the system will pick up an ephemeral 
+port and a valid local address to bind the socket */
+
+public void bind(SocketAddress endpoint, int backlog) 
+  throws IOException
+/* Binds the ServerSocket to a specific address
+(IP address and port number). If the address is null,
+then the system will pick up an ephemeral port 
+and a valid local address to bind the socket.
+The backlog argument must be a positive value 
+greater than 0. If the value passed if equal or less
+than 0, then the default value will be assumed */
+
+public Socket accept() 
+  throws IOException
+/* Listens for a connection to be made 
+to this socket and accepts it. Returns the new Socket.
+The method blocks until a connection is made */
+\end{minted}
+e infine vediamo qualche altro metodo:
+\begin{minted}{java}
+public InetAddress getInetAddress()
+
+/* Returns the local address of this server 
+socket or null if the socket is unbound */
+
+public int getLocalPort()
+
+/* Returns the port on which this socket is 
+listening or -1 if the socket is not bound yet */
+
+public SocketAddress getLocalSocketAddress()
+
+/* Returns the address of the endpoint this
+socket is bound to, or null if it is not bound yet*/
+\end{minted}
+\newpage
+vediamo un esempio di un server che accetta una connessione da un client e manda uno stream di dati (una stringa) e di un client che legge lo stream di bytes. Partiamo col server
+\begin{minted}{java}
+package serverWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class SenderServerSocket {
+  final static String message = "This is a not so 
+    short text to test the reading capabilities of clients."
+   + " If they are not so smart, they will catch only part of it.";
+  public static void main(String[] args) {
+    try {
+      Socket clientSocket;
+      ServerSocket listenSocket;
+      listenSocket = new ServerSocket(53535);
+      System.out.println("Running Server: " + "Host=" 
+        + listenSocket.getInetAddress() + " Port="
+          + listenSocket.getLocalPort());
+
+      while (true) {
+        clientSocket = listenSocket.accept();
+        System.out.println("Connected to client at port: "
+           + clientSocket.getPort());
+        
+        PrintWriter out = 
+          new PrintWriter(clientSocket.getOutputStream(), true);
+        System.out.println("Writing message: ");
+        System.out.println(message);
+        System.out.println("Message length: " + message.length());
+        out.write(message);
+        out.flush();
+        clientSocket.close();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+\end{minted}
+\newpage
+e il client:
+\begin{minted}{java}
+package serverWriter;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+
+public class ReceiverClientSocket {
+
+  public static void main(String[] args) {
+    Socket socket; // my socket
+    InetAddress serverAddress; // the server address
+    int serverPort; // the server port
+    DataInputStream in; // the source of stream of bytes
+    byte[] byteReceived = new byte[1000]; // the temporary buffer
+    String messageString = ""; // the text to be displayed
+
+    try { // connect to the server
+      serverAddress = InetAddress.getByName(args[0]);
+      serverPort = Integer.parseInt(args[1]);
+      socket = new Socket(serverAddress, serverPort);
+      System.out.println("Connected to server: "
+         + socket.getPort()); // the server port
+
+      in = new DataInputStream(socket.getInputStream()); // the stream to
+                                // read from
+
+      // The following code shows in detail how to read from a TCP socket
+      System.out.println("Ready to read from the socket");
+      int bytesRead = 0; // the number of bytes read while (true) {
+      bytesRead = in.read(byteReceived);
+      messageString += new String(byteReceived, 0, bytesRead);
+      System.out.println("Received: " + messageString);
+      System.out.println("I am done!");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+}
+\end{minted}
+Quindi per il server si avrà:
+\begin{center}
+\includegraphics[scale=2.5]{img/sc5.png}
+\end{center}
+e per il client:
+\begin{center}
+\includegraphics[scale=2.5]{img/sc6.png}
+\end{center}
+Si nota però che ci sono dei problemi col client, funziona... ma non nella maniera corretta.\\
+%pagina 34
 \end{document}

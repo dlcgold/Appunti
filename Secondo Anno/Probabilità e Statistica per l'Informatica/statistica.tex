@@ -31,6 +31,13 @@
 \usepackage{pgfplots}
 \usepackage[cache=false]{minted}
 \usepackage{fancyhdr}
+\newcommand{\numberset}{\mathbb}
+\newcommand{\N}{\numberset{N}}
+\newcommand{\Z}{\numberset{Z}}
+\newcommand{\Q}{\numberset{Q}}
+\newcommand{\R}{\numberset{R}}
+\newcommand{\C}{\numberset{C}}
+
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
 \fancyhead[LO,RE]{\slshape \leftmark}
@@ -65,91 +72,107 @@
 \textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
 \chapter{Breve Introduzione}
-La statistica 
-Ormai i dati sono pervasivi e un loro studio è diventato necessario. Inoltre si parla spesso di target marketing, con una selezione dei possibili clienti. Inoltre la statistica è usata in maniera massiccia nel mondo dello shopping online. Si ha l'\textit{A-B testing}, per decidere tra due scelte la migliore. Per scegliere si analizzano i dati presi da campioni di popolazione. Si ha il \textit{tasso di conversione}. Un altro ambito importante è la robotica e la domotica. Ovviamente la statistica è importante anche nel mondo dei videogames. Anche genetica e biologia fanno uso abbondante dei dati statistici. \\
-Si hanno i seguenti 8 argomenti:
+La statistica è una discliplina, basata sulla matematica, con il fine lo studio quantitativo e qualitativo
+di un particolare fenomeno collettivo in condizioni di incertezza o non determinismo ed è usata in molti 
+ambiti come ad esempio l'intelligenza artificiale, data science, robotica, domotica e tutte le analisi 
+per poter ottenere ricavare delle informazioni sui dati.
+
+Ormai i dati sono pervasivi e un loro studio è diventato necessario ed inoltre si parla spesso di target marketing,
+con una selezione dei possibili clienti infatti è usata in maniera massiccia nel mondo dello shopping online.\newline
+Si ha l'\textit{A-B testing}, per decidere tra due scelte la migliore e per la decisione si analizzano i dati
+presi da campioni di popolazione, utilizzando il \textit{tasso di conversione}, ossia la percentuale di visitatori unici
+che hanno effettuato la azione su cui si sta effettuando il test.
+
+In codesto corso vengono effettuati i seguenti argomenti:
 \begin{enumerate}
-\item statistica descrittiva
-\item calcolo delle probabilità
-\item distribuzioni notevoli
-\item teoremi di convergenza
-\item stima dei parametri
-\item test di ipotesi parametrici
-\item test di ipotesi non parametrici
-\item regressione lineare
+    \item statistica descrittiva
+    \item calcolo delle probabilità
+    \item distribuzioni notevoli
+    \item teoremi di convergenza
+    \item stima dei parametri
+    \item test di ipotesi parametrici
+    \item test di ipotesi non parametrici
+    \item regressione lineare
 \end{enumerate}
+
 \chapter{Statistica Descrittiva}
-La statistica descrittiva è una raccolta di metodi e strumenti matematici usati per organizzare una o più serie di dati al fine di trovare:
+La statistica descrittiva è una raccolta di metodi e strumenti matematici usati per organizzare una o più serie di dati
+al fine di trovarne delle simmetrie, periodicità o delle eventuali leggi, ossia si effettua una descrizione 
+delle informazioni implicite ai dati.
+
+Ovviamente solitamente i dati disponibili non rappresentano tutta la popolazione ma un numero limitato 
+di osservazioni effettuato su un \emph{campione}, sottoinsieme selezionato della popolazione su cui si intende
+effettuare l'analisi statistica e la cui efficacia dipende da quale sottoinsieme è stato scelto infatti non esiste
+un solo campione ma vi sono diversi modi per sceglierli, più o meno efficaci per l'analisi statistica.
+
+Si vuole affermare qualcosa riguardo i \textbf{caratteri} della popolazione, ossia gli elementi su cui effettuo 
+l'analisi statistica, che possono essere:
 \begin{itemize}
-\item simmetrie
-\item periodicità
-\item leggi varie
+    \item \textbf{caratteri qualitativi}, indicanti qualità (colori, stili, materiali etc...) e non dati numerici
+             in cui solitamente non è definita una \textit{relazione d'ordine}
+    \item \textbf{caratteri quantitativi}, maggiormente studiati dal corso, in cui vengono definite \emph{relazioni d'ordine}:
+        \begin{itemize}
+            \item \textbf{discreti}, come i lanci di un dado, rappresentanti valori in $\Z$
+            \item \textbf{continui}, che assumono valori reali, come la temperatura, in $\R$
+        \end{itemize}
 \end{itemize}
-Si descrivono quindi le informazioni implicite ai dati. 
-Solitamente la serie di dati di cui si dispone è costituita da un numero limitato di \textbf{osservazioni} che devono essere rappresentative di un'ampia \textbf{popolazione}, che è quindi l'insieme a cui si riferisce l'indagine statistica. Un \textbf{campione} è un sottoinsieme selezionato della popolazione, che viene analizzato per dire qualcosa sulla popolazione da cui è stato prelevato. Non esiste un solo campione di una popolazione ma si hanno molti modi diversi di scegliere un campione. Si vuole affermare qualcosa riguardo i \textbf{caratteri/caratteristiche} della popolazione. Si hanno:
-\begin{itemize}
-\item \textbf{caratteri qualitativi}, che rappresentano qualità (colori, stili, materiali etc...) e non dati numerici e solitamente non hanno una \textit{relazione d'ordine}
-\item \textbf{caratteri quantitativi}, maggiormente studiati dal corso, hanno una \textit{relazione d'ordine} e sono divisi in:
-\begin{itemize}
-\item \textbf{discreti}, come i lanci di un dado, rappresentanti valori in $\mathbb{Z}$
-\item \textbf{continui}, che assumono valori reali, come la temperatura, i $\mathbb{R}$
-\end{itemize}
-\end{itemize}
-Supponiamo di considerare $n$ elementi della popolazione e di rilevare, per
-ognuno di essi, il dato relativo al carattere quantitativo da esaminare. Si ha un insieme di dati:
-$$E=\{x_1,...,x_n\}$$
-la numerosità è il numero di elementi considerati, $n$. Se il carattere è discreto è comodo raggruppare i dati considerando
-l'insieme di tutti i valori assumibili, \textbf{modalità del carattere} ed associare ad ognuno di tali valori il numero di volte che esso compare in $E$. Si quindi $N$ che è il numero di totalità del carattere e si ha l'insieme delle modalità:
-$$S=\{s_1,...,s_N\}$$
-Si chiama \textbf{frequenza assoluta} $s_j$. $f_j$ è il numero di volte che si presenta un elemento di un campione ovvero è il numero di elementi di $E$ che hanno lo stesso valore $s_j$.\\
-Si ha la \textbf{distribuzione di frequenza assoluta dei dati} unzione che associa ad ogni modalità la corrispondente frequenza assoluta:
-$$F:S\to N$$
-Si definisce \textbf{frequenza cumulata assoluta} per la modalità $s_j$ la somma delle frequenze assolute di tutte le modalità:
-$$s:k\in S:s_k\leq s_j$$
-$$F_j=\sum_{k:s_k\leq s_j} f_k$$
-frequenza relativa:
-$$p_j=\frac{f_j}{n}$$
-frequenza cumulativa relativa:
-$$P_j=\sum_{k:s_k\leq s_j} p_k$$
-Si dicono distribuzione di frequenza cumulata assoluta, relativa e cumulata relativa dei dati osservati, le funzioni $F,p,P$ che associano ad ogni modalità frequenze $s_j$ le relative frequenze $F_j, p_j, P_j$, con $n$ numero di osservazioni
+Supponiamo di considerare $n$ elementi della popolazione e di rilevare, per ognuno di essi,
+il dato relativo al carattere quantitativo da esaminare, ossia definiamo l'insieme di dati
+\[ E=\{x_1, x_2, \dots, x_n\} \]
+con la numerosità, il numero di elementi considerati, pari a $n$. 
+In caso il carattere è quantitativo discreto è comodo raggruppare i dati considerando 
+l'insieme di tutti i valori assumibili, \textbf{modalità del carattere} ed associare ad ognuno 
+di esso il numero di volte che esso compare in $E$.\newline
+Si ha quindi $N$ il numero di totalità del carattere e si definisce l'insieme di modalita:
+\[ S=\{s_1,...,s_N\} \]
+su cui si definiscono i seguenti valori statistici:
+\begin{description}
+    \item [frequenza assoluta $f_j$] numero di volte che si presenta un elemento di un campione
+    \item [frequenza cumulata assoluta $F_j$] somma delle frequenze assolute di tutte le modalità:
+            \[ F_j = \sum_{k:s_k \leq s_j} f_k \]
+    \item [frequenza relativa $p_j$] rapporto tra la frequenza assoluta e il numero di elementi 
+            \[ p_j = \frac{f_j}{n} \]
+    \item [frequenza cumulativa relativa $P_j$] somma delle frequenze relativa di tutte le modalità:
+            \[ P_j = \sum{k:s_k \leq s_j} p_k \]
+\end{description}
+Si definisce \textbf{distribuzione di frequenza} una funzione $F:S \to \N$ che associa ad ogni modalità la corrispondente frequenza
+per cui esiste la distribuzione di frequenza assoluta, relativa, frequenza cumulativa assoluta e relativa.
+
 %inserire esempio pagina 9
-Quando il carattere da studiare è continuo (o discreto con un gran numero di valori) è conveniente ricondursi a raggruppamenti come quelli appena trattati. Si suddivide $S$, l'insieme delle modalità, in alcune classi (sottoinsiemi di $S$) che formano una partizione (ogni famiglia di classi tra loro disgiunte la cui unione dà tutto $S$). La scelta delle classi con cui si suddivide l'insieme $S$ è del tutto arbitraria anche se è necessario che esse formino una partizione di $S$. Le partizioni devono essere significative e sufficientemente numerose. Ad ogni classe si asscoiano delle grandezze:
+Quando il carattere da studiare è continuo (o discreto con un gran numero di valori) è conveniente 
+ricondursi a raggruppamenti come quelli appena trattati, per cui si suddivide $S$, l'insieme delle modalità,
+in alcune classi (sottoinsiemi di $S$) che formano una partizione e la scelta delle classi con cui 
+si suddivide l'insieme $S$ è del tutto arbitraria anche se è necessario che esse formino una partizione di $S$.\newline
+Le partizioni devono essere significative e sufficientemente numerose ed inoltre ad ogni classe si associano le grandezze:
 \begin{itemize}
 \item confine superiore e inferiore (valori estremi della classe)
 \item ampiezza (differenza tra confine superiore ed inferiore)
-\item valore centrale (semi-somma tra i confini)
+\item valore centrale (media tra i due confini)
 \end{itemize}
-Nel caso in cui il carattere esaminato sia continuo occorre specificare quando le
-classi sono chiuse, a destra o a sinistra, ovvero specificare se gli elementi dell'indagine il cui dato coincide con il confine della classe sono da raggruppare all'interno della classe stessa oppure no.
+Nel caso in cui il carattere esaminato sia continuo occorre specificare come le classi sono chiuse, a destra o a sinistra,
+ossia specificare se gli elementi dell'indagine il cui dato coincide con il confine della classe sono da raggruppare
+all'interno della classe stessa oppure no.
 %esempio a pagina 13
-\subsection{Indici di tendenza Generale}
-Si cerca un modo di rappresentare una qualche serie di dati con un solo valore. Si usano gli \textbf{indici di tendenza generale} che sono quantità in grado di sintetizzare con un solo valore numerico i valori assunti dai dati. Uno di questi è la \textbf{media aritmetica} $\overline{x}$. Ho un campione $x_1,...,x_n$. Si ha la media:
-$$\overline{x}=\frac{1}{n}\sum	x_i=\frac{x_1+\cdots+x_n}{n}$$
-Nel caso in cui i dati siano di tipo quantitativo discreto allora avremo:
-$$\overline{x}=\frac{1}{n}\sum	s_jf_j=\frac{s_1f_j+\cdots+s_nf_n}{n}$$
-$$\overline{x}=\sum	s_jp_j=s_1p_1+\cdots+s_Np_N$$
-si ha il momento k-esimo rispetto ad y:
-$$M_{k,y}=\frac{1}{n}\sum{(x_i-y)^k}$$
-la media è anche il \textbf{momento primo rispetto all'origine}, con $y=0$ e ovviamente $k=1$.
-\\
-\newpage
-Un secondo indice di tendenza è rappresentato dalla \textbf{mediana} definita come \textit{quel numero reale che precede tanti elementi della serie di dati quanti ne segue}. 
+\section{Indici di tendenza Generale}
+Fino ad ora abbiamo visto come rappresentare i dati, sia discreti che continui, ora iniziamo ad analizzare gli indici
+che ci forniscono un valore che rappresenta un certo aspetto della serie di dati, 
+incominciando dagli \textbf{indici di tendenza generale}:
+\begin{description}
+    \item [media] è la media aritmetica tra tutti i valori dei dati osservati 
+            \[ \overline{x} = \frac{1}{n} \sum x_i = \frac{x_1 + \cdots + x_n}{n} \]
 
-Se ordino $x_1,...,x_n$ in ordine crescente ottengo la serie:
-$$x_{(1)},...,x_{(n)}$$
+    \item [mediana] è l'elemento in mezzo ai valori dei dati, ordinati in maniera crescente
+            in cui se il numero degli elementi $n$ è dispari è l'elemento $\frac{n + 1}{2}$
+            altrimenti è la somma degli elementi di posto $\frac{n}{2}$ e $\frac{n}{2} + 1$.
 
-e la \textbf{mediana} $\hat{x}$ è:
-\begin{itemize}
-\item $\frac{n+1}{2}$ se $n$ è dispari
-\item dalla media aritmetica tra l'elemento di posto $\frac{n}{2}$ e quello di posto $\frac{n}{2}+1$ se $n$ è pari
-\end{itemize}
-la \textbf{moda} $\widetilde{x}$ è quel valore o classe cui corrisponde la massima frequenza assoluta. La moda viene spesso utilizzata nel caso di dati qualitativi ovvero quando risulti
-impossibile definire media e mediana. Si ha che non è garantita l'unicità della moda infatti parleremo di:
-\begin{itemize}
-\item \textbf{distribuzione uni-modale} nel caso in cui vi sia un unica moda
-\item \textbf{distribuzione multi-modale} nel caso in cui vi siano più mode
-\end{itemize}
-La moda è anche il valore con massima frequenza assoluta
+    \item [moda $\widetilde{x}$] valore o classe corrispondente alla massima frequenza assoluta e viene usata 
+            solitamente in caso sia impossibile definire la media e la mediana.\newline
+            La moda non è unica infatti parliamo di:
+            \begin{itemize}
+                 \item \textbf{distribuzione uni-modale} nel caso in cui vi sia un unica moda
+                 \item \textbf{distribuzione multi-modale} nel caso in cui vi siano più mode
+            \end{itemize}
+\end{description}
 %aggiungo esempio
 Gli indici di tendenza centrale non sono utili per fornire informazioni circa l'omogeneità dei dati. Questo aspetto viene fornito da altri indici. Uno di questi è la \textbf{varianza}:
 $$s^2=\frac{1}{n}\sum (x_i-\overline{x})^2$$
@@ -192,6 +215,17 @@ Si hanno anche altri tipi di distribuzione. Vediamo le \textbf{distribuzioni mar
 \item \textbf{frequenza relativa marginale:} $p_{xj}$ che è il rapporto tra la frequenza assoluta marginale e la numerosità delle osservazioni
 \item \textbf{frequenza cumulata relativa marginale:} $FO{xj}$ che è la somma delle frequenze relative marginali di tutti gli $s_k\,\,\,s_k\leq s_j$  
 \end{itemize}
+The sample mean and sample median are both useful statistics for describing the
+central tendency of a data set. The sample mean makes use of all the data values and
+is affected by extreme values that are much larger or smaller than the others; the sample
+median makes use of only one or two of the middle values and is thus not affected by
+extreme values. Which of them is more useful depends on what one is trying to learn
+from the data. For instance, if a city government has a flat rate income tax and is trying to
+estimate its total revenue from the tax, then the sample mean of its residents’ income would
+be a more useful statistic. On the other hand, if the city was thinking about constructing
+middle-income housing, and wanted to determine the proportion of its population able
+to afford it, then the sample median would probably be more useful.
+
 considero due serie $\{x_i\},\{y_i\},\,\,i=1,...,n$. Pongo a confronto le variazione delle coppie di dati rispetto ai corrispondenti valori medi, considerando le coppie di scarti:
 $$x_i-\overline{x}$$
 $$y_i-\overline{y}$$

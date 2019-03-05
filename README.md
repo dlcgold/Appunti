@@ -23,26 +23,29 @@ xelatex -synctex=1 -interaction=nonstopmode --shell-escape file.tex
 ### Stato del completamento
 Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in fase di stesura.
 
-Primo Anno:
+##### I anno
 - [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
 - [x] Architettura degli Elaboratori
 
-Secondo Anno:
+##### II anno
 - [ ] Analisi e Progettazione del Software
 - [ ] Basi di Dati
 - [x] Fisica
-- [ ] Metodi Algebrici per l'Informatica (https://github.com/derogab/)
+- [ ] Metodi Algebrici per l'Informatica
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
 - [ ] Probabilità e Statistica per l'Informatica 
 - [x] Reti e Sistemi Operativi (solo formulario)
 - [ ] Sistemi Distribuiti
 
-Per il corso  di Reti e Sistemi Operativi segnalo questa [repo](https://github.com/jack23247/rso-faq) 
+### Altro
+Suggeriamo queste repository open:
+- [Informazioni Generali sulla Laurea Triennale](https://github.com/dlcgold/LaureaTriennale-Bicocca) 
+- [Altri appunti sui corsi](https://github.com/IlariaB/class-notes)
+- [FAQ di Reti e Sistemi Operativi](https://github.com/jack23247/rso-faq)
 
-Per qualche informazione generale anche questa [repo](https://github.com/dlcgold/LaureaTriennale-Bicocca)
 
 ### Disclaimer
 La maggior parte di questi appunti sono stati presi durante le lezioni.  

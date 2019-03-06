@@ -45,6 +45,7 @@ Suggeriamo queste repository open:
 - [Informazioni Generali sulla Laurea Triennale](https://github.com/dlcgold/LaureaTriennale-Bicocca) 
 - [Altri appunti sui corsi](https://github.com/IlariaB/class-notes)
 - [FAQ di Reti e Sistemi Operativi](https://github.com/jack23247/rso-faq)
+- [Repo con le esercitazioni di R di Probabilità e Statistica (in corso)](https://github.com/dlcgold/Lab-R)
 
 
 ### Disclaimer

@@ -29,6 +29,15 @@
 \usepackage{framed}
 \usepackage{pdfpages}
 \usepackage{pgfplots}
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
 \usepackage[cache=false]{minted}
 \usepackage{fancyhdr}
 \newcommand{\numberset}{\mathbb}
@@ -575,6 +584,7 @@ senza nessuna incertezza, per cui l'obiettivo della statistica è di determinarl
 mentre la probabilità e le sue applicazioni assumono che sia sempre nota.
 Si dimostra che sono delle funzioni di ripartizione tutte e sole le funzioni del tipo:
 \[F:\mathbb{R}\to[0,1]\]
+\newpage
 che godono simultaneamente delle seguenti proprietà:
 \begin{itemize}
 \item $F$ è monotona crescente
@@ -583,5 +593,117 @@ che godono simultaneamente delle seguenti proprietà:
 \item \[\lim_{t\to t_0^+} F(t)=F(t_0),\,\,\forall t_0\in\mathbb{R}\]
      fnsfgsgsjgjfskshfkj   
 \end{itemize}
-%manca ultimo quarto della lezione slide 161
+Le variabili aleatorie si distinguono in due categorie in base alla proprietà di continuità delle corrispondenti funzioni di ripartizione
+\subsubsection{Variabile Aleatoria Discreta}
+Una variabile aleatoria è detta \textbf{variabile aleatoria discreta} nel caso in cui
+l'insieme dei valori $S$ che essa può assumere (supporto) è finito (ovvero costituito
+da un numero finito di elementi) o costituito da una infinità di valori discreti. Ad ogni variabile aleatoria discreta si associa, oltre alla funzione di ripartizione, una funzione che fornisce delle valutazioni sulla probabilità che essa assuma specifici valori.\\
+Sia $S$ il supporto della variabile aleatoria $X$. Si dice \textbf{distribuzione discreta di probabilità} la funzione:
+\[p_X:\mathbb{R}\to[0,1]\]
+coì definita:
+\[
+\begin{cases}
+p(X=t)\,\,\,\,  \forall t\in S\\
+0\,\,\,\,  altrimenti
+\end{cases}
+\]
+Una funzione $p_X$ definita su un insieme finito $S$ è una distribuzione di probabilità se e solo se sono soddisfatte simultaneamente le seguenti proprietà:
+\begin{itemize}
+\item \[p_X(t)\geq 0\,\,\,\, t\in \mathbb{R}\]
+\item \[\sum_{s\in S} p_X(s)=1\]
+
+\newpage
+questa proprietà deriva dalle due precedentemente introdotte:
+\begin{itemize}
+\item $P(\Omega)=1$
+\item data la famiglia $\{A_i,i\in I\subseteq N\}$ 
+di eventi incompatibili vale:
+\[P(\bigcup_{i\in I} A_i)=\sum_{i\in I} P(A_i)\]
+\end{itemize}
+\end{itemize}
+Tra le funzioni di ripartizione delle variabili discrete e le distribuzioni discrete di
+probabilità esiste una corrispondenza biunivoca, nel senso che le une identificano
+univocamente le altre. Si ha infatti che:
+\begin{itemize}
+\item \[F_X(t)=\sum_{s\in S:s\subseteq t} p_X(s)\,\,\, \forall t\in \mathbb{R}\]
+\item \[p_X(s)=F_X(s)-\lim_{t\to s^{-}} F_X(t)\,\,\, \forall s\in S\]
+\end{itemize}
+Dalla prima di tali relazioni se ne deduce che le funzioni di ripartizione delle variabili
+aleatorie discrete presentano dei \textit{salti} in corrispondenza dei valori \textit{s} mentre
+sono costanti per gli altri valori: per tale ragione vengono dette \textit{funzioni a gradino}.
+\subsubsection{Variabile Aleatoria Continua}
+Una variabile aleatoria è detta continua nel caso in cui la corrispondente funzione di ripartizione $F_X$ sia continua. In particolare è detta \textbf{assolutamente continua} se esiste una funzione:
+\[f_X:\mathbb{R}\to R_+\]
+tale che:
+\[F_X(t)=\int_{-\infty}^t f_X(u)du\,\,\,\forall t\in \mathbb{R}\]
+Una tale funzione quando esista viene detta \textbf{densità di probabilità }di $X$.\\
+È detto poi \textbf{supporto} della variabile $X$ l'insieme:
+\[S=\{t\in\mathbb{R}:f_X(t)\neq 0\}\]
+Si osservi che se la densità di probabilità di una variabile casuale esiste allora la
+funzione di ripartizione è una sua primitiva.
+Per semplicità supporremo nel seguito che le variabili aleatorie assolutamente
+continue abbiano funzione di ripartizione derivabile e che la funzione di densità di
+probabilità sia la derivata della funzione di ripartizione.\\
+Come per le distribuzioni discrete di probabilità anche le funzioni di densità di
+probabilità per essere tali devono soddisfare le seguenti due proprietà:
+\begin{enumerate}
+\item \[f_X(t)\geq 0\,\,\, \forall t\in \mathbb{R}\]
+\item \[\int_{-\infty}^{+\infty}f_X(t)dt=1\]
+\end{enumerate}
+La probabilità che una variabile aleatoria continua (o
+assolutamente continua) assuma un ben determinato valore è sempre nulla. Infatti, se $X$ è una variabile aleatoria continua allora $\forall t_0\in \mathbb{R}$ vale:
+\[P(X=t_0)=P(X\leq t_0)-\lim_{t\to t_0^-}P(X\leq t)=F_X(t_0)-\lim_{t\to t_0^-} F_X(t)=F_X(t_0)-F_X(t_0)=0\]
+\begin{center}
+\includegraphics[scale=0.6]{img/con.png}
+\end{center}
+Pertanto quando si pensa a variabili aleatorie continue, non ha mai senso domandarsi, quale sia la probabilità che esse assumano valori esatti. Al contrario ha senso domandarsi quale sia la probabilità che tali variabili assumano
+valori in specifici intervalli dell'asse reale.\\
+Per calcolare la probabilità che una variabile casuale continua $X$ assuma un valore in un intervallo $(a,b]\subseteq \mathbb{R}$ è possibile far ricorso alla seguente formula:
+\[P(X\in(a,b])=\int_a^b f_X(u)du\,\,\, \forall t\in\mathbb{R}\]
+quindi:
+\[P(X\in(a,b])=F_X(b)-F_X(a)=\int_{-\infty}^b f_X(u)du-\int_{-\infty}^a f_X(u)du\]
+valutiamo in $b$:
+\[F_X(b)=\int_{-\infty}^b f_X(u)du=P(X\leq b)\]
+che è quindi l'area sottesa alla curva della funzione fino al punto $b$ sull'asse delle $x$.\\
+Valutiamo anche in $a$:
+\[F_X(a)=\int_{-\infty}^a f_X(u)du=P(X\leq a)\]
+che è quindi l'area sottesa alla curva della funzione fino al punto $a$ sull'asse delle $x$.\\
+quindi:
+\[P(X\in(a,b])=F_X(b)-F_X(a)\]
+è l'area sottesa alla curva della funzione fino dal punto $a$ al punto $b$ sull'asse delle $x$.\\
+In pratica la probabilità che sia soddisfatto l'evento $X\in(a,b]$ corrisponde all'area sottesa dalla densità $f_X$ nell'intervallo $(a,b]$:
+\begin{center}
+
+\psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+{
+\begin{pspicture}(0,-2.375)(8.38,2.375)
+\psbezier[linecolor=black, linewidth=0.04](5.9990716,0.4275487)(5.9981446,1.2275481)(1.6000015,-0.37754923)(1.6009284,-1.1775487080233007)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,-2.375)(0.8,2.425)
+\psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.4,-1.975)(7.2,-1.975)
+\psline[linecolor=black, linewidth=0.04, linestyle=dashed, dash=0.17638889cm 0.10583334cm](1.6,-1.175)(1.6,-1.975)
+\psline[linecolor=black, linewidth=0.04, linestyle=dashed, dash=0.17638889cm 0.10583334cm](6.0,0.425)(6.0,-1.975)
+\rput[bl](1.6,-2.375){$a$}
+\rput[bl](5.6,-2.375){$b$}
+\rput[bl](7.2,-2.375){$X$}
+\rput[bl](-0.1,2.025){$f_X()$}
+\rput[bl](6.4,-0.775){$P(X\in(a,b])$}
+\psline[linecolor=black, linewidth=0.04, linestyle=dotted, dotsep=0.10583334cm](5.6,0.425)(2.0,-1.175)
+\psline[linecolor=black, linewidth=0.04, linestyle=dotted, dotsep=0.10583334cm](5.6,0.025)(2.0,-1.575)
+\psline[linecolor=black, linewidth=0.04, linestyle=dotted, dotsep=0.10583334cm](5.6,-0.375)(2.0,-1.975)
+\psline[linecolor=black, linewidth=0.04, linestyle=dotted, dotsep=0.10583334cm](5.6,-0.775)(2.8,-1.975)
+\psline[linecolor=black, linewidth=0.04, linestyle=dotted, dotsep=0.10583334cm](5.6,-1.175)(3.6,-1.975)
+\psline[linecolor=black, linewidth=0.04, linestyle=dotted, dotsep=0.10583334cm](5.6,-1.575)(4.8,-1.975)
+\end{pspicture}
+}
+
+\end{center}
+quindi:
+\[[P(X\in(a,b])=\int_a^bf_X(u)du\,\,\,\forall a,b\in\mathbb{R},\,\,\,a<b\]
+inoltre essendo $P(X=a)=0$ si ha:
+\[[P(X\in(a,b])=p(X\in[a,b])\,\,\,\forall a,b\in\mathbb{R},\,\,\,a<b\]
+
+Si è visto che per definizione:
+\[F_X(t)=\int_{-\infty}^tf_X(u)du\,\,\,\forall t\in\mathbb{R}\]
+Ovvero che la funzione di ripartizione è la funzione integrale della funzione di densità di probabilità. Quindi, data la funzione di ripartizione, si ottiene la funzione di densità di probabilità tramite derivazione:
+\[\frac{d}{dt}F_X(t)=f_X(t)\]
 \end{document}

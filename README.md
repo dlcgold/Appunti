@@ -56,3 +56,7 @@ Qualora li trovaste siete invitati a [comunicarlo](https://github.com/dlcgold/Ap
 ### Contributi
 Contributi di ogni tipo sono ben accetti. 
 Tutte le persone che hanno pubblicamente contribuito alla stesura di questi appunti sono elencate [qui](https://github.com/dlcgold/Appunti/graphs/contributors) e direttamente all'interno degli stessi.
+
+### License
+These codes are licensed by [ENERGY_DRINK-WARE](https://github.com/dlcgold/energy_drink-license) license
+[![Energy Drink License :boom:](https://img.shields.io/badge/-Energy%20Drink-yellow.svg)](https://github.com/dlcgold/energy_drink-license)

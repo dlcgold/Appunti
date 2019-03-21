@@ -530,7 +530,486 @@ e per il client:
 \includegraphics[scale=2.5]{img/sc6.png}
 \end{center}
 Si nota però che ci sono dei problemi col client, funziona... ma non nella maniera corretta.\\
-%pagina 34
+%pagina 34 % aggiungere lezione venerdì 15
+
+%da pagina 56
+\subsection{Architettura dei server}
+Per la gestione dei thread (che in java sono classi) esistono diversi \textbf{design pattern}:
+\begin{itemize}
+\item \textbf{un thread per pattern}, dove il \textit{thread coordinatore} rileva la presenza di un nuovo client, lo connette ad un nuovo thread il quale:
+\begin{itemize}
+\item decodifica la richiesta
+\item chiama la funzione servente che la soddisfa
+\item torna in ciclo per leggere una nuova richiesta
+\end{itemize}
+\textbf{un thread per richiesta}, dove un \textit{thread coordinatore} riceve una richiesta e genera un thread per processarla. Questo nuovo thread:
+\begin{itemize}
+\item decodifica la richiesta
+\item chiama la funzione servente che la soddisfa
+\item termina
+\end{itemize} 
+\item \textbf{un thread per servente}, dove ogni servente ha un proprio thread e una coda. Il coordinatore riceve una richiesta e lo inserisce nella coda del servente giusto. Ogni thread servente legge ciclicamente una richiesta dalla
+propria coda e la esegue
+\item \textbf{una pool di thread}, dove, dato che la creazione di un thread è costosa, il costo viene ammortizzato facendo gestire ad ogni thread molte richieste. Questo \textit{pool di thread} viene creato all'avvio del sistema e le richieste gli vengono assegnate man mano.
+\end{itemize}
+\subsection{Un esempio}
+Vediamo un esempio client/server con socket TCP/IP in Java.\\
+\textit{Vogliamo realizzare un semplice programma per giocare a “knock knock”, il popolare gioco di parole inglese che si basa su domande e risposte con parole ed espressioni omofone di significato differente:}\\
+\textit{Server: "Knock knock!"\\
+Client: "Who's there?"\\
+Server: "Atch."\\
+Client: "Atch who?"\\
+Server: "Bless you!"}
+\\
+Facciamo quindi tre classi (\textit{qui il ruolo attivo viene assunto dal server che inizia la
+conversazione (in pratica un'inversione dei ruoli)}):
+\begin{enumerate}
+\item una \textbf{classe \textit{KnockKnockProtocol}} che fornisce il protocollo, stabilendo domande e risposte e funzione la soluzione per formulare le risposte
+\item una \textbf{classe \textit{KnockKnockClient}} che stabilisce la connessione e invia i messaggi al server
+\item una \textbf{classe \textit{KnockKnockServer}} che accetta la connessione e interroga il client secondo il protocollo della prima classe 
+\end{enumerate}
+\newpage
+Vediamo la \textbf{\textit{KnockKnockServer}}:
+\begin{minted}{java}
+package KnockKnock;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class KnockKnockServer {
+  public static void main(String[] args) throws IOException {
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(4444);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Could not listen on port: 4444.");
+            System.exit(1);
+        }
+        Socket clientSocket = null;
+        try {
+            clientSocket = serverSocket.accept();
+        } catch (IOException e) {
+            System.err.println("Accept failed.");
+            System.exit(1);
+        }
+        PrintWriter out = 
+          new PrintWriter(clientSocket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(
+        new InputStreamReader(
+        clientSocket.getInputStream()));
+        String inputLine, outputLine;
+        KnockKnockProtocol kkp = new KnockKnockProtocol();
+
+        outputLine = kkp.processInput(null);
+        out.println(outputLine);
+
+        while ((inputLine = in.readLine()) != null) {
+             outputLine = kkp.processInput(inputLine);
+             out.println(outputLine);
+             if (outputLine.equals("Bye."))
+                break;
+        }
+        out.close();
+        in.close();
+        clientSocket.close();
+        serverSocket.close();
+  }
+}
+
+\end{minted}
+passiamo al client:
+\begin{minted}{java}
+package KnockKnock;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+public class KnockKnockClient {
+
+  public static void main(String[] args) throws IOException {
+    Socket kkSocket = null;
+    PrintWriter out = null;
+    BufferedReader in = null;
+
+    try {package KnockKnock;
+
+public class KnockKnockProtocol {
+    private static final int WAITING = 0;
+    private static final int SENTKNOCKKNOCK = 1;
+    private static final int SENTCLUE = 2;
+    private static final int ANOTHER = 3;
+
+    private static final int NUMJOKES = 5;
+
+    private int state = WAITING;
+    private int currentJoke = 0;
+
+    private String[] clues = { "Turnip", "Little Old Lady", "Atch", "Who", "Who" };
+    private String[] answers = { "Turnip the heat, it's cold in here!",
+                                 "I didn't know you could yodel!",
+                                 "Bless you!",
+                                 "Is there an owl in here?",
+                                 "Is there an echo in here?" };
+
+    public String processInput(String theInput) {
+        String theOutput = null;
+
+        if (state == WAITING) {
+            theOutput = "Knock! Knock!";
+            state = SENTKNOCKKNOCK;
+        } else if (state == SENTKNOCKKNOCK) {
+            if (theInput.equalsIgnoreCase("Who's there?")) {
+                theOutput = clues[currentJoke];
+                state = SENTCLUE;
+            } else {
+                theOutput = "You're supposed to say \"Who's there?\"! " +
+			    "Try again. Knock! Knock!";
+            }
+        } else if (state == SENTCLUE) {
+            if (theInput.equalsIgnoreCase(clues[currentJoke] + " who?")) {
+                theOutput = answers[currentJoke] + " Want another? (y/n)";
+                state = ANOTHER;
+            } else {
+                theOutput = "You're supposed to say \"" + 
+			    clues[currentJoke] + 
+			    " who?\"" + 
+			    "! Try again. Knock! Knock!";
+                state = SENTKNOCKKNOCK;
+            }
+        } else if (state == ANOTHER) {
+            if (theInput.equalsIgnoreCase("y")) {
+                theOutput = "Knock! Knock!";
+                if (currentJoke == (NUMJOKES - 1))
+                    currentJoke = 0;
+                else
+                    currentJoke++;
+                state = SENTKNOCKKNOCK;
+            } else {
+                theOutput = "Bye.";
+                state = WAITING;
+            }
+        }
+        return theOutput;
+    }
+
+}
+
+      kkSocket = new Socket("localhost", 4444);
+      out = new PrintWriter(kkSocket.getOutputStream(), true);
+      in = new BufferedReader(new InputStreamReader(kkSocket.getInputStream()));
+    } catch (UnknownHostException e) {
+      System.err.println("Don't know about host: taranis.");
+      System.exit(1);
+    } catch (IOException e) {
+      System.err.println("Couldn't get I/O for the connection to: taranis.");
+      System.exit(1);
+    }
+
+    BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+    String fromServer;
+    String fromUser;
+
+    while ((fromServer = in.readLine()) != null) {
+      System.out.println("Server: " + fromServer);
+      if (fromServer.equals("Bye."))
+        break;
+
+      fromUser = stdIn.readLine();
+      if (fromUser != null) {
+        System.out.println("Client: " + fromUser);
+        out.println(fromUser);
+      }
+    }
+
+    out.close();
+    in.close();
+    stdIn.close();
+    kkSocket.close();
+  }
+
+}
+
+
+\end{minted}
+e il server:
+\begin{minted}{java}
+package KnockKnock;
+
+public class KnockKnockProtocol {
+    private static final int WAITING = 0;
+    private static final int SENTKNOCKKNOCK = 1;
+    private static final int SENTCLUE = 2;
+    private static final int ANOTHER = 3;
+
+    private static final int NUMJOKES = 5;
+
+    private int state = WAITING;
+    private int currentJoke = 0;
+
+    private String[] clues = { "Turnip", "Little Old Lady",
+       "Atch", "Who", "Who" };
+    private String[] answers = { "Turnip the heat, it's cold in here!",
+                                 "I didn't know you could yodel!",
+                                 "Bless you!",
+                                 "Is there an owl in here?",
+                                 "Is there an echo in here?" };
+
+    public String processInput(String theInput) {
+        String theOutput = null;
+
+        if (state == WAITING) {
+            theOutput = "Knock! Knock!";
+            state = SENTKNOCKKNOCK;
+        } else if (state == SENTKNOCKKNOCK) {
+            if (theInput.equalsIgnoreCase("Who's there?")) {
+                theOutput = clues[currentJoke];
+                state = SENTCLUE;
+            } else {
+                theOutput = "You're supposed to say \"Who's there?\"! " +
+          "Try again. Knock! Knock!";
+            }
+        } else if (state == SENTCLUE) {
+            if (theInput.equalsIgnoreCase(clues[currentJoke] + " who?")) {
+                theOutput = answers[currentJoke] + " Want another? (y/n)";
+                state = ANOTHER;
+            } else {
+                theOutput = "You're supposed to say \"" + 
+          clues[currentJoke] + 
+          " who?\"" + 
+          "! Try again. Knock! Knock!";
+                state = SENTKNOCKKNOCK;
+            }
+        } else if (state == ANOTHER) {
+            if (theInput.equalsIgnoreCase("y")) {
+                theOutput = "Knock! Knock!";
+                if (currentJoke == (NUMJOKES - 1))
+                    currentJoke = 0;
+                else
+                    currentJoke++;
+                state = SENTKNOCKKNOCK;
+            } else {
+                theOutput = "Bye.";
+                state = WAITING;
+            }
+        }
+        return theOutput;
+    }
+
+}
+
+
+\end{minted}
+I vari client sono quindi serviti in sequenza, con i conseguenti problemi di performance. Per servire più client in modo concorrente si unsano i server multi-thread:
+\begin{verbatim}
+while (true) {
+ accept a connection ;
+ create a thread to deal with the client ;
+end while
+\end{verbatim}
+
+Si hanno due classi:
+\begin{enumerate}
+\item \textbf{KKMultiServer} per i server
+\item \textbf{KKMultiServerThread} che realizza un server dedicato ad un client
+\end{enumerate} 
+\begin{minted}{java}
+package KnockKnock;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class KKMultiServer {
+
+  public static class KKMultiServerThread extends Thread {
+    private Socket socket = null;
+
+    public KKMultiServerThread(Socket socket) {
+      super("KKMultiServerThread");
+      this.socket = socket;
+    }
+
+    public void run() {
+      try {
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = 
+          new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String inputLine, outputLine;
+        KnockKnockProtocol kkp = new KnockKnockProtocol();
+        outputLine = kkp.processInput(null);
+        out.println(outputLine);
+        while ((inputLine = in.readLine()) != null) {
+          outputLine = kkp.processInput(inputLine);
+          out.println(outputLine);
+          if (outputLine.equals("Bye"))
+            break;
+        }
+        out.close();
+        in.close();
+        socket.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public static void main(String[] args) {
+    ServerSocket serverSocket = null;
+    boolean listening = true;
+
+    try {
+      serverSocket = new ServerSocket(4444);
+
+      while (listening)
+        new KKMultiServerThread(serverSocket.accept()).start();
+      serverSocket.close();
+    } catch (IOException e) {
+      System.err.println("Could not listen on port: 4444.");
+      System.exit(-1);
+    }
+
+  }
+
+}
+
+\end{minted}
+
+\section{L'architettura del web}
+\subsubsection{Message oriented computing}
+Il metodo di comunicazione tra client e server è supportato dal web tramite HTTP (da client a server con delle \textit{request} e all'opposto con delle \textit{response}). Il client è realizzato da un \textit{browser} mentre il server da un \textit{HTTP server} o da un \textit{Web Server}.\\
+Un \textbf{web browser}, detto \textit{user-agent}, è un programma che consente la navigazione sul web, interpretando il codice con cui sono e espresse le web pages rappresentandolo in forma di ipertesto. Una web page è costituita da diversi oggetti identificati da URL. Le page interagiscono mediante ipertesti e link.\\
+L'URL, che identifica un oggetto nella rete e specifica come interpretare i
+dati ricevuti attraverso il protocollo, è formato da:
+\begin{itemize}
+\item nome del protocollo 
+\item indirizzo IP dell'host
+\item porta del processo
+\item cammino/percorso dell'host
+\item identificatore della risposta
+\end{itemize}
+ovvero: \begin{verbatim}
+protocollo://indirizzo_IP[:porta]/cammino/risorsa
+\end{verbatim}
+la parte testuale dei documenti è espressa da:
+\begin{itemize}
+\item HTML per contenuti e impaginazione
+\item CSS per il render
+\item XML e JSON per i dati e la loro struttura
+\end{itemize}
+Si possono avere anche dati multimediali (foto, audio, etc...) con l'encoding MIME per definirne il formato (plain, html per i testi, jpeg, gif per le immagini, etc..) . La dinamicità delle pagine web è data invece da linguaggi come Javascript, VBScript, Java/applet...\\
+I protocolli definiscono il formato, l'ordine di invio e di ricezione dei messaggi tra i dispositivi, il tipo dei dati e le azioni da eseguire quando si riceve un messaggio. Si hanno diversi protocolli come HTTP (\textit{HyperText Transfer Protoco}), FTP \textit{File Transfer Protoco}) e SMTP \textit{Simple Mail Transfer Protoco}).\\
+HTTP usa il modello client/server, col server che visualizza su browser gli oggetti che richiede e server che invia gli oggetti. HTTP usa TCP, infatti inizia una connessione TCP creando una socket verso il server sulla porta 80. Il server accetta la connessione TCP dal client. Vengono quindi scambiati messaggi http (messaggi del protocollo
+di livello applicativo) tra il browser (client http) e il Web
+server (server http).\\
+Per ora si hanno due versioni:
+\begin{enumerate}
+\item\textbf{ http1.0: RFC 1945}
+\item\textbf{ http1.1: RFC 2068}
+\end{enumerate}
+HTTP è \textbf{stateless} in quanto il server non mantiene informazioni sulle precedenti richieste che devono quindi contenere tutte le informazioni necessarie. Si ha che \textit{requeste }e \textit{response} hanno la stessa struttura, in ASCII con un formato testo leggibile, per esempio:
+\begin{verbatim}
+GET /somedir/page.html HTTP/1.1
+Host: www.someschool.edu
+Connection: close
+User-agent: Mozilla/4.0
+Accept: text/html, image/gif, image/jpeg
+Accept-language: fr
+\end{verbatim}
+Con la prima riga rappresentate la request line e le altre rappresentati l'header con le opzioni.\\
+Si hanno quindi i metodi:
+\begin{itemize}
+\item \textbf{GET}:
+\begin{itemize}
+\item restituisce una rappresentazione di una risorsa
+\item include un eventuale input in coda alla URL della risorsa
+\item è safe: l'esecuzione non ha effetti sul server
+=> la risposta può essere gestita con una cache dal client
+\item uso tipico: ottenere pagine html e immagini
+\end{itemize}
+\item \textbf{POST}:
+\begin{itemize}
+\item comunica dei dati da elaborare lato server o crea una nuova risorsa
+subordinata all’URL indicata (vedi più avanti)
+\item l'input segue come documento autonomo (body)
+\item non è idempotente: ogni esecuzione ha un diverso effetto
+=> La risposta non può essere gestita con una cache dal client
+\item uso tipico: processare FORM e modificare dati in un DB
+\end{itemize}
+\item \textbf{HEAD}:
+\item simile al metodo get ma viene restituito solo l’Head della pagina Web
+\item spesso usato in fase di debugging
+\end{itemize}
+nel complesso:
+\begin{center}
+\includegraphics[scale=0.7]{img/http.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=0.7]{img/http2.png}
+\end{center}
+vediamo un http response:
+\begin{verbatim}
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 06 Aug 1998 12:00:15 GMT
+Server: Apache/1.3.0 (Unix)
+Last-Modified: Mon, 22 Jun 1998
+...
+Content-Length: 6821
+Content-Type: text/html
+data data data data data ...
+\end{verbatim}
+con la prima linea contenente protocollo, codice di stato e frase di stato.\\ 
+si ha che:
+\begin{itemize}
+\item Client HTTP 1.0: Server chiude connessione al termine della richiesta
+\item Client HTTP 1.1: mantiene aperta la connessione oppure chiude se la richiesta e quindi
+contiene Connection: close
+\end{itemize}
+ecco alcuni esempi di codici:
+\begin{center}
+\includegraphics[scale=0.7]{img/http3.png}
+\end{center}
+Si cerca di non inviare dati che il client ha già in cache e il server verifica la cosa:
+\begin{center}
+\includegraphics[scale=0.7]{img/http4.png}
+\end{center}
+usando i cookie:
+\textbf{FOTO SBAGLIATA!!!}
+\begin{center}
+\includegraphics[scale=0.7]{img/http5.png}
+\end{center}
+Per gestire l'accesso ai documenti sul server, dato che http è stateless, si deve verificare ogni richiesta (ora i browser spesso forniscono il salvataggio di credenziali) e le informazioni necessarie all'autenticazione si trovano nell'header (\textit{authorization: line}) senza le quali il server rifiuta la connessione (\textit{www authenticate:}): 
+\begin{center}
+\includegraphics[scale=0.7]{img/http6.png}
+\end{center}
+ovviamente i vari livelli hanno diversi protocolli:
+\begin{center}
+\includegraphics[scale=0.7]{img/http7.png}
+\end{center}
+
+
+
+
+
+
+
+
+
+
+
+
+
 \chapter{HTML + CSS + JS}
 Innanzitutto una piccola distinzione:
 \begin{itemize}
@@ -804,5 +1283,7 @@ Widget per il calendario:
 \end{center}
 che fornisce una forma di validazione del dato inserito ma vengono visualizzati diversamente a seconda dei browser ma è supportato da quasi tutti.\\
 Manca il modo di definire e governare la dinamicità della pagina, il modo
-della pagina di cambiare in modo reattivo al comportamento dell'utente o anche proattivo, senza necessariamente dover attendere uno stimolo dall'utente. Tutto ciò è svolto dal\textbf{ JS}. Il \textbf{Javascript} è il linguaggio di scripting che svolge questa funzione, ne parleremo più avanti in esercitazioni dedicate
+della pagina di cambiare in modo reattivo al comportamento dell'utente o anche proattivo, senza necessariamente dover attendere uno stimolo dall'utente. Tutto ciò è svolto dal\textbf{ JS}. Il \textbf{Javascript} è il linguaggio di scripting che svolge questa funzione, ne parleremo più avanti in esercitazioni dedicate.\\
+
+
 \end{document}

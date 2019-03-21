@@ -64,19 +64,34 @@
 \textbf{Questi appunti sono presi a le lezioni. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
 \chapter{Introduzione ai Sistemi Distribuiti}
-\textit{Un sistema distribuito è un sistema nel quale componenti hardware e software, collocati in computer connessi alla rete, comunicano e coordinano le loro azione solitamente col passaggio di messaggi (a differenza delle chiamate di procedura che si hanno col passaggio di parametri su memoria condivisa)}. Ogni processo ha quindi una parte di logica applicativa e una parte di coordinamento. Altrimenti si ha questa definizione. \textit{un sistema distribuito è un insieme di elementi autonomi di computazione che si interfacciano agli utenti come un singolo sistema "coerente"}.
+In questo corso analizziamo i sistemi distribuiti, alla base di tutte le applicazioni software 
+client/server, in cui è presente una comunicazione tra diversi host.
+
+\begin{defi}
+Un sistema distribuito è un sistema nel quale componenti hardware e software, collocati in computer
+connessi alla rete, in cui comunicano e coordinano le loro azione  col passaggio di messaggi.\\
+Ogni processo ha quindi una parte di logica applicativa e una parte di coordinamento. 
+\end{defi}
+
+\begin{defi}
+un sistema distribuito è un insieme di elementi autonomi di computazione che si 
+interfacciano agli utenti come un singolo sistema "coerente".
+\end{defi}
+
 \begin{center}
 \includegraphics[scale=2.5]{img/cli.png}
 \end{center}
-I sistemi distribuiti sono quindi sistemi complessi. Si hanno le seguenti caratteristiche:
-\begin{itemize}
-\item le unità autonome di computazione si chiamano \textbf{nodi} e possono essere device hardware o singoli processi software
-\item ogni nodo "fa quello che vuole", ogni nodo è autonomo, e vanno tra loro sincronizzati e coordinati (programmazione concorrente). Ogni nodo ha la sua "nozione di tempo"
-\item utenti e applicazioni vedono un singolo sistema
-\item si possono aprire e chiudere gruppi di nodi
-\end{itemize}
-La parola chiave è \textbf{trasparenza di distribuzione (distribution trasparency)}. Trasparenza significa nascondere dettagli agli utenti che possono ignorare ciò che succede e che non possono modificare il servizio. Si ha che il sistema non va in errore se un solo nodo va in errore in quanto i nodi sono indipendenti ma è difficile occultare gli errori parziali dei singoli nodi ed è difficile sistemare gli eventuali errori del singolo nodo. Ovviamente non si ha memoria condivisa e non c'è uno stato globale. In un sistema distribuito non si ha un clock globale e non si può controllare globalmente o avere uno scheduling globale.
-\subsection{Il modello Client-Server}
+Le unità di computazioni sono dei nodi, i quali possono essere device hardware e/o singoli processi
+software, autonomi che devono essere sincronizzati e coordinati(programmazione concorrente).\\
+Gli utenti e le applicazioni vedono un singolo sistema, senza conoscere le varie segmentazioni
+e i nodi presenti, e questo permette di effettuare la \textbf{trasparenza di distribuzione},
+ossia si nascondono i dettegli agli utenti che possono ignorare e non possono modificare il servizio.\newline
+Con la trasparenza in teoria si dovrebbe evitano la generazione degli errori, in quanto i nodi sono
+indipendenti, ma in pratica tutto ciò è difficile da fare, quindi i nodi sono completamente indipendenti.
+
+In un sistema distribuito, in quanto la comunicazione avviene tramite messaggi, non è presente la memoria
+condivisa e non si ha un clock globale del sistema, ma ogni nodo si gestisce attraverso un clock interno.
+
 \begin{center}
 \includegraphics[scale=0.6]{img/cli2.png}
 \end{center}
@@ -85,61 +100,59 @@ Si ha che un client fa una richiesta e il server risponde con un certo risultato
 \includegraphics[scale=2.6]{img/cli3.png}
 \end{center}
 Si può accedere a server multipli (cluster con anche bilanciamento del carico) e si può accedere via proxy (dei server "finti" che fungono da concentratori).\\
-Un sistema distribuito ha 4 problemi da fronteggiare:
+Un sistema distribuito per comunicare effettua le seguenti operazioni:
 \begin{enumerate}
-\item \textbf{identificare la controparte}, che si risolve assegnando un nome, è la procedura di \textbf{naming}
-\item \textbf{accedere alla controparte}, che si risolve con una reference, un \textbf{access point}
-\item \textbf{comunicare (parte 1)}, che si risolve accettando e condividendo un formato, un \textbf{protocollo, "protocol"}
-\item \textbf{comunicare (parte 2)}, che si risolve concordando \textit{sintassi e semantica} per l'informazione da condividere \textbf{(quest'ultimo è però ancora un problema aperto)}
+    \item \textbf{identifica la controparte}, attraverso l'assegnazione di un nome(\emph{naming})
+    \item \textbf{si accede alla controparte}, attraverso un punto di accesso
+    \item \textbf{si definisce il protocollo}, al fine di stabilire le regole e le procedure per 
+        essere in grado di comunicare, senza alcun problema.
+    \item \textbf{si definisce}, che si risolve concordando \textit{sintassi e semantica} per l'informazione da condividere \textbf{(quest'ultimo è però ancora un problema aperto)}
 \end{enumerate}
+
 Si hanno le seguenti definizioni per quanto riguarda la trasparenza:
 \begin{itemize}
-\item \textbf{naming}, usare nomi simbolici per identificare le risorse che sono parte del sistema distribuito
-\item \textbf{access trasparency}, nascondere le differenze nella rappresentazione delle informazioni e nell'accedere ad un'informazione locale o remota 
-\item \textbf{location trasparency}, nascondere dove è collocata una risorsa sulla rete
-\item  \textbf{relocation or mobility transparency}, nascondere che una risorsa può essere stata trasferita ad un'altra locazione mentre è in uso
-\item \textbf{migration trasparency}, nascondere che una risorsa può essere trasferita
-\item \textbf{replication transparency}, nascondere che una risorsa può essere replicata
-\item \textbf{concurrency transparency}, nascondere che una risorsa può essere condivisa da molti utenti indipendenti
-\item \textbf{failure trasparency}, nascondere fallimenti e recovery di una risorsa
-\item \textbf{persistence trasparency}, nascondere se una risorsa è volatrile o memorizzata permanentemente
+    \item \textbf{naming}, si usano nomi simbolici per identificare le risorse,
+            facenti parte del sistema distribuito.
+    \item \textbf{access trasparency}, nascondere le differenze nella rappresentazione 
+        delle informazioni e nell'accesso ad un'informazione locale o remota 
+    \item \textbf{location trasparency}, in cui si nasconde dove è collocata una risorsa sulla rete
+    \item  \textbf{relocation(mobility) transparency}, in cui si nasconde se la risorsa è stata
+        trasferita ad un'altra locazione, mentre è in uso.
+    \item \textbf{migration trasparency}, in cui si nasconde che una risorsa può essere trasferita
+    \item \textbf{replication transparency}, in cui si nasconde che una risorsa può essere replicata
+    \item \textbf{concurrency transparency}, in cui si nasconde che una risorsa può essere condivisa
+        da molti utenti indipendenti
+    \item \textbf{failure trasparency}, in cui si nascondono fallimenti e recovery di una risorsa
+    \item \textbf{persistence trasparency}, in cui si nasconde se una risorsa
+                  è volatile o memorizzata permanentemente
 \end{itemize}
-non si possono però nascondere:
-\begin{itemize}
-\item \textbf{ritardi e latenze di comunicazione}
-\item \textbf{nascondere completamente i failure della rete e dei nodi}, non puoi neanche distinguere bene rallentamenti e errori. Ovviamente non puoi sapere se sta per accadere un \textbf{crash}
-\end{itemize}
-Una trasparenza completa, oltre ad essere quasi impossibile a livello teorico, è anche estremamente "cara" a livello di performances e tempistiche (causa scrittura costante su dischi e mantenimento delle repliche).\\
-Nascondere le informazioni è alla base dell'ingegneria del software. Bisogna separare il \textit{cosa} si fa e il \textit{come} lo si fa. Il \textit{cosa} si fa mediante la definizione dell'interfaccia, \textit{Interface Definition Languages (IDL)}, e il \textit{come} mediante l'implementazione delle classi e dei metodi. Le interfacce sono definite mediante principi standard, sono complete e sono neutrali (indipendenti dall'implementazione).
-\begin{center}
+Da questa trasparenze non si è in grado di nascondere i ritardi e le latenze di comunicazione, ma
+soprattutto non si è in grado di effettuare una trasparenza completa, per motivi di performance
+e di latenza dell'operazioni su un sistema distribuito.
+
+Questa volonta di astrarre le informazioni è alla base dell'ingegneria del software, in cui si separa
+il \textit{cosa} dal \textit{come}: il cosa si effettua tramite la definizione dell'interfaccia, complete
+ed indipendenti dalle diverse implementazioni, mentre il come avviene con l'effettiva implementazione
+delle classi e dei metodi.\newline
+Come si vede nella figura \href{figura:interfaccia}, l'interfaccia è unica mentre l'implementazione
+varia in ogni host locale del sistema distribuito e ciò può essere anche visto come la separazione
+tra un meccanismo e una politica, ossia come si implementa effettivamente una funzionalità del sistema.
+
+\begin{figure}
+\centering
+\label{figura:interfaccia}
 \includegraphics[scale=2]{img/cli4.png}
-\end{center}
-Tra i vari componenti si ha:
-\begin{itemize}
-\item \textbf{indipendenza logica}, con i vari componenti che lavorano autonomamente
-\item \textbf{composizione}, con la collaborazione dei vari processi
-\end{itemize}
-Si separano:
-\begin{itemize}
-\item \textbf{meccanismi}, ciò che è fatto dai componenti (esempio il context switch)
-\item \textbf{politiche}, come vengono applicati le varie funzionalità del sistema (esempio lo scheduling Round Robin RR)
-\end{itemize}
-Bisogna separare e bilanciare politiche e meccanismi
+\end{figure}
 \begin{center}
 \includegraphics[scale=2]{img/cli5.png}
 \end{center}
-Ricapitolando il concetto di protocollo:
-\begin{itemize}
-\item per poter capire le richieste e formulare le risposte i due processi devono concordare un protocollo
-\item i protocolli (come \textit{HTTP, FTP e SMTP}) definiscono il formato, l'ordine di invio e di ricezione dei messaggi tra i dispositivi, il tipo dei dati e le azioni da eseguire quando si riceve un messaggio
-\item le applicazioni su TCP/IP:
-\begin{itemize}
-\item si scambiano stream di byte di lunghezza infinita (il meccanismo)
-\item che possono essere segmentati in messaggi (la politica) definiti da un protocollo condiviso
-\end{itemize}
-\end{itemize}
-Vediamo un esempio di codice. Partiamo dall'\textit{header.h}
-\begin{minted}{c}
+Per poter capire le richieste ed eseguire i processi di comunicazione i due processi devono concordare 
+un protocollo, in cui viene definito il formato, l'ordine di invio e di ricezione dei messaggi tra 
+i diversi disposizioni, e per vedere un esempio di una comunicazione tra i diversi processi si guardi
+il listato di codice \href{listato:fileServer}, in cui si implementano sia l'header che l'implementazione.
+
+FAI LINK AI 2 FILE DI C 
+
 // definizioni necessarie a client e server 
 
 #define TRUE 1
@@ -241,10 +254,42 @@ int copy(char *src, char *dst){ // copia file usando il server
 
 \end{minted}
 \subsection{Stream Communication}
-\begin{center}
+\begin{figure}
+\label{figure:livelliRete}
+\centering
 \includegraphics[scale=2.5]{img/sc.png}
-\end{center}
-Si ha il modello ISO/OSI, che si basa sull'astrazione. Un informatico dovrebbe conoscere tutti i vari livelli. Gli utenti possono mandare e ricevere stream di byte via TCP mediante API. Poi al livello successivo si hanno datagrammi con i dati che vengono mandai via meccanismi IP. È lo sviluppatore a decidere le varie politiche. I sistemi distribuiti lavorano tra utenti e TCP/UDP. Ovviamente sono i processi che comunicano tra di loro. Ogni processo comunica attraverso canali. Un canale gestisce i flussi di dati in ingresso e uscita e dall'esterno ogni canale è identificato da un intero detto \textbf{porta}. Le \textbf{socket} sono particolari canali per la comunicazione tra processi che non condividono memoria (per esempio perché risiedono su macchine diverse). Per potersi connettere o inviare dati ad un processo A, un processo B deve conoscere la macchina (host) che esegue A e la porta cui A è connesso (well-known port).   TCP è orientato alla connessione (si ha un invio di richiesta di connessione), è affidabile, si ha un controllo di flusso, si ha un controllo della congestione ma non si hanno garanzie di banda e ritardo minimi. UDP non è affidabile e non offre nulla di quanto offerto da TCP ma è comodo, per esempio, nello streaming, che tollera perdite parziali. UDP scompone i messaggi in pacchetti che invia uno per volta ai servizi network. TCP scompone e invia come UDP ma ogni pacchetto viene numerato per garantire riordinamento, duplicazioni e perdite. Nei sistemi distribuiti non è necessario conoscere tutto questo funzionamento ma importa solo lo stream di byte. TCP utilizza variabili e buffer per realizzare il trasferimenti bidirezionale di flussi di bytes (“pipe”) tra processi, prevede ruoli client/server durante la connessione ma non durante la comunicazione. TCP utilizza i servizi dello strato IP per l'invio dei flussi di bytes.\\
+\end{figure}
+Per la comunicazione tra due host si utilizza il modello ISO/OSI, basato sull'astrazione di cui tutti gli
+informatici ne dovrebbero conoscere in dettaglio tutti i vari livelli, in cui per mandare dei dati da un host
+ad un host si parte dal livello di applicazione, su cui si sviluppano ed operano i sistemi distribuiti,
+per poi andare ai livello di trasporto, di rete e fisico, necessari per il trasferimento sulla rete 
+delle informazioni, come si nota nella figura \href{figure:livelliRete}.
+
+Ogni processo comunica attraverso canali, in cui vengono gestiti i flussi di dati in ingresso ed uscita,
+individuabili tramite un intero detto \textbf{porta} e noi studiamo le \textbf{socket}, particolare canale
+per la comunicazione in cui non vi è una condivisione della memoria e per potersi connettere da un processo A,
+il processo B deve conoscere l'host che esegue A e la porta in cui A è connesso.
+
+Le socket possono essere principalmente di due tipi, come i principali protocolli di trasporti:
+\begin{itemize}
+    \item \textbf{tcp socket}: utilizzano il protocollo TCP, orientato alla connessione,
+        per la comunicazione tra i due processi, prevede un controllo di affidabilità dei messaggi,
+        ossia viene assicurato che i messaggi arrivano nell'ordine previsto all'altro processo
+        ed infine vi è un controllo di flusso e di congestione ma non si hanno garanzie di banda e dei ritardi.
+
+        Si utilizzano nelle applicazioni, in cui si deve avere la sicurezza dell'arrivo dei dati come ad
+        esempio nel protocollo HTTP, per la comunicazione web, e nelle chat app come Telegram e Whatsapp.
+
+    \item \textbf{udp socket}: utilizza il protocollo UDP, non affidabile e non orientato alla connessione,
+        in cui viene solo garantito il trasferimento dei dati dalla rete all'applicazione e un controllo 
+        minimale degli errori, cosa che lo definisce come un sottoinsieme proprio del protocollo TCP.\newline
+        Viene utilizzato quando si deve avere un ritardo di trasmissione limitato ed una perdità minimale
+        può non essere un problema, come ad esempio nei file multimediali e/o chiamate via voip.
+\end{itemize}
+Nei sistemi distribuiti non è necessario conoscere il funzionamento dei protocolli di trasporto ma basta
+considerare i servizi offerti e il fatto che si trasferiscono stream di byte, infatti
+le socket sono delle API(Application Programming Interface) per accedere a TCP o UDP, in quanto due processi
+nel modello client-server comunicano mediante socket
 L'interfaccia tra applicazione e strato di trasporto è dato delle API, \textit{Application Programming Interface}  e i socker sono API per accedere a TCP o UDP, due processi comunicano mediante socker nel modello client-server.\\
 Si hanno delle criticità:
 \begin{itemize}

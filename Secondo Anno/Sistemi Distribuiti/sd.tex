@@ -530,9 +530,379 @@ e per il client:
 \includegraphics[scale=2.5]{img/sc6.png}
 \end{center}
 Si nota però che ci sono dei problemi col client, funziona... ma non nella maniera corretta.\\
-%pagina 34 % aggiungere lezione venerdì 15
+Si introducono quindi i \textbf{lazy server}, che mandano pochi byte per volta con un piccolo delay:
+\begin{minted}{java}
+package serverWriter;
 
-%da pagina 56
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class LazySenderServerSocket {
+
+  final static String message = "This is a not so short text to test the 
+    reading capabilities of clients."
+      + " If they are not so smart, they will 
+        catch only part of it.";
+  final static int chunck = 9; // number of bytes sent every time
+
+  public static void main(String[] args) {
+    try {
+      Socket clientSocket;
+      ServerSocket listenSocket;
+
+      listenSocket = new ServerSocket(53535);
+      System.out.println("Running Server: " + "Host=" +
+         listenSocket.getInetAddress() + " Port="
+          + listenSocket.getLocalPort());
+
+      while (true) {
+        clientSocket = listenSocket.accept();
+
+        PrintWriter out = 
+          new PrintWriter(clientSocket.getOutputStream(), true);
+        System.out.println("message length: " + message.length());
+
+        int i;
+        for (i = 0; i < message.length() - chunck; i += chunck) {
+          System.out.println(message.substring(i, i + chunck));
+          Thread.sleep(1000);
+          out.write(message.substring(i, i + chunck));
+          out.flush();
+        }
+        System.out.println(message.substring(i, message.length()));
+        out.write(message.substring(i, message.length()));
+        out.flush();
+        clientSocket.close();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+  }
+
+}
+
+\end{minted}
+\begin{center}
+\includegraphics[scale=0.7]{img/lazy.png}
+\end{center}
+Quindi per un'applicazione socket si ha:
+\begin{enumerate}
+\item \textbf{client} con l'architettura che è concettualmente più semplice di quella di un server. Spesso è un'applicazione convenzionale, ha solo effetti sull'utente client e non comporta problemi di sicurezza
+\item \textbf{server} che crea una socket, gli assegna una porta nota ed entra in ciclo infinito in cui alternare:
+\begin{itemize}
+\item attesa richiesta
+\item soddisfa richiesta
+\item invia risposta
+\end{itemize}
+L'affidabilità di un server è strettamente dipendente
+dall'affidabilità della comunicazione tra lui e i suoi client, del resto però la modalità \textit{connection-oriented} determina l'impossibilità di rilevare interruzioni sulle connessioni e la necessità di prevedere una connessione (una socket) per ogni comunicazione
+\end{enumerate}
+Ci sono diversi tipi di server:
+\begin{itemize}
+\item \textbf{iterativi}, ovvero che soddisfano una richiesta alla volta
+\item \textbf{concorrenti processo singolo}, ovvero che
+simulano la presenza di un server dedicato
+\item \textbf{concorrenti multi-processo}, ovvero che
+creano server dedicati
+\item \textbf{concorrenti multi-thread}, ovvero che
+creano thread dedicati
+\end{itemize}
+Vediamo come progettare un server iterativo. Al momento di una richiesta di connessione il server crea una
+socket temporanea per stabilire una connessione diretta con il client Le eventuali ulteriori richieste per il server verranno accodate alla porta nota per essere successivamente soddisfatte. Si hanno degli svantaggi:
+\begin{itemize}
+\item viene servito un cliente alla volta, gli altri devono attendere
+\item un server impedisce l'evoluzione di molti client
+\item non scala
+\end{itemize}
+La soluzione sono i \textit{server concorrenti}.\\
+Vediamo un esempio di un server che semplicemente legge da una socker e scrive sulla console:
+\begin{minted}{java}
+package SelectorExample;
+
+import java.io.DataInputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class IterativeServer {
+
+  public static void main(String[] args) {
+    ServerSocket listenSocket;
+    Socket clientSocket;
+    byte[] byteReceived = new byte[1000];
+    String messageString = "";
+
+    try {
+      listenSocket = new ServerSocket(53535);
+      System.out.println("*** Running Server: " + "Host=" + listenSocket.getInetAddress() + " Port="
+          + listenSocket.getLocalPort());
+
+      while (true) {
+        clientSocket = listenSocket.accept();
+
+        DataInputStream in = new DataInputStream(clientSocket.getInputStream());
+        int bytesRead = 0;
+
+        while (true) {
+          bytesRead = in.read(byteReceived);
+          if (bytesRead == -1)
+            break; // no more bytes
+          messageString += new String(byteReceived, 0, bytesRead);
+          System.out.println("Received: " + messageString);
+        }
+
+        clientSocket.close();
+        messageString = ""; // clear the string for the next client
+        System.out.println("*** Avaialble to the next client.");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+
+\end{minted}
+\newpage
+
+Un server concorrente può gestire più connessioni client.
+\begin{center}
+\includegraphics[scale=2.7]{img/conc.png}
+\end{center}
+In java si ha anche il \textbf{multiplexing} dove:
+\begin{itemize}
+\item i \textbf{channel} possono operare sia in modalità bloccante che non bloccante. In modalità non bloccante (dove solo canali stream-oriented, come socket e pipe, possono essere usati) il channel non mette mai il thread invocato in sleep. L'operazione richiesta o viene completata completamente o ritorna che nulla è stato fatto
+\item si hanno classi speciali per java, come \textit{ServerSocketChannel, SocketChannel e
+DatagramChannel} e si usano i selector, permettendo un controllo più fine dei socket channels. 
+\end{itemize}
+Un Selector è un multiplexort di oggetti \textit{SelectableChannel} e viene creato con:
+\begin{minted}{java}
+Selector selector = Selector.open();
+\end{minted}
+I selector vengono poi registrati col metodo \textit{register}:
+\begin{minted}{java}
+channel.configureBlocking(false);
+SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
+\end{minted}
+Con le seguenti \textit{SelectionKey}: 
+\begin{minted}{java}
+SelectionKey.OP_CONNECT // quando un client tenta di connettersi al server
+SelectionKey.OP_ACCEPT // quando il server accetta la connessione del client
+SelectionKey.OP_READ // quando il server è pronto a leggere dal canale
+SelectionKey.OP_WRITE // quando il server è pronto a scrivere sul canale
+\end{minted}
+In generale ecco lo pseudo-codice per un server non bloccante:
+\begin{verbatim}
+create SocketChannel;
+create Selector;
+associate the SocketChannel with the Selector;
+while(true) {
+  waiting events from the Selector;
+  event arrived;
+  create keys;
+  for each key created by Selector {
+    check the type of request;
+    isAcceptable:
+      get the client SocketChannel;
+      associate that SocketChannel with the Selector;
+      record it for read/write operations
+      continue;
+    isReadable:
+      get the client SocketChannel;
+      read from the socket;
+      continue;
+    isWriteable:
+      get the client SocketChannel;
+      write on the socket;
+      continue;
+  }
+}
+\end{verbatim}
+\newpage
+ovvero:
+\begin{center}
+\includegraphics[scale=2.7]{img/conc2.png}
+\end{center}
+In java:
+\begin{minted}{java}
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class SenderClient {
+  private Socket socket;
+  private Scanner scanner;
+
+  private SenderClient(InetAddress serverAddress, 
+    int serverPort) throws Exception {
+    this.socket = new Socket(serverAddress, serverPort);
+    this.scanner = new Scanner(System.in);
+  }
+
+  private void start() throws IOException, InterruptedException {
+    String input;
+    PrintWriter out = new PrintWriter(this.socket.getOutputStream(), true);
+    while (true) {
+      input = scanner.nextLine();
+      if (input.contentEquals("exit"))
+          break;
+      out.print(input);
+      out.flush();
+    }
+    System.out.println("Client terminate.");
+    socket.close();
+  }
+
+  public static void main(String[] args) throws Exception {
+    SenderClient client = new SenderClient(InetAddress.getByName(args[0]),
+        Integer.parseInt(args[1]));
+
+    System.out.println("Connected to: " + client.socket.getInetAddress());
+    client.start();
+
+  }
+
+}
+
+\end{minted}
+\begin{center}
+\includegraphics[scale=0.7]{img/conc4.png}
+\end{center}
+Vediamo come farlo in modo concorrente:
+\begin{minted}{java}
+package SelectorExample;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.util.Iterator;
+import java.util.Set;
+
+public class ConcurrentServer {
+
+  public static void main(String[] args) throws IOException {
+    Selector selector = Selector.open();
+    ServerSocketChannel server = ServerSocketChannel.open();
+    server.bind(new InetSocketAddress("localhost", 53535));
+    // set the channel in non blocking mode
+    server.configureBlocking(false);
+    // register the channel with the selector or the accept operation
+    server.register(selector, SelectionKey.OP_ACCEPT);
+
+    // Infinite server loop
+    while (true) {
+      // Waiting for events
+      selector.select();
+      // Get keys
+      Set<SelectionKey> keys = selector.selectedKeys();
+      Iterator<SelectionKey> i = keys.iterator();
+
+      // For each keys...
+      while (i.hasNext()) {
+        SelectionKey key = (SelectionKey) i.next();
+
+        // Remove the current key
+        i.remove();
+
+        if (key.isAcceptable()) // a client required a connection
+          acceptClientRequest(selector, server);
+
+        if (key.isReadable()) // ready to read
+          readClientBytes(key);
+      }
+    }
+  }
+
+  private static void acceptClientRequest(Selector selector,
+     ServerSocketChannel server) throws IOException {
+    // get client socket channel
+    SocketChannel client = server.accept();
+    // Non Blocking I/O
+    client.configureBlocking(false);
+    // recording to the selector (reading)
+    client.register(selector, SelectionKey.OP_READ);
+    return;
+  }
+
+  private static void readClientBytes(SelectionKey key) throws IOException {
+    SocketChannel client = (SocketChannel) key.channel();
+
+    // Read byte coming from the client
+    int BUFFER_SIZE = 256;
+    ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+    try {
+      if (client.read(buffer) == -1) {
+        client.close();
+        return;
+      }
+    } catch (Exception e) {
+      // client is no longer active
+      e.printStackTrace();
+      client.close();
+      return;
+    }
+
+    // Show bytes on the console
+    buffer.flip(); // set the limit to the current position and then set 
+      the position to zero 
+    Charset charset = Charset.forName("UTF-8");
+    CharsetDecoder decoder = charset.newDecoder();
+    CharBuffer charBuffer = decoder.decode(buffer);
+    int port = client.socket().getPort();
+    System.out.println(port + ": " + charBuffer.toString());
+    return;
+  }
+}
+
+\end{minted}
+\begin{center}
+\includegraphics[scale=3]{img/conc5.png}
+\end{center}
+Vediamo anche una rappresentazione della chiamata di sistema fork:
+\begin{center}
+\includegraphics[scale=0.7]{img/fork.png}
+\end{center}
+La lettura/scrittura su una socket da parte di più processi
+determina un problema di concorrenza: accesso ad una
+risorsa condivisa (mutua esclusione). Si ha quindi;
+\begin{center}
+\includegraphics[scale=0.7]{img/ex.png}
+\end{center}
+Si hanno quindi 2 modelli:
+\begin{enumerate}
+\item \textbf{mono processo (iterativo e concorrente)}, dove gli utenti condividono lo stesso spazio di lavoro. È adatto ad applicazioni cooperative che prevedono la modifica
+dello stato (lettura e scrittura)
+\item \textbf{multi processo}, dove ogni utente ha uno spazio di lavoro autonomo. È adatto ad applicazioni autonome o che non modificano lo stato del server (sola lettura)
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \subsection{Architettura dei server}
 Per la gestione dei thread (che in java sono classi) esistono diversi \textbf{design pattern}:
 \begin{itemize}

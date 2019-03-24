@@ -289,23 +289,30 @@ Le socket possono essere principalmente di due tipi, come i principali protocoll
 Nei sistemi distribuiti non è necessario conoscere il funzionamento dei protocolli di trasporto ma basta
 considerare i servizi offerti e il fatto che si trasferiscono stream di byte, infatti
 le socket sono delle API(Application Programming Interface) per accedere a TCP o UDP, in quanto due processi
-nel modello client-server comunicano mediante socket
-L'interfaccia tra applicazione e strato di trasporto è dato delle API, \textit{Application Programming Interface}  e i socker sono API per accedere a TCP o UDP, due processi comunicano mediante socker nel modello client-server.\\
-Si hanno delle criticità:
+nel modello client-server comunicano mediante esso.
+
+Si hanno delle criticità riguardanti alle socket e al modello client-server:
 \begin{itemize}
-\item gestione del ciclo di vita di cliente e server, attivazione/terminazione del cliente e del server
-\item identificazione e accesso al server
-\item comunicazione tra client e server
-\item ripartizione dei compiti tra client e server, che dipende dal tipo di applicazioni e la scelta influenza le prestazioni in relazione al carico
+    \item gestione del ciclo di vita di cliente e server, attivazione/terminazione del cliente e del server
+    \item identificazione e accesso al server
+    \item comunicazione tra client e server
+    \item ripartizione dei compiti tra client e server, che dipende dal tipo di applicazioni 
+          e la scelta influenza le prestazioni in relazione al carico
 \end{itemize}
+Quando viene definito l'indirizzo del server, esso può essere una costante, inserito dall'utente oppure
+inserendo un nameserver su cui si ricava l'indirizzo tramite il DNS(Domain Name Service).
+
+La comunicazione TCP/IP avviene attraverso flussi di byte, dopo una connessione esplicita, attraverso
+normali system call read/write:queste due syscall sono sospensive, ossia mettono il sistema in attesa,
+e utilizzano un buffer per garantire la massima flessibilità, ad esempio la read definisce un buffer
+per leggere N caratteri ma potrebbe ritornare dopo aver letto solo $k < n$ caratteri.
+
 l'indirizzo del server può essere una costante nel codice, può essere chiesto all'utente, come nel browser, posso usare un nameserver o un repository (con DNS, \textit{Domain Name Service}) o adottare altri protocolli, come DHCP. Il naming sarà il nome dell'host, l'indirizzo IP come access point mediante host e porta, il protocollo saranno stream di byte e la sintassi e la semantica saranno definiti dall'applicazione con http, smtp etc...\\
 Tutto questo è a un basso livello di trasparenza in quanto sia utente che sviluppatore lo necessitano.\\
-La comunicazione TCP/IP avviene attraverso flussi di byte
-(byte stream), dopo una connessione esplicita, tramite
-normali system call read/write. Queste due syscall sono sospensive (mettono il sistema in uno stato di \textit{wait}) e usano un buffer per garantire flessibilità (per esempio la read definisce un buffer per leggere N caratteri, ma potrebbe ritornare avendone letti solo k<N)
-\begin{center}
+\begin{figure}
+\centering
 \includegraphics[scale=0.7]{img/sc2.png}
-\end{center}
+\end{figure}
 \newpage
 Ci sono molte chiamate diverse per accedere i servizi TCP e UDP:
 \begin{center}
@@ -931,28 +938,35 @@ public class KKMultiServer {
 \end{minted}
 
 \section{L'architettura del web}
-\subsubsection{Message oriented computing}
-Il metodo di comunicazione tra client e server è supportato dal web tramite HTTP (da client a server con delle \textit{request} e all'opposto con delle \textit{response}). Il client è realizzato da un \textit{browser} mentre il server da un \textit{HTTP server} o da un \textit{Web Server}.\\
-Un \textbf{web browser}, detto \textit{user-agent}, è un programma che consente la navigazione sul web, interpretando il codice con cui sono e espresse le web pages rappresentandolo in forma di ipertesto. Una web page è costituita da diversi oggetti identificati da URL. Le page interagiscono mediante ipertesti e link.\\
-L'URL, che identifica un oggetto nella rete e specifica come interpretare i
-dati ricevuti attraverso il protocollo, è formato da:
+Per comunicare attraverso internet si utilizza un modello client-server usando principalmente 
+il protocollo \textbf{HTTP}, attraverso l'esecuzione delle sue operazioni \textbf{request} e \textbf{response}:
+la prima indica la richiesta di un oggetto web, come ad esempio un immagine e un file html, 
+da parte del client verso il server mentre la seconda è la risposta da parte del server verso il client.
+
+Nell'architettura di Internet il client viene realizzato mediante un browser, come ad esempio firefox,
+programma che fornisce la possibilità di navigare sul web, attraverso l'interpretazione del codice
+con cui sono espresse le pagine web, costituita da diversi oggetti identificati da un URL, mentre
+il server viene fornito da un Web Server, come ad esempio Apache.
+
+L'URL identifica un oggetto nella rete e specifica come interpretare i dati ricevuti 
+attraverso il protocollo, è formato dai seguenti elementi:
 \begin{itemize}
-\item nome del protocollo 
-\item indirizzo IP dell'host
-\item porta del processo
-\item cammino/percorso dell'host
-\item identificatore della risposta
+    \item nome del protocollo 
+    \item indirizzo IP dell'host
+    \item porta del processo
+    \item cammino/percorso dell'host
+    \item identificatore della risposta
 \end{itemize}
 ovvero: \begin{verbatim}
 protocollo://indirizzo_IP[:porta]/cammino/risorsa
 \end{verbatim}
-la parte testuale dei documenti è espressa da:
-\begin{itemize}
-\item HTML per contenuti e impaginazione
-\item CSS per il render
-\item XML e JSON per i dati e la loro struttura
-\end{itemize}
-Si possono avere anche dati multimediali (foto, audio, etc...) con l'encoding MIME per definirne il formato (plain, html per i testi, jpeg, gif per le immagini, etc..) . La dinamicità delle pagine web è data invece da linguaggi come Javascript, VBScript, Java/applet...\\
+La parte testuale dei documenti viene espressa da HTML, per contenuti ed impaginazione, da CSS per 
+il rending grafico mentre attraverso XML e JSON specifichiamo i dati e la loro struttura nel documento.
+
+Si possono avere anche dati multimediali (foto, audio, etc...) con l'encoding MIME per definirne 
+il formato (plain, html per i testi, jpeg, gif per le immagini, etc..) mentre la dinamicità delle pagine web
+viene data da linguaggi di programmazione come Javascript, VBScript, Java/applet \dots .
+
 I protocolli definiscono il formato, l'ordine di invio e di ricezione dei messaggi tra i dispositivi, il tipo dei dati e le azioni da eseguire quando si riceve un messaggio. Si hanno diversi protocolli come HTTP (\textit{HyperText Transfer Protoco}), FTP \textit{File Transfer Protoco}) e SMTP \textit{Simple Mail Transfer Protoco}).\\
 HTTP usa il modello client/server, col server che visualizza su browser gli oggetti che richiede e server che invia gli oggetti. HTTP usa TCP, infatti inizia una connessione TCP creando una socket verso il server sulla porta 80. Il server accetta la connessione TCP dal client. Vengono quindi scambiati messaggi http (messaggi del protocollo
 di livello applicativo) tra il browser (client http) e il Web
@@ -1056,20 +1070,16 @@ ovviamente i vari livelli hanno diversi protocolli:
 
 
 \chapter{HTML + CSS + JS}
-Innanzitutto una piccola distinzione:
+Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
+utilizzato per annotare un documento in maniera tale che l'annotazione sia sintatticamente
+distiguibile dal testo per diverse finalità:
 \begin{itemize}
-\item un \textbf{linguaggio di programmazione} è utilizzato per comunicare istruzioni a
-una macchina di calcolo, per definire programmi che controllino il comportamento di un calcolatore (lo sono \textit{C, Java, C++...})
-\item un \textbf{linguaggio di markup} è utilizzato per annotare un documento in modo
-tale che l'annotazione sia sintatticamente distinguibile dal testo (lo sono \textit{LaTeX, HTML, XML...}). Qui le annotazioni possono avere diverse finalità:
-\begin{itemize}
-\item di presentazione (definiscono come visualizzare il testo al quale sono associate)
-\item procedurali (definiscono istruzioni per programmi che elaborino il testo al quale sono associate)
-\item descrittive (etichettano semplicemente parti del testo, disaccoppiando la struttura dalla presentazione del testo stesso)
+    \item di presentazione, in cui si definisce come visualizzare il testo al quale sono associate.
+    \item procedurali, in cui si definiscono istruzioni per programmi che elaborino il testo associato.
+    \item descrittive, in cui si etichettano semplicemente parti del testo, 
+        al fine di disaccopiare la struttura dalla presentazione del testo spesso.
 \end{itemize}
-\end{itemize}
-\textbf{HTML} (\textit{Hyper Text Markup Language}) è un linguaggio di markup per dare struttura ai contenuti (web) e la sua specifica è definita dal \textbf{W3C} (\textit{World Wide Web Consortium}). 
-\newpage
+
 Vediamo un piccolo esempio:
 \begin{center}
 \includegraphics[scale=0.9]{img/html.png}

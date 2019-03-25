@@ -1121,51 +1121,52 @@ messaggio di richiesta HTTP, un file di cookie tenuto nel sistema dell'utente e 
 infine un database back-end nel sito web.
 
 Per capire come funzionano i cookie guarda la figura \ref{fig:cookie}, in cui si suppone che 
-Susan accede al sito di Amazon per la prima volta, utilizzando nel header $Set-cookie: 1678$.
+Susan accede al sito di Amazon per la prima volta, utilizzando nel header $Set-cookie: 1678$.\newline
+Nonostante i cookie semplificano le procedure di riconoscimento dell'utente, come ad esempio 
+si ha la possibilità di usare un applicazione e-mail senza doversi ogni volta registrare, 
+ci sono alcuni aspetti negativi riguardo alla privacy, dato che tramite i cookies ed informazioni
+ottenute sull'account di un utente, un sito web è in grado di sapere molto sull'utente e può 
+vendere a terze parti, cosa che un utente vorrebbe sicuramente evitare.
 
-rom this discussion we see that cookies can be used to identify a user. The first
-time a user visits a site, the user can provide a user identification (possibly his or her
-name). During the subsequent sessions, the browser passes a cookie header to the
-server, thereby identifying the user to the server. Cookies can thus be used to create
-a user session layer on top of stateless HTTP. For example, when a user logs in to a
-Web-based e-mail application (such as Hotmail), the browser sends cookie informa-
-tion to the server, permitting the server to identify the user throughout the user’s ses-
-sion with the application.
-Although cookies often simplify the Internet shopping experience for the user,
-they are controversial because they can also be considered as an invasion of privacy.
-As we just saw, using a combination of cookies and user-supplied account informa-
-tion, a Web site can learn a lot about a user and potentially sell this information to a
-third party. Cookie Central [Cookie Central 2012] includes extensive information
-on the cookie controversy
-Si cerca di non inviare dati che il client ha già in cache e il server verifica la cosa:
-\begin{center}
-	\includegraphics[scale=0.7]{img/http4.png}
-\end{center}
-usando i cookie:
-\textbf{FOTO SBAGLIATA!!!}
-\begin{center}
-	\includegraphics[scale=0.7]{img/http5.png}
-\end{center}
-Per gestire l'accesso ai documenti sul server, dato che http è stateless, si deve verificare ogni richiesta (ora i browser spesso forniscono il salvataggio di credenziali) e le informazioni necessarie all'autenticazione si trovano nell'header (\textit{authorization: line}) senza le quali il server rifiuta la connessione (\textit{www authenticate:}):
-\begin{center}
+La web cache, chiamata anche server proxy, è un rete in grado di soddisfare le richieste per conto di un
+web server e possiede un suo storage sul disco, per tenere le copie degli oggett richiesti recentemente,
+per cui si può configurare, come si nota nella figura \ref{fig:cache}, il browser affinche ogni richiesta 
+HTTP venga dirottatta alla web cache, in cui in caso vi sia già una copia dell'oggetto viene subito 
+mandata al browser, senza contattare il web server, altrimenti la web cache effettua una HTTP request
+al web server e dopo aver ottenuto l'oggetto lo salva internamente e lo manda, tramite una HTTP response,
+al browser che lo ha richiesto;come si può notare la web cache agisce sia da client che da server, infatti
+quando interagisce con il browser è un server mentre quando comunica con il web server agisce come un client
+e solitamente viene acquistata ed installata da un provider ISP.
+
+La cache ha avuto un notevole utilizzo nel campo di internet per due ragione:
+\begin{itemize}
+    \item può ridurre il tempo di risposta di una richiesta client, in particolare se il collegamento
+        tra client e web cache possiede una banda più potente del collegamento tra client e server
+        e solitamente ciò avviene, e se si ha un alto tasso di possesso dell'oggetto richiesto da parte
+        della cache, al fine di evitare continue richieste al web server.
+
+    \item riduce il traffico sul link di accesso ad internet di una compagnia e/o istituzione, con la
+        possibilità di evitare un upgrade della banda, con notevoli risparmi di costi.\newline
+        Questa riduzione del traffico fornisce un guadagno anche agli utilizzatori delle applicazioni web
+        dato che vi è un miglioramento delle prestazioni.
+\end{itemize}
+Nonostante la cache riduca il tempo di risposta, introduce il problema sulla integrità della copia
+dell'oggetto rispetto a quella nel web server ma per risolvere il protocollo prevede un meccanismo, 
+chiamato \textbf{conditional GET}, che permette alla cache di verificare se l'oggetto presente nel
+suo storage interno è aggiornato.\newline
+Un messaggio HTTP request prevede questo meccanismo in caso il messaggio usa il metodo GET ed 
+include l'header \textbf{If-modified-since}, per cui la cache manda l'oggetto richiesto in caso 
+in cui l'header if-modified-since coincide con il valore del header last-modified.
+
+Per gestire l'accesso ai documenti sul server, dato che http è stateless, si deve verificare ogni richiesta 
+e le informazioni necessarie all'autenticazione si trovano nell'header (\textit{authorization: line}) 
+senza le quali il server rifiuta la connessione (\textit{www authenticate:}), come si nota 
+nella figura \ref{img:authentication}.
+\begin{figure}
+    \caption{HTTP authentication}
+    \label{img:authentication}
 	\includegraphics[scale=0.7]{img/http6.png}
-\end{center}
-ovviamente i vari livelli hanno diversi protocolli:
-\begin{center}
-	\includegraphics[scale=0.7]{img/http7.png}
-\end{center}
-
-
-
-
-
-
-
-
-
-
-
-
+\end{figure}
 
 \chapter{HTML + CSS + JS}
 Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
@@ -1177,95 +1178,39 @@ distiguibile dal testo per diverse finalità:
     \item descrittive, in cui si etichettano semplicemente parti del testo, 
         al fine di disaccopiare la struttura dalla presentazione del testo spesso.
 \end{itemize}
+Un esempio di una pagina html si nota nella figura \ref{listato:htmlExample}
 
-Vediamo un piccolo esempio:
-\begin{center}
+\begin{figure}
+    \caption{Html example}
+    \label{listato:htmlExample}
 	\includegraphics[scale=0.9]{img/html.png}
-\end{center}
-IL \textbf{CSS} (\textit{Cascading Style Sheets}) è un linguaggio per dare uno stile (di presentazione/visuale) ai contenuti (web) e la sua specifica è definita dal \textbf{W3C} (\textit{World Wide Web Consortium}).
-\\Vediamo un esempio:
-\begin{center}
+\end{figure}
+Il \textbf{CSS}(Cascading Style Sheets) è un linguaggio per dare uno stile ai contenuti web e la sua specifica
+viene definita dal W3C(World Wide Web Consortium), un suo esempio si trova nella figura \ref{css:example}
+mentre il DOM(Document Object Model) è un interfaccia neutrale rispetto al linguaggio e alla piattaforma
+usata al fine di consentire l'accesso e la modifica dinamica di contenuto, struttura e lo stile di un
+documento web, come si nota nella figura \ref{dom:example}.
+
+\begin{figure}
+    \caption{Css example}
+    \label{css:example}
 	\includegraphics[scale=0.9]{img/css.png}
-\end{center}
-\begin{center}
-	\includegraphics[scale=0.9]{img/css2.png}
-\end{center}
-Il \textbf{DOM} (\textit{Document Object Model}) è una interfaccia neutrale rispetto al linguaggio di programmazione e alla piattaforma utilizzata per consentire ai programmi l'accesso e la modifica dinamica di contenuto, struttura e stile di un documento (web). \textbf{DOM} è un API definita dal W3C (e implementata da ogni browser moderno) per l'accesso e la gestione dinamica di documenti XML e HTML.\\
-Graficamente si ha:
-\begin{center}
+\end{figure}
+
+\begin{figure}
+    \caption{Dom example}
+    \label{dom:example}
 	\includegraphics[scale=0.9]{img/dom.png}
-\end{center}
-\newpage
-Ogni nodo può essere caratterizzato da
-attributi che ne facilitano l'identificazione, la ricerca, la selezione:
+\end{figure}
+Ogni nodo può essere caratterizzato da attributi per facilitarne l'identificazione, la ricerca, la selezione:
 \begin{itemize}
 	\item un \textbf{identificatore univoco}, anche se il DOM non garantisce l'unicità
-	\item una \textbf{classe} che indica l'appartenenza ad
-	      un insieme che ci è utile definire
+	\item una \textbf{classe} che indica l'appartenenza ad un insieme che ci è utile definire
 \end{itemize}
-Il browser stesso fornisce funzionalità di ricerca, per esempio:
-\begin{itemize}
-	\item \textit{getElementById(IdName)}
-	\item \textit{getElementsByClassName(ClassName)}
-\end{itemize}
-\begin{center}
-	\includegraphics[scale=2.9]{img/dom2.png}
-\end{center}
-\begin{center}
-	\includegraphics[scale=0.9]{img/dom3.png}
-\end{center}
-\newpage
-Possiamo specificare un selettore più preciso rispetto al
-nome del tag, per esempio specificando il nome di una
-classe o un identificatore di elemento del DOM:
-\begin{minted}{css}
-p.intro{
-  color:red;
-}
-\end{minted}
-Questo stile sarà applicato solo ai tag di classe intro:
-\begin{minted}{html}
-<p class = "intro">
-\end{minted}
-Abbiamo quindi una lista di \textbf{selectors} principali:
-\begin{itemize}
-	\item \textbf{tag name}, il semplice nome del tag:
-	      \begin{minted}{css}
-p{
-  ...
-}
-\end{minted}
-	      così quanto scritto si applicherà a tutti i tags <p>
-	\item il \textbf{dot (.)} applicabile a un tag, indica una classe:
-	      \begin{minted}{css}
-p.highlight{
-  ...
-}
-\end{minted}
-	      così quanto scritto si applicherà a tutti i tags <p> con \textit{class =} \textit{"highlight"}
-	\item lo \textbf{sharp character (\#)}, applicabile a un tag, indica un identificativo:
-	      \begin{minted}{css}
-p#intro{
-  ...
-}
-\end{minted}
-	      così quanto scritto si applicherà a tutti i tags <p> con \textit{id = "intro"}
-	\item i \textbf{two dots (:)} stati comportamentali (ad esempio evento mouseover):
-	      \begin{minted}{css}
-p:hover{
-  ...
-}
-\end{minted}
-	      così quanto scritto si applicherà a tutti i tags <p> quando passa sopra il cursore
-	\item le \textbf{brackets([attr = 'value'])} tag con un valore specifico per un attributo \textit{'value'}:
-	      \begin{minted}{css}
-input[type="text"]{
-  ...
-}
-\end{minted}
-	      così quanto scritto si applicherà ai tag di input di tipo \textit{text}
-\end{itemize}
-Le \textbf{media query} possono essere viste come particolari selettori capaci di valutare le capacità del device di accesso alla pagina (schermi, stamparti, text-to-speech), controllando le dimensioni del device o della finestra, l'orientamento dello schermo e la risoluzione. Vediamo un esempio:\\
+Le \textbf{media query} possono essere viste come particolari selettori capaci di valutare le capacità
+del device di accesso alla pagina (schermi, stamparti, text-to-speech), controllando le dimensioni
+del device o della finestra, l'orientamento dello schermo e la risoluzione.
+Vediamo un esempio:\\
 \textit{se la pagina è più larga di 480
 	pixel (e si sta visualizzando sullo schermo), applica
 	determinati stili agli elementi con id "leftsidebar" (un menu) e "main" (la colonna centrale)}:
@@ -1281,25 +1226,27 @@ In CSS si ha il termine \textit{cascading} perché esistono potenzialmente diver
 	\item il browser ne ha uno, o un vero e proprio CSS o simulato nel loro codice
 	\item il lettore, l’utente del browser, ne può definire uno proprio per customizzare la propria esperienza
 \end{itemize}
-Dei conflitti sono quindi possibili (inevitabili), ed è necessario definire un algoritmo per decidere quale stile vada applicato a un elemento. Si ha il seguente ordine di importanza dei seguenti fattori associati alle regole:
+Dei conflitti sono quindi inevitabili per cui è necessario definire un algoritmo per decidere quale
+stile vada applicato a un elemento.\newline
+Si ha il seguente ordine di importanza dei seguenti fattori associati alle regole:
 \begin{enumerate}
 	\item \textbf{importanza} (flag specifico \textit{!important} per un attributo)
 	\item \textbf{specificità} (per esempio, \textit{id > class > tag})
 	\item \textbf{ordine nel sorgente }(il più “recente” vince)
 \end{enumerate}
-Il browser non è solamente un banale visualizzatore di pagine
-scritte in HTML, è un vero e proprio ambiente di sviluppo (in
-particolare contiene un interprete Javascript e vari strumenti di debug, ma ne parleremo più avanti) che fornisce numerose funzionalità abilitanti inoltre l'impostazione di HTML e CSS separa nettamente il contenuto
-dalla modalità di visualizzazione. Esistono numerosi "front-end framework", dai più sofisticati ai
-più semplici, naturalmente open
-source, ad esempio:
+Il browser non è solamente un banale visualizzatore di pagine scritte in HTML, è un vero e proprio 
+ambiente di sviluppo (in particolare contiene un interprete Javascript e vari strumenti di debug,
+ma ne parleremo più avanti) che fornisce numerose funzionalità abilitanti inoltre l'impostazione di
+HTML e CSS separa nettamente il contenuto dalla modalità di visualizzazione.\newline
+Esistono numerosi "front-end framework", dai più sofisticati ai più semplici, naturalmente open source, ad esempio:
 \begin{itemize}
 	\item \textbf{bootstrap}
 	\item \textbf{foundation}
 	\item \textbf{skeleton}
 \end{itemize}
-\subsubsection{HTML5}
-Introduce nuovi \textbf{elementi semantici} per la strutturazione delle pagine, per esempio:
+
+\subsection{HTML5}
+HTML5 ha introdotto nuovi \textbf{elementi semantici} per la strutturazione delle pagine, per esempio:
 \begin{itemize}
 	\item article
 	\item section
@@ -1307,136 +1254,18 @@ Introduce nuovi \textbf{elementi semantici} per la strutturazione delle pagine, 
 	\item header
 	\item footer
 \end{itemize}
-Introduce nuovi \textbf{elementi di input e multimediali}, widget per input search, email, url, number, tel, ma anche range, date... anche se il supporto a tutto ciò da parte dei browser non è uniforme, ma anche audio, video e canvas.\\
-Si hanno nuove \textbf{API javascript} per la manipolazione delle pagine: offline data, drag and drop, web storage.\\
-quindi si usa:
-\begin{itemize}
-	\item <p> \textit{per definire un paragrafo}
-	\item <ul> \textit{per definire una lista di elementi il cui ordine non è importante}
-	\item <address> \textit{per indicare informazioni relative a un indirizzo}
-	\item <div> e <span> \textit{per contenere informazione che si vuole delimitare per qualche motivo (successive manipolazioni)}
-\end{itemize}
-Vediamo anche dei brutti usi degli stessi:
-\begin{itemize}
-	\item <p> \textit{per andare a capo}
-	\item <blockquote> \textit{per gestire l'indentazione}
-	\item <h1> \textit{per ingrandire del testo}
-\end{itemize}
-L’HTML dovrebbe non contenere informazione di presentazione, riservata ai CSS, quindi senza stili definiti "in linea" e senza l'uso di tag come <font>, <b>, <i>. \\
-Vediamo come sono cambiate le cose con header e footer (quest'ultimo ovviamente con un tag dedicato diverso da quello dell'esempio). \\
-Prima:
-\begin{minted}{html}
-<div id="header">
-  <h1>The Awesome Blog of Awesome</h1>
-    <p class="tagline">Awesome is a State of Mind</p>
-</div>
-\end{minted}
-poi, con HTML5:
-\begin{minted}{html}
-<header>
-  <h1>The Awesome Blog of Awesome</h1>
-  <h2>Awesome is a State of Mind</h2>
-</header>
-\end{minted}
-per i menù di navigazione:\\
-Prima:
-\begin{minted}{html}
-<div id="nav">
-  <ul>
-    <li><a href="">Home</a></li>
-    <li><a href="">Blog</a></li>
-    <li><a href="">About</a></li>
-    <li><a href="">Contact</a></li>
-  </ul>
-</div>
-\end{minted}
-poi, con HTML5:
-\begin{minted}{html}
-<nav>
-  <ul>
-    <li><a href="">Home</a></li>
-    <li><a href="">Blog</a></li>
-    <li><a href="">About</a></li>
-    <li><a href="">Contact</a></li>
-  </ul>
-</nav>
-\end{minted}
-per articoli.\\
-Prima:
-\begin{minted}{html}
-<div class="post">
-  <div class="postheader">
-    <h3><a href="">I Scream My Thoughts</a></h3>
-    <p class="date">August 10, 2011</p>
-  </div> 
-  <p>You probably haven't heard of them duis</p>
-</div>
-\end{minted}
-poi, con HTML5:
-\begin{minted}{html}
-<article>
-  <header>
-    <h3><a href="">I Scream My Thoughts</a></h3>
-    <p class="date">August 10, 2011</p>
-  </header> 
-  <p>You probably haven't heard of them duis</p>
-<article>
-\end{minted}
-o per i contenuti.\\
-Prima:
-\begin{minted}{html}
-<div class=”content”>
-  <div class="post”>
-    ...
-  </div>
-  <div class="post”>
-    ...
-  </div>
-  <div class="post”>
-  ...
-  </div>
-</div>
-\end{minted}
-poi, con HTML5:
-\begin{minted}{html}
-<section>
-  <article>
-    ...
-  </article>
-  <article>
-    ...
-  </article>
-  <article>
-    ...
-  <article>
-</section>
-\end{minted}
-Si nota come HTML5 sia più leggibile. In generale, a parte essere una notazione più concisa e che richiede
-meno definizioni di classi, le gerarchie di contenuti più leggibili e analizzabili in fase di progettazione, manutenzione e debug.\\
-Vediamo un widget per l'input, un widget per il search:
-\begin{minted}{html}
-<input type=“search” name=“search” />
-\end{minted}
-\begin{center}
-	\includegraphics[scale=0.8]{img/see.png}
-\end{center}
-Questi widget non hanno supporto uniforme e vengono visualizzati diversamente a seconda dei browser ma è supportato da quasi tutti.\\
-Vediamo un widget di input per una mail:
-\begin{minted}{html}
-<input type=“email” name=“email” />
-\end{minted}
-che fornisce una forma di validazione del dato inserito e forza la tastiera dedicata (con la chiocciola) su device mobili. È supportato da pochissimi browser.
-\newpage
-Widget per il calendario:
-\begin{minted}{html}
-<input type=“date” name=“dob” />
-\end{minted}
-\begin{center}
-	\includegraphics[scale=0.9]{img/date.png}
-\end{center}
-che fornisce una forma di validazione del dato inserito ma vengono visualizzati diversamente a seconda dei browser ma è supportato da quasi tutti.\\
-Manca il modo di definire e governare la dinamicità della pagina, il modo
-della pagina di cambiare in modo reattivo al comportamento dell'utente o anche proattivo, senza necessariamente dover attendere uno stimolo dall'utente. Tutto ciò è svolto dal\textbf{ JS}. Il \textbf{Javascript} è il linguaggio di scripting che svolge questa funzione, ne parleremo più avanti in esercitazioni dedicate.\\
+Introduce inoltre nuovi \textbf{elementi di input e multimediali}, widget per input search, email,
+url, number, tel, ma anche range, date \dots,  anche se il supporto a tutto ciò da parte dei browser non è uniforme.
 
+L’HTML dovrebbe non contenere informazione di presentazione, riservata ai CSS, 
+quindi senza stili definiti "in linea" e senza l'uso di tag come <font>, <b>, <i> ma dovrebbe solo 
+occuparsi delle informazioni da volere rappresentare nel file web.
+
+HTML5 sia più leggibile. In generale, a parte essere una notazione più concisa e che richiede
+meno definizioni di classi, le gerarchie di contenuti più leggibili e analizzabili 
+in fase di progettazione, manutenzione e debug.
+
+Per avere informazioni riguardo alla sintassi html e css si consiglia di guardare i tutorial presenti 
+in internet su W3CSchool.
 
 \end{document}

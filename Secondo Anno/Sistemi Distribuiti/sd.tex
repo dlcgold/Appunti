@@ -1121,51 +1121,52 @@ messaggio di richiesta HTTP, un file di cookie tenuto nel sistema dell'utente e 
 infine un database back-end nel sito web.
 
 Per capire come funzionano i cookie guarda la figura \ref{fig:cookie}, in cui si suppone che 
-Susan accede al sito di Amazon per la prima volta, utilizzando nel header $Set-cookie: 1678$.
+Susan accede al sito di Amazon per la prima volta, utilizzando nel header $Set-cookie: 1678$.\newline
+Nonostante i cookie semplificano le procedure di riconoscimento dell'utente, come ad esempio 
+si ha la possibilità di usare un applicazione e-mail senza doversi ogni volta registrare, 
+ci sono alcuni aspetti negativi riguardo alla privacy, dato che tramite i cookies ed informazioni
+ottenute sull'account di un utente, un sito web è in grado di sapere molto sull'utente e può 
+vendere a terze parti, cosa che un utente vorrebbe sicuramente evitare.
 
-rom this discussion we see that cookies can be used to identify a user. The first
-time a user visits a site, the user can provide a user identification (possibly his or her
-name). During the subsequent sessions, the browser passes a cookie header to the
-server, thereby identifying the user to the server. Cookies can thus be used to create
-a user session layer on top of stateless HTTP. For example, when a user logs in to a
-Web-based e-mail application (such as Hotmail), the browser sends cookie informa-
-tion to the server, permitting the server to identify the user throughout the user’s ses-
-sion with the application.
-Although cookies often simplify the Internet shopping experience for the user,
-they are controversial because they can also be considered as an invasion of privacy.
-As we just saw, using a combination of cookies and user-supplied account informa-
-tion, a Web site can learn a lot about a user and potentially sell this information to a
-third party. Cookie Central [Cookie Central 2012] includes extensive information
-on the cookie controversy
-Si cerca di non inviare dati che il client ha già in cache e il server verifica la cosa:
-\begin{center}
-	\includegraphics[scale=0.7]{img/http4.png}
-\end{center}
-usando i cookie:
-\textbf{FOTO SBAGLIATA!!!}
-\begin{center}
-	\includegraphics[scale=0.7]{img/http5.png}
-\end{center}
-Per gestire l'accesso ai documenti sul server, dato che http è stateless, si deve verificare ogni richiesta (ora i browser spesso forniscono il salvataggio di credenziali) e le informazioni necessarie all'autenticazione si trovano nell'header (\textit{authorization: line}) senza le quali il server rifiuta la connessione (\textit{www authenticate:}):
-\begin{center}
+La web cache, chiamata anche server proxy, è un rete in grado di soddisfare le richieste per conto di un
+web server e possiede un suo storage sul disco, per tenere le copie degli oggett richiesti recentemente,
+per cui si può configurare, come si nota nella figura \ref{fig:cache}, il browser affinche ogni richiesta 
+HTTP venga dirottatta alla web cache, in cui in caso vi sia già una copia dell'oggetto viene subito 
+mandata al browser, senza contattare il web server, altrimenti la web cache effettua una HTTP request
+al web server e dopo aver ottenuto l'oggetto lo salva internamente e lo manda, tramite una HTTP response,
+al browser che lo ha richiesto;come si può notare la web cache agisce sia da client che da server, infatti
+quando interagisce con il browser è un server mentre quando comunica con il web server agisce come un client
+e solitamente viene acquistata ed installata da un provider ISP.
+
+La cache ha avuto un notevole utilizzo nel campo di internet per due ragione:
+\begin{itemize}
+    \item può ridurre il tempo di risposta di una richiesta client, in particolare se il collegamento
+        tra client e web cache possiede una banda più potente del collegamento tra client e server
+        e solitamente ciò avviene, e se si ha un alto tasso di possesso dell'oggetto richiesto da parte
+        della cache, al fine di evitare continue richieste al web server.
+
+    \item riduce il traffico sul link di accesso ad internet di una compagnia e/o istituzione, con la
+        possibilità di evitare un upgrade della banda, con notevoli risparmi di costi.\newline
+        Questa riduzione del traffico fornisce un guadagno anche agli utilizzatori delle applicazioni web
+        dato che vi è un miglioramento delle prestazioni.
+\end{itemize}
+Nonostante la cache riduca il tempo di risposta, introduce il problema sulla integrità della copia
+dell'oggetto rispetto a quella nel web server ma per risolvere il protocollo prevede un meccanismo, 
+chiamato \textbf{conditional GET}, che permette alla cache di verificare se l'oggetto presente nel
+suo storage interno è aggiornato.\newline
+Un messaggio HTTP request prevede questo meccanismo in caso il messaggio usa il metodo GET ed 
+include l'header \textbf{If-modified-since}, per cui la cache manda l'oggetto richiesto in caso 
+in cui l'header if-modified-since coincide con il valore del header last-modified.
+
+Per gestire l'accesso ai documenti sul server, dato che http è stateless, si deve verificare ogni richiesta 
+e le informazioni necessarie all'autenticazione si trovano nell'header (\textit{authorization: line}) 
+senza le quali il server rifiuta la connessione (\textit{www authenticate:}), come si nota 
+nella figura \ref{img:authentication}.
+\begin{figure}
+    \caption{HTTP authentication}
+    \label{img:authentication}
 	\includegraphics[scale=0.7]{img/http6.png}
-\end{center}
-ovviamente i vari livelli hanno diversi protocolli:
-\begin{center}
-	\includegraphics[scale=0.7]{img/http7.png}
-\end{center}
-
-
-
-
-
-
-
-
-
-
-
-
+\end{figure}
 
 \chapter{HTML + CSS + JS}
 Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
@@ -1177,20 +1178,26 @@ distiguibile dal testo per diverse finalità:
     \item descrittive, in cui si etichettano semplicemente parti del testo, 
         al fine di disaccopiare la struttura dalla presentazione del testo spesso.
 \end{itemize}
+Un esempio di una pagina html si nota nella figura \ref{listato:htmlExample}
 
-Vediamo un piccolo esempio:
-\begin{center}
+\begin{figure}
+    \caption{Html example}
+    \label{listato:htmlExample}
 	\includegraphics[scale=0.9]{img/html.png}
-\end{center}
-IL \textbf{CSS} (\textit{Cascading Style Sheets}) è un linguaggio per dare uno stile (di presentazione/visuale) ai contenuti (web) e la sua specifica è definita dal \textbf{W3C} (\textit{World Wide Web Consortium}).
-\\Vediamo un esempio:
+\end{figure}
+Il \textbf{CSS}(Cascading Style Sheets) è un linguaggio per dare uno stile ai contenuti web e la sua specifica
+viene definita dal W3C(World Wide Web Consortium) mentre il DOM(Document Object Model) è un interfaccia
+neutrale rispetto al linguaggio e alla piattaforma usata al fine di consentire l'accesso e la modifica 
+dinamica di contenuto, struttura e lo stile di un documento web.
+
+
+Vediamo un esempio:
 \begin{center}
 	\includegraphics[scale=0.9]{img/css.png}
 \end{center}
 \begin{center}
 	\includegraphics[scale=0.9]{img/css2.png}
 \end{center}
-Il \textbf{DOM} (\textit{Document Object Model}) è una interfaccia neutrale rispetto al linguaggio di programmazione e alla piattaforma utilizzata per consentire ai programmi l'accesso e la modifica dinamica di contenuto, struttura e stile di un documento (web). \textbf{DOM} è un API definita dal W3C (e implementata da ogni browser moderno) per l'accesso e la gestione dinamica di documenti XML e HTML.\\
 Graficamente si ha:
 \begin{center}
 	\includegraphics[scale=0.9]{img/dom.png}

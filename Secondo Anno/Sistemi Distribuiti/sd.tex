@@ -64,19 +64,29 @@
 \textbf{Questi appunti sono presi a le lezioni. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
 \chapter{Introduzione ai Sistemi Distribuiti}
-\textit{Un sistema distribuito è un sistema nel quale componenti hardware e software, collocati in computer connessi alla rete, comunicano e coordinano le loro azione solitamente col passaggio di messaggi (a differenza delle chiamate di procedura che si hanno col passaggio di parametri su memoria condivisa)}. Ogni processo ha quindi una parte di logica applicativa e una parte di coordinamento. Altrimenti si ha questa definizione. \textit{un sistema distribuito è un insieme di elementi autonomi di computazione che si interfacciano agli utenti come un singolo sistema "coerente"}.
+In questo corso analizziamo i sistemi distribuiti, alla base di tutte le applicazioni software 
+client/server, in cui è presente una comunicazione tra diversi host.
+
+\begin{definizione}
+Un sistema distribuito è un sistema nel quale componenti hardware e software, collocati in computer
+connessi alla rete, in cui comunicano e coordinano le loro azione  col passaggio di messaggi.\\
+Ogni processo ha quindi una parte di logica applicativa e una parte di coordinamento. 
+\end{definizione}
+
+\begin{definizione}
+un sistema distribuito è un insieme di elementi autonomi di computazione che si 
+interfacciano agli utenti come un singolo sistema "coerente".
+\end{definizione}
+
 \begin{center}
 	\includegraphics[scale=2.5]{img/cli.png}
 \end{center}
-I sistemi distribuiti sono quindi sistemi complessi. Si hanno le seguenti caratteristiche:
-\begin{itemize}
-	\item le unità autonome di computazione si chiamano \textbf{nodi} e possono essere device hardware o singoli processi software
-	\item ogni nodo "fa quello che vuole", ogni nodo è autonomo, e vanno tra loro sincronizzati e coordinati (programmazione concorrente). Ogni nodo ha la sua "nozione di tempo"
-	\item utenti e applicazioni vedono un singolo sistema
-	\item si possono aprire e chiudere gruppi di nodi
-\end{itemize}
-La parola chiave è \textbf{trasparenza di distribuzione (distribution trasparency)}. Trasparenza significa nascondere dettagli agli utenti che possono ignorare ciò che succede e che non possono modificare il servizio. Si ha che il sistema non va in errore se un solo nodo va in errore in quanto i nodi sono indipendenti ma è difficile occultare gli errori parziali dei singoli nodi ed è difficile sistemare gli eventuali errori del singolo nodo. Ovviamente non si ha memoria condivisa e non c'è uno stato globale. In un sistema distribuito non si ha un clock globale e non si può controllare globalmente o avere uno scheduling globale.
-\subsection{Il modello Client-Server}
+Le unità di computazioni sono dei nodi, i quali possono essere device hardware e/o singoli processi software, autonomi che devono essere sincronizzati e coordinati(programmazione concorrente).\\ Gli utenti e le applicazioni vedono un singolo sistema, senza conoscere le varie segmentazioni e i nodi presenti, e questo permette di effettuare la \textbf{trasparenza di distribuzione}, ossia si nascondono i dettegli agli utenti che possono ignorare e non possono modificare il servizio.\newline Con la trasparenza in teoria si dovrebbe evitano la generazione degli errori, in quanto i nodi sono
+indipendenti, ma in pratica tutto ciò è difficile da fare, quindi i nodi sono completamente indipendenti.
+
+In un sistema distribuito, in quanto la comunicazione avviene tramite messaggi, non è presente la memoria
+condivisa e non si ha un clock globale del sistema, ma ogni nodo si gestisce attraverso un clock interno.
+
 \begin{center}
 	\includegraphics[scale=0.6]{img/cli2.png}
 \end{center}
@@ -85,198 +95,162 @@ Si ha che un client fa una richiesta e il server risponde con un certo risultato
 	\includegraphics[scale=2.6]{img/cli3.png}
 \end{center}
 Si può accedere a server multipli (cluster con anche bilanciamento del carico) e si può accedere via proxy (dei server "finti" che fungono da concentratori).\\
-Un sistema distribuito ha 4 problemi da fronteggiare:
+Un sistema distribuito per comunicare effettua le seguenti operazioni:
 \begin{enumerate}
-	\item \textbf{identificare la controparte}, che si risolve assegnando un nome, è la procedura di \textbf{naming}
-	\item \textbf{accedere alla controparte}, che si risolve con una reference, un \textbf{access point}
-	\item \textbf{comunicare (parte 1)}, che si risolve accettando e condividendo un formato, un \textbf{protocollo, "protocol"}
-	\item \textbf{comunicare (parte 2)}, che si risolve concordando \textit{sintassi e semantica} per l'informazione da condividere \textbf{(quest'ultimo è però ancora un problema aperto)}
+    \item \textbf{identifica la controparte}, attraverso l'assegnazione di un nome(\emph{naming})
+    \item \textbf{si accede alla controparte}, attraverso un punto di accesso
+    \item \textbf{si definisce il protocollo}, al fine di stabilire le regole e le procedure per 
+        essere in grado di comunicare, senza alcun problema.
+    \item \textbf{si definisce}, che si risolve concordando \textit{sintassi e semantica} per l'informazione da condividere \textbf{(quest'ultimo è però ancora un problema aperto)}
 \end{enumerate}
+
 Si hanno le seguenti definizioni per quanto riguarda la trasparenza:
 \begin{itemize}
-	\item \textbf{naming}, usare nomi simbolici per identificare le risorse che sono parte del sistema distribuito
-	\item \textbf{access trasparency}, nascondere le differenze nella rappresentazione delle informazioni e nell'accedere ad un'informazione locale o remota
-	\item \textbf{location trasparency}, nascondere dove è collocata una risorsa sulla rete
-	\item  \textbf{relocation or mobility transparency}, nascondere che una risorsa può essere stata trasferita ad un'altra locazione mentre è in uso
-	\item \textbf{migration trasparency}, nascondere che una risorsa può essere trasferita
-	\item \textbf{replication transparency}, nascondere che una risorsa può essere replicata
-	\item \textbf{concurrency transparency}, nascondere che una risorsa può essere condivisa da molti utenti indipendenti
-	\item \textbf{failure trasparency}, nascondere fallimenti e recovery di una risorsa
-	\item \textbf{persistence trasparency}, nascondere se una risorsa è volatrile o memorizzata permanentemente
+    \item \textbf{naming}, si usano nomi simbolici per identificare le risorse,
+            facenti parte del sistema distribuito.
+    \item \textbf{access trasparency}, nascondere le differenze nella rappresentazione 
+        delle informazioni e nell'accesso ad un'informazione locale o remota 
+    \item \textbf{location trasparency}, in cui si nasconde dove è collocata una risorsa sulla rete
+    \item  \textbf{relocation(mobility) transparency}, in cui si nasconde se la risorsa è stata
+        trasferita ad un'altra locazione, mentre è in uso.
+    \item \textbf{migration trasparency}, in cui si nasconde che una risorsa può essere trasferita
+    \item \textbf{replication transparency}, in cui si nasconde che una risorsa può essere replicata
+    \item \textbf{concurrency transparency}, in cui si nasconde che una risorsa può essere condivisa
+        da molti utenti indipendenti
+    \item \textbf{failure trasparency}, in cui si nascondono fallimenti e recovery di una risorsa
+    \item \textbf{persistence trasparency}, in cui si nasconde se una risorsa
+                  è volatile o memorizzata permanentemente
 \end{itemize}
-non si possono però nascondere:
-\begin{itemize}
-	\item \textbf{ritardi e latenze di comunicazione}
-	\item \textbf{nascondere completamente i failure della rete e dei nodi}, non puoi neanche distinguere bene rallentamenti e errori. Ovviamente non puoi sapere se sta per accadere un \textbf{crash}
-\end{itemize}
-Una trasparenza completa, oltre ad essere quasi impossibile a livello teorico, è anche estremamente "cara" a livello di performances e tempistiche (causa scrittura costante su dischi e mantenimento delle repliche).\\
-Nascondere le informazioni è alla base dell'ingegneria del software. Bisogna separare il \textit{cosa} si fa e il \textit{come} lo si fa. Il \textit{cosa} si fa mediante la definizione dell'interfaccia, \textit{Interface Definition Languages (IDL)}, e il \textit{come} mediante l'implementazione delle classi e dei metodi. Le interfacce sono definite mediante principi standard, sono complete e sono neutrali (indipendenti dall'implementazione).
-\begin{center}
-	\includegraphics[scale=2]{img/cli4.png}
-\end{center}
-Tra i vari componenti si ha:
-\begin{itemize}
-	\item \textbf{indipendenza logica}, con i vari componenti che lavorano autonomamente
-	\item \textbf{composizione}, con la collaborazione dei vari processi
-\end{itemize}
-Si separano:
-\begin{itemize}
-	\item \textbf{meccanismi}, ciò che è fatto dai componenti (esempio il context switch)
-	\item \textbf{politiche}, come vengono applicati le varie funzionalità del sistema (esempio lo scheduling Round Robin RR)
-\end{itemize}
-Bisogna separare e bilanciare politiche e meccanismi
+Da questa trasparenze non si è in grado di nascondere i ritardi e le latenze di comunicazione, ma
+soprattutto non si è in grado di effettuare una trasparenza completa, per motivi di performance
+e di latenza dell'operazioni su un sistema distribuito.
+
+Questa volonta di astrarre le informazioni è alla base dell'ingegneria del software, in cui si separa
+il \textit{cosa} dal \textit{come}: il cosa si effettua tramite la definizione dell'interfaccia, complete
+ed indipendenti dalle diverse implementazioni, mentre il come avviene con l'effettiva implementazione
+delle classi e dei metodi.\newline
+Come si vede nella figura \href{figura:interfaccia}, l'interfaccia è unica mentre l'implementazione
+varia in ogni host locale del sistema distribuito e ciò può essere anche visto come la separazione
+tra un meccanismo e una politica, ossia come si implementa effettivamente una funzionalità del sistema.
+
+\begin{figure}
+\centering
+\label{figura:interfaccia}
+\includegraphics[scale=2]{img/cli4.png}
+\end{figure}
 \begin{center}
 	\includegraphics[scale=2]{img/cli5.png}
 \end{center}
-Ricapitolando il concetto di protocollo:
-\begin{itemize}
-	\item per poter capire le richieste e formulare le risposte i due processi devono concordare un protocollo
-	\item i protocolli (come \textit{HTTP, FTP e SMTP}) definiscono il formato, l'ordine di invio e di ricezione dei messaggi tra i dispositivi, il tipo dei dati e le azioni da eseguire quando si riceve un messaggio
-	\item le applicazioni su TCP/IP:
-	      \begin{itemize}
-		      \item si scambiano stream di byte di lunghezza infinita (il meccanismo)
-		      \item che possono essere segmentati in messaggi (la politica) definiti da un protocollo condiviso
-	      \end{itemize}
-\end{itemize}
-Vediamo un esempio di codice. Partiamo dall'\textit{header.h}
-\begin{minted}{c}
-// definizioni necessarie a client e server 
+Per poter capire le richieste ed eseguire i processi di comunicazione i due processi devono concordare 
+un protocollo, in cui viene definito il formato, l'ordine di invio e di ricezione dei messaggi tra 
+i diversi disposizioni, e per vedere un esempio di una comunicazione tra i diversi processi si guardi
+il listato di codice \href{listato:fileServer}, in cui si implementano sia l'header che l'implementazione
+del server mentre nel listato di codice \href{listato:fileClient} si vede l'implementazione del client.
 
-#define TRUE 1
-#define MAX_PATH 255 // lunghezza massima del nome di un file
-#define BUF_SIZE 1024 // massima grandezza file trasferibili per volta
-#define FILE_SERVER 243 // indirizzo di rete del file del server
+Non forniamo una spiegazione del codice dato che nel corso del corso impareremo come sviluppare ed
+implementare applicazioni client-server.
 
-// operazioni permesse 
+\begin{figure}
+    \label{listato:fileServer}
+    \inputminted{c}{code/header.h}
+    \inputminted{c}{code/fileServer.c}
+\end{figure}
 
-#define CREATE 1 // crea un nuovo file
-#define READ 2 // legge il contenuto di un file e lo restituisce
-#define WRITE 3 // scrive su un file
-#define DELETE 4 // cancella un file
+\begin{figure}
+    \label{listato:fileClient}
+    \inputminted{c}{code/fileClient.c}
+\end{figure}
 
-// errori
-
-#define OK 0 // nessun errore
-#define E_BAD_OPCODE -1 // operazione sconosciuta
-#define E_BAD_PARAM -2 // errore in un parametro
-#define E_IO -3 // errore del disco o errore di I/O
-
-// definizione del messaggio
-
-struct message{
-  long source; // identità del mittente
-  long dest; // identità del ricevente
-  long opcode; // operazione richiesta
-  long count; // numero di byte da trasferire
-  long offset; // posizione sul file da cui far partire l'I/O
-  long result; // risultato dell'operazione
-  char name[MAX_PATH]; // nome del file
-  char data[BUF_SIZE]; //informazione da leggere o scrivere
-};
-\end{minted}
-\newpage
-vediamo la struttura di un semplice server che realizza un semplice file server remoto:
-\begin{minted}{c}
-#include <header.h>
-void main(void){
-  struct message m1, m2; // messaggio in entrata e uscita
-  int r; // risultato
-  
-  while(TRUE){ // il server è sempre in esecuzione
-    receive(FILE_SERVER, &m1); // stato di wait in attesa di m1
-    switch(m1.code){ // vari casi in base alla richiesta
-      case CREATE: 
-        r = do_create(&m1, &m2);
-        break;
-      case CREATE: 
-        r = do_read(&m1, &m2);
-        break;
-      case CREATE: 
-        r = do_write(&m1, &m2);
-        break;
-      case CREATE: 
-        r = do_delete(&m1, &m2);
-        break;
-      default:
-        r = E_BAD_OPCODE;
-    }
-    
-    m2.result = r; // ritorna il risultato al client
-    send(m1.source, &m2); // manda la risposta
-    
-  }
-}  
-\end{minted}
-\newpage
-vediamo ora un client che usa il servizio per straferire un file:
-\begin{minted}{c}
-#include <header.h>
-
-int copy(char *src, char *dst){ // copia file usando il server
-  strcut message m1; // buffer del messaggio
-  long position; // attuale posizione del file
-  long client = 110; // indirizzo del client
-  
-  initialize(); // prepara l'esecuzione
-  position = 0; 
-  do{
-    m1.opcode = READ; // operazione settata su READ
-    m1.offset = position; // scelta la posizione nel file
-    m1.count = BUF_SIZE; // byte da leggere
-    strcpy(&m1.name, src); // nome file copiato in m1
-    send(FILESERVER, &m1); // manda il messaggio al file server
-    receive(client, &m1); // aspetta la risposta
-    
-    // scrive quanto ricevuto su un file di destinazione
-    m1.opcode = WRITE; // operazione settata su WRITE
-    m1.offset = position; // scelta la posizione nel file
-    m1.count = BUF_SIZE; // byte da leggere
-    strcpy(&m1.name, dst); // nome del file sul buffer
-    send(FILESERVER, &m1); // manda il messaggio al file server
-    receive(client, &m1); // aspetta la risposta
-    position += m1.result // il risultato sono i byte scritti
-  }while(m1.result > 0); // itera fino alla fine
-  return(m1.result >= 0 ? OK : m1.result); // ritorna OK o l'errore
-}
-
-\end{minted}
 \subsection{Stream Communication}
-\begin{center}
-	\includegraphics[scale=2.5]{img/sc.png}
-\end{center}
-Si ha il modello ISO/OSI, che si basa sull'astrazione. Un informatico dovrebbe conoscere tutti i vari livelli. Gli utenti possono mandare e ricevere stream di byte via TCP mediante API. Poi al livello successivo si hanno datagrammi con i dati che vengono mandai via meccanismi IP. È lo sviluppatore a decidere le varie politiche. I sistemi distribuiti lavorano tra utenti e TCP/UDP. Ovviamente sono i processi che comunicano tra di loro. Ogni processo comunica attraverso canali. Un canale gestisce i flussi di dati in ingresso e uscita e dall'esterno ogni canale è identificato da un intero detto \textbf{porta}. Le \textbf{socket} sono particolari canali per la comunicazione tra processi che non condividono memoria (per esempio perché risiedono su macchine diverse). Per potersi connettere o inviare dati ad un processo A, un processo B deve conoscere la macchina (host) che esegue A e la porta cui A è connesso (well-known port).   TCP è orientato alla connessione (si ha un invio di richiesta di connessione), è affidabile, si ha un controllo di flusso, si ha un controllo della congestione ma non si hanno garanzie di banda e ritardo minimi. UDP non è affidabile e non offre nulla di quanto offerto da TCP ma è comodo, per esempio, nello streaming, che tollera perdite parziali. UDP scompone i messaggi in pacchetti che invia uno per volta ai servizi network. TCP scompone e invia come UDP ma ogni pacchetto viene numerato per garantire riordinamento, duplicazioni e perdite. Nei sistemi distribuiti non è necessario conoscere tutto questo funzionamento ma importa solo lo stream di byte. TCP utilizza variabili e buffer per realizzare il trasferimenti bidirezionale di flussi di bytes (“pipe”) tra processi, prevede ruoli client/server durante la connessione ma non durante la comunicazione. TCP utilizza i servizi dello strato IP per l'invio dei flussi di bytes.\\
-L'interfaccia tra applicazione e strato di trasporto è dato delle API, \textit{Application Programming Interface}  e i socker sono API per accedere a TCP o UDP, due processi comunicano mediante socker nel modello client-server.\\
-Si hanno delle criticità:
+\begin{figure}
+    \label{figure:livelliRete}
+    \centering
+    \includegraphics[scale=2.5]{img/sc.png}
+\end{figure}
+Per la comunicazione tra due host si utilizza il modello ISO/OSI, basato sull'astrazione di cui tutti gli
+informatici ne dovrebbero conoscere in dettaglio tutti i vari livelli, in cui per mandare dei dati da un host
+ad un host si parte dal livello di applicazione, su cui si sviluppano ed operano i sistemi distribuiti,
+per poi andare ai livello di trasporto, di rete e fisico, necessari per il trasferimento sulla rete 
+delle informazioni, come si nota nella figura \href{figure:livelliRete}.
+
+Ogni processo comunica attraverso canali, in cui vengono gestiti i flussi di dati in ingresso ed uscita,
+individuabili tramite un intero detto \textbf{porta} e noi studiamo le \textbf{socket}, particolare canale
+per la comunicazione in cui non vi è una condivisione della memoria e per potersi connettere da un processo A,
+il processo B deve conoscere l'host che esegue A e la porta in cui A è connesso.
+
+Le socket possono essere principalmente di due tipi, come i principali protocolli di trasporti:
 \begin{itemize}
-	\item gestione del ciclo di vita di cliente e server, attivazione/terminazione del cliente e del server
-	\item identificazione e accesso al server
-	\item comunicazione tra client e server
-	\item ripartizione dei compiti tra client e server, che dipende dal tipo di applicazioni e la scelta influenza le prestazioni in relazione al carico
+    \item \textbf{tcp socket}: utilizzano il protocollo TCP, orientato alla connessione,
+        per la comunicazione tra i due processi, prevede un controllo di affidabilità dei messaggi,
+        ossia viene assicurato che i messaggi arrivano nell'ordine previsto all'altro processo
+        ed infine vi è un controllo di flusso e di congestione ma non si hanno garanzie di banda e dei ritardi.
+
+        Si utilizzano nelle applicazioni, in cui si deve avere la sicurezza dell'arrivo dei dati come ad
+        esempio nel protocollo HTTP, per la comunicazione web, e nelle chat app come Telegram e Whatsapp.
+
+    \item \textbf{udp socket}: utilizza il protocollo UDP, non affidabile e non orientato alla connessione,
+        in cui viene solo garantito il trasferimento dei dati dalla rete all'applicazione e un controllo 
+        minimale degli errori, cosa che lo definisce come un sottoinsieme proprio del protocollo TCP.\newline
+        Viene utilizzato quando si deve avere un ritardo di trasmissione limitato ed una perdità minimale
+        può non essere un problema, come ad esempio nei file multimediali e/o chiamate via voip.
 \end{itemize}
-l'indirizzo del server può essere una costante nel codice, può essere chiesto all'utente, come nel browser, posso usare un nameserver o un repository (con DNS, \textit{Domain Name Service}) o adottare altri protocolli, come DHCP. Il naming sarà il nome dell'host, l'indirizzo IP come access point mediante host e porta, il protocollo saranno stream di byte e la sintassi e la semantica saranno definiti dall'applicazione con http, smtp etc...\\
-Tutto questo è a un basso livello di trasparenza in quanto sia utente che sviluppatore lo necessitano.\\
-La comunicazione TCP/IP avviene attraverso flussi di byte
-(byte stream), dopo una connessione esplicita, tramite
-normali system call read/write. Queste due syscall sono sospensive (mettono il sistema in uno stato di \textit{wait}) e usano un buffer per garantire flessibilità (per esempio la read definisce un buffer per leggere N caratteri, ma potrebbe ritornare avendone letti solo k<N)
-\begin{center}
-	\includegraphics[scale=0.7]{img/sc2.png}
-\end{center}
+Nei sistemi distribuiti non è necessario conoscere il funzionamento dei protocolli di trasporto ma basta
+considerare i servizi offerti e il fatto che si trasferiscono stream di byte, infatti
+le socket sono delle API(Application Programming Interface) per accedere a TCP o UDP, in quanto due processi
+nel modello client-server comunicano mediante esso.
+
+Si hanno delle criticità riguardanti alle socket e al modello client-server:
+\begin{itemize}
+    \item gestione del ciclo di vita di cliente e server, attivazione/terminazione del cliente e del server
+    \item identificazione e accesso al server
+    \item comunicazione tra client e server
+    \item ripartizione dei compiti tra client e server, che dipende dal tipo di applicazioni 
+          e la scelta influenza le prestazioni in relazione al carico
+\end{itemize}
+Quando viene definito l'indirizzo del server, esso può essere una costante, inserito dall'utente oppure
+inserendo un nameserver su cui si ricava l'indirizzo tramite il DNS(Domain Name Service) e questo comporta 
+un basso livello di trasparenza dato che gli utenti devono conoscre l'indirizzo della rete e soprattutto 
+parsare lo stream di byte nel message voluto.
+
+La comunicazione TCP/IP avviene attraverso flussi di byte, dopo una connessione esplicita, attraverso
+normali system call read/write:queste due syscall sono sospensive, ossia mettono il sistema in attesa,
+e utilizzano un buffer per garantire la massima flessibilità, ad esempio la read definisce un buffer
+per leggere N caratteri ma potrebbe ritornare dopo aver letto solo $k < n$ caratteri.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{img/sc2.png}
+\end{figure}
 \newpage
 Ci sono molte chiamate diverse per accedere i servizi TCP e UDP:
 \begin{center}
 	\includegraphics[scale=3]{img/sc3.png}
 \end{center}
+Per capire le operazioni e le procedure usate per permettere la comunicazione tra client e server,
+mostriamo l'implementazione client-server con udp, nel listato \ref{udpSocket}, e quella
+client-server tramite tcp, nel listato \ref{tcpSocket}.
 
-Il server crea una nuova socket collegata (binded) a una
-nuova porta per comunicare con il client, in questo modo la well-known port resta dedicata a ricevere richieste di connessione:
+\begin{figure}
+    \caption{Implementazione socket con protocollo udp}\label{udpSocket}
+    \inputminted{python}{code/udpClient.py}
+    \inputminted{python}{code/udpServer.py}
+\end{figure}
+
+\begin{figure}
+    \caption{Implementazione socket con protocollo tcp}\label{tcpSocket}
+    \inputminted{python}{code/tcpClient.py}
+    \inputminted{python}{code/tcpServer.py}
+\end{figure}
+Nelle socket udp, protocollo in cui si implementa un sottoinsieme delle funzionalità delle tcp, 
+si effettua la creazione della socket, sia nel client che nel server, e poi subito incomincia la 
+comunicazione mentre nelle socket tcp si effettua prima un handshake a tre vie per settare la connessione
+tra client e server e poi incomincia la comunicazione.
+
+Il server crea una nuova socket collegata (binded) a una nuova porta per comunicare con il client,
+in questo modo la well-known port resta dedicata a ricevere richieste di connessione:
 \begin{center}
 	\includegraphics[scale=3]{img/sc4.png}
 \end{center}
-Non uso la stessa porta per evitare perché comunicazione e handshake non sarebbero distinguibili\\
-Quando si parla di socket non c'è il concetto di messaggio e read/write avvengono per un numero arbitrario di bytes. Quindi si devono prevedere cicli di lettura che
-termineranno in base alla dimensione dei “messaggi” come
-stabilito dal formato del protocollo applicativo in uso. \\
-Il prototipo della read in pseudocodice sarebbe:
 \begin{minted}{c}
 byteLetti read(socket, buffer, dimBuffer);
 \end{minted}
@@ -287,241 +261,44 @@ con:
 	\item buffer = sapzio di memoria dove trasferire i byte letti
 	\item dimBuffer = dimensione del buffer = numero max di caratteri che si possono leggere
 \end{itemize}
-\textbf{Quindi si devono prevedere cicli di lettura che
-	termineranno in base alla dimensione dei “messaggi” come
-	stabilito dal formato del protocollo applicativo in uso}\\
-Java definisce alcune classi che costituiscono un'interfaccia ad oggetti alle system call:
+
+Dopo aver mostrato come si implementano le socket in Python, per rendere semplice e facilmente comprensibile
+quali sono le funzionalità e come si definiscono le socket, analizziamo come vengono fatte con il linguaggio
+Java, usato nel corso, utilizzandoalcune classi che costituiscono un'interfaccia ad oggetti 
+delle system call, su cui sono definite tutte le operazioni delle socket:
 \begin{minted}{java}
-java.net.Socket
-java.net.ServerSocket
+    java.net.Socket
+    java.net.ServerSocket
 \end{minted}
-Queste classi accorpano funzionalità e mascherano alcuni
-dettagli con il vantaggio di semplificarne l'uso.
-Come per ogni framework è necessario conoscerne il modello
-e il funzionamento per poterlo utilizzare in modo efficace.
-Le prossime slide discutono i principali metodi delle due classi. vediamo altro, iniziamo dai costruttori:
-\begin{minted}{java}
-public Socket()
-// Creates an unconnected socket, with the system-default type of SocketImpl
+Queste classi accorpano funzionalità e mascherano alcuni dettagli con il vantaggio di semplificarne l'uso
+e come ogni framework è necessario conoscerne il modello e il funzionamento per poterlo usare efficacemente. 
 
-public Socket(String host, int port)
-  throws UnknownHostException, IOException
-/* Creates a stream socket and connects it to the 
-specified port number on the named host. If the
-specified host is null, the loopback address is assumed.
-The UnknownHostException is thrown if the IP address 
-of the host could not be determined */
+I costrutti principali di queste due classi si possono trovare facilmente nella documentazione Java 
+e negli esempi fatti a lezione, trovabili facilmente sul corso elearning.
 
-public Socket(InetAddress address, int port)
-  throws IOException
-/* Creates a stream socket and connects it to the 
-specified port number at the specified IP address */
-\end{minted}
-e passiamo ai metodi:
-\begin{minted}{java}
-public void bind(SocketAddress bindpoint) throws IOException
-/* Binds the socket to a local address.
-If the address is null, then the system will pick up an
-ephemeral port and a valid local address to bind the socket */
+Vediamo ora un esempio di un server \ref{java:tcpServer}, scritto in Java che accetta una connessione da un client 
+e manda uno stream di dati, e di un client \ref{java:tcpClient}che legge lo stream di bytes, 
+con un esempio similare a quello fatto in python per spiegare le fasi del TCP socket.
 
-public void connect(SocketAddress endpoint) throws IOException
-// Connects this socket to the server
+\begin{figure}
+    \caption{Semplice implementazione TCP server in Java}
+    \label{java:tcpServer}
+    \inputminted{java}{code/javaSocket/ServerWriter/SenderServerSocket.java}
+\end{figure}
 
-public void connect(SocketAddress endpoint, int timeout)
-  throws IOException
-/* Connects this socket to the server with
- a specified timeout value (in milliseconds) */
+\begin{figure}
+    \caption{Semplice implementazione TCP client in Java}
+    \label{java:tcpClient}
+    \inputminted{java}{code/javaSocket/ServerWriter/ReceiverClientSocket.java}
+\end{figure}
 
-public void close()
-//Closes this socket.
-\end{minted}
-abbiamo metodi per modificare i bytes:
-\begin{minted}{java}
-public InputStream getInputStream()!
-  throws IOException
-  
-/* If this socket has an associated channel
- then the resulting input stream delegates all of its
-operations to the channel. If the channel 
-is in non-blocking mode then the input stream's read
-operations will throw an IllegalBlockingModeException.
-When a broken connection is detected by the 
-network software the following applies to the
-returned input stream:
-The network software may discard bytes that 
-are buffered by the socket. Bytes that aren't
-discarded by the network software can be read using read.
-If there are no bytes buffered on the socket, 
-or all buffered bytes have been consumed by read,
-then all subsequent calls to read will throw an IOException.
-If there are no bytes buffered on the socket, 
-and the socket has not been closed using close, then
-available will return 0 */ 
+Quindi per il server si avrà la situazione \ref{img:javaServer} mentre nel client 
+si verifica \ref{img:javaClient}.
 
-public OutputStream getOutputStream()
-  throws IOException
-  
-/* Returns an output stream for writing bytes to this socket.
-If this socket has an associated channel then 
-the resulting output stream delegates all of its
-operations to the channel.
-If the channel is in non-blocking mode 
-then the output stream's write operations will throw an
-IllegalBlockingModeException */
-\end{minted}
-Vediamo ora i costruttori:
-\begin{minted}{java}
-public ServerSocket() throws IOException
-// Creates an unbound server socket
+Si nota facilmente che il seguente modello di client non funziona nella maniera corretta, per cui
+si introducono i \textbf{lazy server} che mandano pochi byte per volta con un piccolo ritardo,
+come si nota nel listato \ref{java:lazyServer}
 
-public ServerSocket(int port) 
-  throws IOException
-
-/* Creates a server socket, bound to the specified port.
-A port of 0 creates a socket on any free port.
-The maximum queue length for incoming connection 
-indications (a request to connect) is set to 50.
-If a connection indication arrives when the queue
-is full, the connection is refused. */
- 
-public ServerSocket(int port, int backlog) 
-  throws IOException
-  
-/* Creates a server socket and binds it to the 
-specified local port number, with the specified backlog.
-A port of 0 creates a socket on any free port.
-The maximum queue length for incoming connection
-indications (a request to connect) is set to the
-backlog parameter.
-If a connection indication arrives when the queue
-is full, the connection is refused.
-\end{minted}
-I metodi per gestire le connessioni:
-\begin{minted}{java}
-public void bind(SocketAddress endpoint) 
-  throws IOException
-/* Binds the ServerSocket to a specific address 
-(IP address and port number).If the address is null, 
-then the system will pick up an ephemeral 
-port and a valid local address to bind the socket */
-
-public void bind(SocketAddress endpoint, int backlog) 
-  throws IOException
-/* Binds the ServerSocket to a specific address
-(IP address and port number). If the address is null,
-then the system will pick up an ephemeral port 
-and a valid local address to bind the socket.
-The backlog argument must be a positive value 
-greater than 0. If the value passed if equal or less
-than 0, then the default value will be assumed */
-
-public Socket accept() 
-  throws IOException
-/* Listens for a connection to be made 
-to this socket and accepts it. Returns the new Socket.
-The method blocks until a connection is made */
-\end{minted}
-e infine vediamo qualche altro metodo:
-\begin{minted}{java}
-public InetAddress getInetAddress()
-
-/* Returns the local address of this server 
-socket or null if the socket is unbound */
-
-public int getLocalPort()
-
-/* Returns the port on which this socket is 
-listening or -1 if the socket is not bound yet */
-
-public SocketAddress getLocalSocketAddress()
-
-/* Returns the address of the endpoint this
-socket is bound to, or null if it is not bound yet*/
-\end{minted}
-\newpage
-vediamo un esempio di un server che accetta una connessione da un client e manda uno stream di dati (una stringa) e di un client che legge lo stream di bytes. Partiamo col server
-\begin{minted}{java}
-package serverWriter;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-public class SenderServerSocket {
-  final static String message = "This is a not so 
-    short text to test the reading capabilities of clients."
-   + " If they are not so smart, they will catch only part of it.";
-  public static void main(String[] args) {
-    try {
-      Socket clientSocket;
-      ServerSocket listenSocket;
-      listenSocket = new ServerSocket(53535);
-      System.out.println("Running Server: " + "Host=" 
-        + listenSocket.getInetAddress() + " Port="
-          + listenSocket.getLocalPort());
-
-      while (true) {
-        clientSocket = listenSocket.accept();
-        System.out.println("Connected to client at port: "
-           + clientSocket.getPort());
-        
-        PrintWriter out = 
-          new PrintWriter(clientSocket.getOutputStream(), true);
-        System.out.println("Writing message: ");
-        System.out.println(message);
-        System.out.println("Message length: " + message.length());
-        out.write(message);
-        out.flush();
-        clientSocket.close();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-}
-\end{minted}
-\newpage
-e il client:
-\begin{minted}{java}
-package serverWriter;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-
-public class ReceiverClientSocket {
-
-  public static void main(String[] args) {
-    Socket socket; // my socket
-    InetAddress serverAddress; // the server address
-    int serverPort; // the server port
-    DataInputStream in; // the source of stream of bytes
-    byte[] byteReceived = new byte[1000]; // the temporary buffer
-    String messageString = ""; // the text to be displayed
-
-    try { // connect to the server
-      serverAddress = InetAddress.getByName(args[0]);
-      serverPort = Integer.parseInt(args[1]);
-      socket = new Socket(serverAddress, serverPort);
-      System.out.println("Connected to server: "
-         + socket.getPort()); // the server port
-
-      in = new DataInputStream(socket.getInputStream()); // the stream to
-                                // read from
-
-      // The following code shows in detail how to read from a TCP socket
-      System.out.println("Ready to read from the socket");
-      int bytesRead = 0; // the number of bytes read while (true) {
-      bytesRead = in.read(byteReceived);
-      messageString += new String(byteReceived, 0, bytesRead);
-      System.out.println("Received: " + messageString);
-      System.out.println("I am done!");
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-}
-\end{minted}
-Quindi per il server si avrà:
 \begin{center}
 	\includegraphics[scale=2.5]{img/sc5.png}
 \end{center}
@@ -529,85 +306,34 @@ e per il client:
 \begin{center}
 	\includegraphics[scale=2.5]{img/sc6.png}
 \end{center}
-Si nota però che ci sono dei problemi col client, funziona... ma non nella maniera corretta.\\
-Si introducono quindi i \textbf{lazy server}, che mandano pochi byte per volta con un piccolo delay:
-\begin{minted}{java}
-package serverWriter;
 
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
+\begin{figure}
+    \caption{Implementazione server Lazy}
+    \label{java:lazyServer}
+    \inputminted{java}{code/JavaSocket/ServerWriter/LazySenderServerSocket.java}
+\end{figure}
 
-public class LazySenderServerSocket {
-
-  final static String message = "This is a not so short text to test the 
-    reading capabilities of clients."
-      + " If they are not so smart, they will 
-        catch only part of it.";
-  final static int chunck = 9; // number of bytes sent every time
-
-  public static void main(String[] args) {
-    try {
-      Socket clientSocket;
-      ServerSocket listenSocket;
-
-      listenSocket = new ServerSocket(53535);
-      System.out.println("Running Server: " + "Host=" +
-         listenSocket.getInetAddress() + " Port="
-          + listenSocket.getLocalPort());
-
-      while (true) {
-        clientSocket = listenSocket.accept();
-
-        PrintWriter out = 
-          new PrintWriter(clientSocket.getOutputStream(), true);
-        System.out.println("message length: " + message.length());
-
-        int i;
-        for (i = 0; i < message.length() - chunck; i += chunck) {
-          System.out.println(message.substring(i, i + chunck));
-          Thread.sleep(1000);
-          out.write(message.substring(i, i + chunck));
-          out.flush();
-        }
-        System.out.println(message.substring(i, message.length()));
-        out.write(message.substring(i, message.length()));
-        out.flush();
-        clientSocket.close();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-  }
-
-}
-
-\end{minted}
 \begin{center}
 	\includegraphics[scale=0.7]{img/lazy.png}
 \end{center}
-Quindi per un'applicazione socket si ha:
+Per un'applicazione socket si ha le seguenti componenti:
 \begin{enumerate}
-	\item \textbf{client} con l'architettura che è concettualmente più semplice di quella di un server. Spesso è un'applicazione convenzionale, ha solo effetti sull'utente client e non comporta problemi di sicurezza
-	\item \textbf{server} che crea una socket, gli assegna una porta nota ed entra in ciclo infinito in cui alternare:
-	      \begin{itemize}
-		      \item attesa richiesta
-		      \item soddisfa richiesta
-		      \item invia risposta
-	      \end{itemize}
-	      L'affidabilità di un server è strettamente dipendente
-	      dall'affidabilità della comunicazione tra lui e i suoi client, del resto però la modalità \textit{connection-oriented} determina l'impossibilità di rilevare interruzioni sulle connessioni e la necessità di prevedere una connessione (una socket) per ogni comunicazione
+	\item \textbf{client} con l'architettura che è concettualmente più semplice di quella di un server,
+        spesso è un'applicazione convenzionale in cui si hanno solo effetti sull'utente client 
+        e non comporta problemi di sicurezza.
+	\item \textbf{server}: crea una socket, gli assegna una porta nota ed entra in ciclo infinito 
+        in cui alternare: attesa di una richiesta, soddisfo la richiesta ed invio la risposta.\newline
+	    L'affidabilità di un server è strettamente dipendente dall'affidabilità della comunicazione 
+        tra lui e i suoi client, del resto però la modalità \textit{connection-oriented} determina 
+        l'impossibilità di rilevare interruzioni sulle connessioni e la necessità di prevedere 
+        una connessione (una socket) per ogni comunicazione.
 \end{enumerate}
-Ci sono diversi tipi di server:
+Ci sono diverse tipologie di server implementabili in un modello client-server:
 \begin{itemize}
-	\item \textbf{iterativi}, ovvero che soddisfano una richiesta alla volta
-	\item \textbf{concorrenti processo singolo}, ovvero che
-	      simulano la presenza di un server dedicato
-	\item \textbf{concorrenti multi-processo}, ovvero che
-	      creano server dedicati
-	\item \textbf{concorrenti multi-thread}, ovvero che
-	      creano thread dedicati
+	\item \textbf{iterativi}, in cui viene soddisfatta una richiesta alla volta
+	\item \textbf{concorrenti processo singolo}, in cui viene simulata la presenza di un server dedicato
+	\item \textbf{concorrenti multi-processo}, in cui vengono creati server dedicati ad ogni client.
+	\item \textbf{concorrenti multi-thread}, in cui vengono creati dei threat specifici per ogni client.
 \end{itemize}
 Vediamo come progettare un server iterativo. Al momento di una richiesta di connessione il server crea una
 socket temporanea per stabilire una connessione diretta con il client Le eventuali ulteriori richieste per il server verranno accodate alla porta nota per essere successivamente soddisfatte. Si hanno degli svantaggi:
@@ -1256,38 +982,51 @@ public class KKMultiServer {
 \end{minted}
 
 \section{L'architettura del web}
-\subsubsection{Message oriented computing}
-Il metodo di comunicazione tra client e server è supportato dal web tramite HTTP (da client a server con delle \textit{request} e all'opposto con delle \textit{response}). Il client è realizzato da un \textit{browser} mentre il server da un \textit{HTTP server} o da un \textit{Web Server}.\\
-Un \textbf{web browser}, detto \textit{user-agent}, è un programma che consente la navigazione sul web, interpretando il codice con cui sono e espresse le web pages rappresentandolo in forma di ipertesto. Una web page è costituita da diversi oggetti identificati da URL. Le page interagiscono mediante ipertesti e link.\\
-L'URL, che identifica un oggetto nella rete e specifica come interpretare i
-dati ricevuti attraverso il protocollo, è formato da:
+Per comunicare attraverso internet si utilizza un modello client-server usando principalmente 
+il protocollo \textbf{HTTP}, attraverso l'esecuzione delle sue operazioni \textbf{request} e \textbf{response}:
+la prima indica la richiesta di un oggetto web, come ad esempio un immagine e un file html, 
+da parte del client verso il server mentre la seconda è la risposta da parte del server verso il client.
+
+Nell'architettura di Internet il client viene realizzato mediante un browser, come ad esempio firefox,
+programma che fornisce la possibilità di navigare sul web, attraverso l'interpretazione del codice
+con cui sono espresse le pagine web, costituita da diversi oggetti identificati da un URL, mentre
+il server viene fornito da un Web Server, come ad esempio Apache.
+
+L'URL identifica un oggetto nella rete e specifica come interpretare i dati ricevuti 
+attraverso il protocollo, è formato dai seguenti elementi:
 \begin{itemize}
-	\item nome del protocollo
-	\item indirizzo IP dell'host
-	\item porta del processo
-	\item cammino/percorso dell'host
-	\item identificatore della risposta
+    \item nome del protocollo 
+    \item indirizzo IP dell'host
+    \item porta del processo
+    \item cammino/percorso dell'host
+    \item identificatore della risposta
 \end{itemize}
-ovvero: \begin{verbatim}
-protocollo://indirizzo_IP[:porta]/cammino/risorsa
+rappresentata nel seguente modo
+\begin{verbatim}
+    protocollo://indirizzo_IP[:porta]/cammino/risorsa
 \end{verbatim}
-la parte testuale dei documenti è espressa da:
-\begin{itemize}
-	\item HTML per contenuti e impaginazione
-	\item CSS per il render
-	\item XML e JSON per i dati e la loro struttura
-\end{itemize}
-Si possono avere anche dati multimediali (foto, audio, etc...) con l'encoding MIME per definirne il formato (plain, html per i testi, jpeg, gif per le immagini, etc..) . La dinamicità delle pagine web è data invece da linguaggi come Javascript, VBScript, Java/applet...\\
-I protocolli definiscono il formato, l'ordine di invio e di ricezione dei messaggi tra i dispositivi, il tipo dei dati e le azioni da eseguire quando si riceve un messaggio. Si hanno diversi protocolli come HTTP (\textit{HyperText Transfer Protoco}), FTP \textit{File Transfer Protoco}) e SMTP \textit{Simple Mail Transfer Protoco}).\\
-HTTP usa il modello client/server, col server che visualizza su browser gli oggetti che richiede e server che invia gli oggetti. HTTP usa TCP, infatti inizia una connessione TCP creando una socket verso il server sulla porta 80. Il server accetta la connessione TCP dal client. Vengono quindi scambiati messaggi http (messaggi del protocollo
-di livello applicativo) tra il browser (client http) e il Web
-server (server http).\\
-Per ora si hanno due versioni:
+La parte testuale dei documenti viene espressa da HTML, per contenuti ed impaginazione, da CSS per 
+il rending grafico mentre attraverso XML e JSON specifichiamo i dati e la loro struttura nel documento.
+
+Si possono avere anche dati multimediali (foto, audio, etc...) con l'encoding MIME per definirne 
+il formato (plain, html per i testi, jpeg, gif per le immagini, etc..) mentre la dinamicità delle pagine web
+viene data da linguaggi di programmazione come Javascript, VBScript, Java/applet \dots .
+
+Vi sono diversi protocolli web, in cui si definiscono le regole di comunicazioni tra varie tipologie di
+applicazioni, come ad esempio HTTP, FTP(File Transfer Protocol) e SMTP(Simple Mail Transfer Protocol);
+questi esempi di protocolli utilizzano il protocollo di trasporto TCP ed utilizzano delle porte note:
+80 per HTTP, 20 per FTP e 25 per SMTP.
+
+Per ora si hanno due versioni del protocollo HTTP, definite in maniera standard:
 \begin{enumerate}
 	\item\textbf{ http1.0: RFC 1945}
 	\item\textbf{ http1.1: RFC 2068}
 \end{enumerate}
-HTTP è \textbf{stateless} in quanto il server non mantiene informazioni sulle precedenti richieste che devono quindi contenere tutte le informazioni necessarie. Si ha che \textit{requeste }e \textit{response} hanno la stessa struttura, in ASCII con un formato testo leggibile, per esempio:
+HTTP è \textbf{stateless} in quanto il server non mantiene informazioni sulle precedenti richieste,
+per cui si devono sempre fornire le informazioni necessarie per cui i siti web per avere informazioni 
+utilizzano i cookie, che analizzeremo alla fine di questo paragrafo.\newline
+Si ha che le \textit{request}e \textit{response} hanno la stessa struttura, in ASCII con un 
+formato testo leggibile, ad esempio:
 \begin{verbatim}
 GET /somedir/page.html HTTP/1.1
 Host: www.someschool.edu
@@ -1296,38 +1035,37 @@ User-agent: Mozilla/4.0
 Accept: text/html, image/gif, image/jpeg
 Accept-language: fr
 \end{verbatim}
-Con la prima riga rappresentate la request line e le altre rappresentati l'header con le opzioni.\\
-Si hanno quindi i metodi:
+Con la prima riga si rappresenta la request line mentre nelle altre sono rappresentati l'header con le opzioni.
+
+Nel protocollo HTTP si hanno diverse tipologie di metodi e richieste, le principali sono le seguenti:
 \begin{itemize}
-	\item \textbf{GET}:
-	      \begin{itemize}
-		      \item restituisce una rappresentazione di una risorsa
-		      \item include un eventuale input in coda alla URL della risorsa
-		      \item è safe: l'esecuzione non ha effetti sul server
-		            => la risposta può essere gestita con una cache dal client
-		      \item uso tipico: ottenere pagine html e immagini
-	      \end{itemize}
-	\item \textbf{POST}:
-	      \begin{itemize}
-		      \item comunica dei dati da elaborare lato server o crea una nuova risorsa
-		            subordinata all’URL indicata (vedi più avanti)
-		      \item l'input segue come documento autonomo (body)
-		      \item non è idempotente: ogni esecuzione ha un diverso effetto
-		            => La risposta non può essere gestita con una cache dal client
-		      \item uso tipico: processare FORM e modificare dati in un DB
-	      \end{itemize}
-	\item \textbf{HEAD}:
-	\item simile al metodo get ma viene restituito solo l’Head della pagina Web
-	\item spesso usato in fase di debugging
+	\item \textbf{GET}: metodo HTTP, in cui viene restituita una rappresentazione di una risorsa web,
+        senza effetti sul server, utile per ottenere pagine html ed immagini.
+
+    \item \textbf{POST}: metodo HTTP, in cui vengono comunicati i dati da far elaborare al server oppure
+        si crea una nuova risorsa, subordinata all'URL.\newline
+        Ogni richiesta POST causa degli effetti sul server, quindi non può venire gestita la richiesta da 
+        una cache e l'utilizzo tipico è quello per processare delle FORM html e di modificare 
+        dati presenti in un database.
+    
+    \item \textbf{HEAD}: viene utilizzato spesso in fase di debugging ed è similare al metodo get
+        ma in questo metodo viene restituito soltanto l'head della pagina web.
 \end{itemize}
-nel complesso:
-\begin{center}
+Nel complesso tutte le tipologie di richieste HTTP si notano nella figura \ref{fig:httpMethod} mentre 
+il formato di una richiesta http si vede nella figura \ref{fig:httpStructure}.
+
+\begin{figure}
+    \caption{Tipologie di richieste HTTP}
+    \label{fig:httpMethod}
 	\includegraphics[scale=0.7]{img/http.png}
-\end{center}
-\begin{center}
+\end{figure}
+
+\begin{figure}
+    \caption{Formato di una richiesta HTTP}
+    \label{fig:httpStructure}
 	\includegraphics[scale=0.7]{img/http2.png}
-\end{center}
-vediamo un http response:
+\end{figure}
+vediamo ora un esempio di risposta http:
 \begin{verbatim}
 HTTP/1.1 200 OK
 Connection: close
@@ -1339,17 +1077,66 @@ Content-Length: 6821
 Content-Type: text/html
 data data data data data ...
 \end{verbatim}
-con la prima linea contenente protocollo, codice di stato e frase di stato.\\
-si ha che:
+In molte applicazioni web il client e il server comunicano per un periodo esteso, in cui il client
+effettua una serie di richieste a cui il server risponde, in maniera intermittente oppure ogni tot 
+periodo di tempo, per cui lo sviluppatore dell'applicazione deve decidere quale interazione deve
+avvenire tra ogni richiesta, ossia se usare la stessa connessione TCP oppure crearne sempre una nuova;
+la scelta comporta due diverse tipologie di utilizzo del protocollo HTTP, che si può estendere anche ai 
+altri protocollo di livello applicativo:
+\begin{itemize}
+    \item \textbf{connessione non persistente}: quando il server manda l'oggetto richiesto viene 
+        chiusa la connessione TCP, quindi successive interazioni tra lo stesso client e server richiedono
+        la creazione e la chiusura di una nuova connessione TCP, con un aggravio di RTT, il tempo
+        per mandare un pacchetto da client e server, per ogni richiesta solo per stabilire una nuova
+        connessione TCP tra i due soggetti della comunicazione.
+
+    \item \textbf{connessione persistente}: modalità usata di default dal protocollo HTTP, ma non per forza
+        dagli altri protocolli, in cui al termine di una richiesta HTTP viene lasciata aperta la connessione
+        TCP tra client e server, per cui ogni successiva richiesta tra essi non richiede la creazione
+        di una nuova connessione, con conseguente maggiore efficenza e velocità del sistema.\newline
+        Ovviamente la connessione TCP non viene lasciata aperta all'infinita, in quanto tipicamente 
+        un server HTTP in caso di mancato utilizzo dopo un certo ammontare di tempo la chiude, per 
+        raggiungere una maggiore efficienza di memoria occupata.
+\end{itemize}
+Esistendo due diverse versioni del protocollo HTTP vi sono due diverse tipologie di client:
 \begin{itemize}
 	\item Client HTTP 1.0: Server chiude connessione al termine della richiesta
 	\item Client HTTP 1.1: mantiene aperta la connessione oppure chiude se la richiesta e quindi
-	      contiene Connection: close
+	      contiene Connection: close, al fine di poter fare una connessione non persistente.
 \end{itemize}
-ecco alcuni esempi di codici:
-\begin{center}
+nella figura \ref{http:headerCode} alcuni esempi di codici, usati per stabilire il tipo di risposta 
+effettuata da HTTP ed è importante saperli, per capire cosa è avvenuto quando riceviamo, come client,
+la risposta HTTP.
+
+\begin{figure}
+    \caption{HTTP Header codes}
+    \label{http:headerCode}
 	\includegraphics[scale=0.7]{img/http3.png}
-\end{center}
+\end{figure}
+Nonostante il protocollo HTTP è di tipo stateless, per i siti web è comodo poter identificare una persona,
+al fine di poter monitorare le abitudini, limitare l'accesso e personalizzare i contenuti, per cui sono 
+stati introdotti i \textbf{cookies}, usati di default da tutti i siti.\newline
+I cookie prevedono 4 componenti: una header line nel messaggio di risposta HTTP, un header line nel
+messaggio di richiesta HTTP, un file di cookie tenuto nel sistema dell'utente e utilizzato dal browser,
+infine un database back-end nel sito web.
+
+Per capire come funzionano i cookie guarda la figura \ref{fig:cookie}, in cui si suppone che 
+Susan accede al sito di Amazon per la prima volta, utilizzando nel header $Set-cookie: 1678$.
+
+rom this discussion we see that cookies can be used to identify a user. The first
+time a user visits a site, the user can provide a user identification (possibly his or her
+name). During the subsequent sessions, the browser passes a cookie header to the
+server, thereby identifying the user to the server. Cookies can thus be used to create
+a user session layer on top of stateless HTTP. For example, when a user logs in to a
+Web-based e-mail application (such as Hotmail), the browser sends cookie informa-
+tion to the server, permitting the server to identify the user throughout the user’s ses-
+sion with the application.
+Although cookies often simplify the Internet shopping experience for the user,
+they are controversial because they can also be considered as an invasion of privacy.
+As we just saw, using a combination of cookies and user-supplied account informa-
+tion, a Web site can learn a lot about a user and potentially sell this information to a
+third party. Cookie Central [Cookie Central 2012] includes extensive information
+on the cookie controversy
 Si cerca di non inviare dati che il client ha già in cache e il server verifica la cosa:
 \begin{center}
 	\includegraphics[scale=0.7]{img/http4.png}
@@ -1381,20 +1168,16 @@ ovviamente i vari livelli hanno diversi protocolli:
 
 
 \chapter{HTML + CSS + JS}
-Innanzitutto una piccola distinzione:
+Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
+utilizzato per annotare un documento in maniera tale che l'annotazione sia sintatticamente
+distiguibile dal testo per diverse finalità:
 \begin{itemize}
-	\item un \textbf{linguaggio di programmazione} è utilizzato per comunicare istruzioni a
-	      una macchina di calcolo, per definire programmi che controllino il comportamento di un calcolatore (lo sono \textit{C, Java, C++...})
-	\item un \textbf{linguaggio di markup} è utilizzato per annotare un documento in modo
-	      tale che l'annotazione sia sintatticamente distinguibile dal testo (lo sono \textit{LaTeX, HTML, XML...}). Qui le annotazioni possono avere diverse finalità:
-	      \begin{itemize}
-		      \item di presentazione (definiscono come visualizzare il testo al quale sono associate)
-		      \item procedurali (definiscono istruzioni per programmi che elaborino il testo al quale sono associate)
-		      \item descrittive (etichettano semplicemente parti del testo, disaccoppiando la struttura dalla presentazione del testo stesso)
-	      \end{itemize}
+    \item di presentazione, in cui si definisce come visualizzare il testo al quale sono associate.
+    \item procedurali, in cui si definiscono istruzioni per programmi che elaborino il testo associato.
+    \item descrittive, in cui si etichettano semplicemente parti del testo, 
+        al fine di disaccopiare la struttura dalla presentazione del testo spesso.
 \end{itemize}
-\textbf{HTML} (\textit{Hyper Text Markup Language}) è un linguaggio di markup per dare struttura ai contenuti (web) e la sua specifica è definita dal \textbf{W3C} (\textit{World Wide Web Consortium}).
-\newpage
+
 Vediamo un piccolo esempio:
 \begin{center}
 	\includegraphics[scale=0.9]{img/html.png}

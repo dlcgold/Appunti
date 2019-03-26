@@ -509,5 +509,293 @@ Questo aspetto di utilizzare un'attributo con una notazione non posizionale ci g
 accedere ai campi di una tupla mediante un nome e soprattutto ci evita di stabilire un ordine tra 
 i diversi campi, ad esempio chi stabilisce che la matricola sia prima del nome e non viceversa.
 
+\chapter{SQL}
+Il linguaggio SQL è un linguaggio per la definizione e la manipolazione dei dati in database relazionali, sviluppato originariamente presso il laboratorio IBM a San Jose’ (California) e adottato nel sistema System R.
+L’SQL è stato poi adottato da molti altri DBMS e quindi è stato soggetto ad un’intensa attività di standardizzazione
+E‘ un linguaggio con varie funzionalità che contiene:
+\begin{itemize}
+\item \textbf{DDL:} definizione di domini, tabelle, autorizzazioni, vincoli,
+procedure, ecc.
+\item \textbf{DML:} linguaggio di query, modifica, ...
+\end{itemize}
+Si studierà una versione vecchia di SQL in quanto è la più implementata. Nello specifico studieremo SQL-2. SQL-3 è comunque compatibile con SQL-2 e introduce il concetto di oggetto. Noi useremo SQL per definire aggiornare e interrogare la base di dati. Sono sempre più frequenti in realtà sistemi dotati di interfacce più facili da usare. Questi programmi generano le istruzioni SQL corrispondenti.\\
+Esistono diverse implementazioni di SQL, per esempio il DBMS di Oracle, Access, Mysql...\\
+SQL è relazionale completo e ogni espressione dell'algebra relazionale può essere tradotta in SQL. Il modello dei dati di SQL è basato su tabelle anziché relazioni e possono essere presenti righe duplicate (le tuple) e adotta la logica a 3 valori dell'algebra relazionale (gestendo il null e aggiungendo il valore di verità U, \textit{unknown}). 
+\newpage 
+Le tabelle di verità diventano quindi:
+\begin{center}
+	\includegraphics[scale=0.7]{img/unk.png}
+\end{center}
+Vediamo la notazione per definire la sintassi di SQL:
+\begin{itemize}
+\item <x> per isolare un termine x
+\item $[x]$ indicano che un termine x è opzionale
+\item \{x\} indicano che un termine x può essere ripetuto 0
+volte o un numero arbitrario di volte
+\item | separa opzioni alternative
+\end{itemize}
+Le parentesi tonde ( ) appartengono al linguaggio
+SQL e non alla notazione sopra descritta.\\
+Uno \textbf{schema di base di dati} è una collezione di oggetti e ogni schema ha un nome e un proprietario. SI ha la seguente sintassi:
+\begin{center}
+	\includegraphics[scale=2.5]{img/sch.png}
+\end{center}
+Dopo il comando CREATE SCHEMA compaiono le
+definizioni dei vari elementi. Non è necessario che la definizione di tutti gli elementi avvenga contemporaneamente alla creazione dello schema. Può avvenire in più fasi successive.\\
+Una \textbf{tabella} è costituita da una collezione ordinata
+di attributi e da un insieme (eventualmente vuoto) di
+vincoli:
+\begin{minted}{mysql}
+CREATE TABLE NomeTabella (
+  NomeAttributo Dominio [ValoreDiDefault] [Vincoli]
+  {,NomeAttributo Dominio [ValoreDiDefault] [Vincoli] }
+  [AltriVincoli])
+\end{minted}
+questa istruzione quindi definisce uno schema di relazione e ne crea un'istanza vuota. Per ogni attributo va specificato il dominio, un eventuale valore di default (per questo è comodo il null, che è il valore di default di base) ed eventuali vincoli Possono essere espressi altri vincoli a livello di tabella (tra più attributi).
+\\ I \textbf{domini} specificano i valori ammissibili per gli attributi di una relazione. SQL ha 6 domini predefiniti:
+\begin{enumerate}
+\item bit SQL-2 poi eliminato e sostituito parzialmente da
+BOOLEAN in SQL-3
+\item carattere
+\item numerico Esatto
+\item numerico Approssimato
+\item data/Ora
+\item intervallo Temporale
+\end{enumerate}
+più ovviamente i domini definiti dall'utente.\\
+Vediamo il \textbf{dominio di tipo Bit}. Può essere di lunghezza fissa o variabile. Se la lunghezza non
+è specificata corrisponde ad 1 singolo valore.
+Corrisponde ad attributi che possono assumere solo due valori
+(0,1). Attributi di questo tipo (\textit{flag}) indicano se l'oggetto rappresentato possiede o meno una certa proprietà:
+\begin{minted}{mysql}
+bit [varying][(lunghezza)]
+bit
+bit(lunghezza)
+bit varying (lunghezza)
+varbit (lunghezza)
+\end{minted}
+\begin{esempio}
+Si definisce l'attributo Lavoratore nella relazione STUDENTI per indicare se se lo studente è o meno lavoratore:
+\begin{minted}{mysql}
+Lavoratore bit
+\end{minted}
+\end{esempio}
+Vediamo il \textbf{tipo carattere}. Rappresenta singoli caratteri alfanumerici oppure stringhe di lunghezza fissa o variabile:
+\begin{minted}{mysql}
+character [varying] [(lunghezza)]
+character o char
+character(lunghezza)
+varchar(lunghezza)
+character varying (lunghezza)
+\end{minted}
+\begin{esempio}
+Si definisce l'attributo Nome della relazione IMPIEGATI come sequenza di caratteri di lunghezza massima 20:
+\begin{minted}{mysql}
+Nome char(20)
+Nome varchar(20)
+\end{minted}
+con il primo che genera \textit{Paolo\_Bianchi\_ \_ \_ \_ \_ \_ \_} e il secondo \textit{Paolo\_Bianchi}
+\end{esempio}
+Vediamo i \textbf{tipi numerici esatti}. Rappresentano numeri interi o numeri decimali in virgola fissa (con un
+numero prefissato di decimali, ad esempio i valori monetari). Precision è numero di cifre significative, scala il numero di cifre dopo la virgola:
+\begin{minted}{mysql}
+integer
+smallint
+numeric numeric(precisione) numeric(precisione,scala)
+decimal decimal(precisione) decimal(precisione,scala)
+\end{minted}
+\begin{esempio}
+i definisce l'attributo Eta nella relazione IMPIEGATI:
+\begin{minted}{mysql}
+Eta decimal(2) // Rappresenta tutti i numeri fra -99 e +99
+\end{minted}
+Si definisce l'attributo Cambio nella relazione PAGAMENTO per  
+il valore del cambio di una certa moneta preciso al centesimo
+\begin{minted}{mysql}
+Cambio numeric(6,2) // Rappresenta tutti i numeri fra -9999,99 e +9999,99
+\end{minted}
+\end{esempio}
+quindi \textit{INTEGER / SMALLINT} rappresentano valor i interi. La precisione (numero totale di cifre) varia a seconda della specifica
+implementazione di SQL, non è specificata nello standard.
+SMALLINT richiede minore spazio di memorizzazione.\\
+\textit{NUMERIC / DECIMAL} rappresentano i valori decimali.
+La differenza tra NUMERIC e DECIMAL è che il primo deve essere implementato esattamente con la precisione richiesta, mentre il secondo può avere una precisione maggiore, la precisione segnalata è requisito minimo. Se la precisione non è specificata si usa il valore caratteristico
+dell'implementazione. Per la scala si usa valore 0. Si hanno ovviamente:
+\begin{minted}{mysql}
+float float(precisione)
+double precision
+real
+\end{minted}
+che sono utili per rappresentare valori reali approssimati, ad esempio grandezze fisiche (rappresentazione in virgola mobile, in cui a ciascun numero corrisponde una coppia di valori: mantissa e esponente).\\
+Per la data si ha:
+\begin{minted}{mysql}
+date
+time time(precisione)
+timestamp timestamp(precisione)
+\end{minted}
+Ciascuno di questi domini è strutturato e decomponibile in un
+insieme di campi (anno, mese, giorno, ora, minuti, secondi):
+\begin{minted}{mysql}
+DataDiNascita date // 1999-09-18
+OraDiConsegna time // 19.24.16
+Arrivo timestamp // 2000-09-18 21.15.20
+\end{minted}
+SI possono avere intervalli temporali:
+\begin{minted}{mysql}
+interval PrimaUnitàDiTempo
+interval PrimaUnitàDiTempo to UltimaUnitàDitempo
+\end{minted}
+Infine si hanno i tipi \textbf{blob}. Permettono di includere direttamente nel database oggetti molto grandi.
+\textit{Binary Large Object (BLOB)} e \textit{Character Large Object (CLOB)}:
+\begin{minted}{mysql}
+fotografia BLOB(10M)
+descrizione CLOB(100k)
+\end{minted}
+Definiti solo in SQL-3, ma implementati in diversi DBMS
+commerciali. Il sistema garantisce solo di memorizzarne il
+valore. Non possono essere usati come criterio di selezione
+per le interrogazioni.\\
+Per creare un dominio uso la primitiva \textit{create domain}:
+\begin{minted}{mysql}
+CREATE DOMAIN NomeDominio as DominioElementare
+             [ValoreDefault] [Constraints]
+\end{minted}
+Un nuovo dominio è caratterizzato dalle seguenti informazioni:
+nome, dominio elementare, valore di default, insieme di vincoli (constraints). Vediamo un esempio:
+\begin{minted}{mysql}
+CREATE DOMAIN Voto AS SMALLINT
+    DEFAULT 0
+    NOT NULL
+\end{minted}
+Il nuovo dominio Voto è definito come uno SMALLINT con
+valore di default e che non deve essere null.\\
+La definizione di "nuovi domini" è utile perché permette di
+associare dei vincoli a un nome di dominio: questo è
+importante quando si deve ripetere la stessa definizione di
+attributo su diverse tabelle: ad esempio, modifiche alla
+definizione di Voto si ripercuotono in tutte le occorrenze di
+questo dominio nello schema del Database.
+\begin{esempio}
+Vediamo un esempio concreto:
+\begin{minted}{mysql}
+CREATE TABLE NomeTabella (
+   NomeAttributo Dominio [ValoreDiDefault] [Vincoli]
+   {,NomeAttributo Dominio [ValoreDiDefault] [Vincoli] }
+   [AltriVincoli] )
 
+CREATE TABLE Impiegato (
+Matricola CHAR(6) PRIMARY KEY,
+Nome CHAR(20) NOT NULL,
+Cognome CHAR(20) NOT NULL,
+Dipart CHAR(15)
+Stipendio NUMERIC(9) DEFAULT 0,
+UNIQUE (Cognome,Nome)
+)
+\end{minted}
+UNIQUE richiede che non ci siano coppie cognome-nome ripetute
+\end{esempio}
+Un vincolo (consreaint) è una regola che specifica delle condizioni
+sui valori di un elemento dello schema del database.
+Un vincolo può essere associato ad una tabella, ad
+un attributo, ad un dominio. Sono di due tipi:
+\begin{enumerate}
+\item \textbf{vincoli intrarelazionali} che si applicano all'interno di una relazione. Possono essere:
+\begin{minted}{mysql}
+NOT NULL // (Il valore deve essere non nullo)
+UNIQUE // (I valori devono essere non ripetuti)
+PRIMARY KEY // (Chiave primaria)
+CHECK // (Condizioni complesse)
+\end{minted}
+Il vincolo PRIMARY KEY può essere definito una sola volta
+all'interno della relazione. In alcune implementazioni di SQL potrebbe essere
+necessario specificare comunque anche il vincolo NOT NULL
+per tutti gli attributi coinvolti.
+\item \textbf{vincoli interrelazionali} che si applicano tra relazioni diverse. Possono essere definiti attraverso i costrutti sintattici:
+\begin{minted}{mysql}
+REFERENCES // Permettono di definire vincoli di integrità
+FOREIGN KEY // referenziale
+CHECK // (Vincoli complessi)
+\end{minted}
+ e si hanno sintassi per singoli o più attributi. È possibile definire politiche di reazione alle violazioni. Si ha l'\textbf{integrità referenziale} che esprime un legame gerarchico (padre / figlio) fra tabelle. Alcuni attributi della tabella figlio sono definiti
+FOREIGN KEY e si devono riferire (REFERENCES)
+ad alcuni attributi della tabella padre che costituiscono
+una chiave (devono essere UNIQUE e NOT NULL
+oppure PRIMARY KEY). I valori contenuti nella FOREIGN KEY devono essere sempre presenti nella tabella padre. SI hanno due sintassi:
+\begin{enumerate}
+\item nella parte di definizione degli attributi con il
+costrutto sintattico REFERENCES:
+\begin{minted}{mysql}
+AttrFiglio CHAR(3) REFERENCES TabellaPadre(AttrPadre)
+\end{minted}
+\item oppure dopo le definizioni degli attributi con i
+costrutti FOREIGN KEY e REFERENCES:
+\begin{minted}{mysql}
+FOREIGN KEY (AttrFiglio)
+            REFERENCES TabellaPadre(AttrPadre)
+\end{minted}
+\end{enumerate}
+quindi:
+\begin{minted}{mysql}
+CREATE TABLE Impiegato (
+  Matricola CHAR(6) PRIMARY KEY,
+  Nome CHAR(20) NOT NULL,
+  Cognome CHAR(20) NOT NULL,
+  Dipart CHAR(15) REFERENCES Dipartimento(NomeDip) ,
+  Stipendio NUMERIC(9) DEFAULT 0,
+  UNIQUE (Cognome,Nome)
+)
+\end{minted}
+Se si omettono gli attributi destinazione, vengono
+assunti quelli della chiave primaria.
+\begin{minted}{mysql}
+AttrFiglio CHAR(3) REFERENCES TabellaPadre
+\end{minted}
+Quando si hanno più attributi da riferire, si utilizza
+sempre FOREIGN KEY:
+\begin{minted}{mysql}
+FOREIGN KEY (AttrFiglio1 {,AttrFiglio2} )
+         REFERENCES TabellaPadre(AttrPadre1 {,AttrPadre2})
+\end{minted}
+\end{enumerate}
+\begin{esempio}
+Definiamo tre tabelle con le informazioni degli esami
+sostenuti dagli studenti: Studente, Esame, Corso:
+\begin{minted}{mysql}
+CREATE TABLE Studente (
+  Matr CHAR(6)
+  Nome VARCHAR(30)
+  Città VARCHAR(20),
+  CDip CHAR(3)
+)
+\end{minted}
+\begin{center}
+\includegraphics[scale=0.7]{img/st.png}
+\end{center}
+\begin{minted}{mysql}
+CREATE TABLE Esame (
+  Matr CHAR(6),
+  CodCorso CHAR(6),
+  Data DATE NOT NULL,
+  Voto Voto,
+  PRIMARY KEY (Matr, CodCorso)
+\end{minted}
+\begin{center}
+\includegraphics[scale=0.7]{img/es.png}
+\end{center}
+\begin{minted}{mysql}
+  CREATE TABLE Corso (
+  CodCorso CHAR(6) PRIMARY KEY,
+  Titolo VARCHAR(30) NOT NULL,
+  Docente VARCHAR(20)
+)
+\end{minted}
+\begin{center}
+\includegraphics[scale=0.7]{img/sc.png}
+\end{center}
+con le relazioni:
+\begin{center}
+\includegraphics[scale=0.7]{img/re.png}
+\end{center}
+\textbf{pagina 50}
+\end{esempio}
 \end{document}

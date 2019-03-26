@@ -796,6 +796,193 @@ con le relazioni:
 \begin{center}
 \includegraphics[scale=0.7]{img/re.png}
 \end{center}
-\textbf{pagina 50}
+aggiungiamo un vincolo a esame:
+\begin{minted}{mysql}
+CREATE TABLE Esame (
+  Matr CHAR(6),
+  CodCorso CHAR(6),
+  Data DATE NOT NULL,
+  Voto Voto,
+  PRIMARY KEY (Matr, CodCorso)
+  FOREIGN KEY (Matr) REFERENCES Studente
+  FOREIGN KEY (CodCorso) REFERENCES Corso
+\end{minted}
+oppure:
+\begin{minted}{mysql}
+CREATE TABLE Esame (
+  Matr CHAR(6), REFERENCES Studente,
+  CodCorso CHAR(6),REFERENCES Corso,
+  Data DATE NOT NULL,
+  Voto Voto,
+  PRIMARY KEY (Matr, CodCorso)
+\end{minted}
 \end{esempio}
+Si introduce il \textbf{problema delle violazioni}.\\
+Per tutti gli altri vincoli visti fino ad ora, a seguito di
+una violazione, il comando di aggiornamento viene
+rifiutato segnalando l’errore all’utente.
+\\ Per i vincoli di integrità referenziale invece SQL
+permette di scegliere delle reazioni da adottare in
+caso di violazioni.\\
+Si possono introdurre violazioni operando sulle righe della
+tabella padre (tabella esterna) o sulle righe della tabella figlio
+(tabella interna). Si hanno le seguenti modifiche sulla tabella interna (figlio):
+\begin{itemize}
+\item inserimento di una nuova riga
+\item modefiche della \textit{foreign key}
+\end{itemize} 
+Inoltre non vengono proposte reazioni, solo il rifiuto dell’operazione\\
+Per la tabella esterna (padre) si hanno le seguenti modifiche:
+\begin{itemize}
+\item cancellazione di una riga
+\item modifica dell'attributo riferito
+\end{itemize}
+inoltre vengono proposte diverse reazioni.\\
+Si ha anche il problema dell'aggiornamento. Se rimuovi una matricola alla tabella Esame si aggiunge un problema, il \textbf{problema degli orfani}.\\
+Si hanno le reazioni alle violazioni, che si introucono con una modifica (update) dell’attributo cui si fa riferimento o con la cancellazione di tuple. Le reazioni operano sulla tabella figlio (es Esami), in seguito a modifiche alla tabella padre (es Studente):
+\begin{minted}{mysql}
+CASCADE: propaga la modifica
+SET NULL: annulla l’attributo che fa riferimento
+SET DEFAULT: assegna il valore di default all’attributo
+NO ACTION: impedisce che la modifica possa avvenire
+\end{minted}
+A fini diagnostici (e di documentazione) è spesso
+utile sapere quale vincolo è stato violato a seguito di
+un’azione sul DB.
+A tale scopo è possibile associare dei nomi ai
+vincoli, ad esempio:
+\begin{minted}{mysql}
+tipendio INTEGER CONSTRAINT StipendioPositivo
+CHECK (Stipendio > 0),
+
+CONSTRAINT ForeignKeySedi
+FOREIGN KEY (Sede) REFERENCES Sedi
+\end{minted}
+Per le modiche degli schemi si hanno:
+\begin{itemize}
+\item ALTER per la modica
+\item DROP che cancella oggetti dallo schema
+\end{itemize}
+\begin{minted}{mysql}
+ALTER DOMAIN NomeDominio <
+  SET DEFAULT ValoreDefault |
+  DROP DEFAULT |
+  ADD CONSTRAINT DefVincolo |
+  DROP CONSTRAINT NomeVincolo >
+  
+ALTER TABLE NomeTabella <
+  ALTER COLUMN NomeAttributo <
+    SET DEFAULT NuovoDefault |
+    DROP DEFAULT > |
+  DROP COLUMN NomeAttributo |
+  ADD COLUMN DefAttributo |
+  DROP CONSTRAINT NomeVincolo
+  ADD CONSTRAINT DefVincolo >
+\end{minted}
+DROP cancella oggetti DDL, si applica su domini, tabelle,
+indici, view, asserzioni, procedure,..:
+\begin{minted}{mysql}
+DROP < schema, domain, table, view, ...> NomeElemento
+[ RESTRICT | CASCADE ]
+\end{minted}
+\begin{itemize}
+\item RESTRICT: impedisce drop se gli oggetti comprendono istanze
+non vuote
+\item CASCADE applica drop agli oggetti collegati. Potenziale
+pericolosa reazione a catena
+\end{itemize}
+\subsection{Interrogazioni in SQL}
+Le interrogazioni si fanno con la SELECT:
+\begin{minted}{mysql}
+SELECT ListaAttributi
+FROM ListaTabelle
+[WHERE Vondizioni] 
+
+SELECT AttrEspr [ [ AS ] Alias ] {, AttrEspr [ [ AS ] Alias ] }
+FROM Tabella [ [ AS ] Alias ] {, Tabella [ [ AS ] Alias ] }
+[ WHERE Condizione ]
+\end{minted} 
+con gli AS setto gli alias.
+Vediamo qualche esempio:
+\begin{minted}{mysql}
+-- Individuare lo stipendio degli impiegati di cognome
+“Rossi”:
+SELECT Stipendio
+FROM Impiegato
+WHERE Cognome="Rossi"
+
+-- Selezionare nome, cognome e mansione degli
+impiegati dell’ufficio 10
+SELECT Nome, Cognome, Mansione
+FROM Impiegato
+WHERE ufficio='10'
+
+-- Individuare le informazioni degli impiegati con
+stipendio > 40
+Individuare le informazioni degli impiegati con
+stipendio > 40
+
+-- Selezionare tutte le informazioni sui dipendenti:
+SELECT id_impiegato, Nome, Cognome, Dipart, Ufficio,
+stipendio, premioprod,Mansione, Città, idcapo
+FROM Impiegato
+
+SELECT *
+FROM Impiegato
+
+-- Selezionare cognome, stipendio e premio di
+produzione per gli impiegati che hanno uno
+stipendio compreso tra 38 e 60:
+ELECT cognome, stipendio, premioprod AS premio_di_produzione
+FROM Impiegato
+WHERE ( stipendio>=38 AND stipendio <=60 )
+
+-- Selezionare i nomi, i cognomi e le città di provenienza
+degli impiegati
+SELECT Nome, Cognome, città AS città_provenienza
+FROM Impiegato
+
+-- Selezionare i nomi e i cognomi degli impiegati, le città
+di provenienza e le città in cui lavorano:
+SELECT Nome, Cognome, CittàDip AS città_lavoro,
+Città AS città_provenienza
+FROM Impiegato, Dip
+WHERE Dipart = NomeDip
+
+/* Specificare più tabelle su cui operare per determinare il
+risultato significa: eseguire il prodotto cartesiano delle tabelle
+e poi selezionare le righe che soddisfano clausola WHERE. 
+Join di algebra relazionale*/
+
+-- Selezionare i nomi e i cognomi degli impiegati, le città
+di provenienza e le città in cui lavorano:
+SELECT Nome, Cognome, CittàDip AS città_lavoro,
+Città AS città_provenienza
+FROM Impiegato, Dip
+WHERE Dipart = NomeDip
+
+-- Selezionare i nomi e i cognomi degli impiegati, le città
+di provenienza e le città in cui lavorano:
+SELECT Nome, Cognome, Città AS città_lavoro,
+Città AS città_provenienza
+FROM Impiegato, Dip
+WHERE Dipart = Nome
+
+/* Notazione punto: si utilizza il nome della tabella cui
+l’attributo fa riferimento */
+SELECT Impiegato.Nome, Cognome, Dip.Città AS città_lavoro,
+Impiegato.Città AS città_provenienza
+FROM Impiegato, Dip
+WHERE Dipart = Dip.Nome
+
+/* Si usano Alias per ridenominare le tabelle:
+1) Abbreviano riferimento a tabelle
+2) Risolvono ambiguità di riferimento*/
+SELECT I.Nome, Cognome, D.Città AS città_lavoro,
+I.Città AS città_provenienza
+FROM Impiegato I, Dip D
+WHERE Dipart = D.Nome
+\end{minted}
+\textbf{pagina 18}
 \end{document}
+

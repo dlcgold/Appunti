@@ -792,6 +792,259 @@ nella figura \ref{img:authentication}.
     \label{img:authentication}
 	\includegraphics[scale=0.7]{img/http6.png}
 \end{figure}
+Quindi ricapitolando:
+\begin{itemize}
+	\item \textbf{applicazione}:
+	\begin{itemize}
+		\item invia i messaggi come stream di byte al servizio di trasporto
+		\item legge lo stream di byte dal servizio di trasporto e ricostruisce i messaggi
+\end{itemize}
+	si ha quindi un unico messaggio:
+	\begin{verbatim}
+	GET /index.html HTTP/1.1<CR><LF>Host:
+	   www.unimib.it<CR><LF>User-agent: Mozilla/4.0<CR><LF><CR><LF> 
+	\end{verbatim}
+	\item \textbf{servizio UDP}:
+	\begin{itemize}
+		\item scompone lo stream di byte ricevuto in segmenti 
+		\item invia i segmenti, secondo una politica, ai servizi network
+\end{itemize}
+invia un messaggio così scomposto:
+	\begin{verbatim}
+	GET /index.html 
+	HTTP/1.1<CR><LF>Host: ww
+	w.unimib.it<CR><LF>U
+	ser-agent: Mozilla/4
+	.0<CR><LF><CR><LF>  
+	\end{verbatim}
+	\item \textbf{servizio TCP}: 
+	scompone e invia come UDP e ogni segmento viene numerato per garantire
+	\begin{itemize}
+		\item riordinamento dei segmenti arrivati 
+		\item controllo delle duplicazioni (scarto dei segmenti con ugual numero d'ordine)
+		\item controllo delle perdite (rinvio dei segmenti mancanti) 
+\end{itemize}
+invia un messaggio così scomposto, con la numerazione del pacchetto all'inizio:
+	\begin{verbatim}
+	0GET /index.html 
+	1HTTP/1.1<CR><LF>Host: ww
+	2w.unimib.it<CR><LF>U
+	3ser-agent: Mozilla/4
+	4.0<CR><LF><CR><LF>  
+	\end{verbatim}
+	come in figura:
+	\begin{center}
+		
+		\includegraphics[scale=2.7]{img/send.png}
+	\end{center}
+\end{itemize}
+\newpage
+\subsection{Tipi di Comunicazione}
+Si hanno 3 tipi di comunicazione:
+\begin{itemize}
+	\item \textbf{comunicazione asincrona}
+	\item \textbf{comunicazione persistente}, dove il middleware memorizza i dati fino alla consegna del messaggio al destinatario e non è necessario che i processi siano in esecuzione prima e dopo l'invio/ricezione dei messaggi. Si divide in:
+	\begin{itemize}
+		\item sincrona:
+		\begin{center}
+			\includegraphics[scale=0.8]{img/sin.png}
+        \end{center}
+		\item asincrona:
+		\begin{center}
+			\includegraphics[scale=0.8]{img/asin.png}
+		\end{center}
+	\end{itemize}
+	\item \textbf{comunicazione transiente}, ovvero se il destinatario non è connesso i dati vengono scartati. Si divide in:
+	\begin{itemize}
+		\item asincrona:
+		\begin{center}
+			\includegraphics[scale=0.8]{img/asin2.png}
+        \end{center}
+		\item sincrona Receipt-based:
+		\begin{center}
+			\includegraphics[scale=0.8]{img/sin2.png}
+        \end{center}
+        \item sincrona delivery-based:
+        \begin{center}
+			\includegraphics[scale=0.8]{img/sin3.png}
+        \end{center}
+        \item sincrona response-based:
+        \begin{center}
+			\includegraphics[scale=0.8]{img/sin4.png}
+        \end{center}
+	\end{itemize}
+\end{itemize}
+Vediamo un'immagine che spiega l'organizzazione generale di un sistema di comunicazione dove i vari hosts sono connessi attraverso la rete:
+\begin{center}
+\includegraphics[scale=0.8]{img/host.png}
+\end{center}
+\subsubsection{Comunicazione Persistente message-oriented}
+Si ha innanzitutto il \textbf{message-queeung model}. In questo caso si ha uno storage intermediario dei messaggi che non richiede ne il sender nel il receiver attivi durante la trasmissione:
+\begin{center}
+	\includegraphics[scale=0.8]{img/que.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.8]{img/queu2.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.8]{img/queu3.png}
+\end{center}
+con i routers:
+\begin{center}
+	\includegraphics[scale=0.8]{img/queu3.png}
+\end{center}
+\section{Web Application}
+Innanzitutto in un'applicazione web si ha l'adozione del protocollo HTTP. Si hanno dei limiti però nel protocollo HTTP a caratteri:
+\begin{itemize}
+	\item \textbf{lentezza}: occorre tradurre e ritradurre i dati 
+	\item \textbf{uso di HTML per input e output}
+	\item \textbf{uso di payload di tipo MIME}, quindi uso di interpreti esterni
+\end{itemize}
+Si hanno inoltre conversazioni senza stato (memoria), quindi ogni richiesta è un messaggio autonomo e per creare sessioni di lavoro (legare più richieste tra loro) occorre includere informazioni con mezzi espliciti , con \textit{cookie} o \textit{campi nascosti}.\\
+Per realizzare una applicazione, il \textbf{Web Server} si fa aiutare da un \textbf{Application Server}. Un Application server è caratterizzato dal protocollo di interazione con il Web Server e l'interazione col client è sempre HTTP.\\
+Lo sviluppo lato server si può avere sia con linguaggi compilati che con script interpretati. Nel caso di programmi compilati (un linguaggio qualsiasi che supporti l'integrazione col web server, C++, Java...) il web server si limita ad invocare, su richiesta del client, un eseguibile. Nel caso di esecuzione di script, il web server ha al suo interno un motore, \textit{engine}, in grado di interpretare il linguaggio di scripting usato (PHP, python, Perl...). In questo caso si perdono performances ma si guadagna una maggior semplicità di scrittura dei programmi.\\
+Si hanno 3 step:
+\begin{enumerate}
+	\item URL definisce un naming globale
+	\item GTTP fornisce un modello tipo RPC basato su socket e permette di invocare programmi sul server
+	\item CGI (\textit{Common Gateway Interface}) permette al server di attivare un programma e di passargli le richieste e i parametri provenienti dal client 
+\end{enumerate}
+Ovvero:
+\begin{center}
+	\includegraphics[scale=0.7]{img/CGI.png}
+\end{center}
+Il processo CGI implementa un interprete per il linguaggio utilizzato coi vantaggi della portabilità, dell'utilizzo di strutture ben definite. Inoltre viene usato per programmare solo le logiche delle applicazioni. Tutto ciò si implementa con Java/Servlet, python e PHP. \\
+\subsection{Il Lato Client}
+Lato client si possono fare request \textbf{link-based} con il parametro \textit{action}:
+\begin{minted}{html}
+<body>
+  <p>Click the link to ask the servlet to send back an HTML document</p>
+    <a href="http://localhost:8080/SlideServlet/GetHTTPServlet"> 
+      Get HTML Document      
+    </a>
+</body>
+\end{minted}
+Si ha quindi una richiesta del tipo: \textit{GET /path/name HTTP:1.1}\\
+\begin{center}
+	\includegraphics[scale=0.7]{img/lb.png}
+\end{center}
+Si possono fare richieste \textbf{form-based}:
+\begin{minted}{html}
+<form ACTION="http://localhost:8080/SlideServlet/GetHTTPServlet"
+      METHOD="GET">
+    <p>Click the button to have the servlet send an HTML document</p>
+    <input TYPE="submit"VALUE="Get HTML Document">
+</form>
+\end{minted}
+Si ha quindi una richiesta del tipo: \textit{GET /path/name HTTP:1.1}\\
+\begin{center}
+	\includegraphics[scale=0.7]{img/fb.png}
+\end{center}
+Si ha anche che i dati possono essere inviati tramite un \textbf{FORM}:
+\begin{minted}{html}
+<form ACTION="http://localhost:8080/SlideServlet/PostHTTPServlet"
+      METHOD="POST">  
+  What is your favorite pet?<br><br>
+  <input TYPE="radio"NAME="animal"VALUE="dog">Dog<br>
+  <input TYPE="radio"NAME="animal"VALUE="cat">Cat<br>
+  <input TYPE="radio"NAME="animal"VALUE="bird">Bird<br>
+  <input TYPE="radio"NAME="animal"VALUE="snake">Snake<br>
+  <input TYPE="radio"NAME="animal"VALUE="none"CHECKED>None
+  <br><br><input TYPE="submit"VALUE="Submit">
+  <input TYPE="reset">
+</form>
+\end{minted}
+\begin{center}
+	\includegraphics[scale=0.7]{img/form.png}
+\end{center}
+\subsection{Java Servlet}
+Le \textbf{Java Servlets} sono piccole applicazioni Java residenti sul server, per esempio \textit{apache/Tomcat}. Una servlet è un componente gestito in modo automatico da un \textit{container} o \textit{engine} e ha un'interfaccia che definisce il set di metodi (ovviamente (ri)definibili). Si ha quindi maggior semplicità e standardizzazione ma magior rigidità del modello. Il container controlla le servlet (attiva/disattiva) in base alle richieste dei client. Inoltre le servelts sono residenti in memoria, mantengono uno stato (sono oggetti java) e consentono le interazioni tra di loro.\\
+Si quindi la differenza tra \textbf{stateless} e \textbf{statefull}. HTTP non prevede persistenza, è quindi stateless e quindi non si possono mantenere informazioni tra un messaggio e i successivi e non si possono identificare i client. Si mantiene lo stato della conversazione con le servlet, con i cookies che sono informazioni memorizzate sul client che permettono di gestire le sessioni e con \textit{HTTPSession} che è gestito automaticamente dal container (con cookie o riscrittura delle URL).\\
+Ogni servlet implementa l'interfaccia:
+\begin{minted}{java}
+javax.servlet.Servlet
+\end{minted}
+con 5 metodi:
+\begin{minted}{java }
+// init inizializza il server
+void init(ServletConfig config) 
+
+/* ServletContext restituisce i parametri di inizializzazione e 
+il ServletContext che da accesso all’ambiente */
+ServletConfig getServletConfig() 
+
+// service è invocato per gestire le richieste dei client
+void service(ServletRequest request, ServletResponse response) 
+
+// getServletInfo restituisce informazioni tipo autore e versione 
+String getServletInfo() 
+
+/* la destroy è chiamata quando la servlet termina 
+(es: per chiudere un file o una connessione con un database) */
+void destroy()  
+\end{minted}
+L'interfaccia è solo la dichiarazione dei metodi che, per essere utilizzabili, devono essere implementati in una classe.\\
+no presenti due classi astratte, cioé che implementano i metodi dell’interfaccia in modo che non facciano nulla. 
+\begin{minted}{java}
+javax.servlet.GenericServlet 
+
+javax.servlet.http.HTTPServlet  /* che definisce 
+                                   metodi per l'uso in ambiente web */
+\end{minted}
+Questo semplifica la scrittura delle servlet vere e proprie in quando basta implementare (ridefinendoli) solo i metodi che interessano.\\
+Vediamo la classe \textit{HTTPServlet}. Questa classe implementa \textit{service} in modo da invocare i metodi per servire le richieste dal web. Si hanno:
+\begin{itemize}
+	\item \textit{doGet(), doHead(), doDelete(), doOptions(), doPost() e doTrace()} con i vari metodi HTTP
+	\item due parametri: \textit{HTTPServletRequest e HTTPServletResponse}
+	\item le eccezzioni: \textit{ServletException e IOException}
+\end{itemize}
+nche i parametri sono stati adattati al protocollo HTTP, cioè consentono di ricevere(inviare) messaggi HTTP leggendo(scrivendo) i dati nell'head e nel body di un messaggio. Si ha che:
+\begin{itemize}
+	\item all'interfaccia \textit{HTTPServletRequest} viene passato un oggetto da service, l'interfaccia contiene la richiesta del client e estende \textit{ServletRequest}
+	\item all'interfaccia \textit{HTTPServletResponse} viene passato un oggetto da service, contiene la risposta per il client ed estende \textit{ServletResponse}
+\end{itemize}
+Vediamo i metodi principali:
+\begin{minted}{java}
+String getParameter(String name) /* Restituisce il valore
+                                    dell’argomento name */
+
+Enumeration getParameterNames() /* Restituisce l'elenco 
+                                   dei nomi degli argomenti */
+
+String[] getParametersValues(String name) /* Restituisce i valori 
+                                             dell'argomento name */
+
+Cookie[] getCockies() //Restituisce i cookies del server sul client 
+
+void addCookie(Cookie cookie) /* Aggiunge un cookie
+                               nell'intestazione della risposta  */
+
+HTTPSession getSession(boolean create) /* Una HTTPSession
+                                          identifica il client e 
+                                          viene creata se create=true */
+                                          
+void setContentType(String type) /* Specifica il tipo MIME della
+                                    risposta per dire al browser come 
+                                    visualizzare la risposta 
+                                    Es: “text/html” dice che è html */
+                                          
+ServletOutputStream getOutputStream() /* Restituisce lo stream di 
+                                         byte per scrivere la risposta */
+
+PrintWriter getWriter() /* Restituisce lo stream di 
+                           caratteri per scrivere la risposta */ 
+\end{minted}
+qualche immagine:
+\begin{center}
+	\includegraphics[scale=2.4]{img/servlet.png}
+\end{center}
+\textbf{slide 22 blocco 06}
+
+
+
+
+
+
 
 \chapter{HTML + CSS + JS}
 Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,

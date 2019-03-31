@@ -1038,14 +1038,194 @@ qualche immagine:
 \begin{center}
 	\includegraphics[scale=2.4]{img/servlet.png}
 \end{center}
-\textbf{slide 22 blocco 06}
+vediamo lato client una pagina HTMl con un URL alla risorsa servlet
+\begin{minted}{html}
+<DOCTYPEhtml>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GetExample LINK</title>
+</head>
+<body>
+  <p>Click the link to ask the servlet to send back an HTML document</p>
+  <a href="http://localhost:8080/SlideServlet/GetHTTPServlet"> 
+  Get HTML document</a>
+</body>
+</html>
+\end{minted}
+vediamo nel caso del form, con il metodo di invio GET e la servlet che processa il form:
+\begin{minted}{html}
+<DOCTYPEhtml>
+<html>
+<head>
+<metacharset="UTF-8">
+<title>GetExample</title>
+</head>
+<body>
 
+<form action="http://localhost:8080/SlideServlet/GetHTTPServlet"
+      method="GET">
+   <p>Click the link to ask the servlet to send back an HTML document</p>
+   <input type="submit"value="Get HTML Document">
+</form>
+</body>
+</html>
+\end{minted}
+\newpage
+avendo lato server:
+\begin{minted}{java}
+// da Internet e WWW – How to program, Dietel&Dietel, Prentice Hall
+// Creating and sending a page to the client
 
+public classGetHTTPServletextendsHttpServlet {
+  public void doGet(HttpServletRequest request,
+                    HttpServletResponse response)
+              throwsServletException, IOException {
+     PrintWriter output;
+     response.setContentType( "text/html" ); // contenttype
+     output = response.getWriter(); // getwriter
+     // create and send HTML page to client
+     StringBufferbuf =new StringBuffer();
+     buf.append( "<html><head><title>\n" );
+     buf.append( "A Simple ServletExample\n" );
+     buf.append( "</title></head><body>\n" );
+     buf.append( "<H1>Welcome to Servlets!</H1>\n" );
+     buf.append( "</body></html>" );
+     output.println( buf.toString() );
+     output.close();// closePrintWriterstream
+  }
+}
+\end{minted}
+vediamo un esempio lato server che converte Celsius e Fahrenheit:
+\begin{center}
+	\includegraphics[scale=0.7]{img/cel.png}
+\end{center}
+\begin{minted}{java}
+public class FCConverter extends HttpServlet {
+  private String convertCtoF(Double celsius) {
+    Double fahrenheit;
+    fahrenheit = ((celsius * 9) / 5) + 32;
+    return Double.toString(fahrenheit);
+  }
+  
+  private String convertFtoC(Double fahrenheit) {    
+    Double celsius;
+    celsius = (fahrenheit - 32) * 5 / 9;
+    return Double.toString(celsius);
+  }
+  
+  protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response) 
+                       throws ServletException, IOException {
+    String result;     
+    String unit=request.getParameter("unit");
+    Double value = Double.parseDouble(request.getParameter("value"));
+    
+    if(unit.equals("fahrenheit")) {
+      response.getWriter().append("fahrenheit to celsius \n");
+      result=convertFtoC(value);
+    } else {
+      response.getWriter().append("celsius to fahrenheit \n");
+      result = convertCtoF(value);
+    }
+    
+    response.getWriter().append("Computed value: ").append(result);
+  }
+}   
+\end{minted}
+con i form:
+\begin{center}
+	\includegraphics[scale=0.8]{img/cel3.png}
+\end{center}
+\begin{minted}{html}
+<!DOCTYPEhtml> 
+<html> 
+<head>
+<meta charset="UTF-8">
+<title>F2C Converter</title>
+</head>
+<body>
 
+<form action="http://localhost:8080/SlideServlet/FCConverter"
+      method="GET">
+   Converter <BR><BR>
+   <input type="radio"name="unit"value="celsius">Celsius<BR>
+   <input type="radio"name="unit"value="fahrenheit">Fahrenheit<BR>
+   value <input type="text"name="value"><BR><BR>
+   <input type="submit"value="send">
+   <input type="reset">
+</form>
+</body>
+</html>
+\end{minted}
+volendo anche una risposta HTML:
+\begin{center}
+	\includegraphics[scale=2.4]{img/cel4.png}
+\end{center}
+con la servlet:
+\begin{minted}{java}
+import java.io.IOException;
+import java.text.DecimalFormat
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+@WebServlet("/FChtml")
+public class FCConverter extends HttpServlet {
 
-
-
+  private Double convertCtoF(Double celsius) {
+    Double fahrenheit;
+    fahrenheit = ((celsius * 9) / 5) + 32;
+    return fahrenheit;
+  }
+  
+  private Double convertFtoC(Double fahrenheit) {    
+    Double celsius;
+    celsius = (fahrenheit - 32) * 5 / 9;
+    return celsius;
+  }
+  
+  protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response) 
+                       throws ServletException, IOException {
+    String unit=request.getParameter("unit");
+    Double value = Double.parseDouble(request.getParameter("value"));
+    Double result;    
+    StringBuffer buf = new StringBuffer();
+    
+    buf.append( "<!DOCTYPE html>\n" );
+    buf.append( "<html>\n<head>\n<title>F2C converter </title>\n</head>\n<body>\n" );
+    if(unit.equals("fahrenheit")) {
+      buf.append("<h1> Fahrenheit to Celsius </h1>\n");
+      result=convertFtoC(value);
+    } else {
+      buf.append("<h1> Celsius to Fahrenheit </h1>\n");
+      result=convertCtoF(value);
+    }
+    DecimalFormat twoDigits = new DecimalFormat( "#0.00" );
+    buf.append("<h2>" + unit + ": " + twoDigits.format( value ) + "</h2>\n”);
+    buf.append("<h2>");
+    if( unit.equals("fahrenheit")) {
+      buf.append("celsius: ");
+    } else {
+      buf.append("fahrenheit: ");
+    }
+    
+    buf.append( twoDigits.format( result ) );
+    buf.append( "</h2>\n" ); 
+    buf.append( "</body>\n</html>" );
+    response.getWriter().append(buf);
+  }  
+}    
+\end{minted}
+\newpage
+Vediamo anche un esempio di POST:
+\begin{center}
+	\includegraphics[scale=0.7]{img/post.png}
+\end{center}
+slide 34 blocco6 
 \chapter{HTML + CSS + JS}
 Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
 utilizzato per annotare un documento in maniera tale che l'annotazione sia sintatticamente

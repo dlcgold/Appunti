@@ -1225,7 +1225,353 @@ Vediamo anche un esempio di POST:
 \begin{center}
 	\includegraphics[scale=0.7]{img/post.png}
 \end{center}
-\textbf{slide 34 blocco 6} 
+\begin{minted}{html}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset= "UTF-8" >
+<title>Post Example</title>
+</head>
+<body>
+  <form action= "http://localhost:8080/SlideServlet/PostHTTPServlet"
+     method= "POST" >
+     What is your favorite pet?<br>
+     <br> <input type= "radio" name= "animal" value= "dog" >Dog<br>
+     <input type= "radio" name= "animal" value= "cat" >Cat<br> <input
+       type= "radio" name= "animal" value= "bird" >Bird<br> <input
+       type= "radio" name= "animal" value= "snake" >Snake<br> <input
+       type= "radio" name= "animal" value= "none" checked>None <br>
+     <br>
+     <input type= "submit" value= "Submit" > <input type= "reset" >
+  </form>
+</body>
+</html> 
+\end{minted}
+con la seguente servlet lato server:
+\begin{minted}{java}
+public class HTTPPostServlet extends HttpServlet {
+  // definisco l’elenco degli animali
+  private String animalNames[] = {
+    "dog",
+    "cat",
+    "bird",
+    "snake",
+    "none"
+  };
+  public void doPost(HttpServletRequest request,
+    HttpServletResponse response)
+  throws ServletException, IOException {
+    int animals[] = null, // contatori di preferenze
+      total = 0; // totale delle preferenze espresse
+    // i dati sono memorizzati nel file "survey.dat"
+    File f = new File("survey.dat"); // apro o creo il file
+    if (f.exists()) { // leggo il file e lo assegno a animals
+      animals = ...
+        // conto quante sono le risposte date in precedenza
+        for (int i = 0; i < animals.length; ++i)
+          total += animals[i];
+    } else // creo un nuovo array di contatori
+      animals = new int[5];
+    // leggo il messaggio con la nuova preferenza
+    String value = request.getParameter("animal");
+    ++total;
+    // aggiorno il totale delle risposte
+    // determino quello votato e aggiorno il suo contatore
+    for (int i = 0; i < animalNames.length; ++i)
+      if (value.equals(animalNames[i]))
+        ++animals[i];
+    // scrivo i nuovi contatori sul file e lo chiudo
+    ObjectOutputStream output =
+      new ObjectOutputStream(new FileOutputStream(f));
+    output.writeObject(animals);
+    output.flush();
+    output.close();
+    // calcolo le percentuali
+    double percentages[] = new double[animals.length];
+    for (int i = 0; i < percentages.length; ++i)
+      percentages[i] = 100.0 * animals[i] / total;
+    // costruisco l’head del messaggio di risposta
+    response.setContentType("text/html"); // content type
+    // predispongo alla scrittura del body del messaggio
+    PrintWriter responseOutput = response.getWriter();
+    // uso un Buffer di servizio per costruire la pagina
+    StringBuffer buf = new StringBuffer();
+    buf.append("<html>\n<title>Thank you!</title>\n");
+    buf.append("Thank you for participating.\n");
+    buf.append("<br>Results:\n<pre>");
+    DecimalFormat twoDigits = new DecimalFormat("#0.00");
+    for (int i = 0; i < percentages.length; ++i) {
+      buf.append("<br>" + animalNames[i] + ": ");
+      buf.append(twoDigits.format(percentages[i]));
+      buf.append("% responses: " + animals[i] + "\n");
+    }
+    buf.append("\n<br><br>Total responses: " + total);
+    buf.append("</pre>\n</html>");
+    // scrivo la pagina nella risposta
+    responseOutput.println(buf.toString());
+  }
+}
+\end{minted}
+Vediamo cosa succede quando si esegue una servlet. Si crea innanzitutto un'istanza della servlet, condivisa da tutti i client e ogni richiesta genera un Thread che esegue la \textit{do} appropriata. Una servlet viene creata dal container quando viene effettuata la prima chiamata. Viene invocato il metodo \textit{init()} per inizializzazioni specifiche e viene distrutta con \textit{destroy()} quando non ci sono servizi in esecuzione o in base ad un timer specifico. Container e richieste dei client devono sincronizzarsi sulla terminazione in quanto potrebbe esserci ancora in esecuzione la \textit{service()}, inoltre bisogna tener traccia dei thread in esecuzione, progettare il metodo \textit{destroy()} in modo da notificare lo
+\textbf{shutdown} e attendere il completamento del metodo \textit{service()} e progettare i metodi lunghi in modo che verifichino periodicamente
+se è in corso uno shutdown e comportarsi di conseguenza.
+\subsection{Java JSP}
+\textbf{Java Service Pages} (analogamente a ASP, \textit{Micorsoft Active Server Page} con VBScript e JScript) è una tecnologia per la creazione di applicazioni web. Specifica l'interazione tra un contenitore/server ed un insieme di "pagine" che presentano informazioni all’utente
+Le pagine sono costituite da tag tradizionali (HTML, XML,
+WML, ...) e da tag applicativi che controllano la generazione
+del contenuto Rispetto ai servlet, facilitano la separazione tra logica applicativa e presentazione. Java Server Pages (JSP) separano la parte dinamica delle pagine dal template HTML statico e il codice si include dei tag <\% ... \%>.\\ Vediamo un esempio semplice, una pagina che visualizza "Grazie per la scelta di \textit{Internet Guida Pratica}" quando ci si connette ad  all'URL \textit{http://host/OrderConfirmation.jsp?title=Internet+Guida+Pratica}. La pagina conterrà:
+\begin{minted}{html}
+Grazie per la scelta di <i> <%= request.getParameter("title") %> </i>
+\end{minted} 
+La pagina viene convertita automaticamente in una servlet java la prima volta che viene richiesta.\\
+Vediamo un altro esempio:
+\begin{minted}{html}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+  pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://
+www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Welcome</title>
+</head>
+<body>
+  <h1><%= ”Welcome to JSP!" %><h1>
+</body>
+</html>
+\end{minted}
+\begin{center}
+	\includegraphics[scale=0.7]{img/jsp.png}
+\end{center}
+Vediamo gli elementi di una JSP:
+\begin{itemize}
+	\item \textbf{template text:} le parti statiche
+	\item \textbf{commenti:} \textit{<\%-- questo e’ un commento -->}
+	\item \textbf{direttive:} \textit{<\%@ direttiva ... di compilazione \%>}
+	\item \textbf{azioni in XML:} \textit{<tag attributes> body </tag>}
+	\item \textbf{elementi di scripting:}
+	\begin{itemize}
+		\item istruzioni nel linguaggio specificato nelle direttive
+		\item sono di tre tipi: scriplet, declaration, expression
+	\end{itemize}
+\end{itemize}
+Approfondiamo il discorso direttive. Si hanno:
+\begin{itemize}
+	\item \textbf{page:} sono liste di attributi/valori e valgono per la pagina dove sono inseriti:
+	\begin{minted}{html}
+    <%@ page import="java.util.*" buffer="16k" %>
+    <%@ page import=“java.math.*, java.util.*” %>
+    <%@ page session=“false” %>
+	\end{minted}
+	\item \textbf{include:} permette di includere in compilazione pagine HTML e JSP:
+	\begin{minted}{html}
+    <%@ include file="copyright.html" %>
+	\end{minted}
+	\item \textbf{taglib:} che dichiara tag definiti dall'utente implementando opportune classi:
+	\begin{minted}{html}
+    <%@ taglib uri=“TableTagLibrary” prefix=“table”%>
+    <table:loop> ... </table:loop>
+	\end{minted} 
+\end{itemize}
+Si hanno nello specifico delle direttive JSP:
+\begin{itemize}
+	\item \textbf{forward:} determina l'invio della richiesta corrente, eventualmente aggiornata con ulteriori parametri, all'URL indicata:
+	\begin{minted}{html}
+    <jsp:forward page=“login.jsp” %> 
+      <jsp:param name=“username” value=“user” />
+      <jsp:param name=“password” value=“pass” />
+    </jsp:forward>
+	\end{minted}
+	\item \textbf{include:} invia dinamicamente la richiesta ad una data URL e ne include il risultato:
+	\begin{minted}{html}
+    <jsp:include page=“login.jsp” %>
+	\end{minted}
+	\newpage
+	\item \textbf{useBean:} localizza ed istanzia (se necessario) un javaBean nel contesto specificato. Il contesto può essere:
+	\begin{minted}{html}
+     <jsp:useBean id=“cart” scope=“session” class=“ShoppingCart” />
+	\end{minted}
+\end{itemize}
+Vediamo gli elementi di scripting:
+\begin{itemize}
+	\item \textbf{declaration:} della forma \textit{<\%! declaration [declaration] ...\%>} indicano le variabili e i metodi usati nella pagina e valgono per la durata della servlet:
+	\begin{minted}{html}
+    <%! int[] v= new int[10]; %>
+	\end{minted}
+	\item \textbf{expression:} della forma \textit{<\%= expression \%>}. Indica una espressione nel linguaggio di scripting che viene valutata e sostituita con il risultato:
+	\begin{minted}{html}
+    <p>La radice di 2 vale <%= Math.sqrt(2.0) %></p>
+	\end{minted}
+	\item \textbf{scriptlet:} della forma \textit{<\% codice \%>} sono frammenti di codice che controllano la generazione della pagina, valutati alla richiesta. Le variabili valgono per la singola esecuzione. Ciò che viene scritto sullo stream di output sostituisce lo scriptlet:
+	\begin{minted}{html}
+    <table>
+    <% for (int i=0; i< v.length; i++) { %>
+             <tr><td> <%= v[i] %></td></tr>
+    <% } %>
+    </table>
+	\end{minted}
+\end{itemize}
+vediamo un esempio di uso di dati dinamici:
+\begin{minted}{html}
+<%@ page language="java" contentType="text/html;
+    charset=UTF-8” pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Uso di JSP</title>
+</head>
+<body BGCOLOR="#FDF5E6" TEXT="blue" >
+<CENTER>
+<TABLE BORDER=5 BGCOLOR="#EF8429">
+  <TR><TH CLASS="TITLE">
+    Using JavaServer Pages</TABLE>
+</CENTER> <BR>
+Some dynamic content created using various JSP mechanisms:
+<UL>
+  <LI><B>Expression.</B><BR>
+    Your hostname: <%= request.getRemoteHost() %>.
+  <LI><B>Scriptlet.</B><BR>
+    <% out.println("Attached GET data: " + request.getQueryString()); %>
+  <LI><B>Declaration (plus expression).</B><BR>
+    <%! private int accessCount = 0; %>
+    Accesses to page since server reboot: <%= ++accessCount %>
+  <LI><B>Directive (plus expression).</B><BR>
+    <%@ page import = "java.util.*" %>
+    Current date: <%= new Date() %>
+</UL>
+</body>
+</html>
+\end{minted}
+Un altro esempio:
+\begin{minted}{html}
+<%@ page language= "java" contentType= "text/html;
+   charset=UTF-8" pageEncoding= "UTF-8" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 
+  Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv= "Content-Type" content= "text/html; charset=UTF-8" >
+<title>Uso di JSP</title>
+<link rel= ”stylesheet" href= "My-Style-Sheet.css" type= "text/css” >
+</head>
+<body bgcolor= "#FDF5E6" text= "blue" >
+  <center>
+    <table border= "5" bgcolor= "#EF8429" >
+      <tr>
+        <th class= "title" > Using JavaServer Pages </th>
+      </tr>
+    </table>
+  </center>
+<br> Some dynamic content created using various JSP mechanisms:
+<ul>
+  <li><b>Expression.</b><br> Your hostname:
+     <%=request.getRemoteHost()%>. </li>
+  <li><b>Scriptlet.</b><br>
+     <% out.println("Attached GET data: " +
+        request.getQueryString()); %></li>
+  <li><b>Declaration (plus expression).</b><br> 
+    <%!private int accessCount = 0;%>
+    Accesses to page since server reboot: 
+    <%=++accessCount%> </li>
+  <li><b>Directive (plus expression).</b><br>
+    <%@ page import= "java.util.*" %> Current date: <%=new Date()%> </li>
+  </ul>
+</body>
+</html> 
+\end{minted}
+ottenendo:
+\begin{center}
+	\includegraphics[scale=0.7]{img/jsp2.png}
+\end{center}
+vediamo un esempio di JSP con form HTML:
+\begin{minted}{html}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JSP Example</title>
+</head>
+<body>
+<form action="http://localhost:8080/SlideServlet/FC.jsp"
+      method="GET"> 
+  Converter <BR><BR>
+  <input type="radio" name="unit" value="celsius">Celsius<BR>
+  <input type="radio" name="unit"   value="fahrenheit">Fahrenheit<BR>
+  value <input type="text" name="value" ><BR><BR>
+  <input type="submit" value="send">
+  <input type="reset">
+</form>
+</body>
+</html>
+\end{minted}
+\begin{center}
+	\includegraphics[scale=2.4]{img/jsp3.png}
+\end{center}
+\newpage
+che in JSP diventa:
+\begin{minted}{html}
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="Content-Type" 
+  content="text/html; charset=UTF-8">
+<title>F2C converter</title></head>
+<body>
+  <%@ page import = "java.text.DecimalFormat" %>
+  <% Double result;
+  String unit = request.getParameter("unit");
+  Double value=Double.parseDouble(request.getParameter("value")); %>
+  <h1> <% if( unit.equals("fahrenheit")) { %>
+       <%= "Fahrenheit to Celsius" %>
+       <% result=(value - 32)*5/9;
+       } else { %>
+       <%= "Celsius to Fahrenheit" %> 
+       <% result=((value * 9) / 5) + 32; } %>
+  </h1>
+  <% DecimalFormat twoDigits = new DecimalFormat( "#0.00" ); %>
+  <h2> <%= unit %> : <%= twoDigits.format(value) %> </h2>
+  <h2> <% if( unit.equals("fahrenheit")) { %>
+       <%= "Fahrenheit: " %>
+       <% result=(value - 32)*5/9;
+       } else { %>
+       <%= "Celsius: " %>
+       <% result=((value * 9) / 5) + 32; } %>
+       <%= twoDigits.format( result ) %>
+  </h2>
+</body>
+</html>
+\end{minted}
+\newpage
+Vediamo gli elementi di scripting. Un linguaggio di scripting ha lo scopo di interagire con gli oggetti java e gestire le eccezioni java. SI hanno 9 oggetti impliciti, gli elementi delle servlet:
+\begin{enumerate}
+	\item requeste
+	\item response
+	\item out
+	\item page
+	\item pageContext
+	\item session
+	\item application
+	\item config
+	\item exception
+\end{enumerate}
+Gli oggetti possono essere creti in 3 modi:
+\begin{enumerate}
+	\item implicitamente usando le direttive JSP
+	\item esplicitamente con le azioni
+	\item direttamente usando uno script (raro)
+\end{enumerate}
+Gli oggetti hanno un attributo che ne definisce lo "scope"
+
+
+
+
+
+
+
+
+
 \chapter{HTML + CSS + JS}
 Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
 utilizzato per annotare un documento in maniera tale che l'annotazione sia sintatticamente

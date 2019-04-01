@@ -1562,7 +1562,87 @@ Gli oggetti possono essere creti in 3 modi:
 	\item esplicitamente con le azioni
 	\item direttamente usando uno script (raro)
 \end{enumerate}
-Gli oggetti hanno un attributo che ne definisce lo "scope"
+Gli oggetti hanno un attributo che ne definisce lo "scope":
+\begin{center}
+	\includegraphics[scale=0.7]{img/scope.png}
+\end{center}
+che accede ad un oggetto HTTPSession. Per esempio si ha:
+\begin{itemize}
+	\item \textbf{memorizzazione}: 
+	\begin{minted}{html}
+    <% Foofoo = new Foo(); session.putValue("foo",foo); %>
+	\end{minted}
+	\item \textbf{recupero}:
+	\begin{minted}{html}
+    <% FoomyFoo = (Foo) session.getValue("foo"); %>
+	\end{minted}
+	\item \textbf{esclusione di una pagina dalla sessione}:
+	\begin{minted}{html}
+    <%@ page session="false" %>
+	\end{minted}
+\end{itemize}
+Parliamo ora del \textbf{pattern Model View COntrol (\textit{MVC})} per la separazione tra dati, controllo e visualizzazione. Si ha che:
+\begin{itemize}
+	\item il client richiede via HTTP un file .JSP
+	\item il file .JSP viene interpretato e accede a componenti lato-server (Java Beans, Servlet) che generano contenuti dinamici  
+	\item il risultato viene spedito al client in forma di pagine HTML 
+\end{itemize}
+\begin{center}
+	\includegraphics[scale=0.7]{img/mvc.png}
+\end{center}
+Un \textbf{bean} è una classe che segue regole precise:
+\begin{itemize}
+	\item ha un costruttore senza parametri
+	\item dovrebbe avere campi (property) protetti \textit{private}
+	\item i metodi di accesso ai campi (property) sono \textit{set e get}, quindi \textit{setXxx e getXxx/isXxx} (xxx = property) 
+\end{itemize}
+per esempio:
+\begin{minted}{java}
+class Book{
+  private String title;
+  private boolean available;
+  void setTitle(String t) ...;
+  String getTitle() ...;
+  void setAvailable(boolean b) ...;
+  boolean isAvailable () ...;
+}
+\end{minted}
+Vediamo le azioni per utilizzare un bean:
+\begin{itemize}
+    \item \textbf{inizializzazione}, ovvero accedere ad un bin:
+    \begin{minted}{html}
+    jsp:useBean id="user" class="com.jguru.Person" scope="session" />
+    <jsp:useBean id="user" class="com.jguru.Person" scope="session">
+     <% user.setDate(DateFormat.getDateInstance( ).format(new Date())); 
+       //etc.. %> 
+    </jsp:useBean> 
+    \end{minted}
+    \item \textbf{accedere alle proprietà:}
+    \begin{minted}{html}
+    <jsp:getPropertyname="user" property="name" />
+    <jsp:setPropertyname="user" property="name" value="jGuru" /
+    ><jsp:setPropertyname="user" property="name" 
+      value="<%=expression %>" />
+    <jsp:useBean id="Attore" class="MyThread" scope="session"
+      type="Thread"/>
+    \end{minted}
+\end{itemize}
+Lo scope determina la vita di un bean e:
+\begin{itemize}
+    \item \textbf{page} è lo scope di default: viene messo in \textit{pageContext} ed acceduto con \textit{getAttribute}
+    \item \textbf{request} viene messo in \textit{ServletReques}t ed acceduto con \textit{getAttribute}
+    \item per \textbf{session \textit{e} application} si ha che se non esiste un bean con lo stesso id, ne viene creato uno nuovo
+\end{itemize}
+Inoltre si ha che il type permette di assegnare al bean una superclasse e che al posto della classe si può usare il nome del bean.\\
+Vediamo un esempio di bean:
+\begin{minted}{html}
+pagina 65 blocco 6
+\end{minted} 
+
+
+
+
+
 
 
 

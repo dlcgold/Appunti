@@ -1636,22 +1636,73 @@ Lo scope determina la vita di un bean e:
 Inoltre si ha che il type permette di assegnare al bean una superclasse e che al posto della classe si può usare il nome del bean.\\
 Vediamo un esempio di bean:
 \begin{minted}{html}
-pagina 65 blocco 6
+<%@ page import= "itis.mvc.CounterBean" %>
+  <jsp:useBean id= "session_counter" class= "itis.mvc.CounterBean"
+    scope= "session" />
+<jsp:useBean id= "app_counter" class= "itis.mvc.CounterBean"
+  scope= "application" />
+<%
+  session_counter.increaseCount();
+  synchronized (page) {
+    app_counter.increaseCount();
+  }
+%>
+<h3>
+  Number of accesses within this session:
+  <jsp:getProperty name= "session_counter" property= "count" />
+</h3>
+<p></p>
+<h3>
+  Total number of accesses:
+  <%
+  synchronized (page) {
+  %>
+  <jsp:getProperty name= "app_counter" property= "count" />
+  <%
+  }
+  %>
+</h3>
 \end{minted} 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\begin{minted}{java}
+public class CounterBean {
+  //declare a integer for the counter
+  private int count;
+  
+  public int getCount() {
+    //return count
+    return count;
+  }
+  public void increaseCount() {
+    //increment count
+    count++;
+  }
+}
+\end{minted}
+\begin{center}
+	\includegraphics[scale=0.7]{img/count1.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.8]{img/count2.png}
+\end{center}
+\subsubsection{MVC2}
+La richiesta viene inviata ad una Java Servlet che
+\begin{itemize}
+	\item genera i dati dinamici richiesti dall’utente
+	\item li mette a disposizione della pagina jsp come Java “Beans”
+\end{itemize}
+e la servlet chiama una pagina .jsp che legge i dati del beans e organizza la presentazione in HTML che invia all'utente:
+\begin{center}
+	\includegraphics[scale=0.7]{img/mvc2.png}
+\end{center}
+L'MVC (\textit{Model View Control}) è formato da tre tipi di oggetti, che prima erano considerati un tutt'uno, incrementando così flessibilità e riutilizzo:
+\begin{enumerate}
+	\item il Model è \textbf{l'application object}
+	\item il View e la \textbf{presentazione a schermo}
+	\item il Controller è la componente che definire com l'interfaccia utente rispodne all'input
+\end{enumerate}
+\begin{center}
+	\includegraphics[scale=0.7]{img/mvc22.png}
+\end{center}
 \chapter{HTML + CSS + JS}
 Il linguaggio \textbf{HTML} è un linguaggio di markup, per dare struttura ai contenuti web,
 utilizzato per annotare un documento in maniera tale che l'annotazione sia sintatticamente
@@ -1749,7 +1800,5 @@ HTML5 sia più leggibile. In generale, a parte essere una notazione più concisa
 meno definizioni di classi, le gerarchie di contenuti più leggibili e analizzabili 
 in fase di progettazione, manutenzione e debug.
 
-Per avere informazioni riguardo alla sintassi html e css si consiglia di guardare i tutorial presenti 
-in internet su W3CSchool.
 
 \end{document}

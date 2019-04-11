@@ -975,6 +975,585 @@ cedenti e corrente presi in considerazione, anziché estendersi a un modello "bi
 di tipo a cascata che tenti di catturare dall'inizio tutte le possibili classi concettuali e
 relazioni.
 \end{shaded}
+\chapter{Progettazione a Oggetti}
+Esistono 3 modi per progettare ad oggetti:
+\begin{enumerate}
+	\item \textbf{codifica}, ovvero progettare mentre si codifica (in Java, C\#, ... ), possibilmente insieme a strumenti potenti come il refactoring. Dal modello mentale al codice.
+	\item \textbf{disegno e poi codifica}, ovvero disegnare alcuni diagrammi UML su una lavagna o con uno strumento CASE per UML, poi passare alla codifica usando un IDE "testuale"
+	\item \textbf{solo disegno}, 
+\end{enumerate}
+Alcuni degli scopi della modellazione agile sono ridurre il costo aggiuntivo del disegno e modellare per comprendere e comunicare, anziché per documentare. Le pratiche comprendono l'utilizzo di molte lavagne bianche (dieci in una stanza, non due) o di speciali fogli di plastica bianca
+aderenti tramite carica statica (che hanno la stessa funzione di una lavagna) per ricoprire ampie aree delle pareti, l'utilizzo di pennarelli, fotocamere digitali e stampanti per catturare "UML come abbozzo", uno dei tre modi per applicare UML. Si ha inoltre la modellazione insieme agli altri e il creare diversi modelli in parallelo (lavorando per tot tempo ad un diagramma su una lavagna e poi un altro po' su un'altra).\\
+Si può usare gli strumenti CASE per UML. Questi strumenti vanno da quelli molto costosi a quelli gratis e open
+source, e ogni anno la loro utilità migliora. Solitamente si sceglie uno strumento che si integra in un IDE diffuso, che sia in grado di eseguire reverse-engineering (generando diagrammi dal codice) non solo per i diagrammi di classe ma anche per quelli di interazione.\\
+\textbf{La modellazione agile alla parete e l'utilizzo di uno strumento CASE per UML integrato in un IDE testuale possono essere pratiche complementari. Sono da provare entrambe durante le varie fasi delle attività.}\\
+Si hanno anche delle linee guida "temporali": per un'iterazione con un timeboxing di tre settimane, si dedichino alcune ore o al massimo un giorno al disegno di UML, all'inizio dell'iterazione.\\
+e si fa modellazione agile, prima di ogni sessione di modellazione successiva, si esegua
+il reverse-engineering della base di codice crescente in diagrammi UML, si faccia una
+stampa (magari con un grande plotter), e si faccia riferimento a questi diagrammi nel
+corso della sessione di abbozzo.\\
+Si hanno due tipi di modelli per gli oggetti:
+\begin{enumerate}
+	\item \textbf{modelli dinamici} che, come i diagrammi di interazione di UML (diagrammi di sequenza e diagrammi di comunicazione), aiutano a progettare la logica, il comportamento del codice o il corpo dei metodi. Questi diagrammi tendono a essere i più interessanti, difficili e importanti da creare. È nel corso della modellazione a oggetti dinamica  che il meccanismo si mette in moto, ovvero si pensa in modo dettagliato e preciso a quali oggetti devono esistere e come questi collaborano attraverso messaggi e metodi. Per la programmazione dinamica usiamo i \textbf{diagrammi di interazione}. Si noti che è soprattutto durante la modellazione dinamica che si applicano la progettazione guidata dalle responsabilità e i principi GRASP. UML contiene altri diagrammi dinamici, come i \textbf{diagrammi di macchina a stati} e i \textbf{diagrammi di attività}
+	\item \textbf{modelli statici} che, come i diagrammi delle classi di UML, aiutano a progettare la definizione dei package, dei nomi delle classi, degli attributi e delle firme (ma non dei corpi) dei metodi. In UML si hanno altri diagrammi statici, come i \textbf{diagrammi dei package} e i \textbf{diagrammi di deployment}
+\end{enumerate}
+Prima si dedica del tempo ai modelli dinamici e poi a quelli statici.
 \newpage
-\section{Modelli di Dominio in UP}
+Mentre si disegna un diagramma a oggetti di UML, è necessario saper rispondere ad alcune domande fondamentali:
+\begin{itemize}
+	\item quali sono le responsabilità dell'oggetto? 
+	\item con chi collabora l'oggetto? 
+	\item quali design pattern devono essere applicati?
+\end{itemize}
+Inoltre la progettazione ad oggetti richiede la conoscenza di:
+\begin{itemize}
+	\item principi di assegnazione di responsabilità
+	\item design pattern
+\end{itemize}
+\textit{Un'altra tecnica di progettazione a oggetti è la CRC, Class, Responsability, Collaboration}.\\
+\section{Diagrammi di Interazione di UML}
+UML comprende i \textbf{diagrammi di interazione} per illustrare il modo in cui gli oggetti interagiscono attraverso i messaggi. Essi sono utilizzati per la modellazione dinamica degli oggetti. Ce ne sono due tipi:
+\begin{enumerate}
+	\item \textbf{modelli di interazione di sequenza}. Questi diagrammi mostrano le interazioni in un formato "a steccato" in cui ciascun nuovo oggetto viene aggiunto sulla destra:
+	\begin{center}
+		\includegraphics[scale=0.7]{img/seqd.png}
+	\end{center}
+	\newpage
+	dove B ha dei metodi \texttt{doTwo} e \texttt{doThree} mentre la classe A potrebbe essere:	
+    \begin{minted}{java}
+    public class A {
+      private B myB = new B();
+      private void doOne() {
+        myB.doTwo();
+        myB.doThree();
+      }
+      ...
+    }    
+    \end{minted}  
+	\item \textbf{modelli di interazione di comunicazione}. Questi diagrammi mostrano le interazioni tra gli oggetti in un formato a grafo o a rete, in cui gli oggetti possono essere posizionati ovunque nel diagramma:
+	\begin{center}
+		\includegraphics[scale=0.7]{img/comd.png}
+	\end{center}
+\end{enumerate}
+Entrambi possono esprimere interazioni simili e si può avere il \textbf{diagramma di interazione generale}, introdotto con UML2; esso fornisce una visione generale di come sono correlati un insieme di diagrammi di interazione, in termini
+di logica e di processi e flussi.\\
+Normalmente si preferiscono i diagrammi di sequenza a causa del loro maggior potere notazionale. Inoltre i diagrammi di sequenza hanno altri vantaggi rispetto a quelli di comunicazione, inoltre la specifica di UML è maggiormente incentrata su quelli di sequenza. Questo comporta un supporto migliore degli strumenti e si hanno più opzioni di notazione. Inoltre con i diagrammi di sequenza è più facile vedere la sequenza "call-flow", \textit{chiamata-flusso}, poiché è sufficiente leggerli dall'alto verso il basso. Con i diagrammi di comunicazione è necessario leggere i numeri di sequenza, come "1: " e "2: ". Pertanto i diagrammi di sequenza sono ottimi per la documentazione o per leggere facilmente una sequenza call-flow ottenuta con il reverse engineering, generata dal codice sorgente con uno strumento UML.
+\newpage
+Senza approfondire troppo pro e contro possiamo basarci su questa tabella riassuntiva:
+\begin{center}
+	\includegraphics[scale=0.7]{img/pc.png}
+\end{center}
+\begin{shaded}
+Vediamo un piccolo esempio di un diagramma di sequenza. Si hanno:
+\begin{enumerate}
+	\item il messaggio makePayment viene inviato a un'istanza di Register. Il mittente non è identificato
+	\item l'istanza di Register invia il messaggio makePayment a un'istanza di Sale
+	\item l'istanza di Sale crea un'istanza di Payment.
+\end{enumerate}
+Si potrebbe avere il seguente codice:
+\begin{minted}{java}
+public class sale {
+  private Payment payment;
+  
+  public void makePayment (Money cashTendered) {
+    payment = new Payment( cashTendered );
+    ...  
+  }
+  ...
+}
+\end{minted}
+con il seguente diagramma di sequenza:
+\begin{center}
+	\includegraphics[scale=0.65]{img/seqsal.png}
+\end{center}
+e di comunicazione:
+\begin{center}
+	\includegraphics[scale=0.65]{img/comsal.png}
+\end{center}
+\end{shaded}
+\subsection{Notazione in UML}
+In UML, nei diagrammi di interazione, si hanno \textbf{le linee di vita}, \textit{lifeline box} rappresentate mediante dei rettangoli. La loro definizione precisa in UML è sottile, ma informalmente essi rappresentano i partecipanti all'interazione, ovvero delle parti correlate definite nel contesto di un qualche diagramma strutturale, per esempio di un diagramma delle classi. Non è molto preciso dire che il rettangolo della linea di vita equivale a un'istanza di una classe ma, informalmente e in pratica, i partecipanti saranno spesso interpretati come tali:
+\begin{center}
+	\includegraphics[scale=0.7]{img/lfd.png}
+\end{center}
+I diagrammi di interazione mostrano dei messaggi tra gli oggetti e si ha una sintassi ben definita:
+\begin{center}
+	\textit{return = message(parameter : parameterType) : returnType}
+\end{center}
+Le parentesi vengono solitamente escluse se non ci sono parametri, anche se sono permesse. Le informazioni sul tipo possono essere escluse se ovvie o poco importanti. Vediamo qualche esempio:
+\begin{verbatim}
+initialize(code)
+initialize
+d = getProductDescription(id)
+d = getProductDescription(id:ItemiD)
+d = getProductDescription(id:ItemiD) : ProductDescription
+\end{verbatim}
+\newpage
+Nel mondo dei design pattern OO, ce n'è uno che è particolarmente diffuso, chiamato il \textbf{pattern Singleton}. Una delle sue implicazioni è che viene istanziata una sola istanza della classe, mai due. In altre parole, è
+un'istanza "singleton" e un tale oggetto è contrassegnato da un 1 nell'angolo superiore destro del rettangolo della linea di vita.
+\begin{center}
+	\includegraphics[scale=0.7]{img/sing.png}
+\end{center}
+\subsection{Notazione dei Diagrammi di Sequenza}
+Diversamente dai diagrammi di comunicazione, nei diagrammi di sequenza i rettangoli delle linee di vita comprendono una linea verticale che si estende sotto di esse (si tratta delle linee di vita vere e proprie). Anche se quasi tutti gli esempi di UML mostrano le linee di vita tratteggiate (a causa dell'influenza di UML 1), di fatto la specifica di UML 2 afferma che possono essere continue oppure tratteggiate.\\
+Ogni messaggio (di solito sincrono) tra gli oggetti è rappresentato da un'espressione messaggio mostrata su una linea continua con una freccia piena tra le linee di vita verticali. L'ordinamento del tempo è organizzato dall'alto verso il basso delle linee di vita. Il messaggio iniziale (in alto a sinistra) è chiamato in
+UML un messaggio trovato, ed è mostrato con un cerchio pieno di apertura; ciò implica che il mittente non sarà specificato, non è noto, o che il messaggio proviene da una sorgente qualsiasi. Tuttavia, per convenzione un team o uno strumento possono ignorare questa indicazione e utilizzare invece una normale linea di messaggio senza il cerchio, intendendo per convenzione che si tratta di un messaggio trovato. I diagrammi di sequenza possono anche mostrare il
+centro del controllo (informalmente, in una normale chiamata bloccante, che l' operazione è sullo stack delle chiamate) utilizzando una barra di specifica di esecuzione (precedentemente chiamata barra di attivazione o semplicemente attivazione in UML 1). 
+\newpage
+La barra è opzionale ma è comune disegnarla con un CASE per UML e meno comunque con un abbozzo alla parete:
+\begin{center}
+	\includegraphics[scale=0.7]{img/msgd.png}
+\end{center}
+Ci sono due modi per mostrare il risultato di ritorno per un messaggio:
+\begin{enumerate}
+	\item utilizzare per il messaggio la sintassi \textit{returnVar = message(parameter)}. Questo metodo è preferibile
+	\item utilizzare una linea di messaggio di risposta (o ritorno) alla fine di una barra di specifica di esecuzione
+\end{enumerate}
+\begin{center}
+	\includegraphics[scale=0.7]{img/msgd2.png}
+\end{center}
+\newpage
+È possibile mostrare un messaggio inviato da un oggetto a se stesso utilizzando una barra di specifica di esecuzione annidata (rappresentando il \texttt{this}):
+\begin{center}
+	\includegraphics[scale=0.7]{img/this.png}
+\end{center}
+Vediamo la notazione per creare oggetti in UML. La freccia è piena se si tratta di un messaggio regolare
+sincrono (per esempio, per indicare l'invocazione di un costruttore Java) , oppure non piena se si tratta di una chiamata asincrona. Non è obbligatorio chiamare il messaggio create (qualunque cosa è permessa) , ma si tratta di un idioma di UML. [interpretazione tipica (in linguaggi come Java o C\#) di un messaggio create su una linea tratteggiata con una freccia piena è "invocare l'operatore new e chiamare il costruttore":
+\begin{center}
+	\includegraphics[scale=0.7]{img/objd.png}
+\end{center}
+In alcune circostanze è opportuno mostrare una distruzione esplicita di un oggetto; per esempio, quando si utilizza il C++ (che non ha garbage collection automatica), o quando si vuole indicare specificamente che un oggetto non è più utilizzabile (come una connessione chiusa a una base di dati). La notazione delle linee di vita di UML fornisce un modo per esprimere questa distruzione:
+\begin{center}
+	\includegraphics[scale=0.7]{img/disd.png}
+\end{center}
+Come supporto ai costrutti condizionali e di ciclo (tra le altre cose), UML utilizza i \textbf{frame}. frame sono regioni o frammenti dei diagrammi; hanno un operatore o un'etichetta (come loop) e una guardia (clausola condizionale):
+\begin{center}
+	\includegraphics[scale=0.7]{img/framed.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.7]{img/framed2.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.7]{img/framed5.png}
+\end{center}
+
+in tabella si hanno gli operatori più comuni per i frame:
+\begin{center}
+	\includegraphics[scale=0.7]{img/farmed2.png}
+\end{center}
+La vecchia notazione UML l.x per i messaggi condizionali singoli nei diagrammi di sequenza non è più legale in UML 2, ma è così semplice che probabilmente resterà diffusa ancora per anni, soprattutto durante l'abbozzo:
+\begin{center}
+	\includegraphics[scale=0.6]{img/framed3.png}
+\end{center}
+Abbiamo anche una tecnica particolare per mostrare l'iterazione su una collezione:
+\begin{center}
+	\includegraphics[scale=0.7]{img/iterd.png}
+\end{center}
+L'espressione selettore è utilizzata per selezionare un solo oggetto da un gruppo. Una linea di vita
+partecipante deve rappresentare un solo oggetto, non una collezione. Vediamo cosa rappresenterebbe in codice:
+\begin{minted}{java}
+public class Sale {
+  private List<SalesLineitem> lineitems =
+                              new ArrayList<SalesLineitem>();
+  public Money getTotal() {
+    Money total = new Money();
+    Money subtotal = null;
+    for ( SalesLineitem lineitem : lineitems) {
+      subtotal = lineitem.getSubtotal();
+      total.add( subtotal );
+    }
+  ...
+}
+\end{minted}
+Si ha anche una variante semplificata senza dettagli:
+\begin{center}
+	\includegraphics[scale=0.7]{img/iterd2.png}
+\end{center}
+\textbf{I frame possono essere annidati:}
+\begin{center}
+	\includegraphics[scale=0.7]{img/framed4.png}
+\end{center}
+Si possono inoltre correlare i diagrammi di interazione. Una occorrenza di interazione (chiamata anche un uso di interazione) è un riferimento a un'interazione all'interno di un'altra interazione. È utile, per esempio, quando si vuole semplificare un diagramma e decomporne una porzione in un altro diagramma, oppure nel caso in cui ci sia un'occorrenza di interazione riusabile. Gli strumenti UML ne traggono vantaggio, grazie alla loro utilità nel correlare e collegare i diagrammi:
+\begin{center}
+	\includegraphics[scale=0.7]{img/corrd.png}
+\end{center}
+\newpage
+Si hanno due frame correlati:
+\begin{enumerate}
+	\item un frame attorno a un intero diagramma di sequenza, etichettato con il tag \textbf{sd} e con un nome, per esempio \textit{AuthenticateUser}
+	\item un frame con tag \textbf{ref}, chiamato un riferimento, che referenzia un altro diagramma di sequenza tramite il nome; è la vera e propria occorrenza di interazione
+\end{enumerate}
+I diagrammi di interazione generale contengono anch'essi un insieme di frame riferimento (occorrenze di interazione). Questi diagrammi organizzano i riferimenti in una struttura più ampia di logica, processi e flussi.\\
+\textit{Qualsiasi diagramma di sequenza può essere racchiuso in un frame sd, per dargli un nome. Si racchiuda un diagramma in un frame e gli si assegni un nome solo
+quando si vuole fare riferimento allo stesso utilizzando un frame ref}.\\
+È possibile mostrare le chiamate a un metodo di classe, o statico, utilizzando un'etichetta
+nel rettangolo di una linea di vita per indicare che l'oggetto ricevente è una classe o, più
+precisamente, un'istanza di una meta-classe. Infatti le classi Class e Type sono meta-classi, il che significa che le rispettive istanze sono esse stesse delle classi:
+\begin{center}
+	\includegraphics[scale=0.7]{img/classd.png}
+\end{center}
+Vediamo come rappresentare un altro aspetto fondamentale della progettazione orientata a oggetti, il \textbf{polimorfismo}. Un approccio consiste nell'utilizzare più diagrammi di sequenza: uno che mostra il messaggio polimorfo all'oggetto della superclasse astratta o dell'interfaccia, insieme a diagrammi di sequenza separati che descrivono nel dettaglio ciascun caso polimorfo, ciascuno che inizia con un messaggio trovato polimorfo:
+\begin{center}
+	\includegraphics[scale=0.6]{img/polid.png}
+\end{center}
+Una \textbf{chiamata di messaggio asincrono} non attende una risposta; non è bloccante. Vengono utilizzate negli ambienti multi-thread come .NET e Java per creare e iniziare nuovi
+thread di esecuzione. La notazione UML per le chiamate asincrone è un messaggio con una freccia con la
+punta non piena; le chiamate sincrone regolari (bloccanti) sono mostrate con una freccia a punta piena:
+\begin{center}
+	\includegraphics[scale=0.6]{img/sincd.png}
+\end{center}
+Si ha un \textbf{oggetto attivo} quando ciascuna istanza
+è eseguita nel proprio thread di esecuzione e lo controlla. In UML, può essere mostrato
+con delle doppie linee verticali sui lati sinistro e destro del rettangolo della linea di vita.
+La stessa notazione è utilizzata per una \textbf{classe attiva}, le cui istanze sono oggetti attivi.
+\subsection{Notazione nei Diagrammi di Comunicazione}
+Iniziamo con i \textbf{collegamenti}. Un collegamento è un percorso di connessione tra due oggetti, che indica che è possibile una qualche forma di navigazione e di visibilità tra gli oggetti. Più formalmente, un collegamento è un'istanza di un'associazione:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd1.png}
+\end{center}
+\textit{i noti che su uno stesso collegamento possono scorrere più messaggi e messaggi in
+entrambe le direzioni. Non c'è una linea di collegamento per ciascun messaggio; tutti i messaggi scorrono sulla stessa linea, come in una strada su cui è consentito il traffico in
+entrambe le direzioni.}\\
+Passiamo ai \textbf{messaggi}. Ogni messaggio tra oggetti è rappresentato da un'espressione messaggio e da una piccola
+freccia che indica la direzione del messaggio. Lungo un collegamento possono scorrere più messaggi. Viene aggiunto un numero di sequenza per mostrare l'ordine sequenziale dei messaggi nel thread corrente, per comodità non si numera il messaggio iniziale:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd2.png}
+\end{center}
+\newpage
+È possibile inviare un messaggio da un oggetto a se stesso. Ciò è illustrato da un collegamento a se stesso, con i messaggi che scorrono lungo il collegamento:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd3.png}
+\end{center}
+Qualsiasi messaggio può essere utilizzato per creare un'istanza, ma la convenzione in UML prevede di utilizzare per questo scopo un messaggio chiamato \textit{create}, anche se alcuni usano \textit{new}. Se viene usato un altro nome di messaggio (meno
+ovvio), il messaggio può essere annotato con uno stereotipo UML, come «create». Il messaggio create può comprendere dei parametri, che indicano il passaggio di valori iniziali. Ciò indica, per esempio, una chiamata di un costruttore con dei parametri in Java. Inoltre, il valore con tag {new} di UML può essere eventualmente aggiunto al rettangolo della linea di vita per evidenziare la creazione. I valori con tag sono un meccanismo di estensione flessibile di UML per aggiungere delle informazioni significative dal punto di
+vista semantico a un elemento UML:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd4.png}
+\end{center}
+L'\textbf{ordine dei messaggi} è illustrato con i numeri di sequenza, per comodità il primo non è numerato. Inoltre l'ordine e l'annidamento dei messaggi seguenti è mostrato mediante uno schema di numerazione legale in cui ai messaggi annidati è aggiunto un numero alla fine. L'annidamento è denotato dal preporre il numero del messaggio in entrata al
+numero del messaggio in uscita:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd5.png}
+\end{center}
+Un \textbf{messaggio condizionale} viene indicato facendo seguire al numero di sequenza una clausola condizionale tra parentesi quadre, simile alla clausola per una iterazione. Il messaggio viene inviato solo se la clausola viene valutata a true:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd6.png}
+\end{center}
+Si possono avere \textbf{percorsi condizionali mutualmente esclusivi}. In questo caso occorre modificare le espressioni di sequenza con una lettera di percorso
+condizionale. La prima lettera utilizzata è, per convenzione, la lettera "a". quindi dopo msg1 potrebbero venire eseguiti 1a o 1b. Entrambi hanno 1 come numero di sequenza, poiché entrambi potrebbero essere il primo messaggio interno. Si noti che i numeri dei messaggi annidati successivi sono ancora preceduti, in modo coerente, dal numero di sequenza del rispettivo messaggio entrante. Pertanto 1b.1 è un
+messaggio annidato a 1b.
+\begin{center}
+	\includegraphics[scale=0.6]{img/comd7.png}
+\end{center}
+vediamo l'\textbf{iterazione}. Se i dettagli della clausola di iterazione non sono importanti per il modellatore, è possibile utilizzare un semplice "*":
+\begin{center}
+	\includegraphics[scale=0.6]{img/comd8.png}
+\end{center}
+Per \textbf{iterare su una collezione} non si ha alcuna convenzione UML ufficiale ma si usa:
+\begin{center}
+	\includegraphics[scale=0.6]{img/umd9.png}
+\end{center}
+Per \textbf{invocare una classe}:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd9.png}
+\end{center}
+Come nel caso dei diagrammi di sequenza, è possibile
+utilizzare più diagrammi di comunicazione per mostrare, separatamente, ciascun \textbf{caso polimorfo concreto}:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd10.png}
+\end{center}
+Come nei diagrammi di sequenza, le chiamate sincrone sono mostrate con una freccia con 
+la punta piena e quelle asincrone con una freccia con la punta non piena:
+\begin{center}
+	\includegraphics[scale=0.7]{img/comd11.png}
+\end{center}
+\chapter{Diagrammi delle Classi}
+UML comprende i \textbf{diagrammi delle classi} per illustrare le classi, le interfacce e le relative associazioni. Essi sono utilizzati per la modellazione statica degli oggetti. Visto che la maggior parte degli elementi sono stati già analizzati partiamo da una figura che racchiude la gran parte delle notazioni, anche quelle opzionali come i modificatori +/- di visibilità (ricordiamo che se non indicata per convenzione si ha che un attributo è privati), i parametri e le sezioni:
+\begin{center}
+	\includegraphics[scale=0.6]{img/clasd.png}
+\end{center} 
+Da un punto di vista concettuale i diagrammi delle classi possono essere utilizzati per visualizzare un modello di dominio. Per la discussione occorre anche un termine univoco che chiarisca quando un diagramma delle classi è utilizzato da un punto di vista software o di progetto. A questo scopo, un termine comune nella modellazione è diagramma delle classi di progetto \textbf{DCD}, \textit{Design Class Diagram}. In UP, l'insieme di tutti i DCD fa parte del Modello di Progetto. Altre parti del Modello di Progetto comprendono i diagrammi di interazione e i diagrammi dei package di UML:
+\begin{center}
+	\includegraphics[scale=0.57]{img/clasd2.png}
+\end{center}
+In UML, un \textbf{classificatore} è un \textit{elemento di modello che descrive caratteristiche comportamentali e strutturali}. I classificatori possono essere \textbf{specializzati}. Essi sono una generalizzazione di molti degli elementi di UML, comprese le classi, le
+interfacce, i casi d'uso e gli attori. Nei diagrammi delle classi, i due classificatori più comuni sono le \textbf{classi regolari} e le \textbf{interfacce}. Gli attributi di un classificatore sono mostrati in vari modi:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd3.png}
+\end{center}
+\begin{itemize}
+	\item con un annotazione testuale, per esempio \textit{currentSale : Sale}. Il formato completo però sarebbe:
+	\begin{center}
+		\textit{visibility name: type multiplicity = default {property-string}}
+	\end{center}
+	\item con una linea di associazione, con una \textbf{freccia di navigabilità} rivolta dall'oggetto sorgente  all'oggetto destinazione, che indica che l'oggetto sorgente ha un attributo di tipo oggetto destinazione. Inoltre viene indicata la molteplicità solo vicino alla destinazione, con la solita notazione. Si ha un \textbf{nome di ruolo} solo all'estremità vicina alla destinazione, per indicare il nome dell'attributo e non si ha un nome per l'associazione. D'altra parte, quando si utilizzano i diagrammi delle classi per un modello di dominio, si mostrino i nomi delle associazioni, ma si evitino le frecce di navigazione, poiché un modello di dominio non è da un punto di vista software:
+	\begin{center}
+		\includegraphics[scale=0.7]{img/clasd4.png}
+	\end{center}
+	\item con entrambe le notazioni sopra indicate
+\end{itemize}
+Si utilizza la notazione testuale per gli attributi per gli oggetti tipi di dato,
+e la notazione delle linee di associazione per gli altri attributi. 
+\newpage
+Da un punto di vista semantico sono equivalenti, ma mostrare una linea di associazione verso il rettangolo di dà un risalto visuale:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd5.png}
+\end{center}
+\begin{minted}{java}
+public class Register {
+  private int id;
+  private Sale currentSale;
+  private Store location;
+  ...
+}
+\end{minted}
+L'estremità di un'associazione può avere una freccia di navigabilità, e può anche comprendere un nome di ruolo opzionale (ufficialmente, un nome di estremità di associazione) per indicare il nome dell'attributo. Naturalmente l'estremità dell'associazione può anche mostrare un valore di molteplicità.\\
+È possibile usare una stringa di proprietà come \{ordered\} o \{ordered, List\}. La prima \{ordered\} è una parola chiave definita da UML che
+implica che gli elementi della collezione sono ordinati. Un'altra parola chiave correlata è
+\{unique\}, che implica un insieme di elementi distinti.
+La parola chiave \{List\} mostra come UML consente anche le parole chiave definite dall'utente. È stato usato \{List\} per indicare che l'attributo collezione lineltems sarà implementato con un oggetto che implementa l'interfaccia \textit{List}. Si hanno due modi per rappresentare un attributo collezione, con anche l'indicazione di propretà opzionali, come \{ordered\}:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd6.png}
+\end{center}
+Si ha una sintassi particolare per le operazioni:
+\begin{center}
+	\textit{visibility name (parameter-list) \{property-string\}}
+\end{center}
+e manca l'elemento per il tipo di ritorno, che è stato introdotto in UML2:
+\begin{center}
+	\textit{visibility name (parameter-list) : return-type \{property-string\}}
+\end{center}
+\textbf{Al contrario degli attributi, in mancanza di specifica sulla visibilità, si assume visibilità pubblica per le classi}.\\
+Nelle proprietà possono essere contenute informazioni riguardanti le eccezioni, una nota indicante se l'operazione è stratta etc...\\
+\textbf{Un'operazione non è un metodo. Un'operazione di UML è una dichiarazione, con un
+nome, dei parametri, un tipo di ritorno, un elenco di eccezioni e magari un insieme di
+vincoli di pre-condizioni e post-condizioni.}\\
+In UML, un \textbf{metodo} è l'implementazione di un'operazione; se sono definiti dei vincoli,
+il metodo deve soddisfarli. Un metodo può essere illustrato in vari modi, tra cui:
+\begin{itemize}
+	\item nei diagrammi di interazione, dai dettagli e dalla sequenza dei messaggi
+	\item nei diagrammi delle classi, con un simbolo di nota di UML stereotipato con «method»
+\end{itemize}
+\textit{Si noti che quando si usa una nota UML per mostrare un metodo, in realtà si stanno
+mischiando viste statiche e dinamiche in uno stesso diagramma. Il corpo di un metodo
+(che definisce del comportamento dinamico) aggiunge un elemento dinamico a un diagramma delle classi statico:}
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd7.png}
+\end{center}
+\textit{Si noti che questo stile va bene per i diagrammi di un libro o di un documento e per
+l' output generato da uno strumento, ma forse è troppo meticoloso o stilizzato per l'abbozzo o per fornire l'input a uno strumento. Gli strumenti possono fornire una finestra
+a comparsa per inserire in modo semplice il codice per un metodo.}\\
+Le operazioni di accesso \textbf{get} e \textbf{set} sono spesso escluse (o filtrate) dai diagrammi delle classi, a causa dell'elevato rapporto disturbo-valore che generano; per $n$ attributi, ci possono essere $2n$ operazioni get e set poco interessanti. La maggior parte degli strumenti per UML consente di filtrare la loro visualizzazione, ed è particolarmente comune ignorarle quando si esegue l'abbozzo alla parete.\\
+Una \textbf{parola chiave} in UML è un decoratore testuale per classificare un elemento di un
+modello. Per esempio, la parola chiave «interface» indica che il rettangolo per un classificatore è un'interfaccia anziché una classe regolare. In generale, quando un elemento di UML può avere una "stringa di proprietà", come per esempio le operazioni e le estremità di associazioni di UML, alcuni dei termini della stringa di proprietà saranno parole chiave (e alcuni possono essere termini definiti dall'utente), scritti nel formato tra parentesi graffe anziché tra le "«»":
+\begin{center}
+	\includegraphics[scale=0.6]{img/clasd8.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.6]{img/clasd9.png}
+\end{center}
+Come le parole chiave, gli \textbf{stereotipi} sono mostrati con i simboli delle virgolette basse, come «authorship». Tuttavia \textbf{non} sono parole chiave, infatti uno stereotipo rappresenta un raffinamento di un concetto di modellazione esistente, ed è definito all'interno di un profilo UML; informalmente, un profilo è una collezione di stereotipi, tag e vincoli correlati per specializzare l'uso di UML in un dominio o una piattaforma specifica, per esempio un profilo UML per la gestione del progetto o per la modellazione dei dati. Gli stereotipi sono un \textit{meccanismo di estensione} di UML, il quale ne predefinisce alcuni come «destroy»:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd10.png}
+\end{center}
+In UML, una proprietà è un "valore con un nome che denota una caratteristica di un elemento; una proprietà ha un impatto semantico". Alcune proprietà sono
+predefinite in UML, come la visibilità (una proprietà di un'operazione). Altre proprietà
+possono essere definite dall'utente.
+Le proprietà degli elementi possono essere presentate in diversi modi, e un approccio
+testuale è quello di utilizzare il formato delle stringhe di proprietà di UML, nel formato
+\{namel = valuel, name2 = value2\}; per esempio \{abstract, visibility = public\}. Alcune
+proprietà sono mostrate senza valore, come \{abstract\}; solitamente ciò implica che si
+tratta di una proprietà booleana, un'abbreviazione di \{abstract = true\}. Si noti che \{abstract\} è un esempio sia di un vincolo che di una stringa di proprietà.
+\newpage
+Vediamo ora la definizione di \textbf{generalizzazione} in UML: \textit{una relazione tassonomica tra un classificatore più generale e un classificatore più specifico. Ogni istanza del classificatore più specifico è anche un'istanza indiretta del classificatore più generale. Pertanto il classificatore più specifico possiede indirettamente le caratteristiche del classificatore più generale}.\\
+\textbf{Non sempre la generalizzazione equivale all'ereditarietà dei linguaggi di programmazione orientati a oggetti}.\\
+Le \textbf{classi astratte}, oltre che mediante il tag \{abstract\}, possono essere indicate anche mediante la scrittura del nome della classe in corsivo. \\
+Le \textbf{classi finali} e le \textbf{operazioni finali} he non possono essere ridefinite nelle sottoclassi, sono mostrate con il tag \{leaf\}.\\
+Analizziamo ora le \textbf{dipendenze}. Le linee di dipendenza possono essere usate in qualsiasi diagramma, ma sono particolarmente comuni nei diagrammi delle classi e dei package. UML comprende una \textbf{relazione di dipendenza} generale che indica che un elemento \textit{cliente} (di qualsiasi tipo, comprese le classi, i package, i casi d'uso e così via) è a conoscenza di un altro elemento \textit{fornitore} e che un cambiamento nel fornitore potrebbe influire sul cliente.\\
+Una dipendenza è illustrata con una linea tratteggiata, con una freccia dal cliente verso il fornitore.\\
+Esistono molte tipologie di dipendenze; ecco alcune tipologie comuni in termini di oggetti e di diagrammi delle classi:
+\begin{itemize}
+	\item avere un attributo del tipo del fornitore
+	\item inviare un messaggio ad un fornitore (e la visibilità verso il fornitore sarebbe data da un attributo, variabile parametro, una variabile locale, una variabile globale, o una visibilità di classe, con una chiamata di metodo o di classe
+	\item ricevere un parametro del tipo del fornitore
+	\item il fornitore è una superclasse o un'interfaccia implementata
+\end{itemize}
+Tutti questi elementi potrebbero essere mostrati con una linea di dipendenza in UML, ma per alcune di queste tipologie ci sono già delle linee speciali che suggeriscono la dipendenza. Per esempio, c'è una linea speciale di UML per indicare la superclasse, una che mostra l'implementazione di un'interfaccia e una per gli attributi (la linea "attributo
+come associazione"). Vediamo un esempio:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd11.png}
+\end{center}
+che descrive:
+\begin{minted}{java}
+public class Sale {
+  public void updatePriceFor( ProductDescription description ) {
+    Money basePrice = description.getPrice();
+  ...
+  }
+...
+}
+\end{minted}
+oppure si ha:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd12.png}
+\end{center}
+per:
+\begin{minted}{java}
+public class Foo {
+  public void doX() {
+    System.runFinalization();
+    ...
+  }
+...
+}
+\end{minted}
+Una linea di dipendenza può essere etichettata:
+\begin{center}
+	\includegraphics[scale=0.7]{img/classd13.png}
+\end{center}
+UML fornisce diversi modi per mostrare l'implementazione di una \textbf{interfaccia}, il fornire un'interfaccia ai clienti e la dipendenza da una interfaccia (una interfaccia richiesta). In UML, l'implementazione di un'interfaccia viene chiamata formalmente realizzazione di interfaccia. In UML2 è stata introdotta la \textbf{notazione a semicerchio, a socket}:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd14.png}
+\end{center}
+L'\textbf{aggregazione} è associazione che suggerisce in modo approssimativo una relazione intero-parte ha la solita semantica ma è definita in UML (anche se gli stessi creatori di UML ne sconsigliano l'uso).\\
+La \textbf{composizione}, detta anche \textit{aggregazione composta}, è un tipo forte di aggregazione intero-parte che è utile da mostrare in alcuni modelli. Una composizione comporta che:
+\begin{itemize}
+	\item un'istanza della parte appartiene a una sola istanza del composto alla volta
+	\item la parte deve sempre appartenere a un composto
+	\item il composto è responsabile della creazione e della cancellazione delle sue parti e se il composto viene distrutto, le rispettive parti devono essere distrutte, oppure associate a un altro composto
+\end{itemize}
+La notazione UML per la composizione è un rombo pieno su una linea di associazione, posto all'estremità della linea vicina al composto:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd15.png}
+\end{center}
+I vincoli possono essere usati nella maggior parte dei diagrammi UML, ma sono particolarmente comuni nei diagrammi delle classi. Un vincolo di UML è una restrizione o una
+condizione su un elemento UML; viene visualizzato come testo tra parentesi graffe, per esempio: \{ size > = O \}:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd16.png}
+\end{center}
+Un'\textbf{associazione qualificata} ha un qualificatore usato per selezionare un oggetto (o più oggetti) da un insieme più ampio di oggetti correlati, sulla base della chiave del qualificatore. Informalmente, da un punto di vista software, suggerisce di effettuare una ricerca
+tra gli elementi tramite una chiave, come gli oggetti in una \textit{HashMap}. La qualifica riduce la molteplicità all'estremità di destinazione dell'associazione, solitamente
+da molti a uno, poiché solitamente implica la selezione di una sola istanza da un insieme più ampio, come si vede nei due esempi:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd17.png}
+\end{center}
+Una \textbf{classe di associazione} consente di trattare un'associazione come una classe a sé, e di
+modellarla con attributi, operazioni e altre caratteristiche. In UML, ciò viene illustrato da una linea tratteggiata che collega l'associazione con la
+classe di associazione:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd18.png}
+\end{center}
+Nel mondo dei design pattern 00, ce n'è uno che è particolarmente diffuso, chiamato il pattern \textbf{Singleton}. Un'implicazione di questo pattern è
+che esiste una sola istanza di una classe, mai due. In altre parole si tratta di un'istanza "singleton". In un diagramma UML, una simile classe può essere contrassegnata da '1'
+nell'angolo superiore destro nella sezione del nome:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd19.png}
+\end{center}
+Molti linguaggi Q ava, C++, ... ) supportano tipi a template, noti anche come \textbf{template}, tipi parametrizzati e generici. Questi sono usati comunemente come tipo per gli elementi delle classi collezione, come gli elementi di liste e mappe. Nell'esempio si ha che \textit{List} e \textit{ArrayList} sono parametrizzate con il tipo \textit{Square}, definito dall'utente:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd20.png}
+\end{center}
+Oltre alle normali sezioni predefinite di una classe (nome, attributi e operazioni), è possibile aggiungere al rettangolo di una classe delle ulteriori sezioni definite dell'utente:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd21.png}
+\end{center}
+\newpage
+Un \textbf{oggetto attivo} è eseguito in un proprio thread di esecuzione e lo controlla. La classe di un oggetto attivo è una classe attiva. In UML, una \textbf{classe attiva} può essere mostrata con delle linee verticali doppie sui lati sinistro e destro del rettangolo della class:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd23.png}
+\end{center}
+È possibile generare le definizioni dei diagrammi delle classi dai diagrammi di interazione. Ciò suggerisce un ordinamento lineare secondo cui disegnare i diagrammi di interazione prima dei diagrammi delle classi, anche se abbiamo visto che spesso l'elaborazione si ha in parallelo:
+\begin{center}
+	\includegraphics[scale=0.7]{img/clasd24.png}
+\end{center}
+\chapter{Diagrammi di Attività in UML}
+Un \textbf{diagramma di attività} di UML mostra le attività sequenziali e parallele in un processo. Tali diagrammi sono utili per la modellazione dei processi di business, i flussi di lavoro, i flussi dei dati e gli algoritmi complessi. Vediamo un'immagine con la notazione base, dove si mostrano i concetti base di \textbf{azione, partizione, fork, join e nodo oggetto}:
+\begin{center}
+	\includegraphics[scale=0.58]{img/atd.png}
+\end{center}
+Si ha che:
+\begin{itemize}
+	\item una volta terminata un'azione, si verifica una transizione automatica in uscita
+	\item il diagramma può mostrare sia il flusso di controllo che il flusso dei dati 
+\end{itemize}
+\textit{Un diagramma di attività di UML offre una notazione ricca per mostrare una sequenza di attività, comprese attività parallele. Può essere applicato a qualsiasi punto di vista o scopo, ma l'applicazione più diffusa è per la visualizzazione dei flussi di lavoro (workflow) e dei processi di business, nonché dei casi d'uso.}
+\newpage
+Vediamo i due casi:
+\begin{enumerate}
+	\item \textbf{modellazione dei processi di business:} 
+	si ottengono diagrammi come quelli nell'immagine di presentazione del capitolo
+	\item \textbf{modellazione dei flussi di dati:} i diagrammi dei flussi di dati \textbf{DFD}, \textit{Data-Flow Diagram}, sono divenuti un modo comune per visualizzare i passi e i dati principali coinvolti nei processi di un sistema software. Non è la stessa cosa della modellazione dei processi di business; anzi, i DFD erano usati di solito per mostrare i flussi dei dati in un sistema informatico , anche se teoricamente potevano essere applicati alla modellazione dei processi di business. I DFD erano utili per documentare i flussi di dati principali o per esaminare un nuovo progetto di alto livello in termini dei flussi di dati. Nella notazione \textit{Gane-Sarson} si hanno i passi numerati secondo l'ordine. Le informazioni modellate in un DFD sono utili, sia per la documentazione sia per la scoperta, ma UML non prevede la notazione dei DFD. I diagrammi delle attività di UML possono soddisfare gli stessi obbiettivi. \textit{Si noti che oltre ai nodi oggetto, utili per mostrare i flussi di dati , si possono usare anche i \textbf{nodi datastore} UML.} 
+	\newpage 
+	Vediamo il confronto tra i diagrammi di flusso dei dati di Gane-Sarson, prima, e la loro riproduzione coi diagrammi di attività, poi:
+	\begin{center}
+		\includegraphics[scale=0.6]{img/atd2.png}
+	\end{center}
+	\begin{center}
+		\includegraphics[scale=0.6]{img/atd3.png}
+	\end{center}
+\end{enumerate}
+Gli algoritmi paralleli nei problemi di
+programmazione concorrente coinvolgono più partizioni, oltre alle operazioni \textbf{fork} e \textbf{join}. Lo spazio fisico complessivo è suddiviso in grossi blocchi, e vengono eseguiti molti thread (o processi) paralleli, uno per ciascun sottoblocco. In questi casi possono essere utilizzate le partizioni dei diagrammi di attività di UML per rappresentare i diversi thread o processi del sistema operativo. I nodi oggetto possono essere utilizzati per modellare gli oggetti e i dati condivisi. E naturalmente è possibile utilizzare il fork per modellare la creazione e l'esecuzione parallela di thread o di processi multipli, uno per ciascuna partizione.\\
+Vediamo come mostrare che un'attività è espansa in un altro diagramma di attività, utilizzando il simbolo a forma di rastrello:
+\begin{center}
+	\includegraphics[scale=0.5]{img/atd4.png}
+\end{center}	
+Inoltre si può mostrare le diramazioni condizionali, utilizzando il simbolo di decisione. Il simbolo \textbf{merge}, correlato, mostra come i flussi possano riunirsi insieme.
+\begin{center}
+	\includegraphics[scale=0.5]{img/atd5.png}
+\end{center}
+Vediamo anche i \textbf{segnali}. che sono utili per esempio quando si devono modellare
+eventi quali avviare un'azione in un determinato istante di tempo o una richiesta di annullamento:
+\begin{center}
+	\includegraphics[scale=0.6]{img/atd6.png}
+\end{center}
+\newpage
+Vediamo un esempio, invece, completo della rappresentazione di un caso d'uso mediante il diagramma delle attività:
+\begin{center}
+	\includegraphics[scale=0.7]{img/atd7.png}
+\end{center} 
+Una delle discipline di UP è la \textbf{Modellazione del business}; il suo scopo è quello di \textit{comprendere e comunicare la struttura e la dinamica dell'organizzazione in cui deve essere rilasciato un sistema}. Un elaborato fondamentale della disciplina di Modellazione del business è il \textbf{Modello degli Oggetti di Business} (un soprainsieme del Modello di Dominio di UP) , che sostanzialmente visualizza come funziona un business, utilizzando i diagrammi delle classi, di sequenza e di attività di UML. Pertanto i diagrammi di attività sono particolarmente applicabili nella disciplina della Modellazione del business di UP.
+\chapter{Diagrammi di Macchina a Stati in UML}
+Come i diagrammi di attività, i \textbf{diagrammi di macchina a stati} di UML mostrano una vista dinamica. UML include la notazione per illustrare gli eventi e gli stati delle cose: transazioni, casi d'uso, persone e così via.\\
+Un diagramma di macchina a stati di UML, illustra
+gli eventi e gli stati interessanti per un oggetto, e il comportamento di un oggetto in reazione a un evento. Le transizioni sono mostrare come frecce, etichettare con il rispettivo evento. Gli stati sono mostrati come rettangoli arrotondati. È comune includere uno pseudo-stato iniziale, con una transizione automatica a un altro stato quando viene creata l'istanza:
+\begin{center}
+	\includegraphics[scale=0.6]{img/statd.png}
+\end{center}
+Un diagramma di macchina a stati mostra il ciclo di vita di un oggetto: quali eventi sperimenta, le sue transizioni e gli stati in cui si trova tra questi eventi. Non è necessario
+che illustri ogni possibile evento; se si verifica un evento che non è rappresentato nel diagramma, l'evento viene ignorato per quanto riguarda il diagramma di macchina a stati. Pertanto, è possibile creare un diagramma di macchina a stati che descrive il ciclo di vita di un oggetto a livelli che possono essere semplici o complessi, a seconda delle necessità. Definiamone meglio le parti:
+\begin{itemize}
+	\item un \textbf{evento} è un evento significativo, degno di nota
+	\item uno \textbf{stato }è la condizione di un oggetto in un certo intervallo di tempo, il tempo tra due eventi
+	\item una \textbf{transizione} è una relazione tra due stati che indica che quando si verifica un evento, l'oggetto passa dallo stato precedente allo stato successivo
+\end{itemize}
+Se un oggetto risponde a un evento sempre nello stesso modo, viene considerato \textbf{indipendente dallo stato} (o senza modo) rispetto a quell'evento. Se un oggetto reagisce sempre allo
+stesso modo per tutti gli eventi di interesse, è un oggetto indipendente dallo stato. Al contrario, gli oggetti \textbf{dipendenti dallo stato} reagiscono in modo diverso agli eventi a seconda del loro stato o modo.\\
+\textbf{Bisogna considerare le macchine a stati per oggetti dipendenti dallo stato che hanno un comportamento complesso, non per gli oggetti indipendenti dallo stato.}\\
+\textit{In generale, i sistemi informatici aziendali hanno poche classi dipendenti dallo stato complesse. In questi casi, raramente è utile applicare la modellazione delle macchine a stati. Al contrario, il controllo di processo, il controllo dei dispositivi, i gestori di protocollo e i domini delle telecomunicazioni hanno spesso molti oggetti dipendenti dallo stato.}\\
+Le macchine a stati, come già sappiamo, sono applicate in due modi:
+\begin{enumerate}
+	\item per modellare il comportamento di un oggetto reattivo complesso in risposta agli eventi
+	\item per modellare le sequenze valide delle operazioni, ovvero specifiche di protocollo o di linguaggio
+\end{enumerate}
+Si hanno diverse situazioni in cui sono comodi:
+\begin{itemize}
+	\item per rappresentare oggetti reattivi complessi come i dispositivi fisici controllati da software, come transazioni e oggetti di business correlati o come i mutatori di ruolo, ovvero oggetti che cambiano ruolo
+	\item per rappresentare protocolli e sequenze valide, come protocolli di comunicazione (esempio TCP), come flussi o navigazione di pagine UI
+\end{itemize}
+Una transizione può causare l'avvio di un'azione. In un'implementazione software, ciò può rappresentare l'invocazione di un metodo della classe a cui è associato il diagramma di macchina a stati. Una transizione può anche avere una guardia condizionale, ovvero un test booleano. La transizione avviene solo se il test viene superato:
+\begin{center}
+	\includegraphics[scale=0.6]{img/statd2.png}
+\end{center}
+Uno stato consente l'annidamento per contenere dei sottostati; un sottostato eredita le transizioni del proprio superstato (lo stato che lo racchiude). I sottostati possono essere mostrati graficamente annidandoli nel rettangolo arrotondato del superstato:
+\begin{center}
+	\includegraphics[scale=0.6]{img/stad3.png}
+\end{center}
+Nei casi di studio non ci sono oggetti reattivi complessi veramente interessanti, per cui
+verrà illustrato un diagramma di macchina a stati per mostrare la sequenza valida delle
+operazioni di caso un d'uso:
+\begin{center}
+	\includegraphics[scale=0.6]{img/statd3.png}
+\end{center}
+\textbf{In UP non esiste alcun modello di \textit{macchina a stati} anche se può essere implementata in qualsiasi modello UP.}
 \end{document}

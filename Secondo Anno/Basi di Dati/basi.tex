@@ -502,13 +502,175 @@ fra dati in strutture diverse sono rappresentati per mezzo dei valori stessi, ga
 
 Il concetto di relazione, ovviamente proviene dalla teoria degli insiemi, rappresenta un sottoinsieme
 del prodotto cartesiano ma nel modello relazionale si utilizza una variante di esso, ossia ad ogni dominio,
-su cui è definito il prodotto cartesiano, viene associato un nome, al fine di superare 
-la struttura posizionale della relazione matematica.
+su cui è definito il prodotto cartesiano, viene associato un nome, chiamato \emph{attributo},
+al fine di superare la struttura posizionale della relazione matematica.
 
 Questo aspetto di utilizzare un'attributo con una notazione non posizionale ci garantisce di poter 
 accedere ai campi di una tupla mediante un nome e soprattutto ci evita di stabilire un ordine tra 
 i diversi campi, ad esempio chi stabilisce che la matricola sia prima del nome e non viceversa.
 
+Forniamo ora un pò di formalismo al fine di definire in maniera non ambigua il concetto di base di dati:
+\begin{definizione}
+    Si definisce \emph{dominio} una funzione $dom:X \to D$ in cui si associa ogni attributo $A \in X$ un 
+    dominio $dom(A) \in D$ mentre si definisce tupla su un insieme di attributi $X$ una funzione $t$ che
+    associa ogni elemento di $X$ un elemento appartenente al dominio $dom(X)$.
+\end{definizione}
+\begin{definizione}
+    Si definisce \emph{schema di relazione} $R(X)$ formato da $R$ indicante il nome della relazione mentre $X$
+    indica un insieme di attributi, a cui ad ogni attributo viene associato un dominio, come abbiamo definito
+    nella definizione precedente.\newline
+    Si definisce invece \emph{istanza di relazione} su uno schema $R(X)$ è un insieme $r$ di tuple definite su
+    $X$, a cui si può accedere ad un attributo della tupla attraverso $r.a$, con $a$ nome di un attributo.
+\end{definizione}
+\begin{definizione}
+    Si definisce \emph{schema di base di dati} un insieme $R = \{R_1(X_1), R_2(X_2), \dots, R_n(X_n)\}$ di
+    schemi di relazione in cui risulta $R_i \neq R_j$ con $i \neq j$.\newline
+    Si definisce inoltre \emph{istanza di base di dati} su uno schema $R = \{R_1(X_1), dots, R_n(X_n)\}$, un
+    insieme di relazioni $r = \{r_1, r_2, \dots, r_n\}$ dove ogni $r_i$, con $1 \leq i \leq n$, è una
+    relazione sullo schema $R_i(X_i)$.
+\end{definizione}
+Nel modello relazione i riferimenti tra i dati di relazioni diverse viene fatto attraverso i valori delle
+tuple, a differenza di altri modelli, come ad esempio il modello reticolare, in cui i riferimenti si
+effettuano attraverso i puntatori; il vantaggio di questo modo di gestire i riferimenti permette di ottenere
+l'indipendenza dei dati, evitando i riferimenti alla rappresentazione fisica ma ciò non significa che nel
+livello fisico non si possa usare i puntatori per gestire i riferimenti ma solo che si evita di renderlo
+visibile agli utenti e/o al livello logico.
+
+Secondo le definizioni formali fatte degli schemi di relazioni e/o basi di dati, sono ammessibili relazioni su
+un solo attributo e ciò ha senso soprattutto in basi di dati con molte relazioni, in cui la relazione su un
+solo attributo contiene valori che appaiono come valori di un attributo di un altra relazione.
+
+La struttura del modello relazionale discussa ed analizzata nei precedenti paragrafi è indubbiamente molto
+semplice e potente ma essa impone un certo grado di rigidità, in quanto le informazioni devono essere
+rappresentate attraverso tuple appartenenti allo schema di relazione stesso ma ciò non sempre può avvenire.\newline
+Ad esempio in una relazione $Persona(Cognome, Nome, Indirizzo, Telefono)$ non sempre il valore del telefono
+risulta definito per cui sarebbe scorretto usare un valore del dominio per rappresentare questa assenza di
+informazione in quanto esso generebbe confusione ed ambiguità.
+
+Per risolvere sto problema e rappresentare in maniera semplice e chiara la mancanza di valori si è deciso di
+estendere il concetto di relazione, permettendo di usare il valore speciale $null$, non facente parte il
+dominio degli attributi.\newline
+Questo valore nullo può rappresentare tre diverse tipologie di informazioni:
+\begin{itemize}
+    \item indicare un valore sconosciuto, in cui si sa che il valore esiste ma non si conosce il suo valore.
+    \item indicare un valore inesistente, in cui il valore dell'attributo non esiste.
+    \item indicare l'assenza di informazione, in cui non si sa se il valore esiste e soprattuto che valore può
+          rappresentare.
+\end{itemize}
+Nei sistemi di basi di dati relazionali non si accentrano sulla differenza tra le diverse tipologie ma suppone
+in maniera semplicista che si rappresenta sempre il caso di assenza di informazione.
+
+Non sempre il valore nullo può essere sensato, infatti come si nota nella figura 2.13 l'assenza di valore di
+matricola e codice di corso crea notevoli problemi in quanto non permette di stabilire correlazioni fra tuple
+di relazioni diverse ed inoltre la presenza di molti valori nulli può generare dubbi sull'effettivo
+significato delle tuple, in quanto è impossibile riconoscere in maniera univoca le istanze della relazione.\newline
+Come vedremo nel prossimo paragrafo, sui vincoli d'integrità, si può indicare in quali attributi sono ammessi
+valori nulli e in quali no.
+
+\section{Vincoli d'integrità}
+Le strutture del modello relazione ci permettono di organizzare le informazioni d'interesso ma non è vero che
+tutti gli insiemi di tuple rappresentano dati corretti per l'applicazione.\newline
+Come ad esempio nella situazione della figura 2.14, non è ammissibile che il voto assuma il valore 36, in
+quanto nel sistema universitario italiano i voti vanno da 0 a 30, poi inoltre compaiono nella relazione esami
+delle matricole non presenti nella relazione studente.
+
+In un database è opportuno evitare le situazioni appena descritte, per cui a questo scopo sono stati
+introdotti i \emph{vincoli di integrità}, ossia delle proprietà da soddisfare da tutte le istanze delle
+relazioni altrimenti lo schema di database risulta non ammissibile.\newline
+È possibile classificare i vincoli a seconda degli elementi coinvolti:
+\begin{itemize}
+    \item \textbf{vincolo intrarelazionale}: sono i vincoli definiti sulle singole relazioni e su cui a sua
+        volta si divide in 2 sottocategorie:
+        \begin{enumerate}
+            \item \emph{vincoli di tupla}: sono delle limitazioni effettuate su ciascuna tupla
+                indipendentemente dalle altre e vengono definite tramite delle espressioni booleane, i cui
+                atomi sono valutati attraverso dei confronti, come ad esempio un vincolo sui voti degli esami
+                può essere $(Voto \geq 0) and (Voto \leq 30)$.
+            \item \emph{vincoli di chiavi}: sono i più importanti vincoli intrarelazionali, che permettono di
+                avere la certezza dell'unicità di uno schema di relazione, come ad esempio si garantisce che
+                non possono esistere due studenti con la stessa matricola.\newline
+                La definizione formale di una chiave è la seguente:
+                \begin{definizione}
+                    Un insieme $K$ di attributi è superchiave di una relazione $r$ se $r$ non contiene 2 tuple
+                    distinte $t_1$ e $t_2$, con $t_1[K] = t_2[K]$.\newline
+                    Si dice che $K$ è chiave di $r$ se è una superchiave minimale di $r$.
+                \end{definizione}
+                Per la relazione, presente nella figura 2.16, l'insieme $\{Cognome, Corso\}$ è una superchiave
+                e poiche vi sono delle tuple uguali su cognomi e su corsi, tale insieme è pure una chiave ma
+                questo vale sulle istanze presenti nella figura 2.16 e non in maniera generale, cosa che
+                quanto sviluppiamo uno schema di relazione cerchiamo di ottenere l'unicità delle tuple su
+                qualsiasi elementi ammissibili, per esempio nella relazione Studente la chiave indicata
+                sarebbe la matricola, indice univoco usato da tutte le università per identificare gli studenti.
+
+                Si può notare che in ogni relazione e relativo schema si ha la presenza di una chiave, infatti
+                una relazione è un insieme, costituita come si sa bene da elementi diversi, da cui di
+                conseguenza per ogni relazione $r(X)$ l'insieme $X$ di tutti gli attributi su cui è definita è
+                senz'altro una superchiave che può essere di due diversi tipi:
+                \begin{itemize}
+                    \item tale insieme è anche una chiave, per cui risulta dimostrato l'esistenza della chiave
+                    \item tale insieme non è una chiave, ossia esiste un'altra superchiave, sottoinsieme di
+                        quella considerata, da cui si può applicare ricorsivamente le stesse considerazioni
+                        fatte, usando un sottoinsieme di relazione fino ad arrivare alla superchiave minimale
+                        in una sequenza finita di passi, dato che il numero di attributi è una quantità finita.
+                \end{itemize}
+                Lo stesso ragionamento può essere fatto anche a livello di schema di relazione, in cui
+                l'insieme di tutti gli attributi è una superchiave per ciascuna relazione e la ricerca della
+                chiave si effettua alla stessa maniera di quella vista per l'istanza di una relazione.
+
+                Il fatto appena dimostrato, ossia che ogni relazione possieda una chiave, ci garantisce
+                l'accessibilità e l'unicità di tutti i valori della base di dati ed inoltre permette di
+                stabilire efficacemente le corrispondenze fra dati contenuti in relazioni diverse.\newline
+                Come già notato nel paragrafo sui valori nulli, si deve avere dei valori senza alcuna
+                informazione e per risolvere codesto problema si adotta una soluzione semplice ma efficace
+                ossia su una delle chiavi, detta \emph{chiave primaria}, si vieta la presenza di valori nulli
+                mentre sugli altri attributi non si ha solitamente nessuna problematica riguardo ai valori null.
+
+                Come viene mostrato nella figura 2.18 gli attributi che costituiscono la chiave primaria
+                vengono evidenziati attraverso una sottolineatura ed inoltre la maggior parte dei riferimenti
+                avviene tramite chiave primaria.\newline
+                Solitamente in quasi tutti i casi reali è possibile trovare degli attributi, i cui attributi
+                sono identificativi e sempre disponibili ma in caso ciò non è possibile si introduce un codice
+                non significativo per l'applicazione.
+        \end{enumerate}
+    \item \emph{vincoli di integrità referenziale}(Foreign Key) fra un insieme di attributi $X$ di una
+        relazione $R_1$ e una relazione $R_2$ risulta soddisfatto se i valori di $X$ su ciascuna tupla di
+        $R_1$ compaiono come valori della chiave dell'istanza di $R_2$.
+
+        La definizione precisa e formale richiede un pochino di attenzione in più, in particolare nel caso in
+        cui la chiave della relazione riferita sia composta e nel caso in cui vi siano più chiavi, per cui
+        procediamo per gradi, incominciando prima con il caso di chiave unica:
+        \begin{definizione}
+            Sia $R_2$ una relazione con una sola chiave $B$ e sia a sua volta $X = \{A\}$ l'insieme di
+            attributi, allora il vincolo di integrità referenziale fra l'attributo $A$ di $R_1$ e la relazione
+            $R_2$ risulta soddisfatto se per ogni tupla $t_1$ in $R_1$, in cui $t_1[A]$ non è nullo, esiste una
+            tupla $t_2$ in $R_2$ tale che $t_1[A] = t_2[B]$.
+        \end{definizione}
+        Nel caso più generale bisogna stare attenti al fatto che ogni attributo di $X$ deve corrispondere ad
+        uno specifico attributo della chiave primaria di $R_2$ per questo la definizione è la seguente:
+        \begin{definizione}
+            Siano $X = \{A_1, A_2, \dots, A_n\}$ e $K = \{B_1, B_2, \dots, B_n\}$ due insiemi ordinati di
+            attributi per le relazioni $R_1$ e $R_2$, il vincolo risulta soddisfatto se per ogni tupla $t_1$
+            in $R_1$, senza attributi nulli su $X$, esiste una tupla $t_2$ in $R_2$ tale per cui $t_1[A_i] =
+            t_2[B_i]$, per ogni $i$ compreso tra 1 e p.
+        \end{definizione}
+        Per analizzare i vincoli di integrità referenziale consideriamo la figura 2.19 in cui le informazioni 
+        della relazione Infrazioni sono rese significative attraverso il collegamento con la relazione Agenti,
+        con l'attributo agente, e alla relazione Auto, per mezzo degli attributi stato e numero di targa.\newline
+        In questa situazione analizzata abbiamo deciso di inserire i seguenti vincoli referenziali:
+        \begin{itemize}
+            \item fra l'attributo $Agente$ della relazione Infrarossi e la relazione Agenti.
+            \item fra gli attributi Stato e Numero di Infrarossi e la relazione Auto, in cui l'ordine degli
+                attributi nella chiave preveda Stato e poi Numero.
+        \end{itemize}
+        Il database, rappresentato dalla figura 2.19 soddisfa i vincoli appena esposti mentre il database
+        della figura 2.20 li viola entrambi: il primo perchè Agenti non contiene nessuna tupla con valore di
+        Matricola pari a 456 mentre il secondo perchè Auto non contiene nessuna tupla con valore "I" come
+        stato e "CB 123 AA" come Numero assieme nella stessa tupla.\newline
+        Relativamente al secondo vincolo, notiamo come il ragionamento sull'ordine degli attributi può
+        risultare pesante, visto che la corrispondenza può, almeno in questo caso, essere realizzata per mezzo
+        dei nomi degli attributi ma in generale ciò non può accedere, quindi l'ordinamento è essenziale.
+
+\end{itemize}
 
 \chapter{SQL}
 Il linguaggio SQL è un linguaggio per la definizione e la manipolazione dei dati in database relazionali, sviluppato originariamente presso il laboratorio IBM a San Jose’ (California) e adottato nel sistema System R.

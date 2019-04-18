@@ -570,9 +570,7 @@ valori nulli e in quali no.
 \section{Vincoli d'integrità}
 Le strutture del modello relazione ci permettono di organizzare le informazioni d'interesso ma non è vero che
 tutti gli insiemi di tuple rappresentano dati corretti per l'applicazione.\newline
-Come ad esempio nella situazione della figura 2.14, non è ammissibile che il voto assuma il valore 36, in
-quanto nel sistema universitario italiano i voti vanno da 0 a 30, poi inoltre compaiono nella relazione esami
-delle matricole non presenti nella relazione studente.
+Come ad esempio non è ammissibile che il voto assuma il valore 36, in quanto nel sistema universitario italiano i voti vanno da 0 a 30, poi inoltre compaiono nella relazione esami delle matricole non presenti nella relazione studente.
 
 In un database è opportuno evitare le situazioni appena descritte, per cui a questo scopo sono stati
 introdotti i \emph{vincoli di integrità}, ossia delle proprietà da soddisfare da tutte le istanze delle
@@ -625,7 +623,7 @@ relazioni altrimenti lo schema di database risulta non ammissibile.\newline
                 ossia su una delle chiavi, detta \emph{chiave primaria}, si vieta la presenza di valori nulli
                 mentre sugli altri attributi non si ha solitamente nessuna problematica riguardo ai valori null.
 
-                Come viene mostrato nella figura 2.18 gli attributi che costituiscono la chiave primaria
+                Gli attributi che costituiscono la chiave primaria
                 vengono evidenziati attraverso una sottolineatura ed inoltre la maggior parte dei riferimenti
                 avviene tramite chiave primaria.\newline
                 Solitamente in quasi tutti i casi reali è possibile trovare degli attributi, i cui attributi
@@ -634,8 +632,10 @@ relazioni altrimenti lo schema di database risulta non ammissibile.\newline
         \end{enumerate}
     \item \emph{vincoli di integrità referenziale}(Foreign Key) fra un insieme di attributi $X$ di una
         relazione $R_1$ e una relazione $R_2$ risulta soddisfatto se i valori di $X$ su ciascuna tupla di
-        $R_1$ compaiono come valori della chiave dell'istanza di $R_2$.
-
+        $R_1$ compaiono come valori della chiave dell'istanza di $R_2$. Vediamo un esempio:
+	\begin{center}
+		\includegraphics[scale=0.7]{img/infref.png}
+	\end{center}
         La definizione precisa e formale richiede un pochino di attenzione in più, in particolare nel caso in
         cui la chiave della relazione riferita sia composta e nel caso in cui vi siano più chiavi, per cui
         procediamo per gradi, incominciando prima con il caso di chiave unica:
@@ -653,24 +653,148 @@ relazioni altrimenti lo schema di database risulta non ammissibile.\newline
             in $R_1$, senza attributi nulli su $X$, esiste una tupla $t_2$ in $R_2$ tale per cui $t_1[A_i] =
             t_2[B_i]$, per ogni $i$ compreso tra 1 e p.
         \end{definizione}
-        Per analizzare i vincoli di integrità referenziale consideriamo la figura 2.19 in cui le informazioni 
+        Per analizzare i vincoli di integrità referenziale consideriamo la figura in cui le informazioni 
         della relazione Infrazioni sono rese significative attraverso il collegamento con la relazione Agenti,
-        con l'attributo agente, e alla relazione Auto, per mezzo degli attributi stato e numero di targa.\newline
+        con l'attributo agente, e alla relazione Auto, per mezzo degli attributi stato e numero di targa:
+        \begin{center}
+        	\includegraphics[scale=0.7]{img/inf.png}
+        \end{center}
         In questa situazione analizzata abbiamo deciso di inserire i seguenti vincoli referenziali:
         \begin{itemize}
             \item fra l'attributo $Agente$ della relazione Infrarossi e la relazione Agenti.
             \item fra gli attributi Stato e Numero di Infrarossi e la relazione Auto, in cui l'ordine degli
                 attributi nella chiave preveda Stato e poi Numero.
         \end{itemize}
-        Il database, rappresentato dalla figura 2.19 soddisfa i vincoli appena esposti mentre il database
-        della figura 2.20 li viola entrambi: il primo perchè Agenti non contiene nessuna tupla con valore di
-        Matricola pari a 456 mentre il secondo perchè Auto non contiene nessuna tupla con valore "I" come
-        stato e "CB 123 AA" come Numero assieme nella stessa tupla.\newline
         Relativamente al secondo vincolo, notiamo come il ragionamento sull'ordine degli attributi può
         risultare pesante, visto che la corrispondenza può, almeno in questo caso, essere realizzata per mezzo
         dei nomi degli attributi ma in generale ciò non può accedere, quindi l'ordinamento è essenziale.
 
 \end{itemize}
+
+\subsection{In pratica}
+Una relazione è spesso rappresentata da una tabella ove le righe rappresentano specifici record e le colonne corrispondono ai campi dei record, l'ordine di righe e colonne è sostanzialmente irrilevante:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel.png}
+\end{center}
+\textbf{In una base di dati relazionale ci sono più relazioni:}
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel2.png}
+\end{center}
+Si hanno 2 componenti:
+\begin{enumerate}
+	\item lo \textbf{schema}, invariante nel tempo, che ne descrive la struttura(aspetto intensionale). Si rappresenta con le intestazioni delle tabelle
+	\item l'\textbf{istanza}, i valori attuali, che possono cambiare anche molto rapidamente (aspetto estensionale). Si rappresenta col corpo di ciascuna tabella
+\end{enumerate}
+Si hanno 3 accezioni del concetto di relazione:
+\begin{enumerate}
+	\item \textbf{relazione matematica}: come nella teoria degli insiemi
+	\item \textbf{associazione/correlazione} che rappresenta una classe di fatti, nel modello \textit{Entity-Relationship}
+	\item \textbf{relazione} secondo il modello relazionale dei dati
+\end{enumerate} 
+quindi ad esempio:
+\begin{center}
+	\includegraphics[scale=0.7]{img/mat.png}
+\end{center}
+\subsection{Relazione Matematica}
+Una relazione matematica sugli insiemi $D_1$ e $D_2$, detti \textbf{domini}, è un sottoinsieme del prodotto cartesiano $D_1\times D_2$. Le relazioni si possono visualizzare efficacemente con una tabella in cui ogni colonna corrisponde ad un dominio e ogni riga a un elemento della relazione. Quindi una relazione matematica è un insieme di n-uple ordinate $(d_1,\cdots, d_n) \mbox{ tali che } d_i\in D_i$.\\
+Si hanno delle proprietà:
+\begin{itemize}
+	\item non c'è ordinamento fra le n-uple
+	\item le n-uple sono distinte 
+	\item ciascuna n-upla è ordinata: l'i-esimo valore proviene dall'i-esimo dominio
+\end{itemize}
+Dato che ciascuno dei domini ha un ruolo definito dalla posizione nella tabella si ha una \textbf{struttura posizionale}
+\subsection{Relazioni nel Modello Relazionale}
+Si ha che:
+\begin{itemize}
+	\item a ciascun dominio si associa un nome (attributo), che  ne descrive il "ruolo"
+	\item gli attributi possono essere usati come intestazione
+	\item struttura non posizionale
+\end{itemize}
+Ovvero:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel3.png}
+\end{center}
+Si hanno delle regole per poter identificare una relazione con una tabella:
+\begin{itemize}
+	\item i valori di ogni colonna sono fra loro omogenei 
+	\item le righe sono diverse fra loro
+	\item le intestazioni delle colonne sono diverse tra loro 
+\end{itemize}
+Inoltre l'ordinamento di righe e colonne è irrilevante.\\
+Si possono creare corrispondenze fra le tuple di relazioni distinte per mezzo di valori degli attributi che compaiono nelle ennuple:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel4.png}
+\end{center}
+dove matricola e studente rappresentano la stessa informazione, così come corso e codice.\\
+Si hanno diversi vantaggi nell'uso della struttura basata su valori:
+\begin{itemize}
+	\item indipendenza dalle strutture fisiche (si potrebbe avere anche con puntatori di alto livello) che possono cambiare dinamicamente 
+	\item si rappresenta solo ciò che è rilevante dal punto di vista dell'applicazione
+	\item i dati sono portabili più facilmente da un sistema ad un altro
+	\item per accedere ai dati non serve sapere come sono memorizzati fisicamente
+\end{itemize}
+vediamo quindi un paio di esempi:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel5.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel6.png}
+\end{center}
+e possono esistere relazioni su  un solo attributo:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel7.png}
+\end{center}
+\newpage
+Si hanno delle regole di notazione:
+\begin{itemize}
+	\item \textbf{attributi:} lettere iniziali dell'alfabeto, maiuscole: \textit{A ,B ,C ,A’ ,A1 ,... }
+	\item \textbf{insieme di attributi:} lettere finali dell'alfabeto, maiuscole: \textit{X ,Y ,Z ,X’, X1, ...}
+	\item \textbf{unioni di insiemi:} $XY$ anziché $X\cup Y$
+	\item \textbf{nomi di relazioni:} \textit{R }e lettere circostanti, maiuscole, anche con indici e pedici: \textit{R1, S, S’, ...}
+	\item \textbf{relazione:} come il nome della relazione, ma in minuscolo
+	\item \textbf{schema di base di dati:} lettera maiuscola in grassetto \textit{\textbf{R}, \textbf{S}, ...}
+	\item \textbf{base di dati:} stesso simbolo dello schema, ma in minuscolo
+\end{itemize}
+Vediamo un'immagine riassuntiva:
+\begin{center}
+	\includegraphics[scale=0.7]{img/ria.png}
+\end{center}
+Si possono rappresentare strutture nidificate, diverse a seconda della necessità:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel8.png}
+\end{center}
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel9.png}
+\end{center}
+Si definisce la \textbf{chiave} come \textit{l'insieme di attributi che identificano le tuple di una relazione}.\\ Più formalmente un insieme di \textit{K} attributi è una \textbf{superchiave} per \textit{r} se \textit{r} non contiene due tuple distinte $r_1$ e $t_2$ con $t_1[K] = t_2[K]$. Inoltre è chiave per \textit{r} se è una \textbf{superchiave minimale} per \textit{r} (cioè non contiene un'altra superchiave). Vediamo un esempio:
+\begin{center}
+	\includegraphics[scale=0.7]{img/rel10.png}
+\end{center}
+Nella tabella Matricola è una superchiave ed è minimale (contiene un solo attributo). L'insieme dato da Cognome, Nome e Nascita è una superchiave minimale. Volendo sarebbe anche una chiave la coppia Cognome-Corso ma  noi però interessano le chiavi corrispondenti a vincoli di integrità soddisfatti da tutte le relazioni lecite dello schema (sarebbe una chiave senza senso).\\
+Il modello relazionale ha una \textbf{struttura rigida}, dove le informazioni sono rappresentate da tuple e solo alcuni formati di tuple sono ammessi (quelli che corrispondono agli schemi di relazione). \textbf{I dati disponibili possono non corrispondere al formato previsto}.\\
+Può capitare di avere un'informazione incompleta. In tal caso non conviene usare valori del dominio (0, stringa nulla) perché potrebbero diventare significativi. Si usa quindi il valore nullo \textbf{NULL}, che denota l'assenza di un valore del dominio(e non è un valore del dominio). Si hanno almeno tre casi di valore nullo anche se i DBMS non li distinguono:
+\begin{enumerate}
+	\item valore sconosciuto 
+	\item valore inesistente 
+	\item valore senza informazione
+\end{enumerate}
+Ovviamente l'uso del valore NULL deve essere sensato (per esempio di uno studente non si può avere data di nascita o matricola NULL). Esistono istanze di basi di dati che, pur sintatticamente corrette, non rappresentano informazioni possibili per l'applicazione di interesse. Una chiave in cui non sono ammessi NULL è detta \textbf{chiave primaria} e come notazione si usa la sottolineatura
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \chapter{SQL}
 Il linguaggio SQL è un linguaggio per la definizione e la manipolazione dei dati in database relazionali, sviluppato originariamente presso il laboratorio IBM a San Jose’ (California) e adottato nel sistema System R.

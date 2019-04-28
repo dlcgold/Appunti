@@ -2116,5 +2116,126 @@ Se un sistema rispetta tutti questi vinoli è RESTful, altrimenti può essere pi
 \begin{center}
 \textit{REST is not a set of laws or even a specification. It’s a style!}
 \end{center}
-\textbf{pagina 53}
+Si ha l'astrazione delle informazioni chiave, mediante le risorse. Una risorsa è una qualsiasi informazione che può essere definita
+mediante un nome (documenti, immagini ...). Le risorse hanno uno stato che può cambiare nel tempo. Inoltre hanno degli identificatori ed
+espongono un'interfaccia semplificata, semplificando l'architettura e incoraggiando l'indipendenza delle implementazioni;
+questi ultimi due aspetti, identificatori e semplificazione, sono dei vincoli. Quando si ha una richiesta può avvenire il trasferimento,
+mediante una risorsa, dello stato al client; si richiede quindi il vincolo di avere un'architettura \textit{client-server}. A sua volta il client può
+trasferire una proposizione di rappresentazione della risorsa stessa; si ha quindi il vincolo della manipolazione delle risorse mediante rappresentazione.
+Infine la rappresentazione ritornata dal server può linkare ad uno stato aggiuntivo dell'applicazione. Il client può quindi seguire il link
+e assumere il nuovo stato; si ha il vincolo dell'uso dell'hypermedia come engine per lo stato delle applicazioni.\\
+Si ha poi il vincolo delle interazioni stateless che comporta che ogni interazione tra client e server contenga tutte le informazioni
+necessarie a comprendere la richiesta e non sfrutta nessun dato salvato sul server. Si necessitano quindi messaggi auto-descrittivi,
+con formati media standardizzati e con l'uso di \textit{meta-data} e\textit{control-data}. Si ottiene quindi un sistema \textit{cacheable} che però richiede un
+sistemastratificato.
+\newpage
+Vediamo uno schema riassuntivo:
+\begin{center}
+\includegraphics[scale=0.7]{img/cont.png}
+\end{center}
+Tutti questi vincoli servono a fronteggiare gli otto errori della programmazione di rete:
+\begin{enumerate}
+\item la rete è sicura
+\item la altenza è nulla
+\item la banda è infinita
+\item la rete è affidabile
+\item la topologia non cambia
+\item c'è un solo amministratore
+\item il trasporto è privo di costi
+\item la rete è omogenea
+\end{enumerate}
+\textbf{Un sistema distribuito privo di vincoli sarebbe inutile e ingestibile}\\
+D'altro canto REST è un insieme di vincoli architetturali con lo scopo di minimizzare la latenza massimizzando indipendenza e scalabilità.
+REST permette il caching, il riutilizzo delle interazioni, la sostituzione dinamica delle componenti e la computabilità delle azioni da parte di intermiediari,
+in accordo coi biosgni del sistema a hypermedia.\\
+REST punta quindi sulla semplicità:
+\begin{itemize}
+\item il caching aumenta le performance in risposta e riduce il carico sul server
+\item meno stati di comunicazione permettono di meglio bilanciare il carico tra i server
+\item meno software specializzato grazie alla presenza di software semplice alla base
+\item l'identificazione viene fatto mediante meccanismi standard, senza nominazioni aggiuntive
+\end{itemize}
+inoltre REST è standard, quindi:
+\begin{itemize}
+\item si ha un uso corretto e completo del protocollo HTTP
+\item si fornisce un meccanismo leggero e stratificato per l'integrazione di dati e servizi sopra HTTP
+\item grazie ad HTTp si fornisce una piattaforma distribuita e gestita mediante hypermedia
+\end{itemize}
+\subsection{HTTP e REST Applications}
+Si hanno 4 step:
+\begin{enumerate}
+\item \textbf{trovare tutti i nomi}. Ogni cosa in un sistema RESTful è una risorsa, con un nome. Ogni risorsa ha un URI che deve essere descrittivo
+  e ben formato (sia semanticamente che sintatticamente, in modo che non serva cambiarlo nel tempo). Si usano le variabili PATH per gestire la gerarchia
+  (padre/figlio) e la punteggiatura (``;'', ``,'') per la gerarchia implcita. Si hanno delle varibili di query (``?'') per indicare un input. Inoltre, per quanto un URI
+  possa essere lungo a piacere si preferisce una lunghezza sensata. È buona norma non specificare informazioni sulla piattafroma in uso (tipo il linguaggio di prpgrammazione)
+  nell'URI. \newpage Vediamo un esempio:
+  \begin{center}
+    \includegraphics[scale=0.7]{img/nouns.png}
+  \end{center}
+\item \textbf{definire il formato}. Si possono avere varie rappresentazioni, come XML e JSON, e se ne permette la creazione di nuove. Il formato in entrata deve però essere
+  uguale al formato in uscita, con il client che può effettuare una GET, fare modifiche, fare una PUT... e il server che deve scartare ogni dato estraneo.
+  Un media-type utile per il business è l'XHTML, che ha i vantaggi dell'XML con una maggiore accessibilità, con classi etc... che forniscono valori
+  dotati della semantica necessaria (si usa \textit{<amount>1000.00</amount>} al posto di \textit{<span class="amount">1000.00</span>}).\\
+  \textit{approfondimento a riguardo su XHTML sulle slide}
+\item \textbf{scelta delle operazioni}. Sulle risorse possono essere effettuate varie operazioni; solitamente basta il set di operazioni di HTTP:
+  \begin{itemize}
+  \item GET, per recuperare una risorsa (non si devono avere effetti collaterali)
+  \item POST, per aggiungere qualcosa ad una risorsa esistente sul server, che sceglie l'URI
+  \item PUT, per caricare una risorsa sul server, il client sceglie l'URI
+  \item DELETE, per eliminare una risorsa
+  \end{itemize}
+  inoltre si hanno altre operazioni non essenziali, come TRACE e CONNECT, altre non supportare universalmente, come OPTIONS, oltre ad operazioni come HEAD.\\
+  \begin{center}
+    \includegraphics[scale=0.7]{img/app1.png}
+  \end{center}
+  \begin{center}
+    \includegraphics[scale=0.7]{img/app2.png}
+  \end{center}
+\item \textbf{evidenziare codici di stato}. Si hanno dei codici a 3 cifre per il risultato di una request:
+  \begin{itemize}
+  \item \textit{1xx (informational):} indica che la richiesta è stata ricevuta e che il server continua a lavorare
+  \item \textit{2xx (success):} indica che la richiesta è stata ricevuta, compresa, accettata ed elaborata
+  \item \textit{3xx (redirection):} indica che ulteriori azioni devono essere intraprese per completare la richiesta
+  \item \textit{4xx (client error):} indica che la richiesta contiene errori di sintassi e non può essere elaborata
+  \item \textit{5xx (server error):} indica che il server non è riuscito ad elaborare una richiesta apparentemente ben formata
+  \end{itemize}
+\end{enumerate}
+Un client può richiedere una particolare rappresentazione (XML, JSON...) attraverso un header di richiesta, per esempio:
+\begin{verbatim}
+Accept: text/xml,application/xml,application/xhtml+xml,
+text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7 q = relative preference (0-1)
+\end{verbatim}
+Nella realtà non funziona così però e si preferisce esporre il tipo nell'uri:
+\begin{verbatim}
+http://expenses.example.com/123.xml
+http://expenses.example.com/123.xhtml
+http://expenses.example.com/123.json
+Dots preferred over slashes: http://expenses.example.com/123/xml
+\end{verbatim}
+Si possono avere dei \textit{conditional GET}, salvando banda e quantità di dati da processare sia lato client che server:
+\begin{center}
+\includegraphics[scale=0.7]{img/condget.png}
+\end{center}
+COme abbiamo già indicato si ha il caching per ridurre latenza e traffico. Solo le GET (non-SSL) lo supportano. Si hanno due tipi:
+\begin{enumerate}
+\item \textbf{browser (user agent)}
+\item \textbf{proxy}, i siti più grandi usano dei \textit{caching proxy server}
+\end{enumerate}
+\newpage
+L'applicazione deve sapere dove sia del contenuto in cache e si hanno degli appositi cache-headers:
+\begin{center}
+  \includegraphics[scale=0.7]{img/cachehead.png}
+\end{center}
+\subsection{REST Services e RESTful Services}
+Molte applicazioni REST attuali sono reimplementazioni di applicazioni CRUD (\textit{Create, Read, Update, Delete}), dove mancava l'hypermedia-control:
+\begin{center}
+\includegraphics[scale=0.6]{img/crud.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=2.0]{img/crud2.png}
+\end{center}
+%pagina 91
 \end{document}

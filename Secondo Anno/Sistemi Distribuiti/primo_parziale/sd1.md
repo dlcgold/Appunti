@@ -155,8 +155,8 @@
     sono FALSE (2 risposte) [non ho capito 
     quale dovrebbe essere la seconda vera]?**
   
-  * ***Il receiver può leggere l’intero buffer con un
-    ciclo di istruzioni: read(socket, buffer, N/2)***
+  * Il receiver può leggere l’intero buffer con un
+    ciclo di istruzioni: read(socket, buffer, N/2)
   * ***Il receiver può leggere l’intero buffer con una
     istruzione: read(socket, buffer, 2\*N)***
   * Il receiver può leggere l’intero buffer con un
@@ -464,3 +464,76 @@
       una chiamata;***
 	* il server restituisce il controllo al
       completamento della richiesta;
+	  
+* **Perché è necessario usare la "select"
+    per realizzare server concorrenti?**
+	
+	* Perché le operazioni di read() e
+	  write sono bloccanti
+    * ***Perché permette di utilizzare
+	  più canali di comunicazione***
+    * Perché è possibile selezionare
+	  il canale da cui leggere e/o scrivere
+	* Perché non è più necessario eseguire
+	  la "accept" per le connessione
+
+* **Se N client inviano una richiesta GET
+    alla stessa risorsa quante istanze della
+	servlet che la gestisce vengono attivate?**
+	
+	* ***Una, cui accedono tutti i client
+	  in concorrenza***
+	* N, una per ogni client
+	* Una o N, come stabilitpo dal codice
+	  della servlet
+	* Una, cui accedono tutti i client
+	  per mutua esclusione
+
+* **Un sender esegue l’istruzione (in pseudo
+    codice): write (socket, buffer, N) per
+    scrivere sulla socket gli N byte contenuti
+    nel buffer. QUALE è falsa? [bho]**
+  
+  * Il receiver può leggere l’intero buffer con un
+    ciclo di istruzioni: read(socket, buffer, N/2)
+  * Il receiver può leggere l’intero buffer con un
+    ciclo di istruzioni: read(socket, buffer, 1)
+  * Il receiver può leggere l’intero buffer con un
+    ciclo di istruzioni: read(socket, buffer, N)
+  * ***Il receiver può leggere l’intero buffer con una
+    istruzione: read(socket, buffer, N)***
+	
+* **In quale scope è necessario mettere una
+    variabile perché sia letta globalmente
+	da diversi utenti e da diverse servlet?**
+	
+	* Session
+	* Page
+	* ***Application***
+	* Request
+
+* **Quali metodi dell'interfaccia Serializable
+    è obbligatorio implementare?**
+	
+	* ***Nessuno, Serializable è una classe marker,
+	  quindi non è obbligatorio implementare
+	  alcun metodo***
+	* È obbligatorio implementare onSerialization
+	  e onDeserialization
+	* È obbligatorio implementare i metodi 
+	  readObject e writeObject
+	  
+  
+* **Perché nel contesto SOA è fondamentale definire
+    delle interfacce, come WSDL, idnipendenti dal
+	linguaggio per la realizzazione del servizio? [?]**
+	
+	* Perché è più semplice automatizzare
+	  la gestione dei servizi
+	* ***Per consentire la composizione di servizi
+	  realizzati da terze parti***
+	* Per separare meglio i compiti assegnati ai
+	  servizi di una applicazione
+	* Per migliorare le performance dei servizi 
+	  realizzati
+	  

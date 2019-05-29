@@ -1472,8 +1472,8 @@ Vediamo qualche esempio di schemi con ridondanze:
 \includegraphics[scale=1]{img/rid.png}
 \end{center}
 \newpage
-La presenza di un dato derivato presenta un vantaggio e alcuni svantaggi. 11 van-
-taggio è una riduzione degli accessi necessari per calcolare il dato derivato,
+La presenza di un dato derivato presenta un vantaggio e alcuni svantaggi. 11 vantaggio
+è una riduzione degli accessi necessari per calcolare il dato derivato,
 gli svantaggi sono una maggiore occupazione di memoria (che è comunque spesso un
 costo trascurabile) e la necessità di effettuare operazioni aggiuntive per mantenere
 il dato derivato aggiornato. La decisione di mantenere o eliminare una ridondanza
@@ -1483,7 +1483,257 @@ assenza della ridondanza. Vediamo come cambiano le tavole degli accessi:
 \begin{center}
 \includegraphics[scale=1]{img/rid2.png}
 \end{center}
-%pagina 311
+\newpage
+\subsubsection{Eliminazione delle Generalizzazioni}
+Dato che i sistemi tradizionali per la gestione delle basi di dati non consentono
+di rappresentare direttamente una \textbf{generalizzazione}, risulta spesso necessario
+trasformare questo costrutto in altri costrutti del modello E-R per i quali esiste invece
+una implementazione naturale: le entità e le associazioni.\\
+Per rappresentare una generalizzazione mediante entità e associazioni
+abbiamo essenzialmente tre alternative possibili. Vediamo un E-R a cui togliere la generalizzazione:
+\begin{center}
+\includegraphics[scale=1]{img/genr.png}
+\end{center}
+Vediamo i 3 metodi:
+\begin{enumerate}
+\item \textbf{accorpamento delle figlie della generalizzazione nel genitore}, ovvero le entità $E_1,E_2$ vengono eliminate e le loro proprietà (attributi e partecipazioni ad
+  associazioni e generalizzazioni) vengono aggiunte all'entità genitore $E_0$.
+  A tale entità viene aggiunto un ulteriore attributo che serve a distinguere
+  il "tipo" di una occorrenza di $E_0$, cioè se tale occorrenza apparteneva a $E_1$,
+  a$E_2$  o, nel caso di generalizzazione non totale, a nessuna di esse:
+  \begin{center}
+  \includegraphics[scale=1]{img/genr2.png}
+  \end{center}
+  \textit{è conveniente quando le operazioni non fanno molta distinzione
+    tra le occorrenze e tra gli attributi di $E_0$, $E_1$ ed $E_2$. In questo caso infatti,
+    anche se abbiamo uno spreco di memoria per la presenza di valori nulli, la
+    scelta ci assicura un numero minore di accessi rispetto alle altre nelle quali le
+    occorrenze e gli attributi sono distribuiti tra le varie entità}
+\item \textbf{accorpamento del genitore della generalizzazione nelle figlie},
+  ovvero l'entità genitore $E_0$ viene eliminata e, per la proprietà dell'ereditarietà, i suoi attributi, il
+suo identificatore e le relazioni a cui tale entità partecipava, vengono aggiunti
+alle entità figlie $E_1$ ed $E_2$. Le relazioni $R_n$ e $R_n$ rappresentano rispettivamente
+la restrizione della relazione $R_1$ sulle occorrenze delle entità $E_1$ ed $E_2$:
+  \begin{center}
+  \includegraphics[scale=1]{img/genr3.png}
+  \end{center}
+  \textit{possibile solo se la generalizzazione è totale, altrimenti le
+    occorrenze di $E_0$ che non sono occorrenze nè di $E_1$ nè di $E_2$ non sarebbero
+rappresentate. È conveniente quando ci sono operazioni che si riferiscono solo
+a occorrenze di $E_1$, oppure di $E_2$ , e dunque fanno delle distinzioni tra tali entità.
+In questo caso abbiamo un risparmio di memoria rispetto alla prima scelta, perché,
+in linea di principio, gli attributi non assumono mai valori nulli. Inoltre, c'è una
+riduzione degli accessi rispetto alla terza scelta perché non si deve visitare E 0 per
+accedere ad alcuni attributi di $E_1$ ed $E_2$.}
+\item \textbf{sostituzione della generalizzazione con associazioni}, ovvero la generalizzazione
+  i trasforma in due associazioni uno a uno che legano rispettivamente l'entità
+genitore con le entità figlie $E_1$ ed $E_2$. Non ci sono trasferimenti di attributi o
+associazioni e le entità $E_1$ ed $E_2$ sono identificate esternamente dall'entità $E_0$
+  \begin{center}
+  \includegraphics[scale=1]{img/genr4.png}
+  \end{center}
+  \textit{è conveniente quando la generalizzazione non è totale (sebbene
+  ciò non sia necessario) e ci sono operazioni che si riferiscono solo a occorrenze
+  di  $e_1, E_2E$ oppure di $E_0$ , e dunque fanno delle distinzioni tra entità figlia ed
+  entità genitore. In questo caso abbiamo un risparmio di memoria rispetto alla prima
+  scelta, per l'assenza di valori nulli, ma c'è un incremento degli accessi per
+  mantenere la consistenza delle occorrenze rispetto ai vincoli introdotti.}
+\end{enumerate}
+\subsection{Elaborazione dei Concetti}
+Entità e associazioni in uno schema E-R possono essere partizionati o accorpati
+per garantire una maggior efficienza delle operazioni in base al seguente princinpio:
+gli accessi si riducono separando attributi di uno stesso concetto che vengono
+acceduti da operazioni diverse e raggruppando attributi di concetti diversi che vengono
+acceduti dalle medesime operazioni. Le stesse tecniche discusse per l'analisi
+delle generalizzazioni possono essere usate per prendere decisioni di questo tipo.
+\subsubsection{Partizionamento di Entità}
+Questa ristrutturazione è conveniente se le operazioni che coinvolgono frequentemente l'entità originaria
+richiedono, per un impiegato, o solo informazioni di carattere anagrafico o solo
+informazioni relative alla sua retribuzione. Un partizionamento di questo tipo è un esempio di\textit{ decomposizione
+verticale} di una entità, nel senso che si suddivide il concetto operando sui suoi attributi. E comunque possibile effettuare anche delle\textit{ decomposizioni
+orizzontali} nelle quali la suddivisione avviene sulle occorrenze dell'entità. Vediamo un esempio di decomposizione verticale:
+\begin{center}
+\includegraphics[scale=1]{img/conc.png}
+\end{center}
+I partizionamenti orizzontali hanno un effetto collaterale: quello di dover du-
+plicare tutte le associazioni a cui l'entità originaria partecipa. Questo fenomeno
+può avere delle ripercussioni negative sulle prestazioni del sistema. D'altra parte,
+i partizionamenti verticali generano entità con pochi attributi che possono essere
+tradotte in strutture logiche sulle quali, con un solo accesso, è possibile recupe-
+rare molti dati. Come per le generalizzazioni, anche in questo caso il semplice
+conteggio delle occorrenze e degli accessi, non è sempre sufficiente per scegliere
+la migliore alternativa possibile. Il problema del partizionamento dei dati viene
+ulteriormente discusso nel secondo volume, nel capitolo dedicato alle basi di dati
+distribuite.
+\subsubsection{Eliminazione di Attributi Multivalore}
+Un particolare tipo di partizionamento che è opportuno trattare a parte è quello che riguarda l'eliminazione di attributi
+multivalore. Questa ristrutturazione si rende necessaria perché, come per le ge-
+neralizzazioni, il modello relazionale non permette di rappresentare in maniera
+diretta questo tipo di attributo. La spiegazione del metodo è data dalla seguente immagine:
+\begin{center}
+\includegraphics[scale=1]{img/conc2.png}
+\end{center}
+\subsubsection{Accorpamento di Entità}
+L'accorpamento è l'operazione inversa del partizionamento.
+Un effetto collaterale di questa ristrutturazione è la possibile presenza di valori nulli. Vediamo un'immagine esplicativa:
+\begin{center}
+\includegraphics[scale=1]{img/conc3.png}
+\end{center}
+Gli accorpamenti si effettuano in genere su associazioni di tipo uno a uno,
+raramente su associazione uno a molti e praticamente mai su relazioni molti a
+molti. Questo perché gli accorpamenti di entità legate da un'associazione uno a
+molti o molti a molti generano ridondanze. In particolare, è facile verificare che si
+possono presentare ridondanze su attributi non chiave dell'entità che partecipava
+all'associazione originaria con una cardinalità massima pari a $N$. La presenza di
+ridondanze può essere comunque analizzata e discussa in maniera efficace con la
+tecnica della normalizzazione.
+\subsubsection{Altre Tecniche}
+Può convenire cioè, in alcuni casi, decomporre una associazio-
+ne tra due entità in due (o più) associazioni tra le medesime entità, per separare
+occorrenze dell'associazione originale accedute sempre separatamente e, viceversa
+, accorpare due (o più) associazioni tra le medesime entità (che si riferiscono
+però a due aspetti dello stesso concetto) in un'unica associazione, quando le
+relative occorrenze vengono sempre accedute contemporaneamente. Per esempio:
+\begin{center}
+\includegraphics[scale=1]{img/conc4.png}
+\end{center}
+\textit{I problemi di partizione/accorpamento possono essere rinviati, in molti casi, alla
+fase di progettazione fisica. Diversi sistemi di gestione di basi di dati correnti
+permettono infatti di specificare cluster di strutture logiche (relazioni nei sistemi
+relazionali), ovvero raggruppamenti di dati, fatti a livello fisico, che permettono
+l'accesso rapido a dati distribuiti su strutture logiche separate.}
+\subsection{Scelta degli Identificatori Principali}
+La scelta degli identificatori principali è essenziale nelle traduzioni verso il mo-
+dello relazionale perché in questo modello le chiavi
+vengono usate per stabilire legami tra dati in relazioni diverse. Inoltre, i sistemi di
+gestione di basi di dati richiedono generalmente di specificare una chiave
+primaria sulla quale vengono costruite automaticamente delle strutture ausiliarie, dette
+indici, per il reperimento efficiente di dati. Quindi, nei casi in cui esistono entità
+per le quali sono stati specificati più identificatori, bisogna decidere quale di questi
+identificatori verrà utilizzato come chiave primaria.
+I criteri di decisione per questa scelta sono i seguenti:
+\begin{itemize}
+\item gli attributi con valori nulli non possono costituire identificatori principali. Tali
+attributi infatti non garantiscono l'accesso a tutte le occorrenze dell'entità cor-
+rispondente, come sottolineato quando abbiamo discusso le chiavi nel modello
+relazionale
+\item un identificatore composto da uno o da pochi attributi è da preferire a iden-
+tificatori costituiti da molti attributi. Questo infatti garantisce che le strutture
+ausiliarie create per accedere ai dati (gli indici) siano di dimensioni ridotte, per-
+mette un risparmio di memoria nella realizzazione dei legami logici tra le varie
+relazioni e facilita le operazioni di join
+\item un identificatore interno con pochi
+attributi è da preferire a un identificatore esterno, che magari coinvolge diverse
+entità. Infatti gli identificatori esterni vengono tradotti in chiavi che includono gli identificatori delle entità coinvolte
+nell'identificazione esterna: chiaramente in questa maniera si possono generare
+chiavi con molti attributi
+\item un identificatore che viene utilizzato da molte operazioni per accedere alle occorrenze di un'entità è da preferire rispetto agli altri. In questa maniera infatti
+tali operazioni possono essere eseguite efficientemente perché possono trarre
+vantaggio dagli indici creati automaticamente dal \textit{DBMS}
+\end{itemize}
+\textit{A questo punto, se nessuno degli identificatori candidati soddisfa tali requisiti,
+e possibile pensare di introdurre un ulteriore attributo all'entità: questo attributo
+conterrà valori speciali, detti \textbf{codici}, generati appositamente per identificare le
+occorrenze delle entità. È comunque consigliabile tenere traccia in questa fase anche degli identificatori
+non selezionati come principali ma che vengono utilizzati da qualche operazione
+per accedere ai dati. Per questi identificatori è infatti possibile definire, in sede
+di progettazione fisica, degli indici secondari. Gli indici secondari consentono
+l'accesso efficiente ai dati e possono essere usati in alternativa agli indici definiti
+automaticamente sugli identificatori principali.}
+\section{Dall'E-R al Modello relazionale}
+Siamo nella seconda fase della progettazione logica e si hanno varie situazioni affrontabili.
+\subsection{Molti a Molti}
+Prendiamo come esempio:
+\begin{center}
+\includegraphics[scale=1]{img/erre.png}
+\end{center}
+La sua traduzione naturale nel modello relazionale prevede:
+\begin{enumerate}
+\item per ogni entità, una relazione con lo stesso nome avente per attributi i medesimi
+  attributi dell'entità e per chiave il suo identificatore
+\item per l'associazione, una relazione con lo stesso nome avente per attributi gli attributi dell'associazione e gli identificatori delle entità coinvolte; tali identificatori
+formano la chiave della relazione
+\end{enumerate}
+\textit{Se gli attributi originali di entità o associazioni sono opzionali, i corrispondenti
+  attributi di relazione possono assumere valori nulli.}
+Si ottiene quindi:
+\begin{center}
+IMPIEGATO(\underline{Matricola}, Cognome, Stipendio)\\
+PROGETTO(\underline{Codice}, Nome, Budget)\\
+PARTECIPAZIONE(\underline{Matricola}, \underline{Codice}, Datalnizio)
+\end{center}
+\subsection{Uno a Molti}
+Partiamo anche qui dall'E-R:
+\begin{center}
+\includegraphics[scale=1]{img/erre2.png}
+\end{center}
+L'entità con cardinalità massima pari a 1 viene tradotta in una relazione
+che contiene anche gli identificatori delle altre entità coinvolte nell'associazione
+e non c'è biosgno di rappresentare esplicitamente l'associazione di partenza. Si ottiene quindi:
+\begin{center}
+GiocATQRE(\underline{Cognome}, \underline{Datanascita}, Ruolo, NomeSquadra, Ingaggio)\\
+SQUADRA(\underline{Nome}, Città, ColoriSociali)
+\end{center}
+\subsection{Entità Esterna}
+Le entità con identificatori esterni danno luogo a relazioni con chiavi che inclu-
+dono gli identificatori delle entità "identificanti".\\
+Partiamo dall'E-R:
+\begin{center}
+\includegraphics[scale=1]{img/erre3.png}
+\end{center}
+Si ottiene:
+\begin{center}
+  STUDENTE(\underline{Matricola}, \underline{NomeUniversità}, Cognome, AnnoIscrizione)\\
+UNIVERSITÀ(\underline{Nome}, Città, indirizzo)
+\end{center}
+Come si può vedere, rappresentando l'identificatore esterno si rappresenta
+direttamente anche l'associazione tra le due entità. Ricordiamo infatti che le entità
+identificate esternamente partecipano all'associazione sempre con una cardinalità
+minima e massima pari a uno. Questo tipo di traduzione è valido
+indipendentemente dalla cardinalità con cui l'altra entità partecipa all'associazione.
+\subsection{Uno a Uno}
+Si hanno varie possibilità. parto dall'E-R:
+\begin{center}
+\includegraphics[scale=1]{img/erre4.png}
+\end{center}
+Se si hanno associazioni uno a uno con partecipazioni obbligatorie per entrambe le entità si hanno due possibilità:
+\begin{enumerate}
+\item
+  \begin{center}
+  DIRETTORE(\underline{Codice}, Cognome, Stipendio. DipartimentoDiretto, InizioDirezione)\\
+  DIPARTIMENTO(\underline{Nome}. Telefono, Sede)
+\end{center}
+\item
+  \begin{center}
+  DIRETTORE(\underline{Codice}, Cognome, Stipendio)
+  DIPARTIMENTO(\underline{Nome}, Telefono. Sede, Direttore, InizioDirezione)
+\end{center}
+\end{enumerate}
+Consideriamo infine il caso in cui entrambe le entità hanno partecipazione
+opzionale e si ha:
+\begin{center}
+IMPIEGATO(\underline{Codice}, Cognome, Stipendio)\\
+DIPARTIMENTO(\underline{Nome}, Telefono, Sede)\\
+DIREZIONE(\underline{Direttore}, Dipartimento, DatalnizioDirezione)
+\end{center}
+Diciamo quindi che la soluzione con tre relazioni è
+da prendere in considerazione solo se il numero di occorrenze dell'associazione è
+molto basso rispetto alle occorrenze delle entità che partecipano all'associazione.
+In questo caso, c'è infatti il vantaggio di evitare la presenza di molti valori nulli.
+\subsection{Tabella Riassuntiva}
+\begin{center}
+\includegraphics[scale=1]{img/tabrel.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=1]{img/tanrel2.png}
+\end{center}
+\chapter{Algebra Relazionale}
+L'algebra relazionale è un linguaggio procedurale, basato
+su concetti di tipo algebrico. Sostanzialmente, esso è costituito da un insieme di
+operatori, definiti su relazioni e che producono ancora relazioni come risultati.
+In questo modo, è possibile costruire espressioni che coinvolgono più operatori,
+allo scopo di formulare interrogazioni anche complesse.
+\section{Unione, Intersezione  e Differenza}
 \end{document}
 
 

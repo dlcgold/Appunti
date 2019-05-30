@@ -1734,7 +1734,175 @@ operatori, definiti su relazioni e che producono ancora relazioni come risultati
 In questo modo, è possibile costruire espressioni che coinvolgono più operatori,
 allo scopo di formulare interrogazioni anche complesse.
 \section{Unione, Intersezione  e Differenza}
+Si ricorda che le relazioni sono insiemi, e quindi ha senso definire su
+di esse gli operatori insiemistici tradizionali di unione, differenza e
+intersezione, esprimibile per mezzo della differenza, in quanto è sempre
+vero che $r\cap s = r-(r-s)$.\\
+Però, dobbiamo prestare attenzione al fatto che una
+relazione non è genericamente un insieme di tuple, ma un insieme di tuple
+\textbf{omogenee}, cioè definite sugli stessi attributi.
+Pertanto, pur potendo, in linea di principio,
+definire gli operatori in questione su qualunque coppia di relazioni,
+non ha senso, dal punto di vista del modello relazionale, definirli con
+riferimento a relazioni su attributi diversi.\\
+Pertanto, consideriamo ammissibili, nell'algebra relazionale, solo applicazioni degli operatori di unione,
+intersezione e differenza a coppie di operandi definite sugli stessi attributi.
+\begin{descrizione}
+Si ha:
+\begin{itemize}
+\item l'\textbf{unione} di due relazioni $r_1$ e $r_2$ definite sullo stesso insieme di
+  attributi $X$ è indicata con $r_1\cup r_2$ ed è una relazione ancora su $X$
+  contenente le tuple che appartengono a $r_1$ o a $r_2$ o a entrambe
+\item l'\textbf{intersezione} di $r_1(X)$ e $r_2(X)$ è indicata con $r_1\cap r_2$ ed è una relazione ancora su $X$
+  contenente le tuple che appartengono sia a $r_1$ che a $r_2$
+\item la \textbf{differenza} di  $r_1(X)$ e $r_2(X)$  è indicata con $r_1- r_2$ ed è una relazione ancora su $X$
+  contenente le tuple che appartengono a $r_1$ ma non a $r_2$
+\end{itemize}
+\end{descrizione}
+nella pratica vediamo degli esempi:
+\begin{center}
+\includegraphics[scale=1]{img/alg.png}
+\end{center}
+La limitazione che abbiamo dovuto imporre agli operatori insiemistici
+(uguaglianza del nome dell'attributo), pur giustificata, risulta però particolarmente pesante.\\
+Per risolvere il problema, introduciamo uno specifico operatore, che ha come
+unico obiettivo proprio quello di adeguare i nomi degli attributi, a seconda delle
+necessità, in particolare al fine di facilitare le operazioni insiemistiche. L'opera-
+tore è detto di \textbf{ridenominazione}, perché appunto "cambia il nome degli attributi",
+lasciando inalterato il contenuto delle relazioni.\\
+Definiamo l'operatore di ridenominazione in forma generale:
+\begin{descrizione}
+Sia $r$ una relazione definita sull'insieme di attributi $X$ e sia $Y$ un altro
+insieme di attributi con la stessa cardinalità.
+Siano pi $A_1,..,A_k$ e $B_1,..,B_k$ rispettivamente un ordinamento per
+gli attributi in $X$ e un ordinamento per quelli in $Y$. Allora la ridenominazione:
+\[\rho B_1, ..., B_k \leftarrow A_1, ..., A_k(r))\]
+contiene una tupla $t^{'}$ per ciascuna tupla $t$ in $r$, definita come segue:
+$t^{'}$ è una tupla su $Y$ e $t^{'}[B_i]=t[A_i],\,\,i=1,...,k$.\\
+\textbf{La definizione conferma che ciò che cambia sono i nomi degli attributi,
+  mentre i valori rimangono inalterati e vengono associati ai nuovi attributi.}\\
+In pratica nelle liste $A_1,...,A_k$ e $B_1, ..., B_k$ noi indicheremo solo gli attributi che vengono ridenominati, ovvero quelli per cui $A_i\neq B_i$.
+\end{descrizione}
+in pratica:
+\begin{center}
+\includegraphics[scale=1]{img/alg1.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=1]{img/alg2.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=1]{img/alg3.png}
+\end{center}
+oppure:
+\begin{center}
+\includegraphics[scale=1]{img/alg4.png}
+\end{center}
+Passiamo ora a esaminare gli operatori più tipici dell'algebra relazionale, che per-
+mettono effettivamente di manipolare le relazioni.\\
+Si hanno:
+\begin{itemize}
+\item selezione
+\item proiezione
+\item join (e varianti)
+\end{itemize}
+vediamo lo schema dei primi due:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg5.png}
+\end{center}
+Si ha che selezione e proiezione
+svolgono funzioni che potremmo definire complementari (od ortogonali).\\
+Sono
+entrambe definite su un operando e producono come risultato una porzione
+dell'operando. Più precisamente, la selezione produce un sottoinsieme delle tuple, su
+tutti gli attributi, mentre la proiezione dà un risultato cui contribuiscono tutte le
+tuple. ma su un sottoinsieme degli attributi. Quindi la selezione genera \textit{decomposizioni orizzontali} mentre la proiezione \textit{decomposizioni verticali}.\\
+Vediamo due esempi di selezione:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg6.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=0.7]{img/alg7.png}
+\end{center}
+L'operatore di seleziona si indica con $\sigma$ a pedice quale viene indicata la "condizione di selezione" opportuna.
+Il risultato contiene
+le tuple dell'operando che soddisfano la condizione di selezione. Come mostrato
+dagli esempi, le condizioni di selezione possono prevedere confronti fra attributi e
+confronti fra attributi e costanti, e possono essere complesse, ottenute combinando
+condizioni semplici con i connettivi logici $\wedge$ (and), $\vee$ (or) e $\neg$ (not).\\ Nel dettaglio data una relazione $r(X)$, una \textbf{formula proposizionale}, $F$ su $X$ è ottenta combinando con i connettivi logici condizioni atomiche del tipo $A\theta B$ o $A\theta c$ dove:
+\begin{itemize}
+\item $\theta$ è un operatore di confronto: $=, \neq, >, <, \geq, \leq$
+\item $A$ e $B$ sono attributi in $X$ sui cui valori il confronto $\theta$ abbia senso
+\item $c$ è una costante "compatibile" con il dominio di $A$ (cioè tale che il confronto $\theta$ sia definito)
+\end{itemize}
+quindi date una formula F e una tupla $t$, è definito un valore di verità per $F$ su $t$:
+\begin{itemize}
+\item $A\theta B$ è vera su t se e solo se $t[A]$ è in relazione $\theta$ con $t[B]$ (per esempio, $A-B$ è vera su $t$ se$ t[A] = t[B]$)
+\item $A\theta c$ è vera su $t$ sse $t[A]$ è in relazione $\theta$ con $c$
+\item $F_1\vee F_2, F_1\wedge F_2$ e $\neg F_1$ hanno l'usuale significato
+\end{itemize}
+Quindi: \textit{la selezione $\sigma_F(r)$ produce una relazione sugli stessi attributi di $r$ che contiene le tuple di $r$ su cui $F$ è vera.}\\
+Passiamo alla \textbf{proiezione}.\\
+La definizione dell'operatore di proiezione è ancora più semplice: dati una
+relazione $r(X)$ e un sottoinsieme $Y$ di $X$, la proiezione di $r$ su $Y$,
+indicata con $\pi_Y(r)$, è l'insieme di tuple $Y$ ottenute dalle tuple di $r$
+considerando solo i valori su $Y$:
+\[\pi_Y(r)=\{t[Y]|\, t\in r\}\]
+Vediamo due esempi:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg8.png}
+\end{center}
+\begin{center}
+\includegraphics[scale=0.7]{img/alg9.png}
+\end{center}
+La proiezione permette di decomporre verticalmente le relazioni. Essendo le relazioni definite come insiemi, non possono in esse comparire più tuple uguali
+fra loro: i contributi uguali "collassano" in una sola tupla.\\
+In generale, possiamo dire che il risultato di una proiezione contiene al più
+tante tuple quante l'operando, ma può contenerne di meno.\\
+Notiamo anche che esiste un legame fra i vincoli di chiave e le proiezioni, relativamente a questo problema: $\pi_Y(r)$ contiene lo stesso numero di tuple
+di $r$ se e solo se $Y$ è superchiave per $r$. Infatti:
+\begin{itemize}
+\item se $Y$ è superchiave, allora $r$ non contiene tuple uguali su $Y$, quindi ogni tupla dà un contributo diverso alla proiezione
+\item se la proiezione ha tante tuple quante l'operando, allora ciascuna tupla di $r$
+  contribuisce alla proiezione con valori diversi, quindi $r$ non contiene coppie di
+tuple uguali su $Y$: ma questa è proprio la definizione di superchiave
+\end{itemize}
+Come inciso, notiamo che una proiezione può produrre un numero di
+tuple pari a quelle dell'operando anche se gli attributi coinvolti non sono definiti come superchiave (nello schema)\\
+Passiamo al \textbf{join}.\\
+Passiamo ora a esaminare l'operatore di join' che è il più caratteristico dell'algebra relazionale,
+in quanto è l'operatore che permette di correlare dati contenuti in
+relazioni diverse, confrontando i valori contenuti in esse e utilizzando quindi la
+caratteristica fondamentale del modello, quella di essere basato su valori. Esistono, a parte alcune varianti, due versioni dell'operatore, comunque riconducibili
+l'una all'altra: la prima (il \textbf{join naturale}) utile per riflessioni di tipo astratto e la
+seconda (il \textbf{theta-join}) più rilevante dal punto di vista pratico:
+\begin{itemize}
+\item il \textbf{join naturale} è un operatore (lo definiamo inizialmente in ver-
+sione binaria, cioè con due operandi, per poi generalizzare) che correla dati in
+relazioni diverse, sulla base di valori uguali in attributi con lo stesso nome. Si denota con il simbolo $\Join$. Il risultato del join è costituito da una relazione
+sull'unione degli insiemi di attributi degli operandi e le sue tuple sono ottenute
+combinando le tuple degli operandi con valori uguali sugli attributi comuni, per esempio,
+la prima tupla del join deriva dalla combinazione della prima tupla della relazione $r_1$ e della seconda tupla della relazione $r_2$.\\
+Vediamo un esempio di join naturale:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg10.png}
+\end{center}
+Definiamo tutto più formalmente: in generale il join naturale $r_1\join r_2$ di
+$r_1(X_1)$ e $r_2(X_2)$è una relazione definita su $X_1X_2$, ovvero sull'unione dei due insiemi, così definita:
+\[r_1\Join r_2=\{t \mbox{ su } X_1X_2|\, \exist t_1\in r_1, t_2\in r_2 \to t[X_1]=t_1, t[X_2]=t_2 \}\]
+La definizione conferma che le tuple del risultato sono ottenute combinando tuple
+degli operandi con valori uguali sugli attributi comuni (\textit{su libro dimostrazioen}). Il grado della relazione ottenuta
+come risultato di un join è minore o uguale della somma dei gradi dei due ope-
+randi, perché gli attributi omonimi degli operandi compaiono una sola volta nel
+risultato.\\
+E opportuno notare che è molto frequente eseguire join sulla base di valori
+della chiave di una delle relazioni coinvolte, esplicitando i riferimenti fra tuple
+che, come abbiamo più volte ripetuto, sono realizzati per mezzo di valori, soprattutto
+valori di chiavi. In molti di questi casi, è anche definito, fra gli attributi coinvolti, un vincolo di integrità referenziale. Per esempio:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg11.png}
+\end{center}
+\item ci sono poi i \textbf{join completi e incompleti}
+\end{itemize}
 \end{document}
-
 
 

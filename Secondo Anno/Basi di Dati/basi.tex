@@ -1931,9 +1931,135 @@ Ricapitolando, possiamo dire che il join di $r_1$ e $r_2$ contiene un numero di 
 \item se $X_1\cap X_2$ coincide con una chiave per $r_2$ e sussiste il vincolo di riferimento
 fra $X_1\cap X_2$ in $r_1$ e la chiave di $r_2$ , allora il join di  $r_1(X_1)$ e $r_2(X_2)$ contiene esattamente $|n|$ tuple
 \end{itemize}
-\item \textbf{join esterni}
-  pagina 73
+\item \textbf{join esterni}, infatti la caratteristica dell'operatore di join di "tralasciare" le tuple di
+una relazione senza controparte nell'altra è utile in molti casi ma potenzialmente
+pericolosa in altri, in quanto può portare a omettere informazioni rilevanti.\\
+Allo scopo, è stata proposta una variante dell'operatore di join chiamata join esterno (in inglese \textbf{outer join}), che prevede che tutte le tuple diano un contributo al risultato, eventualmente estese con valori nulli ove non vi siano controparti opportune. Esistono tre
+varianti per l'operatore: il join esterno sinistro, che estende solo le tuple del primo
+operando, quello destro, che estende solo le tuple del secondo operando, e quello
+completo, che le estende tutte. Vediamo degli esempi:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg15.png}
+\end{center}
+\item \textbf{join n-ario, intersezione e prodotto cartesiano}, infatti partiamo da
+  due proprietà del join naturale: la \textit{commutatività e la associatività};
+  Pertanto, potremo scrivere, ove necessario, sequenze di join
+  senza parentesi:
+  \[r_1\Join r_2\Join ... \Join r_n \mbox{ oppure } \Join^n_{i=1}r_i\]
+  Di conseguenza, ha senso considerare anche i casi estremi, quello in cui sono uguali e quello in cui sono disgiunti.
+  In entrambi i casi, si applica la definizione generale vista sopra, ma è opportuno
+  fare alcune osservazioni. Se $X_1=X_2$, allora il join coincide in effetti con
+  l'intersezione:
+  \[r_1(X_1)\Join r_2(X_1)=r_1(X_1)\cap r_2(X_1)\]
+  in quanto, nella definizione, si richiede che il risultato sia definito sull'unione dei
+  due insiemi di attributi, e che contenga le tuple $t$ tali che $t[X_1]\in r_1$
+  e $t[X_2]\in r_2$; se $X_1=X_2$ allora l0unione di $X_1$ e $X_2$ è ancora pari
+  a $X_1$, quindi $t$ è definita su $X_1$: la definizione richiede quindi che $t\in r_1$ e $t\in r_2$ e coincide perciò con la
+  definizione di intersezione.\\
+  Vediamo ora il caso più interessante di due insiemi disgiunti. Il risultato è sempre definito sull'unione di $X_1$ e $X_2$ e ciascuna tupla deriva
+sempre da due tuple, una per ciascuno degli operandi, ma, in effetti, poiché tali
+tuple non hanno attributi in comune, non viene richiesta a esse nessuna
+condizione per partecipare insieme al join: la condizione che informalmente abbiamo
+prima discusso, e cioè che le due tuple devono avere gli stessi valori sugli attri-
+buti comuni, degenera in una condizione sempre verificata. Quindi, il risultato del
+join contiene le tuple ottenute combinando, in tutti i modi possibili, le tuple degli
+operandi. In questo caso particolare, si dice spesso che il join diventa un \textbf{prodotto cartesiano}. Si ha quindi:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg16.png}
+\end{center}
+\item \textbf{theta-join ed equi-join}, che rispondono alla poca utilità del prodotto cartesiano
+  Per questa ragione, viene spesso definito un operatore derivato (cioè espri-
+  mibile per mezzo di altri operatori), il \textbf{theta-join}, come prodotto cartesiano seguito
+  da una selezione, nel modo seguente (dove $F$ è una formula proposizionale
+  utilizzabile in una selezione e le relazioni $r_1$ e $r_2$  non hanno attributi in comune):
+  \[r_1\Join_F r_2= \sigma_F(r_1\Join r_2)\]
+  Un theta-join in cui la condizione di selezione $F$ sia una congiunzione di atomi
+di uguaglianza, con un attributo della prima relazione e uno della seconda, viene
+chiamato\textbf{ equi-join}. Quindi la relazione nella Figura 3.19 è ottenuta per mezzo di
+un equi-join. Per esempio:
+  \begin{center}
+  \includegraphics[scale=0.7]{img/alg17.png}
+  \end{center}
+  Dal punto di vista pratico il theta-join e ancor più l'equi-join hanno una grande
+  importanza, in quanto la maggior parte dei sistemi di basi di dati effettivamente esistenti non utilizzano i nomi di attributo per correlare relazioni, e pertanto non
+utilizzano il join naturale ma l'equi-join e il theta-join. Notiamo tra l'altro come il
+join naturale possa essere simulato per mezzo della ridenominazione, dell'equi-join e della proiezione.
 \end{itemize}
+\subsection{Interrogazioni in Algebra Relazionale}
+In generale, un'\textbf{interrogazione} può essere definita come una\textit{ funzione che, appli-
+  cata a istanze di basi di dati, produce relazioni}. Nel dettaglio dato uno schema $R$
+di base di dati, un'interrogazione è una funzione che, per ogni istanza $r$ di $R$
+produce una relazione su un dato insieme di attributi $X$. Le espressioni dei vari lin-
+guaggi di interrogazione (per esempio dell'algebra relazionale) "rappresentano" o
+"realizzano" interrogazioni: ogni espressione definisce una funzione. Indichiamo
+con$ E(r)$ il risultato dell'applicazione dell'espressione $E$ alla base di dati $r$.\\
+In algebra relazionale, le interrogazioni su uno schema di base di dati $R$ ven-
+gono formulate con espressioni i cui atomi sono (nomi di) relazioni in $R$ (le "variabili").\\
+Si prenda come base di dati la seguente:
+\begin{center}
+Impiegati(\underline{matr}, Nome, Età, Stipendio)\\
+Supervisione(Capo, \underline{Impiegato})
+\end{center}
+\begin{center}
+\includegraphics[scale=0.7]{img/int.png}
+\end{center}
+La prima interrogazione che consideriamo è molto semplice, in quanto coin-
+volge una sola relazione: \textit{trovare matricola, nome ed età degli impiegati che gua-
+dagnano più di 40 mila euro}. In questo caso, con una selezione possiamo porre
+l'attenzione sulle sole tuple che soddisfano la condizione (stipendio maggiore di
+40 mila euro) e con una proiezione eliminiamo gli attributi non richiesti:
+\[\pi_{Matr.Nome.Età}(\sigma_{Stipendio>40})(IMPIEGATI)\]
+Ovvero:
+\begin{center}
+\includegraphics[scale=0.7]{img/int1.png}
+\end{center}
+vediamo una seconda interrogazione: \textit{trovare le matricole dei capi degli impiegati che guadagnano più di 40
+  mila euro:}
+\[\pi_{Capo}(SUPERVISIONE)\Join_{Impiegato=Matr}\sigma_{Stipendio>40}(IMPIEGATI)\]
+Ovvero:
+\begin{center}
+\includegraphics[scale=0.7]{img/int2.png}
+\end{center}
+Complichiamo le cose, introducendo anche la necessità di ridenominazione: \textit{trovare nome e stipendio dei capi degli impiegati che
+  guadagnano più di 40 mila euro:}
+\[\pi_{NomeC.StipC}(\rho_{MatrC.NomeC.StipC.EtàC\leftarrow Matr.Nome.Stip.Età}(IMPIEGATI))\]
+\[\Join_{MatrC=Capo}\]
+\[SUPERVISIONE\Join{Imp=matr}\sigma_{Stip>40}(IMPIEGATI)\]
+Ovvero:
+\begin{center}
+\includegraphics[scale=0.7]{img/int3.png}
+\end{center}
+\section{Equivalenza di Espressioni Algebriche}
+L'algebra relazionale, come molti altri strumenti formali in contesti diversi, permette
+di formulare espressioni fra loro \textbf{equivalenti}, cioè che producono lo stesso
+risultato. Per esempio, con riferimento ai numeri reali e agli operatori di addizione
+e moltiplicazione, vale l'equivalenza:
+\[x \times(y+z) \equiv x \times y+x \times z\]
+nel senso che. per ogni valore sostituito alle tre variabili, i due membri risultano
+uguali. Nell'algebra relazionale possiamo dare una definizione analoga, facendo
+attenzione al fatto che l'equivalenza può dipendere dallo schema, oppure essere
+assoluta:
+\begin{itemize}
+\item $E_{1} \equiv \mathbf{R} E_{2} \text { se } E_{1}(\mathbf{r})=E_{2}(\mathbf{r}), \text { per ogni istanza } \mathbf{r} \text { di } \mathbf{R}$, 
+\item $E_{1} \equiv E_{2} \text { se } E_{1} \equiv \mathbf{R} E_{2} \text { per ogni schema } \mathbf{R}$  
+\end{itemize}
+Un esempio di equivalenza assoluta è:
+\[\pi_{A B}\left(\sigma_{A>0}(R)\right) \equiv \sigma_{A>0}\left(\pi_{A B}(R)\right)\]
+mentre:
+\[\pi_{AB}(R_1)\Join\pi_{AC}(R_2)\equiv \mathbf{R}\pi_{ABC}(R_1\Join R_2)\]
+sussiste se e solo se nello schema R l'intersezione fra gli insiemi di attributi di $R_1$e $R_2$ è pari ad $A$.\\
+L'equivalenza di espressioni dell'algebra risulta particolarmente importante
+dal punto di vista applicativo, nella fase di esecuzione delle interrogazioni. Infatti,
+le interrogazioni, specificate in linguaggio SQL, vengono tradotte in
+algebra relazionale e, appunto con riferimento all'algebra, viene valutato il co-
+sto, sostanzialmente in termini di dimensioni dei risultati intermedi. In presenza
+di varie alternative equivalenti, viene scelta quella con costo minore. In questo
+contesto, vengono spesso utilizzate trasformazioni di equivalenza, cioè operazio-
+ni che sostituiscono un'espressione con un'altra a essa equivalente. In particolare,
+risultano interessanti le trasformazioni che riducono le dimensioni dei risultati
+intermedi e quelle che preparano un'espressione all'applicazione di una trasformazione
+che riduce le dimensioni dei risultati intermedi.\\
+Vediamo delle trasformazioni interessanti:
 \end{document}
 
 

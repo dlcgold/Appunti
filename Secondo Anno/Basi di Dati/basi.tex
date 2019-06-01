@@ -2059,7 +2059,114 @@ ni che sostituiscono un'espressione con un'altra a essa equivalente. In particol
 risultano interessanti le trasformazioni che riducono le dimensioni dei risultati
 intermedi e quelle che preparano un'espressione all'applicazione di una trasformazione
 che riduce le dimensioni dei risultati intermedi.\\
-Vediamo delle trasformazioni interessanti: 
+Vediamo delle trasformazioni interessanti:
+\begin{enumerate}
+\item \textbf{atomizzazione delle selezioni:} una selezione congiuntiva può essere sostituita
+  da una cascata di selezioni atomiche:
+  \[\sigma_{F_{1} \wedge F_{2}}(E) \equiv \sigma_{F_{1}}\left(\sigma_{F_{2}}(E)\right)\]
+  dove $E$ è una qualunque espressione. Questa trasformazione permette di
+  applicare successive trasformazioni che operano su selezioni con condizioni atomiche
+\item \textbf{idempotenze delle proiezioni:} una proiezione può essere trasformata in una
+  cascata di proiezioni che "eliminano" i vari attributi in fasi diverse:
+  \[\pi_{X}(E) \equiv \pi_{X}\left(\pi_{X Y}(E)\right)\]
+  se $E$ è definita su un insieme di attributi che contiene $Y$ (oltre a $X$). Anche
+questa è una trasformazione preliminare ad altre
+\item \textbf{pushing selections down}, anticipazione della selezione rispetto al join:
+  \[\sigma_{F}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join \sigma_{F}\left(E_{2}\right)\]
+  se la condizione $E$ fa riferimento solo ad attributi nella sottoespressione $E_2$
+\item \textbf{pushing projections down}, anticipazione della proiezione rispetto al join:
+  siano $E_1$ e $E_2$ definite su $X_1$ e $X_2$; se $Y_2\subseteq X_2$ e $Y_2\subseteq (X_1\cap X_2)$ (cioè gli attributi in $X_2-Y_2$ non sono coinvolti nel join) allora vale l'equivalenza:
+  \[\pi_{X_{1} Y_{2}}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join \pi_{Y_{2}}\left(E_{2}\right)\]
+  e combinando questa regola con quella della idempotenza delle proiezioni, possiamo ottenere la seguente equivalenza:
+  \[\pi_{X_{1} Y_{2}}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join \pi_{Y_{2}}\left(E_{2}\right)\]
+  dove, indicando con $X_1$ e $X_2$ gli attributi di $E_1$ ed $E_2$ rispettivamente e con $J_1$
+  e $J_2$ i rispettivi sottoinsiemi coinvolti nella condizione $F$ di join:
+  \[Y_{1}=\left(X_{1} \cap Y\right) \cup J_{1}\]
+  \[Y_{2}=\left(X_{2} \cap Y\right) \cup J_{2}\]
+  \textit{In sostanza, possiamo eliminare subito da ciascuna relazione gli attributi che
+non compaiono nel risultato finale e non sono coinvolti nel join}
+\item \textbf{inglobamento di una selezione in un prodotto cartesiano a formare un join:}
+  \[\sigma_{F}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join_{F} E_{2}\mbox{ con }E_1\cap E_2=\emptyset\]
+\item \textbf{distributività della selezione rispetto all'unione:}
+  \[\sigma_{F}\left(E_{1} \cup E_{2}\right) \equiv \sigma_{F}\left(E_{1}\right) \cup \sigma_{F}\left(E_{2}\right)\]
+\item \textbf{dstributività della selezione rispetto alla differenza:}
+  \[\sigma_{F}\left(E_{1}-E_{2}\right) \equiv \sigma_{F}\left(E_{1}\right)-\sigma_{F}\left(E_{2}\right)\]
+\item \textbf{distributività della proiezione rispetto all'unione:}
+  \[\pi_{X}\left(E_{1} \cup E_{2}\right) \equiv \pi_{X}\left(E_{1}\right) \cup \pi_{X}\left(E_{2}\right)\]
+  Si noti che la proiezione non è distributiva rispetto alla differenza
+\item \textbf{altre trasformazioni interessanti sono quelle che si basano sulla corrispondenza
+    fra gli operatori insiemistici e le selezioni complesse:}
+  \[\sigma_{F_{1} \vee F_{2}}(R) \equiv \sigma_{F_{1}}(R) \cup \sigma_{F_{2}}(R)\]
+  \[\sigma_{F_{1} \vee F_{2}}(R) \equiv \sigma_{F_{1}}(R) \cap \sigma_{F_{2}}(R)\equiv \sigma_{F_1}(R)\Join \sigma_{F_2}(R)\]
+  \[\sigma_{F_{1} \wedge \neg\left(F_{2}\right)}(R) \equiv \sigma_{F_{1}}(R)-\sigma_{F_{2}}(R)\]
+\item \textbf{Proprietà commutativa e associativa di tutti gli operatori binari,
+    esclusa la differenza, e la proprietà distributiva del join rispetto all'unione:}
+  \[E\Join (E_1\cup E_2)\equiv (E\Join E_1)\cup (E\Join E_2)\]
+\end{enumerate}
+ ediamo un esempio che chiarisce l'uso delle trasformazioni preparatorie e l'im-
+portante regola di anticipazione delle selezioni. \textit{Si cerchino i numeri di matricola dei capi di
+  impiegati con meno di trenta anni} dalla seguente base dati:
+\begin{center}
+\includegraphics[scale = 0.7]{img/alg18.png}
+\end{center}
+vediamo una soluzione col prodotto cartesiano, una selezione congiuntiva e una proiezione:
+\[\pi_{Capo}\(\sigma_{matr=Imp\wedge Età <30}(IMPIEGATI \Join SUPERVISIONE))\]
+Iniziamo a migliorare l'espressione. Innanzitutto spezziamo la selezione con la regola delle \textbf{atomizzazioni} e otteniamo:
+\[\pi_{Capo}\(\sigma_{matr=Imp}(\sigma_{età<30}(IMPIEGATI \Join SUPERVISIONE)))\]
+Fondiamo poi la prima selezione col prodotto cartesiano usando l'ultima regola per formare un join e anticiparlo con la terza, ottenendo:
+\[\pi_{Capo}(\sigma_{Età<30}(IMPIEGATI)\Join_{matr=Imp}SUPERVISIONE)\]
+Infine, possiamo eliminare dal primo argomento del join (con una proiezione) gli
+attributi non necessari, utilizzando la quarta regola:
+\[\pi_{Capo}(\pi_{matr}(\sigma_{Età<30}(IMPIEGATI))\Join_{matr=Imp}SUPERVISIONE)\]
+\subsection{Algebra dei Valori Nulli}
+Consirero la relazione:
+\begin{center}
+\includegraphics[scale = 0.7]{img/null.png}
+\end{center}
+con la selezione:
+\[\sigma_{Età>30}(PERSONE)\]
+Innanzitutto è indiscutibile che la prima tupla della relazione debba far parte del risultato
+e che la seconda invece no. Per quanto riguarda invece la terza si è proposto l'uso di una\textbf{ logica a tre valori} in
+cui un predicato può essere vero, falso, o assumere un terzo nuovo valore di verità
+che chiamiamo \textit{unknown} (sconosciuto) e rappresentiamo con il simbolo $U$.
+Un redicato assume questo valore quando almeno uno dei termini del confronto as-
+sume il valore nullo. Quindi, con riferimento al caso in discussione, la prima tupla
+certamente appartiene al risultato (appartenenza vera), la seconda certamente non
+ppartiene (appartenenza falsa) e la terza forse appartiene e forse no (appartenen-
+za sconosciuta). Le tabelle di verità dei connettivi logici not, and e or, per tenere
+conto del nuovo valore logico, si estendono nel modo seguente:
+\begin{center}
+\includegraphics[scale = 0.7]{img/null2.png}
+\end{center}
+Una selezione su relazioni con valori nulli produce come risultato le tuple per
+cui il predicato risulta vero. Il valore unknown rappresenta un valore di verità
+intermedio tra vero e falso, e il significato dei tre connettivi in questo contesto
+diventa il seguente: il not è vero solo se il valore di partenza è falso, l'and è vero
+solo se tutti i termini sono veri, e l'or è vero se almeno uno dei termini è vero.
+Vale la pena sottolineare che la logica a tre valori risulta effettivamente
+significativa solo nel caso di espressioni complesse, in cui il risultato presenta co-
+munque proprietà poco soddisfacenti.\\
+Si introducono due nuove forme di condizioni atomiche
+di selezione, con lo scopo di verificare se un valore è specificato oppure nullo:
+\begin{enumerate}
+\item \textit{A IS NULL} assume valore vero su una tupla $t$ se il valore di $t$ su $A$ è nullo e
+  falso se esso è specificato
+\item \textit{A IS NOT NULL} assume valore vero su una tupla $t$ se il valore di $t$ su $A$ è
+specificato e falso se il valore è nullo
+\end{enumerate}
+e quindi lò'espressione sopra restituisce le persone la cui età è nota e maggiore di 30, mentre per ottenere quelle
+che hanno o potrebbero avere più di trent'anni (cioè quelle per cui l'età è nota e
+maggiore di 30 oppure non nota), possiamo utilizzare l'espressione:
+\[\sigma_{Età>30 \wedge ET\,\,IS\,\,NULL}(PERSONE)\]
+e analogamente le espressuinni:
+\[\sigma_{Età>30}(PERSONE)\cup \sigma_{Età\leq 30}(PERSONE)\]
+\[\sigma_{Età>30\wedgeEtà\leq 30}(PERSONE)\]
+non restituiscono l'intera relazione, ma solo le tuple che hanno un valore non nullo
+per Età. Se volessimo l'intera relazione come risultato, allora dovremmo includere
+una condizione IS NULL:
+\[\sigma_{Età>30\wedge Età\leq 30\wedge Età\,\,IS\,\,NULL}(PERSONE)\]
+\subsection{Viste}
+pagina 86
 \end{document}
 
 

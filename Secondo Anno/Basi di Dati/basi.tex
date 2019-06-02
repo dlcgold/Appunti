@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt, oneside]{book}
+ù\documentclass[a4paper,12pt, oneside]{book}
 
 %\usepackage{fullpage}
 \usepackage[italian]{babel}
@@ -1925,9 +1925,317 @@ Ricapitolando, possiamo dire che il join di $r_1$ e $r_2$ contiene un numero di 
 \item se $X_1\cap X_2$ coincide con una chiave per $r_2$ e sussiste il vincolo di riferimento
 fra $X_1\cap X_2$ in $r_1$ e la chiave di $r_2$ , allora il join di  $r_1(X_1)$ e $r_2(X_2)$ contiene esattamente $|n|$ tuple
 \end{itemize}
-\item \textbf{join esterni}
-  pagina 73
+\item \textbf{join esterni}, infatti la caratteristica dell'operatore di join di "tralasciare" le tuple di
+una relazione senza controparte nell'altra è utile in molti casi ma potenzialmente
+pericolosa in altri, in quanto può portare a omettere informazioni rilevanti.\\
+Allo scopo, è stata proposta una variante dell'operatore di join chiamata join esterno (in inglese \textbf{outer join}), che prevede che tutte le tuple diano un contributo al risultato, eventualmente estese con valori nulli ove non vi siano controparti opportune. Esistono tre
+varianti per l'operatore: il join esterno sinistro, che estende solo le tuple del primo
+operando, quello destro, che estende solo le tuple del secondo operando, e quello
+completo, che le estende tutte. Vediamo degli esempi:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg15.png}
+\end{center}
+\item \textbf{join n-ario, intersezione e prodotto cartesiano}, infatti partiamo da
+  due proprietà del join naturale: la \textit{commutatività e la associatività};
+  Pertanto, potremo scrivere, ove necessario, sequenze di join
+  senza parentesi:
+  \[r_1\Join r_2\Join ... \Join r_n \mbox{ oppure } \Join^n_{i=1}r_i\]
+  Di conseguenza, ha senso considerare anche i casi estremi, quello in cui sono uguali e quello in cui sono disgiunti.
+  In entrambi i casi, si applica la definizione generale vista sopra, ma è opportuno
+  fare alcune osservazioni. Se $X_1=X_2$, allora il join coincide in effetti con
+  l'intersezione:
+  \[r_1(X_1)\Join r_2(X_1)=r_1(X_1)\cap r_2(X_1)\]
+  in quanto, nella definizione, si richiede che il risultato sia definito sull'unione dei
+  due insiemi di attributi, e che contenga le tuple $t$ tali che $t[X_1]\in r_1$
+  e $t[X_2]\in r_2$; se $X_1=X_2$ allora l0unione di $X_1$ e $X_2$ è ancora pari
+  a $X_1$, quindi $t$ è definita su $X_1$: la definizione richiede quindi che $t\in r_1$ e $t\in r_2$ e coincide perciò con la
+  definizione di intersezione.\\
+  Vediamo ora il caso più interessante di due insiemi disgiunti. Il risultato è sempre definito sull'unione di $X_1$ e $X_2$ e ciascuna tupla deriva
+sempre da due tuple, una per ciascuno degli operandi, ma, in effetti, poiché tali
+tuple non hanno attributi in comune, non viene richiesta a esse nessuna
+condizione per partecipare insieme al join: la condizione che informalmente abbiamo
+prima discusso, e cioè che le due tuple devono avere gli stessi valori sugli attri-
+buti comuni, degenera in una condizione sempre verificata. Quindi, il risultato del
+join contiene le tuple ottenute combinando, in tutti i modi possibili, le tuple degli
+operandi. In questo caso particolare, si dice spesso che il join diventa un \textbf{prodotto cartesiano}. Si ha quindi:
+\begin{center}
+\includegraphics[scale=0.7]{img/alg16.png}
+\end{center}
+\item \textbf{theta-join ed equi-join}, che rispondono alla poca utilità del prodotto cartesiano
+  Per questa ragione, viene spesso definito un operatore derivato (cioè espri-
+  mibile per mezzo di altri operatori), il \textbf{theta-join}, come prodotto cartesiano seguito
+  da una selezione, nel modo seguente (dove $F$ è una formula proposizionale
+  utilizzabile in una selezione e le relazioni $r_1$ e $r_2$  non hanno attributi in comune):
+  \[r_1\Join_F r_2= \sigma_F(r_1\Join r_2)\]
+  Un theta-join in cui la condizione di selezione $F$ sia una congiunzione di atomi
+di uguaglianza, con un attributo della prima relazione e uno della seconda, viene
+chiamato\textbf{ equi-join}. Quindi la relazione nella Figura 3.19 è ottenuta per mezzo di
+un equi-join. Per esempio:
+  \begin{center}
+  \includegraphics[scale=0.7]{img/alg17.png}
+  \end{center}
+  Dal punto di vista pratico il theta-join e ancor più l'equi-join hanno una grande
+  importanza, in quanto la maggior parte dei sistemi di basi di dati effettivamente esistenti non utilizzano i nomi di attributo per correlare relazioni, e pertanto non
+utilizzano il join naturale ma l'equi-join e il theta-join. Notiamo tra l'altro come il
+join naturale possa essere simulato per mezzo della ridenominazione, dell'equi-join e della proiezione.
 \end{itemize}
+\subsection{Interrogazioni in Algebra Relazionale}
+In generale, un'\textbf{interrogazione} può essere definita come una\textit{ funzione che, appli-
+  cata a istanze di basi di dati, produce relazioni}. Nel dettaglio dato uno schema $R$
+di base di dati, un'interrogazione è una funzione che, per ogni istanza $r$ di $R$
+produce una relazione su un dato insieme di attributi $X$. Le espressioni dei vari lin-
+guaggi di interrogazione (per esempio dell'algebra relazionale) "rappresentano" o
+"realizzano" interrogazioni: ogni espressione definisce una funzione. Indichiamo
+con$ E(r)$ il risultato dell'applicazione dell'espressione $E$ alla base di dati $r$.\\
+In algebra relazionale, le interrogazioni su uno schema di base di dati $R$ ven-
+gono formulate con espressioni i cui atomi sono (nomi di) relazioni in $R$ (le "variabili").\\
+Si prenda come base di dati la seguente:
+\begin{center}
+Impiegati(\underline{matr}, Nome, Età, Stipendio)\\
+Supervisione(Capo, \underline{Impiegato})
+\end{center}
+\begin{center}
+\includegraphics[scale=0.7]{img/int.png}
+\end{center}
+La prima interrogazione che consideriamo è molto semplice, in quanto coin-
+volge una sola relazione: \textit{trovare matricola, nome ed età degli impiegati che gua-
+dagnano più di 40 mila euro}. In questo caso, con una selezione possiamo porre
+l'attenzione sulle sole tuple che soddisfano la condizione (stipendio maggiore di
+40 mila euro) e con una proiezione eliminiamo gli attributi non richiesti:
+\[\pi_{Matr.Nome.Età}(\sigma_{Stipendio>40})(IMPIEGATI)\]
+Ovvero:
+\begin{center}
+\includegraphics[scale=0.7]{img/int1.png}
+\end{center}
+vediamo una seconda interrogazione: \textit{trovare le matricole dei capi degli impiegati che guadagnano più di 40
+  mila euro:}
+\[\pi_{Capo}(SUPERVISIONE)\Join_{Impiegato=Matr}\sigma_{Stipendio>40}(IMPIEGATI)\]
+Ovvero:
+\begin{center}
+\includegraphics[scale=0.7]{img/int2.png}
+\end{center}
+Complichiamo le cose, introducendo anche la necessità di ridenominazione: \textit{trovare nome e stipendio dei capi degli impiegati che
+  guadagnano più di 40 mila euro:}
+\[\pi_{NomeC.StipC}(\rho_{MatrC.NomeC.StipC.EtàC\leftarrow Matr.Nome.Stip.Età}(IMPIEGATI))\]
+\[\Join_{MatrC=Capo}\]
+\[SUPERVISIONE\Join{Imp=matr}\sigma_{Stip>40}(IMPIEGATI)\]
+Ovvero:
+\begin{center}
+\includegraphics[scale=0.7]{img/int3.png}
+\end{center}
+\section{Equivalenza di Espressioni Algebriche}
+L'algebra relazionale, come molti altri strumenti formali in contesti diversi, permette
+di formulare espressioni fra loro \textbf{equivalenti}, cioè che producono lo stesso
+risultato. Per esempio, con riferimento ai numeri reali e agli operatori di addizione
+e moltiplicazione, vale l'equivalenza:
+\[x \times(y+z) \equiv x \times y+x \times z\]
+nel senso che. per ogni valore sostituito alle tre variabili, i due membri risultano
+uguali. Nell'algebra relazionale possiamo dare una definizione analoga, facendo
+attenzione al fatto che l'equivalenza può dipendere dallo schema, oppure essere
+assoluta:
+\begin{itemize}
+\item $E_{1} \equiv \mathbf{R} E_{2} \text { se } E_{1}(\mathbf{r})=E_{2}(\mathbf{r}), \text { per ogni istanza } \mathbf{r} \text { di } \mathbf{R}$, 
+\item $E_{1} \equiv E_{2} \text { se } E_{1} \equiv \mathbf{R} E_{2} \text { per ogni schema } \mathbf{R}$  
+\end{itemize}
+Un esempio di equivalenza assoluta è:
+\[\pi_{A B}\left(\sigma_{A>0}(R)\right) \equiv \sigma_{A>0}\left(\pi_{A B}(R)\right)\]
+mentre:
+\[\pi_{AB}(R_1)\Join\pi_{AC}(R_2)\equiv \mathbf{R}\pi_{ABC}(R_1\Join R_2)\]
+sussiste se e solo se nello schema R l'intersezione fra gli insiemi di attributi di $R_1$e $R_2$ è pari ad $A$.\\
+L'equivalenza di espressioni dell'algebra risulta particolarmente importante
+dal punto di vista applicativo, nella fase di esecuzione delle interrogazioni. Infatti,
+le interrogazioni, specificate in linguaggio SQL, vengono tradotte in
+algebra relazionale e, appunto con riferimento all'algebra, viene valutato il co-
+sto, sostanzialmente in termini di dimensioni dei risultati intermedi. In presenza
+di varie alternative equivalenti, viene scelta quella con costo minore. In questo
+contesto, vengono spesso utilizzate trasformazioni di equivalenza, cioè operazio-
+ni che sostituiscono un'espressione con un'altra a essa equivalente. In particolare,
+risultano interessanti le trasformazioni che riducono le dimensioni dei risultati
+intermedi e quelle che preparano un'espressione all'applicazione di una trasformazione
+che riduce le dimensioni dei risultati intermedi.\\
+Vediamo delle trasformazioni interessanti:
+\begin{enumerate}
+\item \textbf{atomizzazione delle selezioni:} una selezione congiuntiva può essere sostituita
+  da una cascata di selezioni atomiche:
+  \[\sigma_{F_{1} \wedge F_{2}}(E) \equiv \sigma_{F_{1}}\left(\sigma_{F_{2}}(E)\right)\]
+  dove $E$ è una qualunque espressione. Questa trasformazione permette di
+  applicare successive trasformazioni che operano su selezioni con condizioni atomiche
+\item \textbf{idempotenze delle proiezioni:} una proiezione può essere trasformata in una
+  cascata di proiezioni che "eliminano" i vari attributi in fasi diverse:
+  \[\pi_{X}(E) \equiv \pi_{X}\left(\pi_{X Y}(E)\right)\]
+  se $E$ è definita su un insieme di attributi che contiene $Y$ (oltre a $X$). Anche
+questa è una trasformazione preliminare ad altre
+\item \textbf{pushing selections down}, anticipazione della selezione rispetto al join:
+  \[\sigma_{F}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join \sigma_{F}\left(E_{2}\right)\]
+  se la condizione $E$ fa riferimento solo ad attributi nella sottoespressione $E_2$
+\item \textbf{pushing projections down}, anticipazione della proiezione rispetto al join:
+  siano $E_1$ e $E_2$ definite su $X_1$ e $X_2$; se $Y_2\subseteq X_2$ e $Y_2\subseteq (X_1\cap X_2)$ (cioè gli attributi in $X_2-Y_2$ non sono coinvolti nel join) allora vale l'equivalenza:
+  \[\pi_{X_{1} Y_{2}}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join \pi_{Y_{2}}\left(E_{2}\right)\]
+  e combinando questa regola con quella della idempotenza delle proiezioni, possiamo ottenere la seguente equivalenza:
+  \[\pi_{X_{1} Y_{2}}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join \pi_{Y_{2}}\left(E_{2}\right)\]
+  dove, indicando con $X_1$ e $X_2$ gli attributi di $E_1$ ed $E_2$ rispettivamente e con $J_1$
+  e $J_2$ i rispettivi sottoinsiemi coinvolti nella condizione $F$ di join:
+  \[Y_{1}=\left(X_{1} \cap Y\right) \cup J_{1}\]
+  \[Y_{2}=\left(X_{2} \cap Y\right) \cup J_{2}\]
+  \textit{In sostanza, possiamo eliminare subito da ciascuna relazione gli attributi che
+non compaiono nel risultato finale e non sono coinvolti nel join}
+\item \textbf{inglobamento di una selezione in un prodotto cartesiano a formare un join:}
+  \[\sigma_{F}\left(E_{1} \Join E_{2}\right) \equiv E_{1} \Join_{F} E_{2}\mbox{ con }E_1\cap E_2=\emptyset\]
+\item \textbf{distributività della selezione rispetto all'unione:}
+  \[\sigma_{F}\left(E_{1} \cup E_{2}\right) \equiv \sigma_{F}\left(E_{1}\right) \cup \sigma_{F}\left(E_{2}\right)\]
+\item \textbf{dstributività della selezione rispetto alla differenza:}
+  \[\sigma_{F}\left(E_{1}-E_{2}\right) \equiv \sigma_{F}\left(E_{1}\right)-\sigma_{F}\left(E_{2}\right)\]
+\item \textbf{distributività della proiezione rispetto all'unione:}
+  \[\pi_{X}\left(E_{1} \cup E_{2}\right) \equiv \pi_{X}\left(E_{1}\right) \cup \pi_{X}\left(E_{2}\right)\]
+  Si noti che la proiezione non è distributiva rispetto alla differenza
+\item \textbf{altre trasformazioni interessanti sono quelle che si basano sulla corrispondenza
+    fra gli operatori insiemistici e le selezioni complesse:}
+  \[\sigma_{F_{1} \vee F_{2}}(R) \equiv \sigma_{F_{1}}(R) \cup \sigma_{F_{2}}(R)\]
+  \[\sigma_{F_{1} \vee F_{2}}(R) \equiv \sigma_{F_{1}}(R) \cap \sigma_{F_{2}}(R)\equiv \sigma_{F_1}(R)\Join \sigma_{F_2}(R)\]
+  \[\sigma_{F_{1} \wedge \neg\left(F_{2}\right)}(R) \equiv \sigma_{F_{1}}(R)-\sigma_{F_{2}}(R)\]
+\item \textbf{Proprietà commutativa e associativa di tutti gli operatori binari,
+    esclusa la differenza, e la proprietà distributiva del join rispetto all'unione:}
+  \[E\Join (E_1\cup E_2)\equiv (E\Join E_1)\cup (E\Join E_2)\]
+\end{enumerate}
+ ediamo un esempio che chiarisce l'uso delle trasformazioni preparatorie e l'im-
+portante regola di anticipazione delle selezioni. \textit{Si cerchino i numeri di matricola dei capi di
+  impiegati con meno di trenta anni} dalla seguente base dati:
+\begin{center}
+\includegraphics[scale = 0.7]{img/alg18.png}
+\end{center}
+vediamo una soluzione col prodotto cartesiano, una selezione congiuntiva e una proiezione:
+\[\pi_{Capo}\(\sigma_{matr=Imp\wedge Età <30}(IMPIEGATI \Join SUPERVISIONE))\]
+Iniziamo a migliorare l'espressione. Innanzitutto spezziamo la selezione con la regola delle \textbf{atomizzazioni} e otteniamo:
+\[\pi_{Capo}\(\sigma_{matr=Imp}(\sigma_{età<30}(IMPIEGATI \Join SUPERVISIONE)))\]
+Fondiamo poi la prima selezione col prodotto cartesiano usando l'ultima regola per formare un join e anticiparlo con la terza, ottenendo:
+\[\pi_{Capo}(\sigma_{Età<30}(IMPIEGATI)\Join_{matr=Imp}SUPERVISIONE)\]
+Infine, possiamo eliminare dal primo argomento del join (con una proiezione) gli
+attributi non necessari, utilizzando la quarta regola:
+\[\pi_{Capo}(\pi_{matr}(\sigma_{Età<30}(IMPIEGATI))\Join_{matr=Imp}SUPERVISIONE)\]
+\subsection{Algebra dei Valori Nulli}
+Consirero la relazione:
+\begin{center}
+\includegraphics[scale = 0.7]{img/null.png}
+\end{center}
+con la selezione:
+\[\sigma_{Età>30}(PERSONE)\]
+Innanzitutto è indiscutibile che la prima tupla della relazione debba far parte del risultato
+e che la seconda invece no. Per quanto riguarda invece la terza si è proposto l'uso di una\textbf{ logica a tre valori} in
+cui un predicato può essere vero, falso, o assumere un terzo nuovo valore di verità
+che chiamiamo \textit{unknown} (sconosciuto) e rappresentiamo con il simbolo $U$.
+Un redicato assume questo valore quando almeno uno dei termini del confronto as-
+sume il valore nullo. Quindi, con riferimento al caso in discussione, la prima tupla
+certamente appartiene al risultato (appartenenza vera), la seconda certamente non
+ppartiene (appartenenza falsa) e la terza forse appartiene e forse no (appartenen-
+za sconosciuta). Le tabelle di verità dei connettivi logici not, and e or, per tenere
+conto del nuovo valore logico, si estendono nel modo seguente:
+\begin{center}
+\includegraphics[scale = 0.7]{img/null2.png}
+\end{center}
+Una selezione su relazioni con valori nulli produce come risultato le tuple per
+cui il predicato risulta vero. Il valore unknown rappresenta un valore di verità
+intermedio tra vero e falso, e il significato dei tre connettivi in questo contesto
+diventa il seguente: il not è vero solo se il valore di partenza è falso, l'and è vero
+solo se tutti i termini sono veri, e l'or è vero se almeno uno dei termini è vero.
+Vale la pena sottolineare che la logica a tre valori risulta effettivamente
+significativa solo nel caso di espressioni complesse, in cui il risultato presenta co-
+munque proprietà poco soddisfacenti.\\
+Si introducono due nuove forme di condizioni atomiche
+di selezione, con lo scopo di verificare se un valore è specificato oppure nullo:
+\begin{enumerate}
+\item \textit{A IS NULL} assume valore vero su una tupla $t$ se il valore di $t$ su $A$ è nullo e
+  falso se esso è specificato
+\item \textit{A IS NOT NULL} assume valore vero su una tupla $t$ se il valore di $t$ su $A$ è
+specificato e falso se il valore è nullo
+\end{enumerate}
+e quindi lò'espressione sopra restituisce le persone la cui età è nota e maggiore di 30, mentre per ottenere quelle
+che hanno o potrebbero avere più di trent'anni (cioè quelle per cui l'età è nota e
+maggiore di 30 oppure non nota), possiamo utilizzare l'espressione:
+\[\sigma_{Età>30 \wedge ET\,\,IS\,\,NULL}(PERSONE)\]
+e analogamente le espressuinni:
+\[\sigma_{Età>30}(PERSONE)\cup \sigma_{Età\leq 30}(PERSONE)\]
+\[\sigma_{Età>30\wedgeEtà\leq 30}(PERSONE)\]
+non restituiscono l'intera relazione, ma solo le tuple che hanno un valore non nullo
+per Età. Se volessimo l'intera relazione come risultato, allora dovremmo includere
+una condizione IS NULL:
+\[\sigma_{Età>30\wedge Età\leq 30\wedge Età\,\,IS\,\,NULL}(PERSONE)\]
+\subsection{Viste}
+Risulta utile mettere a disposizione
+degli utenti rappresentazioni diverse per gli stessi dati. Nel modello relazionale,
+la tecnica prevista a questo scopo è quella delle\textit{ relazioni derivate}, relazioni il
+cui contenuto è funzione del contenuto di altre relazioni. In una base di dati rela-
+zionale possono quindi esistere relazioni di base, il cui contenuto è autonomo, e
+relazioni derivate, il cui contenuto è funzione di quello di altre relazioni.\\
+È possibile che una relazione derivata sia funzione di altre relazioni derivate, a condizione
+che esista un ordinamento fra le relazioni derivate tale che ogni relazione sia definita
+solo in termini di relazioni di base e di relazioni derivate che la precedono
+nell'ordinamento. 
+In linea di principio, possono esistere due tipi di relazioni derivate:
+\begin{itemize}
+\item \textbf{viste materializzate:} relazioni derivate effettivamente memorizzate nella base di dati
+\item \textbf{relazioni virtuali (dette anche solo \textit{viste}):} relazioni
+definite per mezzo di funzioni (espressioni del linguaggio di interrogazione),
+non memorizzate nella base di dati, ma utilizzabili nelle interrogazioni come se
+lo fossero
+\end{itemize}
+Le viste materializzate hanno il vantaggio di essere immediatamente disponibili
+per le interrogazioni, ma è spesso oneroso mantenere il loro contenuto allineato
+con quello delle relazioni da cui derivano. Le relazioni virtuali devono essere
+ricalcolate per ogni interrogazione ma non presentano problemi di allineamento. Le
+viste materializzate risultano quindi convenienti quando gli aggiornamenti sono
+rari rispetto alle interrogazioni e il calcolo della vista è complesso. È comunque
+difficile fornire tecniche generalizzate per mantenere l'allineamento. Per questo
+motivo, i sistemi attuali forniscono quasi solo meccanismi per la gestione di re-
+lazioni virtuali, che nel seguito, non essendoci rischio di ambiguità, chiameremo
+semplicemente viste.\\
+Le viste vengono definite nei sistemi relazionali per mezzo di espressioni
+del linguaggio di interrogazione. Eventuali interrogazioni che si riferiscano alle
+viste vengono risolte sostituendo alla vista la sua definizione, componendo cioè
+le due interrogazioni. Di solito, i sistemi relazionali stabiliscono la strategia di
+esecuzione delle interrogazioni dopo aver sostituito alla vista la sua definizione.\\
+Per esempio si supponga una relazione sulla base dati:
+\[R_{1}(A B C), R_{2}(D E F), R_{3}(G H)\]
+con una vista definita per mezzo di un prodotto cartesiano seguito da una selezione:
+\[R=\sigma_{A>D}\left(R_{1} \Join R_{2}\right)\]
+Su questo schema l'interrogazione:
+\[\sigma_{B=G}\left(R \Join R_{3}\right)\]
+viene eseguita sostituendo a $R$ la sua definizione:
+\[\sigma_{B=G}\left(\sigma_{A>D}\left(R_{1} \Join R_{2}\right) \Join R_{3}\right)\]
+Si hanno diversi vantaggi:
+\begin{itemize}
+\item un utente interessato solo a una porzione di una base di dati può evitare di
+  considerare le componenti non rilevanti
+\item espressioni molto complesse possono essere definite tramite viste, con vantaggi
+  rilevanti soprattutto nel caso di presenza di sottoespressioni ripetute
+\item attraverso la definizione di autorizzazioni di accesso rispetto alle viste, è possibile introdurre meccanismi di protezione della privatezza
+\item ioccasione di ristrutturazioni di una base di dati, può risultare conveniente
+definire viste che corrispondano a relazioni sostituite da altre e perciò non più
+presenti dopo la ristrutturazione stessa, ma ricavabili dalle nuove relazioni. In
+questo modo, le applicazioni scritte con riferimento alla versione precedente
+dello schema possono essere utilizzate sul nuovo senza bisogno di modifiche
+\end{itemize}
+\textit{Mentre per quanto riguarda le interrogazioni le viste possono essere trattate come
+le relazioni di base, lo stesso non si può dire per le operazioni di aggiornamento.
+Infatti, in molti casi non è possibile stabilire facilmente una semantica degli aggiornamenti
+sulle viste: dato un aggiornamento su una vista, in generale non esiste
+uno e un solo aggiornamento delle relazioni di base (che sono le uniche
+ùeffettivamente memorizzate) che porti a un'istanza della base di dati cui corrisponda
+un'istanza della vista che sia il risultato effettivo dell'aggiornamento specificato
+sulla vista.}
+\subsection{Rappresentazioni Tramite Alberi}
+Ogni espressione dell’algebra relazionale puo’
+essere rappresentata in modo grafico da un albero
+Rappresenta l’ordine di valutazione degli operatori
+Ogni operatore corrisponde ad un nodo:
+\begin{itemize}
+\item operatori unari con un solo ramo in ingresso
+e uno in uscita
+\item operatori binari con due rami in ingresso e uno in uscita
+\item la radice e’ il alto ???
+\end{itemize}
+\begin{center}
+  \includegraphics[scale=2.7]{img/treeù.png}
+\end{center}
 \end{document}
 
 

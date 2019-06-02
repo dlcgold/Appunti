@@ -1,0 +1,127 @@
+\chapter{Programmazione Logica}
+L'obiettivo della programmazione logica è quello di costruire uno schema logico in grado di descrivere, in maniera corretta ed
+efficiente, tutte le informazioni contenute nell'ER, prodotto nella fase di progettazione concettuale.\newline
+La progettazione logica risulta solitamente articolata in 2 fasi:
+\begin{itemize}
+        \item \emph{ristrutturazione dello schema ER}, fase indipendente dal modello logico scelto e si basa sui criteri di 
+              ottimazione dello schema.
+        \item \emph{traduzione nel modello logico}, con riferimento al modello scelto, con la possibile inclusione di un
+              ulteriore ottimazione, in base alle caratteristiche del modello stesso.
+\end{itemize}
+Gli input e gli output di ogni fase della progettazione logica si possono notare nella \figurename~\ref{img:fig8.1} e
+per ottimizzare lo schema ER si utilizza la normalizzazione, studiata nel prossimo capitolo.
+
+Uno schema ER può essere modificato per ottimizzare alcuni indici di prestazione del progetto, anche se è difficile da poter
+analizzare, essendo le prestazioni dipendenti da parametri fisici e dal DBMS usato, ma è possibile usare 2 parametri, generalmente
+utile e che regolano le prestazioni dei sistemi software, per effettuarne una stima:
+\begin{itemize}
+        \item \emph{costo di un operazione}, in cui viene valutato, in termine di occorrenze di entità ed associazioni visitate
+              in media per rispondere ad un operazione sul database.
+        \item \emph{occupazione di memoria}, in cui viene valutato in termini di spazio in memoria necessario per memorizzare
+              i dati descritti dallo schema.
+\end{itemize}
+Per studiare questi parametri abbiamo bisogno di conoscere il \emph{volume dei dati}, ossia il numero di occorrenze di ogni 
+concetto ER e la dimensione di ogni attributo, e le \emph{caratteristiche delle operazioni}, con indicazione del 
+tipo, frequenza e dei dati coinvolti.\newline
+Supponendo di analizzare la situazione, descritta dallo schema \figurename~\ref{img:fig8.2}, con le seguenti operazioni:
+\begin{itemize}
+    \item OP1: assegna un impiegato a un progetto
+    \item OP2: trova i dati di un impiegato, del dipartimento in cui lavora e dei progetti in cui collabora
+    \item OP3: trova i dati di tutti gli impiegati di un certo dipartimento
+    \item OP4: per ogni sede, trova i dipertimenti con il cognome del direttore e l'elenco degli impiegati del dipartimento
+\end{itemize}
+Sebbene un analisi effettuata su un numero ristretto di operazioni può sembrare superflua, si può affermare che un certo
+che un numero ristretto di operazioni rappresenta la maggior parte del carico generato nel database.\newline
+IL volume dei dati e le caratteristiche possono essere descritte mediante una tabella, come si può notare nella 
+\figurename~\ref{fig:img8.3} per il caso in esame.
+
+È possibile per ogni operazione descrivere i dati coinvolti tramite uno schema di operazione, ossia un frammento dello
+schema ER indicante la parte interessata dall'operazione come si nota nella \figurename~\ref{img:fig8.4}, ed avendo
+a disposizione queste informazioni è possibile stimare il costo di un operazione, attraverso la conta del numero di accessi
+alle occorrenze delle entità ed associazioni necessarie per l'esecuzione dell'operazione.\newline
+Tutte le occorrenze e gli accessi effettuati da un operazione, possono essere riassunti in una \emph{tavola degli accessi},
+come si può notare nella \figurename~\ref{img:fig8.5}.
+
+La fase di ristrutturazione di uno schema ER si può suddividere in 4 passi:
+\begin{itemize}
+    \item \emph{analisi delle ridondanze}, in cui si decide se eliminare o mantenere eventuali ridondanze presenti nello schema,
+          indicante la presenza nello schema di dati derivabili da altri dati.
+    \item \emph{rimozione delle generalizzazioni}, in quanto non essendo un costrutto del modello relazionale devono essere
+          analizzate e sostituite da altri costrutti.
+    \item \emph{partizionamento/accorpamento di entità ed associazioni}, in cui si può decidere di accorpare e partizionare
+          delle entità e delle associazioni, al fine di ottimizzare le operazioni su di esse.
+    \item \emph{scelta degli identificatori principali}, in cui viene scelto l'identificatore per quella entità con più
+          di un identificatore.
+\end{itemize}
+Nei seguenti paragrafi analizziamo in dettaglio tutte le quattro fasi di ristrutturazione dell'ER, incominciando dall'
+analisi delle ridondanze.
+
+\subsection{Analisi delle ridondanze}
+Le ridondanze presenti eventualmente in uno schema ER possono essere di diverso tipo ma i casi più frequnti sono i seguenti:
+\begin{itemize}
+    \item attributi derivabili, occorrenza per occorrenza, da altri attributi della stessa entità( o associazione), 
+          come ad esempio nella \figurename~\ref{img:fig8.7}, l'importo netto lo si può ottenere mediante 
+          l'importo netto e l'iva.
+    \item attributi derivabili da attributi di altre entità(o associazioni), di solito attraverso funzioni aggregative,
+          come ad esempio nella \figurename~\ref{img:fig8.7} l'attributo importo totale si può ottenere mediante
+          la somma dei prezzi dei prodotti di cui un acquisto è composto.
+    \item attributi derivabili da operazioni di conteggio di occorrenze, infatti nella \figurename~\ref{img:fig8.7}
+          l'attributo Numero di Abitanti lo si può ottenere attraverso la conta delle occorrenze della associazione
+          Residenza a cui tale città partecipa.
+    \item associazioni derivabili dalla composizione di altre associazioni, in presenza di cicli, come ad esempio
+          nella \figurename~\ref{img:fig8.7} l'associazione Docenza può essere derivata dalle associazioni 
+          Frequenza ed Insegnamento, in quanto rappresentano informazioni similari.
+\end{itemize}
+La presenza di un dato derivato presenta come vantaggio quello di ridurre il numero di accessi necessari per ottenere
+il dato derivato, con un aggravio di memoria, oggi giorno quasi trascurabile, e la necessità di effettuare operazioni
+aggiuntive per mantenere il dato aggiornato.\newline
+La decisione di mantenere o eliminare una ridondanza va presa considerando il costo delle operazioni e l'aggravio di memoria
+sia in presenza che in assenza del dato ridondante, usando le tecniche presentate nel primo paragrafo di questo capitolo.
+
+\subsection{Eliminazione delle generalizzazioni}
+Dato che i sistemi tradizionali per la gestione dei Database non consentono di rappresentare direttamente una generazione,
+risulta spesso necessario trasformarle in un'entità/associazione, con l'utilizzo di 3 possibili alternative:
+\begin{itemize}
+    \item Accorpamento delle figlie della generalizzazione nel genitore, ossia le entità $E1$ ed $E2$ vengono eliminate
+          e le loro proprietà vengono aggiunte all'entità genitore $E_0$, a cui viene aggiunto un attributo tipo, per 
+          identificare se si rappresenta l'entità $E_1$ oppure la $E_2$.
+    \item Accorpamento del genitore della generalizzazione nelle figlie, ossia l'entità $E_0$ viene eliminata e per la
+          proprietà dell'ereditarietà, i suoi attributi, il suo identificatore e le relazioni a cui partecipava, vengono
+          aggiunti alle entità figlie $E_1$ e $E_2$.
+    \item Sostituzione della generalizzazione con associazioni, in cui la generalizzazione si trasforma in due associazioni
+          uno a uno che legano rispettivamente l'entità genitore $E_0$ con le sue entità figlie $E_1$ e $E_2$.\newline
+          Nello schema vanno introdotti anche che ogni occorrenza di $E_0$ non può partecipare contemporaneamente a tutte 
+          le due associazioni ed inoltre se la generalizzazione è totale ogni occorrenza deve partecipare ad almeno una 
+          associazione.
+\end{itemize}
+La scelta tra le varie alternative può essere fatta in maniera analoga a quanto fatto per i dati derivati, anche se 
+è possibile stabilire alcune regole di carattere generale:
+\begin{itemize}
+    \item l'alternativa (1) è conveniente quando le operazioni non fanno molta distinzione tra le occorrenze e gli attributi
+          di $E_0, E_1$ e $E_2$;in questo caso infatti, anche se avremmo uno spreco di memoria per la presenza di valori nulli,
+          la scelta ci assicura un numero minore di accessi rispetto alle altre nelle quali le occorrenze e gli attributi
+          sono distribuiti tra le varie entità.
+    \item l'alternativa (2) è possibile solo quando la generalizzazione è totale, altrimenti le occorrenze di $E_0$,
+          che non sono occorrenze delle entità figlie non verrebbero rappresentate ed è conveniente quando ci sono 
+          operazioni che si riferiscono a solo un entità figlia, in quanto in questo caso si avrebbe un risparmio 
+          di memoria rispetto all'opzione (1), in quanto non si hanno valori nulli ed inoltre rispetto all'opzione (3)
+          si avrebbe una riduzione del numero di accessi, dato che non bisogna visitare $E_0$ per accedere ad alcuni
+          attributi delle entità figlie.
+    \item l'alternativa (3) è conveniente quando la generalizzazione non è totale e ci sono operazioni che si riferiscono
+          solo ad occorrenze di $E_1(E_2)$ oppure di $E_0$, e dunque fanno distinzione tra entità figlia ed entità genitore.\newline
+          In questo caso abbiamo un risparmio di memoria rispetto ad (1), per la mancanza di valori nulli, ma c'è un 
+          incremento di accessi per mantenere la consistenza delle occorrenze rispetto ai vincoli introdotti
+\end{itemize}
+L'alternativa (3), nonostante può sembrare molto poco usata e poco utile, ha il grande vantaggio di generare entità
+con pochi attributi e questo si traduce, a livello pratico, in strutture logiche di piccole dimensioni, per le quali
+un accesso fisico permette di recuperare molti dati in una volta sola per cui per alcuni casi critici va effettuata
+un'analisi più fine, al fine di tenere conto di altri fattori come la dimensione dei domini degli attributi e la quantità
+di dati recuperabili con una sola operazione di lettura.\newline
+Le alternative analizzate non sono le uniche possibili, infatti è possibile effettuare ristrutturazioni mediante
+la combinazione delle tre trasformazioni presentate e un esempio delle possibili ristrutturazioni effettuate alla 
+\figurename~\ref{img:fig8.10} si può notare nella \figurename~\ref{img:fig8.11}.
+
+
+
+
+

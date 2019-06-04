@@ -2007,8 +2007,62 @@ applicativa che riceve e "controllà' (coordina) la gestione della richiesta. Ve
 \begin{center}
 \includegraphics[scale = 0.7]{img/grasp11.png}
 \end{center}
+Un controller è il primo oggetto oltre lo strato UI che è responsabile di ricevere o gestire
+un messaggio di un'operazione di sistema. Si assegn a responsabilità a una classe che rappresenta una delle seguenti scelte:
+\begin{enumerate}
+\item rappresenta il "sistema'' complessivo, un "oggetto radice", un dispositivo all'interno del quale viene eseguito il software, o un sorrosistema principale; sono tutte
+varianti di un facade controller
+\item rappresenta uno scenario di un caso d'uso all'interno del quale si verifica l'evento
+di sistema, spesso chiamato <UseCaseName>Handler, <UseCaseName>Coordina-
+tor, o <UseCaseName>Session (controller di caso d'uso o controller di sessione) 
+\end{enumerate}
+inoltre:
+\begin{itemize}
+\item si utilizzi la stessa classe controller per tutti gli eventi di sistema nello stesso
+scenario di caso d'uso
+\item informalmente, una sessione è un'istanza di una conversazione con un attore.
+Le sessioni possono avere una lunghezza qualsiasi, ma spesso sono organizzate in
+termini di casi d'uso (sessioni di caso d'uso).
+\end{itemize}
+Si hanno i seguenti vantaggi:
+\begin{itemize}
+\item mggiore potenziale di riuso e interfacce inseribili. Questi vantaggi assicurano
+  che la logica applicativa non sia gestita nello strato dell'interfaccia. Le responsabilità
+  di un controller porrebbero essere gestite, tecnicamente, in un oggetto dell'interfaccia, ma un tale progetto implicherebbe che il codice del programma e l'ese-
+cuzione della logica applicativa sono incorporati negli oggetti dell'interfaccia (nelle
+finestre). Un progetto "interfaccia come controller" riduce l'opportunità di riusare
+la logica in altre applicazioni future, poiché la logica che è legata a una particolare
+interfaccia (per esempio, oggetti di tipo finestra) può essere difficilmente riutilizzata in altre applicazioni. Al contrario, la delega delle responsabilità delle operazioni
+di sistema a un controller favorisce il riuso della logica in altre applicazioni future.
+E dal momento che la logica applicativa non è legata allo strato dell'interfaccia, è
+possibile anche utilizzarla con un'interfaccia diversa
+\item opportunità di ragionare sullo stato del caso d'uso . A volte è necessario assicurarsi
+che le operazioni di sistema si susseguano in una sequenza legale, oppure si desidera
+poter ragionare sullo stato corrente dell'attività e delle operazioni all'interno del caso d'uso in corso di esecuzione. Per esempio, se bisogna garantire che l'operazione
+makePayment non possa essere eseguita fino a che non è stata eseguita l'operazione
+endSale. In questo caso, occorre catturare da qualche parte queste informazioni
+sullo stato; il controller è una scelta ragionevole, soprattutto se Io stesso controller è
+utilizzato per l'intero caso d'uso (come consigliato)
+\end{itemize}
+e progettata in modo mediocre, una classe controller ha una coesione bassa, poiché non
+è focalizzata e gestisce responsabilità in troppe aree; si parla in questo caso di controller
+gonfio, con le seguenti caratteristiche:
+\begin{itemize}
+\item nel sistema c'è un'unica classe controller che riceve tutti gli eventi di sistema, che
+sono numerosi. Ciò avviene talvolta quando viene scelto un facade controller.
+\item il controller stesso svolge molti dei compiti necessari per soddisfare l'evento di
+sistema, senza delegare il lavoro. Ciò solitamente coinvolge una violazione di Information Expert e High Cohesion.
+\item un controller ha numerosi attributi, e conserva informazioni significative sul sistema o sul dominio, che avrebbero dovuto essere distribuite ad altri oggetti, oppure
+duplica informazioni trovate altrove.
+\end{itemize}
 
-pagina 331
+Con due possibili soluzioni:
+\begin{enumerate}
+\item aggiungere più controller; un sistema non deve necessariamente avere un solo
+  controller. Anziché un facade controller, si utilizzino dei controller di caso d'uso
+\item progettare il controller in modo tale che esso, in primo luogo, deleghi la soddisfazione
+della responsabilità di ciascuna operazione di sistema agli altri oggetti
+\end{enumerate}
 \item \textbf{High Cohesion:} ovvero utile per na qualità fondamentale nota come
 \textbf{coesione} è (informalmente) una misura di quanto sono correlate le operazioni di un
 elemento software da un punto di vista funzionale, e altresì una misura di quanto lavoro
@@ -2019,6 +2073,31 @@ sono equivalenti, va preferito un progetto con una coesione più elevata:
 \begin{center}
 \includegraphics[scale = 0.7]{img/grasp12.png}
 \end{center}
+In termini di progettazione a oggetti, la coesione (o più specificamente la coesione
+funzionale) è una misura di quanto fortemente siano correlate e concentrate le responsabilità di un elemento. Un elemento con responsabilità altamente correlate che
+non esegue una quantità di lavoro eccessiva ha una coesione alta. Per elementi si intendono classi,
+sottosistemi e così via.
+Si ha la segunte soluzione: assegna una responsabilità in modo tale che la coesione rimanga alta. Usa questo principio per valutare le alternative.
+Una classe con una coesione bassa fa molte cose non correlate tra loro o svolge troppo
+lavoro. Tali classi non sono opportune, e presentano i seguenti problemi:
+\begin{itemize}
+\item sono difficili da comprendere.
+\item sono difficili da riusare.
+\item sono difficili da mantenere.
+\item ono delicate; sono continuamente soggette a cambiamenti
+\end{itemize}
+Le classi a coesione bassa spesso rappresentano un'astrazione a "grana molto grossa'' o
+hanno assunto responsabilità che avrebbero dovuto essere delegate ad altri oggetti.\\
+\textbf{In alcuni casi, è giustificabile accettare una coesione più bassa.}\\
+Si hanno i seguenti vantaggi:
+\begin{itemize}
+\item maggiore chiarezza e facilità di comprensione del progetto
+\item la manutenzione e i miglioramenti risultano semplificati
+\item low coupling è spesso sostenuto
+\item maggiore riuso di funzionalità a grana fine e altamente correlate, poiché una classe
+coesa può essere usata per uno scopo molto specifico.
+\end{itemize}
+
 \end{enumerate}
 Torniamo ora a \textbf{GRASP}, che è un acronimo per \textit{Generai Responsibility Assignment Software Patterns} ovvero
 di Pattern Generali per l'Assegnazione di Responsabilità nel Software. Il nome è stato
@@ -2027,6 +2106,132 @@ poter progettare con successo il software orientato agli oggetti.
 Comprendere ed essere in grado di applicare le idee che stanno alla base dei pattern
 GRASP, mentre si codifica o mentre si disegnano i diagrammi di interazione e delle classi, consente agli sviluppatori per i quali le esigenze della tecnologia a oggetti costituiscono una novità, di acquisire il più rapidamente possibile la padronanza di questi principi
 di base; essi costituiscono un fondamento per la progettazione di sistemi OO. I 4 pattern mancabnti sono: \textit{Polymorphism, Pure Fabrication, Indirection e Protected variations}.\\
-
+\chapter{Applicare i design pattern GoF}
+I.:accento è posto su come applicare i design pattern Gang-
+of-Four (GoF) e i pattern GRASP più di base.\\
+Vediamo un esempio di pattern GoF:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof2.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof3.png}
+\end{center}
+\textit{i noti che i nomi dei tipi comprendono il nome del pattern ``Adapter''. Si tratta di uno
+stile relativamente comune che ha il vantaggio di comunicare facilmente agli altri che
+leggono il codice o i diagrammi quali sono i design pattern utilizzati.}\\
+Un adattatore di una risorsa che nasconde un sistema esterno può anche essere considerato un oggetto Facade, design pattern Gof che verrà discusso,
+poiché
+"avvolge" l'accesso al sottosistema o al sistema con un oggetto singolo (che è l'essenza di
+Facade). Tuttavia, la motivazione a chiamarlo un adattatore di risorsa sussiste in modo
+particolare quando l'oggetto che avvolge fornisce l'adattamento a interfacce esterne variabili.\\
+L'uso precedente del pattern Adapter può essere visto come una specializzazione di alcuni
+dei principi elementari GRASP:\textit{
+Adapter supporta Protected Variations in relazione al cambiamento delle
+interfacce esterne o di package di terze parti attraverso l'uso di un oggetto
+Indirection che applica le interfacce e Polymorphism.}\\
+È importante per un progettista esperto conoscere nel dettaglio e a memoria oltre 50 dei
+design pattern più importanti, ma solo pochi possono imparare o ricordare anche 1000
+pattern, oppure iniziare a organizzare quella pletora di pattern in una tassonomia utile.
+La bella notizia è che la maggior parte dei design pattern può essere vista come una
+specializzazione di alcuni principi GRASP di base. Anche se è effettivamente utile studiare alcuni design pattern in modo dettagliato per accelerare l'apprendimento, è ancora
+più utile vedere i temi che stanno alla loro base (Protected Variations, Polymorphism,
+lndirection, ... ) per avere un aiuto nel ridur_re le miriadi di dettagli e vedere "l'alfabeto"
+essenziale delle tecniche di progettazione che vengono applicate. Per esempio:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof4.png}
+\end{center}
+È assolutamente normale e comune scoprire concetti di dominio
+significativi e una comprensione raffinata dei requisiti durante la progettazione e la programmazione: lo sviluppo iterativo sostiene questo tipo di scoperta incrementale.
+Se il
+Modello di Dominio sarà utilizzato in futuro come fonte di ispirazione per successivi lavori di progettazione, o come aiuto visuale di apprendimento per comunicare i concetti
+chiave del dominio, in quel caso aggiungerlo potrebbe avere un valore. Vediamo un modello di dominio aggiornato:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof5.png}
+\end{center}
+Vediamo il pattern chiamato \textbf{Simple Factory o Concrete Factory}.\\
+Non si tratta di
+un design pattern GoF vero e proprio, ma è estremamente diffuso. Si tratta piuttosto di
+una semplificazione del design pattern GoF Abstract Factory), e spesso
+viene descritto come una sua variante, anche se ciò non è completamente vero. Tuttavia,
+viene presentato a questo punto per la sua larga diffusione e per la sua associazione con
+GoF.\\
+l'uso dell'adattatore fa sorgere un nuovo problema nella progettazione: nella precedente
+soluzione basata sul pattern Adapter per i servizi esterni con interfacce variabili,\textit{ chi crea
+  gli adattatori? E come stabilire quale classe di adattatore creare?}\\
+Se questi vengono creati da un oggetto di dominio, le responsabilità dell'oggetto di do-
+minio vanno oltre la logica applicativa pura (come il calcolo del totale di una vendita) ed
+entrano in altri interessi relativi alla connessione con i componenti software esterni.
+Questo punto sottolinea un altro principio fondamentale di progettazione (solitamente
+considerato un principio di progettazione architetturale): progettare per mantenere una
+\textbf{separazione degli interessi}. Ciò significa modularizzare o separare interessi distinti in
+aree diverse, in modo che ciascuno abbia uno scopo coeso. Sostanzialmente è un'applicazione del principio GRASP High Cohesion.\\
+Pertanto la scelta di un oggetro di dominio (come Register) per creare gli adattatori non
+sostiene l'obiettivo della separazione degli interessi, e riduce la sua coesione.
+Un'alternativa comune in questo caso consiste nell'applicare il pattern Factory, in cui
+viene definito un oggetto "factory" ("fabbrica") Pure Fabrication per creare gli oggetti.
+Gli oggetti factory presentano diversi vantaggi:
+\begin{itemize}
+\item separano le responsabilità delle creazioni complesse in oggetti di supporto coesi
+\item nascondono la logica di creazione potenzialmente complessa.
+\item consentono l'introduzione di strategie per la gestione della memoria che possono
+migliorare le prestazioni, come il caching o il riciclaggio degli oggetti.
+\end{itemize}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof6.png}
+\end{center}
+con il seguente esempio:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof7.png}
+\end{center}
+Si noti che in ServicesFactory, la logica per stabilire quale classe creare è risolta leggendo
+il nome della classe da una sorgente esterna (per esempio da una proprietà di sistema,
+se viene usato Java), quindi caricando dinamicamente la classe. Questo è un esempio di
+\textbf{progettazione guidata dai dati parziale}.
+Passiamo ora al pattern GoF \textbf{Singleton}.\\
+Innanzitutto si osservi che all'interno del processo è necessaria una sola istanza della
+factory. In secondo luogo, una rapida riflessione suggerisce che i metodi di questa factory
+devono poter essere richiamati da vari punti del codice, poiché diversi punti necessitano
+di accesso agli adattatori per avvalersi dei servizi esterni. C'è dunque un problema di visibilità: \textit{come ottenere la visibilità verso questa singola istanza di ServicesFactory?}\\
+Una soluzione consiste nel passare l'istanza ServicesFactory come parametro ovunque sia
+necessaria la visibilità della stessa, oppure inizializzare gli oggetti che necessitano di visibilità nei confronti di essa con un riferimento permanente. Ciò è possibile ma scomodo;
+un'alternativa è offerta dal pattern\textbf{ Singleton}.\\
+In alcune occasioni è opportuno supportare la visibilità globale o un punto di accesso
+singolo a una istanza singola di una classe, anziché un'altra forma di visibilità. È il caso
+dell'istanza di ServicesFactory:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof8.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof9.png}
+\end{center}
+Un metodo getlnstance di un Singleton viene chiamato molto spesso. Nelle applicazioni
+a thread multipli, il passo di creazione con una logica di \textbf{inizializzazione pigra} è una
+sezione critica che richiede il controllo di concorrenza del thread. Pertanto, supponendo
+che l'istanza venga inizializzata in modo pigro, è prassi comune racchiudere il metodo
+con il controllo della concorrenza.\\
+Un'istanza e un metodo d'istanza sono solitamente preferiti per i seguenti motivi:
+\begin{itemize}
+\item i metodi d'istanza consentono la ridefìnizione nelle sottoclassi e il raffìnamento
+della classe singleton in sottoclassi; i metodi statici non sono polimorfì (virtuali) e
+non consentono la ridefìnizione nelle sottoclassi (nella maggior parte dei linguaggi,
+escluso Smalltalk)
+\item la maggior parte dei meccanismi di comunicazione remota orientati agli oggetti
+(per esempio, Java RMI) supporta l'accesso remoto solo a metodi d'istanza, e non
+a metodi statici. A un'istanza singleton si potrebbe accedere remotamente, anche se
+indubbiamente ciò avviene di rado
+\item una classe non è sempre un singleton in tutti i contesti applicativi. Nell'applica-
+zione X, può essere un singleton, ma potrebbe essere un "multi-ton" nell'applica-
+zione Y. Non è inusuale neppure iniziare un progetto pensando che l'oggetto sia
+un singleton, per poi scoprire la necessità di istanze multiple nello stesso processo.
+Pertanto, la soluzione lato istanza offre una certa flessibilità
+\end{itemize}
+Vediamo un'applicazione complessa con i vari pattern:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof10.png}
+\end{center}
+pagina 471
 \end{document}
 

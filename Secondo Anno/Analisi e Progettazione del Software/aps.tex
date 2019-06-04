@@ -1699,6 +1699,334 @@ uno strato.
 \begin{center}
 \includegraphics[scale =0.7]{img/log5.png}
 \end{center}
-\subsection{Principio di separazione Modello-Vista}
+\subsection{Principio di separazione Modello-Vista }
+Si hanno due parti:
+\begin{enumerate}
+\item gli oggetti non UI non devono essere connessi o accoppiati direttamente agli
+oggetti UI. Infatti le finestre sono relativa ad una applicazione
+specifica, mentre (idealmente) gli oggetti non appartenenti all'interfaccia grafica
+possono essere riusati in nuove applicazioni o vi si può accedere mediante una
+nuova interfaccia.
+\item non mettere logica applicativa nei metodi di un oggetto dell'interfaccia utente.
+  Gli oggetti UI devono solo inizializzare gli elementi dell'interfaccia utente, ricevere eventi UI e delegare le richieste di logica agli oggetti non UI
+\end{enumerate}
+In questo contesto, modello è un sinonimo per lo strato degli oggetti del dominio.
+Vista è un sinonimo per gli oggetti
+dell'interfaccia utente, come finestre, pagine web, applet e report.\\
+\textbf{Il principio di Separazione Modello-Vista afferma che gli oggetti del modello (dominio) non devono avere una conoscenza diretta degli oggetti della vista (UI), almeno in
+  quanto oggetti della vista.}\\
+Un'ulteriore parte di questo principio è che le classi di dominio incapsulano le informazioni e il comportamento relativi alla logica applicativa. Le classi per le finestre sono relativamente leggere; esse sono responsabili dell'input e dell' output, e di catturare gli eventi
+della GUI, ma non mantengono i dati dell'applicazione né forniscono direttamente della
+logica applicativa.\\
+Tutto ciò si basa sulle seguenti motivazioni:
+\begin{itemize}
+\item favorire la definizione coesa dei modelli, incentrati sui processi di dominio anziché
+  sulle interfacce utente
+\item cnsentire lo sviluppo separato degli strati del modello e dell'interfaccia utente
+\item consentire di connettere facilmente nuove viste a uno strato del dominio esistente,
+  senza ripercussioni sullo strato del dominio
+\item minimizzare l'impatto sullo strato del dominio dei cambiamenti dei requisiti relativi all'interfaccia
+\item consentire viste multiple simultanee sugli stessi oggetti modello, come una vista
+delle informazioni sulle vendite sia tramite tabella sia tramite rappresentazione
+grafica
+\item cnsentire l'esecuzione dello strato del modello indipendente da quella dello strato
+dell'interfaccia utente, come in sistema batch o basato sull'elaborazione di messaggi
+\item consentire un porting facile dello strato del modello a un altro framework per l'interfaccia utente
+\end{itemize}
+\subsection{SSD e Operazioni di Sistema}
+Durante il lavoro di analisi, sono stati abbozzati alcuni SSD per gli scenari dei casi d'uso.\\
+Gli SSD mostrano queste operazioni di sistema, ma nascondono gli oggetti specifici
+della UI. Ciononostante, normalmente saranno gli oggetti dello strato UI del sistema
+a catturare queste richieste di operazioni di sistema, solitamente con la GUI di un rich
+client o una pagina web.
+In un'architettura a strati ben progettata, che sostiene una coesione alta e una separazione degli interessi, gli oggetti dello strato UI inoltreranno (o delegheranno) le richieste da
+parte dello strato UI allo strato del dominio, affinché vengano gestite.\\
+\textbf{I messaggi inviati dallo strato UI allo strato del dominio saranno i messaggi mostrati
+  negli SSD, come enterltem.}\\
+Per esempio:
+\begin{center}
+\includegraphics[scale = 0.7]{img/log6.png}
+\end{center}
+\chapter{GRASP}
+Viene studiata la progettazione principale orientata agli oggetti, la \textit{OOD}: \textit{dpo aver identificato i requisiti e aver creato un modello di dominio, si
+aggiungano i metodi alle classi appropriate, e si definiscano i messaggi tra
+gli oggetti per soddisfare i requisiti}\\
+\textbf{Lo strumento critico della progettazione per lo sviluppo software è una mente ben
+  istruita sui principi di progettazione. Non è né UML né qualsiasi altra tecnologia.}\\
+Si parte dagli \textbf{input di processo}. Non tutti questi elaborati sono necessari. Si tenga presente che in UP tutti gli elementi
+sono opzionali, e vengono creati possibilmente per ridurre dei rischi.\\
+Dato uno o più di questi input, gli sviluppatori possono:
+\begin{enumerate}
+\item iniziare immediatamente a
+  codificare (idealmente con lo sviluppo preceduto dai test)
+\item iniziare con un po' di
+  modellazione UML per la progettazione a oggetti
+\item iniziare con un'altra tecnica di
+modellazione
+\end{enumerate}
+Nel caso di UML, il punto cruciale non è UML, ma la modellazione visual<':, ovvero usare un linguaggio che consente di esaminare le scelte di progetto in modo più visuale di
+quanto non si possa fare semplicemente con il testo grezzo.\\
+La
+cosa più importante è che, durante le attività di disegno (e codifica), vengano applicati
+vari principi di progettazione 00, come i \textbf{pattern GRASP} e i design pattern Gang-of-Four (GoF). L'approccio complessivo al fare la modellazione per la progettazione OO si
+baserà sulla metafora della progettazione guidata dalle responsabilità (RDD) , ovvero
+pensare a come assegnare le responsabilità a degli oggetti che collaborano.
+\\Nel complesso si ha quindi:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp.png}
+\end{center}
+Un modo comune di pensare alla progettazione di oggetti software, ma anche di componenti su larga scala, è in termini di responsabilità, ruoli e collaborazioni. Questi
+aspetti fanno parte di un approccio più ampio chiamato \textbf{progettazione guidata dalle
+  responsabilità o RDD (Responsibility-Driven Development) [WM02]}.\\
+Nella RDD, gli oggetti software sono considerati come dotati di responsabilità; per responsabilità si intende un'astrazione di ciò ché fanno . UML definisce una responsabilità
+come "un contratto o un obbligo di un classificatore" [OMG03b]. Le responsabilità
+sono correlate agli obblighi o al comportamento di un oggetto in relazione al suo ruolo.
+Le responsabilità sono fondamentalmente di due tipi: \textit{di fare e di conoscere.}
+Le responsabilità ``di fare'' di un oggetto comprendono:
+\begin{itemize}
+\item fare qualcosa esso stesso, come per esempio creare un oggetto o eseguire un
+calcolo
+\item dare inizio a un'azione in altri oggetti
+\item controllare e coordinare le attività di altri oggetti
+\end{itemize}
+quelle ``di conoscere'':
+\begin{itemize}
+\item conoscere i propri dati privati incapsulati
+\item conoscere gli oggetti correlati
+\item conoscere cose che può derivare o calcolare
+\end{itemize}
+\textbf{Le responsabilità sono assegnate alle classi di oggetti durante la progettazione a oggetti.}\\
+\textit{Per gli oggetti software di dominio, il modello di dominio spesso ispira le
+  responsabilità più importanti relative al "conoscere", grazie agli attributi e alle associazioni che mostra.}\\
+La traduzione delle responsabilità in classi e metodi è influenzata dalla granularità della
+responsabilità. Le responsabilità più grandi coinvolgono centinaia di classi e metodi,
+mentre le responsabilità minori possono coinvolgere un solo metodo; \textbf{una responsabilità non è la stessa cosa che un metodo, è un'astrazione; tuttavia i metodi
+  soddisfano responsabilità.}\\
+La RDD comprende anche l'idea di\textbf{ collaborazione}. Le responsabilità sono implementate per mezzo di metodi che agiscono da
+soli oppure che collaborano con altri metodi e oggetti.\\
+\textbf{La RDD è una metafora generale per pensare alla progettazione del software OO. Si
+pensi agli oggetti software come simili a persone che hanno delle responsabilità e che
+collaborano con altre persone per svolgere un lavoro. La RDD porta a considerare una
+progetto OO come una comunità di oggetti con responsabilità che collaborano.}\\
+\textbf{I pattern GRASP danno un nome e descrivono alcuni principi di base per
+  assegnare le responsabilità, quindi è utile conoscerli, per sostenere la RDD.}\\
+I principi o pattern GRASP sono un aiuto per l'apprendimento degli aspetti
+essenziali della progettazione a oggetti e per l'applicazione dei ragionamenti di
+progettazione in un modo metodico, razionale e spiegabile. Questo approccio alla
+comprensione e all'utilizzo dei principi di progettazione si basa su pattern per l'assegnazione di responsabilità.\\
+Le decisioni sull'assegnazione delle responsabilità agli oggetti possono essere prese
+mentre si esegue la codifica oppure durante la modellazione. Nell'ambito di UML,
+il disegnare i diagrammi di interazione diventa l'occasione per considerare tali responsabilità
+(realizzate come metodi). Vediamo un esempio:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp2.png}
+\end{center}
+Pertanto, quando si disegna un diagramma di interazione di UML, vengono prese delle
+decisioni riguardo all'assegnazione di responsabilità. Questo capitolo sottolinea i principi
+fondamentali, espressi come pattern GRASP, per guidare le scelte nell'assegnazione delle
+responsabilità. In tal modo è possibile applicare i principi GRASP mentre si disegnano i
+diagrammi di interazione di UML, ma anche durante la codifica.\\
+Gli sviluppatori 00 esperti (e altri sviluppatori del software) hanno accumulato (e continuano a farlo) un repertorio contenente sia principi generali che soluzioni idiomatiche
+che li guidino nella creazione del software. Questi principi e idiomi, se codificati in un
+formato strutturato che descrive il problema e la soluzione e a cui è assegnato un nome,
+possono essere chiamati \textbf{pattern}. Un pattern può essere per esempio:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp3.png}
+\end{center}
+\textbf{Nella progettazione 00, un pattern è una descrizione, con un nome, di un problema
+e una soluzione che può essere applicata a nuovi contesti; idealmente, un pattern dà
+consigli su come applicare la sua soluzione in circostanze diverse e considera le forze e i
+compromessi. Molti pattern, data una categoria specifica di problemi, guidano l'assegnazione di responsabilità agli oggetti.}
+\textit{ù semplicemente, un buon pattern è una coppia problema/soluzione ben conosciuta
+e con un nome, che può essere applicata in nuovi contesti, con consigli su come
+applicarla in situazioni nuove e con una discussione sui relativi compromessi,
+implementazioni, variazioni e così via.}\\
+Dare un nome a un pattern, a un'idea di progetto o a un principio presenta i seguenti vantaggi:
+\begin{itemize}
+\item sostiene la segmentazione e l'assimilazione di quel concetto nella nostra mente e
+memoria
+\item facilita la comunicazione
+\end{itemize}
+\textit{I pattern GRASP non affermano nuove idee, ma assegnano un nome e
+codificano dei principi di base ampiamente utilizzati. A un esperto di progettazione 00, i
+pattern GRASP appaiono fondamentali e familiari, per l'idea se non per il nome.}\\
+GRASP definiscono nove principi di progettazione 00 di base o blocchi di costruzione elementari della progettazione. Vediamo i primi 5:
+\begin{enumerate}
+\item \textbf{Creator:} che tratta il ceratore di un oggetto, ovvero di una responsabilità
+  ``di fare''. Si deve sostenere un
+\textbf{salto rappresentazionale basso} (\textit{LRG}, per Low Representational Gap) tra il modo in
+cui si pensa al dominio e una corrispondenza diretta con gli oggetti software. Abbiamo quindi la definizione:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp4.png}
+\end{center}
+Si nota che si ha a che fare con l'assegnazione di responsabilità.\\
+Innanzi tutto, un punto delicato ma importante nell'applicazione di Creatore degli altri
+pattern GRASP: B ed A fanno riferimento a oggetti software, non a oggetti del modello
+di dominio. Dapprima si tenta di applicare Creator cercando degli oggetti software esi-
+stenti che soddisfano il ruolo di B. Ma che cosa succede se la progettazione 00 è appena
+iniziata e non è ancora stata definita alcuna classe software? In questo caso, per LRG, va
+guardato il modello di dominio per trarre ispirazione. A livello pratico
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp6.png}
+\end{center}
+La creazione degli oggetti è una delle attività più comuni in un sistema orientato agli
+oggetti. Di conseguenza, è utile avere un principio generale per l'assegnazione delle re-
+sponsabilità di creazione. Se queste vengono assegnate bene, il progetto può sostenere un
+accoppiamento basso, una chiarezza maggiore, incapsulamento e riusabilità. Quindi si
+segna alla classe B la responsabilità di creare un'istanza della classe A se una
+delle seguenti condizioni è vera (più sono vere, meglio è):
+\begin{itemize}
+\item B "contiene" o aggrega con una composizione oggetti di tipo A
+\item B registra A
+\item B utilizza strettamente A
+\item B possiede i dati per l'inizializzazione di A, che saranno passati ad A al momento
+della sua creazione. Pertanto B è un Expert rispetto alla creazione di A
+\end{itemize}
+B è un creatore di oggetti A.
+Se sono applicabili più opzioni, solitamente va preferita una classe B che aggrega o contiene la classe A.
+\textit{Creator guida l'assegnazione delle responsabilità relative alla creazione di oggetti, un'atti-
+vità molto comune. Lo scopo fondamentale del pattern Creator è trovare un creatore che
+abbia bisogno, in ogni caso, di essere connesso all'oggetto creato. La scelta di un creatore
+con questa caratteristica favorisce l'accoppiamento basso.}
+È favorito l'accoppiamento basso, il che implica minori dipendenze di manutenzione e maggiori opportunità di riuso. I..:accoppiamento probabilmente non aumenta,
+poiché la classe creata deve essere probabilmente già visibile alla classe creatore,
+grazie alle associazioni esistenti che ne hanno motivato la scelta come creatore.
+\item \textbf{Information Expert:} è uno dei principi di base per
+  l'assegnazione delle responsabilità nella progettazione a oggetti.\\
+  \textit{Expert spiega chi conosce un oggetto data una chiave}. vediamo la definizione:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp5.png}
+\end{center}
+Una responsabilità necessita di informazioni per essere soddisfatta: informazioni su altri
+oggetti, sullo stato di un oggetto, sul mondo che circonda l'oggetto, informazioni che
+l'oggetto può ricavare e così via. A livello pratico:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp7.png}
+\end{center}
+Un Modello di Progetto può definire centinaia o migliaia di classi software, e un'applicazione può richiedere centinaia o migliaia di responsabilità da soddisfare. Durante la
+progettazione a oggetti, quando vengono definite le interazioni tra gli oggetti, si effettuano delle scelte sull'assegnazione delle responsabilità alle classi software. Se le scelte
+vengono fatte bene, i sistemi tendono a essere più facili da comprendere, da mantenere
+e da estendere, e le scelte fatte consentono maggiori opportunità di riusare i componenti
+in applicazioni future.
+\\\textbf{Assegna una responsabilità all'esperto delle informazioni, ovvero alla classe che possiede
+le informazioni necessarie per soddisfare la responsabilità.}
+Per Information Expert, si dovrebbe cercare la classe degli oggetti che possiede le infor-
+mazioni necessarie per determinare il totale. Inoltre se ci sono già delle classi pertinenti nel Modello di Progetto, si analizzi questo per
+pnmo altrimenti si guardi nel Modello di Dominio, cercando di usare (o di estendere) le
+sue rappresentazioni per ispirare la creazione di classi di progetto corrispondenti.
+\\nformation Expert è usato frequentemente nell'assegnazione di responsabilità; è un
+principio guida di base, usato continuamente nella progettazione degli oggetti. Expert
+non intende essere un'idea oscura o capricciosa; esso esprime una "intuizione" comune
+secondo cui gli oggetti fanno cose correlate alle informazioni di cui dispongono.
+Si noti che la soddisfazione di una responsabilità spesso richiede informazioni che si
+trovano sparse tra varie classi di oggetti. Ciò implica che molti esperti delle informazioni
+"parziali" dovranno collaborare al compito. Per esempio, il problema del totale di una
+vendita ha richiesto , in definitiva, la collaborazione di tre classi di oggetti. Ogni volta
+che le informazioni sono sparse tra diversi oggetti, questi avranno bisogno di interagire
+attraverso messaggi per condividere il lavoro.\\ In alcune situazioni, una soluzione suggerita da Expert non è opportuna, solitamente
+a causa di problemi di accoppiamento e di coesione. SI hanno del resto due vantaggi:
+\begin{enumerate}
+\item l'incapsulamento delle informazioni viene mantenuto, poiché gli oggetti usano le
+proprie informazioni per adempiere ai propri compiti. Di solito questo sostiene un
+accoppiamento basso, che dà luogo a sistemi più robusti e mantenibili
+\item ol comportamento è distribuito tra tutte le classi che possiedono le informazioni
+richieste, incoraggiando in tal modo definizioni di classe più coese e "leggere", più
+facili da comprendere e da mantenere. Di solito è sostenuta una coesione alta
+\end{enumerate}
+\item \textbf{Low Coupling:} spiega perché Expert è un principio utile
+e fondamentale della progettazione orientata agli oggetti. In modo
+breve e informale, l'accoppiamento è una misura di quanto fortemente un elemento
+è connesso ad altri elementi, li conosce o dipende da essi. Se esiste un accoppiamento
+o una dipendenza, quando l'elemento da cui si dipende subisce una modifica, ciò può
+ripercuotersi sull'elemento dipendente. Per esempio, una sottoclasse è fortemente accoppiata a una superclasse; un oggetto A che richiama le operazioni dell'oggetto B ha un
+accoppiamento ai servizi di B.
+Il principio del Low Coupling si applica a molte dimensioni nello sviluppo del software;
+è veramente uno degli obiettivi cardinali nella costruzione del software. In termini di
+progettazione a oggetti e di responsabilità, si può descrivere il consiglio come segue:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp8.png}
+\end{center}
+Low Coupling è utilizzato per valutare progetti esistenti o per valutare la scelta
+tra nuove alternative; se tutte le altre cose sono uguali, va preferito un progetto in cui l'accoppiamento è più basso che nelle alternative. Nella pratica:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp9.png}
+\end{center}
+\textbf{Per tornare alle motivazioni per lnformation Expert: esso guida verso una scelta che
+sostiene Low Coupling. Expert chiede di trovare l'oggetto che possiede la maggior parte
+delle informazioni richieste per la responsabilità (per esempio, Board) e di assegnare ad
+esso la responsabilità.}\\
+I.:accoppiamento (coupling) è una misura di quanto fortemente un elemento è connesso ad altri elementi, ha conoscenza di altri elementi e dipende da altri elementi. Un
+elemento con un accoppiamento basso (o debole) non dipende da troppi altri elementi;
+"troppi" dipende dal contesto, e questo aspetto sarà esaminato più avanti. Per elementi si
+intendono classi, sottosistemi, sistemi e così via.
+Una classe con un accoppiamento alto (o forre) dipende da molte altre classi. Tali classi
+fortemente accoppiate possono essere inopportune, e alcune di esse presentano i seguenti
+problemi:
+\begin{itemize}
+\item i cambiamenti nelle classi correlate obbligano a cambiamenti locali
+\item sono più difficili da comprendere in isolamento
+\item sono più difficili da riusare, poiché il loro uso richiede la presenza aggiuntiva delle
+classi da cui dipendono
+\end{itemize}
+\textbf{Assegna una responsabilità in modo che l'accoppiamento rimanga basso. Usa questo
+  principio per valutare le alternative}.
+\\\textit{In pratica il livello di accoppiamento da solo non può essere considerato separatamente
+da altri principi quali Expert e High Cohesion. Nondimeno, è uno dei fattori da tenere
+in considerazione per migliorare un progetto.}\\
+Low Coupling è un principio da tenere a mente durante tutte le decisioni di progetto;
+è un obiettivo basilare da tenere continuamente in considerazione. È un principio di
+valutazione da applicare quando si valutano tutte le decisioni della progettazione.\\Low Coupling incoraggia ad assegnare una responsabilità in modo tale che la sua collocazione non aumenti l'accoppiamento a un livello tale da portare ai risultati negativi
+causati dall'accoppiamento alto.
+Low Coupling sostiene la progettazione di classi tra loro più indipendenti, riducendo
+così l'impatto dei cambiamenti. Esso non può essere considerato separatamente da altri
+pattern quali Expert e High Cohesion, ma piuttosto necessita di essere incluso come
+uno dei vari princii di progettazione che influenzano la scelta nell'assegnazione di una
+responsabilità.\\
+\textbf{Un accoppiamento alto a elementi stabili e a elementi pervasivi costituisce raramente un
+  problema.}\\
+Ma si hanno i seguenti vantaggi:
+\begin{itemize}
+\item non influenzato dai cambiamenti negli altri componenti.
+\item semplice da capire separatamente dagli altri componenti.
+\item conveniente da riusare.
+\end{itemize}
+\item \textbf{Controller:} infatti un'architettura a strati semplice ha, tra gli altri, uno strato per l'interfaccia utente e
+uno strato del dominio. n base al Principio di Separazione Modello-Vista, si sa che gli oggetti della Ul non devono contenere logica applicativa o di "business", come per esempio calcolare una mossa
+di un giocatore. Pertanto, una volta che gli oggetti della Ul rilevano l'evento del mouse,
+devono delegare (inoltrare il compito a un altro oggetto) la richiesta agli oggetti di dominio nello strato del dominio.
+Il pattern Controller risponde a questa semplice domanda: \textit{qual è il p rimo oggetto, dopo
+  o oltre lo strato dell'interfaccia utente, che deve ricevere il messaggio dallo strato Ul?}\\
+Ovvero:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp10.png}
+\end{center}
+Pertanto, Controller si occupa di una domanda di base nella progettazione OO:\textit{ come
+  connettere lo strato UI allo strato della logica applicativa?}\\
+In alcuni metodi dell'OOA/D, il nome controller è stato dato all'oggetto della logica
+applicativa che riceve e "controllà' (coordina) la gestione della richiesta. Vediamo la descrizione:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp11.png}
+\end{center}
+
+pagina 331
+\item \textbf{High Cohesion:} ovvero utile per na qualità fondamentale nota come
+\textbf{coesione} è (informalmente) una misura di quanto sono correlate le operazioni di un
+elemento software da un punto di vista funzionale, e altresì una misura di quanto lavoro
+sta eseguendo un elemento software. In definitiva, sia la quantità di codice
+che la correlazione del codice sono indicatori della coesione di un oggetto. Questo porta al principio di High
+Cohesion, che va utilizzato per valutare scelte di progetto diverse. Se tutte le altre cose
+sono equivalenti, va preferito un progetto con una coesione più elevata:
+\begin{center}
+\includegraphics[scale = 0.7]{img/grasp12.png}
+\end{center}
+\end{enumerate}
+Torniamo ora a \textbf{GRASP}, che è un acronimo per \textit{Generai Responsibility Assignment Software Patterns} ovvero
+di Pattern Generali per l'Assegnazione di Responsabilità nel Software. Il nome è stato
+scelto per suggerire l'importanza di capire, afferrare (in inglese, grasp) questi principi per
+poter progettare con successo il software orientato agli oggetti.
+Comprendere ed essere in grado di applicare le idee che stanno alla base dei pattern
+GRASP, mentre si codifica o mentre si disegnano i diagrammi di interazione e delle classi, consente agli sviluppatori per i quali le esigenze della tecnologia a oggetti costituiscono una novità, di acquisire il più rapidamente possibile la padronanza di questi principi
+di base; essi costituiscono un fondamento per la progettazione di sistemi OO. I 4 pattern mancabnti sono: \textit{Polymorphism, Pure Fabrication, Indirection e Protected variations}.\\
+
 \end{document}
 

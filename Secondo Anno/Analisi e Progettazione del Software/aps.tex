@@ -2138,7 +2138,7 @@ pattern, oppure iniziare a organizzare quella pletora di pattern in una tassonom
 La bella notizia è che la maggior parte dei design pattern può essere vista come una
 specializzazione di alcuni principi GRASP di base. Anche se è effettivamente utile studiare alcuni design pattern in modo dettagliato per accelerare l'apprendimento, è ancora
 più utile vedere i temi che stanno alla loro base (Protected Variations, Polymorphism,
-lndirection, ... ) per avere un aiuto nel ridur_re le miriadi di dettagli e vedere "l'alfabeto"
+lndirection, ... ) per avere un aiuto nel ridurre le miriadi di dettagli e vedere "l'alfabeto"
 essenziale delle tecniche di progettazione che vengono applicate. Per esempio:
 \begin{center}
 \includegraphics[scale = 0.7]{img/gof4.png}
@@ -2232,6 +2232,189 @@ Vediamo un'applicazione complessa con i vari pattern:
 \begin{center}
 \includegraphics[scale = 0.7]{img/gof10.png}
 \end{center}
-pagina 471
+Il prossimo problema di progettazione da risolvere è fornire una logica più complessa per il nostro scopo. Abbiamo quindi il pattern \textbf{strategy}:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof11.png}
+\end{center}
+ovvero:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof12.png}
+\end{center}
+\textbf{Un oggetto strategia è associato a un oggetto contesto, ovvero l'oggetto a cui va applicato l'algoritmo.}\\
+\textit{Non è obbligatorio che il messaggio al-
+l' oggetto contesto e quello all'oggetto strategia abbiano lo stesso nome, ma si tratta di una prassi comune. Tuttavia, è
+comune (e di fatto necessario) che l'oggetto contesto passi un riferimento a se stesso
+(this) all'oggetto strategia, in modo che la strategia abbia una visibilità per parametro nei
+confronti dell'oggetto contesto, per ulteriori collaborazioni.}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof13.png}
+\end{center}
+Una factory diversa da ServicesFactory può essere usata per creare una strategy, cò sostiene l'obiettivo di High Cohesion: ciascuna factory è
+focalizzata in modo coeso sulla creazione di una famiglia correlata di oggetti. Quindi in definitiva:
+\textit{Strategy si basa su Polymorphism e fornisce Protected Variations rispetto agli algoritmi
+variabili. Le strategie sono spesso create da una Factory.}\\
+Passiamo ora a \textbf{Composite}:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof14.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof15.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof16.png}
+\end{center}
+e vediamo anche \textbf{facade}. 
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof17.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof18.png}
+\end{center}
+\textit{Una Facade è un oggetto "front-end" che rappresenta il punto di entrata singolo ai ser-
+vizi di un sottosistema; l'implementazione e gli altri componenti del sottosistema sono
+privati e non possono essere visti dai componenti esterni. Una Facade fornisce Protected
+Variations da cambiamenti nell'implementazione di un sottosistema.}\\
+Un altro requisito per l'iterazione è quello di aggiungere la capacità per una finestra della
+GUI di aggiornare la visualizzazione del totale della vendita, quando il totale cambia. L'idea è di risolvere il problema per questo singolo caso, quindi nelle
+successive iterazioni estendere la soluzione all'aggiornamento della visualizzazione nella
+GUI anche per altri dati che cambiano. Il principio di Separazione Modello-Vista scoraggia questa soluzione. Esso afferma che gli oggetti "modello" non devono conoscere gli oggetti "vistà' o presentazione (come una finestra) . Esso pro-
+muove il Low Coupling dagli altri strati allo strato di presentazione (UI) degli oggetti.
+Una conseguenza del sostegno di questo accoppiamento basso è che esso consente la
+sostituzione dello strato vista o presentazione con uno nuovo, o un tipo particolare di
+finestre con nuove finestre, senza influire sugli oggetti non appartenenti alla UI. Se gli
+oggetti modello non conoscono gli oggetti Java Swing (per esempio), allora è possibile
+scollegare un'interfaccia Swing o un tipo particolare di finestre e collegare qual cos'altro.
+Pertanto, il principio Separazione Modello-Vista supporta Protected Variations rispetto
+al cambiamento dell'interfaccia utente.
+Per risolvere questo problema di progettazione, si può utilizzare il pattern Observer:
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof19.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.7]{img/gof20.png}
+\end{center}
+\section{Basi per la Progettazione di un Framework}
+Vediamo innanzitutto diversi meccanismi di memorizzazione, in quanto si studia un framework per la persistenza per \textbf{oggetti persistenti}, che sono quelli che richiedono una
+memorizzazione persistente:
+\begin{itemize}
+\item \textbf{basi di dati a oggetti}. Se è utilizzata una base di dati a oggetti per memorizzare e recuperare gli oggetti, non sono necessari ulteriori servizi di persistenza personalizzati o di
+terze parti. Questo è uno degli aspetti che ne motivano l'utilizzo; tuttavia, sono relativa-
+mente rari.
+\item \textbf{basi di dati relazionali}. A causa della prevalenza degli RDB, il loro utilizzo è spesso
+richiesto, piuttosto che quello delle basi di dati a oggetti, più naturali nelle applicazioni
+orientate agli oggetti. In questo caso, sorgono una serie di problemi a causa del disaccoppiamento tra le rappresentazioni dei dati orientate ai record e quelle orientate agli
+oggetti; questi problemi sono esaminati più avanti. È necessario un servizio speciale di
+mapping tra oggetti e relazioni (0-R, Object-Relational)
+\item \textbf{altri}. Oltre agli RDB, è talvolta opportuno memorizzare gli oggetti in altri meccanismi
+o formati di memorizzazione, come file piatti, strutture XML, file PDB per Palm OS,
+basi di dati gerarchiche e così via. Come per le basi di dati relazionali, esiste un disaccoppiamento nella rappresentazione tra gli oggetti e questi formati non orientati agli
+oggetti, e di conseguenza anche in questo caso sono necessari servizi particolari per farli
+funzionare con gli oggetti.
+\end{itemize}
+\textit{Un framework per la persistenza è un insieme estensibile di tipi, generico e riusabile,
+che fornisce funzionalità a supporto degli oggetti persistenti. Un servizio di persistenza
+(o sottosistema) fornisce effettivamente il servizio, e sarà creato con un framework per la
+persistenza. Un servizio di persistenza viene solitamente scritto per l'utilizzo con le basi
+di dati relazionali, e in questo caso è chiamato anche un servizio di mapping O-R. Normalmente un servizio di persistenza deve tradurre gli oggetti in record (o un'altra forma
+di dati strutturati, come XML) e salvarli in una base di dati, nonché tradurre i record in
+oggetti quando li recupera da una base di dati .} inoltre \textbf{un framework è un insieme estensibile di oggetti per delle funzioni correlate.} La qualità distintiva di un framework è che essa fornisce un'implementazione per le
+funzioni fondamentali e invariabili, e include un meccanismo che consente a uno sviluppatore di inserire le funzioni variabili o di estendere le funzioni.\\
+In generale, un framework:
+\begin{itemize}
+\item è un insieme coeso di interfacce e classi che collaborano per fornire servizi per la
+parte fondamentale e invariabile di un sottosistema logico
+\item contiene classi concrete e (soprattutto) classi astratte che definiscono le interfacce a
+cui conformarsi, le interazioni tra oggetti a cui partecipare, e altri invarianti
+\item di solito (ma non necessariamente) richiede all'utente del framework di definire
+sottoclassi di classi esistenti del framework per fare uso, personalizzare, ed estendere
+i servizi del framework
+\item ha classi astratte che possono contenere sia metodi concreti che astratti;
+\item si basa sul principio di Hollywood: "Non chiamateci, vi chiameremo noi". Ciò
+significa che le classi definite dall'utente (per esempio, le nuove sottoclassi) riceveranno dei messaggi dalle classi predefinite del framework. Esse sono di solito gestite
+implementando i metodi astratti della superclasse
+\end{itemize} Si hanno i seguenti concetti fondamentali:
+\begin{itemize}
+\item \textbf{mapping. }Deve esserci un mapping (ovvero, una corrispondenza) tra una classe
+e la propria memorizzazione persistente (per esempio, una tabella in una base di
+dati) , e tra gli attributi di un oggetto e i campi (colonne) di un record. In sostanza,
+deve esserci un mapping tra schemi tra i due schemi
+\item\textbf{ identità d'oggetto.} Per correlare facilmente i record agli oggetti, e per garantire che
+non ci siano duplicati inopportuni, i record e gli oggetti hanno un identificatore
+d'oggetto univoco
+\item \textbf{mapper della base di dati. }Un mapper della base di dati, una Pure Fabrication, è
+responsabile della materializzazione e dematerializzazione
+\item \textbf{Materializzazione e dematerializzazione. }La materializzazione è l'atto di trasformare in oggetti una rappresentazione di dati non a oggetti (per esempio, record) da
+una memorizzazione persistente. La dematerializzazione è l'attività opposta (nota
+anche come passivazione).
+\item \textbf{Cache.} I servizi di persistenza memorizzano gli oggetti materializzati in una cache, per motivi di prestazioni.
+\item \textbf{Stato transazionale degli oggetti.} È utile conoscere lo stato degli oggetti in termini della loro relazione con la transazione corrente. Per esempio, è utile conoscere
+quali oggetti sono stati modificati (sono dirty) in modo tale che sia possibile stabilire se devono essere salvati di nuovo nella memoria persistente.
+\item  \textbf{Operazioni per le transazioni.} Operazioni commit e rollback
+\end{itemize}
+\chapter{Refactoring e Code Smell}
+\section{refactoring}
+Con \textbf{refactoring} ci si riferisce al processo consistente nel cambiare un sistema software in modo da non alterarne il comportamento ma da migliorare la struttura interna, leggendolo più comprensibile e semplice da modificare. \\
+Si hanno diversi passi per fare il refactor:
+\begin{itemize}
+\item partire da un codice funzionante
+\item trovare le parti di codice imperfette
+\item capire come semplificare il codice
+\item semplificare il codice e testarlo
+\item ripetere finché non si è sistemato tutto il codice
+\end{itemize}
+e in generale le motivazioni per fare il refactor sono:
+\begin{itemize}
+\item migliorare il design del software
+\item ridurre la quantità di codice necessaria per completare un task
+\item rendere il codice più facile da comprendere
+\item aiutare a trovare bug, avendo un codice più pulito
+\end{itemize}
+si effettua il refactor quando:
+\begin{itemize}
+\item quando si aggiunge una funzione
+\item quando si deve fixare un bug
+\item quando si deve effettuare code review
+\item quando si ha palesemente del codice "brutto"
+\end{itemize}
+e non si effettua quando:
+\begin{itemize}
+\item il codice è così mal messo da dover essere rescritto
+\item se il codice non funziona
+\item se si è vicini alla deadline del progetto
+\item se non si ha una suit di test
+\end{itemize}
+e si hanno i seguenti problemi:
+\begin{itemize}
+\item in caso di database bisogna effettuare la migrazione dei dati
+\item si hanno problemi per la ownership del codice
+\item le interfacce non vanno cambiate e questo potrebbe generare problemi
+\end{itemize}
+vediamo i metodi principali:
+\begin{itemize}
+\item \textbf{extract method} per il quale si trasforma un metodo lungo in uno più breve, estraendone una parte in un metodo di supporto, per esempio:
+\begin{center}
+\includegraphics[scale = 0.8]{img/refa.png}
+\end{center}
+\begin{center}
+\includegraphics[scale = 0.8]{img/refa2.png}
+\end{center}
+\item \textbf{extract class} per il quale si crea una nuova classe e vi muove alcuni campi e metodi di un'altra classe
+\item \textbf{move method} per il quale si crea  un nuovo metod, con un corpo simile, nella classe che lo usa di più
+\end{itemize}
+\section{Code Smell}
+Se si ha un design a oggetti ci si può concentrare sul migliorarne il design, sistemando appunto situazioni "brutte" nel codice come:
+\begin{itemize}
+\item codice duplicato, \textit{code clone}
+\item metodi (più di 20 righe) o classi troppo estesi (problemi di astrazione e di code clone), si risolve con l'extract method e con l'extract class o l'extract subclass (che crea una sottoclasse per ogni feature)
+\item lunghe liste di parametri
+\item feature envy, ovvero una classe usa tanti metodi da altre, rovinando l'astrazione etc... Si risolve con il move method
+\item switch statement che può creare problemi di code clone risolubili creando sottoclassi e usando l'extract method
+\item data class, ovvero una classe con solo variabili di classe, getter, setter metodi e proprietà. Si ha quindi il problema di feature envy e che si ha un design estremamente procedurale. Si usa il move method refactoring per spostare i metodi
+\item long parameters list, ovvero troppi metodi passati in un metodo. Si risolve cambiando parametri con metodi o introducendo oggetti come parametri
+\item shotgun surgery, ovvero quando cambiando una classe si deve cambiare anche un gran numero di altre classi. Si risolve con il move method e il move field
+\item ...
+\end{itemize}
+Infine i commenti devono essere pochi e brevi, con codice autoesplicativo.
+\chapter{Testing}
 \end{document}
 

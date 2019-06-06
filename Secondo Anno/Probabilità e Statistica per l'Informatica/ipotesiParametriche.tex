@@ -215,7 +215,53 @@ e il $p$-value è definito come
     p-value & = P(|T_{n + m -2}| \geq |v|) \\
             & = 2P(T_{n + m -2} \geq |v|)\\
    \end{split} \]
-Ovviamente, essendo il p-value la probabilità che l'ipotesi $H_0$ sia verificata, il p-value deve essere inferiore ad
-$\alpha$ per avere il test, con confidenza $100(1 - \alpha)$.
+Ovviamente, essendo il p-value la probabilit che l'ipotesi $H_0$ sia verificata, il p-value deve essere superiore ad
+$\alpha$ per avere l'accettazione del test, con confidenza $100(1 - \alpha)$.
 
+Supponiamo che la varianza $\sigma^2_x$ e $\sigma^2_y$ non solo sono sconosciute ma anche diseguali ed essendo $S^2_x$ e $S^2_y$ i normali stimatori di $\sigma_x^2$ e $\sigma_y^2$
+sembra ragionevole basare il nostro test $H_0:\mu_x = \mu_y$ vs $H_1:\mu_x \neq \mu_y$ sulla statistica 
+\[ \frac{\mean{x} - \mean{y}}{\sqrt{\frac{S^2_x}{n} + \frac{S^2_y}{m} \] 
+Comunque questa statistica ha una distribuzione complicata, in cui a meno di $H_0$ verificato, dipende da parametri sconosciuti e non si puògeneralmente analizzare.\newline
+L'unica situazione in cui possiamo usare questa statistica è quando $n$ e $m$ sono entrambi larghi e in questo caso può essere mostrato che quando $H_0$ è vero,
+l'equazione precedente può essere approssimabile mediante una distribuzione normale standard in cui si accetta $H_0$ se 
+\[ -z_{\frac{\alpha}{2} \leq \frac{\mean{X} - \mean{Y}}{\sqrt{\frac{S_x^2}{n} + \frac{S_y^2}{m}}} \leq z_{\frac{\alpha}{2}} \]
+altrimenti $H_0$ viene rifiutato.\newline
+Il problema di determinare l'esatto livello $\alpha$ di test d'ipotesi della media di 2 popolazioni normali, aventi sconosciute e non necessariamente uguali varianze,
+è conosciuto come il problema di \emph{Behrens-Fishe}, di cui non ci sono ancora soluzioni completamente soddisfacenti.
 
+Siano $X_1, X_2, \dots, X_n$ un campione normale avente media sconosciuta $\mu$ e varianza sconusciuta $\sigma^2$ e vogliamo effettuare il test d'ipotesi:
+\[ H_0: \sigma_x^2 = \sigma_0^2 \mbox{  vs   } H_1: \sigma_x^2 \neq \sigma_0^2 \]
+Per ottenere il test ricordiamo che $\frac{(n - 1)S^2}{\sigma^2}$ ha una distribuzione chi-quadro con $n - 1$ gradi di liberta' e quando $H_0$ è verificato
+\[ \frac{(n - 1)S^2}{\sigma^2} \sim \chi_{n - 1} \] 
+e quindi si ottiene che si accetta $H_0$, con significativita' $\alpha$, se 
+\[ \chi_{1 - \frac{\alpha}{2}, n - 1} \leq \frac{(n - 1)S^2}{\sigma^2} \leq \chi_{\frac{\alpha}{2}, n - 1} \]
+altrimenti lo si rifiuta.\newline
+Il test precedente può essere implementatoi prima calcolando il valore della variabile statistica e poi calcolando la probabilita' che una variabile chi-quadro, con $n - 1$ gradi 
+di liberta', sia minore della variabile statistica ossia 
+\[ p-value = 2 \min(P(\chi^2_{n - 1} < c), P(\chi^2_{n - 1} > c)) \]
+Il p-value e i test a un solo verso si possono ottenere in maniera equivalente, ragionando come fatto in precedenza per i test sulla media.
+
+Siano $X_1, X_2, \dots, X_n$ e $Y_1, Y_2, \dots, Y_m$ 2 campioni indipendenti di 2 popolazioni normali, aventi parametri $(\mu_x, \sigma_x^2)$ e $(\mu_y, \sigma_y^2)$
+e consideriamo il test statistico $H_0: \sigma_x^2 = \sigma_y^2$ con ipotesi alternativa $H_1:\sigma_x^2 \neq \sigma_y^2$.\newline
+Se poniamo $S_x^2 = \frac{\sum _{i = 1}^n (X_i - \mean{X})^2}{n - 1}$ e $S_y^2 = \frac{\sum _{i = 1}^n (Y_i - \mean{Y})^2}{n - 1}$ e sapendo che 
+$\frac{(n - 1)S_x^2}{\sigma_x^2}$ e $\frac{(n - 1)S_y^2}{\sigma y^2}$ hanno entrmabi una distribuzione chi-quadro con $n - 1$ e $m - 1$ gradi di liberta'.\newline
+Quindi $\frac{\sigma_y^2 S_x^2}{\sigma_x^2 S_y^2}$ ha una distribuzione $F$, con parametri $n - 1$ e $m - 1$ e quindi si accetta $H_0$ se 
+\[ F_{1 - \frac{\alpha}{2}, n - 1, m - 1} \leq \frac{S_x^2}{S_y^2} \leq F_{\frac{\alpha}{2}, n - 1, m - 1} \]
+altrimenti $H_0$ viene rifiutato e comunque si può calcolare il $p-value$, che ha definizione e calcolo similare a quello gia' visto durante questo capitolo.
+
+\section{Test per l'incorrelazione}
+Il test che viene ora presentato si riferisce ad un parametro che descrive il grado di correlazione tra due popolazioni $X$ ed $Y$ ovvero tra due diversi 
+caratteri di una popolazione bidimensionale $(X,Y)$.\newline
+Tale parametro è il coefficiente di correlazione lineare di Pearson definito come
+\[ p_{XY} = \frac{\sigma_{xy}}{\sigma_x \cdots \sigma_y \]
+dove ovviamente $\sigma_{xy}$ è la covarianza tra i due caratteri.\newline
+Osserviamo che quando sono noti i dati $(x_i, y_i)$ di tutti gli elementi della popolazione bidimensionale $(X, Y)$ allora il coefficiente di pearson concide con
+il coefficiente di correlazione lineare nel primo capitolo per cui $p_{xy}$ ammette valori nell'intervallo $[-1, 1]$.\newline
+Data una popolazione bidimensionale $(X,Y)$ in contesti reali non è mai possibile determinare il valore del coefficiente di correlazione lineare 
+e questo per gli stessi motivi per i quali non è possibile determinare esattamente il valore dei parametri $\sigma_x, \sigma_y, \mu_x, \mu_y$ per cui si effettua una stima.\newline
+A tal punto si utilizza lo stimatore $R_n$ definito sul campione $((X_1, Y_1), \dots, (X_n, Y_n))$ come
+\[ R_n = \frac{\sum _{i = 1}^n (Y_i - \mean{Y})(X_i - \mean{X})}{n \cdots S_{X, n} S_{Y, n}} \]
+Il test di incorrelazione che andiamo a presentare consiste nel verificare che il coefficiente $p_{xy}$ assuma valore $0$ e quindi vi sia un incorrelazione tra i due caratteri
+quindi per l'ipotesi $H_0: p_{xy} = 0$ la statistica 
+\[ \bar{T_n} = R_n * \sqrt{\frac{n - 2}{1 - R_n^2} \]
+risulta distribuito come una t di student con $n - 2$ gradi di libertà e si accetta $H_0$ quando non assume valori non troppo distanti da zero.

@@ -87,3 +87,11 @@ Per il refactor uso *move method* e *move field* per spezzare la classe madre
 - ***comments***, devono essere corti e pochi, con codice auto esplicativo.
 Se ho un codice che bnon permette questi commenti uso *rename method* e *extracxt method*. 
 Uso *insert assertion* per aiutare a rendere il codice auto esplicativo
+
+## TESTING
+
+# CATEGORY PARTITION
+
+1) identificare le categorie per ogni parametro, ovvero le caratteristiche elementari
+2) per ogni categoria identificare individuo i valori significativi, che possono essere considerazioni numeriche o logiche
+3) per ogni valore significativo identifico i vincoli con [property] e [if-property] [error] [single] (se da testare una volta sola)

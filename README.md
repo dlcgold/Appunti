@@ -30,13 +30,13 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Architettura degli Elaboratori
 
 ##### II anno
-- [ ] Analisi e Progettazione del Software
-- [ ] Basi di Dati
+- [x] Analisi e Progettazione del Software
+- [x] Basi di Dati
 - [x] Fisica
 - [ ] Metodi Algebrici per l'Informatica
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
-- [ ] Probabilità e Statistica per l'Informatica 
+- [x] Probabilità e Statistica per l'Informatica 
 - [x] Reti e Sistemi Operativi (solo formulario)
 - [ ] Sistemi Distribuiti
 

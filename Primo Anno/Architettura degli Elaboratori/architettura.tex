@@ -1907,4 +1907,45 @@ una cache con blocchi più grandi sfrutta maggiormente la località spaziale dim
 	\item se devo rappresentare in virgola fissa un numero x tra max e min in n bit faccio $\frac{max-min}{2^n}$ e verifico quante cifre decimali ho. Se x ha 3 cifre decimali e dal conto esce un numero con 2 allora l'errore di approssimazione sarà 0,00z, con z terza cifra decimale di x
 
 \end{itemize}
+\chapter{Approfondimento}
+\section{IEE754}
+Innazitutto ricordiamo la formula generale per esprimere un numero in virgola mobile:
+\[(-1)^S\times F \times 2^E\]
+con:
+\begin{itemize}
+\item \textit{S} \textbf{most significant bit}. Si usa per il segno
+\item \textit{F} \textbf{mantissa} di \textit{23 bit} che rappresenta il numero frazionario
+\item \textit{E} \textbf{esponente} di \textit{8bit} (incluso il segno)
+\end{itemize}
+I numeri in virgola mobile sono normalmente dei multipli della dimensione
+della parola. La rappresentazione di un numero in virgola mobile sul\textbf{ MIPS} è quella appena specificata.
+Questa rappresentazione è chiamata modulo e segno, dal momento che il segno
+costituisce un bit separato dal resto del numero.
+Nel \textbf{MIPS32} si possono rappresentare numeri piccoli fino a $2|_{10}\times 10 ^{-38}$ e numeri grandi fino $2|_{10}\times 10 ^{38}$, nonostante questo si può comunque incappare in situazioni di \textbf{overflow} (ovvero che l'esponente è troppo grande per essere rappresentato). Si ha anche il cosiddetto \textbf{underflow} per quando si ottengono cifre così piccole da non  poter essere rappresentate.\\
+Un modo per ridurre questi problemi è aumentare l'esponente a \textit{11bit} e ridurrre la mantissa a \textit{20bit} e aggiungere un intero word (\textit{32bit}) per la mantissa (che quindi sarà su \textit{52bit}). Questa è la cosiddetta \textbf{rappresentazione in virgola mobile in doppia precisione}. Ad alto livello quest'ultima rappresenta i double del \textit{C} mentre la notazione precedente il float.
+Con la doppia precisione } si possono rappresentare numeri piccoli fino a $2|_{10}\times 10 ^{-308}$ e numeri grandi fino $2|_{10}\times 10 ^{308}$ e si ha anche un aumento di precisione grazie alla mantissa aumentata.\\
+Questi formati sono importanti anche fuori dal mondo del MIPS e fanno parte dello standard\textbf{ IEEE 754} per la virgola mobile, che si trova utilizzato praticamente in ogni calcolatore.
+Per far stare ancora più bit all'interno della mantissa, lo IEEE 754 rende implicito il bit a 1 iniziale dei numeri binari normalizzati. Quindi la mantissa è in realtà di \textit{24bit} in singola precisione e \textit{53bit} in doppia. Poiché lo O non ha 1 iniziali, gli si è assegnato il valore riservato con esponente nullo, cosicché non abbia un 1 iniziale. \\
+Si ottiene quindi il seguente formato:
+\[(-1)^S\times (1+F) \times 2^E\]
+dove i bit della mantissa rappresentano la frazione tra O e 1, ed E specifica il valore nel campo esponente.\\
+Nonostante la formula l'ordine di rappresentazione in bit è $S+ E +F$.\\
+posizionamento dell'esponente prima della mantissa semplifica inoltre l'ordinamento dei numeri in virgola mobile utilizzando le istruzioni di confronto tra
+interi, in quanto i numeri con esponente maggiore sono più grandi dei numeri con esponente minore, purché ambedue gli esponenti abbiano lo stesso segno.
+Gli esponenti negativi rappresentano un problema per l'ordinamento. Se si usa il complemento a due o una qualunque altra notazione in cui gli esponenti negativi hanno un 1 nel bit più significativo del campo esponente, un esponente negativo apparirà come un numero grande. Si procede quindi con la \textbf{notazione polarizzata} e la polarizzazione è il numero sottratto alla rappresentazione normale senza segno per determinare il valore reale. Lo IEEE 754 usa una polarizzazione pari a 127 per la singola precisione, così che
+-1 è rappresentato dalla combinazione di bit di valore $-1+127|_{10}=126|_{10}=01111110|_2 $ e $+1$ è rappresentato da $1+127$, ossia $128|_{10}=10000000$. Si ottiene quindi:
+\[(-1)^S\times (1+F) \times 2^{E-P}\]
+Con $P$ polarizzazione pari a 127 per la singola precisione e 1023 per la doppia. Quindi il formato IEEE 754 può essere processato dalle istruzioni di confronto tra interi per accelerare l'ordinamento dei numeri in virgola mobile
+\begin{esempio}
+\textit{Scrivo le due rappresentazioni di }$-0.75|_{10}$:
+Innazitutto $-0.75 = -\frac{3}{2^2}$ e $3|_{10}=11_2$ mentre $4|_{10}=100|_2$
+si ha quindi $-\frac{11|_2}{100|_2}=-0,11|_2$.\\
+In notazione scientifica è quindi $-0,11|_2\times 2^0$ che normalizzando diventa $-1,1|_2\times 2^{-1}$. Quindi si ha che $E-127 = -1$ e quindi $E=126$ mentre la mantissa sarà $1+F=|1,1|$ quindi $F$ è la parte frazioanria di $1,1$ e ovviamente $S=1$ in quanto il numero è negativo.\\
+Si ottiene quindi, essendo $E=126|_{10}= 01111110$ e $F=1[0]{22}$:
+\[1\,\,\,01111110\,\,\, 1000000000000000000 \]
+in doppia precisione si ha $E-1023 = -1$ e quindi $E=1022$ mentre la mantissa sarà $1+F=|1,1|$ quindi $F$ è la parte frazioanria di $1,1$ e ovviamente $S=1$ in quanto il numero è negativo.\\
+Si ottiene quindi, essendo $E=1022|_{10}= 01111111110$ e $F=1[0]{51}$:
+\[1\,\,\,01111111110\,\,\, 1000000000000000000000000000000000000000000000000000 \]
+\end{esempio}
+%pagina 124
 \end{document}

@@ -1946,5 +1946,45 @@ in doppia precisione si ha $E-1023 = -1$ e quindi $E=1022$ mentre la mantissa sa
 Si ottiene quindi, essendo $E=1022|_{10}= 01111111110$ e $F=1[0]{51}$:
 \[1\,\,\,01111111110\,\,\, 1000000000000000000000000000000000000000000000000000 \]
 \end{esempio}
-%pagina 124
+\begin{esempio}
+  \textit{Ricavo il decimale di:}
+  \[1 10000001 01000000000000000000000\]
+  Innazitutto sappiamo di avere a che fare con un numero negativo, in quanto il \textit{MSB} è 1. Il campo esponente è $10000001|_2 = 129|_{10}$ e la mantissa è $1\times 2^{-2} = 0,25|_{10}$ (per la mantissa si scala da $2^{-1}$). Applico quindi la formula e ottengo:
+  \[(-1)^1 \times (1+0,25) \times 2^{129-127} = -1,25 \times 4 = -5,0\]
+\end{esempio}
+\subsection{Operazioni in virgola mobile}
+\subsubsection{Somma}
+Innazitutto ricordiamo come si procede per la somma in notazione scientifica in base 10. Vogliamo sommare $9,999\times 10^1 + 1,610 \times 10^{-1}$. Innanzitutto si deve allineare la virgola del numero che ha l'esponente più piccolo. Quindi si deve trovare una forma per il numero minore che corrisponda in
+termini di esponente con il numero di esponente più grande. Quindi otteniamo che $1,610 \times 10^{-1}=0,01610\times 10^1$. Quindi, ragionando sui numeri in virgola mobile, \textbf{primo passo esegue lo scalamento a destra della mantissa del numero più piccolo, fino a che il suo esponente non coincide con quello del
+numero più grande.} Si possono però rappresentare solo 4 cifre decimali, quindi $0,016\times 10^1$. Tornando ai nostri numeri in base 10 si ha ora la somma dei coefficienti: $9,999+0,016 = 10,015$ ovvero $10,015\times 10^1$. Questo passaggio in virgola mobile è \textbf{la somma delle mantisse}. Tornando alla base 10 dobbiamo normalizzare il valore quindi: $10,015\times 10^1 = 1,0015\times 10^2$. Questa operazione non sempre è necessaria, \textbf{sistemando, anche in termini di operazioni in virgola mobile, l'esponente}. \textit{Ogni volta che l'esponente è incrementato o decrementato, si deve
+controllare se si è verificato un overflow o un underflow, cioè ci si
+deve accertare che l'esponente continui ad essere rappresentabile
+all'interno del suo campo.} Poiché si è assunto che la mantissa possa essere lunga soltanto quattro cifre (escludendo il segno), è necessario arrotondare il numero.
+Quindi: $1,0015\times 10^2 = 1,002\times 10^2$. \textit{Si noti che esiste una caso sfortunato per l'arrotondamento, con-
+sistente nel dover sommare un 1 ad una stringa di 9: la somma può
+non essere più normalizzata ed occorre eseguire nuovamente la normalizzazione sistemando l'esponente. A tal proposito si ricorda che per la singola precisione l'esponente più grande è 127 e quello più piccolo -126. I limiti per la doppia precisione sono 1023 e -1022.} Viene quindi usato il \textbf{troncamento}, che è una delle quattro
+opzioni di arrotondamento previste dallo standard IEEE 754, Se ho uno 0 lascio zero se ho un 1 metto 1. Per esempio per arrotondare su 8 cifre decimali:
+\[1,000000000001\longrightarrow 1,00000000 \]
+\[1,000000001111\longrightarrow 1,00000001\]
+L'accuratezza del calcolo in virgola mobile dipende per una buona parte dall'accuratezza dell'arrotondamento e quindi, benché sia facile da realizzare, il troncamento porta lontani dal'accuratezza. Riassumendo:
+\begin{center}
+\includegraphics[scale = 0.60]{img/sum.png}
+\end{center}
+\begin{esempio}
+  \textit{Si effettui} $0,5|_{10}+ (-0,4375|_{10})$.\\
+  Innazitutto effettuiamo le dovute conversioni:
+  \[0,5|_{10}= \frac{1}{2}|_{10}= \frac{1}{2^1}|_{10}= 0,1|_2 = 0,1|_2 \times 2^0 = 1,000|_2 \times 10^{-1}\]
+  \[-0,4345|_{10}=-\frac{7}{16}|_{10}=-\frac{7}{2^4}|_{10}=\overbrace{-0,0111|_2}^{7|_{10} = 111|_2}=-0,0111|_2 \times 2^0 = -1,110|_2 \times 2^{-2}\]
+  Procediamo ora con gli step sopra spiegati.\\
+  Innanzitutto scaliamo la mantissa del numero con esponente minore, per far coincidere l'esponente con quello dell'esponente maggiore:
+  \[-1,110|_2\times 2^{-2} = -0,111 \times 2^{-1}\]
+  Sommiamo le due mantisse, per comodità $1|_2=1|_{10}$ e $0,111|_2 = 0,875|_{10}$:
+  \[1,000|_2\times 2^{-1}+ (-0,111|_2 \times 2^{-1}) = 0,001|_2\times 2^{-1}\]
+  Normalizziamo controllando eventuali overflow e underflow:
+  \[0,001|_2\times 2^{-1} = 1,000|_2 \times 2^{-4}\]
+  e $-126 \leq -4 \leq 127$ e quindi non si ha ne overflow ne underflow. \textit{L'esponente polarizzato sarebbe $-4+ 127$, ossia 123, compreso tra 1 e 254, che
+    sono l'esponente più piccolo e quello più grande tra quelli non riservati.}\\
+  Infine si arrotonda la somma ma in questo caso è già in 4 bit quindi non si hanno modifiche.\\
+  La somma è quindi $1,000|_2 \times 2^{-4}=0,0001|_2 = \frac{1}{2^4|_{10}} = \frac{1}{16|_{10}}= 0,0625|_{10}$
+\end{esempio}
 \end{document}

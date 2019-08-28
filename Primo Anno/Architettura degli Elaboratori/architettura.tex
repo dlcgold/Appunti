@@ -1908,7 +1908,7 @@ una cache con blocchi più grandi sfrutta maggiormente la località spaziale dim
 
 \end{itemize}
 \chapter{Approfondimento}
-\section{IEE754}
+\section{IEEE 754}
 Innazitutto ricordiamo la formula generale per esprimere un numero in virgola mobile:
 \[(-1)^S\times F \times 2^E\]
 con:
@@ -2284,5 +2284,229 @@ Vediamo quindi il funzionamento, usando come esempio una \textit{lw}:
 Questa carrellata sull'istruzione load indica che tutte le informazioni necessarie
 in uno stadio di pipeline successivo devono essere passate a tale
 stadio attraverso i registri di pipeline.\\
-%pagina 203
+Vediamo ora cosa succede per una store:
+\begin{enumerate}
+  \item \textbf{Instruction Fetch, IF:} l'istruzione viene letta dalla
+  memoria utilizzando ilvalore di PC come indirizzo e posta nel
+  registro di pipeline IF /ID. Questo stadio è eseguito prima
+  che l'istruzione sia identificata quindi funziona esattamente come
+  per la load
+  \item \textbf{Instruction Decode e Register File Read, ID:}
+  l'istruzione presente nel registro di pipeline IF /ID fornisce i
+  numeri dei due registri da leggere ed il campo immediato di 16 bit
+  da estendere a 32 con segno. Questi tre valori a 32 bit sono
+  memorizzati nel registro di pipeline ID /EX. Anche questo stadio non
+  cambia ripsetto alla load, infatti \textbf{i primi due stadi sono
+    eseguiti nello stesso modo da tutte le istruzioni,
+    poiché è troppo presto per conoscere il tipo
+    dell'istruzione.}
+  \item \textbf{Execute e Address Calculation, EX:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe9.png}
+  \end{center}
+  l'indirizzo dell'operanda viene posto nel registro di pipeline EX/MEM
+  \item \textbf{Memory Access, MEM:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe10.png}
+  \end{center}
+  si ha la scrittura in memoria. Il il registro contenente il dato da
+  scrivere era stato letto in uno stadio precedente ed il relativo
+  valore memorizzato nel registro ID/EX. L'unico modo per rendere il
+  dato disponibile durante lo stadio MEM è quello di memorizzarlo in
+  EX/MEM durante EX, esattamente come durante EX
+  \item \textbf{Write-Back, WB:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe11.png}
+  \end{center}
+  si ha il passo finale dell'istruzione store: in questo caso non
+  succede nulla. Poiché tutte le istruzioni che seguono la store sono
+  ancora in fase di completamento, non vi è alcun modo per
+  accelerarle: di conseguenza un'istruzione deve passare attraverso
+  uno stadio anche se non vi è nulla da fare poiché le istruzioni
+  successive stanno già procedendo alla massima velocità possibile
+\end{enumerate}
+Si può fare un'altra considerazione: \textbf{ciascun componente logico
+  dell'unità di elaborazione (come la memoria delle istruzioni,
+  le porte di lettura dei registri, la ALU, la memo  ria dei dati
+  e le porte di scrittura dei registri) può essere usato in un solo
+  stadio della pipeline; in caso contrario, si avrebbe uno structural
+  hazard. Di conseguenza questi componenti, e la relativa logica di
+  controllo, possono essere associati ad un solo stadio di
+  pipeline.}\\
+\textit{Si nota quindi un errore nella descrizione della pipeline per
+  la load: Il numero del registro da scrivere è preso dall'istruzione
+  presente nel registro di pipeline IF/ID, ma tale istruzione
+  è decisamente successiva a quella di load. In conclusione è
+  necessario preservare il numero del registro di destinazione per
+  l'istruzione di load. La load deve inviare il numero del registro da
+  ID/EX, attraverso EX/MEM, fino a MEM/WB, per poterlo usare in WB
+  (come la store passa il contenuto di ID/EX a EX/MEM per usarlo in
+  MEM)}.\\
+Un modo alternativo per vedere il passaggio del numero di registro è
+pensare che si è dovuta preservare l'istruzione letta in IF, in modo
+che ciascun registro di pipeline contenga la parte di istruzione usata
+da quello stadio e da quelli successivi. Quindi la giusta
+rappresentazione per la load sarebbe:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipe12.png}
+\end{center}
+dove si passa il numero di registro prima a ID/EX, poi a EX/MEM e
+infine a MEM/WD. Il numero del registro è usato nello stadio WB per
+specificare il registro da scrivere.
+\newpage
+\subsection{Rappresentazione Grafica delle Pipeline}
+Per facilitare la comprensione vi sono due modi fondamentali per
+realizzare le figure che rappresentano le pipeline:
+\begin{enumerate}
+  \item \textbf{diagrammi delle pipeline a più cicli di clock}, in
+  questo tipo di diagrammi il tempo scorre da sinistra verso destra,
+  mentre le istruzioni procedono dall'alto verso il basso. Lungo
+  l'asse delle istruzioni sono rappresentati gli stadi della pipeline,
+  posizionati nei periodi di dock opportuni: i cinque stadi sono
+  rappresentati da una versione stilizzata delle unità funzionali,
+  ma un semplice rettangolo con il nome dello stadio
+  sarebbe altrettanto valido.
+  \item \textbf{diagrammi delle pipeline a singolo ciclo di clock},
+  che mostrano lo stato dell'intera
+  unità di elaborazione durante un singolo ciclo di clock e,
+  solitamente, le cinque istruzioni nella pipeline sono identificate
+  da etichette al di sopra dei relativi stadi
+\end{enumerate}
+\newpage
+Vediamo un esempio più pratico. Si ha la sequenza di istruzioni:
+\begin{verbatim}
+lw    $10, 20($1)
+sub   $11, $2, $3          $
+\end{verbatim}
+Il diagramma a più colpi di clock sarebbe:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/piper.png}
+\end{center}
+con le risorse fisiche utilizzate in ciascuno stadio.\\
+Si ha anche una rappresentazione più tradizionale:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/piper2.png}
+\end{center}
+con il nome di ciascuno stadio.\\
+\textbf{Si usano questi diagrammi a più cicli per fornire delle
+  viste d'insieme di situazioni che coinvolgono la pipeline.}\\
+\newpage
+Vediamo i diagrammi a singolo ciclo, infinitamente più lunghi e complessi:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/piper3.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.7]{img/piper4.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.7]{img/piper5.png}
+\end{center}
+\textbf{Si utilizzerà questo tipo di diagramma per mostrare i dettagli
+  di ciò che avviene nella pipeline in ciascun periodo di dock;
+  tipicamente si riporteranno delle sequenze di tali diagrammi per
+  illustrare il funzionamento della pipeline su più periodi di
+  clock consecutivi.}
+\textit{Queste due rappresentazioni delle pipeline sono, ovviamente,
+  equivalenti. Un aspetto che potenzialmente è fonte di confusione è
+  l'ordine delle istruzioni nei due diagrammi: l'istruzione più
+  recente è in basso e a destra dei diagrammi a più cicli di clock,
+  mentre è a sinistra nei diagrammi ad un ciclo di clock.}
+Estrarre una porzione verticale di ampiezza pari ad un periodo di clock da un
+diagramma a più cicli di clock mostra lo stato della pipeline come un
+diagramma a singolo ciclo di clock, l'iverso è ben più complesso. Si
+ruota ciascun diagramma a singolo ciclo di clock di 90 gradi in senso
+antiorario; i diagrammi così ruotati sono poi affiancati e separati da
+un periodo di clock, in modo che le unità di elaborazione dei cinque
+stadi di ciascuna istruzione siano allineate su una singola riga
+orizzontale
+\subsection{Control Unit con Pipeline}
+Ci occupiamo ora di aggiungere la \textbf{control unit} al datapath
+con pipeline, trascurando però alcune complicazioni.\\
+Il primo passo consiste nell'etichettare i segnali di controllo del
+datapath esistente:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipec.png}
+\end{center}
+Si assumerà che il registro PC venga scritto ad ogni ciclo di clock,
+per cui non vi sarà alcun segnale di controllo per la scrittura di
+tale registro. Per lo stesso motivo non vi saranno segnali
+di scrittura espliciti per i registri di pipeline
+(IF/ID, ID/EX, EX/MEM e MEM/WB), essendo questi scritti ad ogni
+ciclo di clock.\\
+Ora per definire la control unit è sufficiente calcolare i valori dei
+segnali di controllo in ciascuno stadio. Poiché ciascuna linea di
+controllo è associata ad un componente e questo è attivo in un solo
+stadio della pipeline, si possono dividere i segnali di controllo
+in cinque gruppi secondo il relativo stadio:
+\begin{enumerate}
+  \item \textbf{Instruction Fetch, IF:} i segnali di controllo per
+  leggere la memoria delle istruzioni e per scrivere il PC sono sempre
+  affermati, quindi non vi è nulla di particolare da controllare
+  in questo stadio
+  \item \textbf{Instruction Decode e Register File Read, ID:} anche qui ad
+  ogni ciclo di dock avviene sempre la stessa cosa, quindi non
+  vi sono segnali di controllo da calcolare
+  \item \textbf{Execution e Address Calculation, EX:} si hanno da
+  calcolare i segnali \textit{RegDst, ALUOp} e \textit{ALUSrc}. Essi
+  selezionano il registro risultato, l'operazione della ALU e scelgono
+  il dato da inviare alla ALU tra \textit{Read data 2} e l'immediato
+  esteso con segno.
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipec2.png}
+  \end{center}
+  \textit{per ricordare come sono calcolati i bit di controllo della
+    ALU a partire dai bit di controllo ALUOp e dai diversi
+    codici di funzione per le istruzioni di tipo-R}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipec3.png}
+  \end{center}
+  \textit{Quando il segnale
+    di controllo di 1 bit di un multiplexer a 2 vie viene affermato, il
+    multiplexer seleziona l'ingresso etichettato con 1; in caso contrario,
+    cioè se il segnale di controllo è non affermato, il multiplexer
+    seleziona l'ingresso O. Si noti che nella tabella precedente PCSrc
+    è controllato da una porta AND: se il segnale Branch ed il segnale
+    Zero della ALU sono entrambi affermati, allora PCSrc vale 1,
+    altrimenti O. L'unità di controllo porterà Branch ad un valore
+    affermato solamente durante le operazioni beq: in tutti gli
+    altri casi PCSrc è sempre posto a O.}
+  \item \textbf{Memory Access, MEM:} si hanno i segnali di controllo
+  per questo stadio sono \textit{Branch, MemRead} e \textit{MemWrite};
+  essi devono essere affermati rispettivamente nelle
+  istruzioni\textit{ branch equal, load} e\textit{ store}. Si ha
+  \textit{PCSr} che eleziona l'indirizzo successivo in ordine
+  sequenziale, a meno che si affermi il segnale Branch
+  ed il risultato della ALU valga zero.
+  \item \textbf{Write-Back, WB:} si hanno i segnali \textit{MemtoReg},
+  che sceglie tra inviare al register file l'uscita della ALU oppure
+  il valore proveniente dalla memoria, e\textit{ RegWrite},
+  che scrive il valore selezionato
+\end{enumerate}
+\textbf{Implementare la unit control significa forzare i nove segnali
+  di controllo ai valori corretti in ciascuno stadio e per ciascuna
+  istruzione. Il modo più semplice di far ciò è di estendere i
+  registri di pipeline in modo da includere le informazioni di
+  controllo}.\\
+Vediamo una tabella coi segnali di controllo, raggrupati nei tre stadi
+della pipeline in cui ci sono controlli sui segnali:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipec4.png}
+\end{center}
+Dato che i segnali di controllo si creano in EX si può generare
+l'informazione di controllo durante la decodifica dell'istruzione.\\
+Vediamo anche uno schema che  mostra che i segnali di controllo
+sono usati nello stadio appropriato della pipeline, via via che
+l'istruzione scorre lungo la pipeline stessa:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipec5.png}
+\end{center}
+Dove si vede che 4 delle 9 linee di controllo sono in EX, mentre le
+altre procedono in EX/MEM, esteso per memorizzare i segnali di
+controllo.
+\newpage
+Nel complesso si ottiene, con l'aggiunta dei segnali di controllo
+:
+\begin{center}
+  \includegraphics[scale = 0.8]{img/pipec6.png}
+\end{center}
 \end{document}

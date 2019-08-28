@@ -2509,4 +2509,101 @@ Nel complesso si ottiene, con l'aggiunta dei segnali di controllo
 \begin{center}
   \includegraphics[scale = 0.8]{img/pipec6.png}
 \end{center}
+\subsection{Esercizi}
+\begin{esercizio}
+\textbf{Si supponga di avere una architettura con un pipeline a 5
+  stadi, e che i tempi minimi hardware di esecuzione di ciascuno
+  degli stadi siano i seguenti: 10 ns, 8 ns, 7 ns, 8 ns, 7 ns.
+  Qual'è la massima velocità di esecuzione della macchina, supponendo
+  che il pipeline non vada mai in stallo ?}\\
+Non è possibile che la nostra macchina completi un'istruzione meno di
+10 ns dopo la precedente.Nonostante l'ultimo stadio abbia un periodo
+di 8 ns, l'istruzione gli arriva a un tempo determinato dagli stadi
+precedenti e quindi l'ultimo stadio dovrà aspettare che gli stadi
+precedenti abbiano finito prima di poter operare. In particolare lo
+stadio che rallenta gli altri è proprio quello più lento.
+In questo caso la risposta corretta è esattamente $\frac{1}{10} = 100 \frac{Mistr}{sec}$
+e non di più perchè nel testo è specificato che non ci sono mai
+stalli, ovvero ogni stadio impiegherà esattamente il tempo di
+esecuzione dichiarato nel testo.
+\end{esercizio}
+\begin{esercizio}
+  \textbf{Si ha che è più veloce una macchina con un pipeline di 5 stadi
+    e ciclo di clock 8 ns o una macchina con un pipeline di 4 stadi
+    e ciclo di 10 ns?}\\
+  Come nel caso precedente, la velocità è data dallo stadio più
+  lento e non dipende dal numero di stadi che influenza soltanto
+  il ritardo della prima istruzione.\\
+  In questo caso gli stadi hanno tutti lo stesso periodo:
+  8ns per la prima macchina e 10ns per la seconda.\\
+  Le due velcoità saranno quindi $\frac{1}{8} = 125 \frac{Mistr}{sec}$
+  per la prima e $\frac{1}{10} = 100 \frac{Mistr}{sec}$ per la
+  seconda.
+  A parità di altre condizioni, è più veloce quella col ciclo
+  più breve, che completa una istruzione per ogni ciclo in assenza di stalli.
+\end{esercizio}
+\begin{esercizio}
+  \textbf{onsideriamo una implementazione dell'architettura MIPS con pipeline a 5 stadi (fetch, decode, execute, read/write, register write).
+    Date le seguenti istruzioni:}
+\begin{verbatim}
+add $t2, $t1, $t0
+add $t5, $t4, $t3
+add $t8, $t7, $t6
+add $t0, $t2, $t1
+\end{verbatim}
+  \textbf{Rispondere alle seguenti domande:}
+  \begin{itemize}
+    \item Vi sono possibilità di alee sui dati? quali?
+    \item Si supponga di volerle superare inserendo delle nop, quante sono necessarie e dove?
+    \item L'hardware forwarding può risolvere queste alee?
+  \end{itemize}
+  \begin{itemize}
+    \item Le prime tre istruzioni non presentano problemi in quanto
+    usano registri diversi. L'ultima istruzione invece presenta un
+    problema in quanto utilizza \$t2 come ingresso,  che viene scritto
+    dalla prima istruzione.\\
+    Il problema sta nel fatto che quando la quarta istruzione viene eseguita
+    il registro \$t2 non è ancora stato aggiornato, cosa che verrà
+    fatta al tempo successivo, terminato lo stadio di write register
+    \item Siccome abbiamo visto che il registro in questione viene
+    scritto al tempo successivo, sarà sufficiente una sola\textit{ nop},
+    per ritardare l'esecuzione della quarta istruzione di uno stadio.
+    Per ottenere questo risultato è sufficiente posizionare
+    la nop prima della quarta istruzione e dopo la prima
+    \item In questo caso, l'hardware forwarding risolve completamente
+    il problema. Essendo tutte operazioni aritmetiche che interessano
+    quindi lo stadio di esecuzione, generano una sequenza in cui anche
+    se una operazione dipende dall'istruzione immediatamente
+    precedente, può essere eseguita perchè il risultato della
+    precedente, che serve al tempo attuale per il calcolo
+    dell'istruzione corrente, è già stato calcolato all'istante
+    di tempo precedente
+  \end{itemize}
+\end{esercizio}
+\begin{esercizio}
+  \textbf{Consideriamo una implementazione dell'architettura MIPS
+    con pipeline a 5 stadi (fetch, decode, execute, read/write,
+    register write); date le seguenti istruzioni:}
+\begin{verbatim}
+       ...
+       beq t0,t1, dopo
+       add t2,t1, $t0
+       j loop
+       ...
+dopo:  ...    $
+\end{verbatim}
+  \textbf{una soluzione che affronta le alee di controllo mediante
+    esecuzione predittiva dei salti condizionati (non presi per
+    default) ed eventuale annullamento degli effetti delle due
+    istruzioni successive, può funzionare in questo caso?}
+  Si, può funzionare anche in questo caso, infatti anche se il
+  salto condizionato viene considerato come Not Taken e quindi
+  le due istruzioni vengono eseguite (fetch e decode), il salto
+  non è ancora stato fatto quando la condizione viene valutata,
+  pertanto non è necessario annullarlo, ma basta sospenderne
+  l'esecuzione\\
+  \textbf{PROBLEMA IL QUIZ SU ELEARNING RIPORTA ``no, perchè l'effetto
+    della jump non è annullabile ``}
+\end{esercizio}
+\section{Gestione delle Priorità nelle Interruzioni}
 \end{document}

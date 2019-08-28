@@ -2176,6 +2176,113 @@ sw    $t2, 0($t1)    # v[k] = $t2 $
   Inoltre si noti che ciascuna operazione MIPS scrive un solo risultato e unicamente al termine della propria esecuzione. La propagazione sarebbe molto più difficile se vi fossero più risultati da propagare per ciascuna istruzione o se questi venissero scritti prima del termine dell'istruzione.
 \end{enumerate}
 \subsection{Pipelined Datapath}
-% pagina 200
-
+Bisogna separare l'unità di elaborazione in
+cinque parti, ciascuna delle quali prende nome dalla fase
+corrispondente nell esecuzione dell'istruzione (\textit{IF, ID, EX,
+  MEM, WB}).\\
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipe.png}
+\end{center}
+L'esecuzione delle istruzioni procede da \textbf{destra a sinistra},
+anche se si hanno 2 eccezzioni:
+\begin{enumerate}
+  \item lo stadio di scrittura del risultato pone il risultato nel
+  register file (che si trova nel mezzo dell'unità di elaborazione)
+  \item la selezione del valore successivo del PC, scelto tra il valore del PC incrementato e l'indirizzo di salto (proveniente dallo stadio MEM)
+\end{enumerate}
+Il flusso dei dati da destra a sinistra non influenza l'istruzione
+corrente ma solo quella successiva e può causare
+delle criticità sui dati e la seconda delle criticità sul controllo.\\
+Per comprendere con facilità ciò che succede con l'esecuzione in
+pipeline si ipotizzi che ciascuna istruzione disponga della propria
+unità di elaborazione, sistemando tali unità lungo l'asse dei tempi
+per visualizzarne le relazioni:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipe2.png}
+\end{center}
+La figura pare suggerire che tre istruzioni richiedano tre unità di
+elaborazione.\\
+Il caso reale prevede che alcune parti dell'unità di elaborazione
+vengano riutilizzate, per esempio la memoria delle istruzioni è
+utilizzata in una sola delle cinque fasi di esecuzione di
+un'istruzione, per cui potrà essere riutilizzata da altre istruzioni nelle quattro fasi restanti.
+Per memorizzare il valore dell'istruzione letta dalla memoria a beneficio degli
+alrin quattro stadio, occorrera salvarlo in un registro, questo per
+tutti gli stadi della pipeline; vanno quindi aggiunti dei registri per
+ogni linea di divisione tra gli stadi della prima figura della
+sezione. In pratica si avrà una modifica simile a quella fatta per
+passare dall'implementazione a singolo ciclo a quella multiciclo. Si
+ottiene quindi il seguente \textbf{pipelined datapath}, con i registri
+aggiunti per la pipeline:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/pipe3.png}
+\end{center}
+In ogni ciclo di clock tutte le istruzioni procedono da un registro d1
+pipeline a quello successivo. Inoltre ciascun registro prende il nome
+dai due stadi che separa (quindi tra gli stadi IF e ID si avrà
+\textit{IF/ID}).\\
+\textit{Si noti che non vi è alcun registro di pipeline alla fine
+  dello stadio di scrittura del risultato tutte le istruzioni devono
+  alterare qualche elemento di stato nel processore (11 register file,
+  la memoria o il registro PC), per cui un registro di pipeline
+  separato sarebbe ridondante nspetto all'aggiornamento dello stato
+  per esempio se una load carica un valore in un registro quel valore
+  può essere letto direttamente da un'istruzione successiva.}\\
+Vediamo quindi il funzionamento, usando come esempio una \textit{lw}:
+\begin{enumerate}
+  \item \textbf{Instruction Fetch, IF:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe4.png}
+  \end{center}
+  l'istruzione viene letta dalla memoria utilizzando PC come
+  indirizzo e viene posta nel registro di pipeline IF/ID.\\
+  L'indirizzo contenuto nel registro PC viene incrementato di 4 e riscritto
+  nuovamente in PC in modo da essere pronto per il prossimo ciclo di
+  clock.\\
+  L'indirizzo incrementato è anche salvato nel registro di pipeline
+  IF/ID perché potrebbe essere richiesto da un'istruzione successiva,
+  ad esempio da \textit{beq}.\\
+  Il calcolatore non può prevedere quale tipo di istruzione verrà
+  letta dalla memoria, per cui deve essere pronto per ogni istruzione,
+  trasportando lungo la pipeline tutte le informazioni potenzialmente
+  necessarie
+  \newpage
+  \item \textbf{Instruction Decode e Register File Read, ID:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe5.png}
+  \end{center}
+  a la parte inferiore del registro di pipeline IF/ID fornisce il
+  campo immediato di 16 bit, convertito a 32 bit tramite l'estensione del segno,
+  ed i numeri dei due registri da leggere. I tre valori sono memorizzati nel
+  registro di pipeline ID/EX insieme al valore incrementato di PC:
+  viene infatti nuovamente trasferito tutto ciò che potrebbe essere 
+  necessario ad una qual siasi istruzione nei cicli di clock
+  successivi.
+  \item \textbf{Execute e Address Calculation, EX:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe6.png}
+  \end{center}
+  l'istruzione load legge dal registro di pipeline ID/EX il
+  contenuto del registro 1 ed il valore immediato, esteso con segno,
+  e li somma utilizzando la ALU. Il valore della somma è posto nel
+  registro di pipeline EX/MEM
+  \item \textbf{Memory Access, MEM:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe7.png}
+  \end{center}
+  l'istruzione di load legge la memoria dei dati utilizzqndo come
+  indirizzo il valore letto dal registro di pipeline
+  EX/MEM. Il dato letto viene caricato nel registro di pipeline
+  MEM/WB.
+  \item \textbf{Write-Back, WB:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/pipe8.png}
+  \end{center}
+  si ha il passo finale: lettura del dato dal registro di pipeline
+  MEM/WB e scrittura dello stesso nel register file (al centro dell'immagine)
+\end{enumerate}
+Questa carrellata sull'istruzione load indica che tutte le informazioni necessarie
+in uno stadio di pipeline successivo devono essere passate a tale
+stadio attraverso i registri di pipeline.\\
+%pagina 203
 \end{document}

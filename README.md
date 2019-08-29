@@ -27,7 +27,8 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
-- [x] Architettura degli Elaboratori ([ ] approfondimento)
+- [x] Architettura degli Elaboratori 
+- [ ] Architettura degli Elaboratori Approfondimento (in coda agli appunti di Architettura degli Elaboratori)
 
 ##### II anno
 - [x] Analisi e Progettazione del Software

@@ -29,6 +29,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Analisi Matematica
 - [x] Architettura degli Elaboratori 
 - [ ] Architettura degli Elaboratori Approfondimento (in coda agli appunti di Architettura degli Elaboratori)
+- [x] Fondamenti dell'Informatica
 
 ##### II anno
 - [x] Analisi e Progettazione del Software

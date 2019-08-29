@@ -2606,4 +2606,85 @@ dopo:  ...    $
     della jump non è annullabile ``}
 \end{esercizio}
 \section{Gestione delle Priorità nelle Interruzioni}
+Con tante periferiche c'è il rischio che, mentre serviamo una
+poriferica poco critica, arrivi una richiesta da una periferica
+critica, probabilmente costringendoci a smettere di gestire la prima
+in favore della seconda. A qursto scopo si ha la \textbf{gestione
+  delle priorità}\\
+Si hanno 3 punti chiave:
+\begin{enumerate}
+  \item il programma utente è sempre interrompibile
+  \item un'interruzione da una periferica può interrompere sia il
+  programma utente che la gestione di qualsiasi periferica \textbf{a
+    criticità strettamente inferiore}
+  \item la gestione di un'interruzione di una periferica \textbf{non}
+  può essere interrotta da periferiche a criticità minore o uguale
+  alla propria
+\end{enumerate}
+Vediamo una serie di grafici ``esplicativi'':
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int2.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int3.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/iny4.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int5.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int6.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int7.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int8.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int9.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int10.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int11.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int12.png}
+\end{center}
+\begin{center}
+  \includegraphics[scale = 0.6]{img/int13.png}
+\end{center}
+\newpage
+\subsection{Gestione Priorità Software: RMI}
+Il registro di mascheramento delle interruzioni permette di mascherare
+(ovvero di disabilitare) un singolo livello di interruzione ma per
+quato meccanismo si hanno complicazioni sia hw che sw.\\
+Si ha infatti che, quando un interrupt di livello superiore interrompe
+un gestore di livello inferiore, il suo gestore (che inizierà
+l'esecuzione con gli interrupt disabilitati in automatico dal sistema)
+dobrà svolgere i seguenti passi:
+\begin{itemize}
+  \item salvare l'\textit{EPC} del gestore precedente
+  \item salvare l'\textit{RMI} del gestore precedente
+  \item cambiare l'\textit{RMI} in modo da disabilitare gli interrupt
+  di livello inferiore ma non quelli di livello superiore
+  \item riabilitare gli interrupt
+  \item proseguire normalmente con la gestione dell'interrupt
+  \item disabilitare gli interrupt
+  \item ripristinare l'\textit{EPC} e l'\textit{RMI} del gestore
+  precedente
+  \item restituire il controllo al gestore precedente
+\end{itemize}
+Notiamo che \textbf{ogni gestore di un livello di interrupt modifica
+  l'\textit{RMI} per non essere interrotto da un interrupt di livello
+inferiore}. Viene quindi salvato l'\textit{RMI} per poter ripristinare
+il mascheramento degli interrupt di livello inferiore.
+\subsection{Gestione Priorità Hardware}
 \end{document}

@@ -2741,7 +2741,144 @@ durante le letture espressa in cicli di clock e della frequenza di
 miss in lettura:
 \[\mbox{cicli di stallo in lettura} = \frac{\mbox{numero di
       letture}}{\mbox{programma}}\]
-\[\times \mbox{frequenza di miss in lettura} \times \mbox{penalità per i miss in lettura}\]
-% pagina 253 slide
+\[\times \mbox{frequenza di miss in lettura} \times \mbox{miss penalty in lettura}\]
 % pagina 398 libro
+Le scritture sono più complesse; per uno schema \textit{write-through}
+si hanno due tipi di stallo:
+\begin{enumerate}
+  \item i \textbf{miss in scrittura}, che solitamente richiedono di prelevare
+  il blocco prima di continuare l'operazione di scrittura
+  \item gli\textbf{ stalli sul buffer delle scritture},
+  che avvengono quando il buffer delle scritture è pieno
+  nel momento in cui dovrebbe avvenire la scrittura.
+\end{enumerate}
+Quindi i cicli di clock per gli stalli in scrittura saranno:
+\[\mbox{cicli di stallo in scrittura} = \frac{\mbox{numero di
+    scritture}}{\mbox{programma}} \times \mbox{frequenza di miss in scrittura}\]
+\[\times \mbox{miss penalty in scrittura} + \mbox{stalli sul
+    buffer delle scritture}\]
+\textbf{Poiché gli stalli sul buffer delle scritture dipendono dalla
+  temporizzazione delle operazioni di scrittura e non solamente dalla
+  loro frequenza, non è possibile fornire una semplice
+  equazione per quantificarli.}\\
+\textit{In sistemi con un'adeguata profondità del buffer delle
+  scritture (4 o più word) e di
+una memoria capace di accettare le scritture ad una frequenza significativamente
+superiore alla frequenza media con cui il programma effettua
+le operazioni di scrittura (ad esempio, di almeno un fattore due), gli
+stalli sul buffer delle scritture saranno pochi e brevi,
+e si potranno ignorare senza conseguenze. Anche gli schemi di tipo
+write-back sono fonte di potenziali stalli a causa della
+necessità di scrivere un blocco di cache nella memoria quando tale blocco viene
+sostituito.}\\
+Nella maggior parte dei sistemi write-through le miss penalty in
+lettura e scrittura coincidono e sono pari al tempo necessario a
+prelevare il blocco dalla memoria. Trascurando gli stalli sul buffer
+delle scritture si possono combinare letture e scritture usando
+un'unica frequenza di miss e un'unica miss penalty:
+\[\mbox{cicli di clock di stallo per la memoria} = \frac{\mbox{numero
+      di accessi in memoria}}{\mbox{programma}}\]
+\[\times \mbox{frequenza di miss} \times \mbox{miss penalty}\]
+che è uguale a:
+\[\mbox{cicli di clock di stallo per la memoria} =
+  \frac{\mbox{istruzioni}}{\mbox{programma}}\times \frac{\mbox{numero
+      di miss}}{\mbox{istruzione}}\]
+\begin{esercizio}
+\textbf{Per il programma gcc si ipotizzi una frequenza di miss nella
+  cache istruzioni pari al 2\% ed una frequenza di miss nella cache
+  dati pari al 4\%. Se un elaboratore ha un valore di CPI pari a 2 in
+  assenza di stalli per la memoria e la miss penalty è pari a 40
+  cicli per tutti i tipi di miss, si determini di quanto sarebbe più
+  veloce lo stesso calcolatore con una cache ideale in cui non si
+  verificassero mai dei miss. Si usi la seguente tabella per le
+  frequenze delle istruzioni di gcc:}
+\begin{center}
+  \includegraphics[scale = 0.7]{img/gcc.png}
+\end{center}
+Si avrà quindi (con N = numero di istruzioni):
+\[\mbox{cicli per i miss sulle istruzioni} = N\times 2\% \times 40 =
+  0,8 \times N\]
+In gcc la frequenza complessiva delle letture e delle scritture è 36\%
+quindi (con ancora N = numero di istruzioni):
+\[\mbox{cicli per i miss sui dati} = N \times 36\% \times 4\% \times
+  40 = 0,56\times N\]
+quindi:
+\[\mbox{numero totale dei cicli di stallo per la memoria} =
+  (0,80\times N)+(o,56\times N) = 1,36\times N\]
+Questo valore corrisponde a più di un ciclo di stallo per istruzione; di conse-
+guenza il valore di CPI tenendo conto degli stalli in memoria sale a $2 + 1,36 =
+3,36$. Non essendoci alcuna variazione nel numero di istruzioni
+o nella frequenza di dock, il rapporto dei tempi di CPU è:
+\[\frac{\mbox{tempo di CPU con gli stalli}}{\mbox{tempo di CPU con
+      cache ideale}}=\frac{N\times CPI_{stalli}\times \mbox{cicli di
+      clock}}{N\times CPI_{ideali}\times \mbox{cicli di clock}}\]
+  \[= \frac{CPI_{stalli}}{CPI_{ideali}}=\frac{3,36}{2} = 1,68\]
+  \textbf{Le prestazioni del sistema con la cache ideale sarebbero
+    migliori di un fattore di 1,68.}\\
+  Con un processore più veloce ma il sottosistema di
+  memoria rimanesse invariato la quantità di tempo spesa sugli stalli
+  consumerebbe una frazione sempre maggiore del tempo di esecuzione.\\
+  Se riduciamo il CPI a 1 senza modificare la frequenza di clock,
+  adottando quindi una pipeline migliore, il sistema avrebbe CPI
+  pari ad $1+1,36 = 2,36$ ed il sistema con la cache ideale sarebbe
+  $\frac{2,36}{1}=2,34$ volte più veloce. Inoltre la quantità di tempo
+  di esecuzione speso per gli stalli sulla memoria passerebbe da
+  $\frac{1,36}{3,36}=41\%$ a $\frac{2,36}{3,36}=58\%$. \\
+  Analogamente aumentare la frequenza del dock senza modificare il
+  sottosistema di memoria enfatizzerebbe la perdita di prestazioni
+  dovuta ai miss nella cache.
+\end{esercizio}
+\begin{esercizio}
+  \textbf{Si ipotizzi di aumentare le prestazioni del sistema
+    dell'esempio precedente raddoppiandone la frequenza di clock.
+    Poiché la velocità della memoria principale probabilmente sarà
+    uguale, si assuma che non sia variata la quantità di tempo totale
+    dovuta ai miss nella cache. Quanto sarà più veloce il sistema con
+    il clock più veloce, assumendo la stessa frequenza di miss
+    dell'esempio precedente?}\\
+  Misurata con riferimento ai cicli di dock più veloci,
+  la nuova penalità di miss avrà valore doppio, pari ad 80
+  cicli. Quindi:
+  \[\mbox{cicli di miss totali per istruzione} = (2\%\times
+    80)+36\%\times (4\% \times 80) = 2,75\]
+  Tenendo conto dei miss la macchina più veloce avrà $CPI = 2+2,75 =
+  4,75$, rispetto ad un valore di CPI di 3,36 comprensivo dei miss
+  per la macchina più lenta.\\
+  Applicando la formula che fornisce il tempo di CPU dell'esempio
+  precedente, si possono calcolare le prestazioni relative come segue:
+  \[\frac{\mbox{prestazioni con clock veloce}}{\mbox{prestazioni con
+        clock lento}}=\frac{\mbox{tempo di esecuzione con clock
+        lento}}{\mbox{tempo di esecuzione con clock veloce}}\]
+  \[=\frac{N\times CPI\times \mbox{periodo di clock}}{I\times
+      CPI\times \frac{\mbox{periodo di
+          clock}}{2}}=\frac{3,36}{4,75\times \frac{1}{2}}=1,41\]
+  \textbf{Il calcolatore con il dock più veloce è quindi circa 1,4
+    volte più veloce anziché 2 volte più veloce, per effetto della
+    maggiore influenza dei miss nella cache.}
+\end{esercizio}
+Le penalità relative dovute alla cache aumentano via via che i
+sistemi diventano più veloci. Inoltre se un sistema migliora sia la
+frequenza di clock che il valore di CPI, viene penalizzato due volte:
+\begin{enumerate}
+  \item più p basso il CPI più evidente è l'impatto dei cicli dovuti
+  agli stalli
+  \item è improbabile che il sottosistema di memoria migliori con la
+  stessa rapidità del processore. Nel calcolo del CPI, la miss penalty
+  nella cache è misura ta in numero di cicli di dock della CPU richiesti
+  per la risoluzione di un miss: se le memorie principali di due
+  elaboratori hanno lo stesso tempo di accesso assoluto, una maggiore
+  frequenza di clock della CPU porta ad un maggior valore
+  numerico della miss penalty
+\end{enumerate}
+\textbf{L'importanza delle prestazioni della cache è dunque maggiore
+  per la CPU con un basso CPI ed un'elevata frequenza di clock, per
+  cui il pericolo di sottovalutare il comportamento della cache nella
+  valutazione delle prestazioni di tali macchine è maggiore. Inoltre
+  si ricorda che quanto detto fin'ora, formule e calcoli inclusi,
+  trascurano il tempo di hit, che aumenterebbe in caso di cache più
+  grandi. Oltre una certa soglia per una cache molto grande
+  l'incremento del tempo dovuto agli hit potrebbe essere dominante rispetto al
+  miglioramento ottenibile sulla frequenza di hit, portando ad una riduzione delle
+  prestazioni del processore.}\\
+% pagina 255
 \end{document}

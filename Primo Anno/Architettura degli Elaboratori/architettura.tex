@@ -2878,7 +2878,309 @@ frequenza di clock che il valore di CPI, viene penalizzato due volte:
   trascurano il tempo di hit, che aumenterebbe in caso di cache più
   grandi. Oltre una certa soglia per una cache molto grande
   l'incremento del tempo dovuto agli hit potrebbe essere dominante rispetto al
-  miglioramento ottenibile sulla frequenza di hit, portando ad una riduzione delle
-  prestazioni del processore.}\\
-% pagina 255
+  miglioramento ottenibile sulla frequenza di hit, portando ad una
+  riduzione delle prestazioni del processore.}\\
+Fino ad ora si è parlato di cache con metodologia \textbf{direct
+  mapped} ovvero ciascun blocco poteva andare in una sola posizione
+della cache e il nome deriva dal fatto che vi è un legame diretto tra
+l'indirizzo di ciascun blocco della memoria ed una specifica locazione
+del livello superiore della gerarchia. Non è l'unica soluzione.\\
+Una soluzione ``opposta'' è uno schema secondo il quale ciascun blocco può essere
+posto in qualsiasi locazione della cache e viene detto \textbf{fully
+  associative}. Per ritrovare un dato blocco all'interno di una cache
+fully associative occorre cercarlo in tutte le celle, poiché esso può
+risiedere in una qualunque di esse; per rendere realisticamente
+conveniente tale ricerca, questa viene compiuta in parallelo grazie ad
+un comparatore associato a ciascuna posizione della
+cache. \textbf{Questi comparatori contribuiscono significativamente ad
+  aumentare il costo dell'hardware, rendendo la collocazione
+  completamente associativa conveniente solo per le cache con un
+  numero ridotto di blocchi.}\\
+Una ``via di mezzo'' può essere la \textbf{set-associative}. In una
+cache di tipo set-associative vi è un numero fisso di posizioni
+(almeno due) in cui si può porre ciascun blocco; una cache di tipo
+set-associative con $n$ possibili collocazioni per ciascun blocco
+è detta \textbf{n-way}. Una cache set-associative n-way è organizzata come un
+certo numero di insiemi, ciascuno dei quali consta di $n$ blocchi;
+ciascun blocco della memoria è messo in corrispondenza con uno degli
+insiemi, determinato mediante il \textbf{campo indice}, ma può essere posto in
+un qualsiasi elemento dell'insieme. La collocazione di tipo
+set-associative è quindi una combinazione della corrispondenza diretta
+e dell'associatività completa: vi è corrispondenza diretta tra blocchi
+ed insiemi, mentre occorre ricercare in tutti i blocchi dell'insieme
+per trovare un dato corrispondente.\\
+Quindi se per una cache direct mapped si otteneva la posizione dei
+blocchi in memoria con:
+\[(\mbox{numero del blocco})\,modulo\,(\mbox{numero di blocchi nella cache})\]
+In una cache di tipo set-associative l'insieme che contiene un blocco
+di memoria è dato da:
+\[(\mbox{numero del blocco})\,modulo\,(\mbox{numero di insiemi nella cache})\]
+Poiché il blocco può essere posto ovunque all'interno dell'insieme,
+occorre ricercare in \textbf{tutti gli elementi dell'insieme}; in una
+cache completamente associativa il blocco potrebbe essere ovunque e
+si dovrebbe cercare in \textbf{tutti i blocchi della cache}.\\
+\begin{esempio}
+  Ecco le possibili posizioni del blocco numero 12 in una cache
+con otto blocchi complessivi, secondo le strategie di collocazione
+delle cache a corrispondenza diretta, set-associative a due vie e
+completamente associativa:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/cache.png}
+\end{center}
+\end{esempio}
+\textbf{Si possono interpretare le diverse varianti delle strategie di
+  collocazione come diverse versioni del metodo set-associative: una
+  cache a corrispondenza diretta non è altro che una cache
+  set-associative ad una via, poiché ciascun elemento della cache
+  contiene un blocco e pertanto forma un insieme di un solo elemento;
+  una cache completamente associativa di $m$ elementi è invece una
+  cache set-associative a $m$ vie, poiché ha un solo insieme con $m$
+  blocchi e ciascun elemento può risiedere in un qualsiasi blocco
+  dell'insieme.} \\
+Vediamo e possibili strutture associative per una cache di otto
+blocchi:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/cache2.png}
+\end{center}
+\textit{Il vantaggio di un aumento del grado di associatività risiede
+  generalmente nella riduzione della frequenza di miss; lo svantaggio
+  principale è un incremento del tempo di hit.}\\
+Vediamo un esempio:
+\begin{esempio}
+  \textbf{Si considerino tre piccole cache, composte di quattro
+    blocchi di una parola ciascuna. La prima cache è completamente
+    associativa, la seconda è set-associative a due vie e la terza è a
+    corrispondenza diretta. \\
+    Si calcoli il numero di miss nel caso delle tre organizzazioni
+    della cache per la seguente sequenza di indirizzi di
+    blocco: O, 8, O, 6, 8.}\\
+  Il caso della \textbf{cache direct mapped} è il più semplice: si
+  esamina innanzitutto a quale blocco della cache corrispondono
+  gli indirizzi dei blocchi:
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/cache3.png}
+  \end{center}
+  Si può ora vedere il contenuto della cache a seguito di ciascun accesso alla
+  memoria, dove le celle vuote rappresentano i blocchi non validi e gli elementi
+  colorati mostrano i nuovi blocchi aggiunti alla cache durante
+  l'ultimo accesso:
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/CACHE4.png}
+  \end{center}
+  \textbf{La cache a corrispondenza diretta genera quindi cinque
+    miss.}\\
+  La\textbf{ cache di tipo set-associative} ha due insiemi (di indice O ed 1)
+  con due elementi per insieme; si determina innanzitutto a quale
+  insieme corrisponde ciascun indirizzo di blocco:
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/cache4.png}
+  \end{center}
+  Poiché è possibile scegliere l'elemento dell'insieme da sostituire
+  nel caso di un miss, occorre definire una regola di sostituzione. Le
+  cache di tipo set-associative solitamente sostituiscono l'elemento
+  usato meno di recente tra quelli dell'insieme, ossia viene
+  sostituito il blocco che è rimasto inutilizzato da più tempo (tra
+  breve si discuteranno le regole di sostituzione con maggior
+  dettaglio). Con questa regola di sostituzione il contenuto della
+  cache di tipo set-associative dopo i diversi accessi è il seguente:
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/cache5.png}
+  \end{center}
+  Si noti che quando si fa riferimento al blocco 6, questo sostituisce
+  il blocco 8, poiché quest'ultimo era stato utilizzato meno di
+  recente rispetto al blocco O. \\
+  \textbf{La cache di tipo set-associative a due
+    vie genera quattro miss, uno in meno della cache a corrispondenza
+    diretta.}\\
+  La \textbf{cache fully associative} dispone di quattro blocchi
+  (tutti nello stesso insieme), per cui ogni blocco di memoria può
+  essere posto in un qualsiasi blocco della cache. La cache
+  completamente associativa ha le prestazioni migliori,
+  \textbf{ causando solamente tre miss}:
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/cache6.png}
+  \end{center}
+  In questa serie di accessi alla memoria, tre è il numero minimo di
+  miss poiché vi sono tre distinti indirizzi di blocco a cui far
+  riferimento.
+\end{esempio}
+Con l'associatività si hanno quindi delle riduzioni di frequenza di
+miss. Vediamo i miglioramenti per \textit{gcc} e per \textit{spice}:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/cache7.png}
+\end{center}
+\textit{Le basse frequenze di miss del programma spice non consentono
+  significativi miglioramenti dipendenti dagli aumenti di
+  associatività}\\
+Cerchiamo ora un blocco in una cache set-associative. Esattamente come
+le cache a corrispondenza diretta, quelle set-associative comprendono
+un campo tag associato all'indirizzo che permette di risalire
+all'indirizzo del blocco. Occorre verificare il tag di ciascun blocco
+della cache dell'insieme considerato per determinare se corrisponde
+all'indirizzo proveniente dalla CPU. Un indirizzo viene così
+decomposto:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/cache8.png}
+\end{center}
+il valore dell'indice viene usato per scegliere l'insieme contenente l'indirizzo
+considerato, all'interno del quale occorrerà controllare tutti i
+tag. Poiché la velocità è il fattore più importante, tutti i tag
+dell'insieme dovranno essere esaminati in parallelo: come nel caso
+delle cache completamente associative,\textbf{ una ricerca seriale renderebbe
+  le cache set-associative troppo lente}.\\
+\textit{Se la dimensione totale viene mantenuta costante, un aumento
+  dell'associatività aumenta il numero di blocchi per insieme, che
+  corrisponde al numero di confronti contemporanei richiesti per poter
+  compiere la ricerca in parallelo: ciascun incre mento di un fattore
+  due nell'associatività raddoppia il numero di blocchi per insie me e
+  dimezza il numero di insiemi. Di conseguenza un incremento di un
+  fattore due nell'associatività riduce la dimensione dell'indice di 1
+  bit ed aumenta la dimensione del campo tag di 1 bit. In una cache di
+  tipo completamente associativo vi è in effetti un solo insieme, ed
+  occorre controllare in parallelo tutti i blocchi; non vi è quindi
+  alcun indice e l'intero indirizzo, con esclusione dell'offset nel
+  blocco, viene confrontato con il tag dei blocchi.\textbf{ In altre parole si
+  ricerca all'interno dell'intera cache senza far uso di alcun
+  indice}.}\\
+In una cache di tipo set-associative a quattro vie, sono necessari
+quattro comparatori ed un multiplexer a quattro vie per poter
+scegliere tra i quattro potenziali elementi dell'insieme selezionato.
+\begin{center}
+  \includegraphics[scale = 0.7]{img/cache9.png}
+\end{center}
+L'accesso alla cache prevede di indicizzare l'insieme opportuno e poi
+di ricercare all'interno degli elementi dell'insieme. Il costo di una
+cache associativa risiede nei comparatori aggiuntivi e nel ritardo imposto dal 
+1'operazione di confronto e di selezione tra gli elementi
+dell'insieme.
+\begin{esempio}
+  \textbf{Una maggiore associatività richiede più comparatori, ma
+    anche più bit per i tag in ciascun blocco della cache. Disponendo
+    di una cache di 4K blocchi ed indirizzi di 32 bit, si trovi il
+    numero totale di insiemi ed il numero totale di bit per i tag nel
+    caso di cache a corrispondenza diretta, set-associative a due vie
+    e quatto vie e completamente associativa.}\\
+  La cache a corrispondenza diretta ha lo stesso numero di insiemi e
+  di blocchi, da cui si deriva un indice di 12 bit, poiché
+  $\log_2{4K)=12$; il numero totale di bit per i tag è
+  quindi $(32 - 12) \times 4K = 80$ Kbit.\\
+  Ciascun grado di associatività in più riduce il numero di insiemi di
+  un fattore due e quindi riduce di uno il numero di bit usati come
+  indice ed aumenta di uno il numero di bit usati come tag. In una
+  cache set-associative a due vie vi sono dunque 2K insiemi ed il
+  numero totale di bit per i tag è$ (32 - 11) \times 2 \times 2K = 84$
+  Kbit.In una cache set-associative a quattro vie il numero totale di insiemi
+  è 1K ed il numero totale di bit per i tag
+  è $(32 - 10) \times 4 \times 1K= 88$ Kbit.
+\end{esempio}
+Quindi la scelta del tipo di cache si riduce al confronto tra il costo
+di un miss rispetto al costo associato all'implementazione
+dell'associatività, misurato sia come tempo che come logica
+aggiuntiva.\\
+Quando si verifica un fallimento nell'accesso ad una cache a
+corrispondenza diretta, il blocco richiesto può andare in una sola
+posizione, per cui occorre sostituire il blocco che occupava quella stessa
+posizione. Nelle cache di tipo associativo si ha invece un insieme di
+posizioni in cui porre il blocco, e quindi un insieme di blocchi da
+sostituire tra cui scegliere. In una cache fully associative
+tutti i blocchi sono candidati ad essere sostituiti, mentre in quelle
+set-associative si può scegliere tra i blocchi dell'insieme
+selezionato.\\
+La tecnica utilizzata con maggior frequenza è quella chiamata
+\textbf{LRU (\textit{least recently used})}. Il metodo LRU prevede che
+il blocco sostituito sia quello che è rimasto inutilizzato per la
+maggior quantità di tempo; esso viene implementato tenendo traccia di
+quando ciascun elemento dell'insieme è stato utilizzato relativamente
+agli altri elementi dell'insieme. In una cache di tipo set-associative
+a due vie, per determinare quale elemento dell'insieme è stato usato
+più di recente è sufficiente un singolo bit per insieme: ogni volta
+che un elemento dell'insieme viene selezionato, suddetto bit assume un
+valore tale da indicare questo elemento. \textbf{Al crescere del grado
+  di associatività l'implementazione dello schema LRU diviene più
+  complessa}.\\
+\textbf{Tutti gli elaboratori moderni fanno uso di cache; in molti
+  casi, le cache sono addirittura implementate sullo stesso
+  \textit{die} del microprocessore usato come CPU}.\\
+Per colpmare la differenza tra clock delle CPU e tempo di accesso alle
+DRAM, i microprocessori ad alte prestazioni supportano un livello
+aggiuntivo di cache. Si ha quindi una \textbf{second-level cache},
+che si trova spesso al di fuori del chip in un insieme separato di
+SRAM e che è consultata ogniqualvolta avviene un miss nella cache
+principale. \textit{Se la cache di secondo livello contiene il dato
+  richiesto la miss penalty sarà solamente relativa al tempo di
+  accesso alla cache di secondo livello, decisamente inferiore al
+  tempo di accesso della memoria principale. Se il dato non è presente
+  né nella cache principale né in quella secondaria, si renderà
+  necessario un accesso alla memoria principa le, determinando
+  una miss penalty maggiore.}\\
+\begin{esempio}
+  \textbf{Si ipotizzi di disporre di un processore con un valo~e di
+    CPI pari ad 1,0 (ipotizzando che tutti gli accessi siano risolti
+    nella cache principale) ed una frequenza di dock di 500 MHz.
+    Si ipotizzi un tempo di accesso alla memoria di 200 ns,
+    compresa la gestione del miss; si ipotizzi infine che la frequenza
+    di miss per istruzione in corrispondenza della cache principale
+    sia del 5\%. Quanto risulterebbe più veloce il calcolatore se si
+    aggiungesse una cache secondaria con un tempo di accesso di 20 ns
+    (sia nel caso di hit che di miss) ed abbastanza capiente
+    da ridurre la frequenza di miss rispetto alla memoria principale
+    al 2\%?}\\
+  Al miss penalty per accedere alla memoria principale è:
+  \[\frac{200\,ns}{2\frac{ns}{cicli\,\,di\,\,clock}}=100\,\,cicli\,\,di\,\,clock\]
+  Il valore effettivo di CPI con un livello di cache è dato da:
+  \[\mbox{CPI totale} = \mbox{CPI di partenza } +
+    \mbox{ cicli di stallo per istruzione dovuti alla memoria}\]
+  ovvero:
+  \[\mbox{CPI totali} = 1,0 + \mbox{cicli di stallo per istruzione
+      dovuti alla memoria}\]
+  \[= 1,0+5\%\times 100 = 6,0\]
+  Con una cache a due livelli i miss nella cache principale (o di primo livello)
+  possono essere soddisfatti dalla cache secondaria o dalla memoria
+  principale; la penalità di miss per un accesso alla cache di
+  secondo livello e di:
+  \[\frac{20\,ns}{2\frac{ns}{ciclo\,\,di\,\,clock}} =
+    10\,\,cicli\,\,di\,\,clock\]
+  Se il miss viene risolto dalla cache di secondo livello, questo
+  valore costituisce l'intera penalità di miss; se occorre invece far
+  riferimento alla memoria principale, la penalità di miss totale
+  sarà la somma dei tempi di accesso della cache secondaria e della
+  memoria principale. In una cache a due livelli, il valore totale di
+  CPI è dato dalla somma dei cicli di stallo dovuti ai due livelli
+  più il CPI di partenza:
+  \[\mbox{CPI totale} = 1 + \mbox{ cicli di stallo per istruzione
+      dovuti al primo livello} \]
+  \[+ \mbox{ cicli di stallo per istruzione dovuti al secondo
+      livello}\]
+  \[=1+5\%\times 10+2\%\times 100=3,5\]
+  Il calcolatore dotato di cache secondaria sarà quindi più veloce
+  di un fattore pari a $\frac{6,0}{3,5}=1,7$.\\
+  (\textit{Su libro tecnica alternativa con gli stalli})
+\end{esempio}
+\textit{Le considerazioni progettuali legate alle cache di primo e di
+  secondo livello sono notevolmente diverse, poiché la presenza
+  dell'ulteriore cache modifica le scelte ottimali rispetto a quelle
+  per una cache ad un solo livello. In particolare una strut tura
+  delle cache a due livelli permette alla cache principale di
+  concentrarsi sulla riduzione del tempo associato agli hit al fine di
+  ridurre il periodo del clock, mentre la cache secondaria può giocare
+  sulla frequenza di miss per ridurre la penalità dovuta alla
+  lentezza della memoria principale.}\\
+Si ha una divisione di ruoli: la miss penalty della cache
+principale viene notevolmente ridotta grazie alla presenza della
+cache secondaria, permettendo così di avere dimensioni minori e
+frequenze di miss maggiori al primo livello. Nella cache secondaria il
+tempo di accesso non è così importante grazie alla presenza della
+cache principale, poiché il tempo di accesso della cache secondaria
+influenza la miss penalty della cache principale ma non il suo
+tempo di hit, né tantomeno la frequenza di clock della CPU.\\
+Gli effetti di tali modifiche introdotte dai due livelli si possono
+vedere confrontando le due cache con quella ottimale per
+un'architettura ad un solo livello. Rispetto ad una cache unica la
+cache principale di un sistema a più livelli è solita mente più
+piccola; inoltre tende ad utilizzare un blocco di dimensioni minori,
+associato ad una dimensione della cache minore e ad una ridotta
+penalità di miss. Nel confronto la cache di secondo livello sarà
+normalmente più grande di una cache unica, poiché il suo tempo di
+accesso è meno vincolante; date le maggiori dimensioni la cache di
+secondo livello farà solitamente uso di blocchi più grandi di quanto sarebbe conveniente in una sola cache.
 \end{document}

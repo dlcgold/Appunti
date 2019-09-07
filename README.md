@@ -45,9 +45,10 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 ### Altro
 Suggeriamo queste repository open:
 - [Informazioni Generali sulla Laurea Triennale](https://github.com/dlcgold/LaureaTriennale-Bicocca) 
-- [Altri appunti sui corsi](https://github.com/IlariaB/class-notes)
-- [Altri appunti sui corsi](https://github.com/amarusofia/Appunti-universitari)
-- [Altri appunti sui corsi](https://github.com/JacopoDeAngelis/Appunti-universitari)
+- [Altri appunti sui corsi (Ilaria)](https://github.com/IlariaB/class-notes)
+- [Altri appunti sui corsi (Sofia)](https://github.com/amarusofia/Appunti-universitari)
+- [Altri appunti sui corsi (Jacopo)](https://github.com/JacopoDeAngelis/Appunti-universitari)
+- [Altri appunti sui corsi (Marco)](https://github.com/bigboss98/appunti)
 - [Repo con le esercitazioni di R di Probabilità e Statistica (in corso)](https://github.com/dlcgold/Lab-R)
 
 

@@ -42,6 +42,14 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Reti e Sistemi Operativi (solo formulario)
 - [ ] Sistemi Distribuiti
 
+
+##### III anno
+- [ ] Analisi e Progetto di Algoritmi (obbligatorio)
+- [ ] Elementi di Bioinformatica
+- [ ] Programmazione C++
+- [ ] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio)
+
+
 ### Altro
 Suggeriamo queste repository open:
 - [Informazioni Generali sulla Laurea Triennale](https://github.com/dlcgold/LaureaTriennale-Bicocca) 

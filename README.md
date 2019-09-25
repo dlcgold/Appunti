@@ -63,7 +63,7 @@ Suggeriamo queste repository open:
 ### Disclaimer
 La maggior parte di questi appunti sono stati presi durante le lezioni.  
 Per quanto sia stata fatta una revisione, è probabile che possano contenere errori, sia di tipo grammaticale (tanti) che di vero e proprio contenuto.  
-Qualora li trovaste siete invitati a [comunicarlo](https://github.com/dlcgold/Appunti/issues/new) o effettuare una [PL](https://github.com/dlcgold/Appunti/pulls).
+Qualora li trovaste siete invitati a [comunicarlo](https://github.com/dlcgold/Appunti/issues/new) o effettuare una [PR](https://github.com/dlcgold/Appunti/pulls).
 
 ### Contributi
 Contributi di ogni tipo sono ben accetti. 

@@ -1,6 +1,6 @@
 # Appunti
 
-[![Anno in corso](https://img.shields.io/badge/anno%20in%20corso-2%C2%B0-lightgrey.svg)](https://github.com/dlcgold/Appunti)
+[![Anno in corso](https://img.shields.io/badge/anno%20in%20corso-3%C2%B0-lightgrey.svg)](https://github.com/dlcgold/Appunti)
 [![GitHub stars](https://img.shields.io/github/stars/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/network)
 [![GitHub issues](https://img.shields.io/github/issues/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/issues)

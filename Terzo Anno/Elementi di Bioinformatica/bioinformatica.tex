@@ -207,5 +207,68 @@ Ogni 1 nell'ultima riga corrisponde ad un'occorrenza.
 pattern e l'uso di più word comporta il riporto sulla colonna
 seguente, fattore che si complica all'aumentare della lunghezza del
 pattern, soprattutto se arbitraria. Abbiamo inoltre il vantaggio
-di non avere branch if/else. 
+di non avere branch if/else.
+\section{Algoritmo Karp-Rabin}
+Vediamo un altro algoritmo di pattern matching che sfrutta una
+codifica binaria ma che non sempre risulta corretto ma estremamente
+più veloce.\\
+Usiamo un alfebto binario e devo fare il match di due stringhe con
+ciascuna la sua codifica $H(S)=\sum_{i=1}^{|S|}2^{i-1}H(S[i])$. Mi
+muovo sul testo $T$ mediante finestre di ampiezza $m$ pari a quella
+del pattern e controllo il fingerprint di quella porzione con quella
+del pattern. Inoltre il fingerprint di una finestra è facilmente
+calcolabile da quello della precedente. Per farlo elimino il
+contributo del carattere della finestra precedente e includere l'unico
+aggiunto dalla finestra successiva, in quanto mi sposto di 1:
+\[H(T [i + 1 : i + m]) = \frac{H(T [i : i + m - 1]) −T [i]}{2} +
+  2^{m-1} T [i + m]\]
+Dividendo per due si shifta a destra.\\
+La sottostringa è uguale al pattern solo se le fingerprint lo sono:
+\[T [i : i + m - 1] = P \Leftrightarrow H(T [i : i + m - 1]) = H(P)\]
+\textit{Per estendere la codifica binaria in $k$ caratteri avrò la finestra
+  che si sposta di $k$ con la divisione per $k$ anciché per 2.}\\
+Si ha il problema della lunghezza del pattern in quanto ho un
+$2^{m-1}$ che fa esplodere l'algoritmo in quanto si usa un numero di
+bit grandissimo. Si ricorda che un'operazione ``costa 1'' solo se sono
+piccoli i numeri in gioco, in questo caso il costo diventa
+proporzionale al numero di bit coinvolti. La soluzione di Karp-Rabin è
+di continuare con la logica di sopra ma solo con numeri piccoli,
+cambiando la definizione di fingerprint prendendo il resto di quanto
+sopra con un numero primo $p$:
+\[H(T [i + 1 : i + m]) = \left(\frac{H(T [i : i + m - 1]) −T [i]}{2} +
+    2^{m-1} T [i + m]\right)\mod p\]
+ma in quasto modo la fingerprint non è più iniettiva, più stringhe
+avranno la stessa fingerprint e si avranno degli errori. Si ha che
+$  2^{m-1} T [i + m]$ viene calcolato iterativamente facendo $\mod p$
+ad ogni passo. Si può quindi avere una sottostringa di T con lo stesso
+fingerprint del pattern che però non è uguale al pattern,
+è un \textbf{falso positivo} ma non si possono avere falsi negativi,
+ovvero comunque tutte le occorrenze sono trovate ma si possono
+trovare occorrenze false in più:
+% capire la formula
+\[H(T [i : i + m - 1]) \mod p = H(P) \mod p \Leftarrow T [i : i + m - 1] = P\]
+Se il numero primo $p$ è scelto a caso minore di un certo $I$ so che
+l'errore è minire di $O(\frac{nm}{I})$.\\
+Vogliamo sfruttare però che si hanno solo falsi positivi e provare ad
+eseguire l'algoritmo con due $p$ diverse, le vere occorrenze saranno
+trovate da entrambe mentre i falsi positivi probabilmente no. Itero
+quindi su $k$ numeri primi e il risultato sarà l'intersezione di tutte
+le $k$ iterazioni dell'algoritmo, riducendo moltissimo le probabilità di
+avere un risultato errato pagando un incremento di un prodotto
+$k$ delle operazioni (ma comunque lineare) mentre le chances di errore
+diminuiscono esponenzialmente.\\
+È quindi un algoritmo probabilistico in quanto i $p$ sono scelti a
+caso. Si hanno due categorie di algortimi probabilistici:
+\begin{enumerate}
+  \item \textbf{Monte Carlo}, come Karp-Rabin, veloci ma non sempre
+  corretti
+  \item \textbf{Las Vegas}, sempre corretti ma non sempre veloci, come
+  ad esempio   nel quicksort con pivot random (dove il meglio è un pivot che è
+  l'elemento mediano il peggio è che sia un estremo, che porta
+  l'algoritmo ad essere quadratico).
+\end{enumerate}
+\textit{Posso rendere Karp-Rabin un algoritmo della categoria Las Vegas
+controllando tutte le occorrenze (non in questo corso).}\\
+% ultima slide non fatta in aula
+
 \end{document}

@@ -1,6 +1,6 @@
 \documentclass[a4paper,12pt, oneside]{book}
 
-%\usepackage{fullpage}
+% \usepackage{fullpage}
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
@@ -35,6 +35,8 @@
 
 \usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
 
+
+
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -64,8 +66,8 @@
 \algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}
 \tableofcontents
 \renewcommand{\chaptermark}[1]{%
-	\markboth{\chaptername
-		\ \thechapter.\ #1}{}}
+  \markboth{\chaptername
+    \ \thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 \chapter{Introduzione}
 \textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
@@ -73,30 +75,30 @@
 \\
 \begin{comment}
 
-\begin{algorithm}
-  \If {$i \gets 1$}
-  \State $test$
-  \Else
-  \State $bho$
-  \EndIf
-  \While {$test$}
-  \State $cose$
-  \EndWhile
-  \For {$cose...$}
-  \State $altre cose$
-  \EndFor
+  \begin{algorithm}
+    \If {$i \gets 1$}
+    \State $test$
+    \Else
+    \State $bho$
+    \EndIf
+    \While {$test$}
+    \State $cose$
+    \EndWhile
+    \For {$cose...$}
+    \State $altre cose$
+    \EndFor
 
-  \Function{Increment}{$a$}
-  \State $a \gets a+1$
-  \State \Return $a$
-  \EndFunction
-\end{algorithm}
+    \Function{Increment}{$a$}
+    \State $a \gets a+1$
+    \State \Return $a$
+    \EndFunction
+  \end{algorithm}
 
-\begin{algorithm}
-  \Do
-  \State ciao
-  \doWhile {$ciao$}
-\end{algorithm}
+  \begin{algorithm}
+    \Do
+    \State ciao
+    \doWhile {$ciao$}
+  \end{algorithm}
 \end{comment}
 \chapter{Introduzione al corso}
 \section{Argomenti}
@@ -148,7 +150,221 @@ impera (dove il problema P è diviso in sottoproblemi risolti
 separatemente, con la divide, e poi combinati alla fine, con la
 combina) dove i tempi non sono sempre calcolabili ma se lo sono
 si usa il metodo dell'esperto (studiando le tre possibili casistiche).
+\begin{shaded}
+  \subsection{Equazioni di Ricorrenza}
+  Le equazioni di ricorrenza hanno solitamente la seguente forma:
+  $$\begin{cases}
+    T(n)=T(n-1)+f(n) \\
+    T(1)=\Theta(1)
+  \end{cases}$$
+  Esistono tre metodi per risolvere le equazioni di ricorrenza:
+  \begin{itemize}
+    \item Iterativo (detto anche Albero di ricorsione)
+    \item Sostituzione
+    \item Esperto (detto anche Principale)
+  \end{itemize}
+  \subsubsection{Metodo Iterativo}
+  Si può usare sia per algoritmi ricorsivi e per Divide et Impera.
+  Ad ogni passo si prende il valore a destra dell'uguaglianza e
+  lo si sostituisce, arrivando, dopo $k$ passi ad una formula
+  generale. Sempre $k$ ci darà il caso base. Posso rappresentare
+  questo  metodo con l'albero delle chiamate ricorsive,
+  guardando quanto è alto l'albero e quanto impiega ad ogni livello
+  \begin{esempio}
+    Calcolo i tempi di:
+    $$\begin{cases}
+      T(N)=T(n-1)+8 \\
+      T(1)=6
+    \end{cases}$$
+    procedo nella seguente maniera:
+    $$T(n)=T(n-1)+8=[T(n-2)+8]+8=T(n-2)+2\cdot 8$$
+    $$=[T(n-3)+8]+2\cdot 8= T(n-3)+3\cdot 8$$
+    $$=[T(n-4)+8]+3\cdot 8=T(n-4)+4\cdot 8$$
+    $$=T(n-k)+k\cdot 8$$
+    per $k=n-1$ si ha:
+    $$T[n-(n-1)]+(n-1)\cdot 8=T(1)+(n-1)\cdot 8=6+(n-1)\cdot 8=\Theta(n)$$
+  \end{esempio}
+  \textit{Altri esempi su sito e appunti di Chiodini}
+  \subsubsection{Metodo per Sostituzione}
+  Si ipotizza un tempo di calcolo (si possono usare gli
+  asintotici con $O$ e $\Omega$ lo si dimostra per induzione
+  \begin{esempio}
+    $$\begin{cases}
+      T(n)=2\cdot T\left(\frac{n}{\floor{2}}\right)+n & n>1 \\
+      T(1)                                            & n=1
+    \end{cases}
+    $$
+    Ipotizzo $O(n\cdot \log n)$ e dimostro per induzione:
+    $$T(n)=O(n\cdot \log n)\leq c\cdot n\cdot \log n$$
+    Serve una dimostrazione forte:
+    ipotizzo $T(m)$ vera per $1\leq m\leq n-1$ quindi si ha:
+    $$T(n)=2\cdot T\left(\frac{n}{\floor{2}}\right)+n\leq 2\cdot \left[c\cdot \frac{n}{\floor{2}}\cdot \log \frac{n}{\floor{2}}\right]+n$$
+    $$=c\cdot n\cdot \log \frac{n}{2}+n=c\cdot n\cdot (\log_2 n-\log_2 2)+n$$
+    $$=c\cdot n\cdot \log_2 n-c\cdot n+n\leq c\cdot n\cdot \log n \mbox{ se } c\geq 1$$
+    \newpage
+    Analizzo ora il caso base:\\
+    $T(1)=1$ quindi voglio $1\leq c\cdot \log_2 1$ ovvero $1\leq c\cdot 0$ ovvero mai.
+    testo fino a che non trovo $T(3)=2\cdot T(1)+3=29+3=5$ che mi va bene, infatti $5\leq c\cdot 3\cdot \log_2 3$
+  \end{esempio}
+  \subsubsection{Metodo dell'Esperto}
+  Posso usare questo metodo solo nel caso di un'equazione di ricorrenza di questo tipo:
+  $$\begin{cases}
+    T(n)=a\cdot T\left(\frac{n}{b}\right) +f(n) \\
+    T(1)=\Theta(1)
+  \end{cases}$$
+  dove:
+  \begin{itemize}
+    \item $a\cdot T\left(\frac{n}{b}\right)$ è l'Impera ed è $\sim n^{\log_b a}$
+    \item $f(n)$ è il divide e il combina (ovvero la parte iterativa)
+  \end{itemize}
+  Si definiscono tre casi:
+  \begin{itemize}
+    \item \textbf{caso 1:} $n^{\log_b a}>f(n)$ quindi $T(n)\sim n^{\log_b a}$. Si hanno le seguenti condizioni necessarie: $f(n)=O(n^{log_b a -\epsilon})$ ( con $\epsilon>0$) e quindi $T(n)=\Theta(n^{log_b a -\epsilon})$
+    \item \textbf{caso 2:} $n^{\log_b a}\cong f(n)$ quindi $T(n)\sim f(n)\cdot \log n$. Si hanno le seguenti condizioni necessarie $f(n)=\Theta(n^{\log_b a})$ e quindi $T(n)=\Theta(n^{\log_b a})$
+    \item \textbf{caso 3:} $n^{\log_b a}< f(n)$ quindi $T(n)\sim f(n)$. Si hanno le seguenti condizioni necessarie: $f(n)=\Omega(n^{\log_b a +\epsilon})$ (con $\epsilon>0$) e $a\cdot f\left(\frac{n}{b}
+    \right)\leq k\cdot f(n)$ (con $k<1$) quindi $T(n)=\Theta(f(n))$
+  \end{itemize}
+
+  \begin{esempio}
+    Risolvo:
+    $$T(n)=9\cdot T\left(\frac{n}{3}\right)+n$$
+    Si ha: $f(n)=n$, $a=9$ e $b=3$.\\
+    Ho che $n^{\log_3 9}=n^2$ quindi ho il primo caso:\\
+    $f(n)=O(n^{\log_b a -\epsilon})=O(n^{2-\epsilon})$
+    Posso dire che $\exists \epsilon:\, O(n^{2-\epsilon})=n$?\\
+    Si $\forall \epsilon<1$, per esempio $\epsilon=\frac{1}{2}$. Quindi il Metodo dell'esperto è applicabile (nel primo caso) e si ha quindi $T(n)=\Theta(n)$
+  \end{esempio}
+  \newpage
+  \begin{esempio}
+    Si può analizzare meglio il MergeSort:
+    $$T(n)\cong 2\cdot T\left(\frac{n}{2}\right)+\Theta(n)$$
+    Si ha: $f(n)=\Theta(n)$ e $n^{\log_b a}=n^{\log_2 2 }=n$\\
+    Posso applicare il Metodo dell'esperto nel secondo caso avendo così: $$T(n)=\Theta(n\cdot \log n)$$
+  \end{esempio}
+  \begin{esempio}
+    $$T(n)=3\cdot T\left(\frac{n}{4}\right)+n\cdot \log n$$
+    Si ha: $f(n)=n\cdot \log n$ e $n^{\log_b a}=n^{\log_4 3}$ e siamo nel terzo caso:
+    $$f(n)=\Omega(n^{\log_4 3+\epsilon}$$
+    se pongo $\epsilon=1-\log_4 3$ ottengo $n$.
+    Il terzo caso richiede una doppia verifica:
+    $$3\cdot \frac{n}{4}\cdot\log \frac{n}{4}\leq k\cdot n\log n$$
+    che vale per $k=\frac{3}{4}$ infatti si ha:
+    $$\frac{3}{4}\cdot n\cdot\log \frac{n}{4}\leq \frac{3}{4} \cdot n\cdot \log n$$
+    Si hanno quindi entrambi i requisiti e si può asserire che $T(n)=\Theta(n\cdot\log n)$
+  \end{esempio}
+  \begin{esempio}
+    Calcolo i tempi di:
+    $$T(n)=2\cdot T\left(\frac{n}{2}\right)+n\cdot\log n$$
+    Si ha: $n^{\log_b a }=n^{\log_2 2 }=n$ e $f(n)=n\cdot\log n$.
+    Provo a procedere col terzo caso, dimostrando che: $$n\cdot\log n=\Omega(n^{\log_b a +\epsilon})=\Omega(n^{1+\epsilon})=\Omega(n\cdot n^\epsilon)$$
+    Ma tale $\epsilon$ non esiste in quanto $n^\epsilon>\log n$ infatti:
+    $$\lim_{n\rightarrow \infty}\frac{n\cdot\log n}{n\cdot n^\epsilon}=0,\,\,\, \forall\, \epsilon>0$$
+    Bisogna quindi applicare un altro metodo per risolvere l'equazione di ricorrenza
+  \end{esempio}
+  \begin{esempio}
+    Calcolo la seguente equazione di ricorrenza:
+    \[\
+      \begin{cases}
+        T(n)=1 & n=1\\
+        T(n)= 2\cdot T(\frac{n}{2})+1 & n>1
+      \end{cases}
+    \]
+    Quindi avrò un albero binario di soli 1 di profonfità $2^k$
+    Quindi $T(n)=\sum_{i=0}^k2^i=2^{k+1}-1$ con $k=\log n$ in quanto si avranno
+    in totale $n=2^k=2\cdot2^k-1$. Quindi ottengo $2n-1$ quindi
+    avrò $\Theta(n)$.
+  \end{esempio}
+\end{shaded}
 Abbiamo poi visto alcune strutture dati: \textit{array, list, stack, queue,
   tree (e binary-tree) e heap}. 
-
+\chapter{Programmazione Dinamica}
+Partiamo dall'algoritmo che calcola la lista di Fibonacci:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$FIB$}{$n$}
+    \If {$n=1$}
+    \State $return\,\,n$
+    \Else
+    \State $return\,\,FIB(n-1)+FIB(n-2)$
+    \EndIf
+    \EndFunction
+  \end{algorithm}
+\end{shaded}
+\\
+Si vede che non sappiamo calcolarne la compplessità, che non è
+polinomiale ma magari esponenziale o addirittura fattoriale.\\
+Sia $T(n)$ il costo della chiamata alla funzione. Se $n=0$ o $n=1$ ho
+$T(n)=1$. Andando avanti avrò $T(n)=1+T(n-1)+T(n-2)$ che non è
+risolvibile con le tecniche che conosciamo. Vediamo come risolverla:
+riscriviamo l'equazione non omogenea:
+\[T(n)-T(n-1)-T(n-2)=1\]
+e facciamo una piccola approssimazione:
+\[T(n)-T(n-1)-T(n-2)=0\]
+ottenendo un'equazione lineare omogenea a cui sommerò qualcosa per
+ottenre il risultato della non omogenea. Quindi risolvo l'omogenea
+ipotizzando un valore per $T(n)$, per esempio $T(n)=r^n$, e
+testiamolo, diventa:
+\[r^n-r^{n-1}-r^{n-2}=0\]
+moltiplico da entrambe le parti per $r^2$ perché posso:
+\[r^2\cdot r^n-r\cdot r^n-r^n=0\]
+\[r^2-r-1=0\]
+che è un'equazione di secondo grado con soluzioni
+$r=\frac{1\pm\sqrt{5}}{2}$
+Quindi
+\[T(n)-T(n-1)-T(n-2)=0\]
+ha due soluzioni:
+\[C_1\left(\frac{1+\sqrt{5}}{2}\right)^{n}\]
+\[C_2\left(\frac{1-\sqrt{5}}{2}\right)^{n}\]
+quindi:
+\[T_0(n)=C_1\left(\frac{1+\sqrt{5}}{2}\right)^{n} + C_2
+  \left(\frac{1-\sqrt{5}}{2}\right)^{n}\]
+Ora cerco la soluzione particolare, sostituisco in:
+\[T(n)-T(n-1)-T(n-2)=1\]
+Tutte le $T(\cdot)$ con $k$ ottenendo $k-k-k=1\to k = -1$.\\
+Quindi la soluzione finale è:
+\[T(n)=C_1\left(\frac{1+\sqrt{5}}{2}\right)^{n} +C_2
+  \left(\frac{1-\sqrt{5}}{2}\right)^{n}-1=\Theta\left(\left(\frac{1+\sqrt{5}}{2}\right)^{n}\right)\]
+\textit{che è la sezione aurea}\\
+Miglioriamo l'algoritmo introducendo un array di $n$ celle $F$,
+inizializzarlo
+\begin{shaded}
+  \begin{algorithm}
+    \State $F[1\ldots n]$
+    \For {$i\gets1\,\,to\,\, n$}
+    \State $F[i]\gets empty$
+    \EndFor
+  \end{algorithm}
+\end{shaded}
+e procedere con la ricorsione con annotazione, che scrive i vari step
+su un array (sprecando quindi memoria) e modificando fibonacci per
+ottenre la versione con annotazione:
+\begin{shaded}
+  \Function{$FIBANN$}{$n$}
+  \If {$f[i]== empty$}
+  \If {$n\leq 1$}
+  \State $F[n]\gets n$
+  \Else
+  \State $F[n]=FIBANN(n-1)+FIBANN(n-2)$
+  \EndIf
+  \State $return\,\,F[n]$
+  \EndIf
+  \EndFunction
+\end{shaded}
+Quindi se si richiede qualcosa di già usato lo si ritorna prendendolo
+dall'array.\\
+Iterativamente sarebbe:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$FIBIT$}{$n$}
+    \State $F[0] \gets 0$
+    \State $F[1] \gets 1$
+    \For {$i\gets 2\,\,to\,\,n$}
+    \State $F[i] \gets F[i-1]+F[i-2]$
+    \EndFor
+    \State $return\,\,F[n]$
+    \EndFunction
+  \end{algorithm}
+\end{shaded}
+\subsubsection{Un Nuovo Problema}
+da fare a casa
 \end{document}

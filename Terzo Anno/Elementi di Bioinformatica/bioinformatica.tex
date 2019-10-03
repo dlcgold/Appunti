@@ -74,8 +74,8 @@ Un po' di notazione per le stringhe:
   \item \textbf{simbolo:} $T[i]$
   \item \textbf{stringa:} $T[1]T[2]\ldotst[n]$
   \item \textbf{sottostringa:} $T[i:j]$
-  \item\textbf{ prefisso:} $T[:j] = T[1:j]$
-  \item \textbf{suffisso:} $T[i:] = T[i:|T|]$
+  \item \textbf{prefisso:} $T[:j] = T[1:j]$ (inclusi gli estremi)
+  \item \textbf{suffisso:} $T[i:] = T[i:|T|]$ (inclusi gli estremi)
   \item \textbf{concatenazione:} $T_1\cdot T_2 = T_1T_2$
 \end{itemize}
 In bioinformatica si lavora soprattutto con le stringhe, implementando
@@ -110,12 +110,23 @@ e gli \textbf{algoritmi simbolici} che manipolano testi.\\
 Si hanno poi gli\textbf{ algoritmi semi-numerici} che trattano i
 numeri secondo la loro rappresentazione binaria, manipolando quest'ultima
 con \textit{or $\vee$, and $wedge$, xor $\oplus$, left-shift $<<$ e
-  right-shift $>>$}. Queste sono operazioni bitwise e sono
+  right-shift $>>$}. Ricordiamo che il left shift sposta di $k$
+posizioni a sinistra i bit, scartandone $k$ in testa e aggiumgendo
+altrettanti zeri in coda (lo shift a destra sposta a destra, scarta in
+coda e aggiunge zeri in testa). Queste sono operazioni bitwise e sono
 mappate direttamente sull'hardware, rendendo tutto estremamente
 efficiente.\\
 \subsection{Algoritmo D\"om\"olki/Baeza-Yates}
-Si costruisce una matrice M dove:
-\[M(i,j)=1\,\,sse\,\,P[:j]=T[j-i+1:j],\,0\leq i\leq m,\,\,0\leq j\leq n\]
+Questo algoritmo viene anche chiamato \textbf{algoritmo shift-and o
+  anche bit parallel string matching}.\\
+Si definisce una stringa $T$, di cardinalità $n$ in input e un pattern
+$P$ di cardinalità $m$.\\
+Si costruisce una matrice $M$ \textit{ipotetica}, di dimensione
+$n\times m$, con un indice $i$ per $P$ e uno $j$ per $T$  dove:
+\[M(i,j)=1\,\,sse\,\,P[:j]=T[j-i+1:j],\,0\leq i\leq m,\,\,0\leq j\leq
+  n\]
+Quindi $M(i,j)=1$ sse i primi $i$ caratteri del pattern sono uguali
+alla sottostring lunga $i$ in posizione $j-i+1$ del testo.\\
 Questa matrice è veloce da costruire e si ha:
 \[M(m,\cdot) = 1,\,\, M(0,\cdot)=1,\,\, M(\cdot, 0)=0\]
 \[M(i,j)=1\,\,sse\,\,M(i=1, j=1)\,\,AND\,\, P[i]=T[j]\]
@@ -128,7 +139,21 @@ uguali alla porzione di testo $=T[j-i+1:j]$. Ma in posizione $M(i-1,
 j-1)$ mi accorgo che ho 1 se ho un match anche con un carattere in
 meno di P e T. Qindi se $M(i-1,j-1)=0$ lo sarà anche $M(i,j)$. Se
 invece $M(i-1,j-1)=1$ devo controllare solo il carattere $P[i]$ e
-$T[j]$ e vedere se $ P[i]=T[j]$. La matrice la costruisco con due
+$T[j]$ e vedere se $ P[i]=T[j]$.
+Ovvero, avendo $P=assi$ e $T=apassi$ si avrebbe (omettendo la prima
+riga e la prima colonna in quanto banali):
+\begin{center}
+  \begin{tabular}{c c | c c c c c c}
+    & j & 1 & 2 & 3 & 4 & 5 & 6 \\
+    i & & a & p & a & s & s & i \\
+    \hline
+    1 & a & 1 & 0 & 1 & 0 & 0 & 0\\
+    2 & s & 0 & 0 & 0 & 1 & 0 & 0 \\
+    3 & s & 0 & 0 & 0 & 0 & 1 & 0 \\
+    4 & i & 0 & 0 & 0 & 0 & 0 & 1
+  \end{tabular}
+\end{center}
+La matrice la costruisco con due
 cicli e controllo solo l'ultima riga ma il guadagno non si ha a livello di
 complessità, in quanto sempre $O(nm)$, ma dall'architettura a 64bit
 della cpu. Con una word della cpu posso memorizzare una colonna
@@ -138,7 +163,7 @@ su più bit, con un algoritmo \textbf{bit-parallel}, facendo ogni volta
 moltiplicativa nell'O-grande.\\
 Ma come passo da una colonna $C[j]$ a una $C[j-1]$? Con questi step:
 \begin{itemize}
-  \item right shift di $C[j-1]$
+  \item la colonna $C[j]$ corrisponde al right shift della colonna $C[j-1]$
   \item aggiungo 1 in prima posizione per compensare lo shift
   \item faccio l'AND con $U[T[j]]$, che è un array binario lungo come
   il pattern dove ho un binario con 1 se è il carattere  di
@@ -149,7 +174,8 @@ Ma come passo da una colonna $C[j]$ a una $C[j-1]$? Con questi step:
     U[b]=0100\\
     U[c]=0010\\
   \end{center}
-  \item ragiono sul word size $\omega$
+  \item ragiono sul word size $\omega$ in caso di pattern più grandi
+  di 64bit.
 \end{itemize}
 ottengo:
 \begin{center}
@@ -160,12 +186,10 @@ seguente. Quindi $M[i,j]=M[i-1,j-1]\,\,AND\,\,P[i]=T[j]$ (per
 esempio, $M[1,j]=TRUE\,\,AND\,\,(p[i]=T[j])$) Cioè conta solo il
 confronto dei caratteri. In pratica con lo shift sposto in
 basso di uno la colonna e faccio il confronto. \\
-Ricapitolando: costruisco gli array U, itero controllando di
-avere l'1 in posizione più significativa e ottengo i match nell'ultima
-riga; in pratica la matrice non la stiamo costruendo, è solo un
-concetto teorico.\\ Però si ha il limite dei 64bit di lunghezza del
+Ogni 1 nell'ultima riga corrisponde ad un'occorrenza.
+\\ Però si ha il limite dei 64bit di lunghezza del
 pattern e l'uso di più word comporta il riporto sulla colonna
 seguente, fattore che si complica all'aumentare della lunghezza del
-pattern, soprattutto se arbitraria. Abbiamo il vantaggio
-che non abbiamo if/else. 
+pattern, soprattutto se arbitraria. Abbiamo inoltre il vantaggio
+di non avere branch if/else. 
 \end{document}

@@ -39,7 +39,8 @@
 \fancyhead[LE,RO]{\slshape \rightmark}
 \fancyhead[LO,RE]{\slshape \leftmark}
 \fancyfoot[C]{\thepage}
-
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
 
 
 \title{Elementi di Bioinformatica}
@@ -153,14 +154,30 @@ riga e la prima colonna in quanto banali):
     4 & i & 0 & 0 & 0 & 0 & 0 & 1
   \end{tabular}
 \end{center}
-La matrice la costruisco con due
-cicli e controllo solo l'ultima riga ma il guadagno non si ha a livello di
-complessità, in quanto sempre $O(nm)$, ma dall'architettura a 64bit
-della cpu. Con una word della cpu posso memorizzare una colonna
-intera, in quanto vista come numero binario. Ora lavoro in parallelo
-su più bit, con un algoritmo \textbf{bit-parallel}, facendo ogni volta
-64 confronti tra binari. In questo modo crolla la costante
-moltiplicativa nell'O-grande.\\
+Con un automa non deterministico che accetta una stringa terminante
+con $P$ sarebbe:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+    \node[state,initial] (q_0)   {$-1$};
+    \node[state] (q_1) [right=of q_0] {$0$};
+    \node[state] (q_2) [right=of q_1] {$1$};
+    \node[state] (q_3) [right=of q_2] {$2$};
+    \node[state, accepting] (q_4) [right=of q_3] {$3$};
+    \path[->]
+    (q_0) edge  node {a} (q_1)
+    edge [loop above] node {$\varepsilon$} ()
+    (q_1) edge  node  {s} (q_2)
+    (q_2) edge  node  {s} (q_3)
+    (q_3) edge  node  {i} (q_4);
+  \end{tikzpicture}
+\end{center}
+La matrice la costruisco con due cicli e controllo solo l'ultima riga
+ma il guadagno non si ha a livello di complessità, in quanto sempre
+$O(nm)$, ma dall'architettura a 64bit della cpu. Con una word della
+cpu posso memorizzare una colonna intera, in quanto vista come numero
+binario. Ora lavoro in parallelo su più bit, con un algoritmo
+\textbf{bit-parallel}, facendo ogni volta 64 confronti tra binari. In
+questo modo crolla la costante moltiplicativa nell'O-grande.\\
 Ma come passo da una colonna $C[j]$ a una $C[j-1]$? Con questi step:
 \begin{itemize}
   \item la colonna $C[j]$ corrisponde al right shift della colonna $C[j-1]$

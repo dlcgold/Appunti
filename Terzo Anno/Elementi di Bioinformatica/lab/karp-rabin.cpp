@@ -12,7 +12,8 @@
 std::set<int> search(std::string, std::string, int);
 std::vector<unsigned long long int> sieve(unsigned long long int);
 bool isZero(unsigned long long int);
-std::vector< unsigned long long int> sieveRange(unsigned long long int, unsigned long long int);
+std::vector< unsigned long long int> sieveRange(unsigned long long int,
+						unsigned long long int);
 
 int main(){
   // read pattern
@@ -58,7 +59,7 @@ int main(){
   for(auto i: result_total)
     std::cout << i << ", ";
   std::cout << "\b\b" << std::endl;
-   std::cout << "number of occurrences: " <<
+  std::cout << "number of occurrences: " <<
     result_total.size() + 1 << std::endl;
 }
 
@@ -68,8 +69,8 @@ std::set<int> search(std::string pattern, std::string text, int q){
   int n = text.size();
   int j; // iterator check
   int p = 0; // hash for pattern
-   int t = 0; // hash for text
-   int h = (int)std::pow(d, m-1) % q; // n_bit^(m-1)
+  int t = 0; // hash for text
+  int h = (int)std::pow(d, m-1) % q; // n_bit^(m-1)
 
   // hash of pattern
   for(auto i: pattern){
@@ -141,7 +142,8 @@ bool isZero(unsigned long long int i) {
   return i == 0; 
 } 
    
-std::vector<unsigned long long int> sieveRange(unsigned long long int start, unsigned long long int end){ 
+std::vector<unsigned long long int> sieveRange(unsigned long long int start,
+					       unsigned long long int end){ 
   // find primes from [0..start] range
   std::vector<unsigned long long int> s1 = sieve(start);   
        

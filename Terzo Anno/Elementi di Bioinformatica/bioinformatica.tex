@@ -92,19 +92,21 @@ di dati che si deve usare. Bisogna quindi bilanciare pratica e teoria.
 \section{Bit-Parallel}
 È un algoritmo veloce in pratica ma poco performante a livello
 teorico, ha complessità $O(nm)$.
-\begin{algorithm}
-  \For {$i=1\to n$}
-  \State $trovato \gets true$
-  \For{ $j=1\to m$}
-  \If{ $T[1+j-1]<>P[j]$}
-  \State $trovato \gets false$
-  \EndIf
-  \EndFor
-  \If{ $trovato$}
-  \State $print(i)$
-  \EndIf
-  \EndFor
-\end{algorithm} \\
+\begin{shaded}
+  \begin{algorithm}
+    \For {$i=1\to n$}
+    \State $trovato \gets true$
+    \For{ $j=1\to m$}
+    \If{ $T[1+j-1]<>P[j]$}
+    \State $trovato \gets false$
+    \EndIf
+    \EndFor
+    \If{ $trovato$}
+    \State $print(i)$
+    \EndIf
+    \EndFor
+  \end{algorithm} 
+\end{shaded}
 Questo algoritmo è facilmente eseguibile dall'hardware del pc. \\
 In generale si hanno \textbf{algoritmi numerici} che trattano i numeri
 e gli \textbf{algoritmi simbolici} che manipolano testi.\\
@@ -211,10 +213,15 @@ pattern, soprattutto se arbitraria.
 \section{Algoritmo Karp-Rabin}
 Vediamo un altro algoritmo di pattern matching che sfrutta una
 codifica binaria e che, pur non risultando sempre corretto, è estremamente
-più veloce.\\
+più veloce, viene infatti eseguito in tempo lineare.\\
 Uso un alfabeto binario e devo fare il match di due stringhe con
-ciascuna la sua codifica $H(S)=\sum_{i=1}^{|S|}2^{i-1}H(S[i])$. Mi
-muovo sul testo $T$ mediante finestre di ampiezza $m$ pari a quella
+ciascuna la sua codifica $H(S)=\sum_{i=1}^{|S|}2^{i-1}H(S[i])$.
+Ad ogni carattere di una string si associa un numero nel range $[0,\,
+2^{m-1}]$. Praticamente si usano due funzioni hash che trasformano una
+stringa in un decimale rappresentate in binario (ogni numero intero è
+facilmnete rappresentabile come somma di potenze di 2 e quindi in
+binario). Viene quindi facile paragonare le due fingerprints.
+Mi muovo sul testo $T$ mediante finestre di ampiezza $m$ pari a quella
 del pattern e controllo il fingerprint di quella porzione con quella
 del pattern. Inoltre il fingerprint di una finestra è facilmente
 calcolabile da quello della precedente. Per farlo elimino il
@@ -222,7 +229,9 @@ contributo del carattere della finestra precedente e includo l'unico
 aggiunto dalla finestra successiva, in quanto mi sposto di 1:
 \[H(T [i + 1 : i + m]) = \frac{H(T [i : i + m - 1]) −T [i]}{2} +
   2^{m-1} T [i + m]\]
-Dividendo per due si shifta a destra.\\
+Essendo il primo carattere quello meno pesante viene rimosso ad ogni
+spostamento sfruttando la divisione per due per lo shift
+\\
 La sottostringa è uguale al pattern solo se le fingerprint lo sono:
 \[T [i : i + m - 1] = P \Leftrightarrow H(T [i : i + m - 1]) = H(P)\]
 \textit{Per estendere la codifica binaria in $k$ caratteri avrò la finestra
@@ -245,7 +254,6 @@ fingerprint del pattern che però non è uguale al pattern,
 è un \textbf{falso positivo}. Non si possono tuttaavia avere falsi negativi,
 quindi tutte le occorrenze sono trovate con la possibilità di trovare occorrenze
 false in più:
-% capire la formula
 \[H(T [i : i + m - 1]) \mod p = H(P) \mod p \Leftarrow T [i : i + m - 1] = P\]
 Se il numero primo $p$ è scelto a caso minore di un certo $I$ so che
 l'errore è minore di $O(\frac{nm}{I})$.\\
@@ -255,8 +263,27 @@ trovate da entrambe mentre i falsi positivi probabilmente no. Itero
 quindi su $k$ numeri primi e il risultato sarà l'intersezione di tutte
 le $k$ iterazioni dell'algoritmo, riducendo moltissimo le probabilità di
 avere un risultato errato. Paghiamo quindi un incremento di un prodotto
-$k$ delle operazioni (che è comunque lineare) per ridurre esponenzialmente
-le chances di errore.\\
+$k$ delle operazioni (diventa $O(k(n+m))$) per ridurre esponenzialmente
+le chances di errore.
+\newpage
+Proponiamo una versione semplificata dell'algoritmo (lunghezza del
+testo = $n$ e del pattern = $m$):
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$RabinKarp$}{$text,\, pattern$}
+    \State $patternHash \gets hash(pattern[1:m])$
+    \For{$i\gets 1\,\,\mathbf{to}\,\, n-m+1$}
+    \State $textHash \gets hash(text[i : i + m - 1])$
+    \If{$textHash = patternHash$}
+    \If{$text[i : i + m - 1] = pattern[1:m]$}
+    \State $return(i)$
+    \EndIf
+    \EndIf
+    \EndFor
+    \State $return(NotFound)$
+    \EndFunction
+  \end{algorithm}
+\end{shaded}
 È quindi un algoritmo probabilistico in quanto i $p$ sono scelti a
 caso. Ci sono due categorie di algoritmi probabilistici:
 \begin{enumerate}
@@ -268,7 +295,7 @@ caso. Ci sono due categorie di algoritmi probabilistici:
         sia un estremo, portando l'algoritmo ad essere quadratico).
 \end{enumerate}
 \textit{È possibile rendere Karp-Rabin un algoritmo della categoria Las Vegas
-controllando tutte le occorrenze (non in questo corso).}\\
+controllando tutti i falsi positivi (anche se non è una procedura utlizzata).}\\
 % ultima slide non fatta in aula
 
 \end{document}

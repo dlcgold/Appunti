@@ -394,4 +394,86 @@ serie di task, con:
 Quindi la soluzione sarà un insieme di task tale che:
 \[S\subseteq \{1,\ldots, n\} \to
   comp(S)=true,\,\, V(S)=\max\{v(A)\}\]
+\textbf{Attendere fine lezione settimana prossima}
+\subsection{Programmazione Dinamica}
+Un problema di decisione prevede unicamente 2 tipi di risultato: vero
+e falso. Si ha una distinzione dei problemi:
+\begin{itemize}
+  \item \textbf{problemi intrattabili}, che potrebbero avere una
+  risposta calcolabile in un tempo idnefinito o addirrittura che non
+  possono essere dimostrati
+  \item \textbf{problemi di ricerca}, che si occupano di trovare una
+  soluzione positiva ad una certa istanza (per esempio dei problemi
+  che trattano i percorsi)
+  \item \textbf{problemi di ottimo}, dove si cerca una e una sola
+  soluzione che massimizza o minimizza una certa funzione costo
+\end{itemize}
+Si parla di \textbf{algoritmi euristici} quando si una un algoritmo
+che ci da una soluzione che magari non è la migliore. A questi si
+aggiungono \textbf{algortitmi di approssimazione} che si occupano di
+cercare l'ordine di una soluzione rispetto a quella ``migliore''.
+\subsection{Un Problema di Sequenze}
+Prendiamo una stringa $X=<x_1,\ldots,x_n>$. Una sottosequenza di $X$ è
+un insieme di indici con $i_1\ldots i_k$ con $k\leq n$ e indici
+strettamente crescenti ma non necessariamente consecutivi. Quindi data
+una sequenza $X=<x_1,\ldots,x_n>$ e una sottosequenza $Z=<z_1,\ldots
+z_n>$ diciamo che:
+\[\exists i_1,\ldots i_k \to x_{i_1}< x_{i_2} < \cdots < x_{i_k},\,\,
+  i_i > i_{i-1}\]
+\textit{Si assuma che gli indici partano da 1}.\\
+Quindi, per esempio, per la stringa $X=<A,B,C,B,D,A,B>$ si possono
+avere le sottosequenze $A_1 = <B,C,D,B>$ (con indici $2,3,5,7$),
+$A_2=<A,B,A,B>$ (con indici $1,2,6,7$ oppure $1,4,6,7$) etc$\ldots$.
+\subsection{Longest Common Substring}
+Si definisce una \textbf{sottosequenza comune} $Z$ a due sequenze $X$ e
+$Y$ se $Z$ è sottosequenza sia di $X$ che di $Y$ (non è necessario che
+gli indici siano nello stesso ordine).\\
+Cerchiamo ora un algoritmo che trovi la più grande sottostringa
+comune, appunto \textbf{long common substring
+  (LCS)}, con però elementi ordinati in grandezza, quindi
+\textit{longest increasing subsequence (LIS)}.\\
+Con una soluzione iterativa avremmo $O(2^n)$ quindi pensiamo
+ad una soluzione con la programmazione dinamica.\\
+Cerchiamo quindi un problema associato, cercando la sottoesequenza di
+$X$ più lunga che termina in una certa posizione $i$. In questo studio
+delle sequenze gli indici aumentano solo se il valore che indicizzano
+è superiore a quello rpecedente, altrimenti diminuisocno di una unità
+(a meno che non sia l'indice 1 che resta uguale),
+quindi, per esempio, la stringa $X=<A,B,C,B,D,A,B>$ avrà indici
+$1,2,3,2,4,3,4$.\\
+Definiamo $L[i]$ la lunghezza massim della LIS che termina col
+carattere in posizione $i$.\\
+Procedo salvando la lunghezza della sottosequenza iù lunga fino a
+$i$.\\
+Si definisce $X_i$ la restrizione della sequenza considerando
+solo i primi $i$ caratteri. Chiamiamo $Z_i$ la più lunga sottosequenza
+di $X$ che termina con $X_i$. Salviamo le varie $Z$ in un array
+$L[1..N]$ con $L[i]$ che è la lunghezza massima della sottosequenza
+di $X$ che termina con $X_i$
+\\
+Si ha il caso base:
+\[L[1]=1\]
+e il caso generale:
+\[L[i]=1+\max_{1\leq j\leq i-1} \{L[j]|\,X_j<X_i\},\,\, 1 <i\leq N\]
+ricordando che $\max{\emptyset}=0$.\\
+La soluzione sarà quindi:
+\[\max_{1\leq i \leq N}\{L[i]\}\]
+Scriviamo quindi l'algoritmo:
+\begin{shaded}
+  \begin{algorithm}
+    \Function {$LIS$}{$X[1..N]$}
+    \State $L[1..N]$
+    \State $X[0]=-1$
+    \State $L[1]=1$
+    \State $L[0]=0$
+    \For {$i\gets 2$ \textbf{to} $N$}
+    \State $R\gets\maxAcc(l[], i, i-1, X[i])$
+    \State $L[i]=R+1$
+    \EndFor
+    \State $RT\gets \max(L[i],1,N)$
+    \State \Return $RT$
+  \end{algorithm}
+\end{shaded}
+Con la funzione \textit{maxAcc} che calcola il massimo degli
+accettabili. Questo algoritmo è $O(n^2)$
 \end{document}

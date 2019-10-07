@@ -29,6 +29,8 @@
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage[cache=false]{minted}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
 
 \usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
 
@@ -488,4 +490,118 @@ e ipotizzo una previsione e cerco $a$ e $b$
 \textbf{Questo è un problema di ottimizzazione non vincolata e non lineare}
 \end{esempio}
 \textbf{altri esempi sulle slide}
+\subsection{Esercizio}
+\begin{esercizio}
+  \textbf{testo:}\\
+  \textit{La Svivon produce  batterie  elettriche  di  tre  tipi
+    (Alfa,  Beta  e  Gamma).  Per  due  di  esse  (Beta  e  Gamma)
+    utilizza del rame. Per coprire la produzione del prossimo mese, può
+    acquistare il rame al prezzo di 5 euro/kg. Il fornitore però non
+    può fornire più di 4000  kg  di rame.  Nella  seguente  tabella
+    sono  indicate: la  quantità di  rame  richiesta  per  ciascuna
+    batteria, i costi di manodopera (per batteria prodotta) e prezzi
+    di vendita al pubblico (per batteria):}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/es1.png}
+  \end{center}
+  \textbf{(costi e manodopera sono entrambi in euro/batteria)}\\
+  \textbf{Si suppinga che ogni batteria prodotta sia anche venduta.}\\
+  \textit{I tre tipi di batteria vogliono essere prodotti in quantità
+    tali che il numero di batterie di tipo Alfa sia almeno doppio del
+    numero  di  batterie  di  tipo  Beta  e  non  superiore  al
+    numero di  batterie  Gamma.  Formulare un  opportuno  modello
+    di programmazione lineare per la pianificazione ottimale
+    dell’attività diproduzione della Svivon.}\\
+  \textbf{Soluzione:}\\
+  Innazitutto partiamo dal'ultima frase e definiamo le relazioni tra i
+  tipi di batteria. Definiamo $x_i$ il numero di batterie di tipo
+  $i\in I$, con   $I=\{\alpha, \beta, \gamma\}$ \textbf{insieme degli
+    indici}. Cerchiamo ora funzione \textbf{obiettivo} e
+  \textbf{vincoli}.\\
+  Suppongo di produrre una batteria di tipo $\alpha$, avrò un guadagno
+  effettivo pari a guadagno meno costi: $25-12=13$. Per le $\beta$ si
+  avrà, avendo anche il costo del rame di 5 euro al kilo, $20-6-5\cdot
+  1= 9$. Per le $\gamma$ sarà $30-4-5\cdot 2 = 16$. L'azienda
+  ovviamente vuole guadagnare di più, dobbiamo massimizzare il
+  profitto. Il profitto delle $\alpha$ sarà $13x_\alpha$, per le
+  $\beta$ sarà $9x_\beta$ e per le $\gamma$ sarà $16x_\gamma$.
+  Quindi si avrà la seguente funzione obiettivo:
+  \[\max(z) = 13x_\alpha+ 9x_\beta +16x_\gamma\]
+  con i seguenti vincoli (ricordando che solo le $\beta$ e le $\gamma$
+  usano il rame):
+  \[
+    \begin{cases}
+      x_\alpha \geq 2x_\beta \\
+      x_\alpha \leq x_\gamma \\
+      x_\beta +2x_\gamma < 4000
+    \end{cases}
+  \]
+  Bisogna specificare che le variabili non sono continue, quindi
+  aggiungiamo un vincolo di interezza:
+  \[x_i\in\mathbb{N},\, \forall i\in I\]
+  E abbiamo risolto le richieste dell'esercizio
+\end{esercizio}
+\begin{esercizio}
+  \textbf{Testo:}\\
+  \textit{Un’industria con dueimpianti  produttivi  localizzati  a
+    Rimini e Firenze è interessata a sapere qual è l’organizzazione
+    ottimale della propria rete distributiva, in modo da ottimizzare
+    la consegna dei prodotti presso letreprincipali città di
+    distribuzione:Palermo, Milano  e Roma.  La  capacità  produttiva
+    dei  due  impianti  di  produzione  è  la  seguente: Rimini 300,
+    Firenze 600. La domanda presso le tre città di distribuzione è
+    la seguente: Palermo 325, Milano 300, Roma 275. I costi associati
+    al viaggio tra gli impianti di produzione e le città di
+    distribuzione sono dati dalla seguente tabella:}
+  \begin{center}
+    \includegraphics[scale = 0.7]{img/es3.png}
+  \end{center}
+  \textit{Formulare un modello di Programmazione lineare che
+    permetta di pianificare lo spostamento ottimale dei prodotti
+    dagli impiantialle cittàdi distribuzione in modo tale da
+    minimizzare i costi di viaggio}\\
+  \textbf{Soluzione:}\\
+  \begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=5cm,on grid,auto]
+    \node[state] (q_0)   {$RN (300)$};
+    \node[state] (q_1) [right =of q_0] {$PA(-325)$};
+    \node[state] (q_2) [below=of q_0] {$FI(600)$};
+    \node[state] (q_3) [below=of q_1] {$MI(-300)$};
+    \node[state] (q_4) [below=of q_3] {$RM(-275)$};
+    \path[->]
+    (q_0) edge  node {$2500$} (q_1)
+    (q_0) edge  node  {$1700$} (q_3)
+    (q_0) edge  node  {$1800$} (q_4)
+    (q_2) edge  node  {$2500$} (q_1)
+    (q_2) edge  node  {$1800$} (q_3)
+    (q_2) edge  node  {$1400$} (q_4);
+  \end{tikzpicture}
+\end{center}
+Sugli archi ho i costi di trasporto.\\
+Definisco due insiemi indici, uno $I=\{RN,FI\}$ con le città di
+partenza, e uno $J=\{PA, MI, RM\}$ con le città d'arrivo. \\
+Quindi le varfiabili $x_{i,j}$ indicano il numero di prodotti
+trasportati da dalla città $i\in I$ a quella $j\in J$.\\
+Avrò la seguente funzione obiettivo:
+\[\min(z)= 2500x_{RN, PA} + 1700x_{RN, MI}+\cdots + 1400x_{FI,RM}\]
+che può essere scritta in maniera compatta definendo il dato $c_{i,j}$ come il
+costo di trasporto tra le due città $i$ e $j$, ottenendo:
+\[\min(z)=\sum_i\sum_jc_{i,j}x_{i,j}\]
+Cerchiamo ora i vincoli. A Rimini possono uscire 300 prodotti:
+\[x_{RN,PA}+x_{RN,MI}+x_{RN,RM}=300\]
+una cosa simile va fatta per Firenze.\\
+Per le città di arrivo vediamo l'esempio di Palermo:
+\[x_{RN,PA}+x_{FI_PA}=+325\]
+similmente per Milano e Roma.\\
+Questi vincoli possono essere compattati a livello di sintassi,
+indicando con $b_i$ il numero di prodotti spedibili da una città $i\in
+I$:
+\[\sum_{j\in J}x_{i,j}=b_i,\,\, \forall i \in I\]
+e indicando con $b_j$ il numero di prodotti ricevibili da una città
+$j\in J$:
+\[\sum_{i\in I}x_{i,j})b_j,\,\,\forall j \in J\]
+e aggiungiamo il vincolo per l'interezza:
+\[x_{i,j}\in\mathbb{N},\,\,\forall (i,j)\in I\times J\]
+\end{esercizio}
+
 \end{document}

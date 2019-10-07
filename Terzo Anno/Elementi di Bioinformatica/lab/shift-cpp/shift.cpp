@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
     std::cerr << "Missing file-name\nusage: ./bin/shift [file]\n";
     return -1;
   }
-
+  
   std::string pattern= "";
   std::cout << "Insert pattern: ";
   std::cin >> pattern;
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
   std::cout << results.size() << " occurrance at: ";
   for(auto i: results)
     std::cout << i << " ";
-  return 0;
-    
+
+  return 0; 
 }
 

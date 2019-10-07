@@ -1,11 +1,11 @@
 #include "shiftMethod.h"
 
 std::vector<int> shiftMethod(std::string pattern, std::string text){
-  std::vector<int> results;
-
   
+  std::vector<int> results;  
   tsl::ordered_map<char, int> mask;
-  
+
+  // charge the map 
   for(unsigned int i = 0; i < pattern.size(); i++){
     mask.insert(std::pair<char, int>(pattern.at(i), 0));
   }
@@ -17,6 +17,7 @@ std::vector<int> shiftMethod(std::string pattern, std::string text){
   // insert random char with 0 as value for not match
   mask.insert(std::pair<char, int>('*', 0));
 
+  // execution of shift 
   int d = 0; // variable for the check 
   bool match = true;
   int matchMask = 1 << (pattern.size() - 1);

@@ -475,5 +475,89 @@ Scriviamo quindi l'algoritmo:
   \end{algorithm}
 \end{shaded}
 Con la funzione \textit{maxAcc} che calcola il massimo degli
-accettabili. Questo algoritmo è $O(n^2)$
+accettabili. Questo algoritmo è $O(n^2)$.\\
+calcolo $L[i]$ che è la sequenza più lunga che termina col carattere i:
+\[
+  L[i]=]\begin{cases}
+    0 & i=0\\
+    1 & i=1\\
+    1+\max(L[j]|\, c[j]<c[i],\, j=1\ldots i-1)  & i>1 
+  \end{cases}
+\]
+Scriviamo il vero algoritmo:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$LIS$}{$S[1..n]$}
+    \State $L[1]\gets1$
+    \State $maxTot \gets 1$
+    \For {$i\gets 2$ \textbf{to} $n$}
+    \State $max \gets 0$
+    \For {$j\gets 1$ \textbf{to} $i-1$}
+    \If{$S[j] < S[i]$ \textbf{AND} $L[i]>max$}
+    \State $max \gets j$
+    \EndIf
+    \State $l[i]\gets L[max]+1$
+    \State $P[i]\gets max$ 
+    \If {$L[i]> maxTot$}
+    \State $maxTot \gets i$
+    \EndIf
+    \EndFor
+    \EndFor
+    \State \textbf{return} $maxTot$
+    \EndFunction
+  \end{algorithm}
+\end{shaded}
+Con \textit{maxTot} salva il massimo dell'arrayb delle lunghezza.\\
+Che ha tempo di esecuzione pari a $T(n)=3c+5cn+3c\sum_1^ni=O(n^2)$.\\
+Questa funzione verrà chiamata in una ciclo $for$. Per rendere il
+tutto più efficiente quindi memorizzo, anzichè memorizzare tutti i
+valori degli array che si vengono a creare contenenti le sequenze
+buone, l'indice del maxTot precedente, nella lista $P$, avendo una
+complessità di salvataggio sulla memoria pari a $O(n)$.\\
+\subsection{Il Problema delle Scatole}
+Ho una tripla $B_i=(a_i,b_i,c_i)$ rappresentanti lunghezza, larghezza
+e altezza di una scatola. $B_i$ è quindi un insieme di scatole che non
+possono essere ruotate. Voglio sapere a lunghezza più lunga di scatole
+che possono essere contenute una dentro l’altra. Cerco quindi il
+massimo valore di $k$ tale per cui, per una sequenza $ B_1,\ldots,B_i$:
+\[\exists x\to B_1,\ldots,B_i|\,B_{i1}\subset B_{i2}\subset\cdots
+  \subsetB_{ik},\,\,i_1<\cdots<i_k\]
+Si introduce un vettore $z$ con $n$ elementi tale che $z[i]$ sia la
+lunghezza massima di una sottosequenza crescente di elementi $
+B_1,\ldots,B_i$. Quindi:
+\[
+  z[i]=\begin{cases}
+    1+\max\{z[j]|\, 1\leq j < i,\,a_j<a_i,\,b_j<b_i,\,c_j<c_i\} &
+    i>1\\
+    1 & i = 1
+  \end{cases}
+\]
+inoltre $\max\{\emptyset\}=0$. Abbiamo quindi il seguente algoritmo:
+\begin{shaded}
+  \begin{algorithm}
+    \Function {MaxBox}{B[1..n]}
+    \State $z[1]\gets 1$
+    \For{$i\gets 2$ \textbf{to} $n$}
+    \State $max \gets 0$
+    \For{$j\gets 1$ \textbf{to} $i-1$}
+    \If {$a_j<a_i$ \textbf{AND} $b_j<b_i$ \textbf{AND} $c_j<c_i$
+    \textbf{AND} $z[j]<max$ }
+    \State $max\gets z[j]$
+    \EndIf
+    \EndFor
+    \State $z[i]\gets max$
+    \EndFor
+    \State \textbf{return} $z$ 
+    \EndFunction
+  \end{algorithm}
+\end{shaded}
+Si ha complessità apri a $O(n^2)$ mentre lo spazio richiesto è quello
+per memorizzare il vettore, ovvero $\Theta(n)$.\\
+Può anche essere scritto ricorsivamente ma risulta troppo esoso in
+termini di spazio.
+\section{Longest Common Subsequence}
+Ritorniamo al problema di inizio capitolo. Abbiamo due stringhe,
+$X=<x_1,\ldots x_n>$ e $Y=<y_1\ldots y_n>$ con $Z$ sottosequenza
+comune a $X$ e $Y$.\\
+%terminare
 \end{document}

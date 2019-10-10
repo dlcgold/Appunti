@@ -457,11 +457,11 @@ Quindi abbiamo trovato la ricorrenza, considerando anche che:
 Quindi ottengo l'algoritmo ricorsivo per calcolare i vari $v_i$:
 \begin{shaded}
   \begin{algorithm}
-    \Function{$R-OPT$}{$i$}
+    \Function{$R\_OPT$}{$i$}
     \If{$i == 0$}
     \State \textbf{return} $0$
     \Else
-    \State \textbf{return} $\max(v_i+R-OPT(p[i]), R-OPT(i-1))$
+    \State \textbf{return} $\max(v_i+R\_OPT(p[i]), R\_OPT(i-1))$
     \EndIf
     \EndFunction
   \end{algorithm}  
@@ -477,12 +477,12 @@ Facciamo quindi la ricorsione con l'annotazione:
     \State $M[j]\gets \mbox{\textit{empty}}$
     \EndFor
     
-    \Function{$AR-OPT$}{$i$}
+    \Function{$AR\_OPT$}{$i$}
     \If{$M[i] == \mbox{\textit{empty}}$}
     \If {$i==0$}
     \State $M[i]\gets 0$
     \Else
-    \State $M[i]\gets\max(v_i+AR-OPT(p[i]), AR-OPT(i-1))$
+    \State $M[i]\gets\max(v_i+AR\_OPT(p[i]), AR\_OPT(i-1))$
     \EndIf
     \EndIf
     \State \textbf{return} $M[i]$
@@ -494,7 +494,7 @@ che resta una tecnica \textit{top-down}. Ma solitamente si lavora
 di caricare l'array e non abbiamo bisogno di if/else:
 \begin{shaded}
   \begin{algorithm}
-    \Function{$PD-OPT$}{$i$}
+    \Function{$PD\_OPT$}{$i$}
     \State $M[0]\gets 0$
     \For {$j\gets 1$ \textbf{to} $i$}
     \State $M[j]\gets\max(v_j+M[P[j]], M[J-1])$
@@ -506,8 +506,47 @@ di caricare l'array e non abbiamo bisogno di if/else:
 \textbf{ovviamente prima di tutto ho il caricamento di p[i], come è
   stato descritto sopra}.\\
 Ora si ha una complessità pari a $\Theta(n)$ per quest'ultimo
-algortimo ma bisogna sommare $\Theta(n\log n)$, in quanto bisogna
-ordinare le attività sul tempo di fine.  
+algortimo, che calcola $v(S_i)$ ma bisogna sommare $\Theta(n\log n)$,
+in quanto bisogna ordinare le attività sul tempo di fine.\\
+Ora devo capire cos'è $S_i$, uso il \textbf{weighted interval
+  scheduling} per stamparlo (usando l'array $M$), usando un algoritmo
+ricorsivo che non ripete cose già usare, un algoritmo ricorsivo in
+coda che quindi è comodo ed efficiente da lasciare ricorsivo:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$WIS\_PRINT$}{$i$}
+    \If {$i\neq 0$}
+    \If {$v_i+M[p(i)] \geq M[i-1]$}
+    \State $print(i)$
+    \State $WIS\_PRINT(p(i))$
+    \Else
+    \State $WIS\_PRINT(i-1)$
+    \EndIf
+    \EndIf
+    \EndFunction
+  \end{algorithm}  
+\end{shaded}
+C'è uno step necessità di un teorema:
+\begin{teorema}
+  Siano $s_0,\ldots,S_{i-1}$ le varie soluzioni dei sottoproblemi allora:
+  \[
+    S_i=\begin{cases}
+      \{i\}\cup S_{p(i)} & \mbox{se }i\in S_i\\
+      S_{i-1} & \mbox{se } i\not\in S_i
+    \end{cases}
+  \]
+\end{teorema}
+\begin{proof}
+  Assumo che $i\not\in S_i$. Se per assurdo $S_{i-1}\neq S_i$ e non
+  fosse soluzione del problema i-esimo allora sicuramente
+  $v(S_i)>v(S_{i-1})$. Siccome $i\not\in S_i$ allora
+  $S_i\subseteq\{1,\ldots,i-1\}$ e quindi $comp(S_i)=TRUE$ ma questo
+  comporta un assurdo, infatti so che $S_{i-1}$ è soluzione di $i-1$
+  ma lo sarebbe anche $S_i$ ma so che $v(S_i)>v(S_{i-1})$ quindi
+  $S_{i-1}$ non sarebbe soluzione di $i-1$; quindi abbiamo un assurdo
+  dato da una contraddizione.
+  \textbf{resto della dimostrazione settimana prossima}
+\end{proof}
 \subsection{Programmazione Dinamica}
 Un problema di decisione prevede unicamente 2 tipi di risultato: vero
 e falso. Si ha una distinzione dei problemi:

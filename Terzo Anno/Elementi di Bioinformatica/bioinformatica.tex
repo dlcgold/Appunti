@@ -297,5 +297,129 @@ caso. Ci sono due categorie di algoritmi probabilistici:
 \textit{È possibile rendere Karp-Rabin un algoritmo della categoria Las Vegas
   controllando tutti i falsi positivi (anche se non è una procedura utlizzata).}\\
 % ultima slide non fatta in aula
+\section{Trie}
+Si usera la filosofia che prevede il preprocessamento del testo.\\
+Il \textbf{trie} è una struttura ad albero, con archi etichettati,
+che, preso un insieme di parole, detto dizionario, controlla che
+quella sequenza sia nell'insieme di parole. Si tratta di un
+\textbf{problema di membership}. Voglio un tempo $O(n)$ con $n$
+lunghezza della query. Quindi si preprocessa una volta sola il
+dizionario in un albero e poi si procede con le query. Nella pratica
+si ha che un percorso radice-foglia deve essere esattamente la query
+richiesta. Si ha però un problema, essendo ogni ramo un elemento del
+dizionario, non si possono avere parole diverse nel dizionario che
+siano l'una prefissa dell'altra (per esempio se ho $abraabra$ non
+posso avere anche $abra$ nel dizionario), perché non riuscirei ad
+andare da radice a foglia. Introduco quindi il carattere $\textdollar$, il quale
+non appartiene all'alfabeto che viene aggiunto alla fine di ogni
+stringa, viene infatti detto \textbf{terminatore}, così $abra\textdollar$ non è
+prefisso di $abraabra\textdollar$ etc$\ldots$, rimuovendo così ogni ambiguità.\\
+% aggiungere albero
+Usiamo una struttura dati chiamata \textbf{suffix tree}, che è il trie
+di tutti i suffissi di $T\textdollar$, che quindi è un insieme più specifico di
+stringhe (i suffissi). È una sorta di trie compatto, dove un suffisso
+diventa l'etichetta di un arco. Le etichette degli archi uscenti, i
+\mathit{figli}, da $X$ inziano con simboli diversi. I suffissi sono il
+percorso radice-foglia.
+% aggiungere albero
+Una sottostringa è il \textit{prefisso di un suffisso}. Dato un
+pattern voglio trovare tutti i suffissi che iniziano col
+pattern. Quindi, dato che ogni nodo ha un solo figlio con un certo
+prefisso, la procedura di pattern matching nel suffix-tree naviga
+nell'albero sequendo il pattern nell'unico arco possibile con quel
+pattern, posto che esista. Se non esiste il pattern cercato termina,
+così come termina nel momento in cui lo trova raggiungendo un
+$\textdollar$. Il compattamento da trie a suffix tree serve a
+migliorare le performance di costruzione della struttura dati, non
+quelle del pattern matching in sè. Un suffix-tree ha un rapporto tra
+il numero di nodi e il numero di foglie (?).\\
+Questo pattern matching ha $O(m)$ con $m$ lungheza del pattern da
+ricercare ma poi ho tante foglie $k$ sotto il nodo a cui sono arrivato
+quante sono le occorrenze del pattern nel testo, che quindi visito in
+$O(k)$. Nel complesso ho la costruzione dell'albero in $O(n)$, $n$
+lunghezza testo, matching in $O(m)$ e visita finale delle foglie in
+$O(k)$, quindi nel complesso ho
+\[O(n+m+k)\]
+Se il pattern termina prima del passaggio ad un nodo successivo non mi
+interessa in quanto i suffissi corrispondono (se ho $NA$ e mi fermo a
+$N$ va bene lo stesso, in quanto i suffissi di $NA$ sono dello stesso
+numero di quelli di $N$). Nelle foglie ho indicato l'indice dove
+inizia ogni occorrenza.\\
+Definisco la \textbf{path-label(X)} di un nodo X è la concatenazione delle
+stringhe fino a quel nodo. Definisco invece \textbf{string-depth(X)} di
+un nodo X la lunghezza del path-label, che è calcolabile in $O(n)$. La
+string-depth di X sarà la lunghezza dell'etichetta sommata alla
+string-depth del padre.\\
+\textit{Molti algoritmi sfruttano molte visite per arricchire le
+  informazioni dell'albero ai fini di rendere semplice la risoluzione
+  di un problema.}\\
+Non posso fare lo stesso ragionamento per la path-label perché,
+concatendando quella del padre alla propria raggiungerei quasi
+$O(n^2)$. Si usa quindi una tecnica basata su puntatori al testo e non
+su stringhe, questo fa si che ogni arco sia etichettato da una coppia
+di numeri (posizione di inizio e lunghezza), quindi raggiungo tempo
+costante per etichettare ogni albero.\\
+Il grande problema del suffix-tree è lo spazio occupato, circa $20n$
+byte, quindi per il genoma umano servono 60gb di memoria. Per
+risolvere questo problema si usano i \textbf{suffix array (SA)}, che occupa
+meno spazio, ed è \textit{l'array dei suffissi in ordine
+  lessicografico}. Il suffix array non permette il pattern matching in
+tempo lineare quindi viene usato il suffix array per costruire il
+suffix tree. Tutto quello che si può fare sul suffix tree si può fare
+sul suffix array con tempi diversi ma simili. Non memorizzo
+esplicitamente i suffissi ma memorizzo le posizioni iniziali del
+suffisso. Al suffix array si aggiunge l'array ausiliario \textit{LCP
+  (longest  common prefix)} con la lunghezza del prefisso comune $LPC[i]$
+tra $SA[i]$ e $SA[i+1]$.
+% aggiungere tabella
+Lo spazio diventa $4n$ bytes, quindi per il genoma 12gb.\\
+Passiamo ora dall'albero all'array. Facciamo una visita depth-firts
+(pre-order) del suffix array, assumento che a sinistra ci siano
+etichette in ordine lessicografico minore (a sinistra ho suffissi con
+una lettera dell'alfabeto iniziale ``precedente'').\\
+Ho quindi che $LPC[i]$ è la string-depth di $LCA(i, i+1)$, ovvero
+\textit{least common ancestor}, che quindi mi indica dove due percorsi
+divergono e vedo quanto vale lì la string-depth.\\
+Calcolare LPC costa un tempo quadratico. Ma possiamo fare un altra
+cosa. Ogni arco viene visitato almeno due volte inq aundo una volta arrivati
+ad una foglia si torna indietro. Mi salvo la string depth dell'LCA
+nell'array ogni volta che ho un cambio di direzione nella visita dell'albero
+lavorando quindi in tempo lineare. Nel disegno guardiamo due foglie
+consective e contiamo i nodi che hanno in comune sopra esclusa la radice.\\
+Dati SA e LCP passiamo ora a costruire l'albero. Gli LCP nulli
+partizionano il SA e corrispondono ai figli della radice del suffix
+array aggiungendo 1 (tre zeri corrispondono 4 figli). Di questi 4
+figli prendo i valori no nulli e saranno un cammino che prosegue
+ripetutamente sul valore minimo.\\
+\textit{Quindi se l'array è 013002 avrò 4 figli della radice, uno 0, uno 13,
+  uno 00 (che conta come 0) e uno 2. Il 13 avrà una foglia a sinistra e
+  poi scenderà di un nodo. Avendo solo un numero (3) avrà due
+  foglie. Infine avrò due, che essendo un solo numero, avrà solo 2
+  foglie.}\\
 
+
+% aggiungere grafici
+Un \textbf{suffix tree generalizzato} rappresenta un insieme di
+testi. Prendo x stringhe con terminatore, le concateno in un unico
+testo e ne genero il suffix tree ma nelle foglie avremo le coppie
+(numero stringa, posizione inizio suffisso) che potrebbero essere una
+per ogni stringa e lo costruisco in tempo lineare alla lunghezza del
+testo completo. Cerco ora la sottostringa comunque più lunga tra due
+stringhe sfruttando il suffix tree generalizzato. Una sottostringa
+comune corrisponde ad un cammino tra una radice e un nodo X e tra i
+discendenti di X devo avere almeno un discendente  per ogni
+stringa. La più lunga sarà quindi quella che arriva al nodo con
+string-depth massimo. Visito quindi due volte l'albero, alla prima
+vedo se ha le foglie giuste e la seconda per cercare il max delle
+string-depth. La prima visita la faccio dalle foglie verso la radice,
+creo un array di booleani per uil nodo X lungo quanto il numero di
+stringhe i cui elementi valgono true sse esiste un disendente di X tale che è
+suffisso della stringa S. Alla fine faccio l'and tra tutti i valori
+dell'array, se è true significa che ho un discendente per ogni
+stringa. Se X è nodo interno faccio l'or con l'array del nodo
+discendente per determinare se X va bene. Se è foglia determino il
+vettore leggendone l'etichetta. La seconda visita può essere in
+qualsiasi direzione e dove ho nodi con la proprietà di essere comune
+alle stringhe e trovo quello con la string-depth max, ottengo quindi
+un tempo che è $O(k\cdot n)$.
 \end{document}

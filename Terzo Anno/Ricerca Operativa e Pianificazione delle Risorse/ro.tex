@@ -269,17 +269,17 @@ Si ha:
   lineari:
   \[opt\,f(x)=c^T x\]
   \[X=\{x\in\mathbb{R}^n:\, g_i(x)\{\leq, =, \geq\}0,\,\,
-    i=1,\ldotsm\,\, g_i(x)=a_i^T x-b_i\}\]
+    i=1,\ldots m\,\, g_i(x)=a_i^T x-b_i\}\]
   \item \textbf{programmazione lineare intera (PLI)}, con obiettivo e
   vincoli lineari interi:
   \[opt\,f(x)=c^T x\]
   \[X=\{x\in\mathbb{Z}^n:\, g_i(x)\{\leq, =, \geq\}0,\,\,
-    i=1,\ldotsm\,\, g_i(x)=a_i^T x-b_i\}\]
+    i=1,\ldots m\,\, g_i(x)=a_i^T x-b_i\}\]
   \item \textbf{programmazione non lineare (PNL)}, con obiettivo e
   vincoli $g_i(x)$ non lineari:
   \[opt\,f(x)\]
   \[X=\{x\in\mathbb{R}^n:\, g_i(x)\{\leq, =, \geq\}0,\,\,
-    i=1,\ldotsm\,\, g_i(x)=a_i^T x-b_i\}\]
+    i=1,\ldots m\,\, g_i(x)=a_i^T x-b_i\}\]
 \end{itemize}
 \begin{esempio}
   abbiamo la funzione obiettivo:
@@ -366,7 +366,7 @@ Si ha:
   che è una funzione obiettivo lineare.\
   Osserviamo che la funzione obiettivo può essere scritta anche nella
   seguente forma compatta:
-  \[\min c^tx,\,\con\,\,c^t=\left[
+  \[\min c^tx,\,\,con\,\,c^t=\left[
       \begin{matrix}
         15 & 1 & 2.5
       \end{matrix}
@@ -934,5 +934,237 @@ numero di variabili $n$, allora:
     vincoli è ridondante
   \end{itemize}
 \end{itemize}
-% fino a inizio simplesso
+\section{Metodo del Simplesso}
+Questo metodo è stato ideato da G. Dantzig nel 1947 ed è considerato
+uno dei dieci migliori algoritmi del 900.\\
+Questo algoritmo ha:
+\begin{itemize}
+  \item nel caso medio tempo computazionale lineare rispetto al numero
+  delle variabili
+  \item nel caso peggiore ha tempo computazionale esponenziale
+\end{itemize}
+È comunque uno dei più efficienti algoritmi per risolvere un problema
+PL.\\
+Partiamo dal solito modello matematico relativo alla società
+WYNDOR GLASS \& Co:
+\[\max{x_1,x_2} z= (3x_1+5x_2)\]
+con:
+\[x_1\leq 4,\,\,2x_2\leq 12,\,\,3x_1+2x_2\leq 18,\,\,x_1\geq 0,\,\,
+  x_2\geq 0\]
+\textit{che è un PL a variabili continue con 5 vincoli, 3 funzionali e
+  2 di non negatività}. \textbf{Il valore che massimizza è (2,6)}
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp.png}
+\end{center}
+Partiamo ad analizzare i concetti geometrici. Per un vincolo,
+l’equazione della frontiera è ottenuta sostituendo i $\geq$ e $\leq$
+con $=$, otteniamo quindi:
+\[x_1= 4,\,\,2x_2= 12,\,\,3x_1+2x_2= 18,\,\,x_1= 0,\,\,
+  x_2= 0\]
+\textbf{Ricordiamo che in due dimensioni una frontiera corrisponde ad
+  una retta mentre nello spazio n-dimensionale la frontiera corrisponde ad un
+  iperpiano}
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp2.png}
+\end{center}
+Un \textbf{vertice ammissibile} è una soluzione ammissibile che non è
+presente su nessun segmento che congiunge altre due soluzioni
+ammissibili. \textit{i vertici di un poligono convesso non possono essere mai
+  ottenuti da una combinazione convessa di altri 2 punti del
+  poligono}. In 2 dimensioni ogni vertice ammissibile è
+l’intersezione delle frontiere di 2 vincoli mentre in $n$ dimensioni
+ogni vertice ammissibile è l’intersezione delle frontiere di n vincoli
+Nell'esempio sopra si hanno 8 vertici di cui 5 ammissibili e 3 no:
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp3.png}
+\end{center}
+e il vertice C è ammissibile ed è dato dall’intersezione
+della frontiera $2x_1=12$ con $3x_1+2=18$.\\
+n un problema PL 2D, due vertici si dicono \textbf{adiacenti} se
+sono vertici di un medesimo segmento (la frontiera di uno dei vincoli)
+della regione ammissibile.\\
+\textit{Per un problema di PL con n variabili, due vertici si dicono
+adiacenti se condividono le frontiere di n − 1 vincoli. Essi sono
+collegati attraverso un segmento, chiamato \textbf{spigolo} della
+regione ammissibile}
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp4.png}
+\end{center}
+Dove la linea rossa è la frontiera di $x\geq 0$.\\
+Si hanno i seguenti vertici adiacenti:
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp5.png}
+\end{center}
+Vediamo ora il \textbf{teorema fondamentale della PL}:
+\begin{teorema}
+  Dato un generico problema PL:
+  \begin{enumerate}
+    \item se esiste una sola soluzione ottima (per esempio se X è non
+    vuoto e limitato), allora deve essere un vertice ammissibile
+    \item se esistono soluzioni ottime multiple e la regione
+    ammissibile è limitata, allora almeno due soluzioni ottime sono
+    vertici adiacenti ammissibili
+  \end{enumerate}
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp6.png}
+  \end{center}
+\end{teorema}
+\textbf{Si ha che il numero di vertici ammissibili è finito}.\\
+Nel caso in esame, questo è una conseguenza del fatto che
+ogni vertice è l’intersezione di 2 delle 5 frontiere del
+problema e, quindi, il numero massimo di combinazioni
+differenti di 5 equazioni considerate 2 alla volta è dato da:
+\[{5\choose{2}}=10\]
+e nel nostro caso ne abbiamo 8 di cui 5 ammissibili.\\
+\subsection{Test di Ottimalità}
+i consideri un qualunque problema di PL che possieda almeno una
+soluzione ottima (ad esempio se $X$ è non vuoto e limitato). Se un
+vertice ammissibile non ha nessun vertice adiacente migliore
+(in termini di funzione obiettivo), allora tale vertice è la soluzione
+ottima.\\
+Riprendendo l'esempio solito il vertice $A$ ha i due vertici adiacenti
+$B$ e $E$ che sono migliori e quindi $A$ non è migliore. $C$ ha gli
+adiacenti $B$ e $D$ peggiori e quindi è la souzione ottima del
+problema:
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp7.png}
+\end{center}
+Vediamo ora una simulazione del metodo del simplesso dal punto di
+vista geometrico:
+\begin{enumerate}
+  \item \textbf{inizializzazione}, dove si sceglie (0,0) come vertice
+  inziale:
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp8.png}
+  \end{center}
+  \item \textbf{test di ottimalità:} (0,0) non è una soluzione
+  ottimale ma esistono soluzioni adiacenti migliori
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp9.png}
+  \end{center}
+  \item \textbf{prima iterazione}, mi sposto su (0,6)
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp10.png}
+  \end{center}
+  \item \textbf{test di ottimalità:} (0,6) non è soluzione ottimale.
+  Esistono soluzioni adiacenti migliori
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp11.png}
+  \end{center}
+  \item \textbf{seconda iterazione}, mi sposto su (2,6)
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp12.png}
+  \end{center}
+  \item \textbf{test di ottimalità}, (2,6) è la soluzione ottimale in
+  quanto non esistono vertici migliori adiacenti
+  \begin{center}
+    \includegraphics[scale = 0.8]{img/simp13.png}
+  \end{center}
+  \item \textbf{fine procedura}, termina dopo solo 2 iterazioni
+  visitando 3 vertici su 5
+\end{enumerate}
+Questo metodo è iterativo e si concentra solo sui vertici. Se
+possibile, si sceglie come vertice iniziale l’origine:
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp14.png}
+\end{center}
+Un'iterazione del metodo del simplesso corrisponde a muoversi dal
+vertice corrente ad uno adiacente migliore. Il metodo del simplesso si
+ferma nel momento in cui non vi sono più vertici adiacenti migliori.
+\begin{center}
+  \includegraphics[scale = 0.8]{img/simp15.png}
+\end{center}
+Vediamo ora i \textbf{concetti algebrici del simplesso}.\\
+\textit{a procedure algebrica per il metodo del simplesso, prevede di
+  scrivere il problema PL in forma standard}. Considerando il solito
+problema si avrebbe:
+\begin{center}
+  \includegraphics[scale = 1]{img/simp16.png}
+\end{center}
+Questa nuova forma si chiama \textbf{forma aumentata}, in quanto sin
+introducono le 3 variabili $s_1, s_2, s_3$.
+\newpage
+Abbiamo quindi ottenuto una forma del tipo:
+\[Ax=b\]
+dove $A$ è una matrice $3\times 5$ e si passa da 3 a 5 variabili
+(2 originali più 3 di \textit{slack}).\\
+\[A=\left[
+    \begin{matrix}
+      0 & 2 & & 1 & 0 & 0\\
+      3 & 2 & & 0 & 1 & 0\\
+      1 & 0 & & 0 & 0 & 1\\
+    \end{matrix}
+\right],\,\,b=\left[
+  \begin{matrix}
+    12\\
+    18\\
+    4
+  \end{matrix}
+\right],\,\,x=\left[
+  \begin{matrix}
+    x_1\\
+    x_2\\
+    s_1\\
+    s_2\\
+    s_3
+  \end{matrix}
+\right]\]
+\begin{definizione}
+Una \textbf{soluzione aumentata} è una soluzione per la quale alle variabili
+originali sono aggiunte le variabili di slack e corrispodne ad una
+soluzione del sistema $Ax=b$, che è sempre risolubile fissando due
+valori di variabili.
+\end{definizione}
+\begin{esempio}
+  Se consideriamo la soluzione 1,1 nella formulazione originale del
+  problema, la soluzione aumentata è data da
+  \begin{center}
+    \includegraphics[scale = 1]{img/simp17.png}
+  \end{center}
+  Ovvero la soluzione aumentata corrisponde a $(1, 1, 10, 13, 3)$\\
+  Se considero (0,8):
+  \begin{center}
+    \includegraphics[scale = 1]{img/simp18.png}
+  \end{center}
+  Ovvero la soluzione aumentata corrisponde a $(0, 8 , −6 , 0,4)$
+  (fuori da X)\\
+  Se considero (4,3):
+  \begin{center}
+    \includegraphics[scale = 1]{img/simp19.png}
+  \end{center}
+\end{esempio}
+\begin{definizione}
+  Una \textbf{soluzione di base} ammissibile è un vertice ammissibile a
+  cui sono aggiunti i corrispondenti valori della variabili di slack e
+  corrisponde ad una soluzione di $Ax=b$ tale che $x\geq 0$
+\end{definizione}
+\begin{esempio}
+  consideriamo il vertice $(4,3)$ $to$ è ammissibile e la soluzione di base
+  ammissibile corrispondente è $(4, 3, 6, 0, 0)$. Se considero $(4,3)$
+  $to$ non è ammissibile e la soluzione di base ammissibile corrispondente
+  è $(0,9,-6,0,0)$ non è ammissibile, infatti viene violato il vincolo
+  di non negatività della variabile di slack $s_1$.\\
+  \begin{center}
+    \includegraphics[scale = 1]{img/simp21.png}
+  \end{center}
+\end{esempio}
+Una soluzione di base ha $m$ (numero dei vincoli del problema)
+\textbf{variabili di base} ($\leq 0$) e le rimanenti $n − m$ ($n$ umero di
+variabili della forma aumentata) sono chiamate \textbf{variabili
+  non di base} ($=0$). Si ha che:
+\[m\leq n\]
+In una soluzione di base le variabili non di base sono nulle e i valori delle
+variabili di base sono ottenuti risolvendo il sistema di $m$
+equazioni.\\
+\textbf{Se una delle variabili di base è nulla, si parla di 
+  \textit{ soluzione di base degenere}}
+\begin{definizione}
+  In un problema PL due soluzioni di base si dicono adiacenti se tutte
+  le variabili non di base tranne una sono uguali e questo implica che
+  e variabili di base tranne una sono le stesse, anche se con 
+  valori numerici differenti
+\end{definizione}
+\begin{center}
+  \includegraphics[scale = 1]{img/simp22.png}
+\end{center}
 \end{document}

@@ -390,11 +390,124 @@ che verifica se dei task sono mutualmente compatibili.\\
 Inoltre $V(A)=\sum_{i\in A}v_i$ per vedere il costo totale di una
 serie di task, con:
 \[P(\{1,\ldots, n\})\to \{true,\,false\}\]
-\[V:[P(\{1,\ldots, n\})\to \mathbb{R}\]
+\[V:P(\{1,\ldots, n\})\to \mathbb{R}\]
 Quindi la soluzione sarà un insieme di task tale che:
 \[S\subseteq \{1,\ldots, n\} \to
   comp(S)=true,\,\, V(S)=\max\{v(A)\}\]
-\textbf{Attendere fine lezione settimana prossima}
+Definiamo in maniera formale:
+l'instanza è una $n\in\mathbb{N}$ e $X_n\in\{1,\ldots,n\}$. Ad ogni
+attività $i\in X_n$ ci sono associate il tempo di inizio $s_i$, di fine $f_i$
+e il valore $v_i$.\\
+La soluzione è un sottoinsieme $S\subseteq X_N$ di attività
+compatibili secondo la funzione \textit{comp} e tale che
+$v(S)=\max_{A\subseteq X_n,\, comp(A)=TRUE}\{v(A)\}$.
+La soluzione basata sulla forza bruta (calcolo tutte le combinazioni)
+è $\Omega(2^n)$ nel caso migliore; non va bene.\\
+Usiamo quindi la programmazione dinamica devo però prima cercare la
+soluzione in termini ricorsivi, cercando i sottoproblemi. La struttura
+da ``far calare'' è $X_n$ a step di $n-1$ lavorando quindi su
+$S_{n-1}\subseteq X_{n-1}$ tale che valga quanto sopra.\\ Il
+sottoprobelma i-esimo sarà $X_i=\{1,\ldots i\}$ con $S_i\subseteq X_i$
+con le condizioni di sopra.\\
+Il sottoproblema con $i=1$ avrà $X_1=\{1\}$ fatto solo dalla prima
+attività e quindi avrò $S_1 = \{1\}$ e quindi $v(S_1)= v_1$, ovvero
+$10$ nel nostro caso.\\
+Inoltre se $i=0$ avrò l'insieme vuoto che ha valore 0. \\
+Quindi $S_1 = \{1\}$, con $V(S_1)=1$, e $S_0 = \emptyset$, con
+$v(s_0)=0$ e questi potrebbero essere i miei casi base. \\
+Ragioniamo su 6, se 6 è soluzione allora sarà insieme alla soluzione
+delle altre attività compatibili, ovvero quella di 4 essendo la prima
+compatibile in ordine, o meglio $s_6 = \{6\}\cup S_4$. Per la 5 sarà
+1, per la 4 sarà 2, per la 3 sarà 1 e per la 2 non sarà nessuna, come per
+1, e quindi sarà 0. Ho appena definito $p(i) =\max\{j|\, j< i,\,
+\mbox{ j compatibile con i}\}$ assumendo che $\max \emptyset = 0$,
+quindi l'attività con indice maggiore compatibile precedente a quella
+in studio.\\
+\textbf{Questo schema funziona per attività ordinate sull'ordine di
+  fine}.\\
+
+Quindi:
+\[
+  S_i=\begin{cases}
+    \{i\}\cup S_{p(i)} & \mbox{se }i\in S_i\\
+    S_{i-1} & \mbox{se } i\not\in S_i
+  \end{cases}
+\]
+e:
+\[
+  v(S_i)=\begin{cases}
+    v_i+v(S_{p(i)})\\
+    v(S_{i-1})
+  \end{cases}
+\]
+Il modo di procedere consiste nel valcolare i valori e aggiornare il
+massimo:
+\[v(S_i)=\max\{v_i+v(S_{p(i)}),\, v(s_{i-1})\},\,i>0\]
+sapendo $v(S_1)=1$ e $v(s_0) = 0$.\\
+Ma in realtà $v(S_1)=1$ è ricavabile da $v(S_0)$ con la formula quindi
+avremo solo un caso base: $v(S_0)=0,\,i=0$.\\
+Quindi abbiamo trovato la ricorrenza, considerando anche che:
+\[
+  S_i=\begin{cases}
+    \{i\}\cup S_{p(i)} & \mbox{se }v_i+v(S_{p(i)}) \geq v(S_{i-1})\\
+    S_{i-1} & \mbox{se } v_i+v(S_{p(i)}) < v(S_{i-1}
+  \end{cases}
+\]
+\newpage
+Quindi ottengo l'algoritmo ricorsivo per calcolare i vari $v_i$:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$R-OPT$}{$i$}
+    \If{$i == 0$}
+    \State \textbf{return} $0$
+    \Else
+    \State \textbf{return} $\max(v_i+R-OPT(p[i]), R-OPT(i-1))$
+    \EndIf
+    \EndFunction
+  \end{algorithm}  
+\end{shaded}
+Ma è ingestibile dal punto di vista della complessità. Utilizzo quindi
+un vettore $M[0..n]$, introducendo la programmazione dinamica,
+dove in $M[i]$ memorizzo il valore della soluzione del problema di
+taglia $i$, ovvero $v(S_i)$.\\
+Facciamo quindi la ricorsione con l'annotazione:
+\begin{shaded}
+  \begin{algorithm}
+    \For {$j\gets 0$ \textbf{to} $n$}
+    \State $M[j]\gets \mbox{\textit{empty}}$
+    \EndFor
+    
+    \Function{$AR-OPT$}{$i$}
+    \If{$M[i] == \mbox{\textit{empty}}$}
+    \If {$i==0$}
+    \State $M[i]\gets 0$
+    \Else
+    \State $M[i]\gets\max(v_i+AR-OPT(p[i]), AR-OPT(i-1))$
+    \EndIf
+    \EndIf
+    \State \textbf{return} $M[i]$
+    \EndFunction
+  \end{algorithm}  
+\end{shaded}
+che resta una tecnica \textit{top-down}. Ma solitamente si lavora
+\textit{bottom-up} nella programmazione dinamica. Quindi non abbiamo
+di caricare l'array e non abbiamo bisogno di if/else:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$PD-OPT$}{$i$}
+    \State $M[0]\gets 0$
+    \For {$j\gets 1$ \textbf{to} $i$}
+    \State $M[j]\gets\max(v_j+M[P[j]], M[J-1])$
+    \EndFor
+    \State \textbf{return} $M[i]$
+    \EndFunction
+  \end{algorithm}  
+\end{shaded}
+\textbf{ovviamente prima di tutto ho il caricamento di p[i], come è
+  stato descritto sopra}.\\
+Ora si ha una complessità pari a $\Theta(n)$ per quest'ultimo
+algortimo ma bisogna sommare $\Theta(n\log n)$, in quanto bisogna
+ordinare le attività sul tempo di fine.  
 \subsection{Programmazione Dinamica}
 Un problema di decisione prevede unicamente 2 tipi di risultato: vero
 e falso. Si ha una distinzione dei problemi:

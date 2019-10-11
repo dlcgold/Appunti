@@ -685,6 +685,7 @@ B_1,\ldots,B_i$. Quindi:
   \end{cases}
 \]
 inoltre $\max\{\emptyset\}=0$. Abbiamo quindi il seguente algoritmo:
+
 \begin{shaded}
   \begin{algorithm}
     \Function {MaxBox}{B[1..n]}
@@ -692,8 +693,7 @@ inoltre $\max\{\emptyset\}=0$. Abbiamo quindi il seguente algoritmo:
     \For{$i\gets 2$ \textbf{to} $n$}
     \State $max \gets 0$
     \For{$j\gets 1$ \textbf{to} $i-1$}
-    \If {$a_j<a_i$ \textbf{AND} $b_j<b_i$ \textbf{AND} $c_j<c_i$
-    \textbf{AND} $z[j]<max$ }
+    \If {$a_j<a_i$ \textbf{AND} $b_j<b_i$ \textbf{AND} $c_j<c_i$ \textbf{AND} $z[j]<max$ }
     \State $max\gets z[j]$
     \EndIf
     \EndFor
@@ -703,6 +703,8 @@ inoltre $\max\{\emptyset\}=0$. Abbiamo quindi il seguente algoritmo:
     \EndFunction
   \end{algorithm}
 \end{shaded}
+
+
 Si ha complessità apri a $O(n^2)$ mentre lo spazio richiesto è quello
 per memorizzare il vettore, ovvero $\Theta(n)$.\\
 Può anche essere scritto ricorsivamente ma risulta troppo esoso in
@@ -711,5 +713,97 @@ termini di spazio.
 Ritorniamo al problema di inizio capitolo. Abbiamo due stringhe,
 $X=<x_1,\ldots x_n>$ e $Y=<y_1\ldots y_n>$ con $Z$ sottosequenza
 comune a $X$ e $Y$.\\
-%terminare
+Per ragionare secondo la programmazione dinamica identifichiamo le
+istanze relative ai sottoproblemi come $X_i$ e $Y_j$ che sono $n+1$ e
+$m+1$ prefissi del problema. Un sottoproblema generico è identificato
+da una coppia di indici e ad ogni sottoproblema è associata una
+lunghezza. L alunghezza della massima sottosequenza comune $K$ è la
+maggiore tra tutte le lunghezze delle sottosequenze comuni $W$.
+Si ha quindi che:
+\[Z_k=LCS(X_i, Y_j)\]
+Inoltre si ha che, sapendo che $x_i$ è l'ultimo simbolo:
+\[LCS(x_{i-1},y_{j-1})\, |\, x_i & \mbox{ se } x_i=y_j\]
+altrimenti, se $z_k\neq x$, si ha che:
+\[Z_{k}=LCS\left(X_{i}, Y_{j}\right)=LCS\left(X_{i-1},
+    Y_{j}\right)   \text { e } C_{i, j}=C_{i-1, j}\]
+mentre, se $x_x\neq y_j$ si ha che:
+\[Z_k=LCS\left(X_{i}, Y_{j}\right)=LCS\left(X_{i}, Y_{j-1}\right)
+  \text { e } C_{i, j}=C_{i, j-1}\]
+Quindi cerco un algoritmo del tipo:
+\[LCS(x,y)\to LCS(x-\{A\},y-\{A\})\]
+Costruisco quindi una matrice $C$ che indica come sono allineate le
+sequenze con un algoritmo che controlla i primi $i$ caratteri di
+$X$ e i primi $j$ di $Y$.
+
+La prima riga e la prima colonna sono fissi 0, e il controllo inizia
+dalla prima riga di 0. Non appena l’algoritmo trova un match, copia
+nella casella della matrice corrispondente il valore contenuto nella
+casella precedente sulla diagonale a sinistra, incrementandolo di 1,
+mentre se i caratteri confrontati sono diversi viene copiato nella
+casella il massimo tra il valore a sinistra e il calore
+sopra. L'ultima casella in basso a destra (quella di posizione
+$(n,m)$) rappresenta la lunghezza massima.\\
+Quindi $C[i,j]$ contiene la lunghezza della stringa più lunga tra gli
+$i$ caratteri di $X$ e i $j$ di $Y$.\\
+Si ha quindi un caso base sfruttando la prima riga e la prima colonna
+formate da soli zeri:
+\[C[i,j]=0 \mbox{ se } i=j=0\]
+e un caos generico:
+\[C[i,j]=
+  \begin{cases}
+    C[i-1, j-1]+1 & \mbox{se } x_i=y_i\\
+    \max \{C[i-1, j], C[i, j-1]\} & \mbox{se } x_i\neq y_i
+  \end{cases}
+\]
+per esempio per $X=<A,B,C,B,D,A,B>$ e $Y=<B,D,C,A,B,A>$ avremmo:
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    X / Y & {0} & {B} & {D} & {C} & {A} & {B} & {A} \\
+    \hline
+    0 & {0} & {0} & {0} & {0} & {0} & {0} & {0} \\
+    \hline
+    A & {0} & {0} & {0} & {0} & {1} & {1} & {1} \\
+    \hline
+    B & {0} & {1} & {1} & {1} & {1} & {2} & {2} \\
+    \hline
+    C & {0} & {1} & {1} & {2} & {2} & {2} & {2} \\
+    \hline
+    B & {0} & {1} & {1} & {2} & {2} & {3} & {3} \\
+    \hline
+    D & {0} & {1} & {2} & {2} & {2} & {3} & {3} \\
+    \hline
+    A & {0} & {1} & {2} & {2} & {3} & {3} & {4} \\
+    \hline
+    B & {0} & {1} & {2} & {2} & {3} & {4} & {4} \\
+    \hline
+  \end{tabular}
+\end{center}
+\newpage
+ottengo quindi:
+\begin{shaded}
+  \begin{algorithm}
+    \Function{$LCS$}{$X,Y$}
+    \For {$i\gets 0$ \textbf{to} $n$}
+    \State $C[i,0]\gets 0$
+    \EndFor
+    \For {$j\gets 0$ \textbf{to} $m$}
+    \State $C[0,j]\gets 0$
+    \EndFor
+    \For {$1\gets 1$ \textbf{to} $n$}
+    \For {$j\gets 1$ \textbf{to} $m$}
+    \If {$X[i]==Y[j]$}
+    \State $C[i,j]\gets C[i-1,j-1]+1$
+    \Else
+    \State $C[i, j]=\max(C[i-1, j], C[i, j-1]+1)$
+    \EndIf
+    \EndFor
+    \EndFor
+    \State \textbf{return} $C[n,m]$
+    \EndFunction
+  \end{algorithm}
+\end{shaded}
+Ho quindi un tempo $\Theta(nm)\sim \Theta(n^2)$ e uno spazio richiesto
+pari a $\theta(nm)$ che è quello della matrice può essere ridotto
+tenendo solo l’ultima riga o lavorando con degli if/else aggiuntivi.
 \end{document}

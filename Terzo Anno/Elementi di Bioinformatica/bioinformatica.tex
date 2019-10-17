@@ -430,7 +430,7 @@ stringa. La più lunga sarà quindi quella che arriva al nodo con
 string-depth massimo. Visito quindi due volte l'albero, alla prima
 vedo se ha le foglie giuste e la seconda per cercare il max delle
 string-depth. La prima visita la faccio dalle foglie verso la radice,
-creo un array di booleani per uil nodo X lungo quanto il numero di
+creo un array di booleani per il nodo X lungo quanto il numero di
 stringhe i cui elementi valgono true sse esiste un disendente di X tale che è
 suffisso della stringa S. Alla fine faccio l'and tra tutti i valori
 dell'array, se è true significa che ho un discendente per ogni
@@ -440,4 +440,142 @@ vettore leggendone l'etichetta. La seconda visita può essere in
 qualsiasi direzione e dove ho nodi con la proprietà di essere comune
 alle stringhe e trovo quello con la string-depth max, ottengo quindi
 un tempo che è $O(k\cdot n)$.
+\subsection{Pattern Matching su Suffix Array}
+Il suffix array contiene le posizioni di inizio dei suffissi ordinati
+lessicograficamente e viene utilizato insieme all'LCP. Il pattern
+matching in questo caso non sarà ottimale ma si
+otterrà $O(m\log n)$, con $m$ lunghezza del pattern. Si sfrutta la
+ricerca dicotomica, che si basa sulla ricerca a partire dall'elemento
+mediano di un array, per poi cercare su una sola delle metà
+dell'array, dimezzando di volta in volta l'array. La ricerca
+dicotomica funziona sul suffix array ma ogni iterazione consisite nel
+confrontare il pattern con i primi $m$ caratteri del suffisso mediano,
+fermandosi ovviamente al primo carattere discordante per capire poi su
+quale metà del suffix array continuare a cercare, basandosi sui
+singoli caratteri che non matchano. Quest'ultimo passaggio è possibile
+grazie al fatto che il suffix array è ordinato lessicograficamente. Si
+avranno 3 aggiustamenti all'algoritmo, detti \textbf{acceleranti}, che
+abbasseranno la complessità del caso pessimo (col terzo si arriva a
+$O(m+\log n)$). Con gli acceleranti si evitano confronti inutili.
+\\Partiamo col \textbf{primo accelerante}.\\
+Si parte dal presupposto che ci sia un ordine lessicografico posso
+individuare regioni, dal $L$ a $R$, in cui tutti i possibili pattern
+iniziano con gli stessi caratteri iniziali.
+\begin{center}
+  \includegraphics[scale = 0.5]{img/arr.png}
+\end{center}
+Formalmente si ha che tutti i fuffissi in $SA(L,R)$ iniziano con lo
+stesso prefisso lungo $Lcp(SA[L], SA[R])$ e quindi potrò non
+controllare i primi $Lcp(SA[L], SA[R])$ caratteri.
+\\ Vediamo il \textbf{secondo accelerante}.\\
+Si ha un elenco di casi che tengono in considerazione il pattern. Si
+indica con $l$ l'Lcp tra il pattern e il primo suffisso
+dell'intervallo e $r$ l'Lcp tra il primo e l'ultimo suffisso
+dell'intervallo. Queste due variabili vengono aggiornate man mano e ho:
+\begin{itemize}
+  \item \textbf{caso 1:} se $l>r$ quindi il pattern somiglia più al
+  primo suffisso che all'ultimo
+  \begin{center}
+    \includegraphics[scale = 0.5]{img/arr2.png}
+  \end{center}
+  Quindi dovrò poi controllare nella seconda metà del suffix array
+  quindi scarterò in tempo costante tutta la prima metà solo se
+  $Lcp(L,M)>l$, assegnando a $L$ il valore di $M$.\\
+  % grafico
+  Se fosse minore farei uguale scartando la seconda metà, assegnando a $R$
+  il valor edi $M$ e ad $r$ l'$Lcp(M,L)$ (perché dovrò fermarmi a metà).\\
+  % grafico
+  Se fossero uguali dovrei confrontare $P[l+1:]$ e $M[l+1:]$ per
+  decidere quale metà scartare, se avrò un carattere che non matcha
+  tra il suffisso mediano e il pattern con l'ultimo carattere del
+  suffisso mediano più piccolo allora cercherò nella seconda metà,
+  altrimenti nella prima (sempre grazie all'ordine lessicografico).
+  A differenza dei due sottocasi sopra questo
+  impiega un tempo che dipende dal numero di caratteri uguali che
+  trovo, più sono e più impiego tempo, anche se per assurdo più
+  caratteri uguali trovo più mi sto stringendo alla regione che
+  contiene il match del mio pattern. \textbf{Si ha consumo di tempo
+    solo nel caso in cui mi stia avvicinando alla soluzione, se
+    ``pago'' tanto in un'iterazione avrò la certezza di ``pagare''
+    meno la volta seguente. Al massimo potro avere un costo pari a
+    $2m$ perché ogni volta incremento o $l$ o $r$, che sommati sono
+    per forza $\leq 2m$, quindi alla peggio ho complessitò $O(2m)$}.
+  % grafico
+  \textit{In ogni caso $l$ e $r$ potrebbero restare invariati o crescere in
+    base al numero di caratteri che matchano e al massimo avranno valore
+    pari alla lunghezza del pattern $m$}
+  \item \textbf{caso 2:} se $l=r$. Se ho $Lcp(L,M)>l$ tengo la prima
+  metà mentre se ho l'opposto   $Lcp(L,M)>l$ tengo seconda metà come
+  nel primo caso.   Se invece $Lcp(L,M)=Lcp(M,R)=l$
+  ragiono come nel terzo sottocaso del primo caso
+  \item \textbf{caso 3:} se $l<r$ faccio lo speculare del primo caso 
+\end{itemize}
+\begin{esempio}
+  ho i seguenti suffissi: \textit{\$, A\$, ANA\$, ANANA\$, BANANA\$,
+    NA\$ e NANA\$} e pattern \textit{BA} ho quindi $L=0$, $R=6$ e $M=3$.\\
+  $Lcp(L,M)=0$ e $Lcp(R,M)=0$.\\
+  Confronto il primo carattere del pattern e il primo del mediano
+  $B\neq A$ e $B>A$ quindi ho $L\gets 3$ mentre $R$ resta uguale (cosi
+  come $r$ e $l$). Il nuovo mediano è tra 3 e 6, quindi, arrotonando,
+  5.\\
+  Confronto $B$ e $N$ e quindi cerco nella prima metà, che ha un solo
+  elemento, quindi controllo i caratteri e scopro che, in questo caso,
+  ho il match con \textit{BANANA}.
+\end{esempio}
+\begin{esempio}
+  ho i seguenti suffissi: \textit{\$, A\$, ABRA\$, ABRACADABRA\$, ACADABRA\$,
+    ADABRA\$, BRA\$, BRACADABRA\$, CADABRA\$, DABRA\$, RA\$ e
+    RACADABRA\$} e pattern \textit{BRACA} ho quindi $L=0$, $R=11$ e $M=6$.\\
+  $Lcp(L,M)=0$ e $Lcp(R,M)=0$.\\
+  Confronto con \textit{BRA\$} e vedo che ci sono 3 caratteri uguali,
+  quindi ora ho $L=6$, $R=11$, $M=9$, $l=3$ (i 3 caratteri uguali) e
+  $r=0$.\\
+  Confronto con \textit{DABRA\$} e vedo che il primo carattere non
+  matcha e $D>B$ quindi cerco nella
+  metà sopra. Quindi ora ho $L=6$, $R=9$, $M=8$, $l=3$ (i 3 caratteri uguali) e
+  $r=0$.\\
+  Confronto con \textit{CADABRA\$} e vedo che il primo carattere non
+  matcha e $C>B$ quindi cerco nella  metà sopra.
+  quindi ora ho $L=6$, $R=8$, $M=7$, $l=3$ (i 3 caratteri uguali) e
+  $r=0$.\\
+  Confronto con \textit{BRACADABRA\$} e vedo che ho $Lcp(L,M)=3$
+  (prima era sempre stata nulla cosìccome $Lcp(R,M)$) e
+  quindi sono nel terzo caso e confronto solo a partire dal terzo
+  carattere escluso, trovando il match (di 5 caratteri).
+\end{esempio}
+Vediamo ora il \textbf{terzo accelerante (DA SISTEMARE)}.\\
+Con questo accelerante studiamo il calcolo dell'Lcp. Alla prima
+iterazione avrò $L=1$ e $R=n$, alla seconda avrò o $L=1$ e
+$=\frac{n}{2}$ oppure $L=\frac{n}{2}$ e $R=n$ (a seconda della metà
+scelta). Ad interazione $k$ avrò una forma del tipo $L=h\frac{n}{2^{k-1}}$ e
+$R=(h+1)\frac{n}{2^{k-1}}$ con $h$ che rappresenta l'indice
+dell'intervallo (al primo giro ho $h=\{1,2\}$, al secondo in
+$h=\{1,2,3,4\}$ $\ldots$ $h=\{1,\ldots, 2^{k}\}$). Al termine
+della mia ricerca dicotimica ho intervalli di cardinalità due. Sempre
+alla fine della ricerca dicotomica si avranno al massimo $n$
+intervalli. Entra quindi in gioco il terzo accelerante, che consiste
+nel preprocessare tutti gli intervalli, quindi precalcola tutti i vari
+Lcp. \textbf{Questo accelerante è di solo interesse teorico}. Voglio
+calcolare abbastanza velocemente questi Lcp. Per ogni intervallo
+calcolo l'Lcp ma in realtà per intervalli consecutivi (quindi nel caso
+k-simo) ho già l'array Lcp e per ottenere gli altri aggrego i
+risultati dell'interazione. Quindi Lcp tra un $L$ e un $R$ è il minimo
+tra l'Lcp della prima metà, l'Lcp della seconda meta e l'Lcp tra $M$ e
+$M+1$ che è nell'array Lcp (mentre quelli delle due metà sono già
+calcolate).
+% aggiungo formula
+Ottengo quindi un $O(n)$.\\
+Ho quindi ottenuto l'algoritmo per trovare un'occorrenza, che non è
+per forza la prima. Voglio ora espandere per trovare tutte le
+occorrenze in un tempo proprorzionale al numero stesso di
+occorrenze. So che tutte le occorenze sono in un intorno
+dell'occorrenza trovata. Cerco quindi i suffisi precedente e seguenti
+fino a non trovare alcun match. Parto con l'occorrenza precedente e
+uso l'array Lcp, in quanto controllo suffissi consecutivi, con l'array
+vedo quanti caratteri iniziali condidono e se ne condividono almeno
+$m$ (cardinalità del pattern) allora ho trovato un'altra
+occorrenza. Dovendo solo leggere un valore ho tempo costante e quindi
+nel complesso ho un $O(n+m+k)$ con $k$ numero di occorrenze.\\
+In totale calcolo suffix array, array Lcp, preprocessamento e
+scansione per trovare tutte le occorrenze, il tutto in $O(m\log n)$
 \end{document}

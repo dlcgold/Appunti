@@ -1017,5 +1017,67 @@ La soluzione quindi è il valore più grande contenuto nella matrice:
 Per riempire ho tempo $\Theta(n^4)$ e spazio $\Theta(n^2)$
 \section{Problemi di Ottimo}
 \subsection{Problema Knapsack (dello zaino)}
-\textbf{aggiungere}
+Sia data una serie di oggetti appartentenenti all'insieme
+$X_n=\{1,\ldots, n\}$. $\forall i \in X_n$ si hanno due variabili:
+$v_i$ corrispondente al valore di un oggetto e $w_i$ corrispondente al
+peso di quell'oggetto. Il problema da risolvere consiste nel riempire
+uno zaino di capacità $L$ con la combinazione ottimale di oggetti che
+massimizzi il valore. Voglio quindi una soluzione $S_n\subseteq X_n$.
+Avendo in ballo peso e valore useremo una matrice $M[n,L]$, dove
+$M[i,j]$ rappresenterà il massimo valore ottenibile scegliendo tra i
+primi $i$ oggetti per avere peso $S$. Formalmente si avrà:
+\[
+  \begin{cases}
+    M[0,j]=0\\
+    M[i,0]=0\\
+    M[i,j]=\max\{M[i-1,j], M[i-1, j-w_i]+v_i\}
+  \end{cases}
+\]
+E la soluzione sarà il valore contenuto nell'ultima casella
+$M[n,L]$.\\
+Vediamo un esempio di matrice, con $X=\{1,2,3,4,5\}$, $V=\{1,6,18,22,28\}$,
+$W=\{1,2,5,6,7\}$ e $L=11$:
+\begin{center}
+  \begin{tabular}{c|cccccccccccc}
+    $X/L$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11\\
+    \hline
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+    1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+    2 & 0 & 1 & 6 & 7 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+    3 & 0 & 1 & 6 & 7 & 0 & 18 & 19 & 24 & 25 & 0 & 0 & 0\\
+    4 & 0 & 1 & 6 & 7 & 0 & 18 & 22 & 24 & 29 & 29 & 0 & 0\\
+    5 & 0 & 1 & 6 & 7 & 0 & 18 & 22 & 28 & 29 & 34 & 35 & 40\\
+  \end{tabular}
+\end{center}
+Dove la soluzione è appunto 40.\\
+\textbf{capire come risalire a oggetti}\\
+Questo algoritmo lavora in tempo $\Theta(nL)$ e in spazio
+$\Theta(nL)\sim \Theta(L))$. Questo algoritmo funziona su $L$
+comparabile al numero dei pesi nonostante sia
+\textit{NP-complete}, con tempo esponenziale e di difficile
+risoluzione negli altri casi. Vediamo ora l'algoritmo ($n$ è il numero
+di oggetti)
+\begin{shaded}
+  \begin{algorithmic}
+    \Function{$Knapsack$}{$X,v,w,L$}
+    \For{$j\gets 1$\textbf{ to }$L$}
+    \State $M[0,j]\gets 0$
+    \EndFor
+    \For{$i\gets 1$\textbf{ to }$n$}
+    \State $M[i,0]\gets 0$
+    \EndFor
+    \For{$i\gets 2$\textbf{ to }$n$}
+    \For{$j\gets 2$\textbf{ to }$L$}
+    \If{$w_i>j$}
+    \State $M[i,j]\gets M[i-1,j]$
+    \Else
+    \State $M[i,j]\gets \max\{M[i-1,j]mM[i-1,j-w_i]+v_i\}$
+    \EndIf
+    \EndFor
+    \EndFor
+    \State \textbf{return} $M[n,L]$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+
 \end{document}

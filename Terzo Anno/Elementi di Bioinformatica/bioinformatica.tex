@@ -578,4 +578,55 @@ occorrenza. Dovendo solo leggere un valore ho tempo costante e quindi
 nel complesso ho un $O(n+m+k)$ con $k$ numero di occorrenze.\\
 In totale calcolo suffix array, array Lcp, preprocessamento e
 scansione per trovare tutte le occorrenze, il tutto in $O(m\log n)$
+\subsubsection{Pattern Matching}
+Per calcolare la sottostringa comune più lunga ho i seguenti step:
+\begin{enumerate}
+  \item calcolo il suffix tree generalizzato della stringa $S$
+  \item cerco il nodo $x$ tale che:
+  \begin{enumerate}
+    \item per ogni stringa $s_i \in S$ esiste un discendente di $x$
+    corrispondente ad un suffisso di una delle stringhe $s_i$
+    \item abbia la string-depth di massima fra tutti i nodi con la
+    stessa caratteristica
+  \end{enumerate}
+\end{enumerate}
+Dobbiamo ``rimappare'' questo ragionamento sul suffix array.\\
+Una volta che i suffissi sono ordinati lessicograficamente essi
+appaiono consecutivamente nel suffix tree (di $n$ nodi), come se
+fossero una porzione contigua del suffix array. Però dal suffix array
+posso estrarre $n\choose 2$ intervalli.\\
+Parto quindi da un suffix array generalizzato (col suo array
+LCP). Estraggo un generico intervallo $[i:j]$ del suffix array,
+provando ad estrarli tutti, mi salvo il prefisso comune $p$ di tutti i
+suffissi in quell'intervallo e se quell'intervallo contiene almeno un
+suffisso per ogni stringa $s_i\in S$ e la lunghezza del prefisso
+estratto $p$ è maggiore di $t$ (maggior lunghezza fino a quel momento)
+allora mi salvo quella $p$ in $t$. Ma questa tecnica non può essere
+lineare. Posso quindi diminuire il numero di intervalli da considerare
+e devo calcolare velocemente la lunghezza del prefisso comune in $p$
+(nel tree era facile calcolarlo in quanto si usava la string-depth).\\
+Iniziamo col vedere come ridurre gli intervalli, cercando quelli
+inutili. Fissato un punto finale $j$ guardo tutti gli intervalli che
+finisono in $j$. Per ogni $j$ che controllo voglio considerare solo un
+punto di inizio $i$. Non voglio intervalli con suffissi di una sola
+della stringhe in ingresso. Presi un $l\leq i \leq j \leq q$ e
+considero il $SA[i:j]$ e $SA[l:q]$ con il primo intervallo quindi
+incluso nel secondo. Se $SA[l:q]$ non contiene nemmeno un suffisso per ogni
+stringa in ingresso allora anche $SA[i:j]$ farà lo stesso. Sia quindi
+$t_1$ un prefisso comune di $SA[i:j]$ e $t_2$ di $SA[l:q]$ allora la
+lunghezza di $t_1$ è $\geq$ di quella di $t_2$. Cerco quindi l'unico
+punto di inizio per ogni fine $j$ che ha senso considerare, ovvero
+calcolo il massimo $i$ tale per cui $SA[i:j]$ contiene almeno un
+suffisso per ogni stringa in ingresso, ho quindi un numero lineare di
+intervalli da considerare. Per calcolare $i$ tengo traccia, per ogni
+stringa in ingresso, di ogni ultima volta che ho un suffisso (creo
+quindi un array $last$). Fissato $j$ quindi prendo l'intervallo minimo
+che finisce in $j$ e sfrutto l'array $last$. Quindi $i$ sarà il
+massimo valore tale che $SA[i:j]$ contiene almeno un suffisso per ogni
+stringa in ingresso.
+\textbf{capire}
+% aggiungere disegno
+Quindi considero un intervallo $[i:j]$ e la lunghezza del
+prefisso comune a tutti i suffissi che è uguale al minimo dell'LCP tra
+$i$ e $j-1$
 \end{document}

@@ -1103,6 +1103,172 @@ ha:
 Cerchiamo ora la soluzione. Se $M[n,k]=0$ allora non esiste nessun
 sottoinsieme di valore $k$. Invece se $M[n,k]=1$ bisogna risalire la
 matrice per trovare gli elementi appartenetenti alla soluzione.\\
-\textbf{aggiungere algortimo}
-
+Quindi si avrà:
+\begin{shaded}
+  \begin{algorithmic}
+    \State $posR\gets n$
+    \State $posC\gets k$
+    \While {$posC>0$}
+    \If {$M[posR-1][posC] == T$}
+    \State $print(posR)$
+    \State $posC\gets posC - v[posR]$
+    \EndIf
+    \State $posr \gets posR-1$
+    \EndWhile
+  \end{algorithmic}
+\end{shaded}
+\subsection{Knapsack frazionario}
+Vediamo ora un esempio di \textbf{programmazione greedy}, ricordando
+che questa tecnica:
+\begin{shaded}
+  \textit{riguarda problemi che hanno l’obiettivo di arrivare al
+    risultato ottimo utilizzando sottostrutture ottime locali.}
+\end{shaded}
+Vediamo ora \textit{knapsack frazionario} che, a differenza
+dell'algoritmo orginale, prevede che un oggetto possa essere preso
+anche parzialmente. Si indica con $w_i$ il peso degli oggetti e con
+$v_i$ il loro valore. Chiamiamo $L$ la capacità dello zaino e con
+$p_i$ il profitto di un oggetto:
+\[p_i=\frac{v_i}{w_i}\]
+Cerco quindi di massimizzare il profitto.\\
+Procedo quindi ordinando, usando quindi la tecncia greedy, gli oggetti
+in ordine decrescente rispetto al profitto e inserendo gli oggetti
+sfruttando questo ordine fin tanto che il peso dell'oggetto che sto
+inserendo non è maggiore alla capacità residua. A questo punto
+frazioniamo l'oggetto (che prende il nome di \textbf{oggetto
+  critico}). Si ha quindi il caso migliore nel caso non si debba mai
+frazionare e si ha tempo $O(n\log n)$ (usando, per esempio, mergesort)
+per l'ordinamento e $O(n)$ per la scelta. Si ha quindi (con $P$
+vettore dei profitti, $W$ vettore dei pesi, $V$ vettore dei valori,
+$n$ numero degli oggetti e $L$ peso massimo trasportabile):
+\begin{shaded}
+  \begin{algorithmic}
+    \Function {$Knap\_frazionario$} {$V,W,n,L$}
+    \State $s\gets 0$
+    \State $weight\gets 0$
+    \For{$i\gets 1$ \textbf{to} $n$}
+    \State
+    \state $R[i]\gets \frac{V[i]}{W[i]}$
+    \EndFor
+    \State $mergesort(R)$
+    \State $i\gets 1$
+    \While{$peso<L$ \textbf{AND} $i\leq n$}
+    \If{$W[i]+peso\leq L$}
+    \State $s\gets s+1$
+    \Else
+    \State $s\gets s+\frac{(L-p)}{W[i]}$
+    \EndIf
+    \State $peso\gets peso+W[i]$
+    \State $i\gets i+1$
+    \EndWhile
+    \State \textbf{return} $s$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+Si ha quindi $O(n\log n)$ e dipende solo dal numero di oggetti, si ha
+quindi un algortimo polinomiale.
+\subsection{Approfondimento Greedy}
+Come abbiamo visto con knapsack frazionario facciamo una scelta
+\textit{greedy} nel momento in cui prendo la spluzione che mi sembra
+migliore in un dato momento, infatti queste scelte sono dette
+\textit{localmente ottime}.\\
+\textbf{I problemi di ottimo in cui si riesce ad arrivare ad una soluzione di
+  ottimo mediante una sequenza di soluzioni localmente ottima
+  ammettono smepre una soluzione greedy}.\\
+Un algoritmo greedy segue un certo schema. Parto inizializzando un insieme
+di soluzioni a vuoto, eventualmente calcolo il parametro di selezione,
+ordino gli elementi in base a quel parametro e infine per ogni
+elemento vedo se appartiene alle soluzioni. In questo modo si impiega
+$O(n\log n)$ per ordinare e $O(n)$ per scegliere.\\
+\subsection{Problema dell'Autostrada}
+Si ipotizzi di essere all'inizio di un'autostrada (al kilometro 0) di
+lunghezza $N$. Si ipotizzi di avere $R$ kilometri di autonomia e che
+ci siano $n$ pompe di benzina. Si cerca di minimizzare il numero di
+soste.\\
+Usiamo la tecnica greedy e ordiniamo il vettore delle soste, sapendo
+che ci fermeremo sse la stazione successiva è fuori portata. Vediamo
+quindi l'algortimo, sapendo che $K$ è il vettore delle soste, $S$
+vettore delle soluzioni (si usa notazione insiemistica nello psuedo
+codice) e $R$ è l'autonomia in kilometri:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function {$Sosta$}{$K, R$}
+    \State $S\gets \emptyset$
+    \State $pos\gets 0$
+    \State $mergesort(K)$
+    \For{$i\gets 1$ \textbf{to} $n-1$}
+    \If{$K[i]\geq pos + R$ \textbf{AND} $K[i+1]>pos+R$}
+    \State $S\gets S\cup K[i]$
+    \State $pos \gets K[i]$
+    \EndIf
+    \EndFor
+    \If{$K[i]\geq pos + R$ \textbf{AND} $N>pos+R$}
+    \State $S\gets S\cup K[N]$
+    \State $pos \gets K[N]$
+    \EndIf
+    \State \textbf{return }$S$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+Ma non stiamo analizzando il caso in cui due stazioni distino più di
+$R$, ma questo a livello teoirco lo possiamo ovviare dando per
+scontato ipotizzando che l'input sia corretto (ovvero che $K$ non
+permetta questa situazione). Come Dimostrato sopra si ha $O(n\log n$)
+\subsection{TSP}
+Vediamo il problema del \textit{traveling saleman problem (TSP)}. Si
+ha che un viaggiatore deve visitare una e una sola volta tutte le $N$
+città in cui deve vendere i prodotti. Vuole minimizzare il costo per
+fare il giro completo delle città e tornare al punto di partenza. Si
+ha che ogni città è collegata ad ogni altra con un certo peso (che
+rappresenta il costo che si deve pagare per spostarsi tra le due
+città).\\
+Una possibile soluzione greedy consiste nel scegliere sempre il
+cammino meno ``pesante'', ma questo rischia di far perdere alcune
+combinazioni di cammini che insieme ``costerebbero'' meno, perdendo
+quindi la soluzione migliore. Possiamo concludere che non si può
+risolvere con la programmazione greedy in maniera ottimizzata.
+\subsection{Matroidi}
+Con il problema del TSP abbiamo visto che non sempre si può arrivare
+ad una soluzione con la programmazione greedy. Cerchiamo quindi uno
+strumento teorico per stabilire a priori se si può arrivare ad una
+soluzione con la programmazione greedy. Questo strumento è detto
+\textbf{matroide}.
+\begin{definizione}
+  Si definisce un \textbf{sistema di indipendenza} $<E,F>$. Si ha che
+  $F$ è l'insieme di tutti i possibili sottoinsiemi construibili a
+  partire dagli elementi di $E$, che è un insieme finito. $F$ è quindi
+  \textbf{l'insieme delle parti} di $E$. La coppia $<E,F>$ è sistema
+  di indipendenza sse:
+  \[\forall A\in F,\,\,\, \exists B\subseteq A\Rightarrow B\in F\]
+  \textit{sarebbe l'ideale d’ordine rispetto alla relazione di
+    inclusione}. $F$ contiene quindi tutte le soluzioni di un
+  problema, tra cui le soluzioni di ottimo.\\
+  Un sistema di indipoendenza $<E,F>$ è un matroide se:
+  \[\forall A,B\in F\mbox{ con }|A|+1=|B|\Longrightarrow\exists b\in
+    B-A\to |A|\cup \{b\}\in F\]
+  Definiamo una funzione di costo per esplicare il problema di
+  ottimo:
+  \[w:E\to \mathbb{R}^+\]
+  \[w:F\to \mathbb{R}^+,\,\,\,w(F)=\sum_{e_i\in F}w(e_i))\]
+  Il problema di ottimizzzione sarà quindi composto da
+  \textbf{istanza}, il sistema di indipendenza $<E,F>$ e la funzione
+  di peso $w$, e \textbf{soluzione}. Si hanno due condizioni per le
+  soluzioni:
+  \begin{enumerate}
+    \item ammissibilità, ovvero che la soluzione deve essere
+    accettabile secondo i criteri del problema
+    \item massimo, ovvero cerco la soluzione migliore
+  \end{enumerate}
+  \textbf{Un sistema di indipendenza
+    ha una soluzione ottima greedy se e solo se esso è un matroide.}
+\end{definizione}
+\subsubsection{Teorema di Rado}
+\begin{teorema}
+  $<E,F>$ è matroide sse $\forall w:E\to \mathbb{R}^+$ l'algortimo
+  greedy resitisce l'ottimo per ogni $w$
+\end{teorema}
+\textbf{Dire che un problema non è un matroide, vuol dire
+che non tutte le funzioni peso sono associabili a un algoritmo
+greedy. Non significa che per nessun obiettivo non esiste mai un
+algoritmo greedy che produce la soluzione ottima}
 \end{document}

@@ -198,7 +198,7 @@ Ma come passo da una colonna $C[j]$ a una $C[j-1]$? Con questi step:
 \end{itemize}
 ottengo:
 \begin{center}
-  C[j]=((C[j-1])>>1)|(1<<($\omega$-1)\&U[T[j]])
+  C[j] = ((C[j-1])>>1)| (1 << ($\omega$-1)\&U[T[j]])
 \end{center}
 Conoscendo una colonna della matrice voglio calcolare la successiva. 
 Quindi $M[i,j]=M[i-1,j-1]\,\,AND\,\,P[i]=T[j]$ (per esempio, 
@@ -628,5 +628,34 @@ stringa in ingresso.
 % aggiungere disegno
 Quindi considero un intervallo $[i:j]$ e la lunghezza del
 prefisso comune a tutti i suffissi che è uguale al minimo dell'LCP tra
-$i$ e $j-1$
+$i$ e $j-1$\\
+Questo sistema comporta un tempo quadratico e bisogna arrivare ad un
+tempo lineare.\\
+Io ho un array $A$ di $n$ elementi e voglio calcolare il minimo in un
+certo intervallo. È il \textbf{range minimun query}. Vogliamo
+indicizzare in tempo $O(n\log n)$ e calcoleremo, grazie a questo
+preprocessamento, il minimo in di un intervallo in tempo costante
+$O(1)$. Il sistema consiste nel precalcolare i minimi per alcuni
+intervalli che bastano per tutti. Il calcolo del minimo sarà poi un
+confronto tra due intervalli. Se voglio il minimo in un intervallo e
+ho precalcolato il minimo di due intervalli che insieme coprono
+l'intero intervallo allora mi basta confrontare i due minimi dei
+sottointervalli pre calcolati. \\
+Preprocesso quindi piccoli intervalli ma che nel complesso mi coprano,
+a coppie, tutto l'intervallo completo. Partiamo cercando un $z$ tale
+che $2^z\leq j-i+1$ e prendo poi due intervalli, uno $[i:i+2^z-1]$ e
+uno $[j-2^z+1:j]$. Ho quindi che $z=\left\lfloor{\log_2
+    j-i+1}\right\rfloor$. Uso quindi la programmazione dinamica con
+una matrice $B[x,y]=\min_{x\leq z<x+2^{y}}A[z]$:
+\[
+  \begin{cases}
+    B[x,0]=A[x]\\
+    B[x,y]=\min\{B[x,y-1], B[x+2^{y-1},y-1]\} \mbox { se } y\geq 0\\
+  \end{cases}
+\]
+nel complesso ho quindi $n\log n$ elementi. Costruita questa matrice
+vado a prendere il:
+\[\min\{B[i,wr],B[j-2^w+1,w]\}\]
+dove $w$ è la più grande potenza di 2 minore o uguale a $j-i+1$.
+\textbf{finire}
 \end{document}

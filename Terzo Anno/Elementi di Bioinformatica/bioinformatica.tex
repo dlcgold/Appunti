@@ -729,7 +729,7 @@ con la seguente equazione di ricorrenza, detta di
 \textbf{Needleman-Wunsch} (si indicano con ``-'' gli indel):
 \[M[i,j]=\max
   \begin{cases}
-    M[i-1,j-1]+d(s_1[i],s_2[j]) & \mbox{ se non ho indel}\\
+    M[i-1,j-1]+d(s_1[i],s_2[j]) & \mbox{se non ho indel}\\
     M[i,j-1]+d(-,s_2[j]) & \mbox{se ho indel solo in }s_1\\
     M[i-1,j]+d(s_1[i],-) & \mbox{se ho indel solo in }s_2
   \end{cases}
@@ -750,6 +750,46 @@ sottostringhe $u_1,u_2$ delle 2 stringhe si ha che:
 \[All[t_1,t_2]\geq All[u_1,u_2]\]
 Un algoritmo banale avrebbe tempi assurdi: $O(n^3m^3)$.\\
 Questo problema si può risolvere velocemente con il metodo
-\textbf{Smith-Waterman}.
- \\ \textbf{continuare}
+\textbf{Smith-Waterman}.\\
+Con questo metodo l'allineamento viene ricercato tra tutte le
+sottostribghe terminanti nelle posizioni $i$ e $j$, ovvero
+$t_1=s_1[h,i]$ e $t_2=s_2[k,j]$, con $h$ e $k$ incogniti e con massimo
+valore di $All[t_1,t_2]$. Si richiede inoltre che l'allineamento
+ottimo abbia un'ultima colonna senza indel. Grazie a questa clausola
+si ha che $s_1[h,i-1]$ e $s_2[h,j-1]$ è l'allineamento ottimale delle
+sottostrighe terminanti un carattere prima di $i$ e $j$. Supponiamo
+che queste ultime due sottostringhe inizino da $a$ e $b$ e che:
+\[All(s_1[a,i-1],s_2[b,j-1])>All(s_1[h,i-1],s_2[k,j-1])\]
+Aggiungiamo ora anche la colonna $i$ e quella $j$. Se si hanno
+caratteri uguali nell'ultima colonna si ha che:
+\[All(s_1[a,i],s_2[b,j])>All(s_1[h,i],s_2[k,j])\]
+Ma questo è un assurdo essendo $All(s_1[h,i],s_2[k,j]$ massimo per
+ipotesi.\\
+Questo ragionamento si estende anche ai casi in cui ci sia un'indel a
+termine di una delle due stringhe. Si introduce anche un nuovo caso,
+aggiuntivo rispetto a quelli di Needleman-Wunsch: il caso in cui
+nessuna sottostringa ha un allineamento positivo. In questo caso se
+precedentemente non ci sono match si setta la casella a 0 e si evitano
+i valori negativi. Una conseguenza diretta è che:
+\[M[0,0]=M[i,0]=M[0,j]=0\]
+Dopo aver costruito la matrice cerco il valore massimo e le coordinate
+$x,y$ indicano le posizioni finali delle sottostringhe mentre le
+coordinate del primo 0 indicano le posizioni iniziali.\\
+Definiamo quindi l'equazione di ricorrenza:
+\[M[i,j]=\max
+  \begin{cases}
+    M[i-1,j-1]+d(s_1[i],s_2[j]) & \mbox{se non ho indel}\\
+    M[i,j-1]+d(-,s_2[j]) & \mbox{se ho indel solo in }s_1\\
+    M[i-1,j]+d(s_1[i],-) & \mbox{se ho indel solo in }s_2\\
+    0 & \mbox{altrimenti}
+  \end{cases}
+\]
+Si è quindi raggiunto un $O(nm)$.\\
+Graficamente si ha:
+\begin{center}
+  \includegraphics[scale = 0.5]{img/sw.png}
+\end{center}
+\begin{definizione}
+  Si definisce \textbf{gap} una sequenza contigua di indel
+\end{definizione}
 \end{document}

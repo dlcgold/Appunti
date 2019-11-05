@@ -657,5 +657,99 @@ nel complesso ho quindi $n\log n$ elementi. Costruita questa matrice
 vado a prendere il:
 \[\min\{B[i,wr],B[j-2^w+1,w]\}\]
 dove $w$ è la più grande potenza di 2 minore o uguale a $j-i+1$.
-\textbf{finire}
+\textbf{finire}\\
+\chapter{Allineamenti}
+Ovviamente in bioinformatica uno dei problemi principali è il
+confronto di sequenze biologiche per lo studio, per esempio, delle
+proteine, alla ricerca di similitudini tra sequenze. Una sequenza
+biologica si basa su un alfaberto formato dalle basi azotate:
+\[\Sigma=\{A,C,T,G\}\]
+In biologia molecolare si ha che \textbf{se due sequenze sono
+  strutturalmente simili allora hanno anche una funzione simile}.
+Si ha quindi la \textit{ricerca di omologie}, anche per lo studio
+dell'evoluzione.
+\begin{definizione}
+  Si definsice \textbf{distanza di Hamming} il numero totale di
+  caratteri differenti, a parità di posizione, tra due stringhe:
+  \[d:S\times S\to\mathbb{R}^+\]
+  con $S\times S$ insieme delle coppie di stringhe.\\
+  La distanza di Hamming gode di:
+  \begin{itemize}
+    \item \textbf{riflessività}: $d(x,y)=0\Longleftrightarrow x=y,\,\,\forall
+    x,y\in S$
+    \item \textbf{simmetria}: $d(x,y)=d(y,x),\,\,\,\forall
+    x,y\in S$
+    \item \textbf{diseguaglianza triangolare}: $d(x,y)+d(y,z)\leq
+    d(x,z),\,\,\,\forall x,y\in S$
+  \end{itemize}
+  \textbf{La distanza di Hamming è definita unicamente per stringhe di
+  egual lunghezza}
+\end{definizione}
+\section{Allineamento globale}
+Si analizza l'allineamento di due intere stringhe, si ha quindi un
+problema di \textbf{ottimo gloable}. Si analizzano due stringhe di
+lunghezza arbitraria e non uguale tra di loro. Ci si riconduce all'uso
+della distanza di Hamming inserendo spazi fino ad ottenere due
+stringhe di egual lunghezza per poter lavorare colonna per colonna.
+Si usano caratteri \textbf{indel} (\textit{in} inserisco e
+\textit{del} tolgo). Si hanno delle proprietà:
+\begin{itemize}
+  \item non si possono avere colonne di soli indel
+  \item le stringhe estese con gli indel devono essere lunghe uguali
+\end{itemize}
+Per esempio si ha quindi:
+\begin{center}
+  \includegraphics[scale = 0.7]{img/indel.png}
+\end{center}
+Un buon allineamento deve contenere pochi indel, molti caratteri
+allineati e pochi non allineati.\\
+\begin{definizione}
+  Un problema di ottimizzazione richiede:
+  \begin{itemize}
+    \item un'istanza che è un insieme infinito di casi
+    \item un insieme di soluzioni ammissibili verificabili in tempo
+    polinomiale
+    \item una funzione obiettivo, che è una soluzione ammissibile che
+    mappa in $\mathbb{Q}$
+    \item una soluzione che massimizza (massimizza il valore) o
+    minimizza (minimizza il costo) la funzione obiettivo
+  \end{itemize}
+\end{definizione}
+Si usa quindi la programmazione dinamica per stabilire uno score che
+cresce quando i valori delle colonne coincidono e quindi si cerca di
+massimizzare questo valore.\\
+Cerchiamo quindi l'equazione di ricorrenza di questo problema di
+massimizzazione.\\
+Innazitutto abbiamo come variabile una matrice di score:
+\[d:\left(\Sigma\cup\{-\}\right)\times\left\(\Sigma\cup
+    \{-\}\right)\to \mathbb{Q}\]
+Quindi date due stringhe $s_1$ e $s_2$ si ha che:
+\[M[i,j]=\mbox{ottimo su} s_1[:i],\,s_2[:j]\]
+con la seguente equazione di ricorrenza, detta di
+\textbf{Needleman-Wunsch} (si indicano con ``-'' gli indel):
+\[M[i,j]=\max
+  \begin{cases}
+    M[i-1,j-1]+d(s_1[i],s_2[j]) & \mbox{ se non ho indel}\\
+    M[i,j-1]+d(-,s_2[j]) & \mbox{se ho indel solo in }s_1\\
+    M[i-1,j]+d(s_1[i],-) & \mbox{se ho indel solo in }s_2
+  \end{cases}
+\]
+con le seguenti condizioni a contorno:
+\[
+  \begin{cases}
+    M[0,0]=0\\
+    M[i,0]=M[i-1,0]+d(-,s_2[j])\\
+    M[0,j]=M[0,j-1]+d(-,s_2[j])
+  \end{cases}
+\]
+Si ha quindi un doppio ciclo for e un tempo pari a $O(nm)$.\\
+Fino ad ora si è aprlato di \textbf{allineamento globale}. Si
+definisce invece \textbf{allineamento locale} l'individuazione di due
+sottostringhe $t_1\subseteq s_1$ e $t_2\subseteq s_2$. Date altre due
+sottostringhe $u_1,u_2$ delle 2 stringhe si ha che:
+\[All[t_1,t_2]\geq All[u_1,u_2]\]
+Un algoritmo banale avrebbe tempi assurdi: $O(n^3m^3)$.\\
+Questo problema si può risolvere velocemente con il metodo
+\textbf{Smith-Waterman}.
+ \\ \textbf{continuare}
 \end{document}

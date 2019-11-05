@@ -1,0 +1,293 @@
+\documentclass[a4paper,12pt, oneside]{book}
+
+% \usepackage{fullpage}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{engrec}
+\usepackage{rotating}
+\usepackage[safe,extra]{tipa}
+\usepackage{showkeys}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{enumerate}
+\usepackage{braket}
+\usepackage{marginnote}
+\usepackage{pgfplots}
+\usepackage{cancel}
+\usepackage{polynom}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{pdfpages}
+\usepackage{pgfplots}
+\usepackage[cache=false]{minted}
+
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
+
+\usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyhead[LO,RE]{\slshape \leftmark}
+\fancyfoot[C]{\thepage}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+
+
+\title{Assignment 1}
+\author{Davide Cozzi, 829827}
+\date{}
+
+\pgfplotsset{compat=1.13}
+\begin{document}
+\maketitle
+
+\definecolor{shadecolor}{gray}{0.80}
+\setlist{leftmargin = 2cm}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definizione}{Definizione}
+\newtheorem{esempio}{Esempio}
+\newtheorem{corollario}{Corollario}
+\newtheorem{lemma}{Lemma}
+\newtheorem{osservazione}{Osservazione}
+\newtheorem{nota}{Nota}
+\newtheorem{esercizio}{Esercizio}
+
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\chaptername
+    \ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\chapter{esercizio 1}
+Innazitutto definisco i due insiemi degli indici. Per le cotture abbiamo:
+\[C=\{G,V,GR\}\]
+dove:
+\begin{itemize}
+  \item $G=griglia$
+  \item $V=vapore$
+  \item $GR=gratinati$
+\end{itemize}
+per i piatti:
+\[P=\{P,Z,T,O\}\]
+dove:
+\begin{itemize}
+  \item $P=peperoni$
+  \item $Z=zucchine$
+  \item $T=totani$
+  \item $O=orate$
+\end{itemize}
+
+Quindi per $c\in C$ e $p\in P$ definisco $x_{c,p}$ il numero di piatti
+per cottura.\\
+Sappiamo poi che il costo delle verdure è pari a 5, dei totani è 7 e
+delle orate è 11.\\ 
+Definisco quindi la funzione obiettivo:
+\[\min(z)=\bigg\{5\cdot\sum_{i\in C}x_{i,P}+5\cdot\sum_{i\in
+    C}x_{i,Z}+7\cdot\sum_{i\in C}x_{i,T}+11\cdot\sum_{i\in
+    C}x_{i,O}\Bigg\}\]
+Dove con le varie sommatorie rappresentiamo la somma delle varie
+cotture per ogni piatto.\\
+Analizziamo ora i vincoli.\\
+Innanzitutto abbiamo che la somma dei piatti deve essere almeno
+100. Si ha quindi che la somma di ogni piatto per ogni cottura deve
+essere $\geq 100$:
+\[\sum_{i\in C}x_{i,P}+\sum_{i\in
+    C}x_{i,Z}+\sum_{i\in C}x_{i,T}+\sum_{i\in
+    C}x_{i,O}\geq 100\]
+Ovvero:
+\[\sum_{i\in C}\sum_{j\in P}x_{i,j} \geq 100\]
+Un altro vincolo consiste nell'avere i piatti cotti alla griglia di
+numero inferiore a 60:
+\[\sum_{i\in P}x_{G,i}\leq 60\]
+Abbiamo poi dicitura di indicare che il numero di ogni cottura deve
+essere uguale. Posso quindi esprimerlo con due vincoli, dicendo che le
+cotture alla griglia sono uguali sia a quelle al vapore che quelle
+gratinate (implicando quindi che le gratinate siano uguali a quella al
+vapore):
+\[\sum_{i\in P}x_{G,i}=\sum_{i\in P}x_{V,i}\]
+\[\sum_{i\in P}x_{G,i}=\sum_{i\in P}x_{GR,i}\]
+Rappresentiamo poi che le orate possono essere unicamente cotte alla
+griglia (specificando che per qualsiasi altra cottura il numero di
+piatti sarà nullo):
+\[\forall i\in \{V,GR\}:\,\,x_{i,O}=0\]
+Bisogna poi rappresentare che un piatto non può essere di numero
+negativo (per motivi logici):
+\[\forall i\in P,\,\,\forall j\in C:\,\, x_{i,j}\geq 0\]
+\newpage
+Siamo arrivati quindi a poter scrivere il nostro modello matematico:
+\begin{shaded}
+  \textbf{Funzione obiettivo:}
+  \[\min(z)=\Bigg\{5\cdot\sum_{i\in C}x_{i,P}+5\cdot\sum_{i\in
+      C}x_{i,Z}+7\cdot\sum_{i\in C}x_{i,T}+11\cdot\sum_{i\in
+      C}x_{i,O}\Bigg\}\]
+  \textbf{vincoli:}
+  \[
+    \begin{dcases}
+      \sum_{i\in C}\sum_{j\in P}x_{i,j} \geq 100\\
+      \sum_{i\in P}x_{G,i}\leq 60\\
+      \sum_{i\in P}x_{G,i}=\sum_{i\in P}x_{V,i}\\
+      \sum_{i\in P}x_{G,i}=\sum_{i\in P}x_{GR,i}\\
+      \forall i\in \{V, GR\}:\,\,x_{i,O}=0\\
+      \forall i\in P,\,\,\forall j\in C:\,\, x_{i,j}\geq 0
+    \end{dcases}
+  \]
+\end{shaded}
+\chapter{Esercizio 2}
+Innazitutto, procedendo con la risoluzione grafica, cerchiamo la
+regione ammissibile data dai vincoli.
+Prendendo il vincolo $x_1+2\cdot x_2 \leq 4$ cerchiamo l'area sottesa
+alla retta $x_1+2\cdot x_2 = 4$ (che ha $q=2$ e $m=4$):
+\begin{center}
+  \begin{pspicture}(0,-4.3089447)(12.817888,4.3089447)
+    \rput(4.808944,-2.2910554){\psaxes[linecolor=black, linewidth=0.04, tickstyle=full, axesstyle=axes, labels=all, ticks=all, dx=1.0cm, dy=1.0cm](0,0)(0,0)(6,6)}
+    \psline[linecolor=black, linewidth=0.04](0.008944397,2.1089447)(12.808945,-4.2910557)
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(4.808944,3.7089446)(4.808944,4.1089444)
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(10.808945,-2.2910554)(11.208944,-2.2910554)
+    \rput[bl](11.208944,-2.6910555){$x_1$}
+    \rput[bl](4.0089445,4.1089444){$x_2$}
+  \end{pspicture}
+\end{center}
+\newpage
+Prendiamo poi il secondo vincolo $x_1+\frac{1}{3}\cdot x_2\leq 2$. Procediamo
+nella stessa maniera di sopra, disegnando la retta ($x_1+\frac{1}{3}$
+che ha $q=6$ e $m=-3$) e ragionando sull'area sottesa:
+\begin{center}
+  
+  \begin{pspicture}(0,-4.2063246)(7.5,4.2063246)
+    \rput(0.8,-3.0){\psaxes[linecolor=black, linewidth=0.04, tickstyle=full, axesstyle=axes, labels=all, ticks=all, dx=1.0cm, dy=1.0cm](0,0)(0,0)(6,6)}
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,3.0)(0.8,3.3999999)
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(6.8,-3.0)(7.2,-3.0)
+    \rput[bl](7.2,-3.4){$x_1$}
+    \rput[bl](0.0,3.3999999){$x_2$}
+    \psline[linecolor=black, linewidth=0.04](0.4,4.2)(3.2,-4.2000003)
+  \end{pspicture}
+
+\end{center}
+L'ultimo vincolo mi specifica che sono nel primo quadrante del piano
+cartesiano (con ascisse e ordinate positive).\\
+Uniamo quindi le aree di interesse dei vincoli per ottenere la regione
+ammissibile:
+\begin{center}
+  \begin{pspicture}(0,-3.5319617)(7.5,3.5319617)
+    \definecolor{colour0}{rgb}{0.38431373,0.40784314,0.92941177}
+    \rput(0.8,-3.0680382){\psaxes[linecolor=black, linewidth=0.04, tickstyle=full, axesstyle=axes, labels=all, ticks=all, dx=1.0cm, dy=1.0cm](0,0)(0,0)(6,6)}
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,2.9319618)(0.8,3.3319616)
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(6.8,-3.0680382)(7.2,-3.0680382)
+    \rput[bl](7.2,-3.4680383){$x_1$}
+    \rput[bl](0.0,3.3319616){$x_2$}
+    \psline[linecolor=black, linewidth=0.04](0.8,2.9319618)(2.8,-3.0680382)
+    \psline[linecolor=black, linewidth=0.04](0.8,-1.0680383)(4.8,-3.0680382)
+    \pspolygon[linecolor=black, linewidth=0.04](0.8,-3.0680382)(2.8,-3.0680382)(2.4,-1.8680383)(0.8,-1.0680383)
+    \pspolygon[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour0](0.8,-3.0680382)(2.8,-3.0680382)(2.4,-1.8680383)(0.8,-1.0680383)
+  \end{pspicture}
+\end{center}
+\newpage
+I punti di interesse sono quindi $(0,2)$, $(2,0)$ e il punto di
+intersezione tra le due rette $x_1+\frac{1}{3}\cdotx_2=2$ e $x_1+2\cdot x_2 =
+4$.\\
+Calcoliamo quindi questo punto mettendo a sistema le due rette:
+\[
+  \begin{cases}
+    x_1+2\cdot x_2 = 4\\
+    x_1+\frac{1}{3}\cdot x_2=2
+  \end{cases}
+\]
+Risolviamo il sistema:
+\[\left(
+    \begin{matrix}
+      1 & 2 & | & 4\\
+      1  & \frac{1}{3} & | & 2
+    \end{matrix}\right)=\left(
+    \begin{matrix}
+      1 & 2 & | & 4\\
+      0 & -\frac{5}{3} & | & -2
+    \end{matrix}\right)
+\]
+Quindi $-\frac{5}{3}\cdot x_2 = -2$, ovvero $x_2 =
+\frac{6}{5}$. Sostituendo $x_2$ nella prima equazione otteniamo
+$x_1=\frac{8}{5}$.
+Abbiamo quindi i 3 punti di interesse: $(0,2)$, $(2,0)$ e
+$\left(\frac{8}{5}, \frac{6}{5}\right)$:
+\begin{center}
+  \begin{pspicture}(0,-3.7)(7.5,3.7)
+    \definecolor{colour0}{rgb}{0.38431373,0.40784314,0.92941177}
+    \rput(0.8,-2.9){\psaxes[linecolor=black, linewidth=0.04, tickstyle=full, axesstyle=axes, labels=all, ticks=all, dx=1.0cm, dy=1.0cm](0,0)(0,0)(6,6)}
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(0.8,3.1)(0.8,3.5)
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(6.8,-2.9)(7.2,-2.9)
+    \rput[bl](7.2,-3.3){$x_1$}
+    \rput[bl](0.0,3.5){$x_2$}
+    \psline[linecolor=black, linewidth=0.04](0.8,3.1)(2.8,-2.9)
+    \psline[linecolor=black, linewidth=0.04](0.8,-0.9)(4.8,-2.9)
+    \pspolygon[linecolor=black, linewidth=0.04](0.8,-2.9)(2.8,-2.9)(2.4,-1.7)(0.8,-0.9)
+    \pspolygon[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour0](0.8,-2.9)(2.8,-2.9)(2.4,-1.7)(0.8,-0.9)
+    \psdots[linecolor=black, dotsize=0.4](0.8,-0.9)
+    \psdots[linecolor=black, dotsize=0.4](2.4,-1.7)
+    \psdots[linecolor=black, dotsize=0.4](2.8,-2.9)
+    \rput[bl](2.6,-1.7){$\left(\frac{8}{5}, \frac{6}{5}\right)$}
+    \rput[bl](-0.2,-0.6){$(0,2)$}
+    \rput[bl](2.8,-4.0){$(2,0)$}
+  \end{pspicture}
+\end{center}
+Procediamo ora con la ricerca del massimo. Prendiamo la funzione
+obiettivo e calcoliamo la retta passante per l'origine. In questo caso
+avremmo $5\cdot x_1+4\cdot x_2 = 0$, che ha $q=0$ e
+$m=\frac{-5}{4}$. Per vedere quale dei tre punti è massimo vediamo le
+tre rette parallele a quella passante per l'origine è più lontana
+dall'origine stessa. Per farlo sostituiamo le coordinate dei punti in
+$5\cdot x_1+4\cdot x_2 $ ottenendo le tre $q$ che rappresentano le 3
+rette parallele.
+\newpage
+Per $(0,2)$ avremo $q=8$, per $(2,0)$ $q=10$ e per
+$\left(\frac{8}{5}, \frac{6}{5}\right)$ $q=\frac{64}{5}$. Disegnamo
+quindi le rette parallele, muovendoci aumentando $q$ (che corrisponde
+alla $z$ della funzione obiettivo):
+\begin{center}
+  \begin{pspicture}(0,-5.306292)(10.315545,5.306292)
+    \definecolor{colour0}{rgb}{0.38431373,0.40784314,0.92941177}
+    \rput(3.615545,-1.2937077){\psaxes[linecolor=black, linewidth=0.04, tickstyle=full, axesstyle=axes, labels=all, ticks=all, dx=1.0cm, dy=1.0cm](0,0)(0,0)(6,6)}
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(3.615545,4.706292)(3.615545,5.1062922)
+    \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,arrowlength=1.4,arrowinset=0.0]{->}(9.615545,-1.2937077)(10.015545,-1.2937077)
+    \rput[bl](10.015545,-1.6937077){$x_1$}
+    \rput[bl](2.815545,5.1062922){$x_2$}
+    \psline[linecolor=black, linewidth=0.04](3.615545,4.706292)(5.6155453,-1.2937077)
+    \psline[linecolor=black, linewidth=0.04](3.615545,0.7062923)(7.6155453,-1.2937077)
+    \pspolygon[linecolor=black, linewidth=0.04](3.615545,-1.2937077)(5.6155453,-1.2937077)(5.215545,-0.09370773)(3.615545,0.7062923)
+    \pspolygon[linecolor=black, linewidth=0.04, fillstyle=solid,fillcolor=colour0](3.615545,-1.2937077)(5.6155453,-1.2937077)(5.215545,-0.09370773)(3.615545,0.7062923)
+    \psdots[linecolor=black, dotsize=0.2](3.615545,0.7062923)
+    \psdots[linecolor=black, dotsize=0.2](5.215545,-0.09370773)
+    \psdots[linecolor=black, dotsize=0.2](5.6155453,-1.2937077)
+    \rput[bl](5.6155453,-0.09370773){$\left(\frac{8}{5}, \frac{6}{5}\right)$}
+    \psline[linecolor=black, linewidth=0.04, linestyle=dashed, dash=0.17638889cm 0.10583334cm](0.015545044,3.1062922)(6.815545,-5.293708)
+    \psline[linecolor=black, linewidth=0.04, linestyle=dashed, dash=0.17638889cm 0.10583334cm](0.995545,4.3862925)(7.795545,-4.0137076)
+    \psline[linecolor=black, linewidth=0.04, linestyle=dashed, dash=0.17638889cm 0.10583334cm](1.735545,4.186292)(8.535545,-4.213708)
+    \psline[linecolor=black, linewidth=0.04, linestyle=dashed, dash=0.17638889cm 0.10583334cm](1.2955451,3.6062922)(8.095545,-4.793708)
+  \end{pspicture}
+\end{center}
+Come si dimostra sia graficamente che matematicamente col calcolo
+del termine noto $q$ si ha che il punto di massimo cercato è il punto:
+\[P=\left(\frac{8}{5}, \frac{6}{5}\right)\]
+quindi:
+\begin{shaded}
+ il valore che massimizza la funzione obiettivo è $\left(\frac{8}{5},
+   \frac{6}{5}\right)$ con $z=\frac{64}{5}$
+\end{shaded}
+\end{document}

@@ -747,25 +747,23 @@ Fino ad ora si è aprlato di \textbf{allineamento globale}. Si
 definisce invece \textbf{allineamento locale} l'individuazione di due
 sottostringhe $t_1\subseteq s_1$ e $t_2\subseteq s_2$. Date altre due
 sottostringhe $u_1,u_2$ delle 2 stringhe si ha che:
-\[All[t_1,t_2]\geq All[u_1,u_2]\]
-Indicando con $All(str_1,str_2)$ una funzione che restituisce il
-punteggio massimo.\\
+\[M[t_1,t_2]\geq M[u_1,u_2]\]
 Un algoritmo banale avrebbe tempi assurdi: $O(n^3m^3)$.\\
 Questo problema si può risolvere velocemente con il metodo
 \textbf{Smith-Waterman}.\\
 Con questo metodo l'allineamento viene ricercato tra tutte le
 sottostribghe terminanti nelle posizioni $i$ e $j$, ovvero
 $t_1=s_1[h,i]$ e $t_2=s_2[k,j]$, con $h$ e $k$ incogniti e con massimo
-valore di $All[t_1,t_2]$. Si richiede inoltre che l'allineamento
+valore di $M[t_1,t_2]$. Si richiede inoltre che l'allineamento
 ottimo abbia un'ultima colonna senza indel. Grazie a questa clausola
 si ha che $s_1[h,i-1]$ e $s_2[h,j-1]$ è l'allineamento ottimale delle
 sottostrighe terminanti un carattere prima di $i$ e $j$. Supponiamo
 che queste ultime due sottostringhe inizino da $a$ e $b$ e che:
-\[All(s_1[a,i-1],s_2[b,j-1])>All(s_1[h,i-1],s_2[k,j-1])\]
+\[M(s_1[a,i-1],s_2[b,j-1])>M(s_1[h,i-1],s_2[k,j-1])\]
 Aggiungiamo ora anche la colonna $i$ e quella $j$. Se si hanno
 caratteri uguali nell'ultima colonna si ha che:
-\[All(s_1[a,i],s_2[b,j])>All(s_1[h,i],s_2[k,j])\]
-Ma questo è un assurdo essendo $All(s_1[h,i],s_2[k,j]$ massimo per
+\[M(s_1[a,i],s_2[b,j])>M(s_1[h,i],s_2[k,j])\]
+Ma questo è un assurdo essendo $M(s_1[h,i],s_2[k,j]$ massimo per
 ipotesi.\\
 Questo ragionamento si estende anche ai casi in cui ci sia un'indel a
 termine di una delle due stringhe. Si introduce anche un nuovo caso,
@@ -794,4 +792,81 @@ Graficamente si ha:
 \begin{definizione}
   Si definisce \textbf{gap} una sequenza contigua di indel
 \end{definizione}
+\begin{definizione}
+  La \textbf{distanza di Edit} è la trasformazione di una stringa in
+  un'altra tramite l'inserimento, la cacncellazione o la modifica di
+  un carattere. Inoltre si ha che la distanza di edit è un caso
+  particolare dell'allineamento globale tra due sequenze.\\
+  \textbf{L'allineamento globale racchiude tutte le possibili
+    casistiche delle distenze di Edit}.\\
+  Si ha la seguente equazione di ricorrenza:
+  \[M[i,j]=\min
+    \begin{cases}
+      M[i-1,j-1] & \mbox{se} s_1[i]=s_2[j]\\
+      M[i-1,j] & \mbox{se viene cancellato un carattere}\\
+      M[i,j-1] & \mbox{se viene aggiunto un carattere}\\
+      M[i-1,j-1]+1 & \mbox{se viene modificato un carattere}
+    \end{cases}
+  \]
+\end{definizione}
+Sulla stringa si procede da sinistra a destra.\\
+Quindi il costo di ogni mismatch è pari a 1. \\
+La distanza di Edit ha tempo $O(nm)$
+\textbf{rivedere completamente}
+\begin{shaded}
+  Con LCS abbiamo un problema di massimizzazione dove mettiamo nella
+  matrice di score 1 in corrispondenza di caratteri uguali e 0 negli
+  altri casi. Con la distanza di Edit abbiamo 0 in caso di uguali
+  caratteri e 1 nelle altre posizioni. Le due matrici di score sono
+  quindi complementari. 
+\end{shaded}
+Facciamo un altro ragionamento. Penso ad un allineamento di minimo
+costo dove ``taglio'' un prefisso e un suffisso delle due stringhe,
+ovviamente un prefisso o un suffisso di una delle due stringhe.
+Quindi, dato che parliamo di minimizzazione, quanto taglio ha
+costo 0. Bisogna trovare un modo per imporre costo 0 per i caratteri
+scartati ragionando sull'equazione di ricorrenza \textbf{senza toccare la
+  matrice di score}. Basta modificare le condizioni a contorno,
+mettendo a 0 la prima riga e la prima colonna:
+\[
+  \begin{cases}
+    M[0,0]=0\\
+    M[i,0]=0\\
+    M[0,j]=0
+  \end{cases}
+\]
+\textbf{Abbiamo quindi una nuova variante dell'allineamento globale
+  dove minimizziamo il costo e non massimiziamo la validità, scartando
+  un prefisso di una delle due stringhe}.\\
+\textit{Questo proedimento è comodo se si hanno stringhe di lunghezza
+  molto diversa, trovando un allineamento buono in modo che dove si
+  allineano si abbiano pochi indel}.\\
+Abbiamo visto come scartare un prefisso, ora ragioniamo sul suffisso.
+Cerco quindi il minimo nell'ultima riga e nell'ultima colonna e
+decido di conseguenza quale suffisso scartare e i quale stringa (se è
+nell'ultima riga scarto da $s_2$, se nella colonna è in $s_1$).\\
+Un altra variante prevede una lunghezza $k$ del prefisso o suffisso
+da scartare. Per il suffisso ragiono solo le ultime $k$ posizioni
+nell'ultima riga e dell'ultima colonna, mentre per il prefisso metto 0
+solo nelle prime k posizioni della prima riga e della prima colonna.\\
+In ogni caso per ricorstruire risalgo fino ad un 0.\\
+Analizziamo un ulteriore approccio. Questa volta si è interessati solo
+al costo di un allineamento globale, cercando però di ottimizzare
+sullo spazio. Per calcolare $M[i,j]$, essendo una LCS, mi bastano solo
+il valore a sinistra $M[i-1,j]$, quello sopra $M[i,j-1]$ e quello
+precedente sulla diagonale $M[i-1,j-1]$. Quindi mi basta tenere la
+riga o la colonna in cui sono e la riga o la colonna precedente,
+scegliendo la riga o la  colonna in base alla loro lunghezza, che
+corrisponde quindi alla lunghezza della stringa (se $s_2$ è più corta
+scelgo la riga altrimenti, se $s_1$ è più corta, la colonna). Non
+serve quindi tenere tutta la matrice e posso quindi risparmiare
+spazio.\\
+Ora restringiamo ancora l'allineamento, cercando di risolvere
+l'allineamento su stringhe molto simili, in maniera ancora più
+ottimizzata sfruttando la similarità. In altre parole si ha la
+distanza di Edit con un numero di operazioni che è al massimo un
+valore $k$, tutto in $O(kn)$. Voglio ridurre il tempo di calcolo dela
+distanza di Edit sapendo che vale al massimo $k$. Avrò quindi al
+massimo $kn$ caselle.\\
+\textbf{to be continued}
 \end{document}

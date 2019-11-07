@@ -934,10 +934,64 @@ una casella costa $i+j+1$:
 E non si può scendere sotto questo caso pessimo. Ipotizziamo di
 dividere in 4 la matrice, del quadrante in basso a destra ho $i\geq
 \frac{n}{2}$ e $j\geq\frac{m}{2}$ e quindi ho
-\[t\geq \frac{nm}{4}(\frac{n}{2}+\frac{m}{2})\geq \frac{1}{8}nm(n+m)\]
+\[t\geq \frac{nm}{4}\left(\frac{n}{2}+\frac{m}{2}\right)\geq
+  \frac{1}{8}nm(n+m)\]
 tutto questo solo nell'ultimo quadrante. È quindi impossibile scendere
-sotto quel caso pessimo. \textbf{Questo è il ``prezzo da pagare'' per
-  avere costo di gap generico, dove un gap lungo $n$ costa meno di $n$
-  gaps lunghi 1}.\\
+sotto quel caso pessimo. \textbf{Questo, $O(nm(n+m))$, è il ``prezzo
+  da pagare'' per avere costo di gap generico, dove un gap lungo $n$
+  costa meno di $n$ gaps lunghi 1}.\\
+Bisogna quindi cambiare approccio per migliorare l'algoritmo,
+riducendo i valori da calcolare, in quanto ora leggo tutti i valori
+sopra, tutti quelli a sinistra e quello precedente sulla diagonale. Si
+passa al \textbf{gap affine o lineare}, dove si ha una penlità $P_o$
+di apertura del gap più $l$ volte quella di estenione del gap $P_e$:
+\[costo=P_o+l\cdot P_e,\,\,\,P_e,P_o>0\]
+Quindi la creazione costa un valore che tiene conto di $P_o$ e $P_e$
+mentre l'aumento del gap varia solo su $P_e$. Vista questa situazione
+cerco le casistiche dell'ultima componente da guardare. Alla
+situazione di prima si aggiungono dei casi. Si cerca l'allineamento
+ottimo di $s_1[i-1]$ e $s_2[j:]$ sotto la condizione che l'ultima
+colonna di tale allineamento abbia un indel per $s_2$ (e si cerca
+anche il problema simmetrico a questo per $s_1$). Si hanno quindi
+ottimi vincolati.
+\newpage
+Si ha quindi: 
+\[M[i,j]=\mbox{ ottimo su } s_1[:i],\,s_2[:j]\]
+\[E_1[i,j]=\mbox{ ottimo su } s_1[:i],\,s_2[:j] \mbox{ con estensione
+    di gap finale in }s_1\]
+\[E_2[i,j]=\mbox{ ottimo su } s_1[:i],\,s_2[:j] \mbox{ con estensione
+    di gap finale in }s_1\]
+\[E_1[i,j]=\mbox{ ottimo su } s_1[:i],\,s_2[:j] \mbox{ con apertura
+    di gap alla fine di }s_1\]
+\[N_2[i,j]=\mbox{ ottimo su } s_1[:i],\,s_2[:j] \mbox{  con apertura
+    di gap alla fine di }s_2\]
+quindi:
+\[M[i,j]=\max
+  \begin{cases}
+    M[i-1,j-1]+d(s_1[i],s_2[j])\\
+    E_1[i,j],E_2[i,j]\\
+    N_1[i,j],N_2[i,j]
+  \end{cases}
+\]
+\[E_1[i,j]=\max
+  \begin{cases}
+    E_1[i,j-1]+P_e\\
+    N_1[i,j-1]+P_e
+  \end{cases}
+\]
+\[E_2[i,j]=\max
+  \begin{cases}
+    E_2[i-1,j]+P_e\\
+    N_2[i-1,j]+P_e
+  \end{cases}
+\]
+\[N_1[i,j]=M[i,j-1]+P_o+P_e\]
+\[N_2[i,j]=M[i-1,j]+P_o+P_e\]
+Si ha quindi tempo costante per ogni casella e ottengo tempo pari a
+$O(nm)$ anche se ho una costante superiore (5) che moltiplica $nm$ da
+considerare i termini di spazio.\\
+\textit{Si può volendo compattare in 3 matrici.}\\
+\textbf{Ho programmazione dinamica in termini di soluzioni di
+  sottoistanze ottime di altri problemi collegati al primo}\\
 
 \end{document}

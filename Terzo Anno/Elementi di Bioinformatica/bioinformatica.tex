@@ -790,9 +790,6 @@ Graficamente si ha:
   \includegraphics[scale = 0.5]{img/sw.png}
 \end{center}
 \begin{definizione}
-  Si definisce \textbf{gap} una sequenza contigua di indel
-\end{definizione}
-\begin{definizione}
   La \textbf{distanza di Edit} è la trasformazione di una stringa in
   un'altra tramite l'inserimento, la cacncellazione o la modifica di
   un carattere. Inoltre si ha che la distanza di edit è un caso
@@ -802,7 +799,7 @@ Graficamente si ha:
   Si ha la seguente equazione di ricorrenza:
   \[M[i,j]=\min
     \begin{cases}
-      M[i-1,j-1] & \mbox{se} s_1[i]=s_2[j]\\
+      M[i-1,j-1] & \mbox{se } s_1[i]=s_2[j]\\
       M[i-1,j] & \mbox{se viene cancellato un carattere}\\
       M[i,j-1] & \mbox{se viene aggiunto un carattere}\\
       M[i-1,j-1]+1 & \mbox{se viene modificato un carattere}
@@ -868,5 +865,79 @@ distanza di Edit con un numero di operazioni che è al massimo un
 valore $k$, tutto in $O(kn)$. Voglio ridurre il tempo di calcolo dela
 distanza di Edit sapendo che vale al massimo $k$. Avrò quindi al
 massimo $kn$ caselle.\\
-\textbf{to be continued}
+Sapendo che ho la distanza di Edit tra le due stringhe  vale al
+massimo $k$ e che le due stringhe sono lunghe $n$ e $m$ so che:
+\[|n-m|\leq k\]
+Si ha quindi una matrice di programmazione dinamica che è quasi
+quadrata. Si ha che le parti che non costano corrispondono ad uno
+spostamento sulla diagonale, quindi al diminuire della distanza di
+Edit mi avvicino alla diagonale principale. Posso quindi non
+considerare le caselle lontane della diagonale. È l'\textbf{allineamento
+  mediante distanza di Edit con banda}, ovvero seleziono un intorno
+della diagonale principale (appunto una banda) da analizzare, perché
+fuori dalla stessa avrò solo soluzioni non ottimali.\\
+\textbf{disegno}\\
+Si arricchiscono ancora le condizioni a contorno della ricorrenza
+della distanza di Edit, ponendo a $-\infty$ le caselle in cui
+$|i-j|\geq k$ (nel codice si avrebbe solo questo controllo).
+Si potrebbe però non conoscere $k$ o si potrebbe avere un $k$
+sbagliato, portando ad una soluzione non ottima (magari perché questa
+soluzione vorebbe ``uscire'' nell'area fuori dalla banda). Si procede
+quindi raddoppiando $k$ e mi fermo quando la distanza di Edit $edit$ è,
+per un certo $h$ che alla fine varrà $h^*=\log_2 edit$:
+\[2^{h-1}<edit<2^h\]
+Ho quindi tempo complessivo pari a:
+\[\sum_{i=0}^{h^*}O(2^in)=O(n)\cdot\sum_{i=0}^{h^*}O(2^i)=O(n)\cdot
+  (2^{h^*+1}-1)\sim O(n)\cdot (2^{h^*}-1)\]
+\[\Downarrow\]
+\[O(n)\cdot (2\cdot edit -1)=O(n\cdot edit)\]
+Abbiamo quindi un buon tempo, rispetto a $O(nm)$.\\
+\textit{Si raddoppia per essere comodi coi conti con il logaritmo.}\\
+\textbf{Ovviamente questa strategia funziona bene sse le stringhe sono
+  abbastanza simili, con $k<<n$ e $k<<m$.}\\
+Vediamo un'altra variante di allineamento. Ogni volta che si
+introducono indel si ha un forte ``significato'' biologico. Quando si
+aggiunge un indel si sposta il frame di lettura e si shiftano di uno i
+codoni. 
+\begin{definizione}
+  Si definisce \textbf{gap} una sequenza contigua di indel
+\end{definizione}
+Si ha che tra inserire un indel e un gap si ha poca differenza. Si ha
+quindi che ogni gap è associato ad un costo legato alla sua lunghezza
+$P(l)$. Per l'allineamento separo quindi in match e mismatch tra
+caratteri e in costi in presenza di gap.\\
+Si vuole ottenere che allungare di uno un gap deve avere costo
+costante (allungare un gap da 1 a 2 deve costare come da 11 a 12).\\
+L'ultima colonna dell'allineamento ottimo quindi varia rispetto a
+quella standard dell'allineamento globale.\\
+Quindi $M[i,j]$ è l'allineameno ottimo si $s_i[1:]$ e $s_2[:j]$.\\
+Cerco quindi la mia equazione di ricorrenza dove si devono considerare
+i gap. Ma non posso scrivere un'unica equazione di ricorrenza che
+consideri tutte le possibili lunghezze dei gap. Cerco quindi l'ultima
+componente per la matrice della programmazione dinamica, che sono
+l'ultima colonna in assenza di gap o la posizione dell'ultimo
+gap. Ottengo quindi:
+\[M[i,j]=\max
+  \begin{cases}
+    M[i-1,j-1]+d(s_i[i],s_2[j]) & \mbox{se non ho gap} \\
+    \max_{l>0} M[i,j-l]+P(l) & \mbox{se ho gap in }$s_1$ \\
+    \max_{l>0} M[i-l,j]+P(l) & \mbox{se ho gap in }$s_2$
+  \end{cases}
+\]
+Ponendo come condizione a contorno che:
+\[M[0,0]=0\]
+\[M[i,0]=P(i)\]
+\[M[0,j]=P(j)\]
+Per i tempi ho, con un'analisi iniziale grezza, sapendo che riempire
+una casella costa $i+j+1$:
+\[\sum_{i=0}^n\sum_{j=0}^m(i+j)\leq nm(n+m)=n^2m+nm^2\]
+E non si può scendere sotto questo caso pessimo. Ipotizziamo di
+dividere in 4 la matrice, del quadrante in basso a destra ho $i\geq
+\frac{n}{2}$ e $j\geq\frac{m}{2}$ e quindi ho
+\[t\geq \frac{nm}{4}(\frac{n}{2}+\frac{m}{2})\geq \frac{1}{8}nm(n+m)\]
+tutto questo solo nell'ultimo quadrante. È quindi impossibile scendere
+sotto quel caso pessimo. \textbf{Questo è il ``prezzo da pagare'' per
+  avere costo di gap generico, dove un gap lungo $n$ costa meno di $n$
+  gaps lunghi 1}.\\
+
 \end{document}

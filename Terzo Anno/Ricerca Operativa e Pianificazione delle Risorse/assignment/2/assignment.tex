@@ -1,0 +1,485 @@
+\documentclass[a4paper,12pt, oneside]{book}
+
+% \usepackage{fullpage}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{engrec}
+\usepackage{rotating}
+\usepackage[safe,extra]{tipa}
+\usepackage{showkeys}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{enumerate}
+\usepackage{braket}
+\usepackage{marginnote}
+\usepackage{pgfplots}
+\usepackage{cancel}
+\usepackage{polynom}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{pdfpages}
+\usepackage{pgfplots}
+\usepackage[cache=false]{minted}
+
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
+
+\usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyhead[LO,RE]{\slshape \leftmark}
+\fancyfoot[C]{\thepage}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+
+
+\title{Assignment 2}
+\author{Davide Cozzi, 829827}
+\date{}
+
+\pgfplotsset{compat=1.13}
+\begin{document}
+\maketitle
+
+\definecolor{shadecolor}{gray}{0.80}
+\setlist{leftmargin = 2cm}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definizione}{Definizione}
+\newtheorem{esempio}{Esempio}
+\newtheorem{corollario}{Corollario}
+\newtheorem{lemma}{Lemma}
+\newtheorem{osservazione}{Osservazione}
+\newtheorem{nota}{Nota}
+\newtheorem{esercizio}{Esercizio}
+
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\chaptername
+    \ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\chapter{Esercizio 1}
+\section{Parte a}
+Innanzitutto dobbiamo scrivere il problema in forma standard
+introducendo 3 variabili di slack $s_1, s_2, s_3$. Otteniamo quindi la
+seguente funzione obiettivo:
+\[\max z=2x_1-x_2+x_3\]
+soggetta ai seguenti vincoli:
+\[3x_1+x_2+x_3+s_1\qquad\qquad\leq 60\]
+\[x_1-x_2+2x_3\qquad+ s_2\qquad\leq 10\]
+\[x_1+x_2-x_3 \qquad\qquad+s_3\leq 20\]
+con i seguenti vincoli di dominio:
+\[x_1,x_2,x_3,s_1,s_2,s_3\geq 0\]
+Scriviamo quindi il tableau, ricordandoci di invertire il segno dei
+coefficienti della funzione obiettivo:
+\begin{center}
+  \begin{tabular}{c|cccccc}
+    & $x_1$ & $x_2$ & $x_3$ & $s_1$ & $s_2$ & $s_3$\\
+    \hline
+    0 & -2 & 1 & -1 & 0 & 0 & 0\\
+    \hline
+    60 & 3 & 1 & 1 & 1 & 0 & 0\\
+    10 & 1 & -1 & 2 & 0 & 1 & 0\\
+    20 & 1 & 1 & -1 & 0 & 0 & 1
+  \end{tabular}
+\end{center}
+abbiamo quindi le variabili di slack in base e le variabili del
+problema originale fuori base.\\
+Nella prima riga, detta $riga_0$, si leggono i tassi di miglioramento.
+Si capirà di essere giunti alla soluzione ottimale quando non si avranno
+coefficienti negativi come tassi di miglioramento.\\
+Partiamo con la \textbf{prima iterazione}.\\
+Scegliamo la variabile da far entrare in base e scegliamo quella col
+tasso di miglioramento più grande, in questo caso $x_1$ che ha tasso
+di miglioramento pari a $-2$, e chiamiamo \textbf{colonna pivot}
+la colonna sottostante:
+\[
+  \left[\begin{matrix}
+    3\\
+    1\\
+    1
+  \end{matrix}\right]
+\]
+Iniziamo ora a cercare la variabile uscente. Si parte col \textbf{test
+  del minimo rapporto}. Prendo i rapporti tra i termini noti e i
+corrispettivi coefficienti positivi (tutti nel nostro caso) della
+colonna pivot e ne cerco il minimo:
+\[\min\Bigg\{\frac{60}{3}, \frac{10}{1},\frac{20}{1}\Bigg\}\]
+e notiamo che il minimo, $10$, corrisponde al rapporto tra il termini
+della seconda riga, che diventa quindi la nostra \textbf{riga pivot}:
+\[\left[
+    10,1,-1,2,0,1,0
+  \right]\]
+L'incrocio tra riga e colonna pivot corrisponde al nostro
+\textbf{elemento di pivot}, che, in questo caso, è pari a 1.
+Divido ora la riga pivot per l'elemento pivot (anche se in questo caso
+è un'operazione banale essendo il pivot pari a 1) e riscrivo il
+tableau con la nuova riga pivot:
+\begin{center}
+  \begin{tabular}{c|cccccc}
+    & $x_1$ & $x_2$ & $x_3$ & $s_1$ & $s_2$ & $s_3$\\
+    \hline
+    0 & -2 & 1 & -1 & 0 & 0 & 0\\
+    \hline
+    60 & 3 & 1 & 1 & 1 & 0 & 0\\
+    10 & 1 & -1 & 2 & 0 & 1 & 0\\
+    20 & 1 & 1 & -1 & 0 & 0 & 1
+  \end{tabular}
+\end{center}
+manipolo ora il tableau in modo da annullare tutti i valori della
+colonna pivot tranne il pivot stesso. Effettuo quindi le seguenti
+operazioni tra righe:
+\[riga_0=riga_0+2riga_2\]
+\[riga_1=riga_1-3riga_2\]
+\[riga_3=riga_3-riga_2\]
+ottenendo quindi un nuovo tableau:
+\begin{center}
+  \begin{tabular}{c|cccccc}
+    & $x_1$ & $x_2$ & $x_3$ & $s_1$ & $s_2$ & $s_3$\\
+    \hline
+    20 & 0 & -1 & 3 & 0 & 2 & 0\\
+    \hline
+    30 & 0 & 4 & -5 & 1 & -3 & 0\\
+    10 & 1 & -1 & 2 & 0 & 1 & 0\\
+    10 & 0 & 2 & -3 & 0 & -1 & 1
+  \end{tabular}
+\end{center}
+Qundi ora in base abbiamo $x_1,s_1,s_3$ mentre $s_2$ esce dalla
+base.\\
+Sulla riga 0 abbiamo i nuovi tassi di miglioramento e, avendo ancora
+valori negativi, sappiamo che non abbiamo raggiunto la soluzione
+ottimale. Quindi il primo valore della $riga_0$, 20, non è il valore
+ottimale della funzione obiettivo.\\
+Procedo quindi con la \textbf{seconda iterazione}.\\
+Il tasso di miglioramento maggiore è $-1$ quindi vogliamo far entrare
+in base $x_2$. La colonna pivot sarà quindi:
+\[
+  \left[\begin{matrix}
+    4\\
+    -1\\
+    2
+  \end{matrix}\right]
+\]
+Facciamo nuovamente il test del rapporto minimo, ricordando di
+prendere solo i valori strettamente positivi della colonna pivot:
+\[\min\Bigg\{\frac{30}{4}, \frac{10}{2}\Bigg\}\]
+e il minimo, 5, corriponde ai rapporti tra i valori della terza riga
+che qindi diventa la nostra riga pivot:
+\[[10,0.2,-3,0,-1,1]\]
+Il nostro elemento pivot corriponde quindi a 2.\\
+Divido ora la riga pivot per l’elemento pivot e riscrivo il tableau:
+\begin{center}
+  \begin{tabular}{c|cccccc}
+    & $x_1$ & $x_2$ & $x_3$ & $s_1$ & $s_2$ & $s_3$\\
+    \hline
+    20 & 0 & -1 & 3 & 0 & 2 & 0\\
+    \hline
+    30 & 0 & 4 & -5 & 1 & -3 & 0\\
+    10 & 1 & -1 & 2 & 0 & 1 & 0\\
+    5 & 0 & 1 & $-\frac{3}{2}$ & 0 & $-\frac{1}{2}$ & $\frac{1}{2}$
+  \end{tabular}
+\end{center}
+manipolo ora il tableau in modo da annullare tutti i valori della colonna pivot
+tranne il pivot stesso. Effettuo quindi le seguenti operazioni tra
+righe:
+\[riga_0=riga_0+riga_3\]
+\[riga_1=riga_1-4riga_3\]
+\[riga_2=riga_2+riga_3\]
+ottengo quindi il nuovo tableau:
+\begin{center}
+  \begin{tabular}{c|cccccc}
+    & $x_1$ & $x_2$ & $x_3$ & $s_1$ & $s_2$ & $s_3$\\
+    \hline
+    25 & 0 & 0 & $\frac{3}{2}$ & 0 & $\frac{3}{2}$ & $\frac{1}{2}$\\
+    \hline
+    10 & 0 & 0 & 7 & 1 & -1 & -2\\
+    15 & 1 & 0 & $\frac{1}{2}$ & 0 & $\frac{1}{2}$ & $\frac{1}{2}$\\
+    5 & 0 & 1 & $-\frac{3}{2}$ & 0 & $-\frac{1}{2}$ & $\frac{1}{2}$
+  \end{tabular}
+\end{center}
+quindi $x_2$ è entrato in base mentre $s_3$ esce dalla base.\\
+\textbf{Non si hanno più tassi di miglioramento negativi, abbiamo
+  trovato la soluzione ottimale}.\\
+Quindi siamo giunti alla risoluzione:
+\begin{shaded}
+  \noindent Il punto di massimo è dato da $(15,5,0,10,0,0)$\\
+  Il massimo è $25$
+\end{shaded}
+\section{Parte b}
+Dobbiamo scrivere il problema duale della funzione obiettivo:
+\[\max z=2x_1-x_2+x_3\]
+soggetta ai seguenti vincoli:
+\[3x_1+x_2+x_3\leq 60\]
+\[x_1-x_2+2x_3\leq 10\]
+\[x_1+x_2-x_3 \leq 20\]
+con i seguenti vincoli di dominio:
+\[x_1,x_2,x_3\geq 0\]
+Innazitutto bisogna invertire cosa si ricerca nella funzione obiettivo
+del problema primale. Nel nostro caso il problema primale cerca il
+massimo quindi il duale cercherà il minimo. Inoltre i termini noti
+dei vincoli del primale diventeranno i coefficienti della funzione
+obiettivo del duale e i coefficienti della funzione obiettivo del
+problema primale diventeranno i termini noti dei vincoli. Nei vincoli
+si cambia anche il ``verso'' quindi $\leq$ diventerà $\geq$, mentre i
+vincoli di dominio conservano il ``verso''. Infine i coefficienti dei
+vincoli del problema duale non sono altro che la matrice trasposta dei
+coefficienti del problema primale.
+\newpage
+Si ottiene quindi la seguente
+funzione obiettivo per il problema duale:
+\[\min z^*=60y_1+10y_2+20y_3\]
+Con i seguenti vincoli:
+\[3y_1+y_2+y_3\geq 2\]
+\[y_1-y_2+y_3\geq -1\]
+\[y_1+2y_2-y_3\geq 1\]
+con i seguenti vincoli di dominio:
+\[y_1,y_2,y_3\geq 0\]
+Prodedo ora cercando il punto di ottimo del duale col teorema degli
+scarti.\\
+Procedo usando il teorema, ricordando che $x_1=15$, $x_2=10$ e
+$x_3=0$.\\
+Applico quindi le condizioni di complementarietà:
+\begin{itemize}
+  \item $y_1\cdot(3x_1+x_2+x_3-60)=0$, sostituisco le $x_i$ e ottengo
+  $y_1\cdot (-10)=0$ quindi $y_1=0$ che è la \textbf{prima condizione}
+  \item $y_2\cdot(x_1-x_2+2x_3-10)=0$  sostituisco le $x_i$ e ottengo
+  $y_2\cdot (0)=0$ quindi\textbf{ non posso dedurre alcuna condizione di
+  complementarietà} su $y_2$
+  \item $y_3\cdot(x_1+x_2-x_3-20)=0$, sostituisco le $x_i$ e ottengo
+  $y_3\cdot (0)=0$ \textbf{quindi non posso dedurre alcuna condizione di
+    complementarietà} su $y_3$
+  \item $(3y_1+y_2+y_3-2)\cdot x_1=0$ che corrisponde a
+  $(3y_1+y_2+y_3-2)\cdot 15=0$ quindi $3y_1+y_2+y_3-2=0$ è la
+  \textbf{seconda condizione}
+  \item $(y_1-y_2+y_3+1)\cdot x_2=0$ che corrisponde a
+  $(y_1-y_2+y_3+1)\cdot 5=0$ quindi $y_1-y_2+y_3+1=0$ è la
+  \textbf{terza condizione}
+  \item $(y_1+2y_2-y_3-1)\cdot x_3=0$ che corrisponde a
+  $(y_1+2y_2-y_3-1)\cdot 0=0$ \textbf{quindi non è possibile dedurre alcuna
+    condizione di complementarietà sul primo vincolo duale}
+\end{itemize}
+\newpage
+risolvo quindi il sistema con le 3 condizioni trovate:
+\[
+  \begin{cases}
+    y_i=0\\
+    3y_1+y_2+y_3-2=0\\
+    y_1-y_2+y_3+1=0
+  \end{cases}
+\]
+\[\Downarrow\]
+\[
+  \begin{cases}
+    y_i=0\\
+    3y_1+y_2+y_3=2\\
+    y_1-y_2+y_3=-1
+  \end{cases}
+\]
+\[\Downarrow\]
+\[
+  \begin{cases}
+    y_i=0\\
+    y_2+y_3=2\\
+    y_2+y_3=-1
+  \end{cases}
+\]
+Ottengo quindi:
+\begin{shaded}
+  \[
+    \begin{cases}
+      y_1=0\\
+      y_2=\frac{3}{2}\\
+      y_3=\frac{1}{2}
+    \end{cases}
+  \]
+  e sostituendo nella funzione obiettivo del problema duale ottengo
+  esattamente $z^*=25$ quindi la soluzione è congruente. Inoltre,
+  sempre sostitutendo, verifico che tutti i vincoli (compresi quelli
+  di dominio) sono rispettati, verificando così la correttezza dei
+  risultati ottenuti.
+\end{shaded}
+\chapter{Esercizio 2}
+Partiamo dalla seguente funzione obiettivo:
+\[\max z=3x_1+4x_2\]
+soggetta ai seguenti vincoli:
+\[x_1+2x_2\leq 4\]
+\[x_1+\frac{1}{3}x_2\leq 2\]
+con i seguenti vincoli di dominio:
+\[x_1,x_2\geq 0\]
+Sappiamo, grazie al testo, che si ha il seguente tableau finale:
+\begin{center}
+  \begin{tabular}{c|cccc}
+    & $x_1$ & $x_2$ & $s_1$ & $s_2$\\
+    \hline
+    $\frac{64}{5}$ & 0 & 0 & $\frac{7}{5}$ & $\frac{18}{5}$\\
+    \hline
+    $\frac{6}{5}$ & 0 & 1 & $\frac{3}{5}$ & $-\frac{3}{5}$\\
+    $\frac{8}{5}$ & 1 & 0 & $-\frac{1}{5}$ & $\frac{6}{5}$\\
+  \end{tabular}
+\end{center}
+Procediamo per punti:
+\begin{itemize}
+  \item cerchiamo gli intervalli di ammissibilità dei termini noti
+  $b_i$:
+  \begin{itemize}
+    \item il primo è $b_1=4$. Sappiamo che al primo vincolo è
+    associata la variabile di slack $s_1$ la quale può modificare il
+    valore del termine noto. Prendendo il tableau finale dobbiamo
+    ottenere che i termini noti restino positivi al più di $\Delta_1$
+    volte il valore della variabile di slack in quella riga. Ottengo quindi
+    il sistema:
+    \[
+      \begin{cases}
+        \frac{6}{5}+\frac{3}{5}\Delta_1\geq 0\\
+        \frac{8}{5}-\frac{1}{5}\Delta_1\geq 0
+      \end{cases}
+    \]
+    Risolvendo il sistema ottengo $-2\leq \Delta_1\leq 8$ e quindi
+    l'intervallo di ammissibilità di $b_1$:
+    \begin{shaded}
+      $b_1\in [4-2, 4+8]=[2,12]$
+    \end{shaded}
+    \item il secondo è $b_2=2$. Sappiamo che al secondo vincolo è
+    associata la variabile di slack $s_2$  la quale può modificare il
+    valore del termine noto. Prendendo il tableau finale dobbiamo
+    ottenere che i termini noti restino positivi al più di $\Delta_2$
+    volte il valore della variabile di slack in quella riga. Ottengo quindi
+    il sistema:
+    \[
+      \begin{cases}
+        \frac{6}{5}-\frac{3}{5}\Delta_2\geq 0\\
+        \frac{8}{5}+\frac{6}{5}\Delta_2\geq 0
+      \end{cases}
+    \]
+    Risolvendo il sistema ottengo $-\frac{4}{3}\leq \Delta_2\leq 2$ e quindi
+    l'intervallo di ammissibilità di $b_2$:
+    \begin{shaded}
+      $b_2\in [2-\frac{4}{3}, 2+2]=[\frac{2}{3},4]$
+    \end{shaded}
+  \end{itemize}
+  \item cerchiamo gli intervalli di ammissibilità dei coefficienti
+  della funzione obiettivo relativi alle variabili in base $c_1$:
+  \begin{itemize}
+    \item il primo è $c_1=3$. Riscrivo il tableau ponendo un
+    $-\Delta_1$, nella $riga_0$ in corrispondenza alla variabile di cui
+    sto studiando il coefficiente. Cerco quindi un modo per riportare
+    la variabile in base e studio le trasformazioni che vengono
+    propagate. Il tableu sarà quindi:
+    \begin{center}
+      \begin{tabular}{c|cccc}
+        & $x_1$ & $x_2$ & $s_1$ & $s_2$\\
+        \hline
+        $\frac{64}{5}$ & $-\Delta_1$ & 0 & $\frac{7}{5}$ & $\frac{18}{5}$\\
+        \hline
+        $\frac{6}{5}$ & 0 & 1 & $\frac{3}{5}$ & $-\frac{3}{5}$\\
+        $\frac{8}{5}$ & 1 & 0 & $-\frac{1}{5}$ & $\frac{6}{5}$\\
+      \end{tabular}
+    \end{center}
+    e procedo facendo $riga_0=riga_0+\Delta\cdot riga_2$ in quanto
+    $x_1$ è presente per la $riga_2$, rimandando così $x_1$ in base.
+    Ottengo quindi:
+    \begin{center}
+      \begin{tabular}{c|cccc}
+        & $x_1$ & $x_2$ & $s_1$ & $s_2$\\
+        \hline
+        $\frac{64}{5}+\Delta_1\cdot \frac{8}{5}$ & 0 & 0 & $\frac{7}{5}-\Delta_1\cdot \frac{1}{5}$ & $\frac{18}{5}+\Delta_1\cdot \frac{6}{5}$\\
+        \hline
+        $\frac{6}{5}$ & 0 & 1 & $\frac{3}{5}$ & $-\frac{3}{5}$\\
+        $\frac{8}{5}$ & 1 & 0 & $-\frac{1}{5}$ & $\frac{6}{5}$\\
+      \end{tabular}
+    \end{center}
+    ma sappiamo che per mantenere ottima la soluzione devo avere solo
+    termini positivi in $riga_0$ quindi:
+    \[
+      \begin{cases}
+        \frac{7}{5}-\Delta_1\cdot \frac{1}{5}\geq 0\\
+        \frac{18}{5}+\Delta_1\cdot \frac{6}{5}\geq 0
+      \end{cases}
+    \]
+    Risolvendo il sistema ottengo $-3\leq \Delta_1\leq 7$ e quindi
+    l'intervallo di ammissibilità di $c_1$:
+    \begin{shaded}
+      $c_1\in [3-3,3+7]=[0,10]$
+    \end{shaded}
+    \item il secondo è $c_2=4$. Riscrivo il tableau ponendo un
+    $-\Delta_2$, nella $riga_0$ in corrispondenza alla variabile di cui
+    sto studiando il coefficiente. Cerco quindi un modo per riportare
+    la variabile in base e studio le trasformazioni che vengono
+    propagate. Il tableu sarà quindi:
+    \begin{center}
+      \begin{tabular}{c|cccc}
+        & $x_1$ & $x_2$ & $s_1$ & $s_2$\\
+        \hline
+        $\frac{64}{5}$ & 0 & $-\Delta_2$ & $\frac{7}{5}$ & $\frac{18}{5}$\\
+        \hline
+        $\frac{6}{5}$ & 0 & 1 & $\frac{3}{5}$ & $-\frac{3}{5}$\\
+        $\frac{8}{5}$ & 1 & 0 & $-\frac{1}{5}$ & $\frac{6}{5}$\\
+      \end{tabular}
+    \end{center}
+    e procedo facendo $riga_0=riga_0+\Delta\cdot riga_1$ in quanto
+    $x_2$ è presente per la $riga_1$, rimandando così $x_2$ in base.
+    Ottengo quindi:
+    \begin{center}
+      \begin{tabular}{c|cccc}
+        & $x_1$ & $x_2$ & $s_1$ & $s_2$\\
+        \hline
+        $\frac{64}{5}+\Delta_2\cdot \frac{6}{5}$ & 0 & 0 & $\frac{7}{5}+\Delta_2\cdot \frac{3}{5}$ & $\frac{18}{5}-\Delta_2\cdot \frac{3}{5}$\\
+        \hline
+        $\frac{6}{5}$ & 0 & 1 & $\frac{3}{5}$ & $-\frac{3}{5}$\\
+        $\frac{8}{5}$ & 1 & 0 & $-\frac{1}{5}$ & $\frac{6}{5}$\\
+      \end{tabular}
+    \end{center}
+    ma sappiamo che per mantenere ottima la soluzione devo avere solo
+    termini positivi in $riga_0$ quindi:
+    \[
+      \begin{cases}
+        \frac{7}{5}+\Delta_2\cdot \frac{3}{5}\geq 0\\
+        \frac{18}{5}-\Delta_2\cdot \frac{3}{5}\geq 0
+      \end{cases}
+    \]
+    Risolvendo il sistema ottengo $-\frac{7}{3}\leq \Delta_2\leq 6$ e quindi
+    l'intervallo di ammissibilità di $c_2$:
+    \begin{shaded}
+      $c_2\in [4-\frac{3}{7},4+6]=[\frac{5}{3},10]$
+    \end{shaded}
+  \end{itemize}
+  \item cerchiamo gli intervalli di ammissibilità dei coefficienti
+  della funzione obiettivo relativi alle variabili fuori base $k_i$.\\
+  \textbf{Per rispondere alla domanda non si deve fare nulla in quanto
+  le variabili della funzione obiettivo sono in base. ``Per sport''
+  calcoliamo lo stesso quelle delle variabili fuori base, anche se non
+  sono nella funzione obiettivo}. \\
+  In questo caso ci basta verificare che i valori corrispondenti alle
+  variabili fuori base nella $riga_0$ restino positivi al più di un
+  $\Delta_i$, in modo di restare nella condizione di avere la
+  soluzione ottimale. Si ha quindi:
+  \begin{itemize}
+    \item $\frac{7}{5}+\Delta_1\geq 0\Longrightarrow \Delta_1\geq -\frac{7}{5}$
+    \item $\frac{18}{5}+\Delta_2\geq 0\Longrightarrow \Delta_2\geq -\frac{18}{5}$
+  \end{itemize}
+  quindi si ottiene che:
+  \begin{shaded}
+    $k_1\in[-\frac{7}{5}, +\infty]$\\
+    $k_2\in[-\frac{18}{5}, +\infty]$
+  \end{shaded}
+\end{itemize}
+\end{document}

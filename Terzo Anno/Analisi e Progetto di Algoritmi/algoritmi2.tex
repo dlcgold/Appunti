@@ -1305,5 +1305,137 @@ soluzione con la programmazione greedy. Questo strumento è detto
 che non tutte le funzioni peso sono associabili a un algoritmo
 greedy. Non significa che per nessun obiettivo non esiste mai un
 algoritmo greedy che produce la soluzione ottima}
-% aggiungere bin packing
+\chapter{Grafi}
+Ci occupiamo ora della risoluzione di quei problemi che possono essere
+ricondotti ad un grafo per essere risolti.
+\begin{definizione}
+Un \textbf{grafo} è un insieme $G=(V,E)$, con $V$ insieme dei vertici
+e $E$ insieme degli archi. Per per gli archi si ha anche una funzione
+rappresentante il peso:
+\[w:E\to\mathit{R}\]
+Dato un certo $e\in E$ e un certo $i\in V$ un \textbf{cappio} viene
+rappresentato con $e(i,i)$
+\end{definizione}
+Si hanno due modi principali di rappresentare un grafo:
+\begin{enumerate}
+  \item una collezione di \textbf{liste di adiacenza}, da usare quando la
+  cardinalità di $E$ è molto inferiore a quella di $V$ elevata al
+  quadrato:
+  \[|E|<< |V|^2\]
+  Questa rappresentazione consiste in un vettore $Adj$ composto da un
+  numero $V$ di liste (una lista per ogni vertice). $\forall u\in V$
+  la lista di adiacenza $Adj[u]$ contiene ``puntatori'' a tutti i
+  vertici $v\in V$ tali che $\exists c(u,v)\in E$, quindi tutti i
+  vertici adiacenti ad $u\in G$. Generalmente i vertici vengono
+  memorizzati in modo arbitrario.\\
+  Se $G$ è un grafo orientato la somma delle lunghezze di tutte le
+  liste di adiacenza è $E$, se non è orientato è $2|E|$ (in quanto un
+  arco appare nelle liste di adiacenza di due vertici).\\
+  In ogni caso si ha un uso dello spazio approssimabile a:
+  \[O(\max\{|V|,|E|\})=O(|E|+|V|)\]
+  o, se orientato:
+  \[O(\max\{|E|,|V|\})=O(2|E|+|V|)\]
+  Nel caso di un grafo pesato si salvano insieme vertici e pesi.\\
+  \textbf{Si ha la limitazione che per cercare un arco $e(u,v)$
+    bisogna cercare $v$ in $Obj[u]$, che è un processo abbastanza
+    lento}
+  \textit{Le liste di adiacenza permettono di conoscere quali nodi
+    sono collegati al nodo di partenza, ma non necessariamente se ci
+    siano cammini tra più di due di essi.}\\
+  Per i tempi di accesso si ha un tempo peggiore pari a:
+  \[O(|V|)\]
+  un tempo medio di $\Theta(\frac{|V|}{2})$ e uno miglior di $\Omega(1)$
+  \item una \textbf{matrice di adiacenza}. In questo caso si assume
+  che i vertici siano numerati in modo arbitrario. Si ha quindi una
+  matrice $A$, di dimensione $|V|\times |V|$ e indici $i$ e $j$, tale
+  che:
+  \[a_{i,j}=
+    \begin{cases}
+      1 & \mbox{se } e(i,j)\in E\\
+      0 & \mbox{altrimenti}
+    \end{cases}
+  \]
+  In un grafo non orientato si ha una simmetria della matrice (in quanto un
+  arco appare nelle liste di adiacenza di due vertici) quindi può
+  essere comodo, in determinati casi, memorizzare i dati solo nella
+  diagonale superiore, quasi dimezzando i tempi di memorizzazione. Con
+  un grafo pesato rappresento il peso di un arco $e(u,v)$ nella
+  casella di indice $u,v$. Se un arco non esiste si memorizza il
+  valore nullo $NIL$, oppure valori comodi come $0$, $-1$ o $\infty$. Se un
+  grafo non è pesato si può addirittura usare un singolo bit per ogni
+  elemento della matrice.\\
+  Si ha tempo costante per accedere alla matrice $O(1)$ ma si ha
+  $O(|V|^2)$ per quanto riguarda lo spazio necessario.\\
+  \textbf{Questa tecnica è molto comoda in presenza di grafi \textit{densi}}
+\end{enumerate}
+% aggiungere immagini delle due rappresentazioni
+\section{Visita di un Grafo}
+Si hanno due principali tecniche di visita:
+\begin{enumerate}
+  \item \textbf{visita in ampiezza BFS (\textit{breadth-first search})}
+  \item \textbf{visita in profondità DFS}
+\end{enumerate}
+BFS analizza una sola componente del grafo che è connessa alla
+sorgente, dando informazioni sulle distanze da tutti i vertici (per
+trovare quella minima), mentre la DFS analizza tutte le componenti
+dando informazioni su quali vertici sono collegati e quali no.
+\subsection{Visita in Ampiezza BFS}
+È uno dei modi più semplici di vistare un grafo ma nonostante ciò è
+alla base di algoritmi importanti come \textbf{l'algoritmo di
+  Dijkstra} per i cammini minimi con sorgente singola e
+\textbf{l'algoritmo di Prim} per gli alberi minimi.\\
+Dato un grafo $G(E,V)$ con uno specifico vertice $s$ detto
+\textbf{sorgente} la visita in ampiezza esplora tutti gli archi di $G$
+per scoprire che vertici sono raggiungibili da $s$ e ne calcola la
+distanza (numero di archi necessari per raggiungerlo). Si produce un
+\textbf{BFS tree} che ha $s$ come radice e tutti i vertici
+raggiungibili da $s$ come nodi. $\forall v$ raggiunbile da $s$ il
+cammino dell'albero è il cammino minimo.\\
+\textbf{Per questo algoritmo non si distinguono grafi orientati o
+  meno.}\\
+\textit{L'algortimo scopre tutti i vertici distangti $k$ prima di
+  quelli distanti $k+1$}\\
+Per tenere traccia del lavoro all'inizio si ``colora'' di
+\textbf{bianco} tutti i vertici, che poi possono diventare
+\textbf{grigi} o \textbf{neri}. La prima volta che un vertice viene
+visitato smette di essere bianco. Inoltre vengono distinti i vertici
+già visitati tra grigi e neri. Se $e(u,v)\in E$ e $u$ è nero allora
+$b$ è grigio o nero. Ovvero tutti i vertici adiacenti a quelli neri
+sono già stati scoperti, invece un vertice grigio può avere vertici
+non ancora scoperti, quindi bianchi, come vertici adiacenti. Quando un
+vertice bianco $v$ viene scoperto durante la scansione della lista
+di adiacenza di un vertice $u$ già scoperto vengono aggiunti
+all'albero sia $v$ che $e(u,v)$. In questo caso $u$ è \textbf{padre o
+  predecessore} di $v$ nel BFS tree. Dato un vertice viene scoperto
+una sola volta si ha che nell'albero ogni vertice ha un solo vertice.
+\newpage
+Vediamo l'algortimo:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function{$BFS$}{$G,s$}
+    \For{$\forall u\in V \backslash \{s\}$}
+    \State $color[u]=white$
+    \State $d[u]=\infty$
+    \State $p[u]=NIL$
+    \EndFor
+    \State $color[s]=gray$
+    \State $d[s]=0$
+    \State $p[s]=NIL$
+    \State $Q=\emptyset$
+    \State $enqueue(Q,s)$
+    \While {$Q\neq \emptyset$}
+    \State $u=dequeue(Q)$
+    \For {$\forall v\in Adj[u]$}
+    \If {$col[v]==white$}
+    \State $p[v]=u$
+    \State $d[v]=d[u]+1$
+    \State $color[v]=gray$
+    \State $enqueue(Q,v)$
+    \EndIf
+    \EndFor
+    \State $color[u]=black$ 
+    \EndWhile
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
 \end{document}

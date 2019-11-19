@@ -42,7 +42,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [ ] Analisi e Progetto di Algoritmi (obbligatorio)
 - [ ] Elementi di Bioinformatica
 - [ ] Programmazione C++
-- [ ] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio)
+- [ ] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (temporaneamente interrotti)
 
 
 ### Altro

@@ -33,6 +33,16 @@
 \usepackage{tikz}
 \usetikzlibrary{automata,positioning}
 
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
+
 \usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
 
 \usepackage{fancyhdr}
@@ -1404,11 +1414,11 @@ con:
     $x_B=B^{-1}b$
     \item quindi:
     \[c^Tb=[c_B|c_D]^T\left[
-      \begin{matrix}
-        x_B\\
-        x_D
-      \end{matrix}
-    \right]=c_D^Tx_B+c_D^Tx_D=c_D^TB^{-1}b+c_D^T\cdot 0= c_D^TB^{-1}b\]
+        \begin{matrix}
+          x_B\\
+          x_D
+        \end{matrix}
+      \right]=c_D^Tx_B+c_D^Tx_D=c_D^TB^{-1}b+c_D^T\cdot 0= c_D^TB^{-1}b\]
   \end{itemize}
 \end{definizione}
 \begin{teorema}
@@ -1536,8 +1546,8 @@ si ha:
   \item $(u^{*T}A_i-c_i)x^*=0,\,\,\forall i$
 \end{itemize}
 Nel complesso si ha che: \textbf{il vettore della variabili duali
-ottime per un problema di PL è $c_bb^{-1}$ ed è visualizzabile se si
-usa il tableau:}
+  ottime per un problema di PL è $c_bb^{-1}$ ed è visualizzabile se si
+  usa il tableau:}
 \begin{center}
   \includegraphics[scale = 0.7]{img/dua4.png}
 \end{center}
@@ -1612,4 +1622,221 @@ E si ottiene la seguente variazione della funzione obiettivo:
     \includegraphics[scale = 0.6]{img/add5.png}
   \end{center}
 \end{esempio}
+\textbf{proseguire}
+\chapter{Programmazione Lineare Intera}
+Sia:
+\[opt\,f(x)=c^Tx\]
+con i seguenti vincoli lineari:
+\[X=\left{x\in\mathbb{R}^n:\, g_i(x)\{\leq, =, \geq\}0,\, i=1\ldots
+      m\right}\]
+con:
+\[g_i(x)=a_i^Tx-b_i,\,\, a\in \mathbb{R}, b\in \mathbb{R}^m,\,\, c\in
+  \mathbb{R}^n,\,\,opt=\{\min, \max\}\]
+Si hanno tre divisioni:
+\begin{enumerate}
+  \item se $x\in \mathbb{Z}^n$ si ha un problema di
+  \textbf{programmazione lineare intera, \textit{PLI}}
+  \item se $x\in \{0,1\}^n$ si ha un problema di
+  \textbf{programmazione lineare binaria, \textit{PB}}
+  \item se $x\in \mathbb{R}^p\mathbb{Z}^q$, con
+  $p+q=n,\,\,p>0,\,\,q>0$, si ha un problema di \textbf{programmazione
+    lineare mista, \textit{PLM}}
+\end{enumerate}
+Un PLI ha un numero di soluzioni inferiori a quelle di un PL e, nel
+momento in cui si ha una regione ammissibile limitata, si ha per forza
+un numero di soluzioni ammissibili finito. Purtroppo questo non
+implica che sia semplice trovare le soluzioni di un PLI.\\
+Per esempio, avendo un PLI con $n=20$ variabili binarie ho $2^{20}$
+soluzioni possibili. \\
+Si cerca quindi un metodo per formulare il corrispettivo PL di un PLI,
+ovvero lo stesso problema ma senza i problemi di interezza. Si ha il
+cosiddetto \textbf{rilassamento lineare}. Vediamo due esempi.
+\begin{esempio}
+  Il PLI:
+  \[\max z=2x_1+4x_2+3x_3\]
+  coi vincoli
+  \[
+    \begin{cases}
+      3x_1+4x_2+2x_3\leq 60\\
+      2x_1+x_2+2x_3\leq 40\\
+      x_1+3x_2+2x_3\leq 80\\
+      x_1,x_2,x_3\in\mathbb{N}
+    \end{cases}
+  \]
+  diventa il PL:
+  \[\max z=2x_1+4x_2+3x_3\]
+  coi vincoli
+  \[
+    \begin{cases}
+      3x_1+4x_2+2x_3\leq 60\\
+      2x_1+x_2+2x_3\leq 40\\
+      x_1+3x_2+2x_3\leq 80\\
+      x_1,x_2,x_3\geq 0
+    \end{cases}
+  \]
+\end{esempio}
+\begin{esempio}
+  Il PLI:
+  \[\max z=2x_1+4x_2+3x_3\]
+  coi vincoli
+  \[
+    \begin{cases}
+      3x_1+4x_2+2x_3\leq 60\\
+      2x_1+x_2+2x_3\leq 40\\
+      x_1+3x_2+2x_3\leq 80\\
+      x_1,x_2,x_3\in\{0,1\}
+    \end{cases}
+  \]
+  diventa il PL:
+  \[\max z=2x_1+4x_2+3x_3\]
+  coi vincoli
+  \[
+    \begin{cases}
+      3x_1+4x_2+2x_3\leq 60\\
+      2x_1+x_2+2x_3\leq 40\\
+      x_1+3x_2+2x_3\leq 80\\
+      x_1\leq 1, x_2\leq 1, x_3\leq 1\\
+      x_1,x_2,x_3\geq 0
+    \end{cases}
+  \]
+\end{esempio}
+Formalizziamo questo metodo. In generale dato un PLI si ha che:
+\begin{itemize}
+  \item una variabile intera può essere ``rilassata'' sostituendo
+  $x\in\mathbb{N}$ con $x$ variabile continua tale che $x\geq 0$
+  \item una variabile binaria può essere ``rilassata'' sostituendo
+  $x\in\{0,1\}$ con $x$ variabile continua tale che:
+  \[
+    \begin{cases}
+      x\geq 0 & \mbox{vincolo di non negatività}\\
+      x\leq 1 & \mbox{nuovo vincolo funzionale}
+    \end{cases}
+  \]
+  \item una variabile intera non negativa con un vincolo del tipo
+  $x\leq M$ può essere rilassata sostituendo $x\in\{o,M\}$ con $x$
+  variabile continua tale che:
+  \[
+    \begin{cases}
+      x\geq 0 & \mbox{vincolo di non negatività}\\
+      x\leq M & \mbox{nuovo vincolo funzionale}
+    \end{cases}
+  \]
+\end{itemize}
+Si cerca quindi il PL di un PLI, lo si risolve e si verifica se la
+soluzione sia intera. In caso contrario si ottiene un \textbf{upper
+  bound} o un \textbf{lower bound} rispettivamente per problemi di
+massimo o minimo. \\
+Vediamo un esempio:
+\begin{esempio}
+  Si ha la seguente funzione obiettivo:
+  \[\max z=x_2\]
+  con i seguenti vincoli:
+  \[
+    \begin{cases}
+      x_1+\frac{5}{2}x_2\leq 11\\
+      x_1,x_2\in\mathbb{N}
+    \end{cases}
+  \]
+  Si ha l'ottimo del PL (ovvero del rilassamento lineare) pari a:
+  \[\left(0,\frac{22}{5}\right)\]
+  e si ha che la soluzione approssimata del PLI è pari a:
+  \[(0,4)\]
+  ovvero $\frac{22}{5}=4,4$ viene approssimato all'intero più vicino, $4$
+\end{esempio}
+\textbf{Questo è un caso fortuito. Approssimare all'intero più vicino
+  può portare ad una soluzione non ammissibile}.\\
+Vediamo qui come ottenere la soluzione del PLI.
+\subsection{Metodo Branch ad Bound}
+Il metodo \textbf{Branch and Bound (\textit{B\&B})} è una tecnica
+generale per la risoluzione di problemi di ottimizzazione
+combinatoria (ovvero con spazio di soluzioni finito). Il B\&B è una
+tecnica di \textbf{enumerazione implicita}, ovvero su provano tutte le
+soluzioni fino a trovare l'ottima, scaratandone quindi alcune a priori
+dimostrandone la non ottimimalità. Si basa sul \textbf{\textit{divide
+    et impera}}.\\
+Sia:
+\[\max f(x)=c^Tx\]
+con i seguenti vincoli lineari:
+\[X=\left{x\in\mathbb{Z}^n:\, g_i(x)\{\leq, =, \geq\}0,\, i=1\ldots
+      m\right}\]
+con:
+\[g_i(x)=a_i^Tx-b_i,\,\, a\in \mathbb{R}^n, b\in \mathbb{R}^m,\,\, c\in
+  \mathbb{R}^n\]
+questo viene definito come \textbf{problema completo}. Un PLI è un
+\textbf{sotto-problema} del PL se \textit{presenta la medesima
+  funzione obiettivo ma ha un sottoinsieme proprio di $X$ come regione
+  ammissibile}.\\
+Formalmente sia $z^*=f(x^*)$ la soluzione del problema completo e
+$\widetilde{z}=f(\widetilde{x})$ la soluzione ottima di un
+sotto-problema. Si ha che:
+\[\widetilde{z}\leq z^*,\,\,e\,\,\,f(\widetilde{x})\leq f(x^*)\]
+visto che $\widetilde{x}$ è una soluzione del problema completo.\\
+\textit{Per un problema di minimo si ribaltano i $\leq$ in $\geq$}.\\
+Il \textit{B\&B} usa tre teniche per risolvere un generico PLI:
+\begin{enumerate}
+  \item la partizione, ovvero il \textbf{branching}. Questa tecnica si
+  usa per dividere un PLI $P_0$ in $k$ sotto-problemi $P_1,\ldots,
+  p_k$ di modo che l'unione delle regioni ammissibili $X_1\ldots, X_k$
+  dia la regione ammissibile del problema originario $X$, quindi:
+  \[\bigcup_{i=1}^kP_k=P_0\]
+  Si genera quindi un \textbf{albero delle soluzioni} che ha come
+  radice $P_0$ e che può diramarsi iterativamente. Si ha che l'unione
+  delle foglie è anche il problema $p_o$, in base ad un ragioanmento
+  simile si possono avere altre unioni per ottenere $P_0$. Le
+  diramazioni si hanno in base a dei vincoli (una variabile maggiore o
+  minore di qualcosa etc $\ldots$).\\
+  Nel caso di PB si ramifica in base ad ogni booleano di ogni
+  variabile, ottenendo un albero binario.\\
+  La variabile usata per il branching è detta \textbf{variabile di
+    branching} che vengono utilizzate secondo l'ordine degli indici.\\
+  Si hanno due modi per d:ividere l'insieme delle soluzioni
+  ammissibili, fissando una variabile, per esempio $x_1$:
+  \begin{itemize}
+    \item fissare il valore di $x_1$ a tutti i suoi possibili valori
+    \item specificare un insieme di valori per ogni nuovo sotto-problema
+    che si vuole generare
+  \end{itemize}
+  Nel caso di PML si procede così:
+  \begin{itemize}
+    \item si calcola la soluzione ottima del rilassamento lineare di
+    $P_0$
+    \item si sceglie come variabile di branching una $x_j$ che non
+    abbia valore intero nella soluzione ottima del rilassamento
+    lineare
+    \item si divide $P_0$ in $P_1$ e $P_2$ specificando due intervalli
+    per $x_j$:
+    \begin{itemize}
+      \item $x_j\leq [x_j^*]$
+      \item $x_j\geq [x_j^*]+1$
+    \end{itemize}
+  \end{itemize}
+  \item la determinazione di un limite superiore, ovvero il
+  \textbf{bounding}. Ad ognuno dei sotto-problemi definiti nel
+  branching si può associare un bound, ovvero un limite,
+  $z_1,\ldots,z_k$ su quanto buona possa essere la soluzione migliore
+  di ogni sotto-problema. Questi bound si ottengono con il
+  \textbf{rilassamento lineare associato}. Risolvo quindi i
+  rilassamenti lineari dei sotto problemi e riporto nell'albero del
+  branhcing sia la soluzione ottima che il bound (il valore di $z$) di
+  ogni sottoproblema.\\
+  Si definice \textbf{soluzione incombente} $x^*$ per $P_0$ la miglior (la
+  più grande se ho max, la più piccola se ho min)   soluzione
+  ammissibile (quindi intera) trovata finora, insieme al suo valore
+  di funzione obiettivo. All'inizio si ha che $z^*=-\infty$
+  \item l'eliminazione, ovvero il \textbf{fathoming}. Si ha che un
+  sotto-problema $P_i$ può essere ``taglaito via'' (fathoming) e
+  quindi escluso dal ragionamento se:
+  \begin{itemize}
+    \item il suo upper bound è $\leq z^*$. Infatti non è sicuramente
+    la soluzione migliore e un suo branch non darà una soluzione
+    migliore
+    \item il suo rilassamento non da soluzioni ammissibili intere
+    \item la soluzione ottima del rilassamento lineare è intera, in
+    quanto se è migliore della soluzione incombente attuale essa
+    diventa la nuova soluzione incombente (nel caso di PML basta che
+    le componenti relative alla variabili intere della soluzione
+    ottima siano in-tere)
+  \end{itemize}
+\end{enumerate}
+% pagina 19
 \end{document}

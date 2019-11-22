@@ -1411,31 +1411,104 @@ una sola volta si ha che nell'albero ogni vertice ha un solo vertice.
 \newpage
 Vediamo l'algortimo:
 \begin{shaded}
-  \begin{algorithmic}
+  \begin{algorithmic}[1]
     \Function{$BFS$}{$G,s$}
     \For{$\forall u\in V \backslash \{s\}$}
-    \State $color[u]=white$
-    \State $d[u]=\infty$
-    \State $p[u]=NIL$
+    \State $color[u]\gets white$
+    \State $d[u]\gets \infty$
+    \State $p[u]\gets NIL$
     \EndFor
-    \State $color[s]=gray$
-    \State $d[s]=0$
-    \State $p[s]=NIL$
-    \State $Q=\emptyset$
+    \State $color[s]\gets gray$
+    \State $d[s]\gets 0$
+    \State $p[s]\gets NIL$
+    \State $Q\gets \emptyset$
     \State $enqueue(Q,s)$
     \While {$Q\neq \emptyset$}
-    \State $u=dequeue(Q)$
+    \State $u\gets dequeue(Q)$
     \For {$\forall v\in Adj[u]$}
     \If {$col[v]==white$}
-    \State $p[v]=u$
-    \State $d[v]=d[u]+1$
-    \State $color[v]=gray$
+    \State $p[v]\gets u$
+    \State $d[v]\gets d[u]+1$
+    \State $color[v]\gets gray$
     \State $enqueue(Q,v)$
     \EndIf
     \EndFor
-    \State $color[u]=black$ 
+    \State $dequeue(u)$
+    \State $color[u]\gets black$ 
     \EndWhile
     \EndFunction
   \end{algorithmic}
 \end{shaded}
+Questo metodo assume che il grafo in input sia rappresentato con liste
+di adiacenza che mantiene diverse strutture dati addizionali associate
+ad ogni vertice. Con $color$ si memorizza il colore, con $p$ il
+predecessore (che può non esserci venendo settato a $NIL$) e con $d$
+si salva la distanza dal sorgente $s$. Si usa anche unda queue $Q$ per
+gestire l'insieme dei vertici grigi.\\
+% aggiungere immagine pagina 237
+Analizziamo meglio l'algortimo:
+\begin{itemize}
+  \item le righe dalla 2 alla 5 colorano tutti i vertici di bianco,
+  settando la distanza ad un valore simbolico, per esmepio $\infty$ e
+  il predecessore a $NIL$
+  \item la riga 6 colora di grigio il sorgente $s$, che viene infatti
+  ``scoperto'' subito. Di conseguenza alla riga 7 si setta a 0 il
+  la distanza di $s$ (dista da se stesso 0 ovviamente) e alla riga 8
+  si setta il predecessore a $NIL$ (in quanto il sorgente non ha
+  predecessori)
+  \item la riga 9 inizializza la queue $Q$ e alla riga 10 si inserisce
+  $s$ in qaunto vertice grigio
+  \item tra le righe 11 e 19 si ha il ciclo principale
+  dell'algoritmo. Il ciclo termina quando non si hanno più vertici
+  grigi (vertici già scoperti le cui liste di adiacenza non sono
+  completamente esaminate), quindi $Q\neq \emptyset$. La riga 11
+  determina il vertice grigio che   si trova in testa alla queue
+  $Q$. Il ciclo for, tra le righe 13 e   18, esamina ogni vertice $v$
+  della lista di adiacenza del vertice grigio   preso in
+  considerazione. Se $v$ è bianco esso viene ``scoperto'' tra   le
+  linee 15 e 17, colorandolo, e settando la distanza come quella   del
+  vertice grigio, che lo ha in lista e quindi è anche il
+  predecessore, +1. Viene infine posto in fondo alla queue.
+  \item infine alla riga 19 si toglie il vertice grigio dalla coda, lo
+  si ``colora'' di nero nella riga 20 e si riprende a ciclare
+\end{itemize}
+Analizziamo il codice ipotizzando un grafo in input $G=(V,E)$
+Dal codice si capisce che ogni vertice viene inserito (e quindi anche
+eliminato) al massimo una volta nella coda. Le operazioni di
+inseriemnto e di eliminazione da una coda hanno costo $O(1)$, quindi
+il tempo per le operazioni sulla coda è $O(V)$. Sapendo che la somma
+delle lunghezze di tutte le liste di adiancenza è $E$ il tempo masismo
+per la scansione totale delle liste è $O(E)$. Quindi il tempo totale
+per la procedura \textit{BFS} è un tempo lineare:
+\[O(E+V)\]
+\begin{definizione}
+  Si definisce \textbf{distanza sul cammino minimo} $\delta(s,v)$ dal
+  vertice sorgente $s$ al vertice $v$ come il numero minimo di archi
+  di un cammino tra i due vertici. L'assenza di un cammino comporta $\delta(s,v)=\infty$
+\end{definizione}
+\begin{lemma}
+  Sia $G=(V,E)$ un grafo e $s\in V$ un vertice arbitrario. Si ha che:
+  \[\forall e(u,v)\in E \Longrightarrow \delta(s,v)\leq\delta(s,u)+1\]
+  Se ipotizziamo poi che si esegua $BFS$ dal vertice sorgente $s$ si
+  ha che:
+  \[\forall v\in V \Longrightarrow d[v]\geq \delta(s,v)\]
+  e quindi $d[v]$ è limite superiore di $\delta(s,v)$.\\
+  Si supponga inoltre che $v_1$ sia la testa di $Q$ e $v_t$ il
+  fondo. Si ha che:
+  \[d[v_t]\leq d[v_1]+1\]
+  e:
+  \[d[v_i]\leq d[v_{i+1}],\,\, \forall i=1,.\ldots, t-1\]
+\end{lemma}
+Dimostrato tutto ciò si ha il \textbf{teorema delle correttezza della
+  vista in ampiezza}:
+\begin{teorema}
+  Dato un grafo $G=(V,E)$ si supponga di esegurire \textit{BFS} a
+  partire dalla sorgente $s$. Durante la sua esecuzione si ha che
+  ogni $v\in V$ raggiungibile da $s$ viene scoperto e al termine si
+  ha:
+  \[d[v]=\delta(s,v),\,\,\forall v\in V\]
+  Inoltre, $\forall v\neq s$ raggiungibile da $s$ si ha che
+  \textbf{uno dei cammini minimi da $s$ a $v$ è il cammino minimo da
+    $s$ a $p[v]$ seguito dall'arco $e(p[v],v)$}
+\end{teorema}
 \end{document}

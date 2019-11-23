@@ -1943,5 +1943,263 @@ Si hanno quindi diverse tipologie di PNL:
   \item \textbf{programmazione non convessa:} ovvero tutti i PNL che
   non soddisfano le ipotesi di convessità
 \end{itemize}
-%slide 27
+Si quindi la funzione obiettivo una funzione concava da massimizzare:
+\[\max_{x\in\mathbb{R}}f(x)\]
+la condizione sufficiente per avere un punto di massimo è sempre:
+\[\frac{d\,f(x^*)}{d\,x}=0\]
+se posso risolvere analiticamente l'equazione ho trovato il massimo
+(se fosse stata convessa il minimo). In mancanza mi affido ad
+\textbf{algoritmi di risoluzione numerica}.
+\begin{itemize}
+  \item construisco una sequenza di punti $\{x_k\}$ tali che:
+  \[\lim_{k\to +\infty}x_k=x^*\]
+  \textit{ad ogni iterazione $k$, partendo da $k_k$ si esegue una
+    ricerca sistematica per identificare un punto migliore $x_{k+1}$}
+  \item devo garantire la convergenza della sequenza al mio punto di
+  ottimo. Se la funzione è continua e concava in un intervallo $[a,b]$
+  considero il genrico $x_k$:
+  \begin{itemize}
+    \item se $\frac{d\,f(x^*)}{d\,x}<0$ allora l'ottimo è a sinistra
+    di $x_k$
+     \item se $\frac{d\,f(x^*)}{d\,x}>0$ allora l'ottimo è a destra
+     di $x_k$
+     \item se $\frac{d\,f(x^*)}{d\,x}\approx 0$ allora l'ottimo $x_k$,
+     $x_k\approx x^*$
+  \end{itemize}
+\end{itemize}
+Non abbiamo eprò la certezza che un numero finito di iterazioni ci
+possa portare ad un risultato. Abbiamo dei criteri per capire quando
+fermarci:
+\begin{itemize}
+  \item come detto sopra quando la soluzione è abbastanza accurata,
+  ovvero $\frac{d\,f(x^*)}{d\,x}\approx 0$
+  \item quando si è raggiunto un numero massimo di iterazioni $N$
+  stabilito a priori
+  \item quando si hanno progressi lenti, ovvero
+  $|x_{k+1}+x_k|<\varepsilon_k$ o $|f(x_{k+1})+f(x_k)|<\varepsilon_f$
+  \item quando la soluzione diverge, ovvero $|x_k|\to+\infty$
+  \item quando si hanno dei cicli, ovvero da $x_k$ si arriva a
+  $x_{k+1}$ e da $x_{k+1}$ si arriva a $x_k$ 
+\end{itemize}
+Si hanno due tipi di algoritmi possibili:
+\begin{enumerate}
+  \item \textbf{algoritmi dicotomici}, che risolvono l'equazione
+  della derivata uguale a zero e ad ogni iterazione riducono
+  l'intervallo di ricerca all'interno del quale la funzione derivata
+  si annulla
+  \item \textbf{algoritmi di approssimazione}, che usano
+  approssimazioni locali della funzione
+\end{enumerate}
+\begin{shaded}
+  Partendo dalla \textit{formula di Taylor}, centrata in $x_k$, si può
+  ottenere un'approssimazione quadratica di tale funzione:
+  \[f(x_{k+1})=f(x_k)+f^{'}(x_{k+1}-x_k)+\frac{1}{2}f^{''}(x_k)(x_{k+1}-x_k)^2
+    +O((x_{k+1} -x_k)^2)\]
+  \[\Downarrow\]
+  \[f(x_{k+1})\approxf(x_k)+f^{'}(x_{k+1}-x_k)+\frac{1}{2}f^{''}(x_k)(x_{k+1}-x_k)^2\]
+  Si ha che l'approssimazione quadratica è funzione solo di
+  $x_{k+1}$. Calcolo quindi la derivata dell'approssimazione
+  quadratica:
+  \[f^{'}(x_k)+f^{''}(x_k)(x_{k+1}-x_k)=0\Longrightarrow
+    x_{k+1}=x_k-\frac{f^{'}(x_k)}{f^{''}(x_k)}\]
+\end{shaded}
+Per l'ottimizzazione in una variabile si hanno 2 metodi:
+\begin{enumerate}
+  \item \textbf{metodo di bisezione}, che si applica quando $f(x)$ è
+  concava, continua su un intervallo $[a,b]$ e derivabile su
+  $(a,b)$.\\
+  Si basa sul guardare la pendenza della funzione (ovvero la derivata)
+  per un punto di $x$ per capire dove cercare il massimo (ribaltando
+  nel caso du funzion e concava e ricerca del minimo):
+  \begin{itemize}
+    \item se $f^{'}(x)>0$ allora si può ottenere un nuovo punto
+    spostandosi verso sinistra
+    \item se $f^{'}(x)<0$ allora si può ottenere un nuovo punto
+    spostandosi verso destra
+  \end{itemize}
+  inoltre, considerando un generico $x_k$:
+   \begin{itemize}
+    \item se $f^{'}(x_k)>0$ allora $x_k$ è un estremo inferiore
+    $\underline{x}$ per $x_{k+1}$ 
+    \item se $f^{'}(x_k)<0$ allora $x_k$ è un estremo superiore
+    $\overline{x}$ per $x_{k+1}$ 
+  \end{itemize}
+  per ogni passo $k$ si identifica un \textbf{intervallo di ricerca}:
+  \[[a_k,b_k]\subset[a_{k-1},b_{k-1}]\subset[a,b]\]
+  per ridurre lo spazio di ricerca in modo da identificare
+  un'iterazione $k$ che presenta:
+  \[|b_k-a_k|<2\varepsilon\mbox{ con }|a_k-x^*|<\varepsilon \mbox{ e
+    }|x^*-b_k|<\varepsilon\] 
+  Vediamo ora l'lagoritmo nel dettaglio, nel caso di problema di max:
+  \begin{itemize}
+    \item \textbf{inizializzazione: }si fissano un $\varepsilon$ e
+    $k=0$. Si calcolano $\overline{x}$ e $\underline{x}$ cercando
+    valori di $x$ per cui la derivata sia positiva e negativa. Si
+    sceglie il punto iniziale:
+    \[x_0=\frac{\overline{x}+\underline{x}}{2}\]
+    \item \textbf{iterazione del metodo della bisezione:}
+    \begin{itemize}
+      \item calcolo $f^{'}(x_k)$
+      \item se $f^{'}(x_k)=0$ allroa $x_k=x^*$
+      \item se $f^{'}(x_k)<0$ allora $\overline{x}=x_k$
+      \item se $f^{'}(x_k)>0$ allora $\underline{x}=x_k$
+      \item infine pongo
+      $x_{k+1}=\frac{\overline{x}+\underline{x}}{2}$ e $k=k+1$
+    \end{itemize}
+    \item \textbf{criterio d'arresto:} se
+    $\overline{x}-\underline{x}\leq 2 \varepsilon$ allora $x^*$ avrà
+    una distanza minore di $\varepsilon$ dall'estremo superiore (o
+    inferiore). In caso contrario procedo con un'altra iterazione
+  \end{itemize}
+  \textbf{Il metodo di bisezione converge molto lentamente in quanto
+    considera unicamente le informazioni della derivata prima}
+  \item \textbf{metodo di Newton}, che si basa sull'usare l'ottimo
+  dell'approssimazione quadratica di $f(x)$:
+  \[x_{k+1}=x_k-\frac{f^{'}(x_k)}{f^{''}(x_k)}\]
+  che è la formula che viene usata ad ogni generica iterazione $k$ per
+  calcolare $x_{k+1}$.\\
+  Si ha che se la funzione è concava allora $x_k$ converge verso un
+  punto di massimo in quanto:
+  \begin{itemize}
+    \item se $f(x)$ è concava allora se $x_k$ è a sinistra del punto
+    di massimo si ha che $f^{'}(x)>0$, quindi
+    $-\frac{f^{'}(x_k)}{f^{''}(x_k)}>0$ e, di conseguenza,
+    $x_{k+1}>x_k$
+    \item se $f(x)$ è concava allora se $x_k$ è a destra del punto
+    di massimo si ha che $f^{'}(x)<0$, quindi
+    $-\frac{f^{'}(x_k)}{f^{''}(x_k)}<0$ e, di conseguenza,
+    $x_{k+1}<x_k$
+  \end{itemize}
+  \textit{Se le funzione fosse stata convessa si avrebbe avuto la
+    convergenza di $x_k$ verso il minimo}.\\
+  Vediamo quindi nel dettaglio l'algortimo di Newton:
+  \begin{itemize}
+    \item \textbf{inizializzazione:} si fissa $\varepsilon$ e $k=0$
+    \item \textbf{iterazione del metodo di Newton:}
+    \begin{itemize}
+      \item si calcolano $f^{'}(x)$ e $f^{''}(x)$
+      \item si pone $x_{k+1}=x_k-\frac{f^{'}(x_k)}{f^{''}(x_k)}$
+    \end{itemize}
+    \item \textbf{criterio di arresto:} se $x_{k+1}-x_k|\leq
+    \varepsilon$ si ha che $x_{k+1}=x^*$ e quindi è la soluzione
+    ottima, altrimenti itero nuovamente con $k=k+1$
+  \end{itemize}
+  \textbf{Può succedere che l'algoritmo di Newton diverga (mentre ul
+    metodo della bisezione ci assicura la convergenza) ma gode di
+    una velocità di convergenza quadratica}.\\
+  \textit{L'algortimo di Newton fallisce se il punto iniziale è
+    lontano dall'ottimo (si ha una convergenza globale scarsa)}
+\end{enumerate}
+\subsection{Il Caso N-Dimensionale}
+Nel caso unidimensionale la derivata prima della funzione obiettivo ci
+da indormazioni sull'ottimalità di un punto mentre la derivata seconda
+fornisce indicazioni sulla convessità della funzione.\\
+Spostandoci al caso n-dimensionale si ha che la derivata prima viene
+sostituita dal \textbf{gradiente} e la derivata seconda
+dall'\textbf{Hessiano}.\\
+\begin{shaded}
+  \textbf{Vediamo un piccolo ripasso di alcuni concetti fondamentali}:
+  \begin{itemize}
+    \item \textbf{derivata direzionale:}\\
+    sia $f:\mathbb{R}^n\to \mathbb{R}$ una funzione continua e $v\in
+    \mathbb{R}^n$ un vettore direzionale, quindi $||v||=1$, allor si
+    ha che:
+    \[\lim_{h\to 0}\frac{f(x+hv)-f(x)}{h}=\frac{\partial
+        f(x)}{\partial v}\]
+    che viene chiamata \textbf{derivata direzionale di $f$ in $x$
+      nella direzione $v$}.\\
+    Si ha il caso particolare delle direzioni della base canonica
+    $\frac{\partialf(x)}{\partial e_i}$ che vengono chiamare \textbf{derivate
+      parziali}
+    \item \textbf{gradiente:}\\
+    il gradiente rappresenta l’estensione del concetto di derivabilità
+    per una funzione in più dimensioni e corrispond al vettore delle
+    derivate parziali, data $f:\mathbb{R}^n\to \mathbb{R}$ una
+    funzione reale:
+    \[\nabla f(x)=\left[\frac{\partial
+          f(x)}{\partial x_1},\,\frac{\partial
+          f(x)}{\partial x_2},\,\ldots,\,\frac{\partial
+          f(x)}{\partial x_n}\right]\]
+    \begin{esempio}
+      \[f=15x_1+2(x_2)^3-ex_1(x_3)^2\]
+      \[\Downarrow\]
+      \[\nabla f=[15-3(x_3)^2,\, 6(x_2)^2,\, -6x_1x_3]\]
+    \end{esempio}
+    \item \textbf{Matrice Hessiana:}\\
+    la matrice Hessiana rappresenta l’estensione del concetto di
+    derivata seconda per una funzione in più dimensioni ed è una
+    matrice di dimensioni $n\times x$:
+    \[\nabla^2f=H_f=\left[
+        \begin{matrix}
+          \frac{\partial f^2}{\partial x_1^2} &  \frac{\partial
+            f^2}{\partial x_1\partial x_2} & \ldots &
+          \frac{\partial f^2}{\partial x_1\partial x_n}\\
+          \frac{\partial f^2}{\partial x_2\partial x_1} &  \frac{\partial
+            f^2}{\partial x_2^2} & \ldots & 
+          \frac{\partial f^2}{\partial x_2\partial x_n}\\
+          \vdots & \vdots & \ddots & \vdots\\
+          \frac{\partial f^2}{\partial x_n\partial x_1} &  \frac{\partial
+            f^2}{\partial x_n\partial x_2} & \ldots &
+          \frac{\partial f^2}{\partial x_n^2}\\
+        \end{matrix}
+      \right]\]
+    Inoltre si ha che se le derivatre seconde sono continue allora si
+    ha che:
+    \[\frac{\partial f^2}{\partial x_i\partial j}=\frac{\partial
+        f^2}{\partial x_j\partial x_{ij}}\]
+    e quindi l'Hessiana di $f$ è simmetrica
+    \begin{esempio}
+      \[f=15x_1+2(x_2)^3-ex_1(x_3)^2\]
+      \[\Downarrow\]
+      \[\nabla^2f=\left[
+          \begin{matrix}
+            0 & 0 & -6x_2\\
+            0 & 12x_2 & 0\\
+            -6x_3 & 0 & -6x_1
+          \end{matrix}
+        \right]
+      \]
+    \end{esempio}
+    Sia quindi $f:\mathbb{R}^n\to \mathbb{R}$ una funzione reale due
+    volte differenziabile. Per ogni punto $x_0$ è possibile calcolare
+    l'Hessiana in quel punto:
+    \[H_f(x_0)=\left[
+        \begin{matrix}
+          \frac{\partial f(x_0)^2}{\partial x_1^2} &  \frac{\partial
+            f(x_0)^2}{\partial x_1\partial x_2} & \ldots &
+          \frac{\partial f(x_0)^2}{\partial x_1\partial x_n}\\
+          \frac{\partial f(x_0)^2}{\partial x_2\partial x_1} &  \frac{\partial
+            f(x_0)^2}{\partial x_2^2} & \ldots & 
+          \frac{\partial f(x_0)^2}{\partial x_2\partial x_n}\\
+          \vdots & \vdots & \ddots & \vdots\\
+          \frac{\partial f(x_0)^2}{\partial x_n\partial x_1} &  \frac{\partial
+            f(x_0)^2}{\partial x_n\partial x_2} & \ldots &
+          \frac{\partial f(x_0)^2}{\partial x_n^2}\\
+        \end{matrix}
+      \right]\]
+    \item \textbf{matrice positiva o negativa}:\\
+    Si hanno i seguenti casi:
+    \begin{itemize}
+      \item una matrice quadrata è \textbf{definita positiva} se tutti gli
+      autovalori della matrice sono positivi
+      \item una matrice quadrata è \textbf{definita negativa} se tutti gli
+      autovalori della matrice sono negativi
+      \item una matrice quadrata è \textbf{semi-definita positiva} se tutti gli
+      autovalori della matrice sono non negativi
+      \item una matrice quadrata è \textbf{semi-definita negativa} se tutti gli
+      autovalori della matrice sono non positivi
+    \end{itemize}
+    definita quindi l'Hessiana in un pun to $x_0$ si ha che:
+    \begin{itemize}
+      \item se $H_f(x_0)$ è definita positiva la funzione $f(x)$ è
+      convessa in quel punto
+      \item se $H_f(x_0)$ è definita negativa la funzione $f(x)$ è
+      concava in quel punto
+      \item se  la funzione $f(x)$ è convessa in quel punto allora
+      $H_f(x_0)$ è semi-definita positiva
+      \item se  la funzione $f(x)$ è concava in quel punto allora
+      $H_f(x_0)$ è semi-definita negativa
+    \end{itemize}
+  \end{itemize}
+\end{shaded}
 \end{document}

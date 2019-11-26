@@ -993,6 +993,67 @@ considerare i termini di spazio.\\
 \textit{Si può volendo compattare in 3 matrici.}\\
 \textbf{Ho programmazione dinamica in termini di soluzioni di
   sottoistanze ottime di altri problemi collegati al primo}\\
-\subsection{Allineamento multiplo}
-
+\subsection{Allineamento Multiplo}
+Estendiamo il problema dell'allineamento avendo ora $k$ stringhe in
+input, oltre alla matrice di score. Si nota che l'allineamento globale
+è solo un sottocaso dei quello multiplo, ovvero è un allineamto
+multiplo con $k=2$.\\
+Per risolvere il problema cerco gli allineamenti per ogni coppia
+possibile di stringhe. Chiamiamo $t_i$ le stringhe estese. Si hanno
+alcune proprietà necessarie:
+\begin{itemize}
+  \item $|t_1|=\cdots=|t_n|$, ovvero tutte le stringhe estese hanno
+  lunghezza uguale
+  \item non ho colonne di soli indel
+\end{itemize}
+Si ha quindi quindi l'equazione per il caso passo della ricorrenza:
+\[\sum_{i=1}^h\sym_{j=1}^h\sum_{n=0}^kd(t_i[j], t_n[j])\]
+Il tempo è $O(2^kn^k)$ e si ha uno spazio di $O(n^k)$. Avendo $k$
+arbitrario quindi si ha a che fare con un problema NP-completo.
+\subsection{Matrici di Score}
+Si hanno matrici di score ``famose'' per valutare gli allineamenti. I
+loro dati possono essere letti come le probabilità che avvenga una
+transizione. Vediamo le più importanti:
+\begin{itemize}
+  \item \textbf{PAM (\textit{Point/Percent Accepted Mutation})}. Viene
+  usata per capire la ``distanza tra due sequenze'' usando la
+  quantità di mutazioni. In realtà si hanno più matrici PAM pvvero
+  $PAMk$, dove $k$ indica l'accuratezza. Queste matrici si calcolano
+  numericamente prendnedo varie seguenze distanti $kPAM$ e
+  allineandole. SI ha che 1PAM è il numero di mutazioni:
+  $\frac{1}{k}|s_i|$. Sia $f(i)$ la frequenza di ogni carattere e sia
+  $f(i,j)$ la frequenza di ogni coppia di caratteri. \textit{Ogni
+    casella, quindi, indica la probabilità che l’aminoacido di quella
+    riga sia stato sostituito con l’aminoacido di quella colonna
+    attraverso il tempo.}\\
+  Si ha quindi la formula:
+  \[PAM_k(i,j)=\log\frac{f(i,j)}{f(i)f(j)}\]
+  e il risultato è detto \textbf{Logs Odd Ratio}
+  \item \textbf{BLOSUM (\textit{BLOck SUbstitution Matrix})} si usano,
+  a differenza delle PAM, per allineare sequenze lontane, infatti
+  divide i blocchi di regioni conservate da quelle mutate,
+  scegliendole manualmente. Anche le BLOSUM sfruttano il Logs Odd
+  Ratio. Si hanno anche qui varie $BLOSUMk$ e la
+  più usata è la \textit{BLOSUM62}
+\end{itemize}
+Tra i tool più usati nominiamo invece \textbf{BLAST (\textit{Basic
+    Local Alignment Search Tool})} che confronta sequenze, allineate
+con \textit{Smith Watermn} in un database sfruttando i \textit{seed},
+ovvero pattern matching con una sottostringa di lunghezza
+3. L'algoritmo usato su basa su \textbf{HSP   (\textit{High-scoring
+    Segment Pair})} che è l'estensione di un seed che massimizza i
+valori dell'allineamento. Si tengono solo gli HSP significativi mentre
+gli altri vengono fusi tra loro.\\
+I risultati di BLAST vengono analizzati statisticamente con le
+\textbf{statistiche Karlin-Altschul}, che assegnano un punteggio ad
+ogni query. Queste statistiche tengono conto di simboli indipendenti
+ed equiprobabili, sequenze infinitamente lunghe e allineamenti senza gap.
+Gli HSP con massimo score sono distribuiti casualmente, e si può
+considerare che la probabilità che questi punteggi superino una
+determinata soglia segua una distribuzione di Poisson.\\
+Vedno $E$ apri al numero di allineamenti senza gap, $k$ costante
+dipendente dallo score, $n$ numero di caratteri nel database, $m$
+lunghezza della stringa di cui si fa la query e $\lambda S$ il
+punteggio normalizzato (secondo Poisson) si ha:
+\[E=kmne^{-\landa S}\]
 \end{document}

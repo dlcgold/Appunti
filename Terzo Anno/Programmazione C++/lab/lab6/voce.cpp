@@ -4,7 +4,7 @@ voce::voce(){
   
 }
 
-voce(const std::string &n, const std::string &s,
+voce::voce(const std::string &n, const std::string &s,
      const std::string &t):
   name(n), surname(s), ntel(t) {
   

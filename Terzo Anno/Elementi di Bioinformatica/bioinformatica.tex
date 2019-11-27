@@ -11,6 +11,7 @@
 \usepackage{amsmath}
 \usepackage{amstext}
 \usepackage{engrec}
+\usepackage{verbatim}
 \usepackage{rotating}
 \usepackage[safe,extra]{tipa}
 \usepackage{showkeys}
@@ -1055,5 +1056,73 @@ Vedno $E$ apri al numero di allineamenti senza gap, $k$ costante
 dipendente dallo score, $n$ numero di caratteri nel database, $m$
 lunghezza della stringa di cui si fa la query e $\lambda S$ il
 punteggio normalizzato (secondo Poisson) si ha:
-\[E=kmne^{-\landa S}\]
+\[E=kmne^{-\lamda S}\]
+\chapter{Assemblaggio di Genomi}
+Si parla di assemblaggio da 0. Nella prima metà degli anni 90 c'è
+stato il \textbf{progetto genoma umano}, che si proponeva di
+ricostruire la sequenza del genoma umano, lungo circa 3 miliardi di
+basi. Non si ha una tecnologia per leggere tutto il genoma ma ho
+delle tecnologie che ne leggono pezzetti, detti \textbf{read}, che con
+la tecnologia di ``prima generazione`` erano lunghi
+tra i 50 e i 10000 basi (\textit{base pairs}, nucleotidi), con un
+errore del $\sim 1\%$ ma un costo economico elevatissimo.
+Le read ``di seconda generazione'' sono  molto
+più precise (errore sotto all'uno per mille) ma molto corte, circa 200
+basi. La ``terza generazione'' offre lunghezze estese, circa 10000
+basi, ad un costo d'errore elevatissimo ($10\%-15\%$). Estratte le
+read non so da quale porzione del genoma arrivino. Si ha quindi una
+grande collezione di read che devono essere assemblate per ottenere il
+genoma, a partire da un numero di read vincolate solo dai costi
+economici (superano comunque in lunghezza il genoma, magari avendo
+un totale di 60 miliardi di basi). Il rapporto tra read archiviate e
+lunghezza del genoma originale è detto \textbf{copertura}.\\
+Si sfruttano le sovrapposizioni delle read per ottenere il genoma
+(come se fosse un puzzle).\\
+Spesso le read sono prodotte a coppie e vengono dette \textit{mate
+  pairs}, derivate dalla natura a doppio filamento del del DNA e la
+\textbf{legge di complementarietà di Dawson-Crick}, infatti una base
+ha la suia complementare nell'altro filamento. In modo deterministico
+quindi si ottengono due sequenze che si sa essere ``vicine''. \\
+Formalmente le sovrapposizioni si riducono a cercare un suffisso di
+una read che sia il prefisso di un'alra read, è la tecnica
+dell'\textbf{overlap}. La differenza di una singola base (o comunque
+una differenza minima) può essere data dal tasso d'errore del
+macchinario che produce la sequenza oppure si ha che è una conseguenza
+della natura diploide dell'uomo, ovvero che si hanno due copie
+genomiche, una ereditata da ciascun genitore. Magari si ha a che fare
+quindi con un confronto tra queste due copie che genera queste minime
+differenze.
+
+
+
+
+\begin{comment}
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto]
+      \node[state] (q_0)   {$CGTGTGC$};
+      \node[state] (q_1) [right=of q_0] {$CCACG$};
+      \node[state] (q_2) [below=of q_0] {$ACGTGTG$};
+      \node[state] (q_3) [right=of q_2] {$GTGCCA$};
+      \path[->]
+      (q_0) edge  node {$CGTGTG$} (q_1)
+      (q_0) edge  node  {$CGT$} (q_3)
+      (q_2) edge  node  {$A$} (q_0)
+      (q_2) edge  node  {$ACGT$} (q_3)
+      (q_3) edge  node [right]  {$GTG$} (q_1);
+    \end{tikzpicture}
+  \end{center}
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto]
+      \node[state] (q_0)   {$CGTGTGC$};
+      \node[state] (q_1) [right=of q_0] {$CCACG$};
+      \node[state] (q_2) [below=of q_0] {$ACGTGTG$};
+      \node[state] (q_3) [right=of q_2] {$GTGCCA$};
+      \path[->]
+      (q_0) edge  node  {$CGT$} (q_3)
+      (q_2) edge  node  {$A$} (q_0)
+      (q_3) edge  node [right]  {$GTG$} (q_1);
+    \end{tikzpicture}
+  \end{center}
+\end{comment}
+
 \end{document}

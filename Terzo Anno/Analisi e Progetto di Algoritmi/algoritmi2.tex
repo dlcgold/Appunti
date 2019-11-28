@@ -1559,12 +1559,76 @@ Vediamo ora un algoritmo che stabilisce se un grafo sia connesso
     \State \textbf{return }$false$
     \Else
     \State \textbf{return }$true$
+    \EndIf
     \EndFor
     \EndFunction
   \end{algorithmic}
 \end{shaded}
-\subsubsection{Visita in Profondità DFS}
+\subsection{Visita in Profondità DFS}
 Vediamo ora la \textbf{visita in profonditò, DFS (\textit{depth-first
     search})}. Con questa strategia si esplora il grafo andando ad
-ogni istante il più possibile in ``profondità''. 
+ogni istante il più possibile in ``profondità''. Con questa tecnica
+gli archi vengono esplorati a partire dall'ultimo vertice scoperto $v$
+che abbia ancor archi uscenti non esplorati. Una volta che gli archi
+di $v$ sono stati esplorati si esplora a ritroso il vertice che aveva
+$v$ come uscente. Si itera fino a finire i vertici raggiungibili dalla
+sorgente e, una volta concluso, si impone, eventualmente, un nuovo
+vertice non raggiungibile dalla sorgente come nuovo sorgente,
+continuando così a iterare fino a scoprire tutti i vertici. \\
+Anche con questo tipo di visita quando un vertice $v$ viene scoperto
+durante la scansione di una lista di adiacenza di un vertice $u$ già
+scoperto la DFS setta $p[v]=u$, formando così un insieme di diversi
+alberi, uno per sorgente, che formano il \textbf{grafo dei
+  predecessori} $G_p=(V,E_p)$, con gli \textbf{archi dell'albero}:
+\[E_p=\{(p[v],v):\,v\in V,\, p[v]\neq NIL\}\]
+Questo insieme di \textbf{alberi BFS} è detto \textbf{foresta BFS}.\\
+Come la BFS si procede colorando i vertici. Ogni vertice inizialmente
+è \textit{bianco}, quando viene scoperto diventa \textit{grigio} e
+\textit{nero} quando la sua lista di adiacenza viene completamente
+esaminata, garantendo che ogni vertice finisca in un solo albero BFS,
+che sono quindi \textit{disgiunti} tra loro. Durante la visita si
+marcano i vertici con alcune informazioni temporanee, un'etichetta
+$d[u]$ che registra quando $u$ viene scoperto (diventando grigio) e
+un'etichetta $f[u]$ che registra quando si finisce di esaminare la
+lista di adiacenza di $u$ (diventando nero). Entrambe queste etichette
+non sono altro che variabili intere comprese tra 1 e $2|V|$, in quanto
+ogni vertice può essere scoperto una e una sola volta e può terminare
+la sua visita una e una sola volta. Si ha che:
+\[d[u]<f[u],\,\,\forall u\in V\]
+Infatti sicuramente un vertice all'inizio è bianco, al tempo $d[u]$
+diventa grigio e solo dopo, al tempo $f[u]$, diventa nero.\\
+Vediamo lo pseudocodice, ricordando che con $c[u]$ si indica il colore
+del vertice:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function{$DFS$}{$G$}
+    \For {$\forall u \in V[G]$}
+    \State $c[u]\gets white$
+    \State $p[u]\gets NIL$
+    \EndFor
+    \State $time \gets 0$
+    \For {$\forall u \in V[G]$}
+    \If {$c[u]==white$}
+    \State $DFS\_Visit(u)$
+    \EndIf
+    \EndFor
+    \EndFunction
+
+    
+    \Function{$DFS\_visit$}{$u$}
+    \State $c[u] \gets gray$
+    \State $time \gets time +1$
+    \State $d[u] \gets time$
+    \For {$\forall v \in Adj[u$}
+    \If {$c[v]==white$}
+    \State $p[v] \gets u$
+    \State $DFS\_Visit(v)$
+    \EndIf
+    \EndFor
+    \State $c[u] \gets black$
+    \State $time \gets time +1$
+    \State $f[u] \gets time$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
 \end{document}

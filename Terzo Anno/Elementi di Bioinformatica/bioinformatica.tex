@@ -1214,6 +1214,157 @@ si usa per ridurre il grafo di overleap e si basa su 3 passaggi:
   esso sia anche un suffisso
   \item \textbf{consensus,} dove si calcolano i nucleotidi
 \end{enumerate}
-% aggiungere SBH
+\subsection{SBH}
+Si ha che un \textit{k-mero} è una sottostringa di lunghezza $k$.
+\textbf{SBH (\textit{Sequencing By Hybridation})} è una vecchia
+tecnologia che analizza gli \textit{oligonucleotidi} (ovvero sequenze
+nucleotidiche di un numero di basi da 6 a 10). Per ogni
+\textit{k-mero}, che viene chiamato \textbf{chip}, con $k\approx 8$, si
+conosce se appare nel genoma. Il processo è chiamato DNA chip perché
+la logica di fondo è la stessa che viene usata per i chip, ognuno di
+essi può tenere migliaia di oligonucleotidi. Trascurando tutta la
+parte tecnica e passando a quella algoritmica si ha che SBH si
+differenzia dal grafo di overleap in quanto in \textit{k-meri} hanno
+tutti la stessa lunghezza (al conbtrario delle reads) e quindi si
+hanno sovrapposizioni di lunghezza $k-1$
 \subsection{Grafi di De Bruijin}
+Si ha che ogni k-mero viene diviso in \textit{(k-1)-meri}. \\
+In un \textbf{grafo di De Bruijin} ogni vertice corrisponde ad un
+\textit{(k-1)-mero} e un arco corrisponde ad un \textit{k-mero}. Due
+archi sono collegati sse ci sono sovrapposizioni. Avendo stringhe
+tutte di lunghezza $k$ che sono presenti in almeno una read si
+costruisce facilmente il grafo. I \textit{(k-1)-meri} identici vengono
+eliminati ottenendo unicamente nodi distinti. \\
+Si definisce \textbf{cammino Euleriano} un cammino che attraversa ogni
+nodo una e una sola volta.\\
+Si definisce \textbf{ciclo} un cammino che torna al nodo di partenza.\\
+Si definisce \textbf{ciclo sempice} un cammino che torna al nodo di partenza
+passando una e una sola volta per ogni nodo.\\
+Trovando il cammino Euleriano dei grafi di De Bruijin si ottiene il
+genoma.
+\begin{esempio}
+  Si abbiano le seguenti reads:
+  \[reads=\{ACGTGTG,\,\,CGTGTGC,\,\,GTGCCA,\,\,CCACG\}\]
+  Scegliamo $k=4$ e otteniamo i \textit{4-meri}:
+  \[ACGT,\,\,CACG,\,\,CCAC,\,\,CGTG,\,\,GCCA,\,\,GTGC,\,\,GTGT,
+    \,\,TGCC,\,\,TGTG\]
+  e i seguenti 3.meri unici:
+  \[ACG,\,\,CAC,\,\,CCA,\,\,CGT,\,\,GCC,\,\,GTG,\,\,TGC,\,\,TGT\]
+  e quindi:
+  \begin{center}
+    \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+      % uncomment if require: \path (0,248); %set diagram left start at 0, and has height of 248
+
+      % Shape: Circle [id:dp5662414203096264] 
+      \draw   (81,53) .. controls (81,39.19) and (92.19,28) .. (106,28) .. controls (119.81,28) and (131,39.19) .. (131,53) .. controls (131,66.81) and (119.81,78) .. (106,78) .. controls (92.19,78) and (81,66.81) .. (81,53) -- cycle ;
+      % Shape: Circle [id:dp13985089677551477] 
+      \draw   (81,129) .. controls (81,115.19) and (92.19,104) .. (106,104) .. controls (119.81,104) and (131,115.19) .. (131,129) .. controls (131,142.81) and (119.81,154) .. (106,154) .. controls (92.19,154) and (81,142.81) .. (81,129) -- cycle ;
+      % Shape: Circle [id:dp3574816316500795] 
+      \draw   (15,93) .. controls (15,79.19) and (26.19,68) .. (40,68) .. controls (53.81,68) and (65,79.19) .. (65,93) .. controls (65,106.81) and (53.81,118) .. (40,118) .. controls (26.19,118) and (15,106.81) .. (15,93) -- cycle ;
+      % Shape: Circle [id:dp6367614117013465] 
+      \draw   (162,97) .. controls (162,83.19) and (173.19,72) .. (187,72) .. controls (200.81,72) and (212,83.19) .. (212,97) .. controls (212,110.81) and (200.81,122) .. (187,122) .. controls (173.19,122) and (162,110.81) .. (162,97) -- cycle ;
+      % Shape: Circle [id:dp8286860889666687] 
+      \draw   (236,135) .. controls (236,121.19) and (247.19,110) .. (261,110) .. controls (274.81,110) and (286,121.19) .. (286,135) .. controls (286,148.81) and (274.81,160) .. (261,160) .. controls (247.19,160) and (236,148.81) .. (236,135) -- cycle ;
+      % Shape: Circle [id:dp04605576669499256] 
+      \draw   (236,45) .. controls (236,31.19) and (247.19,20) .. (261,20) .. controls (274.81,20) and (286,31.19) .. (286,45) .. controls (286,58.81) and (274.81,70) .. (261,70) .. controls (247.19,70) and (236,58.81) .. (236,45) -- cycle ;
+      % Shape: Circle [id:dp9155218336299027] 
+      \draw   (303,43) .. controls (303,29.19) and (314.19,18) .. (328,18) .. controls (341.81,18) and (353,29.19) .. (353,43) .. controls (353,56.81) and (341.81,68) .. (328,68) .. controls (314.19,68) and (303,56.81) .. (303,43) -- cycle ;
+      % Shape: Circle [id:dp766738912437283] 
+      \draw   (303,123) .. controls (303,109.19) and (314.19,98) .. (328,98) .. controls (341.81,98) and (353,109.19) .. (353,123) .. controls (353,136.81) and (341.81,148) .. (328,148) .. controls (314.19,148) and (303,136.81) .. (303,123) -- cycle ;
+      % Straight Lines [id:da9646625679785032] 
+      \draw    (61.75,79.5) -- (82.55,66.56) ;
+      \draw [shift={(84.25,65.5)}, rotate = 508.11] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Straight Lines [id:da8830983152823235] 
+      \draw    (106,78) -- (106,102) ;
+      \draw [shift={(106,104)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Curve Lines [id:da7743744950450349] 
+      \draw    (131,129) .. controls (138.6,137.33) and (149.07,134.14) .. (172.31,119.42) ;
+      \draw [shift={(173.75,118.5)}, rotate = 507.41] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Curve Lines [id:da701157029011428] 
+      \draw    (162,97) .. controls (156.37,91.61) and (140.89,82.86) .. (122.86,107.45) ;
+      \draw [shift={(121.75,109)}, rotate = 304.92] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Curve Lines [id:da9534415928320956] 
+      \draw    (328,148) .. controls (184.94,235.12) and (18.86,163.46) .. (39.32,119.33) ;
+      \draw [shift={(40,118)}, rotate = 479.11] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Curve Lines [id:da9799576589537213] 
+      \draw    (106,154) .. controls (123.33,180.73) and (219.06,188.84) .. (259.78,159.89) ;
+      \draw [shift={(261,159)}, rotate = 503.13] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Straight Lines [id:da2213126680718589] 
+      \draw    (261,109) -- (261,72) ;
+      \draw [shift={(261,70)}, rotate = 450] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+      % Straight Lines [id:da05405134063421202] 
+      \draw    (328,96) -- (328,68) ;
+
+      \draw [shift={(328,98)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+      % Straight Lines [id:da7142573004014958] 
+      \draw    (286,45) -- (301.01,43.23) ;
+      \draw [shift={(303,43)}, rotate = 533.29] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+
+
+      % Text Node
+      \draw (40,94) node  [align=left] {ACG};
+      % Text Node
+      \draw (106,55) node  [align=left] {CGT};
+      % Text Node
+      \draw (107,129) node  [align=left] {GTG};
+      % Text Node
+      \draw (187,99) node  [align=left] {TGT};
+      % Text Node
+      \draw (261,45) node  [align=left] {GCC};
+      % Text Node
+      \draw (328,43) node  [align=left] {CCA};
+      % Text Node
+      \draw (261,137) node  [align=left] {TGC};
+      % Text Node
+      \draw (329,125) node  [align=left] {CAC};
+    \end{tikzpicture}
+  \end{center}
+\end{esempio}
+tornando sul discorso dei cammini diamo qualche definizione:
+\begin{definizione}
+  \begin{itemize}
+    \item \textbf{grafo Semi-Euleriano}: dato un grafo orientato
+    $G=(V,A)$ esso è definitito semi-Euleriano se esistono due
+    vertici $s$ e $t$ tali che:
+    \[N_G^- (s) = N_G^+(s) + 1, N_G^-(t) = N_G^+(v) - 1\]
+    mentre per ogni altro vertice $w$ si ha che:
+    \[N_G^-(w) = N_G^+(w)\]
+    Si ottiene che ogni nodo avrà lo stesso numero di archi entranti
+    e uscenti, tranne due nodi, uno che ne avrà uno uscente in più e
+    l'altro uno entrante meno
+    \item \textbf{grafo Euleriano:} dato un grafo orientato
+    $G=(V,A)$ esso è definitito Euleriano se:
+    \[N_G^-(w) = N_G^+(w)\]
+    ovvero ogni vertice ha lo stesso numero di archi entranti e
+    uscenti.
+    \begin{teorema}
+      Dato un grafo orientato $G=(V,A)$ e sia $C$ un suo cilo. Sia
+      $G_1$ il grafo senza gli archi di $C$. $G_1$ è Euleriano
+    \end{teorema}
+    \begin{teorema}
+      Un grafo connesso $G=(V,A)$ ha un cammino Euleriano sse $G$ è
+      Semi-Euleriano, inoltre $G$ ha un ciclo Euleriano sse $G$ è Euleriano
+    \end{teorema}
+    \begin{teorema}
+      Dato un grafo Semi-Euleriano $G=(V,A)$ e sia $P$ un cammino
+      tra $s$ e $t$. Sia $G_1$ il grafo ottenuto togliendo a $G$ gli
+      arhci di $P$. Si ha che $G_1$ è Euleriano
+    \end{teorema}
+    \item \textbf{ciclo Euleriano:} è un assemblaggio in un grafo
+    orientato e connesso che attraversa ogni \textbf{arco} esattamente una
+    volta. Si possono avere cicli Euleriani semplici
+    \item \textbf{ciclo Hamiltoniano} è un cammino che attraversa
+    ogni \textbf{vertice} esattamente una volta. Non si possono
+    avere cicli Hamiltoniani semplici
+  \end{itemize}
+\end{definizione}
+% potrebbe mancare roba
+\subsection{Reverse and Complement}
 \end{document}

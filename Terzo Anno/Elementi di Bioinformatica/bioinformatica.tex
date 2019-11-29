@@ -1092,37 +1092,130 @@ della natura diploide dell'uomo, ovvero che si hanno due copie
 genomiche, una ereditata da ciascun genitore. Magari si ha a che fare
 quindi con un confronto tra queste due copie che genera queste minime
 differenze.
-
-
-
-
-\begin{comment}
+\subsection{Grafi di Overleap}
+Iniziamo a vedere come ricostruire il genoma. Il primo approccio
+potrebbe essere quello di trovare una stringa, detta
+\textit{superstringa} $T$ tale che ogni
+$s_i \in S\,\,S=\{s_1,\ldots s_n\}$ sia sottostringa di
+$T$. Praticamente si ha che $T$ è il genoma (con $|T|$ che rappresenta
+la nostra funzione obiettivo) e le $s_i$ le reads. Si
+hanno però diverse ripetizioni e grandi regioni di basi ripetute.
+\begin{esempio}
   \begin{center}
-    \begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto]
-      \node[state] (q_0)   {$CGTGTGC$};
-      \node[state] (q_1) [right=of q_0] {$CCACG$};
-      \node[state] (q_2) [below=of q_0] {$ACGTGTG$};
-      \node[state] (q_3) [right=of q_2] {$GTGCCA$};
-      \path[->]
-      (q_0) edge  node {$CGTGTG$} (q_1)
-      (q_0) edge  node  {$CGT$} (q_3)
-      (q_2) edge  node  {$A$} (q_0)
-      (q_2) edge  node  {$ACGT$} (q_3)
-      (q_3) edge  node [right]  {$GTG$} (q_1);
-    \end{tikzpicture}
+    ng\_lon \_long\_ a\_long long\_l ong\_ti ong\_lo long\_t g\_long
+    \textbf{g\_time ng\_tim}\\
+    ng\_time ng\_lon \textbf{\_long\_} a\_long long\_l ong\_ti ong\_lo long\_t
+    \textbf{g\_long}\\  
+    ng\_time g\_long\_ ng\_lon a\_long long\_l \textbf{ong\_ti} ong\_lo
+    \textbf{long\_t}\\ 
+    ng\_time long\_ti g\_long\_ \textbf{ng\_lon} a\_long long\_l
+    \textbf{ong\_lo}\\
+    \textbf{ng\_time} ong\_lon \textbf{long\_ti} g\_long\_ a\_long long\_l
+    \textbf{ong\_lon} long\_time g\_long\_ a\_long \textbf{long\_l}
+    long\_lon \textbf{long\_time g\_long\_} a\_long\\
+    \textbf{long\_lon g\_long\_time} a\_long\\
+    \textbf{long\_long\_time a\_long}\\
+    a\_long\_long\_time
   \end{center}
-  \begin{center}
-    \begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto]
-      \node[state] (q_0)   {$CGTGTGC$};
-      \node[state] (q_1) [right=of q_0] {$CCACG$};
-      \node[state] (q_2) [below=of q_0] {$ACGTGTG$};
-      \node[state] (q_3) [right=of q_2] {$GTGCCA$};
-      \path[->]
-      (q_0) edge  node  {$CGT$} (q_3)
-      (q_2) edge  node  {$A$} (q_0)
-      (q_3) edge  node [right]  {$GTG$} (q_1);
-    \end{tikzpicture}
-  \end{center}
-\end{comment}
+\end{esempio}
+Si procede con un algoritmo greedy fondendo le due stringhe com massimo
+overleap iterativamente finchè non si ottiene una sola stringa. Questa
+è una soluzione \textbf{NP-hard} oltre al fotto che si hanno regioni
+estremamente simili che verranno considerate solo una volta.
+\newpage
+Si passa quindi ad un ragionamento che sfrutta i grafi. In un
+\textbf{grafo di overleap} i nodi sono rappresentati da dalle read. I
+nodi sono collegati sse l'overleap è abbastanza lungo e l'arco tra un
+vertice $A$ e uno $B$ è etichettato con la sottosequenza di $A$ che
+precede la sovrapposizione. Si tiene conto anche dell'ordine di
+lettura delle reads. Vediamo un esempio avendo:
+\[read=\{ACGTGTG,\,\, CGTGTGC,\,\, GTGCCA,\,\, CCACG\}\]
 
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto]
+    \node[state] (q_0)   {$CGTGTGC$};
+    \node[state] (q_1) [right=of q_0] {$CCACG$};
+    \node[state] (q_2) [below=of q_0] {$ACGTGTG$};
+    \node[state] (q_3) [right=of q_2] {$GTGCCA$};
+    \path[->]
+    (q_0) edge  node {$CGTGTG$} (q_1)
+    (q_0) edge  node  {$CGT$} (q_3)
+    (q_2) edge  node  {$A$} (q_0)
+    (q_2) edge  node  {$ACGT$} (q_3)
+    (q_3) edge  node [right]  {$GTG$} (q_1);
+  \end{tikzpicture}
+\end{center}
+\newpage
+Dal grafo precedente si passa allo \textbf{string graph}
+rimuovendo gli archi transitivi, ottenendo:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+    \node[state] (q_0)   {$CGTGTGC$};
+    \node[state] (q_1) [right=of q_0] {$CCACG$};
+    \node[state] (q_2) [below=of q_0] {$ACGTGTG$};
+    \node[state] (q_3) [right=of q_2] {$GTGCCA$};
+    \path[->]
+    (q_0) edge  node  {$CGT$} (q_3)
+    (q_2) edge  node  {$A$} (q_0)
+    (q_3) edge  node [right]  {$GTG$} (q_1);
+  \end{tikzpicture}
+\end{center}
+\subsubsection{TSP e Superstringa}
+Per inizare ad approcciarci ai grafi vediamo il probolema del
+\textbf{Traveling Salesman Problem, \textit{TSP}}.\\
+Dato un grafo orientato $G=(V,A)$ con archi pesati seocndo $w:A\to
+\mathbb{Q}^+$. Si cerca una permutazione $\Pi=\{\pi_1,\ldots,\pi_n\}$
+di $V$ di costo (peso totale degli archi che vengono attraversati)
+minimo che visiti tutti i nodi e torni al punto di partenza. Si ha la
+seguente funzione obiettivo:
+\[\min z=w(\pi_n,\pi_1)+\sum_{i=1}^nw(\pi_i, \pi_{i+1})\]
+Si dimostra che questo è un problema \textbf{NP-Complete} risolvibile
+grazie all'hardware.\\
+\textbf{Una soluzione è un percorso che tocca ogni città esattamente
+  una volta e torna al punto di partenza}\\
+Torniamo ora al problema originario della superstringa. Ipotizziamo
+che una read non sia altro che un città del TSP. Però si ha che
+l'asseblaggio non è il ``ciclo'' tra le città e la lunghezza della
+stringa non è il costo del percorso TSP. Le stringhe in ingresso
+vengono mappate nel grafo di TSP, diventando nodi. Gli archi devono
+avere peso minimo, quindi diventano la parte della stringa che non è
+sovrapposta. 
+e si ha quindi:
+\[|T|=\sum_{i=1}^n|s_i|-\sum_{i=1}^{n-1}|overleap(s_i,s_{i+1})|\]
+\textit{Per permettere di tornare all'inizio della stringa dalla fine
+  si usa il carattere \$ a fine stringa che viene collegata al suo
+  inizio.}\\
+\textbf{Si mappano quindi tutti i possibili cammini e si individua il
+  percorso ottimo.}
+\subsection{OLC}
+L'\textbf{OLC (\textit{Overlap, Layout, Consensus})} è una tecnica che
+si usa per ridurre il grafo di overleap e si basa su 3 passaggi:
+\begin{enumerate}
+  \item \textbf{overleap,} dove si calcolano le sovrapposizioni e si
+  costruisce il grafo di overleap. Si usa il suffix array per ottenere
+  un \textit{metodo esatto} oppure la programmazione dinamica (che può
+  comportare errori). Usando il primo metodo si calcola il suffix tree
+  generalizzato di tutte le read  \textit{L’albero viene visitato
+    carattere per carattere, usando la read come pattern, e cercando
+    tutti i nodi da cui esce un simbolo di terminazione che non sia
+    l’ultimo.} \\
+  Usando invece la programmazione dinamica si definisce un problema
+  che prende in input due stringhe $s$ e $t$ si cercano i suffissi $x$
+  di $s$ e $y$ di $t$ tali che si abbia:
+  \[\max\{|x|+|y|-2edit(x,y)\}\]
+  dove il $2\cdot$ è stato introdotto in modo arbitrario per dare un
+  maggior peso alle sovrapposizioni. Si confrontano quindi un prefisso
+  e un suffisso e si ha che $m[i,j]$ è l'ottimo del prefisso lungo $j$
+  di $t$ e del suffisso lungo $i$ di $s$
+  \item \textbf{layout,} dove si fondono i cammini per ottenre i
+  cosiddetti \textbf{contigs}, ovvero sottoseuqneze continue. In
+  questa fase vengono rimossi i \textit{branching nodes}, ovvero le
+  ripetizioni e con una sola visita determinare per ogni prefisso se
+  esso sia anche un suffisso
+  \item \textbf{consensus,} dove si calcolano i nucleotidi
+\end{enumerate}
+\subsection{SBH}
+\textbf{SBH (\textit{Sequencing By Hybridation})} è una tecnologia che
+analizza gli oligonucleotidi (di circa 6-10 basi). Per ogni k-mero
+(chip), con $k \sim 8$, si conosce se appare nel genoma.
 \end{document}

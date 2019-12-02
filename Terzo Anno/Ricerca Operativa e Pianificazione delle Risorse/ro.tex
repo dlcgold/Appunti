@@ -2202,5 +2202,110 @@ dall'\textbf{Hessiano}.\\
     \end{itemize}
   \end{itemize}
 \end{shaded}
-
+\newpage
+\subsection{PNL non Vincolata}
+Spostiamoci nel caso n-dimensionale. Per cercare i punti di ottimo si
+richiede che:
+\[\nabla f=0\]
+ovvero si richiede che derivando secondo le $n$ variabili si abbia:
+\[\frac{\partial f}{\partial x_i}=0,\,\,\,\forall i=0,\ldots, n\]
+una volta trovati i punti di ottimo (mettendo a sistema le varie
+derivate parziali uguali a 0) valuto la matrice Hessiana, se
+definita positiva ho un punto di minimo, se definita negatica ho un
+massimo. Per calcolarlo calcolo gli $n$ autovalori.\\
+\textbf{Questo metodo funziona in casi particolari, con una funzione
+  di cui sappiamo discutere la convessità e avendo equazioni lineari
+  facili da risolvere. In caso contrario si hanno \textit{algoritmi
+    numerici per l'otttimizzazione non lineare}}.\\
+Si hanno due metodi:
+\begin{enumerate}
+  \item \textbf{metodo del gradiente (\textit{steepest descent})}
+  \item \textbf{metodo di Newton}
+\end{enumerate}
+Entrambi appartengono alla categoria di strategie del tipo
+\textbf{line-search} che genrano una successione di punti $x_k$ nello
+spazio $\mathbb{R}^n$ tali che $x_{k+1}$ è ottenuto da $x_k$
+muovendosi lungo una direzione di salita (nel caso di massimo) o di
+discesa (nel caso di minimo). Nel dettaglio si ha che, data una generica
+$f:\mathbb{R}^n\to\mathbb{R}$ e un generico punto $x\in \mathbb{R}^n$,
+dove $f$ è differenziabile (indicando con $\langle\,\rangle$ il
+prodotto scalare tra vettori):
+\begin{itemize}
+  \item un vettore $v\in\mathbb{R}^n$ è una \textbf{direzione di
+    discesa} se:
+  \[\langle v,\nabla f(x) \rangle<0\]
+  \item un vettore $v\in\mathbb{R}^n$ è una \textbf{direzione di
+    salita} se:
+  \[\langle v,\nabla f(x) \rangle>0\]
+\end{itemize}
+\newpage
+\textbf{dubbi sulla parte a seguire (i due elenchi)\\}
+Quindi se voglio cercare un minimo posso procedere così:
+\begin{itemize}
+  \item considero un punto generico $x^0$ e $k=0$
+  \item cerco una funzione di discesa $d^k$
+  \item cerco un nuovo $x^{k+1}$ lungo $d^k$:
+  \[x^{k+1}=x^k+\alpha^kd^k\]
+  con $k$ che è la generica iterazione e $\alpha^k>0$ è una quantità
+  scalare chiamata \textbf{step-size} 
+\end{itemize}
+e se voglio cercare un massimo posso procedere così:
+\begin{itemize}
+  \item considero un punto generico $x^0$ e $k=0$
+  \item cerco una funzione di salita $d^k$
+  \item cerco un nuovo $x^{k+1}$ lungo $d^k$:
+  \[x^{k+1}=x^k+\alpha^kd^k\]
+  con $k$ che è la generica iterazione e $\alpha^k>0$ è una quantità
+  scalare chiamata \textbf{step-size} 
+\end{itemize}
+Sapendo il punto di partenza $x^k$ e la direzione di ricerca $d^k$
+calcoliamo lo step size. Sappiamo che cerchiamo di ottimizzare la
+funzione:
+\[f(x^{k+1})=x^k+\alpha^kd^k\]
+ovvero la \textit{restrizione di $f(x)$ lungo $d^k$} e sappiamo che
+l'unica incognita risulta essere $\alpha^k$, quindi mi basta cercare:
+\[\frac{df(x^k+\alpha^kd^k)}{d\,\alpha^k}=0\]
+e usare un metodo di ottimizzazione per trovare $\alpha^k$ ottima.
+\subsubsection{Metodo del Gradiente}
+Con questo metodo si impone la \textit{direzione di crescita} per
+problemi di massimo:
+\[d^k=\nabla f(x^k)\]
+e la \textit{direzione di decrescita} per i problemi di minimo:
+\[d^k=-\nabla f(x^k)\]
+ottenendo quindi:
+\[x^{k+1}=x^k\pm\alpha^kd^k\]
+\textbf{Il gradiente fornisce una direzione \textit{certa} della
+  salita della funzione}\\
+Vediamone quindi l'algoritmo:
+\begin{enumerate}
+  \item si considera un generico punto $k^0$ e si pone $k=0$
+  \item si calcola:
+  \[\nabla f(x^k)\]
+  con $k$ indicante il numero di iterazione
+  \item si pone per problemi di minimo:
+  \[d^k=-\nabla f(x^k)\]
+  o per probelmi di massimo:
+  \[d^k=\nabla f(x^k)\]
+  \item si pone (\textbf{secondo me è $\alpha^k$}):
+  \[x^{k+1}=x^k+\alpha d^k\]
+  \item per problemi di minimo si calcola:
+  \[\alpha^k=arg\,\,\max f(x^k+\alpha d^k)\]
+  con $arg\,\,\max$ che indica l'\textbf{argomento del massimo},
+  ovvero \textit{insieme dei punti di un dato argomento
+    per i quali una data funzione raggiunge il suo massimo}.\\
+  per problemi di minimo si ha:
+  \[\alpha^k=arg\,\,\min f(x^k+\alpha d^k)\]
+   con $arg\,\,\min$ che indica l'\textbf{argomento del minimo},
+  ovvero \textit{insieme dei punti di un dato argomento
+    per i quali una data funzione raggiunge il suo minimo}.\\
+  In entrambi i casi \textbf{utilizzando un metodo di ottimizzazione
+    per funzioni in una variabile}
+  \item come \textbf{criterio di arresto} si ha che ci si ferma se:
+  \[\vert f(x^{k+1})-f(x^k)<\varepsilon_1 \vert\]
+  \[o\]
+  \[\Vert \nablaf(x^{k+1})<\varepsilon_2 \Vert\]
+  con $\varepsilon_i$ piccolo a piacere.\\
+  Se non ci si arresta si pone $k=k+1$ e si ritorna al calcolo del
+  gradiente 
+\end{enumerate}
 \end{document}

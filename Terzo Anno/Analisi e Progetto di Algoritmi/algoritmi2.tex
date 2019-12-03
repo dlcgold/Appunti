@@ -1600,7 +1600,7 @@ diventa grigio e solo dopo, al tempo $f[u]$, diventa nero.\\
 Vediamo lo pseudocodice, ricordando che con $c[u]$ si indica il colore
 del vertice:
 \begin{shaded}
-  \begin{algorithmic}
+  \begin{algorithmic}[1]
     \Function{$DFS$}{$G$}
     \For {$\forall u \in V[G]$}
     \State $c[u]\gets white$
@@ -1613,8 +1613,7 @@ del vertice:
     \EndIf
     \EndFor
     \EndFunction
-
-    
+    \State
     \Function{$DFS\_visit$}{$u$}
     \State $c[u] \gets gray$
     \State $time \gets time +1$
@@ -1631,4 +1630,79 @@ del vertice:
     \EndFunction
   \end{algorithmic}
 \end{shaded}
+Analizziamo l'algoritmo:
+\begin{itemize}
+  \item le righe dalla 2 alla 4 colorano i vertici di \textbf{bianco}
+  e inizializzano i predecessori da \textit{NIL}
+  \item la riga 5 azzera il contatore globale del tempo
+  \item le righe dalla 6 alla 8 controllano tutti i vertici di $V$ e
+  visitano tutti quelli bianchi con la procedura
+  \textit{DFS\_Visit}. Ogni volta che si fa questa chiamata il vertice
+  $u$ che si sta considerando diventa la radice di un nuovo albero
+  della \textit{foresta DFS}. Alla fine di ogni iterazione il vertice
+  considerato avrà il \textit{tempo di scoperta} e il \textit{tempo di
+    fine visita}
+  \newpage
+  \item la riga 11 colora di \textit{grigio} il vertice considerato in
+  quanto è stato ``scoperto''
+  \item la riga 12 e la riga 13  memorizzano il tempo di scoperta del vertice
+  incrementando di 1 la variabile globale del tempo e assegnando il
+  valore al tempo di scoperta del vertice considerato
+  \item le righe dalla 14 alla 17 esaminano i vertici adiacenti al
+  vertice considerato e visitano ricorsivamente ogni vertice adiacente
+  \textit{bianco}. Ogni volta che un vertice $v$ adiacente viene preso
+  in considerazione si considera esplorato dalla visista in profondità
+  l'arco $e(u,v)$, con $u$ vertice preso in considerazione dal metodo
+  \textit{DFS\_Visit}
+  \item la riga 18 colora il vertice considerato di \textit{nero}, in
+  quanto ogni arco uscente dal vertice considerato è stato esplorato
+  \item le righe 19 e 20 aggiornano la variabile di tempo globale
+  e salvano il tempo di fine visita
+\end{itemize}
+Analizziamo ora i tempi. Si hanno due cicli di complessità
+$\Theta(V)$ ciascuno nel metodo \textit{DFS}. Inoltre il metodo
+\textit{DFS\_Visit} viene chiamato una e una sola volta $\forall v\in
+V$. Sempre in \textit{DFS\_Visit} si ha un ciclo che viene eseguito
+$\vert Adj[v]\vert$ volte. Ma sappiamo che:
+\[\sum \vert Adj[v]\vert=\Theta(E)\]
+che è quindi il costo totale di \textit{DFS\_Visit}.\\
+Possiamo quindi dire che il tempo di esecuzione complessivo è:
+\[\Theta(V+E)\]
+La \textit{DFS} ha proprietà interessanti:
+\begin{itemize}
+  \item il sottografo dei predecessori $G_p$ forma effettivamente una
+  foresta di alberi DFS, quindi $u=p[v]$ sse \textit{DFS\_Visit} è
+  stata chimata durante la visita delle liste di adiacenza di $u$
+  \item i tempi di scoperta e fine visita, se sostituiti da parenetsi
+  formano una'espressione ben formata, ovvero sono perfettamente
+  bilanciate.
+  % inserire disegno
+  \\ Infatti si ha il \textbf{teorema delle parentesi}:
+  \begin{teorema}
+    In ogni \textit{DFS} di $G=(V,E)$ per ogni coppia di vertici $u$ e
+    $v$ si soddisfa una e una sola delle seguenti condizioni:
+    \begin{itemize}
+      \item gli intervalli $[d[u],f[u]]$ e $[d[v],f[v]]$ sono
+      completamente disgiunti
+      \item l'intervallo $[d[u],f[u]]$ è interamente c0ontenuto in
+      $[d[v],f[v]]$ e $u$ è discendete di $v$ nell'albero DFS
+      \item \item l'intervallo $[d[v],f[v]]$ è interamente c0ontenuto in
+      $[d[u],f[u]]$ e $v$ è discendete di $u$ nell'albero DFS
+    \end{itemize}
+  \end{teorema}
+  \item si ha il \textbf{corollario degli intervalli dei
+    discendenti}:
+  \begin{corollario}
+    Un vertice $v$ è un \textbf{discendente proprio} di un vertice $u$ nella
+    foresta DFS fi un grafo $G$ sse:
+    \[d[u]<d[v]<f[v]<f[u]\]
+  \end{corollario}
+  \item si ha il \textbf{teorma del cammino bianco}
+  \begin{teorema}
+    In una foresta DFS di un grafo $G=(V,E)$ un vertice $v$ è
+    discendete di $u$ sse, al tempo $d[u]$ di scoperta di $u$, $v$ è
+    ragiungibile da $u$ con un cammino fatto solo di vertici
+    \textit{bianchi} 
+  \end{teorema} 
+\end{itemize}
 \end{document}

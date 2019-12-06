@@ -2345,4 +2345,181 @@ n$ con $n$ numero di variabili, si ha un grande sforzo computazionale,
 ripagato parzialmente dalla velocità di convergenza.\\
 Si ha che permette una sola iterazione nel caso di funzioni
 quadratiche.
+\section{Ottimizzazione Non Lineare Vincolata}
+Consideriamo un generico problema di programmazione non lineare
+vincolata:
+\[opt\,\,f(x)\]
+con $opt=\{\min,\max\}$, soggetta ai \textit{vincoli di uguaglianza}:
+\[g_i(x)=0\,\,i=1,\ldots, m\]
+e ai \textit{vincoli di disuguaglianza}:
+\[h_j(x)\leq0\,\,j=1,\ldots, p\]
+Si hanno 3 metodi:
+\begin{enumerate}
+  \item riduzione del numero di variabili libere (dimensionality
+  reduction)
+  \item metodo dei moltiplicatori di Lagrange
+  \item condizioni di Karash-Kuhn Tucker
+\end{enumerate}
+\subsection{Dimensionality Reduction}
+Supponiamo di avere un problema di ottimizzazione soggetto ad un certo
+numero $l$ di vincoli di uguaglianza.\\
+Nel caso in cui sia possibile esplicitare $l$ variabili in funzione delle
+restanti $n-l$ variabili utilizzando i vincoli di ugualianza del problema
+allora possiamo trasformare tale problema in un problema di
+ottimizzazione non vincolata con $n-l$ variabi. Quindi, per esempio,
+si passerebbe da:
+\[\max f(x_1,\ldots, x_n)\]
+\[g_j(x_1,\ldots, x_n)=b_j\,\,i=1,\ldots, l\]
+a:
+\[\max f(x_1,\ldots, x_{n-l})\]
+\[x_{n-l+1}=\widetilde{g_1}(x_1,\ldots, x_{n-l})\]
+\[\ldots\]
+\[x_n0\widetilde{g}_l(x_1,\ldots,x_{n-l})\]
+\textbf{Questo metodo non è sempre applicabile}.\\
+Per esempio, fissato $x_1$, $x_2$ può assumere 2 valori e viceversa.
+Quindi non posso esplicitare univocamente una variabile in funzione
+dell’altra.  
+\subsection{Lagrangiana}
+Consideriamo un generico problema di programmazione non lineare
+vincolata con solo vincoli di uguaglianza:
+\[opt\,f(x_1,\ldots,x_n)\]
+con $opt=\{\min,\max\}$, soggetto ai vincoli:
+\[g_i(x_1,\ldots,x_n)=0,\,\,\,i=1,\ldots,m\]
+Si consideri la funzione in $n+m$ variabili:
+\[L(x_1,\ldots,x_n,\lambda_1,\ldots,\lambda_m)=f(x_1,\ldots,x_n)+
+  \sum_{i=0}^m\lambda_i\cdot g_i(x_1,\ldots,x_n)\]
+Questa funzione è detta \textbf{Funzione Lagrangiana} e le variabili
+$\lambda_i$ (di numerosità pari al numero di variabili) sono detti
+\textbf{Moltiplicatori di Lagrange}. Si ha che:\\
+\textit{i punti stazionari della Lagrangiana sono fortemente legati
+  agli ottimi della funzione}.\\
+Sia quindi $x^*=(x_1^*,\ldots,x_n^*)$ il punto stazionario di
+$f$. Esistono quindi $m$ moltiplicatori di Lagrange
+$\lambda^*=(\lambda_1^*,\ldots, \lambda_n^*)$ tali che il punto
+$(x^*,\lambda^*)$ è un punto stazionario della Lagrangiana associata:
+\[L(x^*,\lambda^*)=f(x^*)+\sum_{i=0}^m\lambda_i^*\cdot g_i(x^*)\]
+Si hanno due osservazioni:
+\begin{enumerate}
+ \item $x^*$ e $(x^*,\lambda^*)$ possono essere punti stazionari di
+ tipo diverso (massimo, minimo, di sella)
+ \item tale condizione fornisce una condizione necessaria ma non
+ sufficiente per l’ottimizzazione dei problema vincolato 
+\end{enumerate}
+Si ha quindi che nel punto $(x^*,\lambda^*)$ il gradiente della
+funzione Lagrangiana è nullo:
+\[\frac{\partial L(x^*,\lambda^*)}{\partial
+    x_i}=0\,\,\,i=1,\ldots,n\]
+\[\frac{\partial L(x^*,\lambda^*)}{\partial
+    \lambda_i}=0\,\,\,i=1,\ldots,m\]
+I punti che annullano il gradiente rappresentano i punti candidati ad
+essere punto di ottimo della funzione:
+\begin{enumerate}
+  \item se la funzione $f$ è convessa allora i punti stazionari sono
+  punti di minimo
+  \item se la funzione $f$ è concava allora i punti stazionari sono
+  punti di massimo 
+\end{enumerate}
+Si nota inoltre che:
+\begin{itemize}
+  \item $\frac{\partial L(x^*,\lambda^*)}{\partial
+    \lambda_i}=0\,\,\,i=1,\ldots,m$ è un modo differente per
+  riscrivere i vincoli $g_i(x_1,\ldots,x_n)$
+  \item  $\frac{\partial L(x^*,\lambda^*)}{\partial
+    x_i}=0\,\,\,i=1,\ldots,n$ può essere riscritto come:
+  \[\frac{\partial L(x^*,\lambda^*)}{\partial
+      x_i}=\frac{\partial f(x^*)}{\partial
+      x_i}+\sum_{i=0}^m\lambda_i^\*\cdot \frac{\partial
+      g_i(x^*)}{\partial x_i}=0\]
+  \newpage
+  ovvero:
+  \[\nabla L(x^*,\lambda^*)=\nabla
+    f(x^*)+\sum_{i=1}^m\lambda_i^*\cdot \nabla g_i(x^*)=0\]
+  \[\Downarrow\]
+  \[\nabla f(x^*)=-\sum_{i=1}^m\lambda_i^*\cdot \nabla g_i(x^*)\]
+\end{itemize}
+Quest'ultimo risultato comporta:
+\begin{itemize}
+  \item l'insieme dei vincoli di fatto restringe lo spazio delle
+  soluzioni ammissibili del problema al sottospazio intersezione
+  dato dall’intersezione dei vari vincoli
+  \item $\nabla f(x^*)$ nel punto di ottimo $x^*$ deve risultare
+  ortogonale a tale sottospazio
+  \item il vettore ortogonale a tale sottospazioè dato da:
+  \[\sum_{i=1}^m\lambda_i^*\cdot \nabla g_i(x^*)\]
+  quindi:
+  \[\nabla f(x^*)=-\sum_{i=1}^m\lambda_i^*\cdot \nabla g_i(x^*)\]
+  ovvero  nel punto di ottimo il gradiente della funzione $f$ può
+  essere riscritto come combinazione lineare dei gradienti dei vincoli 
+\end{itemize}
+Fino ad ora però abbiamo usato la Lagrangiana avendo solo vincoli di
+uguaglianza. Aggiungiamo anche i vincoli di disuguaglianza:
+\[h_j(x_1,\ldots,x_n)\geq 0,\,\,\,j=1,\ldots,p\]
+Si ha quindi che il punto di ottimo $x^*$ è tale che:
+\begin{itemize}
+  \item $g_i(x^*),\,\,\forall i=1,\ldots,m$
+  \item $h_j(x^*)=0,\,\,\forall j=1,\ldots,p$ se ho un vicolo attivo
+  \item $h_j(x^*)<0,\,\,\forall j=1,\ldots,p$ se ho un vicolo non
+  attivo, in quetso caso significa che un piccolo cambiamento non viola
+  il vincolo 
+\end{itemize}
+Si definisce la \textbf{Lagrangiana generalizzata} come una funzione
+in $n+m+p$ variabili:
+\[L(x_1,\ldots,x_n,\lambda_1,\ldots,\lambda_m,\mu_1,\ldots,\mu_p)=\]
+\[=f(x_1,\ldots,x_n)+ \sum_{i=0}^m\lambda_i\cdot g_i(x_1,\ldots,x_n)+
+  \sum_{i=0}^p\mu_i\cdot h_i(x_1,\ldots,x_n)\]
+\subsection{KKT}
+Le condizioni di Karush-Kuhn-Tucker rappresentano una generalizzazione
+del metodo dei moltiplicatori di Lagrange, applicato a problemi in
+cui siano presenti anche dei vincoli di disuguaglianza.\\
+Consideriamo il solito problema di programmazione non lineare
+vincolata:
+\[opt\,\,f(x)\]
+con $opt=\{\min,\max\}$, soggetta ai \textit{vincoli di uguaglianza}:
+\[g_i(x)=0\,\,i=1,\ldots, m\]
+e ai \textit{vincoli di disuguaglianza}:
+\[h_j(x)\leq0\,\,j=1,\ldots, p\]
+Sia $x^*=(x_1^*,\ldots,x_n^*)$ un ottimo di $f$, allora $h_j(x^*)$ può
+essere:
+\begin{itemize}
+  \item attivo, se $h_j(x^*)=0$
+  \item inattivo se $h_j(x^*)<0$
+\end{itemize}
+L'insieme dei vincoli attivi si indica con $l(x^*)$.\\
+Sia $x^*=(x^*:1,\ldots, x^*_n)$ il punto di ottimo di $f$. Esistono,
+di conseguenza, $m$ moltiplicatori $\lambda^*=(\lambda_1^*,\ldots,
+\lambda_m^*)$ e $p$ moltiplicatori $\mu*=(\mu_1^*,\ldots, \mu_p^*)$
+valgono le seguenti condizioni:
+\begin{itemize}
+  \item \textbf{condizione di stazionarietà}:
+  \begin{itemize}
+    \item per problemi di massimo:
+    \[\nabla f(x^*,\lambda^*,\mu^*)- \sum_{i=0}^m\lambda^*_i\cdot \nabla
+      g_i(x^*)-\sum_{j=1}^p\mu^*_j\cdot \nabla h_j(x^*)=0\]
+     \item per problemi di minimo:
+    \[\nabla f(x^*,\lambda^*,\mu^*)+ \sum_{i=0}^m\lambda^*_i\cdot \nabla
+      g_i(x^*)+\sum_{j=1}^p\mu^*_j\cdot \nabla h_j(x^*)=0\]
+  \end{itemize}
+  \item \textbf{ammissibilità primale:}
+  \[g_i(x^*)=0,\,\,\forall i=1,\ldots,m\]
+  \[g_j(x^*)\leq 0,\,\,\forall j=1,\ldots,p\]
+  \item \textbf{ammissibilità duale:}
+  \[\mu_j\geq 0,\,\,\forall j=1,\ldots,p\]
+  \item \textbf{condizione di complementarietà}:
+  \[\mu_j^*\cdot h_j(x^*)=0,\,\,\forall j=1,\ldots,p\]
+\end{itemize}
+Le ultime due confizioni inoltre implicano che, nel caso di vincoli di
+disuguaglianza:
+\begin{itemize}
+  \item se ho un vincolo non attivo, quindi $h_j(x^*)<0$ allora
+  $\mu_j^*=0$
+  \item se ho un vincolo attivo, quindi $h_j(x^*)=0$ allora
+  $\mu_j^*\geq 0$
+\end{itemize}
+\textbf{Le condizioni di \textit{KKT} rappresentano le condizioni
+  necessarie ma non sufficienti che caratterizzano i punti di ottimo
+  (condizioni di ottimalità)}.\\
+I punti di ottimo devono soddisfare le condizioni di KKT che
+``limitano'' la ricerca dei punti di ottimo tra quelli che soddisfano
+le condizioni.\\
+\textbf{\textit{Le condizioni KKT non sono un algortimo}}
 \end{document}

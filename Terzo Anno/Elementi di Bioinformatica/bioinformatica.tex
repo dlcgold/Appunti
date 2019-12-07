@@ -28,7 +28,7 @@
 \usepackage{enumitem}
 \usepackage{framed}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage[cache=false]{minted}
@@ -68,9 +68,14 @@
     \ \thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 \chapter{Introduzione}
-\textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
+\textbf{Questi appunti sono presi a lezione. Per quanto sia stata
+  fatta una revisione è altamente probabile (praticamente certo) che
+  possano contenere errori, sia di stampa che di vero e proprio
+  contenuto. Per eventuali proposte di correzione effettuare
+  una pull request. Link: }
+\url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
-\chapter{Introduzione alla Bioinformatica}
+\chapter{Algoritmi di Pattern Matching}
 Un po' di notazione per le stringhe:
 \begin{itemize}
   \item \textbf{simbolo:} $T[i]$
@@ -90,15 +95,14 @@ complessità sarebbe $O(n+m)$ (è il \textbf{lower bound}). Si ragiona
 anche sulla costante implicita della notazione O-Grande cercando di
 capire quale sia effettivamente l'algoritmo migliore con la quantità
 di dati che si deve usare. Bisogna quindi bilanciare pratica e teoria.
-\section{Bit-Parallel}
-È un algoritmo veloce in pratica ma poco performante a livello
-teorico, ha complessità $O(nm)$.
+\newpage
+Ecco l'algoritmo banale:
 \begin{shaded}
   \begin{algorithmic}
-    \For {$i=1\to n$}
+    \For {$i\gets 1$ \textbf{to} $n$}
     \State $trovato \gets true$
-    \For{ $j=1\to m$}
-    \If{ $T[1+j-1]<>P[j]$}
+    \For{ $j\gets 1$ \textbf{to} $m$}
+    \If{ $T[1+j-1]\neq P[j]$}
     \State $trovato \gets false$
     \EndIf
     \EndFor
@@ -108,12 +112,15 @@ teorico, ha complessità $O(nm)$.
     \EndFor
   \end{algorithmic} 
 \end{shaded}
+\section{Bit-Parallel}
+È un algoritmo veloce in pratica ma poco performante a livello
+teorico, ha complessità $O(nm)$.
 Questo algoritmo è facilmente eseguibile dall'hardware del pc. \\
 In generale si hanno \textbf{algoritmi numerici} che trattano i numeri
 e gli \textbf{algoritmi simbolici} che manipolano testi.\\
 Si hanno poi gli\textbf{ algoritmi semi-numerici} che trattano i
 numeri secondo la loro rappresentazione binaria, manipolando quest'ultima
-con \textit{or $\vee$, and $wedge$, xor $\oplus$, left-shift $<<$ e
+con \textit{or $\vee$, and $\wedge$, xor $\oplus$, left-shift $<<$ e
   right-shift $>>$}. Ricordiamo che il left shift sposta di $k$
 posizioni a sinistra i bit, scartandone $k$ in testa e aggiumgendo
 altrettanti zeri in coda (lo shift a destra sposta a destra, scarta in
@@ -122,9 +129,13 @@ mappate direttamente sull'hardware, rendendo tutto estremamente
 efficiente.\\
 \subsection{Algoritmo D\"om\"olki/Baeza-Yates}
 Questo algoritmo viene anche chiamato \textbf{algoritmo shift-and} o
-anche \textbf{bit parallel string matching}.\\
+anche \textbf{bit parallel string matching}. Questo algoritmo punta a
+ridurre il reale tempo di esecuzione delle istruzioni sulla cpu.\\
 Si definisce in input una stringa $T$ di cardinalità $n$ e un pattern
 $P$ di cardinalità $m$.\\
+Si ha una semplificazione rispetto all'algoritmo Shift-And reale,
+infatti i caratteri dell'alfabero vengono rappresentati con il loro
+valore vero e proprio e non con una bit-mask.\\
 Si costruisce una matrice $M$ \textit{ipotetica}, di dimensione
 $n\times m$, con un indice $i$ per $P$ e uno $j$ per $T$  dove:
 \[M(i,j)=1\,\,sse\,\,P[:i]=T[j-i+1:j],\,0\leq i\leq m,\,\,0\leq j\leq

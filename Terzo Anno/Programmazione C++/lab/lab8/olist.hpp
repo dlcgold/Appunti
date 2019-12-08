@@ -144,6 +144,7 @@ public:
       _size++;
       return;
     }
+    
     node *current = _head;
     node *previous = _head;
     while(current != nullptr){

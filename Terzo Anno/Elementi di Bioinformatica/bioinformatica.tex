@@ -130,7 +130,7 @@ efficiente.\\
 \subsection{Algoritmo D\"om\"olki/Baeza-Yates}
 Questo algoritmo viene anche chiamato \textbf{algoritmo shift-and} o
 anche \textbf{bit parallel string matching}. Questo algoritmo punta a
-ridurre il reale tempo di esecuzione delle istruzioni sulla cpul.\\
+ridurre il reale tempo di esecuzione delle istruzioni sulla cpu.\\
 Si definisce in input una stringa $T$ di cardinalità $n$ e un pattern
 $P$ di cardinalità $m$.\\
 Si ha una semplificazione rispetto all'algoritmo Shift-And reale,
@@ -307,12 +307,28 @@ caso. Ci sono due categorie di algoritmi probabilistici:
   sia un estremo, portando l'algoritmo ad essere quadratico).
 \end{enumerate}
 \textit{È possibile rendere Karp-Rabin un algoritmo della categoria Las Vegas
-  controllando tutti i falsi positivi (anche se non è una procedura utlizzata).}
+  controllando tutti i falsi positivi (anche se non è una procedura
+  utlizzata).} \\
+Per riconoscere i falsi positivi posso usare anche le sovrapposizioni,
+che distano al amssimo $\frac{m}{2}$ caratteri. Eventauali eccessi
+sono gestiti come semiperiodici di periodo $d$. Si ha quindi che
+$d=l_2-l_1$, che è il periodo del pattern $P$. Sapendo che
+$P=\alpha\beta^{k-1}$, con $\alpha$ suffisso di $\beta$. Ne segue che
+ogni cattarete di $T$ è al massimo in due run dell'algoritmo.
 \section{Trie}
-Si usera la filosofia che prevede il preprocessamento del testo.\\
-Il \textbf{trie} è una struttura ad albero, con archi etichettati,
-che, preso un insieme di parole, detto dizionario, controlla che
-quella sequenza sia nell'insieme di parole. Si tratta di un
+Si usera la filosofia che prevede il preprocessamento del testo.
+\begin{definizione}
+  Il \textbf{trie} è una struttura dati ordinata, ovverp un albero,
+  con archi etichettati, che, preso un insieme
+  di parole, detto dizionario, controlla che
+  quella sequenza sia nell'insieme di parole. \\
+  La forma più semplice di indice è un array ausiliario
+  che contiene il puntatore agli elementi in ordine lessicografico,
+  tramite il quale è possibile effettuare una ricerca dicotomica
+  ovvero una tecnica \textit{d\&i} che opera selezionando ad ogni
+  passo due alternative.  
+\end{definizione}
+Si tratta di un
 \textbf{problema di membership}. Voglio un tempo $O(n)$ con $n$
 lunghezza della query. Quindi si preprocessa una volta sola il
 dizionario in un albero e poi si procede con le query. Nella pratica
@@ -324,17 +340,42 @@ posso avere anche $abra$ nel dizionario), perché non riuscirei ad
 andare da radice a foglia. Introduco quindi il carattere $\textdollar$, il quale
 non appartiene all'alfabeto che viene aggiunto alla fine di ogni
 stringa, viene infatti detto \textbf{terminatore}, così $abra\textdollar$ non è
-prefisso di $abraabra\textdollar$ etc$\ldots$, rimuovendo così ogni ambiguità.\\
-
-Usiamo una struttura dati chiamata \textbf{suffix tree}, che è il trie
-di tutti i suffissi di $T\textdollar$, che quindi è un insieme più specifico di
+prefisso di $abraabra\textdollar$ etc$\ldots$, rimuovendo così ogni
+ambiguità.\\ 
+Un trie può essere rappresentato con:
+\begin{itemize}
+  \item un \textbf{array}, dove le celle vuote immagazzinano
+  predecessori e successori, con tempo $O(P)$ e spazio $O(\Sigma P)$
+  \item un \textbf{balanced binary search tree}, con tempo
+  $O(P\log\Sigma)$ e spazio $O(T)$
+  \item una \textbf{tabella hash}, che però ``rompe'' il ragioanmento
+  sul predecessore e rende impossibile il sorting, con tempo $O(P)$ e
+  spazio $O(T)$
+  \item un \textbf{compressed trie}, ovvero mediante la compressione
+  con un solo figlio in ogni nodo, con i relativi simboli sullo stesso
+  arco 
+\end{itemize}
+\subsection{Suffix Tree}
+Usiamo una struttura dati chiamata \textbf{suffix tree}, che è il
+compressed trie di tutti i suffissi di $T\textdollar$, che quindi è un insieme più specifico di
 stringhe (i suffissi). È una sorta di trie compatto, dove un suffisso
 diventa l'etichetta di un arco. Le etichette degli archi uscenti, i
 \mathit{figli}, da $X$ inziano con simboli diversi. I suffissi sono il
 percorso radice-foglia.
+\begin{definizione}
+  Un \textbf{suffix tree} per una stringa $T$ di lunghezza $m$ è un albero di
+  $m$ foglie indicizzate. Ogni nodo interno ha almeno due figli e ogni
+  arco è etichettato con una stringa non vuota di $S$. Si ha che due
+  archi che non appartengono allo stesso nodo non possono iniziare con
+  lo stesso carattere. Per ogni foglia di indice $i$ si ha che la
+  concatenazione delle etichette deglia rchi che portano dalla radice
+  alla foglia corrisponde al suffisso della sottostringa che inizia
+  alla posizione $i$.
+\end{definizione}
 \begin{center}
-  \includegraphics[scale = 0.5]{img/suf.png}
+  \includegraphics[scale = 0.5]{img/suf.png}  
 \end{center}
+\textbf{Un suffisso implica un percorso radice foglia}\\
 Una sottostringa è il \textit{prefisso di un suffisso}. Dato un
 pattern voglio trovare tutti i suffissi che iniziano col
 pattern. Quindi, dato che ogni nodo ha un solo figlio con un certo
@@ -344,8 +385,13 @@ pattern, posto che esista. Se non esiste il pattern cercato termina,
 così come termina nel momento in cui lo trova raggiungendo un
 $\textdollar$. Il compattamento da trie a suffix tree serve a
 migliorare le performance di costruzione della struttura dati, non
-quelle del pattern matching in sè. Un suffix-tree ha un rapporto tra
-il numero di nodi e il numero di foglie (?).\\
+quelle del pattern matching in sè. \\
+Ci sono $|T + 1|$ foglie. Ogni label è una sottostringa $T [i : j]$,
+è importante avere in memoria entrambi
+gli indici $(i, j)$. Lo spazio di attraversamento dell’albero è $O(T )$,
+quindi gli alberi possono essere
+utilizzati per risolvere problemi di string matching in tempo
+lineare.\\ 
 Questo pattern matching ha $O(m)$ con $m$ lungheza del pattern da
 ricercare ma poi ho tante foglie $k$ sotto il nodo a cui sono arrivato
 quante sono le occorrenze del pattern nel testo, che quindi visito in
@@ -358,11 +404,15 @@ interessa in quanto i suffissi corrispondono (se ho $NA$ e mi fermo a
 $N$ va bene lo stesso, in quanto i suffissi di $NA$ sono dello stesso
 numero di quelli di $N$). Nelle foglie ho indicato l'indice dove
 inizia ogni occorrenza.\\
+Si ha che la \textbf{label(X)} è la concatenazione delle sottostringhe
+che etichettano gli archi di un nodo.
+\\
 Definisco la \textbf{path-label(X)} di un nodo X è la concatenazione delle
 stringhe fino a quel nodo. Definisco invece \textbf{string-depth(X)} di
 un nodo X la lunghezza del path-label, che è calcolabile in $O(n)$. La
 string-depth di X sarà la lunghezza dell'etichetta sommata alla
-string-depth del padre.\\
+string-depth del padre.
+\\
 \textit{Molti algoritmi sfruttano molte visite per arricchire le
   informazioni dell'albero ai fini di rendere semplice la risoluzione
   di un problema.}\\
@@ -371,7 +421,56 @@ concatendando quella del padre alla propria raggiungerei quasi
 $O(n^2)$. Si usa quindi una tecnica basata su puntatori al testo e non
 su stringhe, questo fa si che ogni arco sia etichettato da una coppia
 di numeri (posizione di inizio e lunghezza), quindi raggiungo tempo
-costante per etichettare ogni albero.\\
+costante per etichettare ogni albero.
+\begin{definizione}
+  Si definisce \textbf{suffix tree generalizzato} un suffix tree
+  derivante da un insieme di stringhe, che sono caratterizzati da un
+  unico delimitatore
+\end{definizione}
+\subsection{Pattern Matching con Suffix Tree}
+Dato un pattern $P$ di lunghezza $n$ e un testo $T$ di lunghezza $m$,
+si vogliono trovare tutte le occorrenze di $P$ in $T$.\\
+Usando i suffix tree risolvo il problema in tempo lineare.\\
+Si ha che la rierca in un trie permette di capire se una stringa è
+suffisso di un'altra, si estende questa logica alle sottostringhe,
+carpendo anche indici e numero di occorrenze. \\
+Cerchiamo di esprimere una sottostringa in termini di suffisso. Si ha
+che: \textit{un suffisso è sicuramente una sottostringa, e ogni
+sottostringa è il prefisso di un suffisso}, quindi, dato che ogni suffisso è
+in realtà un perocrso radice-foglia univoco, bisogna cercare i
+percorsi iniziali. \\
+Tutte le occorrenze del pattern $P$ sono le porzioni iniziali dei
+suffissi che iniziano con $P$. Nel caso invece di ricerca di stringhe
+a metà tra due archi l’etichetta non viene consumata interamente.\\
+Quindi ci sono due alternative:
+\begin{enumerate}
+  \item la stringa non è presente in $T$
+  \item ogni foglia del sotto-albero sottostante l’ultimo match è
+  enumerata con un punto di partenza di $P$ in $T$, e ogni punto di
+  partenza corrisponde a una foglia. 
+\end{enumerate}
+Si ha quindi $O(T)$ per processare la stringa, e i match si trovano in
+$O(n+k)$, con $k$ numero di occorrenze. Una volta trovata una
+ricorrenza si risale verso l'alto fino al primo suffisso che non
+inizia con $P$. In aggiunta si ha un tempo $O(n)$ per creare l'albero.\\
+Si ha che \textbf{ogni occorrenza di P in T è un prefisso di qualche
+  suffisso in T}.\\
+Vediamo il procedimento (\textbf{si ringraziano gli appunti Ilaria e
+  Adi (link nel readme)} partendo dal primo carattere del pattern e dalla radice dell’albero:
+\begin{enumerate}
+  \item per il carattere corrente del pattern, se c’è una
+  corrispondenza con la stringa dell’arco, allora 
+  si prosegue verso il basso
+  \item se il pattern non esiste nell’arco corrente, allora esso non
+  esiste in assoluto
+  \item si continua fino ad arrivare a una o più foglie
+  dell’albero. Il valore delle foglie indicheranno 
+l’indice al quale si trovano le corrispondenze 
+\end{enumerate}
+\begin{center}
+  \includegraphics[scale = 0.7]{img/su.png}
+\end{center}
+\section{Suffix Array}
 Il grande problema del suffix-tree è lo spazio occupato, circa $20n$
 byte, quindi per il genoma umano servono 60gb di memoria. Per
 risolvere questo problema si usano i \textbf{suffix array (SA)}, che occupa
@@ -382,13 +481,24 @@ suffix tree. Tutto quello che si può fare sul suffix tree si può fare
 sul suffix array con tempi diversi ma simili. Non memorizzo
 esplicitamente i suffissi ma memorizzo le posizioni iniziali del
 suffisso. Al suffix array si aggiunge l'array ausiliario \textit{LCP
-  (longest  common prefix)} con la lunghezza del prefisso comune $LPC[i]$
+  (longest common prefix)} con la lunghezza del prefisso comune $LPC[i]$
 tra $SA[i]$ e $SA[i+1]$.
 \begin{center}
-  \includegraphics[scale = 0.5]{img/suf2.png}
+  \includegraphics[scale = 0.7]{img/sa.png}
 \end{center}
+\begin{center}
+  \includegraphics[scale = 0.7]{img/sa2.png}
+\end{center}
+il primo valore dell'\textit{LCP} rappresenta il terminatore, che non
+ha sottostringhe comuni col suo elemento precedente, in quanto
+inesistente.\\
+\textit{Nel pattern matching, tutte le occorrenze di P corrispondono a
+  una porzione dell’array Lcp, dove 
+gli elementi sono tutti minori o uguali della lunghezza del
+pattern. La scansione di Lcp permette di 
+trovare il pattern in tempo costante.}\\
 Lo spazio diventa $4n$ bytes, quindi per il genoma 12gb.\\
-Passiamo ora dall'albero all'array. Facciamo una visita depth-firts
+Passiamo ora dal suffix tree al suffix array. Facciamo una visita depth-firts
 (pre-order) del suffix array, assumento che a sinistra ci siano
 etichette in ordine lessicografico minore (a sinistra ho suffissi con
 una lettera dell'alfabeto iniziale ``precedente'').\\
@@ -396,12 +506,12 @@ Ho quindi che $LPC[i]$ è la string-depth di $LCA(i, i+1)$, ovvero
 \textit{least common ancestor}, che quindi mi indica dove due percorsi
 divergono e vedo quanto vale lì la string-depth.\\
 Calcolare LPC costa un tempo quadratico. Ma possiamo fare un altra
-cosa. Ogni arco viene visitato almeno due volte inq aundo una volta arrivati
+cosa. Ogni arco viene visitato almeno due volte in qaunto una volta arrivati
 ad una foglia si torna indietro. Mi salvo la string depth dell'LCA
 nell'array ogni volta che ho un cambio di direzione nella visita dell'albero
 lavorando quindi in tempo lineare. Nel disegno guardiamo due foglie
 consective e contiamo i nodi che hanno in comune sopra esclusa la radice.\\
-Dati SA e LCP passiamo ora a costruire l'albero. Gli LCP nulli
+\textit{Dati SA e LCP passiamo ora a costruire l'albero}. Gli LCP nulli
 partizionano il SA e corrispondono ai figli della radice del suffix
 array aggiungendo 1 (tre zeri corrispondono 4 figli). Di questi 4
 figli prendo i valori no nulli e saranno un cammino che prosegue
@@ -425,6 +535,26 @@ ripetutamente sul valore minimo.\\
   \includegraphics[scale = 0.5]{img/suf6.png}
 \end{center}
 
+In pratica, viene calcolato il minimo $Lcp$ dell’albero o della porzione
+considerata, e l’albero viene 
+diviso in $k + 1$ regioni (dove k sono le occorrenze del numero). Alla
+fine della ricorsione ci saranno 
+k regioni di un singolo elemento, le quali corrispondono a foglie che
+saranno collegate al rispettivo $SA[i]$.
+Schematicamente si ha:
+\begin{enumerate}
+  \item si ricerca il minimo dell'\textit{LCP} e si contano le
+  occorrenze
+  \item si divide l'albero in $k+1$ regioni, con $k$ numero di
+  occorrenze
+  \item si considera gni regione specifica compresa tra ogni coppia di
+  occorrenze, e ricerca del minimo
+  \item si asseganno i sottoalberi (considerando che \$ è sempre a
+  sinistra, in base all’ordine lessicografico)
+  \item si itera fino all'esaurimento dell'array
+  \item si fa la visita depth-first e si assegnano le etichette in
+  ordine a ogni foglia
+\end{enumerate}
 Un \textbf{suffix tree generalizzato} rappresenta un insieme di
 testi. Prendo x stringhe con terminatore, le concateno in un unico
 testo e ne genero il suffix tree ma nelle foglie avremo le coppie
@@ -434,11 +564,12 @@ testo completo.
 \begin{center}
   \includegraphics[scale = 0.5]{img/suf7.png}
 \end{center}
-Cerco ora la sottostringa comunque più lunga tra due
+Cerco ora la sottostringa comune più lunga tra due
 stringhe sfruttando il suffix tree generalizzato. Una sottostringa
 comune corrisponde ad un cammino tra una radice e un nodo X e tra i
 discendenti di X devo avere almeno un discendente  per ogni
-stringa. La più lunga sarà quindi quella che arriva al nodo con
+stringa. Ovvero ogni stringa rappresenta un suffisso di una delle due
+stringhe (o entrambe). La più lunga sarà quindi quella che arriva al nodo con
 string-depth massimo. Visito quindi due volte l'albero, alla prima
 vedo se ha le foglie giuste e la seconda per cercare il max delle
 string-depth. La prima visita la faccio dalle foglie verso la radice,
@@ -697,6 +828,8 @@ dell'evoluzione.
   \textbf{La distanza di Hamming è definita unicamente per stringhe di
   egual lunghezza}
 \end{definizione}
+\newpage
+
 \section{Allineamento globale}
 Si analizza l'allineamento di due intere stringhe, si ha quindi un
 problema di \textbf{ottimo gloable}. Si analizzano due stringhe di
@@ -709,10 +842,17 @@ Si usano caratteri \textbf{indel} (\textit{in} inserisco e
   \item non si possono avere colonne di soli indel
   \item le stringhe estese con gli indel devono essere lunghe uguali
 \end{itemize}
-Per esempio si ha quindi:
-\begin{center}
+
+\begin{esempio}
+  Vediamo alcuni possibili allineamenti tra $s_1=ABRACADABRA$ e
+  $s_2=BANANA$ usando gli indel:
+  \begin{center}
+    \includegraphics[scale = 0.5]{img/al.png}
+  \end{center}
+  \begin{center}
   \includegraphics[scale = 0.7]{img/indel.png}
 \end{center}
+\end{esempio}
 Un buon allineamento deve contenere pochi indel, molti caratteri
 allineati e pochi non allineati.\\
 \begin{definizione}
@@ -754,8 +894,9 @@ con le seguenti condizioni a contorno:
     M[0,j]=M[0,j-1]+d(-,s_2[j])
   \end{cases}
 \]
-Si ha quindi un doppio ciclo for e un tempo pari a $O(nm)$.\\
-Fino ad ora si è aprlato di \textbf{allineamento globale}. Si
+Si ha quindi un doppio ciclo for e un tempo pari a $O(nm)$.
+\subsection{Allineamento Locale}
+Fino ad ora si è parlato di \textbf{allineamento globale}. Si
 definisce invece \textbf{allineamento locale} l'individuazione di due
 sottostringhe $t_1\subseteq s_1$ e $t_2\subseteq s_2$. Date altre due
 sottostringhe $u_1,u_2$ delle 2 stringhe si ha che:
@@ -796,7 +937,8 @@ Definiamo quindi l'equazione di ricorrenza:
     0 & \mbox{altrimenti}
   \end{cases}
 \]
-Si è quindi raggiunto un $O(nm)$.\\
+Si è quindi raggiunto un $O(nm)$.
+\newpage
 Graficamente si ha:
 \begin{center}
   \includegraphics[scale = 0.5]{img/sw.png}
@@ -1112,35 +1254,40 @@ $T$. Praticamente si ha che $T$ è il genoma (con $|T|$ che rappresenta
 la nostra funzione obiettivo) e le $s_i$ le reads. Si
 hanno però diverse ripetizioni e grandi regioni di basi ripetute.
 \begin{esempio}
-  \begin{center}
-    ng\_lon \_long\_ a\_long long\_l ong\_ti ong\_lo long\_t g\_long
-    \textbf{g\_time ng\_tim}\\
-    ng\_time ng\_lon \textbf{\_long\_} a\_long long\_l ong\_ti ong\_lo long\_t
-    \textbf{g\_long}\\  
-    ng\_time g\_long\_ ng\_lon a\_long long\_l \textbf{ong\_ti} ong\_lo
-    \textbf{long\_t}\\ 
-    ng\_time long\_ti g\_long\_ \textbf{ng\_lon} a\_long long\_l
-    \textbf{ong\_lo}\\
-    \textbf{ng\_time} ong\_lon \textbf{long\_ti} g\_long\_ a\_long long\_l
-    \textbf{ong\_lon} long\_time g\_long\_ a\_long \textbf{long\_l}
-    long\_lon \textbf{long\_time g\_long\_} a\_long\\
-    \textbf{long\_lon g\_long\_time} a\_long\\
-    \textbf{long\_long\_time a\_long}\\
-    a\_long\_long\_time
-  \end{center}
+  Si ha:\\
+  ng\_lon \_long\_ a\_long long\_l ong\_ti ong\_lo long\_t g\_long
+  \textbf{g\_time ng\_tim}\\
+  ng\_time ng\_lon \textbf{\_long\_} a\_long long\_l ong\_ti ong\_lo long\_t
+  \textbf{g\_long}\\  
+  ng\_time g\_long\_ ng\_lon a\_long long\_l \textbf{ong\_ti} ong\_lo
+  \textbf{long\_t}\\ 
+  ng\_time long\_ti g\_long\_ \textbf{ng\_lon} a\_long long\_l
+  \textbf{ong\_lo}\\
+  \textbf{ng\_time} ong\_lon \textbf{long\_ti} g\_long\_ a\_long long\_l
+  \textbf{ong\_lon} long\_time g\_long\_ a\_long \textbf{long\_l}
+  long\_lon \textbf{long\_time g\_long\_} a\_long\\
+  \textbf{long\_lon g\_long\_time} a\_long\\
+  \textbf{long\_long\_time a\_long}\\
+  a\_long\_long\_time
 \end{esempio}
 Si procede con un algoritmo greedy fondendo le due stringhe com massimo
 overleap iterativamente finchè non si ottiene una sola stringa. Questa
 è una soluzione \textbf{NP-hard} oltre al fotto che si hanno regioni
 estremamente simili che verranno considerate solo una volta.
-\newpage
+\\
 Si passa quindi ad un ragionamento che sfrutta i grafi. In un
 \textbf{grafo di overleap} i nodi sono rappresentati da dalle read. I
 nodi sono collegati sse l'overleap è abbastanza lungo e l'arco tra un
 vertice $A$ e uno $B$ è etichettato con la sottosequenza di $A$ che
 precede la sovrapposizione. Si tiene conto anche dell'ordine di
-lettura delle reads. Vediamo un esempio avendo:
+lettura delle reads.
+Vediamo un esempio avendo:
 \[read=\{ACGTGTG,\,\, CGTGTGC,\,\, GTGCCA,\,\, CCACG\}\]
+\begin{center}
+  \includegraphics[scale = 0.6]{img/gra.png}
+\end{center}
+\newpage
+semplificando:
 
 \begin{center}
   \begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto]
@@ -1156,7 +1303,6 @@ lettura delle reads. Vediamo un esempio avendo:
     (q_3) edge  node [right]  {$GTG$} (q_1);
   \end{tikzpicture}
 \end{center}
-\newpage
 Dal grafo precedente si passa allo \textbf{string graph}
 rimuovendo gli archi transitivi, ottenendo:
 \begin{center}
@@ -1376,12 +1522,69 @@ tornando sul discorso dei cammini diamo qualche definizione:
     avere cicli Hamiltoniani semplici
   \end{itemize}
 \end{definizione}
-% potrebbe mancare roba
-% \subsection{Reverse and Complement}
-% lezione 4 dicembre fino a slide 9
+%\subsection{Reverse and Complement}
+
 \chapter{Filogenesi}
-Non esiste un unico modello di evoluzione sensato.
+Non esiste un unico modello di evoluzione sensato. \\
+\textbf{Il processo di sviluppo nell’ambiente (di qualsiasi tipo) è
+  definito pressione selettiva: le mutazioni 
+dominanti sono quelle che hanno garantito un vantaggio sul numero di
+figli sani. Riconoscere i 
+cambiamenti è utile per ricostruire la storia evolutiva.}\\
+Ci sono diverse tipologie di mutazione, tra cui traslazioni di DNA e
+replicazioni di genoma.
+\begin{definizione}
+  Si definisce \textbf{carattere} in due maniere:
+  \begin{enumerate}
+    \item un \textbf{carattere genetico} è la presenza o meno di
+    una specifica mutazione nel DNA
+    \item un \textbf{carattere fenotipico} è un carattere visibile
+    esteriormente, quindi \textit{morfologico}
+  \end{enumerate}
+\end{definizione}
+Per semplicità si assume il \textbf{modello binario}, ovvero:
+\textit{ogni carattere è stato acquisito esattamente una volta in tutta la
+storia, e una volta acquisito non viene mai perso (avere quel
+carattere risulta vantaggioso).}
+\section{Filogenesi Basata su Caratteri}
+\textit{Il problema della filogenesi è definito con una matrice le cui
+  righe rappresentano gli individui, e le 
+colonne rappresentano i caratteri. Un 1 indica che quella determinata
+specie ha un determinato carattere, e viceversa}\\
+Cerchiamo un albero che rappresenti tale matrice. Questo algoritmo si
+costruisce in tempo lineare usando il \textit{radix sort} delle
+colonne decrementando il numero di 1 e inserendo le specie 
+una alla volta.\\
+Si crea quindi un albero $T$ che possiede $n$ foglie per ogni specie,
+$m$ archi per ogni carattere. Per ogni oggetto $p$, i caratteri che
+etichettano gli archi nel percorso dalla radice alla foglia 
+hanno come stato 1. Per evitare archi non etichettati da un carattere
+si usano solo foglie della matrice
+$M$, che hanno la stessa etichetta dei genitori (interni), senza
+corrispondenza $1 : 1$. La radice non ha nessuno degli $m$
+caratteri. \\
+Se si può effettivamente costruire un albero di questo tipo si parla
+di \textbf{filogenesi perfetta}.\\
+Un certo carattere si trasmette tra nodo padre e nodo figlio tramite
+un arco, quindi solo i figli possiedono quel carattere. \\
+Definiamo $l(c)$ l’insieme di specie che hanno il carattere $c$:
+\[l(c)=\{s:M[s,c]=1\}\]
+Si ha il seguente lemma:
+\begin{lemma}
+  Sia $M$ una matrice con filogenesi perfetta $T$ con due caratteri
+  $c_1$ e $c_2$. Si ha che vale uno e uno solo tra:
+  \begin{itemize}
+    \item $l(c_1)\cap l(c_2)=\emptyset$
+    \item $l(c_1)\subseteq l(c_2)$
+    \item $l(c_1)\supseteq l(c_2)$
+  \end{itemize}
+\end{lemma}
+L’algoritmo è semplice, e impiega un tempo computazionale di $O(nm)$,
+considerando che i confronti sono effettuati in tempo costante. Esso
+si basa sull’ordinamento di $M$.
+%pagina 50 ila
 \subsection{Tumori}
+Tante mutazioni in un ridotto lasso temporale comportano un tumore.
 Un tumore contiene cellule sane e cancerose, inoltre ì un miscuglio di
 \textit{subclones}, ovvero sotto-popolazioni omogenee diverse. Quando
 si preleva una campione da analizzare se ne preleva uno con diversi

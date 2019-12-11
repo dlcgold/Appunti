@@ -2522,4 +2522,209 @@ I punti di ottimo devono soddisfare le condizioni di KKT che
 ``limitano'' la ricerca dei punti di ottimo tra quelli che soddisfano
 le condizioni.\\
 \textbf{\textit{Le condizioni KKT non sono un algortimo}}
+\chapter{Metaeuristiche}
+Andiamo ad analizzare il mondo nei problemi NP-hard. Si possono avere:
+\begin{itemize}
+  \item \textbf{metodo B\&B}, esatto ma computazionalmente troppo costoso
+  \item \textbf{metodi approssimati}, che trova una soluzione di
+  valore corretto entro un certo errore
+  \item \textbf{metodi euristici}, che identificano una buona
+  soluzione ammissibile ma non necessariamente esatta. Sono metodi
+  efficienti su larga scala che iterativamente cercano una soluzione
+  migliore ad ogni iterazione. Sono studiati \textit{ad hoc} sul
+  problema. Spesso sono usati in problemi \textit{TSP} o di
+  ottimizzazione non lineare con molti ottimi locali
+  \item \textbf{metodi metaeuristici}, che sono di carattere generale,
+  quindi indipendenti dal problema, potendo essere usate come
+  \textbf{black box}. 
+\end{itemize}
+\section{Metaeuristiche}
+\begin{definizione}
+  Una metaeuristica è una metodologia risolutiva generale che gestisce
+  l'iterazione tra le procedure di miglioramento locale e strategie a
+  più alto livello al fine di creare un processo in grado di
+  allontanarsi da un ottimo locale ed eseguire una ricerca
+  approfondita della regione ammissibile. Allontanandosi da un pottimo
+  locale si accerrano anche punti con valore peggiore della funzione
+  obiettivo. Non si garantisce che la soluzione sia migliore ma,
+  d'altro canto, ci si muove velocemente verso le soluzioni migliori. 
+\end{definizione}
+A differenza di un metodo euristico si hanno elementi di casualità
+detti \textbf{randomness}, inoltre non si cerca \textbf{la} soluzione
+migliore ad ogni iterazione. Si hanno tre metauristiche interessanti:
+\begin{enumerate}
+  \item \textbf{tabù Search}
+  \item \textbf{Simulated Annealing}
+  \item \textbf{Algoritmi generici}
+\end{enumerate}
+\subsection{Tabù Search}
+La Tabu Search è un'evoluzione del classico metodo di discesa detto
+\textbf{steepest descent}. L’idea base è par tire da una soluzione
+iniziale ed eseguire una serie di mosse (dettate da una euristica) che
+portano ad una nuova soluzione nell’intorno di un punto corrente. Si
+hanno le cosiddette \textbf{mosse di non miglioramento} per non
+rimanere bloccati in un ottimo locale. Si hanno quindi i
+\textbf{tabù}, ovvero si proibiscono le ultime mosse dell'algoritmo
+evitando di ritornare in un ottimo già analizzato. Si hanno quindi tre
+step:
+\begin{enumerate}
+  \item la \textbf{ricerca locale}, con l’accettazione anche di mosse
+  peggiorative
+  \item la \textbf{tabù list}, ovvero la lista di mosse non più
+  consentite
+  \item la \textbf{exploitation vs exploration}, ovvero il bilanciare
+  la parte di ottimizzazione locale con quella di esplorazione 
+\end{enumerate}
+Vediamo quindi l'algortimo:
+\begin{itemize}
+  \item \textbf{inializazione:} scegliere una soluzione ammissibile
+  iniziale
+  \item \textbf{iterazione}:
+  \begin{itemize}
+    \item usare un metodo di ricerca locale per identificare le mosse
+    ammissibili che non sono nella tabu list. Scegliere una mossa Tabù
+    solo se è la migliore tra tutte le soluzioni trovate fino a quel
+    momento, questo è il \textbf{criterio di aspirazione}
+    \item scegliere la mossa migliore
+    \item modificare la lista tabù aggiungendo la mossa corrente. Se
+    la lista tabu è piena, rimuovere gli elementi più vecchi 
+  \end{itemize}
+  \item \textbf{criteri di stop:}
+  \begin{itemize}
+    \item massimo numero di iterazioni raggiunto
+    \item massimo tempo computazionale raggiunto
+    \item massimo numero di iterazioni successive senza alcun
+    miglioramento
+    \item nessun mossa ammissibile permessa
+  \end{itemize}
+\end{itemize}
+\textbf{Si accetta come soluzione ottima la migliore ottenuta}.\\
+A priori non si può sapere che ricerca locale usare, come
+rappresentare le mosse nella lista tabù, non si sanno definire bene i
+criteri dis top etc$\ldots$. \\
+(\textbf{Su slide tabù search su \textit{TSP} e \textit{spanning
+    tree}})\\
+Nel complesso quindi la Tabù Search ha diversi \textbf{pro}:
+\begin{itemize}
+  \item l'’uso anche di mosse di peggioramento consente di non
+  rimanere intrappolati in un punto di minimo locale
+  \item l'implementazione della Tabù list consente una maggiore
+  esplorazione dello spazio delle soluzioni 
+  \item può essere applicato sia per problemi discreti che continui
+  \item Per problemi complessi (scheduling, quadratic assignment and
+  vehicle routing), il tabù search ottiene soluzioni che spesso sono
+  migliori rispetto ad altre tecniche di ottimizzazione 
+\end{itemize}
+ma anche diversi \textbf{contro}:
+\begin{itemize}
+  \item vi sono molto parametri da dover impostare
+  \item il numero di iterazioni necessarie potrebbe essere molto alto
+  per avere una buona soluzione
+  \item non vi è garanzia di raggiungere il punto di ottimo globale
+\end{itemize}
+\subsection{Simulated Annealing}
+Questo metodo prende spunto dal mondo metallurgico, dove per eliminare
+difetti causati da ordini dei reticoli cristallini che vengono a
+mancare si procede con la loro parziale rifusione,
+l'\textbf{annealing}, seguita da una procedura di raffreddamento molto
+lenta.  \\
+Il \textbf{Simulating Annealing} cerca di stimare l'ottimo globale
+evitando quelli locali. Continuando l'analogia della metallurgica si
+ha:
+\begin{itemize}
+  \item l’ottimo globale corrisponde al metallo con struttura
+  cristallina senza difetti  
+  \item gli ottimi locali corrispondono al metallo con struttura
+  cristallina con presenza di difetti reticolari
+  \item la procedura algoritmica per trovare il minimo globale,
+  sfuggendo ai minimi locali, corrisponde al processo di lento
+  raffreddamento ed eventuale riscaldamento. 
+\end{itemize}
+Questo metodo cerca una nuova soluzione in un intorno della soluzione
+corrente ma sfruttando, a differenza della tabù search, mosse
+random. Si accettano sia mosse di miglioramento che di peggioramento
+per scavalcare gli ottimi locali.
+\begin{center}
+  \includegraphics[scale = 0.8]{img/sa.png}
+\end{center}
+Vediamo come procedere.\\
+Si seleziona, per esempio, un generico problema di massimizzazione
+$\max f(x)$. Bisogna capire come scegliere la mossa successiva:
+\begin{itemize}
+  \item dalla soluzione corrente $x_c$ seleziono in modo random una
+  nuova soluzione $x_n$ in un intorno di $x_c$
+  \item si definisce $z_c=f(x_c)$ il valore della funzione obiettivo
+  corrispondente a $x_c$
+  \item si definisce $z_n=f(x_n)$ il valore della funzione obiettivo
+  corrispondente a $x_n$
+  \item se $z_n\geq z_c$ allora accetto il nuovo punto candidato.
+  Altrimenti posso comunque accettare l’attuale punto candidato con
+  una certa probabilità:
+  \[P(accept)=e^{\frac{z_n-z_c}{T}}\]
+  con $T$ detto \textbf{temperatura}
+\end{itemize}
+Si possono fare delle osservazioni:
+\begin{itemize}
+  \item se $z_c>>z_n$ si ha che $P\to 0$, quindi peggiore è la nuova
+  soluzione e minore probabilità ho di accettarla
+  \item se $𝑇$ aumenta allora aumenta la probabilità di accettare
+  anche punti molto peggiori. Viceversa se $T$ è bassa accetto solo
+  punti di poco peggiori 
+\end{itemize}
+\textit{In caso di minimizzazione si avrebbe:}
+\[P(accept)=e^{\frac{z_c-z_n}{T}}\]
+Per simulare la probabilità si genera un numero random tra 0 e q, se è
+minore di $e^{\frac{z_n-z_c}{T}}$ accetto $x_n$ altrimenti rifiuto. \\
+La probabilità di accettazione è direttamente proporzionale a $T$ e
+inversamente proporzionale a $|z_n-z_c|$. All’inizio la temperatura è
+molto alta in modo da accettare molte mosse di peggioramento per
+scappare dai minimi locali per poi calare lentamente fino a 0 (momento
+nel quale tutte le mosse peggiorative vengono rigettate).\\
+Vediamo quindi l'algoritmo:
+\begin{itemize}
+  \item \textbf{inizializzazione:} si sceglie un punto iniziale $x_c$,
+  un massimo numero di iterazioni $N$ e un valore minimo di
+  temperatura $T_{min}$. Si pone quindi $n=0$ e $z_c=f(x_c)$
+  \item \textbf{iterazione:}
+  \begin{itemize}
+    \item si sceglie un nuovo candidato $x_n$ in modo random
+    nell'intorno di $x_c$ e se ne calcola $z_n=f(x_n)$
+    \item
+    \begin{algorithmic}
+      \If{$z_n\geq z_c$}
+      \State $x_{n+1}=x_n$
+      \Else
+      \If{$rand(0,1)<e^{\frac{z_n-z_c}{T}}$}
+      \State $x_{n+1}=x_n$
+      \Else
+      \State $x_{n+1}=x_c$
+      \EndIf
+      \EndIf
+    \end{algorithmic}
+  \end{itemize}
+  \item \textbf{controllo di temperatura:} dopo un certo numero di
+  iterazioni $𝐾$con lo stesso valore di $T$, diminuire $T$ e ripetere
+  il procedimento
+  \item \textbf{criterio di stop:} numero massimo di iterazioni,
+  massimo tempo computazionale, oppure quando si sono fatte
+  $N$ iterazioni con la temperatura minima $T_{min}$
+\end{itemize}
+\textbf{La soluzione finale è la migliore soluzione ottenuta}.\\
+Come per la Tabù Search anche qui bisogna scegliere varie cose, come
+la temperatura, il numero di iterazioni etc$\ldots$.\\
+Per quanto riguarda la temperatura ci sono dei consigli pratici:
+\begin{itemize}
+  \item la temperatura iniziale deve essere tale da poter accettare
+  molte mosse peggiorative (50\% delle mosse peggiorative)
+  \item la temperatura va diminuita lentamente ad esempio del 10\%
+  \item la temperatura finale deve essere tale da non accettare mosse
+  peggiorative, ovvero $T\approx 0$
+\end{itemize}
+\begin{teorema}
+  Simulated Annealing converge asintoticamente al punto di ottimo
+  globale. La velocità di convergenza è influenzata da come viene
+  diminuita la temperatura, a causa del \textbf{cooling schedule}
+\end{teorema}
+\textbf{Su slide esempio di uso del metodo per \textit{TSP} e per una
+  \textit{funzione non lineare}}
 \end{document}

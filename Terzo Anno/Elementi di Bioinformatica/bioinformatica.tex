@@ -20,6 +20,7 @@
 \usepackage{microtype}
 \usepackage{enumerate}
 \usepackage{braket}
+\usepackage{forest}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -34,7 +35,7 @@
 \usepackage[cache=false]{minted}
 
 \usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every  relationship /.style={draw=Chartreuse2, fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
-
+\newcommand{\coloredbox}[1]{\fcolorbox{black}{#1}{\rule{0pt}{6pt}\rule{6pt}{0pt}}\quad}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -43,6 +44,55 @@
 \usepackage{tikz}
 \usetikzlibrary{automata,positioning}
 
+% forest
+\forestset{
+  every leaf node/.style={
+    if n children=0{#1}{}
+  },
+  every tree node/.style={
+    if n children=0{}{#1}
+  },
+  edgelabel/.style n args={2}{
+    edge label={node[midway,#1]{#2}}
+  },
+  nodevalue/.style n args={2}{
+    label=#1:{{#2}}
+  }
+}
+\forestset{
+  suffix tree/.style={
+    for tree={
+      edge={->},
+      every tree node={
+        circle, draw, minimum size=1.5em, s sep=1cm,
+        s sep+=1em,
+        l sep+=1em
+      },
+      every leaf node={
+        rectangle, draw, 
+        minimum size=1.5em
+      }
+    }
+  }
+}
+\forestset{
+  highlight ancestors/.style={
+    before typesetting nodes={
+      for current and ancestors=highlight
+    }
+  },
+  highlight/.style={
+    draw=darkgray,
+    edge+=red
+  }
+}
+\forestset{
+  terminal/.style={
+    if n children=0{
+      tier=terminal
+    }{}
+  }
+}
 
 \title{Elementi di Bioinformatica}
 \author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold}}
@@ -436,7 +486,7 @@ suffisso di un'altra, si estende questa logica alle sottostringhe,
 carpendo anche indici e numero di occorrenze. \\
 Cerchiamo di esprimere una sottostringa in termini di suffisso. Si ha
 che: \textit{un suffisso è sicuramente una sottostringa, e ogni
-sottostringa è il prefisso di un suffisso}, quindi, dato che ogni suffisso è
+  sottostringa è il prefisso di un suffisso}, quindi, dato che ogni suffisso è
 in realtà un perocrso radice-foglia univoco, bisogna cercare i
 percorsi iniziali. \\
 Tutte le occorrenze del pattern $P$ sono le porzioni iniziali dei
@@ -465,7 +515,7 @@ Vediamo il procedimento (\textbf{si ringraziano gli appunti Ilaria e
   esiste in assoluto
   \item si continua fino ad arrivare a una o più foglie
   dell’albero. Il valore delle foglie indicheranno 
-l’indice al quale si trovano le corrispondenze 
+  l’indice al quale si trovano le corrispondenze 
 \end{enumerate}
 \begin{center}
   \includegraphics[scale = 0.7]{img/su.png}
@@ -494,9 +544,9 @@ ha sottostringhe comuni col suo elemento precedente, in quanto
 inesistente.\\
 \textit{Nel pattern matching, tutte le occorrenze di P corrispondono a
   una porzione dell’array Lcp, dove 
-gli elementi sono tutti minori o uguali della lunghezza del
-pattern. La scansione di Lcp permette di 
-trovare il pattern in tempo costante.}\\
+  gli elementi sono tutti minori o uguali della lunghezza del
+  pattern. La scansione di Lcp permette di 
+  trovare il pattern in tempo costante.}\\
 Lo spazio diventa $4n$ bytes, quindi per il genoma 12gb.\\
 Passiamo ora dal suffix tree al suffix array. Facciamo una visita depth-firts
 (pre-order) del suffix array, assumento che a sinistra ci siano
@@ -826,7 +876,7 @@ dell'evoluzione.
     d(x,z),\,\,\,\forall x,y\in S$
   \end{itemize}
   \textbf{La distanza di Hamming è definita unicamente per stringhe di
-  egual lunghezza}
+    egual lunghezza}
 \end{definizione}
 \newpage
 
@@ -850,8 +900,8 @@ Si usano caratteri \textbf{indel} (\textit{in} inserisco e
     \includegraphics[scale = 0.5]{img/al.png}
   \end{center}
   \begin{center}
-  \includegraphics[scale = 0.7]{img/indel.png}
-\end{center}
+    \includegraphics[scale = 0.7]{img/indel.png}
+  \end{center}
 \end{esempio}
 Un buon allineamento deve contenere pochi indel, molti caratteri
 allineati e pochi non allineati.\\
@@ -1522,15 +1572,15 @@ tornando sul discorso dei cammini diamo qualche definizione:
     avere cicli Hamiltoniani semplici
   \end{itemize}
 \end{definizione}
-%\subsection{Reverse and Complement}
+% \subsection{Reverse and Complement}
 
 \chapter{Filogenesi}
 Non esiste un unico modello di evoluzione sensato. \\
 \textbf{Il processo di sviluppo nell’ambiente (di qualsiasi tipo) è
   definito pressione selettiva: le mutazioni 
-dominanti sono quelle che hanno garantito un vantaggio sul numero di
-figli sani. Riconoscere i 
-cambiamenti è utile per ricostruire la storia evolutiva.}\\
+  dominanti sono quelle che hanno garantito un vantaggio sul numero di
+  figli sani. Riconoscere i 
+  cambiamenti è utile per ricostruire la storia evolutiva.}\\
 Ci sono diverse tipologie di mutazione, tra cui traslazioni di DNA e
 replicazioni di genoma.
 \begin{definizione}
@@ -1544,13 +1594,13 @@ replicazioni di genoma.
 \end{definizione}
 Per semplicità si assume il \textbf{modello binario}, ovvero:
 \textit{ogni carattere è stato acquisito esattamente una volta in tutta la
-storia, e una volta acquisito non viene mai perso (avere quel
-carattere risulta vantaggioso).}
+  storia, e una volta acquisito non viene mai perso (avere quel
+  carattere risulta vantaggioso).}
 \section{Filogenesi Basata su Caratteri}
 \textit{Il problema della filogenesi è definito con una matrice le cui
   righe rappresentano gli individui, e le 
-colonne rappresentano i caratteri. Un 1 indica che quella determinata
-specie ha un determinato carattere, e viceversa}\\
+  colonne rappresentano i caratteri. Un 1 indica che quella determinata
+  specie ha un determinato carattere, e viceversa}\\
 Cerchiamo un albero che rappresenti tale matrice. Questo algoritmo si
 costruisce in tempo lineare usando il \textit{radix sort} delle
 colonne decrementando il numero di 1 e inserendo le specie 
@@ -1582,10 +1632,46 @@ Si ha il seguente lemma:
 L’algoritmo è semplice, e impiega un tempo computazionale di $O(nm)$,
 considerando che i confronti sono effettuati in tempo costante. Esso
 si basa sull’ordinamento di $M$.
-%pagina 50 ila
+\\
+Vediamo quindi come costruire l'albero in tempo $O(nm)$. Questo
+algoritmo si basa sull'ordinamento della matrice $M$ e su confronti in
+tempo costante. Si ordinano le colonne in modo che quelle che ne
+includono altre siano messe prima e per fare questo le colonne vengono
+interpretate come interi binari.
+\\
+\textit{La matrice M ha un albero filogenetico se e solo se per ogni
+  coppia di colonne i, j, gli insiemi delle caratteristiche
+  corrispondenti sono disgiunti o uno un sottoinsieme dell’altro.} \\
+Ogni specie quindi viene collegata subito sotto l'ultimo carattere
+che possiede e se un carattere ne include un altro viene collocato a
+sinistra (praticamente si fa il \textbf{radix sort}). Ricapitolando si
+ha:
+\begin{itemize}
+  \item ogni colonna viene ordinata con un radix sort decrescente
+  \item per ogni riga della matrice ottenuta si costruisce la stringa
+  dei caratteri della riga in ordine crescente
+  \item si costruisce l'albero per le stringhe ottenute inserendole
+  iterativamente
+  \item se verifica la filogenesi perfetta dell'albero
+\end{itemize}
+\subsubsection{Backmutation}
+È il caso in cui una mutazione viene persa, ovvero quando si ha un
+cambiamento dello stato di un arco da 1 a 0. In una filogenesi
+perfetta non si hanno backmutation. Si hanno quindi diversi casi:
+\begin{itemize}
+  \item \textbf{filogenesi persistente}, in cui ogni carattere viene
+  acquisito una sola volta e perso al più una volta nell’albero
+  \item \textbf{parsimonia di Dollo}, dove si acquisisce un carattere
+  una e una sola volta ma senza limite di numero di perdite dello
+  stesso
+  \item \textbf{Camin-Sokal}, dov gni carattere può essere acquisito
+  più volte e non viene mai perso 
+\end{itemize}
+In questi casi non si garantisce l'unicità dell'albero ma, negli
+ultimi due casi si garantisce l'esistenza di almeno un albero. 
 \subsection{Tumori}
 Tante mutazioni in un ridotto lasso temporale comportano un tumore.
-Un tumore contiene cellule sane e cancerose, inoltre ì un miscuglio di
+Un tumore contiene cellule sane e cancerose, inoltre è un miscuglio di
 \textit{subclones}, ovvero sotto-popolazioni omogenee diverse. Quando
 si preleva una campione da analizzare se ne preleva uno con diversi
 subclones al suo interno. Inoltre i subclones appaiono in numerosità
@@ -1600,17 +1686,27 @@ che vengono allineate al genoma.\\
 Si crea poi un albero in cui i nodi vengono collegati se si hanno
 mutazioni comuni. L'algoritmo per calcolare questo albero è
 estremamente complesso (\textit{NP-hard}) e non verrà trattato. 
-\subsection{Approcci Basati su Parsimonia}
+\section{Approcci Basati su Parsimonia}
 La funzione obiettivo è il cercare di minimizzare le differenze
-cercando la soluzione più semplice e \textbf{\textit{parsimoniosa}}.\\
+cercando la soluzione più semplice e \textbf{\textit{parsimoniosa}}.
+Si applica il \textbf{rasoio di Occam}.\\
 Si introduce quindi una forma di costo e, per un albero, si ha che
 \textit{per ogni arco si ha costo pari al numero di caratteri che
   cambiano stato}.\\
 % aggiungere disegni
-Ci sono molti alberi che spiegano la stessa matrice e devo scendere
+Ci sono molti alberi che spiegano la stessa matrice e devo scegliere
 quello che costa meno.
-\subsubsection{piccolo problema di parsimonia}
-Si ha una matrice $M$ di $n$ specie e $|C|$ caratteri che
+\subsection{Grande Parsimonia}
+Si cerca la filogenesi (si cerca quindi un albero sconosciuto)
+che minimizza il numero di cambiamenti di stato. Si ha quindi una
+matrice non binaria in quanto ogni carattere può avere più stati. Si
+parla di un problema NP-complete che però può essere approssimato al
+problema della \textbf{piccola parsimonia} (che ha in input la matrice
+e la topologia dell'albero). \textit{Si vuole determinare
+  quale specie etichetta ogni foglia, e quali passaggi di stato sono
+  rappresentati da ogni arco.}
+\subsection{Piccola parsimonia}
+Si ha una matrice triangolare $M$ di $n$ specie e $|C|$ caratteri che
 associa ad ogni coppia uno stato. Si ha poi un albero $T$ le cui
 foglie sono le specie di $M$ di cui si assume la topologia. Infine si
 ha un costo $w_c,\,\,\forall c\in C$ fra coppie 
@@ -1622,23 +1718,178 @@ Vediamo ora la funzione obiettivo, con $E(T)$ insieme dei lati di $T$:
 \[\min\{\sum_{c\in C}\sum_{(x,y)\in
     E(T)}w_c(\lambda_c(x),\lambda_c(y))\}\]
 si hanno $k^n$ (???) stati possibili.\\
+
+\begin{esempio}
+  \textbf{Esempio preso dagli appunti di Ila e Adi}\\
+  \begin{center}
+    \begin{tabular}{l | *{6}{c}}
+      \# arti & 0 & 1 & 2 & 4 & 6 & 8 \\
+      \hline
+      0 & 0 & 1000 & 2000 & 4000 & 6000 & 8000 \\
+      1 & ~ & 0 & 60 & 150 & 190 & 232 \\
+      2 & ~ & ~ & 0 & 30 & 70 & 120 \\
+      4 & ~ & ~ & ~ & 0 & 25 & 80\\
+      6 & ~ & ~ & ~ & ~ & 0 & 10\\
+      8 & ~ & ~ & ~ & ~ & ~ & 0
+    \end{tabular}
+  \end{center}
+  Una matrice di questo tipo è parte dell’istanza:
+  \begin{center}
+    \begin{tabular}{l | c c}
+      M & \# arti & Gene X \\
+      \hline
+      Topo & 4 & 0 \\
+      Uomo & 4 & 0 \\
+      Ragno & 8 & 1 \\
+      Mosca & 6 & 0 \\
+      Antilope & 4 & 0
+    \end{tabular}
+  \end{center}
+  Nella piccola parsimonia bisogna capire qual è l’etichettatura dei
+  nodi interni (grigio, rosso e 
+  verde) in modo che la somma totale dei costi su ogni arco sia minimizzata.
+\end{esempio}
 Spostiamo ora il ragionamento sull'uso di un solo carattere, che viene
-gestito separatamente.\\
-\textbf{sistemare bene fino a ultrametrica}
-\subsection{Alberi e distanze additive}
-Si hanno periodi ricchi di mutazioni e momenti con basso tasso di
-mutazione, quindi la tecnica dell'orologio molecolare non funziona più
-troppo bene. \\
-Siccome sono interessato solo a storie evolutive rappresentate come
-alberi parto da un albero completamente generico:
-% aggiungere disegno
-Etichettiamo orgi arco con la sua lunghezza e faccio una matrice con
-le distanze tra ogni foglia (ovviamente sulla diagonale principale si
-avrà 0). Avendo la propietà simmetrica tra le distanze non sono in
-grado di stabilire la radice dell'albero. Cerchiamo quindi la radice
-più probabile. Cerchiamo delle specie \textbf{outgroup} in modo da
-poter separare l'albero in due, la foglia outgroup da una parte e il
-resto dell'albero dall'altra, determinando così la radice. \\
+gestito separatamente, in quanto ogni carattere è indipendente.
+\subsubsection{Algoritmo di Sankoff}
+È un algoritmo riolutivo del problema della piccola
+parsimonia. Vogliamo determinare l'etichettatura ottimale. Sfruttiamo
+la programmazione dinamico visitando l'albero dalle foglie alla radice
+e usando un sottoinsieme di sottoistanze ordinate. Si etichetta
+dinamicamente ogni nodo con l'ultima componente della soluzione dei
+nodi precedenti. L’ordinamento nell’albero è parziale, ma è
+sufficiente esaminare le sottoistanze formate dai sottoalberi. Per
+ogni nodo $x$ si definsice $sol(x,y)$ quel valore nella matrice che è
+la soluzione ottimale del sottoalbero $T$ che ha radice $x$, con
+etichetta di $x$ uguale $y$:
+\[sol(x,y)=\min_{z_1,\ldots,z_n}=\{\sum_{i=1}^hsol(f_i,z_1)+d(z_i,y)\}\]
+con con $f_i$ indichiamo i figli del nodo $x$ e con $z_i$ tutte le
+etichette di questi figli. Si ha quindi:\\
+$M[x,z]$ è la soluzione ottimale del sottoalbero di $T$ che ha
+radice $x$, sotto la condizione che $x$ abbia etichetta $z$. Nel dettaglio
+\begin{itemize}
+  \item $M[x,z]=0$ se $x$ è una foglia con etichetta conosciuta e
+  presente nella matrice $z$
+  \item $M[x,z]=+\infty$ se $x$ è una foglia con etichetta diversa da
+  $z$ e quindi lo imposto ad un valore ``sentinella''
+  \item  $M[x,z]=\sum_{f\in f(x))}\min_s\{M[r,s]\}$ con $f(x)$
+  l’insieme dei figli in $x$ di $T$, se $x$ è un nodo interno.
+\end{itemize}
+La soluzione ottimale è quindi:
+\[\min_s\{M[r,s]\]
+con $r$ radice di $T$.\\
+Per ogni figlio dell’albero viene calcolata la funzione min (tutte le
+possibilità), e la soluzione del padre viene ricavata da quella dei
+figli. Ogni cambiamento ha un costo: se i figli sono già etichettati
+nel modo desiderato allora esso sarà 0. Il costo dell’arco $(x, f_1
+)$ è $0$ se l’etichetta è uguale a $y$, 1 altrimenti. Quindi $z$
+rappresenta ogni etichetta diversa da $y$.
+\subsubsection{Algoritmo di Fitch}
+Questo algoritmo funziona unicamente con un albero binario in un caso
+non pesato. Si hanno le seguenti casistiche:
+\begin{itemize}
+  \item $S(x)=\delta_c(x)$ se $x$ è una foglia
+  \item $S(x)=S(f_l)\cap S(f_r)$ se $S(f_l)\cap S(f_r)\neq \emptyset$
+  con $f_i$ nodi figlio destro e sinistro del nodo $x$. Questo
+  significa che si etichetta il padre con l'intersezione dei figli
+  \item $S(x)=S(f_l)\cup S(f_r)$ se $S(f_l)\cap S(f_r)= \emptyset$
+  con $f_i$ nodi figlio destro e sinistro del nodo $x$. Questo
+  significa che si etichetta il padre con l'unione figli
+\end{itemize}
+La soluzione $B(x)$ è l'insieme degli stati $z$ tale che $M[x,z]$ (costo di
+$x$ con stato $z$) sia minimo, con $B(x)=S(x)$. Quindi $B(x)$ è lo stato
+migliore che posso ottenere con un determinato nodo $x$.\\
+\textit{er generalizzare, si usa un’etichettatura con caratteristiche
+  (colori) non pesate, di cui ognuna vale 
+  1, e si cerca l’insieme degli stati che compare il maggior numero di
+  volte.}
+
+\section{Filogenesi su Distanze}
+\begin{definizione}
+  Si definisce distanza come la misura della differenza del materiale
+  genetico tra distinte specie o individui della stessa specie.\\
+  Si ha che minore è la distanza e maggiore è la similitudine tra due
+  specie.
+  \newpage
+  Formalmente si ha $S\times S\to \mathbb{R}^+$, con $S$
+  insieme delle specie, con le seguenti proprietà:
+  \begin{itemize}
+    \item $d(a,b)=0\Longleftrightarrow a=b,\,\,\forall a,b\in S$
+    \item $d(a,b)=d(b,a),\,\,\forall a,b\in S$, proprietà simmetrica
+    \item $d(a,b)\leq d(a,c)+d(c,b),\,\,\forall a,b,c\in S$,
+    diseguaglianza triangolare
+  \end{itemize}
+\end{definizione}
+Si ha quindi una matrice simmetrica contentente la stima delle
+distanze tra specie. Ovviamente la diagonale principale sarà nulla per
+la prima proprietà. Ogni arco è etichettato con la misura del tempo
+trascorso dall’evento di speciazione a oggi. Si ottengono quindi alberi
+senza radice.
+\begin{esempio}
+  \textbf{Esempio preso dagli appunti di Adi e Ila:}\\
+  \begin{center}
+    \begin{tabular}{l | *{5}{c}}
+      M		& M & U & R & T & A \\ \hline
+      Mosca	& - & 10 & 2 & 12 & 9 \\
+      Uomo	& ~ & - & 9 & 2 & 3 \\
+      Ragno	& ~ & ~ & - & 13 & 14 \\
+      Topo	& ~ & ~ & ~ & - & 4 \\
+      Antilope & ~ & ~ & ~ & ~ & -
+    \end{tabular}
+
+    \begin{forest}
+      for tree={circle, draw,minimum size=1.5em, s sep=1cm}
+      [~,
+      [~, edgelabel={left}{8},
+      [~, edgelabel={left}{6}, fill=purple, nodevalue={south}{Mosca}],
+      [~, edgelabel={right}{2}, fill=green, nodevalue={south}{Ragno}]
+      ],
+      [~, edgelabel={right}{1},
+      [~, edgelabel={left}{3}, fill=gray, nodevalue={south}{Topo}],
+      [~, edgelabel={right}{4}, fill=blue, nodevalue={south}{Antilope}]
+      ],
+      [~, edgelabel={right}{2}, fill=red, nodevalue={south}{Uomo}]
+      ]
+    \end{forest}
+  \end{center}
+\end{esempio}
+l problema da risolvere è: data una matrice numerica $M$ di distanze,
+trovare un albero T la cui matrice di distanza indotta $M_T$ abbia
+distanza minima da $M$ (cosa non sempre possibile).\\
+Si introduce una misura temporale che parte dalla radice. Se il tempo
+è misurato correttamente, la distanza tra tutti i percorsi da una foglia
+qualunque alla radice deve essere uguale. Questo deve valere anche per
+ogni nodo interno: la distanza fra ogni nodo e tutte le sue foglie
+deve essere uguale.\\
+Ma non si ha una misura corretta del tempo in quanto si possono
+confrontare solo le sequenze a diposizione. Si ha però
+l\textbf{ipotesi dell'orologio molecolare} cioè l’ipotesi che il
+numero di variazioni genomiche sia una 
+misura precisa dello scorrere del tempo. È, come si può intuire,
+un'ipotesi troppo semplificativa e quindi utile solo per poter
+calcolare le distanze. \textit{Il caso è ideale, non reale, altrimenti
+  ogni coppia di figli dovrebbe avere la stessa etichetta che li
+  collega al proprio genitore (il che è improbabile).} \\
+Si studia quindi l'\textbf{ultrametrica}, ovvero, prese tre specie, si
+considerano tutte le distanze tra coppie di queste e si ha che:
+\[\max{d(a,b),d(a,c),d(c,b)},\,\,\forall a,b,c\in S\]
+è ottenuto da almeno due casi. Quest'ultima proprietà si aggiunge a
+quelle normali della distanza sopra definite. Si ha, con quest'ultima
+considerazione, che due specie saranno molto vicine tra loro mentre il
+resto avrà valori massimi uguali, questo per l'\textit{uguaglianza
+  triangolare}. Si hanno quindi matrici ultrametriche con cui si può
+ottenere l'unico albero associato in quanto esse non sono più
+simmetriche. Gli alberi con radice danno delle storie evolutive
+profondamente diverse: è necessario quindi trovare il modo di capire
+quale dei nodi interni sia il miglior candidato a radice. Per poterlo
+fare, bisogna aggiungere dei cosiddetti \textbf{outgroup}, specie che non
+c’entrano niente con il soggetto da analizzare. \\
+Si possono, a necessità, aggiungere più outgroup.\\
+Vediamo ora come ricostruire l'albero. Se l'albero è binario si parla
+di \textbf{distanza additiva} quando si parla della matrice delle
+distanze, in quanto la speciazione può essere vista come una divisione
+in 2. Si ha che la matrice associata $D$ ultrametriche delle distanze
+totali è simmetrica.  
 Si ha la \textbf{condizione dei 4 punti}:
 Si prendono 4 punti e si calcola:
 \[
@@ -1649,13 +1900,110 @@ Si prendono 4 punti e si calcola:
   \end{cases}
 \]
 Il massimo dei tre valori è ottenuto da esattamente due dei 3 casi
-sopra. Due saranno circa uguali e maggiori della terza.\\
-Tutto ciò vale perché è un generico albero \textbf{binario}\\
-Prese tre specie si ha che se:
-\[D[x, y] + D[x, z] = D[ y, z]\]
-allora si parla di \textbf{tripla degenere}.\\
-e si ha uno sbilancio di $x$ su $(x,y)$ pari a:
-\[S(x, y, z) = D[x, y] + D[x, z] − D[ y, z].\]
+sopra. Due saranno circa uguali e maggiori della terza. Se questa
+proprietà è soddifatta si ha una distanza additiva.\\
+\textit{n un albero, vengono estratte quattro specie (foglie),
+  considerando soltanto la porzione di cammini che li collega. Essendo
+  l’albero binario, la struttura sarà sempre la stessa. Sono poi
+  considerate tutte le coppie di distanze: due di esse avranno un
+  valore più elevato, e uno sarà minore. Questo accade perché per due
+  coppie non sarà necessario attraversare il cammino intermedio. Per
+  calcolare le distanze è sufficiente sfruttare la struttura
+  dell’albero, non necessariamente i valori. Se un cammino ha
+  etichetta 0, la disuguaglianza diventa uguaglianza, e per
+  posizionarlo si contrae un arco}:
+\newpage
+\textbf{esempio preso dagli appunti di Adi e Ila}
+\begin{center}
+  
+
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+    % uncomment if require: \path (0,180); %set diagram left start at 0, and has height of 180
+
+    % Shape: Rectangle [id:dp4575426560517115] 
+    \draw   (10,20) -- (54.55,20) -- (54.55,45.45) -- (10,45.45) -- cycle ;
+    % Shape: Rectangle [id:dp6927715472240803] 
+    \draw   (156.36,20) -- (200.91,20) -- (200.91,45.45) -- (156.36,45.45) -- cycle ;
+    % Shape: Rectangle [id:dp155118006605103] 
+    \draw   (10,134.55) -- (54.55,134.55) -- (54.55,160) -- (10,160) -- cycle ;
+    % Shape: Rectangle [id:dp8400261930370232] 
+    \draw   (156.36,134.55) -- (200.91,134.55) -- (200.91,160) -- (156.36,160) -- cycle ;
+    % Shape: Circle [id:dp9765420472983006] 
+    \draw   (80,88.73) .. controls (80,85.92) and (82.28,83.64) .. (85.09,83.64) .. controls (87.9,83.64) and (90.18,85.92) .. (90.18,88.73) .. controls (90.18,91.54) and (87.9,93.82) .. (85.09,93.82) .. controls (82.28,93.82) and (80,91.54) .. (80,88.73) -- cycle ;
+    % Shape: Circle [id:dp0875174655899531] 
+    \draw   (120.73,88.73) .. controls (120.73,85.92) and (123.01,83.64) .. (125.82,83.64) .. controls (128.63,83.64) and (130.91,85.92) .. (130.91,88.73) .. controls (130.91,91.54) and (128.63,93.82) .. (125.82,93.82) .. controls (123.01,93.82) and (120.73,91.54) .. (120.73,88.73) -- cycle ;
+    % Curve Lines [id:da46139202218941167] 
+    \draw [color={rgb, 255:red, 0; green, 134; blue, 255 }  ,draw opacity=1 ]   (54.55,45.45) .. controls (80.95,60.73) and (60.59,77.27) .. (80,88.73) ;
+
+
+    % Curve Lines [id:da6780938508393746] 
+    \draw [color={rgb, 255:red, 255; green, 0; blue, 254 }  ,draw opacity=1 ]   (156.36,45.45) .. controls (127.41,54.36) and (138.86,64.55) .. (130.91,88.73) ;
+
+
+    % Curve Lines [id:da5564598577024364] 
+    \draw [color={rgb, 255:red, 0; green, 255; blue, 27 }  ,draw opacity=1 ]   (90.18,88.73) .. controls (115.64,69.64) and (95.27,107.82) .. (120.73,88.73) ;
+
+
+    % Curve Lines [id:da7296276339072194] 
+    \draw [color={rgb, 255:red, 206; green, 0; blue, 0 }  ,draw opacity=1 ]   (54.55,134.55) .. controls (80,115.45) and (54.55,107.82) .. (80,88.73) ;
+
+
+    % Curve Lines [id:da3486369957330029] 
+    \draw [color={rgb, 255:red, 255; green, 173; blue, 0 }  ,draw opacity=1 ]   (130.91,88.73) .. controls (156.36,69.64) and (130.91,153.64) .. (156.36,134.55) ;
+
+
+
+    % Text Node
+    \draw (32.27,32.73) node  [align=left] {A};
+    % Text Node
+    \draw (178.64,32.73) node  [align=left] {C};
+    % Text Node
+    \draw (32.27,147.27) node  [align=left] {B};
+    % Text Node
+    \draw (178.64,147.27) node  [align=left] {D};
+
+
+  \end{tikzpicture}
+  \begin{align*}
+    d(A, B) + d(C, D) & \quad \coloredbox{blue} \coloredbox{red} \coloredbox{magenta} \coloredbox{yellow} \\
+    d(A, C) + d(B, D) & \quad \coloredbox{blue} \coloredbox{red} \coloredbox{magenta} \coloredbox{yellow} \coloredbox{green} \coloredbox{green} \\
+    d(A, D) + d(B, C) & \quad \coloredbox{blue} \coloredbox{red} \coloredbox{magenta} \coloredbox{yellow} \coloredbox{green} \coloredbox{green}
+  \end{align*}
+\end{center}
+ci sono due modi di procedere:
+\begin{enumerate}
+  \item \textbf{procedura con minimo valore}: si prende in input una
+  matrice $D$ ultrametrica. Si considera quindi la distanza minima $d$
+  tra due specie che avranno un genitore in comune. Si ha che, per
+  ogni nodo, la distanza fra esso e tutte le sue foglie dev’essere
+  uguale a $d$. Le etichette tra una specie e il padre saranno
+  etichettate con $\frac{d}{2}$ e si rimuove una delle due specie
+  dalla matrice e si cerca un nuovo $d$. Se un nodo ha già un
+  genitore, non si deve dimezzare la distanza, ma si deve tenere in
+  considerazione l’etichetta esistente. Sia quindi $a$ il valore
+  dell'arco, questo viene sovrascritto con l'etichett $\frac{d}{2}-a$
+  \item \textbf{procedura con minimo squilibrio}: è una procedura
+  simile alla precedente ma basata sulla diseguaglianza
+  triangolare. Si ha che tuttele foglie sono incidenti (collegate) su
+  un arco solo, e si vuole trovare l’etichetta minima. Si toglie
+  quindi un certo $\delta$ da ogni peso di archi incidenti su foglie
+  ottenendo un nuovo albero. Di conseguenza la matrice avrà un
+  $-2\delta$ su ogni elemento. Prendiamo quindi una tripla di specie
+  con minimo squilibrio $\delta$, si ha che una di quelle specie sarà
+  inclusa in un nodo interno. Si itera fino ad ottenere un solo nodo e
+  infine si ricostruisce l'albero. Quindi si ha un albero contratto
+  (anche non conosciuto) in cui ogni percorso foglia-foglia attraversa
+  esattamente due archi ridotti. Si ha che, tra le tre specie:
+  \[D(a,b)\leq D(a,c)+D(b,c)\]
+  \[\Downarrow\]
+  \[D(a,b)\geq D(a,c)-D(b,c)\]
+  Il valore dello squilibrio quindi è il doppio della lungheza
+  dell'arco incidente sulla foglia in cui la lettera non appare in
+  $D(a,b)$.\\
+  \textbf{domani spiega meglio questa parte}
+\end{enumerate}
 
 
 \end{document}

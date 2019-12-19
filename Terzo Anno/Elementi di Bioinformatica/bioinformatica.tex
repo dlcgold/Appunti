@@ -2004,6 +2004,75 @@ ci sono due modi di procedere:
   $D(a,b)$.\\
   \textbf{domani spiega meglio questa parte}
 \end{enumerate}
-
-
+\chapter{Ultima Lezione}
+% manca cosa siano aplotipi etc...
+% c'è l'audio
+Vediamo un algoritmo per l'inferenza di agolotgi (?) a partire da
+genotipi. Se ho lo stesso allele in entrambi gli aplotipi ho la
+sequenza omozigote mentre alternativamente è eterozigote.\\
+Analizzo il caso in cui ho un pedigree, ovvero studio che un aplotipo
+è stato ereditato da due determinati genitori. \\
+Studio anche il caso biallelico, ovvero in ogni locus (singola
+posizione sul genoma) posso avere al massimo due possibili valori,
+quindi sono in un caso binario 0, 1. Si
+assume inoltre che non ci sono ricombinazioni (ovvero l'aplotipo
+è un ``mosaico'' dei suoi aplotipi genitori). \\
+Avendo il pedigree rappresento come quadrato la donna e cerchio
+l'uomo. Posso avere 3 casi: 00 e 11 che rappresentano l'omozigosi e 01
+che rappresenta l'eterozigosi (ma non sai da dove arriva lo 0 e da
+dove l'1). Questa volta si usa la programmazione lineare. Rappresento
+le afferenze come varibili numeriche.\\
+Sia $g_i[j]$ il genotipo di $i$ nel locus $j$, che vale 0 o 1 se
+omozigote, 2 se eterozigote. Voglio rimappare il problema in uno di
+programmazione lineare intera. Ho bisogno anche di variabili o vincoli
+per la struttura del pedigree e ho bisogno di sapere come sono fatti
+gli aplotipi.\\
+Ho $P_i[j]$ che è l'aplotipo paterno dell'individuo $i$ nel locus $j$,
+a differenza delle variabili $G$ però non le ho in input, sono
+incognite. Quindi nel mio problema di programmazione lineare le $G$ è
+cpome se fossero costanti me mentre le $P$ sono le mie variabili.\\
+Ho anche la variabile $w_i[j]$ che vale 0 se sono in un locus
+omozigote e 1 se eterozigote. Ho anche $h_{x,i}$ con $x$ genitore di
+$i$, se $x$ passa il suo aplotipo paterno a $i$, allora $h_{x,i} = 0$,
+altrimenti 1.\\
+L'aplotipo materno è $p_[j]+w_i[j]\in\mathbb{Z}_2$ $(1+1=0)$ (in
+$\mathbb{Z}_2$) dato che $g_i[j],g_i[j]=(0,1)$ se omozigote o $(1,0)$
+se eterozigote.\\
+Si usa la cosiddetta eredità di Mendel ($p$ padre, $m$ madre, $f$
+figlio): 
+\begin{itemize}
+  \item $h_{p,f}=0\to p_f[j]=p_p[j]$
+  \item $h_{p,f}=1\to p_f[j]=p_p[j]+w_p[j]$
+  \item $h_{m,f}=0\to p_f[j]+w_f[j]=p_m[j]$
+  \item $h_{m,f}=1\to p_f[j]+w_f[j]=p_m[j]+w_m[j]$
+\end{itemize}
+ma tutte queste implicazioni sono ``fastidiose'' dal punto di vista
+algoritmico. Riscrivo senza implicazione:
+\begin{itemize}
+  \item $p_f[j]=p_p[j]+w_p[j]\cdot h_{p,f}$
+  \item $p_f[j]+w_f[j]=p_m[j]+w_m[j]h_{m,f}$
+\end{itemize}
+che resta lineare in quanto $w$ non è una variabile. Posso fare un
+ulteriore accorpamento:
+\[p_f[j]+d_{x,f}=p_x[j]+w_x[h]\cdot h_{x,f}\]
+con:
+\[d_{x,f}=
+  \begin{cases}
+    0 & \mbox{ se } x=p\\
+    w_f & \mbox{ se } x=m
+  \end{cases}
+\]
+risolvo quindi il sistema di disequazione con incognite $p_x[j]$ e
+$h_{x,f}$ in tempo polinomiale:
+\[
+  \begin{cases}
+    p_f[j]+d_{x,f}=p_x[j]+w_x[h]\cdot h_{x,f}\\
+    d_{p,f}=0\\
+    d_{m,f}=w_f\\
+    p_i[j])=g_i[j] \mbox{ se } g_i[j]\neq 2\\
+    w_i[i]=1 \mbox{ se } g_i[j]=2\\
+    w_i[i]=0 \mbox{ se } g_i[j]\neq 2
+  \end{cases}
+\]
+% manca ultima pagina da xournal
 \end{document}

@@ -30,7 +30,7 @@
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage{algorithm}
-%\usepackage{algpseudocode}
+% \usepackage{algpseudocode}
 \usepackage[cache=false]{minted}
 \usepackage{mathtools}
 \usepackage[noend]{algpseudocode}
@@ -1042,7 +1042,7 @@ e $Y_j$. Diventa quindi:
   \begin{cases}
     0 & \mbox{ se } X_i\neq Y_j\\
     1+\max\{M[a,b]|\, 1\leq a \leq i,\,\,1\leq b\leq j,\,\,and\,\,
-   (x_a\,mod\, 2 \neq x_b\,mod\, 2)\} & \mbox{ se } X_i=Y_j
+    (x_a\,mod\, 2 \neq x_b\,mod\, 2)\} & \mbox{ se } X_i=Y_j
   \end{cases}
 \]
 La soluzione quindi è il valore più grande contenuto nella matrice:
@@ -1302,19 +1302,19 @@ soluzione con la programmazione greedy. Questo strumento è detto
   greedy restituisce l'ottimo per ogni $w$
 \end{teorema}
 \textbf{Dire che un problema non è un matroide, vuol dire
-che non tutte le funzioni peso sono associabili a un algoritmo
-greedy. Non significa che per nessun obiettivo non esiste mai un
-algoritmo greedy che produce la soluzione ottima}
+  che non tutte le funzioni peso sono associabili a un algoritmo
+  greedy. Non significa che per nessun obiettivo non esiste mai un
+  algoritmo greedy che produce la soluzione ottima}
 \chapter{Grafi}
 Ci occupiamo ora della risoluzione di quei problemi che possono essere
 ricondotti ad un grafo per essere risolti.
 \begin{definizione}
-Un \textbf{grafo} è un insieme $G=(V,E)$, con $V$ insieme dei vertici
-e $E$ insieme degli archi. Per per gli archi si ha anche una funzione
-rappresentante il peso:
-\[w:E\to\mathit{R}\]
-Dato un certo $e\in E$ e un certo $i\in V$ un \textbf{cappio} viene
-rappresentato con $e(i,i)$
+  Un \textbf{grafo} è un insieme $G=(V,E)$, con $V$ insieme dei vertici
+  e $E$ insieme degli archi. Per per gli archi si ha anche una funzione
+  rappresentante il peso:
+  \[w:E\to\mathit{R}\]
+  Dato un certo $e\in E$ e un certo $i\in V$ un \textbf{cappio} viene
+  rappresentato con $e(i,i)$
 \end{definizione}
 Si hanno due modi principali di rappresentare un grafo:
 \begin{enumerate}
@@ -1697,7 +1697,7 @@ La \textit{DFS} ha proprietà interessanti:
     foresta DFS fi un grafo $G$ sse:
     \[d[u]<d[v]<f[v]<f[u]\]
   \end{corollario}
-  \item si ha il \textbf{teorma del cammino bianco}
+  \item si ha il \textbf{teorema del cammino bianco}
   \begin{teorema}
     In una foresta DFS di un grafo $G=(V,E)$ un vertice $v$ è
     discendete di $u$ sse, al tempo $d[u]$ di scoperta di $u$, $v$ è
@@ -1705,4 +1705,372 @@ La \textit{DFS} ha proprietà interessanti:
     \textit{bianchi} 
   \end{teorema} 
 \end{itemize}
+Gli archi in un grafo visitato con DFS possono essere così
+etichettati:
+\begin{itemize}
+  \item \textbf{tree-edge}, che sono gli archi della foresta DFS. Un
+  arco $(u,v)$ è arco dell'albero se $v$ è stato scoperto esplorando
+  quell'arco 
+  \item \textbf{back-edge}, che sono gli archi $(u,v)$ che connettono
+  un vertice $u$ ad un antenato $v$ in un albero DFS. I cappi sono
+  considerati back-edge
+  \item \textbf{forward-edge}, che sono gli archi $(u,v)$ che non sono
+  archi dell'albero e che connettono un vertice $u$ ad un discendente
+  di $v$ in un albero DFS
+  \item \textbf{cross-edge}, che sono i vertici non appartenetenti
+  alle categprie sopra. Questi archi possono connettere vertici nello
+  stesso albero DFS, purché un vertice non sia antento di un
+  altro. Possono connettere vertici in alberi DFS distinti.
+\end{itemize}
+In questa distinzione ci aiutano i colori:
+\begin{itemize}
+  \item se $v$ è white allora $(u, v)$ è un tree-edge
+  \item se $v$ è gray allora $(u, v)$ è un back-edge
+  \item se $v$ è black allora $(u, v)$ è un forward-edge o cross-edge
+  (se il tempo di scoperta di $u$ è minore del tempo di scoperta di
+  $v$ allora è un arco in avanti, altrimenti è un arco trasversale)
+\end{itemize}
+Nel caso di grafo non orientato il primo tra $(u,v)$ e $(v,u)$ che
+viene etichettato viene usato per etichettare nello stesso modo
+l'altro.\\ Vediamo l'algoritmo che modifica la $DFS\_visit$ stampando
+le tipologie d:i arco
+\begin{shaded}
+  \begin{algorithmic}
+    \Function{$DFS\_visit$}{$v$}
+    \State $time \gets time+1$
+    \State $d[v]\gets time$
+    \State $c[v]\gets gray$
+    \State $\mbox{\#si rimuove P[v] solo se il grafo non è orientato}$
+    \For {$a\in Adj[v]\backslash P[v]$}
+    \If{$c[a]==white$}
+    \State $print((v,a), "tree")$
+    \State $DFS\_visit(a)$
+    \ElsIf {$c[a]==gray$}
+    \State $print((v,a), "back")$
+    \ElsIf {$c[a]==black$}
+    \If{$d[a]<f[a]$}
+    \State $print((v,a), "forward")$
+    \Else
+    \State $print((v,a), "cross")$
+    \EndIf
+    \EndIf
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+\newpage
+\subsection{Ordinamento Topologico}
+Usando la DFS posso effettuare l'ordinamento topologico di grafi
+orientati aciclici (\textbf{DAG}). Tale ordinamento è un ordinamento
+lineare di tutti i suoi vertici tale che $G$ contiene un arco $(u,v)$,
+allora $u$ compare prima di $v$ nell'ordinamento (questa cosa è
+possibile solo grazie al fatto che è aciclico). Tale ordinamento può
+essere visto quindi come un ordinamento dei suoi vertici lungo una
+linea orizzontale in modo che tutti gli archi orientati vadano da
+sinistra a destra. Si procede così:
+\begin{itemize}
+  \item si chiama DFS e si calcolano i tempi di fine visita su ogni
+  vertice $v$
+  \item dopo aver visitato un vertice lo si inserisce in testa ad una
+  lista concatenata
+  \item si ritorna la lista
+\end{itemize}
+\section{Algoritmo di Floyd-Warshall}
+Dato un grafo orientato $G=(V,E)$ e una funzione peso $w:E\to
+\mathbb{R}$, che associa gli archi del grafo ad un valore reale, si
+cerca il cammino di peso minimo tra due vertici $u$ e $v$ dove il peso
+del cammino è la somma dei pesi degli archi del cammino. Si assume che
+possano esserci archi di peso negativo ma non cicli negativi. Questo
+algortimo sfrutta una matrice $M^n$ (di programmazione dinamica ???)
+che è la matrice delle distanze calcolate utilizzando al massimo i
+nodi da 1 a $n$ come nodi intermedi. All'inizio la matrice contiene le
+distanze tra i vertici adiancenti:
+\[M^0[i,j]=
+  \begin{cases}
+    0 & \mbox{ se } i=j\\
+    w_{i,j} & \mbox{ se } i\neq j \wedge (i,j)\in E\\
+    \infty & \mbox{ altrimenti}
+  \end{cases}
+\]
+Quindi ho una matrice $n\times n$ con l'elmento $(i,j)$ che contiene
+il peso di un cammino minimo tra i vertici $i$ e $j$. \\
+Il sottografo indotto dalla i-esima riga dalla matrice sarà un albero
+di cammini minimi con radice $i$ e definisco la amtrice dei
+predecessori:
+\[P[i,j]=
+  \begin{cases}
+    nil & \mbox{ se } i=j\vee (i,j)\not\in E\\
+    p[\cdot, j] & \mbox{ altrimenti}
+  \end{cases}
+\]
+\newpage
+Definisco il sottografo dei predecessori per ul vertice i-simo come:
+\[G_{\pi,i}=(V_{\pi,i},E_{\pi,i})\]
+con:
+\begin{itemize}
+  \item $V_{\pi,i}=\{j\in V:\,p[i,j]\neq nil\}\cup\{i\}$
+  \item $V_{\pi,i}=\{(p[i,j],j):\,j\in V_{\pi,i}-\{i\}$
+\end{itemize}
+L'algortimo suppone che i vertici siano numerati da 1 a $n$ e
+considera un sottoinsieme di vertici da 1 a $k$, con ovviamente
+$k<n$. Per ogni coppia di vertici considera tutti i cammini possibili
+tra i due vertici i cui vertici intermedi siano nel sottoinsieme di
+vertici da 1 a $k$ e sia $p$ un cammino di peso minimo fra di essi:
+\begin{itemize}
+  \item se $k$ non è un vertice intermedio del cammino $p$ allora
+  tutti i vertici intermedi del cammino $p$ sono compresi tra 1 e
+  $k−1$. Di conseguenza, un cammino minimo da $i$ a $j$ con i vertici
+  intermedi compresi tra 1 e $k − 1$ è ancora un cammino minimo da i a
+  $j$ con i vertici compresi tra 1 e $k$
+  \item se $k$ è un vertice intemedio spezzo $p$ in due sottocammini
+  $p_1$ (da $i$ a $k$) e $p_2$ (da $k$ a $j$) e opero come nel passo
+  precedente, dimostrando che i due sottocammini sono
+  minimo e rimangono tali anche con l’aggiunta di un vertice $k$
+\end{itemize}
+Quindi si ha che:
+\[M^k[i,j]=
+  \begin{cases}
+    w_{i,j} & \mbox{ se } k=0\\
+    \min\{M^{k-1}[i,j], min^{k-1}M[i,k]+M^k[k,j]\}  & \mbox{ se }
+    k\geq 1
+  \end{cases}
+\]
+La matrice $M^n[i,j]$ mi darà le soluzioni per ogni coppia di vertici
+$i,j\in V$.
+\newpage
+Vediamo l'algoritmo:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function {$Floyd\-Warshall$}{$G$}
+    \For {$i\gets 1$\textbf{ to }$n$}
+    \For {$j\gets 1$\textbf{ to }$n$}
+    \If {$(i,j)\not \in E$}
+    \State $M[0,i,j]=\infty$
+    \Else
+    \If {$i==j$}
+    \State $M[0,i,j]=0$
+    \Else
+    \State $M[0,i,j]=w_{i,j}$
+    \EndIf
+    \EndIf
+    \EndFor
+    \EndFor
+    \For {$k\gets 1$\textbf{ to }$n$}
+    \For {$i\gets 1$\textbf{ to }$n$}
+    \For {$j\gets 1$\textbf{ to }$n$}
+    \State $M[k,i,j]=\min\{M[k-1,i,j],M[k-1,i,j]+M[k-1,i,k]\}$
+    \EndFor
+    \EndFor
+    \EndFor
+    \State \textbf{return} $M[n,n,n]$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+Abbiamo quindi un tempo pari a $O(n^3)$
+\section{Algortimo di Bellman-Ford}
+\textbf{DA SISTEMARE}\\
+Questo algortimo risolve il problema di cammini minimi con sorgente
+singola nel caso generale in cui i pesi degli archi possono essere
+negativi.\\ Dato un grafo orientato $G=(V,E)$, con sorgente $s$ e
+funzione peso $w:E\to\mathbb{R}$ l'algoritmo di Bellman-Ford
+restituisce un booleano che indica se esiste un ciclo di peso negativo
+raggiungibile dalla sorgente. Se e solo se non esiste tale ciclo
+l'algoritmo produce i cammini minimi e i loro pesi.\\
+Si usa la tecnica del \textit{rilassamento}, diminuendo
+progressivamente una stima $d[v]$ del peso di un cammino da $s$ a
+$v\in V$ fino a raggiungere il peso reale del cammino
+$\delta(s,v)$. L'algoritmo restituisce \textit{TRUE} sse il grafo non
+ha un ciclo di peso negativo raggiunbile dalla sorgente:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function {$Bellman\-Ford$}{$G,w,s$}
+    \State \textit{Inizialize-Single-Source(G, v)}
+    \For {$i\gets 1$ \textbf{ to } $|V|-1$}
+    \For {\textit{every} $e(u,v)\in E$}
+    \State \textit{Relax(u, v, w)}
+    \EndFor
+    \EndFor
+    \For {\textit{every} $e(u,v)\in E$}
+    \if {$d[v]>d[u]+w(u,v)$}
+    \State \textbf{return} FALSE
+    \EndFor
+    \State \textbf{return} TRUE
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+Si ha un tempo di $O(|V|\cdot |E|)$
+\section{Strutture Dati per Insiemi Disgiunti}
+Si ha che alcune applicazioni devono raggruppare $n$ elementi distinti
+in una collezione di insiemi disgiunti. Studiamo quindi strutture dati
+che permettono di mantenere una collezione di insiemi dinamici
+disgiunti, \\
+$S=\{S_1,\ldots, S_n\}$. Si ha quindi che, $\forall i,j
+\in[1,n],\,\,i\neq j\to S_i \cap S_j=\emptyset$. Si definisce
+\textbf{rappresentante di un insieme} un dato membro di
+quell'insieme (imponendo che la funzione che cerca il rappresentante
+restituisca sempre lo stesso). Ovviamente un elemento si troverà solo
+in uno degli insiemi della collezione. In determinati casi un
+rappresentante è l'elemento più piccolo o più grande etc$\ldots$\\
+Si definiscono 3 operazioni fondamentali:
+\begin{enumerate}
+  \item \texttt{Make-Set(x)}, che crea un nuovo insieme il cui unico
+  elemento (e quindi rappresentante) è $x$, che però non deve essere
+  già in un insieme della collezione
+  \item \texttt{Union(x, y)}, che unisce due insiemi dinamici che
+  contengono $x$ e $y$ nell'insieme unione. Si presuppone che i due
+  insiemi $S_x$ e $S_y$ che contengono rispettivamente $x$ e $y$ siano
+  disgiunti a priori. Il rappresentante di $S_x\cup S_y$ può,
+  eventualmente, essere $x$ o $y$. Alla fine dell'operazione i due
+  insiemi vengono rimossi dalla collezione e si restituisce il
+  rappresentante dell'unione
+  \item \texttt{Find-Set(x)}, che restituisce un puntatore al
+  rappresentante dell'unico insieme contenente $x$
+\end{enumerate}
+% capire uso grafo non connesso
+\subsection{Rappresentazione a Lista Concatenata}
+Con questa rappresentazione si rappresenta ogni insieme come una lista
+concatenata, il cui primo elemento, a cui punta \textit{head},
+è il rappresentante dell'insieme. Ogni offetto nella lista contiene
+un elemento dell'insieme, un puntatore al rappresentante
+e un puntatore all'oggetto successivo. Ad eccezione del primo
+elemento non si hanno regole per l'ordine degli
+elementi nella lista. Con questa rappresentazione
+\textit{Make-Set(x)} e \textit{Find-Set(x)} sono semplici da
+realizzare in tempo $O(1)$. Infatti la prima operazione crea una
+lista con un solo oggetto mentre per la seconda basta seguire il
+puntatore a head dell’oggetto $x$ e poi ritornare l’elemento a cui
+punta head. \\
+Vediamo ora \textit{Union(x,y)}. Si procede appendendo la lista di $x$
+alla fine di quella di $y$, avendo quindi $y$ come nuovo
+rappresentante. Bisogna perà aggiornare tutti i puntatori al
+rappresentante agli oggetti che prima erano nella lista di $x$, in
+tempo lineare, in $O(n^2)$. Questo succede perché potremmo appendere
+una lista più lunga a una lista più corta e dovremmo aggiornare
+il puntatore al rappresentante per ogni membro
+della lista più lunga. Supponiamo invece che ogni rappresentante
+includa anche la lunghezza della lista e che si appenda sempre la
+lista più corta a quella più lunga. Con questa \textit{euristica} si
+arriva a $\Omega(n)$ se tutti gli insiemi hanno $\Omega(n)$
+elementi. Infine si ha il seguente teorema:
+\begin{teorema}
+  Una sequenza di $m$ operazioni tra le 3 sopra descritte (di cui $n$
+  sono \textit{Make-Set(x)}) impiega tempo $O(m+n\log n)$
+\end{teorema}
+\subsection{Rappresentazione con Foreste di Insiemi Disgiunti}
+Con questa rappresentazione gli insiemi sono alberi radicati dove ogni
+nodo contiene un elemento. SI ha quindi una foresta di insiemi
+disgiunti dove ogni elemento ha puntatore solo al padre e dove le
+radici contengono il rappresentante (e un puntatore a se
+stesse). L'operazione \textit{Make-Set(x)} si ottiene creando un
+albero con un solo nodo (che è radice e quindi
+rappresentante). L'operazione \textit{Find-Set(x)} si esegue
+controllando i punattori al padre fino alle radici (chiamando questi
+cammini \textit{cammini di accesso}). Per la \textit{(union(x, y))} si
+ha che la radice di uno dei due insiemi punta alla radice
+dell'altro. Allo stato attuale non si hanno miglioramenti di tempo
+rispetto alle liste concatenate. Si introduce quindi un'euristica,
+detta \textbf{unione per rango}, per la quale l'albero più basso punta
+alla radice di quello più alto. Per ogni nodo si memorizza un
+\textit{rango}, ovvero un limite superiore dell'altezza del nodo. Con
+l'unione per rango quindi si fa quindi puntare la radice col rango più
+piccolo viene fatta puntare a quella col rango più grande. \\
+Si ha anche un'altra euristica, detta \textbf{compressione dei
+  cammini}, usata durante la \textit{Find-Set} per far si che ogni
+nodo sul cammino di accesso punti direttamente alla radice.
+\textbf{Minimum Spanning Tree}
+\begin{definizione}
+  Un albero di copertura o albero di connessione o albero di supporto
+  di un grafo, connesso e con archi non orientati, è un albero che
+  contiene tutti i vertici del grafo e contiene soltanto un
+  sottoinsieme degli archi, cioè solo quelli necessari per connettere
+  tra loro tutti i vertici con uno e un solo cammino. Infatti ciò che
+  differenzia un grafo da un albero è che in quest'ultimo non sono
+  presenti cammini multipli tra due nodi.
+\end{definizione}
+Minimum Spanning Tree è un problema di copertura di grafi non
+orientati dove ad ogni arco viene associato un peso. Un minimum
+spanning tree è un cammino senza cicli che colleghi tutti i nodi
+(connesso) con peso totale minimo.\\
+Si assuma quindi di avere un grafo non orientato e connesso $G=(V,E)$
+con una funzione peso $w:E\to\mathbb{R}$. Si ha innazitutto un
+algoritmo greedy generico che gestice un insieme $A$ che è sempre
+sottoinsieme di un qualche albero di copertura minimo. Ad ogni passo
+si determina un arco $e(u,v)$ che si aggiunge ad $A$ in modo che
+$A\cup\{e(u,v)\}$ sia ancora un sottoinsieme di copertura minimo. In
+tal caso $e(u,v)$ è detto \textit{arco sicuro}.\\
+Si ha quindi l'algortimo generico:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function {$Generic\_MST$}{$G,w$}
+    \State $A\gets \emptyset$
+    \While {\textit{A non forma un albero di copertura minima}}
+    \State \textit{seleziona un arco} $a\inE$ \textit{sicuro per} $A$
+    \State $A\gets A\cup \{a\}$
+    \EndWhile
+    \State \textbf{return} $A$
+    \EndFunction
+  \end{algorithmic}
+
+\end{shaded}
+Prima di procedere sono necessarie alcune definizioni:
+\begin{itemize}
+  \item un \textbf{taglio} $(S,V-S)$ in un grafo non orientato
+  $G=(V,E)$ è una partizione di $V$. Un arco $e(u,v)\in E$ attraversa
+  il taglio $(S,V-S)$ se uno dei suoi ustremi è in $S$ e l'altro in
+  $V-S$. Si dice che un taglio \textbf{rispetta} un insieme $A$ di
+  archi sse nessun arco di $A$ attraversa il taglio
+  \item un arco che attraversa un taglio è detto \textbf{arco leggero}
+  sse il suo peso è minimo tra quelli che attraversano il taglio
+  (potrebbero esserci più archi leggeri di egual peso)
+\end{itemize}
+Si ha quindi il seguente teorema:
+\begin{teorema}
+  Si assuma quindi di avere un grafo non orientato e connesso $G=(V,E)$
+  con una funzione peso $w:E\to\mathbb{R}$. Sia $A\subseteq E$
+  contenuto in qualche albero di copertura minimo per $G$. Sia
+  $(S,V-S)$ un qualcunque taglio che \textit{rispetta} $A$ e sia
+  $e(u,v)$ un arco leggero che attraversa $(S,V-S)$. Si ha quindi che
+  $e(u,v)$ è un \textbf{arco sicuro} per $A$
+\end{teorema}
+inoltre si ha il seguente corollario:
+\begin{corollario}
+  Sia $T$ un albero nella foresta $G_A=(V,A)$. Se $e(u,v)$ è un arco
+  leggero che connette $T$ ad un altro albero di $G_A$ allora $e(u,v)$
+  è sicuro per $A$
+\end{corollario}
+\subsection{Algoritmo di Kruskal}
+Con questo algoritmo si individua un arco sicuro da aggiungere alla
+foresta scegliendo un arco $e(u,v)$ di peso minimo tra tutti gli archi
+che connettono due distinti alberi della foresta, che chiamo $T_1$ e
+$T_2$. Essendo $e(u,v)$ un arco leggero che connette $T_1$ ad un altro
+albero si ha che esso è un arco sicuro (per il corollario
+sopra). L'aAlgoritmo di Kruskal è quindi un algortimo greedy che ad
+ogni passo aggiunge alla foresta l'arco col minor peso
+possibile.
+\newpage
+Nell'implementazione si usa una struttura dati per insiemi
+disgiunti di modo che gli elementi restino appunto disgiunti e si ha
+in input $G=(V,E)$:
+\begin{shaded}
+  \begin{algorithmic}
+    \Function {$MST\-Kruskal$}{$G,w$}
+    \State $A\gets \emptyset$
+    \For {\textit{every} $v\in V$}
+    \State \textit{Make-Set(v)}
+    \EndFor
+    \State \textit{\# ordino E in ordine non decrescente secondo w}
+    \State \textit{mergesort(E,w)}
+    \For {\textit{every} $e(u,v)\in E$}
+    \If{\textit{Find-Set(u)}$\neq$ \textit{Find-Set(v)}}
+    \State $A\gets A\cup\{e(u,v)\}$
+    \State \textit{Union(u, v)}
+    \EndIf
+    \EndFor
+    \State \textbf{return} $A$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+Avendo un grafo connesso si ha che $|E|\geq |V|-1$. L'inizializzazione
+richeide $O(|V|)$, l'ordinamento $O(|E|\log |E|)$ quindi il tempo
+totale è $O(|E|\log |E|)$
 \end{document}

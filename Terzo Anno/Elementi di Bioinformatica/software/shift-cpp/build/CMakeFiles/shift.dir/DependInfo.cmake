@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/dlcgold/Appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/shift.cpp" "/home/dlcgold/Appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/build/CMakeFiles/shift.dir/shift.cpp.o"
-  "/home/dlcgold/Appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/shiftMethod.cpp" "/home/dlcgold/Appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/build/CMakeFiles/shift.dir/shiftMethod.cpp.o"
+  "/home/dlcgold/appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/shift.cpp" "/home/dlcgold/appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/build/CMakeFiles/shift.dir/shift.cpp.o"
+  "/home/dlcgold/appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/shiftMethod.cpp" "/home/dlcgold/appunti/Terzo Anno/Elementi di Bioinformatica/software/shift-cpp/build/CMakeFiles/shift.dir/shiftMethod.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

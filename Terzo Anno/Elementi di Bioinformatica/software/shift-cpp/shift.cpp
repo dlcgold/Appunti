@@ -10,9 +10,9 @@ int main(int argc, char *argv[]){
     return -1;
   }
   
-  std::string pattern= "";
-  std::cout << "Insert pattern: ";
-  std::cin >> pattern;
+  std::string pattern= "sit";
+  /*std::cout << "Insert pattern: ";
+    std::cin >> pattern;*/
   
   std::string text;
   std::fstream ifs(argv[1]);

@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
-  "../bin/shift"
-  "../bin/shift.pdb"
   "CMakeFiles/shift.dir/shift.cpp.o"
   "CMakeFiles/shift.dir/shiftMethod.cpp.o"
+  "../bin/shift.pdb"
+  "../bin/shift"
 )
 
 # Per-language clean rules from dependency scanning.

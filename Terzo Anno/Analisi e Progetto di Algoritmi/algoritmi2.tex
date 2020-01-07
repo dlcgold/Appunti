@@ -1316,6 +1316,12 @@ ricondotti ad un grafo per essere risolti.
   Dato un certo $e\in E$ e un certo $i\in V$ un \textbf{cappio} viene
   rappresentato con $e(i,i)$
 \end{definizione}
+\begin{definizione}
+  Si definisce \textbf{grafo sparso} un grafo in cui il numero di
+  archi $|E|$ è molto minore di del quadrato del numero di vertici
+  $|V^2|$. 
+\end{definizione}
+\newpage
 Si hanno due modi principali di rappresentare un grafo:
 \begin{enumerate}
   \item una collezione di \textbf{liste di adiacenza}, da usare quando la
@@ -1978,7 +1984,7 @@ $i,j\in V$.
 Vediamo l'algoritmo:
 \begin{algorithm}
   \begin{algorithmic}
-    \Function {$Floyd\-Warshall$}{$G$}
+    \Function {$FloydWarshall$}{$G$}
     \For {$i\gets 1$\textbf{ to }$n$}
     \For {$j\gets 1$\textbf{ to }$n$}
     \If {$(i,j)\not \in E$}
@@ -2014,9 +2020,10 @@ con peso di cammino minimo dalla sorgente $s$ già determinati, ovvero:
 L'algoritmo seleziona ripetutamente il vertice $u\in V\backslash\{s\}$
 con la minima stima di cammino minimo, inserisce $u$ in $S$ e
 \textit{rilassa} gli archi uscenti da $u$. Nell'implementazione si
-mantiene una queue $Q$ con tutti i vertici $ V\backslash\{s\}$ usando
-come chiave i rispettivi $d[v]$. SI usa la rappresentazione con liste
-di adiacenza:
+mantiene una queue di minima priorità $Q$ con tutti i vertici $ V\backslash\{s\}$ usando
+come chiave i rispettivi $d[v]$ (in modo che si estragga il nodo più
+vicino con al funzione \textit{Extract-Min}). Si usa la
+rappresentazione con liste di adiacenza:
 \begin{algorithm}[H]
   \begin{algorithmic}
     \Function {$Dijkstra$}{$G,w,s$}
@@ -2058,11 +2065,22 @@ Analizziamo ora i tempi. Si ha che ogni operazione
 viene inserito in $S$ esattamente una volta e ogni arco nella lista di
 adiacenza viene esaminatyo esattamente una volta. Avendo $|E|$ archi
 nella lista di adiacenza e avendo $|E|$ iterazioni col ciclo
-\textit{for}, che contiene operazioni di peso $O(1)$, si ha
-$O(|E|^2)$, ottenendo in toatle:
+\textit{for} (quindi $|E|$ chiamate alla \textit{relax} e quindi alla
+\textit{decrease-key}), che contiene operazioni di peso $O(1)$, si ha 
+$O(|E|^2)$, ottenendo in totale:
 \[O(|V|^2+|E|^2)=O(|V|^2)\]
-essendo $|V|>|E|$
-\section{Algortimo di Bellman-Ford}
+essendo $|V|>|E|$.\\
+Se il grafo è suffientemente sparso, ovvero $|E|=o(\frac{|V|^2}{\log
+  |V|})$ si ha che la coda di priorità minima può essere implementata
+con un \textbf{min-heap binario} (aggiungendo il dettaglio
+implementativo in cui i vertici devono mantenere dei puntatori ai
+corrispondenti elementi dell'heap e viceversa). In questo modo
+\textit{Extract-Min} richiede tempo $=(\log |V|)$ (avendo per di più
+sempre $|V|$ operazioni). Ricordiamo che il min-heap binariosi
+costruisce in $O(|V|)$. Raggiungo quindi un tempo di $O(|E|\log
+|V|)$. Usando gli \textbf{heap i fibonacci} ottengo addirittura
+$O(|V|\log |V|+|E|)$
+\section{Algoritmo di Bellman-Ford}
 Questo algortimo risolve il problema di cammini minimi con sorgente
 singola nel caso generale in cui i pesi degli archi possono essere
 negativi.\\ Dato un grafo orientato $G=(V,E)$, con sorgente $s$ e
@@ -2120,6 +2138,68 @@ Si ha quindi il \textbf{teorema della correttezza dell'algoritmo di
   con $s$ come radice. Se il grafo contiene cicli di peso negativo si
   restituisce \textit{False} 
 \end{teorema}
+\subsection{Algoritmo di Prim}
+Questo algoritmo opera in modo simile all'algoritmo di Dijkstra. Si ha
+la priorità che gli archi nell'insieme $A$ formano sempre un albero
+singolo. Questo albero inizia da un vertice radice, detto $r$, scelto
+in maniera arbitraria, e si sviluppa fino a coprire tutti i vertici in
+$V$. Ad ogni passo si aggiunge un arco leggero all'albero $A$ che
+collega $A$ con un vertice isolato (ovvero un vertice che non sia
+estremo di qualche arco in $A$). Aggiungo quindi solo sicuri per $A$,
+in modo che al termine si ottiene un albero di connessione minimo. \\
+Si ha quindi un algoritmo \textit{greedy}, infatti l'albero cresce
+includendo ad ogn i passo un arcoche contribuisc con la quantità più
+piccola possibile a formare il peso dell'albero.\\
+Si cerca quindi un modo veloce per trovare l'arco da aggiungere ad
+$|A|$. L'algoritmo prende in input un grafo connesso $G$ e la radice
+$r$ dell'albero di connessione che si vuole costruire. Tutti i vertici
+che non si trovano in $A$ risiedono in una queue di minima priorità
+$Q$ con un campo $key$, con $key[v]$, $\forall v\in V$, cheb
+rappresenta il peso minimo di un arco qualsiasi arco che collega $v$
+ad un vertice nell'albero (per definizione se tale arco non esiste si
+ha che $key[v]=\infty$). Con $p[v]$ si definisce il predecessore di
+$v$ come il padre di $v$ nell'albero. Nella pratica quindi, durante
+l'algoritmo si ha che:
+\[A=\{(v,p[v]):v\in V-\{r\}-Q\}\]
+mentre alla fine sarà:
+\[A=\{(v,p[v]):v\in V-\{r\}\}\]
+In pratica parto da un nodo e lo inserisco in $A$. Inserisco poi in
+$A$ il nodo adiacente collegato con l'arco di peso minimo, aggiorando
+comunque tutte le $key$ dei nodi adiacenti. Continuo poi aggiorando le
+keys dei nodi adiacenti al nodo raggiunto con l'arco minimo
+all'iterazione precedente e muovendomi verso il nodo presente in Q
+raggiungibile con chiave minima (indipendentemente dal nodo posto in
+$A$ che si vuole considerare). Ogni nodo raggiunto viene inserito in
+$A$ e tolto dalla coda di minima priorità. Ci si ferma ad esaurimento
+di $Q$.
+\newpage
+Vediamo l'algoritmo:
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{$Prim$}{$G,w,r$}
+    \For {\textit{every} $u\in V$}
+    \State $key[u]\gets \infty$
+    \State $p[u]\gets NIL$
+    \EndFor
+    \State $p[r]\gets 0$
+    \State $Q\gets V$
+    \While {$Q\neq 0$}
+    \State $u\gets ExtractMin(Q)$
+    \For {\textit{every} $v\in Adj[u]$}
+    \If {$v\in Q$ \textbf{AND} $w(u,v)<key[v]$}
+    \State $key[v]\gets w(u,v)$
+    \State $p[v]\gets u$
+    \EndIf
+    \EndFor
+    \EndWhile
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+Dove con l'\textit{ExtractMin} si identifica un vertice su un arco
+leggero che attraversa un taglio $(V-Q,Q)$.\\
+Se la coda viene implementata con un min-heap si ha tempo apri a
+$O(|E|\log |V|)$ mentre se implementata con heap di Fibonacci si ha
+$O(|E|+|V|\log |V|)$
 \section{Strutture Dati per Insiemi Disgiunti}
 Si ha che alcune applicazioni devono raggruppare $n$ elementi distinti
 in una collezione di insiemi disgiunti. Studiamo quindi strutture dati
@@ -2259,6 +2339,7 @@ inoltre si ha il seguente corollario:
   leggero che connette $T$ ad un altro albero di $G_A$ allora $e(u,v)$
   è sicuro per $A$
 \end{corollario}
+\newpage
 \subsection{Algoritmo di Kruskal}
 Con questo algoritmo si individua un arco sicuro da aggiungere alla
 foresta scegliendo un arco $e(u,v)$ di peso minimo tra tutti gli archi
@@ -2431,5 +2512,6 @@ dettaglio si hanno 3 classi:
   può essere risolto in tempo polinomiale, allora tutti i problemi 
   in NP hanno un algoritmo di risoluzione in tempo polinomiale. 
 \end{enumerate}
-\\textbf{manca ultima parte}
+\\
+\textbf{manca ultima parte}
 \end{document}

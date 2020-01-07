@@ -44,7 +44,6 @@
 \fancyfoot[C]{\thepage}
 
 
-
 \title{Analisi e Progetto di Algoritmi}
 \author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold}\\\\Gabriele De Rosa\\\href{https://t.me/derogab}{@derogab} \\\\Federica Di Lauro\\\href{https://t.me/f_dila}{@f\textunderscore dila}}
 \date{}
@@ -69,6 +68,8 @@
   \markboth{\chaptername
     \ \thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+
 \chapter{Introduzione}
 \textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta una revisione è altamente probabile (praticamente certo) che possano contenere errori, sia di stampa che di vero e proprio contenuto. Per eventuali proposte di correzione effettuare una pull request. Link: } \url{https://github.com/dlcgold/Appunti}.\\
 \textbf{Grazie mille e buono studio!}
@@ -1182,7 +1183,7 @@ $n$ numero degli oggetti e $L$ peso massimo trasportabile):
     \State $peso\gets 0$
     \For{$i\gets 1$ \textbf{to} $n$}
     \State
-    \state $R[i]\gets \frac{V[i]}{W[i]}$
+    \State $R[i]\gets \frac{V[i]}{W[i]}$
     \EndFor
     \State $mergesort(R)$
     \State $i\gets 1$
@@ -1873,7 +1874,7 @@ valore della stima del cammino minimo) e $p[v]$, tutto ciò si ottiene
 in un passo di rilassamento così implementabile:
 \begin{algorithm}[H]
   \begin{algorithmic}
-    \Function {\textit{Relax}}{$u,v,w$}
+    \Function {$Relax$}{$u,v,w$}
     \If {$d[v]>d[u]+w(u,v)$}
     \State $d[v]\gets d[u]+w(u,v)$
     \State $p[v]\gets u$
@@ -1973,7 +1974,7 @@ Quindi si ha che:
 \[M^k[i,j]=
   \begin{cases}
     w_{i,j} & \mbox{ se } k=0\\
-    \min\{M^{k-1}[i,j], min^{k-1}M[i,k]+M^k[k,j]\}  & \mbox{ se }
+    \min\{M^{k-1}[i,j], M^{k-1}[i,k]+M^{k-1}[k,j]\}  & \mbox{ se }
     k\geq 1
   \end{cases}
 \]
@@ -1999,7 +2000,7 @@ Vediamo l'algoritmo:
     \For {$k\gets 1$\textbf{ to }$n$}
     \For {$i\gets 1$\textbf{ to }$n$}
     \For {$j\gets 1$\textbf{ to }$n$}
-    \State $M[k,i,j]=\min\{M[k-1,i,j],M[k-1,i,j]+M[k-1,i,k]\}$
+    \State $M[k,i,j]=\min\{M[k-1,i,j],M[k-1,i,k]+M[k-1,k,j]\}$
     \EndFor
     \EndFor
     \EndFor
@@ -2008,6 +2009,82 @@ Vediamo l'algoritmo:
   \end{algorithmic}
 \end{algorithm}
 Abbiamo quindi un tempo pari a $O(n^3)$
+\newpage
+\subsection{Costruzione del Cammino minimo}
+Uno dei metodi per costruire il cammino minimo è partire dalla matrice
+$M[n,\cdot, \cdot]$ e costruire la matrice dei predecessori. Questo
+calcolo viene fatto a partre dalle varie $M[k,\cdot,\cdot]$ definendo
+una matrice $P$ con il seguente caso base:
+\[P[0,i,j]=
+  \begin{cases}
+    i & \mbox{ se }i\neq j\vee w_{i,j}=\infty\\
+    NIL & \mbox{ se }i= j\wedge w_{i,j}<\infty\\
+  \end{cases}
+\]
+mentre per il caso passo si ha:
+\[P[k,i,j]=
+  \begin{cases}
+    P[k-1,i,j] & \mbox{ se }M[k-1,i,j]\leq M[k-1,i,k]+M[k-1,k,j]\\ 
+    P[k-1,i,j] & \mbox{ se }M[k-1,i,j]> M[k-1,i,k]+M[k-1,k,j]\\
+  \end{cases}
+\]
+In pratica controllo a ritroso come ho ottenuto il cammino minimo per
+assegnare il predecessore in base al fatto che ho $k$ come vertice
+intermedio o meno
+\subsection{Chiusura Transitiva di un Grafo Orientato}
+Si vuole determinare l'esistenza di un cammino minimo tra due vertici
+in un grafo orientato $G$.
+\begin{definizione}
+  Si definisce \textbf{chiusura transitiva} di $G$ il grafo
+  $G^{*}=(V,E^{*})$ dove:
+  \[E^{*}=\{(i,j):\mbox{ esiste un cammino dal vertice } i \mbox{ al
+      vertice }j \mbox{ in } G\}\]
+\end{definizione}
+Per calcolare la chiusura transitiva si assegna peso 1 ad ogni arco e,
+alla fine dell'algoritmo se si ha $M[n,i,j]<n$, altrimenti si avrebbe
+$M[n,i,j]=\infty$ (nell'ultima matrice ho un valore sensato).\\
+Si può però risparmiare complessità spaziale e temporale lavorando con
+i booleani egli operatori bitwise, l'\textit{and logico} $\wedge$ e
+l\textit{'or logico} $\vee$. Si ha quindi $M[k,i,j]=1$ se esistse un
+cammino tra $i$ e $j$ con i vertici intermedi nell'insieme
+$\{1,\ldots,k\}$ e $M[k,i,j]=0$ altrimenti.\\
+Si costruisce la chiusura transitiva ponendo l'arco $(i,j)$ in $E^{*}$
+sse $M[n,i,j]=1$ (qundi se ho 1 nell'ultima matrice). Si ha quindi la
+seguente equazione di ricorrenza per il caso base:
+\[M[0,i,j]=
+  \begin{cases}
+    0 & \mbox{ se }i\neq j\wedge (i,j)\not\in E\\
+    1 & \mbox{ se }i= j\vee (i,j)\in E\\
+  \end{cases}
+\]
+col seguente caso passo:
+\[M[k,i,j]=M[k-1,i,j]\vee (M[k-1,i,k)\wedge M[k-1,k,j])\]
+Vediamo l'algoritmo (con costo $O(n^3)$):
+\begin{shaded}
+   \begin{algorithmic}
+    \Function {$FloydWarshallClosure$}{$G$}
+    \For {$i\gets 1$\textbf{ to }$n$}
+    \For {$j\gets 1$\textbf{ to }$n$}
+    \If {$i==j\vee (i,j)\in E$}
+    \State $M[0,i,j]=1$
+    \Else
+    \State $M[0,i,j]=0$
+    \EndIf
+    \EndFor
+    \EndFor
+    \For {$k\gets 1$\textbf{ to }$n$}
+    \For {$i\gets 1$\textbf{ to }$n$}
+    \For {$j\gets 1$\textbf{ to }$n$}
+    \State $M[k,i,j]\gets M[k-1,i,j]\vee (M[k-1,i,k]\wedge M[k-1,k,j])$
+    \EndFor
+    \EndFor
+    \EndFor
+    \State \textit{\# ritorno l'ultima matrice }
+    \State \textbf{return} $M[n]$
+    \EndFunction
+  \end{algorithmic}
+\end{shaded}
+
 \section{Algoritmo di Dijkstra}
 Questo algoritmo risolve il problema dei cammini minimi con sorgente
 singola su un grafo orientato e pesato $G=(V,E)$ con pesi non
@@ -2302,7 +2379,7 @@ Si ha quindi l'algortimo generico:
     \Function {$Generic\_MST$}{$G,w$}
     \State $A\gets \emptyset$
     \While {\textit{A non forma un albero di copertura minima}}
-    \State \textit{seleziona un arco} $a\inE$ \textit{sicuro per} $A$
+    \State \textit{seleziona un arco} $a\in E$ \textit{sicuro per} $A$
     \State $A\gets A\cup \{a\}$
     \EndWhile
     \State \textbf{return} $A$
@@ -2369,8 +2446,10 @@ in input $G=(V,E)$:
   \end{algorithmic}
 \end{algorithm}
 Avendo un grafo connesso si ha che $|E|\geq |V|-1$. L'inizializzazione
-richeide $O(|V|)$, l'ordinamento $O(|E|\log |E|)$ quindi il tempo
-totale è $O(|E|\log |E|)$
+richiede $O(|V|)$, l'ordinamento $O(|E|\log |E|)$ quindi il tempo
+totale è $O(|E|\log |E|)$. D'altro canto $|E|<|V|^2$ quindi $\log
+(|E|)=O(\log |V|)$ quindi si ha che il tempo dell'algoritmo è
+scrivibile come $O(|E|\log |V|)$ 
 \chapter{Problemi di Flusso Massimo}
 \textbf{Rivedere profondamente}\\
 Partiamo con la seguente definizione:

@@ -39,10 +39,9 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 
 
 ##### III anno
-- [ ] Analisi e Progetto di Algoritmi (obbligatorio)
+- [x] Analisi e Progetto di Algoritmi (obbligatorio)
 - [ ] Elementi di Bioinformatica
-- [ ] Programmazione C++
-- [ ] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (temporaneamente interrotti)
+- [x] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (con assignment)
 
 
 ### Altro

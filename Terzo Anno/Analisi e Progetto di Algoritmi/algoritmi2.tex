@@ -1412,14 +1412,15 @@ Per tenere traccia del lavoro all'inizio si ``colora'' di
 \textbf{grigi} o \textbf{neri}. La prima volta che un vertice viene
 visitato smette di essere bianco. Inoltre vengono distinti i vertici
 già visitati tra grigi e neri. Se $e(u,v)\in E$ e $u$ è nero allora
-$b$ è grigio o nero. Ovvero tutti i vertici adiacenti a quelli neri
+$v$ è grigio o nero. Ovvero tutti i vertici adiacenti a quelli neri
 sono già stati scoperti, invece un vertice grigio può avere vertici
 non ancora scoperti, quindi bianchi, come vertici adiacenti. Quando un
 vertice bianco $v$ viene scoperto durante la scansione della lista
 di adiacenza di un vertice $u$ già scoperto vengono aggiunti
 all'albero sia $v$ che $e(u,v)$. In questo caso $u$ è \textbf{padre o
   predecessore} di $v$ nel BFS tree. Dato un vertice viene scoperto
-una sola volta si ha che nell'albero ogni vertice ha un solo vertice.
+una sola volta si ha che nell'albero ogni vertice ha un solo vertice
+predecessore. 
 \newpage
 Vediamo l'algortimo:
 \begin{algorithm}[H]
@@ -1445,7 +1446,6 @@ Vediamo l'algortimo:
     \State $enqueue(Q,v)$
     \EndIf
     \EndFor
-    \State $dequeue(u)$
     \State $color[u]\gets black$ 
     \EndWhile
     \EndFunction
@@ -1455,13 +1455,13 @@ Questo metodo assume che il grafo in input sia rappresentato con liste
 di adiacenza che mantiene diverse strutture dati addizionali associate
 ad ogni vertice. Con $color$ si memorizza il colore, con $p$ il
 predecessore (che può non esserci venendo settato a $NIL$) e con $d$
-si salva la distanza dal sorgente $s$. Si usa anche unda queue $Q$ per
+si salva la distanza dal sorgente $s$. Si usa anche una queue $Q$ per
 gestire l'insieme dei vertici grigi.\\
 % aggiungere immagine pagina 237
 Analizziamo meglio l'algortimo:
 \begin{itemize}
   \item le righe dalla 2 alla 5 colorano tutti i vertici di bianco,
-  settando la distanza ad un valore simbolico, per esmepio $\infty$ e
+  settando la distanza ad un valore simbolico, per esempio $\infty$ e
   il predecessore a $NIL$
   \item la riga 6 colora di grigio il sorgente $s$, che viene infatti
   ``scoperto'' subito. Di conseguenza alla riga 7 si setta a 0 il
@@ -1469,7 +1469,7 @@ Analizziamo meglio l'algortimo:
   si setta il predecessore a $NIL$ (in quanto il sorgente non ha
   predecessori)
   \item la riga 9 inizializza la queue $Q$ e alla riga 10 si inserisce
-  $s$ in qaunto vertice grigio
+  $s$ in quanto vertice grigio
   \item tra le righe 11 e 19 si ha il ciclo principale
   dell'algoritmo. Il ciclo termina quando non si hanno più vertici
   grigi (vertici già scoperti le cui liste di adiacenza non sono
@@ -1481,15 +1481,16 @@ Analizziamo meglio l'algortimo:
   linee 15 e 17, colorandolo, e settando la distanza come quella   del
   vertice grigio, che lo ha in lista e quindi è anche il
   predecessore, +1. Viene infine posto in fondo alla queue.
-  \item infine alla riga 19 si toglie il vertice grigio dalla coda, lo
-  si ``colora'' di nero nella riga 20 e si riprende a ciclare
+  \item infine alla riga 19 si ``colora'' di nero il vertice $u$ in
+  quanto si sono scoperti tutti i vertici adiacenti e si
+  riprende a ciclare fino ad esaurimento della coda
 \end{itemize}
 Analizziamo il codice ipotizzando un grafo in input $G=(V,E)$
 Dal codice si capisce che ogni vertice viene inserito (e quindi anche
 eliminato) al massimo una volta nella coda. Le operazioni di
 inseriemnto e di eliminazione da una coda hanno costo $O(1)$, quindi
 il tempo per le operazioni sulla coda è $O(V)$. Sapendo che la somma
-delle lunghezze di tutte le liste di adiancenza è $E$ il tempo masismo
+delle lunghezze di tutte le liste di adiancenza è $E$ il tempo massimo
 per la scansione totale delle liste è $O(E)$. Quindi il tempo totale
 per la procedura \textit{BFS} è un tempo lineare:
 \[O(E+V)\]
@@ -1561,13 +1562,13 @@ i vertici distanti $k$ da $s$:
 Vediamo ora un algoritmo che stabilisce se un grafo sia connesso
 (\textit{per ogni coppia di vertici esiste un cammino, relazione di
   raggiungibilità simmetrica})
-\begin{algorithm}
+\begin{algorithm}[H]
   \begin{algorithmic}
     \Function {$is-connected$}{$G$}
     \State $s\gets random(V)$
     \State $BFS(G, S)$
     \For {$v\in V$}
-    \If $color[v]==white$
+    \If {$color[v]==white$}
     \State \textbf{return }$false$
     \Else
     \State \textbf{return }$true$

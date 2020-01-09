@@ -1154,7 +1154,6 @@ Vediamo ora l'algoritmo ($n$ è il numero di oggetti):
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
-\chapter{Programmazione Greedy}
 \section{Subset Sum}
 Sia dato un insieme di oggetti $X_n=\{1,\ldots, n\}$, ognuno con un
 certo valore $v_i$. Si ricerca un sottoinsieme che come somma dei
@@ -1179,7 +1178,7 @@ ha:
 Cerchiamo ora la soluzione. Se $M[n,k]=0$ allora non esiste nessun
 sottoinsieme di valore $k$. Invece se $M[n,k]=1$ bisogna risalire la
 matrice per trovare gli elementi appartenetenti alla soluzione.\\
-\newpage
+
 Quindi si avrà:
 \begin{algorithm}[H]
   \begin{algorithmic}
@@ -1196,6 +1195,8 @@ Quindi si avrà:
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
+\chapter{Programmazione Greedy}
+
 \section{Knapsack frazionario}
 Vediamo ora un esempio di \textbf{programmazione greedy}, ricordando
 che questa tecnica:
@@ -1343,6 +1344,20 @@ soluzione con la programmazione greedy. Questo strumento è detto
   \textbf{Un sistema di indipendenza
     ha una soluzione ottima greedy se e solo se esso è un matroide.}
 \end{definizione}
+Si elencano ora due esempi:
+\begin{esempio}
+  Sia $E$ un insieme finito di vettori in uno spazio vettoriale
+  $V$. Sia $F$ la famiglia di sottoinsiemi di $E$ formati da vettori
+  linearmente indipendenti. SI ha che $<E,F>$ forma un matroide, detto
+  \textit{matroide vettoriale}
+\end{esempio}
+\begin{esempio}
+  Sia $G$ un grafo non orientato con $E$ insieme degli archi. Un
+  sottoinsieme $X\subseteq E$ è detto indipendente se non forma cicli
+  in $G$, quindi se $X$ forma una foresta contenuta in $G$. Sia quindi
+  $F$ la famiglia di tali insiemi indipendenti. Si ha che $<E,F>$ è un
+  matroide, detto \textit{matroide grafico}
+\end{esempio}
 \subsection{Teorema di Rado}
 \begin{teorema}
   $<E,F>$ è matroide sse $\forall w:E\to \mathbb{R}^+$ l'algortimo
@@ -1351,7 +1366,74 @@ soluzione con la programmazione greedy. Questo strumento è detto
 \textbf{Dire che un problema non è un matroide, vuol dire
   che non tutte le funzioni peso sono associabili a un algoritmo
   greedy. Non significa che per nessun obiettivo non esiste mai un
-  algoritmo greedy che produce la soluzione ottima}
+  algoritmo greedy che produce la soluzione ottima}\\
+\subsection{Problemi di Ottimizzazione}
+Considero un insieme finito $E$ e una famiglia di sottoinsiemi $F$ di
+$E$, tale che $F\subseteq 2^E$ che forma un \textbf{ideale d'ordine}
+rispetto all'inclusione, ovvero:
+\[A\inF\wedge B\subseteq A\Rightarrow B\in F\]
+Si ha quindi che $<E,F>$ è un sistema di indipendenza.\\
+Sia ora $\mathbb{R}^{+}$ l'insieme dei reali non negativi e sia
+definita una funzione peso $w:E\to\mathbb{R}^{+}$. Tale funzione può
+essere estesa ai sottoinsiemi di $E$, ponendo $\forall A\subseteq E$:
+\[w(A)=\sum_{x\in A}w(x)\]
+Ho quindi gli strumenti per formulare il mio problema di
+ottimizzazione:
+\begin{itemize}
+  \item \textbf{istanza:} un sistema di indipendenza $<E,F>$ e una
+  funzione peso $w:E\to\mathbb{R}^{+}$
+  \item \textbf{soluzione:} un insieme $M\in F$ tale che $w(M)$ sia
+  massimo, ovvero tale che:
+  \[A\in F\Rightarrow w(A)\leq w(M)\]
+\end{itemize}
+\newpage
+Si ha quindi il seguente algoritmo greedy:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{$greedy$}{$E,F,w$}
+    \State $S\gets \emptyset$
+    \State $Q\gets E$
+    \While {$Q\neq \emptyset$}
+    \State \textit{si determina l'elemento m di peso massimo in Q}
+    \State $Q\gets Q\backslash\{m\}$
+    \If {$(S\cup \{m\})\in F$}
+    \State $S\gets S\cup \{m\}$
+    \EndIf
+    \EndWhile
+    \State \textbf{return} $S$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+Si ritorna quindi un insieme $S$ che sicuramente appartiene a $F$ e
+quindi è una soluzione ammissibile ma che contemporaneamente non è
+necessariamente l'ottimo, non rappresentando un insieme di peso
+massimo in $F$.\\
+Per studiare meglio la procedura, rappresento l'insieme
+$E=\{l_1,\ldots,l_n\}$ con un vettore $Q=(Q[1],\ldots,Q[n])$, dove,
+inizialmente si ha $Q[i]=l_i$. Si ha quindi una funzione $SORT(Q)$
+che ordina il vettore in modo che i pesi degli archi siano in ordine
+non crescente. Riscriviamo quindi una semplificazione dell'algoritmo:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{$greedy$}{$E,F,w$}
+    \State $S\gets \emptyset$
+    \State $Q\gets (l_1,\ldots,l_2)$
+    \State $Q\gets SORT(Q)$
+    \For {$i\gets 1$\textbf{ to }$n$}
+    \If {$(S\cup Q[i])\in F$}
+    \State $S\gets S\cup Q[i]$
+    \EndIf
+    \EndFor
+    \State \textbf{return} $S$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+Ho quindi un ordinamento in tempo $O(n\log n)$ e il test, ripetuto $n$
+volte, per verificare che $X\in F$ che ha tempo fortemente dipendente
+dal sistema di indipendenza. Supponendo che $X\in F$ si verifichi in
+un tempo $C(n)$ si ha che il ciclo for ha tempo $O(n\cdot C(n))$ e
+quindi l'intero algoritmo costa al più:
+\[O(n\log n+n\cdot C(n)\]
 \chapter{Grafi}
 Ci occupiamo ora della risoluzione di quei problemi che possono essere
 ricondotti ad un grafo per essere risolti.

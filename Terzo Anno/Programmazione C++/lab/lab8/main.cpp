@@ -147,9 +147,10 @@ void test_list_int(olint &other) {
   std::cout<<"Stampa con iteratori"<<std::endl;
 
   olint::const_iterator i,ie;
-
-  for(i=other.begin(),ie=other.end(); i!=ie; ++i)
-    std::cout<<*i<<std::endl;
+  i=other.begin();
+  std::cout << *i;
+    for(i=other.begin(),ie=other.end(); i!=ie; ++i)
+      std::cout<<*i<<std::endl;
 
   other.clear();
   std::cout<<"Dimensione della lista dopo clear(): "<<other.get_size()

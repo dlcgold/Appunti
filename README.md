@@ -42,7 +42,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Analisi e Progetto di Algoritmi (obbligatorio)
 - [ ] Elementi di Bioinformatica
 - [x] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (con assignment)
-
+- [ ] Metodi Formali (in corso)
 
 ### Altro
 Suggeriamo queste repository open:

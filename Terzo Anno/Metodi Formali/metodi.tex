@@ -86,9 +86,9 @@
 \textbf{Grazie mille e buono studio!}
 \section{Contenuti del Corso}
 \textit{Il corso tratta di metodi e tecniche formali per specificare, disegnare e
-analizzare sistemi complessi, in particolare sistemi concorrenti e distribuiti
-costituiti da componenti che operano in modo indipendente e che interagiscono
-tra loro.} \\ \\
+  analizzare sistemi complessi, in particolare sistemi concorrenti e distribuiti
+  costituiti da componenti che operano in modo indipendente e che interagiscono
+  tra loro.} \\ \\
 Si usa un linguaggio logico che spiega il comportamento di tali sistemi e fa
 riferimento alla \textbf{logica temporale} di tali sistemi, in quanto le
 proprietà di tali sistemi sono tali per cui evolvono con il cambiamento di stato
@@ -180,25 +180,25 @@ letteratura:
 \end{itemize}
 \subsubsection{Sistemi di Transizioni Etichettati}
 \begin{definizione}
-I sistemi di transizione etichettati sono definiti come gli automi a stati
-finiti ma senza essere visti come riconoscitori di linguaggi infatti un sistema
-è formato da un insieme, solitamente finito, di stati globali $S$. Si ha poi un
-\textit{alfabeto} delle possibili azioni che può eseguire il sistema. Si hanno
-anche delle relazioni di transizioni, ovvero delle transizioni che permettono di
-specificare come, attraverso un'azione, si passa da uno stato ad un altro. Le
-transizioni si rappresentano con archi etichettati tra i nodi, che rappresentano
-gli stati. Le etichette degli archi rappresentano le azioni necessarie alla
-trasformazione. L'insieme delle azioni viene chiamato $E$ mentre $T\subseteq
-S\times E\times S$ è l'insieme degli archi etichettati. Può essere,
-opzionalmente, individuato uno stato iniziale $s_0$. Un sistema non è obbligato
-a ``terminare'', quindi non si ha obbligatoriamente uno stato finale.\\
-Riassumendo quindi un sistema di transizione etichettato è un quadrupla:
-\[A=(S,E,T,s_0)\]
-\begin{figure}[H]
-  \centering
-  \includegraphics[scale = 0.5]{img/ste.jpg}
-  \caption{Esempio di sistema di transizione etichettato}
-\end{figure}
+  I sistemi di transizione etichettati sono definiti come gli automi a stati
+  finiti ma senza essere visti come riconoscitori di linguaggi infatti un sistema
+  è formato da un insieme, solitamente finito, di stati globali $S$. Si ha poi un
+  \textit{alfabeto} delle possibili azioni che può eseguire il sistema. Si hanno
+  anche delle relazioni di transizioni, ovvero delle transizioni che permettono di
+  specificare come, attraverso un'azione, si passa da uno stato ad un altro. Le
+  transizioni si rappresentano con archi etichettati tra i nodi, che rappresentano
+  gli stati. Le etichette degli archi rappresentano le azioni necessarie alla
+  trasformazione. L'insieme delle azioni viene chiamato $E$ mentre $T\subseteq
+  S\times E\times S$ è l'insieme degli archi etichettati. Può essere,
+  opzionalmente, individuato uno stato iniziale $s_0$. Un sistema non è obbligato
+  a ``terminare'', quindi non si ha obbligatoriamente uno stato finale.\\
+  Riassumendo quindi un sistema di transizione etichettato è un quadrupla:
+  \[A=(S,E,T,s_0)\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/ste.jpg}
+    \caption{Esempio di sistema di transizione etichettato}
+  \end{figure}
 \end{definizione}
 La critica di Petri è che in un sistema distribuito non sia individuabile uno
 \textbf{stato globale}, che in un sistema distribuito le trasformazioni di stato
@@ -234,7 +234,56 @@ semplice e astratta partiamo da un esempio:
   devono essere vere per permettere l'occorrenza dell'evento). L'occorrenza
   dell'evento rende false le precondizioni e rende vere le
   \textit{postcondizioni} (che sono stati raggiungibili con un arco uscente da
-  un evento). 
-  %3.01
+  un evento). Si ha quindi che il produttore può depositare solo se il buffer
+  non è pieno, quindi le postcondizioni di un evento devono essere false
+  affinché l'evento possa occorrere (oltre alle precondizioni vere).\\
+  Passiamo al consumatore che estrae solo se il buffer è pieno ed è pronto a
+  prelevare. Si procede poi con la stessa logica del produttore di cambiamento
+  tra vero e falso delle varie condizioni locali.\\
+  In questo esempio si hanno quindi condizioni che sono preposizioni booleane e
+  rappresentano stati locali.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/prod.jpg}
+    \caption{Produttore e Consumatore}
+  \end{figure}
+  Lo stato globale del sistema è dato da una
+  collezione di stati locali. Per segnare tali condizioni mettiamo un punto
+  pieno dentro il cerchio e queste condizioni ``abilitano'' i vari eventi:
+  \begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.7]{img/prod1.jpg}
+    \caption{Uno stato globale Produttore e Consumatore dove l’evento\textit{
+        produce} è l’unico abilitato} 
+  \end{figure}
+  Si può arrivare ad una \textit{configurazione} dove, per esempio, sia l'evento
+  \textit{produce}, del produttore, che l'evento \textit{preleva}, del
+  consumatore, sono abilitati. Si ha quindi che i due eventi possono occorrere
+  in modo \textbf{concorrente} infatti i due eventi sono \textbf{indipendenti}
+  in quanto condizionati da \textbf{precondizioni e postcondizioni completamente
+    disgiunte}. Due eventi che occorrono in maniera concorrente lo possono fare in
+  qualsiasi ordine, non si ha infatti una sequenza temporale specifica tra i
+  due. \\
+  In questo sistema quindi siano solo stati locali ed eventi localizzati e non
+  stati ed eventi globali. Un evento dipende solo dalle sue precondizioni e
+  dalle sue postcondizioni.\\
+  \textit{Se rappresentiamo con delle marche le condizioni vere possiamo
+    simulare il comportamento del sistema con il \textit{gioco delle marche} che
+    mostra come l'evoluzione delle condizioni avviene all'occorrenza degli
+    eventi.} \\
+  La simula di un tale sistema può comunque avvenire con un sistema di
+  transizioni etichettato, ovvero con un automa a stati finiti, che rappresenta
+  gli stati globali corrispondenti alle diverse combinazioni di stati locali che
+  di volta in volta sono veri. Gli archi vengono etichettati con gli eventi che
+  comportano un cambiamento di stato globale:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/prod3.jpg}
+    \caption{Semplificazione della nomenclatura del sistema per praticità}
+    \includegraphics[scale = 0.8]{img/prod2.jpg}
+    \caption{Rappresentazione del sistema con un automa a stati finiti che
+      rappresenta stati globali}
+  \end{figure}
 \end{esempio}
 \end{document}
+

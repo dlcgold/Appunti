@@ -361,7 +361,7 @@ una per il buffer.\\
 \end{definizione}
 \begin{definizione}
   Sia $N=(B,E,F)$ una rete elementare e sia $c\subseteq B$ una certa
-  configurazione (n0on serve quindi necessariamente conoscere tutto lo stato del
+  configurazione (non serve quindi necessariamente conoscere tutto lo stato del
   sistema). La \textbf{regola di scatto} mi permette di stabilire quando
   un evento $e\in E$ è abilitato, ovvero può occorrere, in $c$ sse:
   \[^\bullet e\subseteq c \mbox{ e } e^\bullet \cap c = \emptyset\]
@@ -371,7 +371,117 @@ una per il buffer.\\
   configurazione). \\
   L'occorrenza (l'abilitazione) di $e$ in $c$ si denota con la scrittura:
   \[c[e >\]
-  %8.55
+  Se un evento $e$ è abilitato in $c$, ovvero $c[e >$, si ha che quando $e$
+  occorre in $c$ genera un nuovo caso $c'$ e si usa la notazione:
+  \[c[e > c'\]
+  Si ha quindi che $c'$ è così calcolabile:
+  \[c'=(c-^\bullet e)\cup e^\bullet\]
+  Ovvero togliendo da $c$ tutte le precondizioni dell'evento $e$ e aggiungendo
+  quindi tutte le postcondizioni di $e$
 \end{definizione}
+Le reti si basano sul \textbf{principio di estensionalità}, ovvero sul fatto che
+il cambiamento di stato è locale:
+\begin{center}
+  \textit{un evento è completamente caratterizzato dai cambiamenti che produce
+    negli stati locali, tali cambiamenti sono indipendenti dalla particolare
+    configurazione in cui l’evento occorre.}
+\end{center}
+L'importante è che le precondizioni di un evento siano vere e le postcondizioni
+false (siamo comunque interessati solo alla validità delle condizioni che
+riguardano l'evento).
+\newpage
+\begin{esempio}
+  Vediamo un esempio esplicativo dove l’evento $e$ è l'unico abilitato, ovvero
+  le sue precondizioni sono vere e le sue postcondizioni sono false.\\
+  Lo scatto di $e$ rende le precondizioni false e le postcondizioni vere,
+  mentre le altre condizioni rimangono inalterate:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/est.jpg}
+  \end{figure}
+  Si nota quindi che lo scatto dell'evento $e$ riguarda solo le precondizioni e
+  le postcondizioni di quel dato evento, come ci ricorda il principio di
+  estensionalità 
+\end{esempio}
+\begin{definizione}
+  Sia $N=(B,E,F)$ una rete elementare. Possiamo definire due tipologie di rete:
+  \begin{enumerate}
+    \item $N$ è definita \textbf{semplice} sse:
+    \[\forall x,y \in B\cup E,\,\, (^\bullet x = ^\bullet y)\wedge (x^\bullet =
+      y^\bullet)\Rightarrow x = y\]
+    Ovvero per ogni coppia di elementi (che siano quindi eventi o condizioni) se
+    i loro pre-elementi e i loro post-elementi coincidono allora non ha senso
+    distinguere $x$ e $y$.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.5]{img/sem.jpg}
+      \caption{Esempi di reti \textbf{non} semplici}
+    \end{figure}
+    \newpage
+    \item $N$ è definita \textbf{pura} sse:
+    \[\forall e \in E:\,\,^\bullet e \cap e^\bullet = \emptyset\]
+    Ovvero se per ogni evento non esiste una precondizione che sia anche
+    postcondizioni. Si ha quindi un \textbf{cappio} (detto anche \textbf{side
+      condition}) tra un evento e una condizione. Avere questa situazione
+    comporta che l'evento non può scattare in quanto la condizione che per lui è
+    sia una precondizione che una postcondizioni non può essere
+    contemporaneamente vera e falsa, l'evento non potrà mai scattare e quindi
+    non potrà mai essere osservato. Non avrebbe quindi senso modellarlo
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.5]{img/pura.jpg}
+      \caption{Esempio di rete \textbf{non} pura}
+    \end{figure}
+  \end{enumerate}
+\end{definizione}
+\begin{definizione}
+  Data una rete elementare $N=(B,E,F)$ e sia $U \subseteq E$ un sottoinsieme di
+  eventi e siano $c,c_1,c_2\in B$ tre configurazioni. Si ha che:
+  \begin{itemize}
+    \item $U$ è un \textbf{insieme di eventi indipendenti} sse:
+    \[\forall e_1,e_2\in U:\,\,e_1\neq e_2\Rightarrow (^\bullet e_1\cup
+      e_1^\bullet)\cap  (^\bullet e_2\cup e_2^\bullet) = \emptyset\]
+    ovvero per ogni coppia distinta di eventi nell'insieme $U$ si ha che le
+    precondizioni e le postcondizioni dei due eventi sono completamente
+    disgiunte.
+    \item $U$ è un \textbf{passo abilitato}, ovvero un insieme di \textit{eventi
+      concorrenti} in una certa configurazione $c$, che si indica con:
+    \[c[U>\]
+    sse:
+    \[U \mbox{ è un insieme di eventi indipendenti } \wedge\,\, \forall e\in
+      U:\,\, c[e>\]
+    $U$ quindi deve essere un insieme di eventi indipendenti e ogni evento in
+    $U$ è abilitato in $c$, quindi le sue precondizioni sono vere e le sue
+    postcondizioni sono false. Si ha quindi che $U$ è un insieme di eventi
+    abitati in maniera concorrente in $c$
+    \item $U$ è un \textbf{passo} dalla configurazione $c_1$ alla configurazione
+    $c-2$, che si indica con:
+    \[c_1[U > c_2\]
+    sse:
+    \[(c_1[U) \wedge \Big(c_2=(c_1-^\bullet U)\cup U^\bullet\Big)\]
+    ovvero sse $U$ è un passo abilitato in $c_1$ e lo scatto degli eventi in $U$
+    porta alla configurazione $c_2$ che si ottiene togliendo da $c_1$ l'insieme
+    delle precondizioni degli eventi in $U$ e aggiungendo quindi l'insieme delle
+    postcondizioni degli eventi in $U$
+  \end{itemize}
+\end{definizione}
+\begin{esempio}
+  Riprendiamo l'esempio del produttore e del consumatore.\\
+  Sia dato il sistema $\Sigma$ che modella produttore e consumatore
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/prod5.jpg}
+  \end{figure}
+  Si hanno:
+  \begin{itemize}
+    \item $\{p,e\},\{p,c\},\{d,c\}$ esempi di insiemi di eventi indipendenti
+    \item $\{p,e\}$ che è un passo abilitato in $\{P_1,B,C_1\}$
+    \item $\{P_1,B,C_1\}[\{p,w\}>\{P_2,C_2\}$ ovvero lo scatto del passo
+    $\{p,e\}$ ci porta in $\{P_2,C_2\}$
+  \end{itemize}
+\end{esempio}
 \end{document}
 
+
+% LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem
+% LocalWords:  side condition prod

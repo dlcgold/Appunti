@@ -517,9 +517,238 @@ Diamo ora una definizione formale di \textbf{sistema elementare}.
   raggiungibili in $C_\Sigma$ e $U$ è abilitato in $c$ e il suo scatto mi porta
   in $c'$.
 \end{definizione}
-% 4.27
+Definiamo ora il comportamento dei sistemi elementari.
+\begin{definizione}
+  Sia $\Sigma=(B,E,F;c_{in})$ un sistema elementare e siano $c_i\in C_\Sigma$ ed
+  $e_i\in E$.\\
+  Definiamo;
+  \begin{itemize}
+    \item un \textbf{comportamento sequenziale} come una sequenza di eventi che
+    possono occorrere dal caso iniziale. Facendo scattare in maniera sequenziale
+    gli eventi uno alla volta in $c_n$:
+    \[c_{in} [e_1 > c_1 [e_2 > \ldots[e_n > c_n\]
+    Scrittura che può essere alleggerita in:
+    \[c_{in} [e_1 e_2 \ldots e_n > c_n\]
+    Possiamo dire di avere a che fare con una \textbf{simulazione sequenziale
+      non deterministica, detta anche \textit{semantica a interleaving}},
+    infatti ho più eventi abilitati da prendere uno alla volta
+    \item un \textbf{comportamento non sequenziale}, in quanto possiamo anche
+    considerare insiemi di eventi, ovvero passi. Considero quindi sequenze di
+    passi, avendo a che fare con la \textbf{step semantics}. Non ho quindi una
+    simulazione sequenziale non deterministica in quanto dal caso iniziale
+    faccio scattare un insieme di eventi, in maniera concorrente (e quindi senza
+    ordine specificato), per poi far scattare un altro insieme di eventi fino ad
+    arrivare a $c_n$: 
+    \[c_{in} [U_1 > c_1 [U_2 > \ldots [U_n > c_n\]
+    Scrittura che può essere alleggerita in:
+    \[c_{in} [U_1 U_2 \ldots U_n > c_n\]
+    Gli insiemi $U_i$ non sono insiemi massimali abilitati ma sottoinsiemi
+    indipendenti e abilitati in $c_{in}$.\\
+    Posso avere anche un altro tipo di \textbf{comportamento non sequenziale},
+    definito da Petri stesso, in una \textbf{semantica ad ordini parziali} in
+    cui si definiscono processi non sequenziali. Il comportamento di tale
+    sistema viene registrato in una rete di Petri
+  \end{itemize}
+  In ogni caso si considerano sia sequenze finite che infinite (con cicli) di
+  eventi o passi. 
+\end{definizione}
+\newpage
+\begin{esempio}
+  Dato il sistema elementare $\Sigma$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/seq.jpg}
+  \end{figure}
+  si ha, per esempio, la seguente sequenza di occorrenza di eventi:
+  \[\{1, 2\}[a > \{3, 2\}[b > \{3, 4\}[c > \{1, 2\}[b > \{1, 4\}[d > \{5\}\]
+  arrivati in ``5'' abbiamo un caso finale, ovvero una situazione di
+  \textbf{deadlock}, in quanto il sistema non può evolvere ulteriormente.\\
+  Vediamo anche la seguente possibile sequenza di passi. In ``1'' e ``2'' sia
+  ``a'' che ``b'' sono indipendenti e sono entrambi abilitati (scattano in
+  maniera concorrente in un unico passo$\ldots$ ovviamente posso avere passi con lo
+  scatto di un solo evento):
+  \[\{1, 2\}[\{a, b\} > \{3, 4\}[\{c\} > \{1, 2\}[\{b\} > \{1, 4\}\]
+  Come ricordato posso finire in una sequenza infinita.
+\end{esempio}
+Vediamo ora come modellare e registrare il comportamento del sistema. Un modo è
+usando il \textbf{grafo dei casi raggiungibili}.
+\begin{definizione}
+  Il \textbf{grafo dei casi raggiungibili} di un sistema elementare
+  $\Sigma=(B,E,F;c_{in})$ è il sistema di transizioni etichettato:
+  \[CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})\]
+  dove:
+  \begin{itemize}
+    \item $C_\Sigma$ è l'insieme dei nodi del grafo, ovvero gli stati globali
+    sono i casi raggiungibili dal sistema $\Sigma$    
+    \item $U\Sigma$, è l'alfabeto, ovvero i passi del sistema rappresentano
+    l'alfabeto 
+    \item $A$ è l'insieme di archi etichettati, formalmente definito come:
+    \[A=\{(c,U',c')|\,c,c'\in C_\Sigma, U\in U_\Sigma, c[U>c']\}\]
+    ovvero sono archi che connettono uno caso $c$ con un caso $c'$ e sono
+    etichettati con un passo $U$ sse $U$ è abilitato in $c$ e porta in
+    $c'$. Ovviamente $c$ e $c'$ sono devono essere raggiungibili e $U$ deve
+    appartenere all'insieme dei passi di $\Sigma$
+  \end{itemize} 
+\end{definizione}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/seq1.jpg}
+  \caption{il sistema $\Sigma$}
+  \includegraphics[scale = 0.5]{img/seq2.jpg}
+  \caption{Grafo dei casi del sistema $\Sigma$}
+\end{figure}
+\newpage
+\subsection{Diamond Property}
+Dato un sistema elementare $\Sigma = (B,E,F,c_{in})$ e il suo grafo dei casi
+$CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})$ si ha 
+che il grafo soddisfa una particolare proprietà, detta \textbf{diamond
+  property}, tipica solo dei sistemi elementari.
+\begin{definizione}
+  La \textbf{diamond property} stabilisce una proprietà della struttura del
+  grafo della rete elementare, ovvero, dati $U_1,U_2\in U_\Sigma$ tali che:
+  \begin{itemize}
+    \item $U_1\cap U_2=\emptyset$
+    \item $U_1\neq\emptyset$
+    \item $U_2\neq\emptyset$
+  \end{itemize}
+  e dati $c_i\in C_\Sigma$ allora vale, per esempio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/diam.jpg}
+  \end{figure}
+  ovvero se posso rilevare come sottografo una struttura come quella a sinistra
+  nell'immagine allora sicuramente tale sottografo contiene anche l'arco gli
+  archi per ottenere l'immagine di destra. Il discorso vale anche all'opposto.
+\end{definizione}
+Si possono fare delle prove:
+\begin{enumerate}
+  \item \textbf{prima prova:}\\
+  Dimostriamo che possiamo passare all'immagine di destra da quella di sinistra
+  aggiungendo i due archi mancanti.\\
+  Per semplicità diciamo che $U_i$ è un singolo evento $e_i$, con $i=1,2$. Siano
+  inoltre $c_1,c_2\in C_\Sigma$, ovvero sono casi raggiungibili, ed $e_1,e_2\in
+  E$ tali che $c_1 [e_1 > c_2 [e_2 > \mbox{ e } c_1 [e_2 >$, i due eventi quindi
+  sono abilitati in sequenza e da $c_1$ è anche abilitato $c_2$ . Si vuole
+  dimostrare che: 
+  \[(^\bullet e_1\cup e_1^\bullet)\cap(^\bullet e_2\cup e_2^\bullet)=\emptyset\]
+  ovvero che i due eventi sono indipendenti, che sono entrambi abilitati e che
+  sono eseguibili in qualsiasi ordine.
+  \newpage
+  Da $c_1 [e_1 > \mbox{ e }c_1 [e_2 >$ segue che:
+  \begin{itemize}
+    \item $^\bullet e_1\cap e_2^\bullet=\emptyset$
+    \item $^\bullet e_2\cap e_1^\bullet=\emptyset$
+  \end{itemize}
+  infatti se $e_1$ e $e_2$ sono entrambi abilitati in $c_1$, le loro
+  pre-condizioni sono vere e le post-condizioni false, e quindi non è possibile
+  che una condizione sia contemporaneamente precondizione di $e_1$ (vera) e
+  anche postcondizione di $e_2$ (falsa), e viceversa. Quindi le precondizioni
+  di un evento sono disgiunte dalle postcondizioni dell'altro.\\
+  Inoltre dal fatto che ho $c_1 [e_1 > c_2 [e_2$, ovvero che da $c_1$ è
+  abilitato $e_1$ e che dopo lo scatto di $e_1$ è ancora abilitato $e_2$
+  possiamo dire che:
+  \begin{itemize}
+    \item $e_1^\bullet\cap e_2^\bullet=\emptyset$
+    \item $^\bullet e_1\cap\, ^\bullet e_2=\emptyset$
+  \end{itemize}
+  in $c_2$, infatti, le pre-condizioni di $e_1$ sono false mentre le
+  precondizioni di $e_2$ sono vere e quindi $e_1$ e $e_2$ non possono avere
+  precondizioni in comune; inoltre sempre in $c_2$ le postcondizioni di $e_1$
+  sono vere, mentre quelle di $e_2$ sono false, e quindi $e_1$ e $e_2$ non
+  possono avere post-condizioni in comune. Quindi le precondizioni dei due
+  eventi sono disgiunte, come del resto anche le postcondizioni, in quanto i due
+  eventi sono sequenziali.\\
+  Si è quindi dimostrato che i due eventi hanno precondizioni e postcondizioni
+  completamente disgiunte e quindi la tesi è verificata
+  \item \textbf{seconda prova:}\\
+  Analizzando la situazione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.45]{img/diam2.jpg}
+  \end{figure}
+  \newpage
+  Si supponga che $U_1\cup U_2\in U_\Sigma$ e che si abbiano:
+  \begin{itemize}
+    \item $U_1\cap U_2=\emptyset$, ovvero sono disgiunti
+    \item $U_1\neq\emptyset$
+    \item $U_2\neq\emptyset$
+  \end{itemize}
+  allora se $c_1[(U_1\cup U_2)>c_3$, quindi è abilitato il passo $U_1\cup U_2$
+  in $c_1$, sicuramente si ha che sono abilitati anche i singoli passi:
+  \begin{itemize}
+    \item $c_1[U_1>$
+    \item $c_1[U_2>$
+  \end{itemize}
+  resta da dimostrare che dopo lo scatto di $U_1$ è ancora abilitato $U_2$ in
+  $c_2$. Ma se $U_1\cup U_2$ è un passo abilitato significa che posso eseguirli
+  in qualsiasi ordine, quindi anche prima $U_1$ e poi $U_2$, e questo comporta
+  sicuramente che $U_2$ è abilitato e che porta a $c_3$. Analogamente invertendo
+  $U_1$ e $U_2$, formalmente: 
+  \begin{itemize}
+    \item $c_1[U_1>c_2[U_2>c_3$
+    \item $c_1[U_2>c_4[U_1>c_3$
+  \end{itemize}
+  Si dimostra così che l'immagine di sinistra comporta quella di destra.
+\end{enumerate}
+Grazie alla diamond property possiamo non considerare il grafo dei casi
+raggiungibili ma solo il \textbf{grafo dei casi sequenziale}:
+\begin{definizione}
+  Un \textbf{grafo dei casi sequenziale} del sistema elementare
+  $\Sigma=(B,E,F,c_{in})$ è una quadrupla:
+  \[SCG_\Sigma=(C_\Sigma,E,A,c_{in})\]
+  dove le etichette sono i singoli eventi (mentre il resto rimane definito come
+  nel grafo dei casi raggiungibili). Formalmente si ha quindi che:
+  \[A=\{(c,e,c')|,\c,c'\inC_\Sigma,e\in E:\, c[e>c'\}\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/seq3.jpg}
+    \caption{Esempio di grafo dei casi sequenziale}
+  \end{figure}
+  Si registra quindi l'occorrenza di un evento alla volta. Il grafo dei casi
+  sequenziale è quindi il sistema di transizione con gli archi etichettati dai
+  singoli eventi.
+\end{definizione}
+Riprendendo l'immagine precedente si ha che per la diamond property possono
+aggiungere l'arco ``centrale'' che trasformerebbe nuovamente il grafo dei casi
+sequenziale in quello dei casi raggiungibili quindi:
+\textit{per la diamond property, nei sistemi elementari il grafo dei casi e il
+  grafo dei casi sequenziale sono \textbf{sintatticamente equivalenti}, ovvero
+  possono essere ricavati a vicenda.\\
+  Questo implica il fatto che due sistemi elementari hanno grafi dei casi
+  \textbf{isomorfi} sse hanno grafi dei casi sequenziali isomorfi.}
+\subsection{Isomorfismo tra Sistemi di Transizione Etichettati}
+Si ricorda che:
+\begin{center}
+  \textit{Si parla di isomorfismo quando due strutture complesse si possono
+    applicare l'una sull'altra, cioè far corrispondere l'una all'altra, in modo
+    tale che per ogni parte di una delle strutture ci sia una parte
+    corrispondente nell'altra struttura; in questo contesto diciamo che due
+    parti sono corrispondenti se hanno un ruolo simile nelle rispettive
+    strutture.}
+\end{center}
+Diamo ora una definizione formale di isomorfismo tra sistemi di transizione
+etichettati, che possono quindi essere grafi dei casi o grafi dei casi
+sequenziali.
+\begin{definizione}
+  Siano dati due sistemi di transizione etichettati:\\
+  $A_1 = (S_1,E_1,T_1,s_{01})$ e $A_2 = (S_2 , E_2 , T_2 , s_{02})$.\\
+  e siano date due \textbf{mappe biunivoche}:
+  \begin{enumerate}
+    \item $\alpha:S_1\to S_2$
+    \item $\beta:E_1\to E_2$
+  \end{enumerate}
+  allora:
+  \[\langle \alpha,\beta\rangle:A_1= (S_1 , E_1 , T_1 ,s_{01})\to A_2 = (S_2 ,
+    E_2 , T_2 , s_{02})\]
+  è un \textbf{isomorfismo} sse:
+  \begin{itemize}
+    \item $\alpha(s_{01})=s_{02}$
+    \item $\forall s,s'\in S_1,\forall e\in E_1:\,(s,e,s')\in T_1
+    \Leftrightarrow (\alpha(s),\beta(e),\alpha(s'))\in T_2$
+  \end{itemize}
+\end{definizione}
 \end{document}
-
-
-% LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem
-% LocalWords:  side condition prod
+%1.15
+% LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
+% LocalWords:  side condition prod interleaving step semantics Petri deadlock
+% LocalWords:  Property diamond property sottografo diam postcondizione

@@ -857,8 +857,141 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
     corrispondente al nuovo sistema senza contatti (grafo che è isomorfo a
     quello ottenibile al sistema con contatti)} 
 \end{figure}
+\subsection{Situazioni Fondamentali}
+\subsubsection{Sequenza}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare, con contatti o meno
+  e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1,e_2\in
+  E$ due eventi.\\
+  Si ha che $e_1$ ed $e_2$ sono \textbf{in sequenza} nel caso
+  raggiungibile $c$ sse:
+  \[c[e_1>\wedge\, \neg c[e_2\wedge c[e_1e_2>\]
+  ovvero in $c$ è abilitato $e_1$ ma non $e_2$ ma, dopo lo scatto di $e_1$,
+  $e_2$ diventa abilitato. Quindi in $c$ è possibile attivare prima $e_1$ e poi
+  $e_2$ in sequenza.\\
+  Si ha quindi una relazione di \textbf{dipendenza causale tra $e_1$ ed $e_2$},
+  ovvero qualche postcondizione di $e_1$ è precondizione di $e_2$ (che quindi
+  può occorrere solo se precedentemente è occorso $e_1$).
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/se.jpg}
+    \caption{Esempio di sequenza tra $e_1$ ed $e_2$}
+  \end{figure}
+\end{definizione}
+\subsubsection{Concorrenza}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare, con contatti o meno
+  e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1,e_2\in
+  E$ due eventi. \\
+  Si ha che i due eventi sono \textbf{concorrenti} nel caso
+  raggiungibile $c$ sse:
+  \[c[\{e_1,e_2\}>\]
+  ovvero se possono essere abilitati in unico passo o, detto in maniera
+  diversa, se sono indipendenti ed entrambi abilitati in $c$
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/conc.jpg}
+    \caption{Esempio di concorrenza tra $e_1$ ed $e_2$}
+  \end{figure}
+\end{definizione}
+\subsubsection{Conflitto}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare, con contatti o meno
+  e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1,e_2\in
+  E$ due eventi.\\
+  Si ha che $e_1$ ed $e_2$ sono in conflitto sse:
+  \[c[e_1>\wedge c[e_2 \wedge\,\neg c[\{e_1,e_2\}>\]
+  ovvero i due eventi sono entrambi abilitati (quindi le precondizioni sono vere
+  mentre le postcondizioni son false) ma l'occorrenza di uno disabilità
+  l'altro, quindi non possono essere abilitati in un unico passo, in quanto non
+  sono indipendenti. Ci sono due casi:
+  \begin{enumerate}
+    \item i due eventi hanno una precondizione in comune, e in tal caso si parla
+    di \textbf{conflitto forward} (ovvero \textit{in avanti})
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.7]{img/conf1.jpg}
+      \caption{Esempio di conflitto forward tra $e_1$ ed $e_2$}
+    \end{figure}
+    \item i due eventi hanno una postcondizione in comune, e in tal caso si parla
+    di \textbf{conflitto backward} (ovvero \textit{all'indietro})
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.7]{img/conf2.jpg}
+      \caption{Esempio di conflitto backward tra $e_1$ ed $e_2$}
+    \end{figure}
+  \end{enumerate}
+  Si ha quindi una situazione di \textbf{non determinismo}, non essendo
+  specificato quale dei due eventi scatterà prima (e lo scatto di uno impedisce
+  lo scatto dell'altro).
+  \newpage
+  Posso ritrovarmi nel caso in cui effettivamente un evento scatta, cambiando lo
+  stato del sistema. In tal caso, in un'ottica completamente deterministica, si
+  deve assumere che \textbf{l'ambiente} abbia fornito un'informazione
+  riguardo il conflitto, ovvero c'è stato qualcosa di esterno che ha permesso ad
+  uno dei due eventi di scattare ugualmente. Ho quindi guadagnato
+  dell'informazione. 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/conf3.jpg}
+    \caption{Esempio di conflitto con l'intervento dell'ambiente tra $e_1$ ed
+      $e_2$ (con conseguente guadagno di informazione)} 
+  \end{figure}
+  Ci sono però casi in cui in ogni caso non si può avere informazione su quale
+  esempio sia scattato. Si può ipotizzare che tale informazione fosse presente
+  nello stato precedente del sistema (una sola condizione attiva, per
+  esempio). Quindi l'informazione, finita nell'ambiente (ricevuta
+  dall'ambiente), si è persa.
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/conf3.jpg}
+    \caption{Esempio di conflitto tra $e_1$ ed
+      $e_2$ con conseguente perdita di informazione (si può ipotizzare, per
+      esempio, che nello stato precedente la precondizione di $e_1$ fosse attiva
+      mentre quella dio $e_2$ fosse inattiva)} 
+  \end{figure}
+  Il modello, nell'ottica di Petri, non è quindi un \textbf{modello chiuso} ma è
+  in grado di comunicare con l'ambiente (in sintonia con le teorie della
+  fisica). 
+\end{definizione}
+\newpage
+\subsubsection{Confusione}
+\begin{definizione}
+  La situazione di \textbf{confusione} è una \textit{mistura} di situazioni di
+  concorrenza e di conflitto. Si hanno 2 tipi di confusione, entrambe
+  ammissibili: 
+  \begin{enumerate}
+    \item detta \textbf{confusione asimmetrica} considera il fatto di avere un
+    caso raggiungibile e due eventi abilitati, nella figura $e_1$ ed $e_2$, in
+    maniera concorrente in $c$, che nella figura consiste nel caso
+    $\{b_1,b_2,b_3\}$. I due eventi sono quindi indipendenti. Nella figura lo
+    scatto dei due eventi porterebbe allo stato $c'=\{b_4,b_5\}$. Bisogna
+    analizzare però nel dettaglio il sistema. Se prima occorre $e_1$ non si ha
+    alcun conflitto mentre se occorre prima $e_2$ (che porterebbe in
+    $\{b_1,b_3,b_4\}$) si crea un conflitto tra $e_1$ ed $e_3$, che viene
+    risolto a favore di $e_1$ e a sfavore di $e_3$. \textbf{Non è possibile
+      stabilire oggettivamente se è stato sciolto un conflitto} sono quindi in
+    una situazione di confusione in quanto non so se è stata effettuata o meno
+    una scelta.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.7]{img/confu.jpg}
+      \caption{Esempio di confusione asimmetrica tra $e_1$ ed $e_2$} 
+    \end{figure}
+    Una soluzione che vedremo sarà la scomposizione in più componenti del
+    sistema 
+    \item detta \textbf{confusione simmetrica}
+    %14.51
+     \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.7]{img/confu2.jpg}
+      \caption{Esempio di confusione simmetrica tra $e_1$ ed $e_2$} 
+    \end{figure}
+  \end{enumerate}
+\end{definizione}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
 % LocalWords:  side condition prod interleaving step semantics Petri deadlock
 % LocalWords:  Property diamond property sottografo diam postcondizione seqq
+% LocalWords:  conc conf backward confu

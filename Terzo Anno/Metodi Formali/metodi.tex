@@ -278,7 +278,7 @@ semplice e astratta partiamo da un esempio:
   comportano un cambiamento di stato globale:
   \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.7]{img/prod3.jpg}
+    \includegraphics[scale = 0.4]{img/prod3.jpg}
     \caption{Semplificazione della nomenclatura del sistema per praticità}
     \includegraphics[scale = 0.8]{img/prod2.jpg}
     \caption{Rappresentazione del sistema con un automa a stati finiti che
@@ -599,7 +599,7 @@ usando il \textbf{grafo dei casi raggiungibili}.
 \end{figure}
 \newpage
 \subsection{Diamond Property}
-Dato un sistema elementare $\Sigma = (B,E,F,c_{in})$ e il suo grafo dei casi
+Dato un sistema elementare $\Sigma = (B,E,F;c_{in})$ e il suo grafo dei casi
 $CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})$ si ha 
 che il grafo soddisfa una particolare proprietà, detta \textbf{diamond
   property}, tipica solo dei sistemi elementari.
@@ -786,8 +786,77 @@ Il problema è stato risolto mediante la cosiddetta \textbf{teoria delle regioni
 soddisfare la diamond property, in quanto altrimenti non sarebbe un sistema di
 transizioni che potrebbe corrispondere al comportamento di un sistema
 elementare.
-
-
+\subsection{Contatti}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare e siano $e\in E$ un evento
+  e $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale. Allora si ha che
+  $(e,c)$ è un \textbf{contatto} sse:
+  \[^\bullet e\subseteq c \wedge e^\bullet \cap c \neq\emptyset\]
+  Ovvero, in termini pratici, siamo nel caso in cui un evento $e$ ha le
+  precondizioni vere, si ha quindi che $^\bullet e\subseteq c$, e l'evento non
+  ha tutte le postcondizioni false, quindi $e^\bullet \cap c \neq\emptyset$,
+  allora si dice che l'evento $e$ è in una situazione di contatto e quindi non
+  può scattare
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/con.jpg}
+    \caption{Esempio dove l'evento \emph{deposita} è in una situazione di
+      contatto}
+  \end{figure}
+\end{definizione}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare. Si dice che il sistema è
+  \textbf{senza contatti} sse:
+  \[\forall e\in E,\,\forall c\in C_\Sigma\mbox{ si ha che } ^\bullet
+    e\subseteq c\Rightarrow e^\bullet\cap c=\emptyset\]
+  ovvero per ogni evento e per ogni caso raggiungibile dal caso iniziale succede
+  sempre che se le precondizioni sono vere, ovvero $^\bullet e\subseteq c$,
+  allora le postcondizioni sono false, ovvero disgiunte dal caso considerato
+  ($e^\bullet\cap c=\emptyset$)
+\end{definizione}
+Ci si chiede se sia possibile trasformare un sistema elementare $\Sigma$, con
+contatti, in uno $\Sigma'$, senza contatti, senza però modificarne il
+comportamento.\\
+La risposta a questo quesito è affermativa e la procedura consiste
+nell'aggiungere a $\Sigma$ il complemento di ogni condizione che crea situazione
+di contatto, ottenendo così un sistema $\Sigma'$ con grafo dei casi isomorfo a
+quello di $\Sigma$.\\ 
+Per aggiungere il complemento, data la condizione $x$, si aggiunge la condizione
+$not\,\, x$ che sarà vera tutte le volte che $x$ è falsa e viceversa. Per
+ottenere questo risultato la nuova condizione avrà come pre-eventi i
+post-eventi di $x$ e come post-eventi i pre-eventi di $x$. Ovvero
+connetto la nuova condizione agli stessi eventi di quella vecchia ma con archi
+orientati in senso opposto. Ovviamente le inizializzazioni delle due condizioni
+dovranno essere opposte (una vera e l'altra falsa).
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/con2.jpg}
+  \caption{Esempio con l'ottenimento del complemento di un sistema}
+\end{figure}
+Se un sistema è senza contatti si ha una regola di contatto semplificata:
+\begin{definizione}
+   Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare \textbf{senza
+     contatti}. Sapendo che se le precondizioni di un evento sono vere allora
+   sicuramente le postcondizioni di quell'evento sono false in quel caso. Dato
+   che questo avviene per ogni evento e per ogni caso raggiungibile dal caso
+   iniziale per verificare che un evento $e$ sia abilitato in un caso
+   raggiungibile $c$ è sufficiente verificare che le precondizioni di $e$ siano
+   vere (in quanto automaticamente le postcondizioni saranno false). In
+   maniera formale quindi si ha che: 
+   \[c[e\mbox{ sse } ^\bullet e\subseteq c,\,\,\mbox{ con } e\in E,c\in
+     C_\Sigma\]
+   semplificando di molto la \textbf{regola di scatto}
+ \end{definizione}
+ \begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/con3.jpg}
+  \caption{Esempio con il complemento del sistema produttore-consumatore (dove è
+    stato aggiunto solo il complemento di ``buffer-pieno'', ottenendo così sia
+    $B1$ che $B2$, in quanto le altre condizioni avevano già il loro
+    complemento). In aggiunta si ha anche il grafo dei casi sequenziale
+    corrispondente al nuovo sistema senza contatti (grafo che è isomorfo a
+    quello ottenibile al sistema con contatti)} 
+\end{figure}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq

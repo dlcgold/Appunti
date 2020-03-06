@@ -970,7 +970,7 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
     alcun conflitto mentre se occorre prima $e_2$ (che porterebbe in
     $\{b_1,b_3,b_4\}$) si crea un conflitto tra $e_1$ ed $e_3$, che viene
     risolto a favore di $e_1$ e a sfavore di $e_3$. \textbf{Non è possibile
-      stabilire oggettivamente se è stato sciolto un conflitto} sono quindi in
+      stabilire oggettivamente se è stato sciolto un conflitto}. Sono quindi in
     una situazione di confusione in quanto non so se è stata effettuata o meno
     una scelta.
     \begin{figure}[H]
@@ -980,18 +980,71 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
     \end{figure}
     Una soluzione che vedremo sarà la scomposizione in più componenti del
     sistema 
-    \item detta \textbf{confusione simmetrica}
-    %14.51
-     \begin{figure}[H]
+    \item detta \textbf{confusione simmetrica}, nome dovuto al fatto che la rete
+    risulta disegnata in modo simmetrico, comportando delle
+    problematiche. Prendiamo nell'immagine il caso raggiungibile $c=\{b_1,b_2\}$
+    e i due eventi $e_1$ ed $e_3$, abilitati in maniera concorrente. Si ha che
+    $c[\{e_1,e_3\}>c'$, con $c'=\{b_3,b_5\}$. Anche in questo caso si hanno dei
+    conflitti, infatti sia $e_1$ che $e_3$ sono in conflitto con $e_2$ (in
+    quanto se uno dei due viene eseguito $e_2$ non può più occorrere). Anche in
+    questo caso non posso stabilire se il conflitto è stato risolto nel momento
+    in cui arrivo in $c'$ (ovvero se si è deciso di fare $e_1$ piuttosto che
+    $e_2$ o $e_3$ piuttosto che $e_2$).\\
+    Anche in questo caso potremo dividere in componenti (una che esegue $e_1$ ed
+    $e_2$ e un'altra che esegue $e_1$ ed $e_3$, con $e_2$ che è una
+    sincronizzazione tra le due componenti).\\
+    Non si può dire chi ha deciso e chi ha la responsabilità di decidere quale
+    evento deve occorrere, se alla componente di $b_1$ o a quella di $b_2$.\\
+    \begin{figure}[H]
       \centering
       \includegraphics[scale = 0.7]{img/confu2.jpg}
       \caption{Esempio di confusione simmetrica tra $e_1$ ed $e_2$} 
     \end{figure}
   \end{enumerate}
+  Petri era convinto, nella sua visione deterministica e senza conflitti, che
+  l'avere una situazione di confusione nel modello fosse dovuto al non aver
+  esplicitato alcuni aspetti o di aver costruito male il modello, con
+  informazioni parziali e non complete sul modello e sull'ambiente.\\
+  Un altro studioso, Einar Smith, molto vicino a Petri ha invece dimostrato come la
+  confusione sia inevitabile
 \end{definizione}
+%\newpage
+Vediamo un esempio famoso, detto della \textbf{mutua esclusione}, portato da
+Smith per spiegare come la confusione sia inevitabile nella realtà.
+\begin{esempio}
+  Si analizza il seguente sistema:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/mes.jpg} 
+  \end{figure}
+  In rosso e in Blu abbiamo specificate le due componenti del sistema, che
+  condividono una risorsa, ovvero la condizione $b_4$, che rappresenta che la
+  risorsa è libera e a disposizione. L'evento $e_1$ e evento $e_4$ rappresentano
+  eventi di acquisizione della risorsa (rispettivamente per la prima e per la
+  seconda componente) e quindi le loro precondizioni rappresentano la necessità
+  di acquisirla. Tra questi due eventi c'è una \textbf{situazione di
+    conflitto}. Le condizioni $b_2$ e $b_7$, ovvero le rispettive postcondizioni
+  dei due eventi, rappresentano che la risorsa è in uso per la rispettiva
+  componente mentre gli eventi $e_2$ ed $e_5$ rappresentano il rilascio della
+  risorsa condivisa, sempre per la rispettiva componente, arrivando
+  rispettivamente nella componente $b_3$ e $b_8$. Ovviamente la risorsa
+  non può essere contemporaneamente in uso da entrambe le risorse, quindi $b_2$
+  e $b_7$ non possono essere contemporaneamente marcate, ovvero vere, e per
+  questo si parla di \textit{mutua esclusione} (se una delle due è vera l'altra
+  deve essere necessariamente falsa). D'altro canto gli
+  eventi $e_3$ ed $e_6$ possono invece occorrere in modo concorrente senza
+  conflitti.\\
+  Scrivendo formalmente si ha che, nel caso che la risorsa sia stata acquisita
+  dalla componente rossa e successivamente rilasciata:
+  \[\{b_3,b_4,b_6\}[\{e_3,e_4\}>\{b_1,b_7\}\]
+  ma se scatta prima $e_3$ ho il conflitto tra $e_1$ ed $e_4$, se scatta prima
+  $e_4$ non ho conflitti con $e_1$. Quindi non ho informazioni sulla risoluzione
+  del conflitto.\\
+  \textbf{Capire se è confusione simmetrica}
+\end{esempio}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
 % LocalWords:  side condition prod interleaving step semantics Petri deadlock
 % LocalWords:  Property diamond property sottografo diam postcondizione seqq
-% LocalWords:  conc conf backward confu
+% LocalWords:  conc conf backward confu mes Smith Einar

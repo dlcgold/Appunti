@@ -1174,10 +1174,224 @@ Iniziamo informalmente a vedere degli esempi pratici.
 Sarà interessante studiare come la composizione di due componenti, per esempio,
 senza deadlock non comporta, in generale, l'ottenimento di una rete priva di
 deadlock.
+\newpage
+\section{Reti Posti e Transizioni}
+Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
+  Posti e Transizioni}, permette di rappresentare un sistema in modo più
+compatto, sono una sorta di \textit{ripiegamento} dei sistemi
+elementari. Partiamo quindi da un esempio:
+\begin{esempio}
+  prendiamo in studio sempre il sistema produttore-consumatore:
+  Sia nella versione con contatto:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pt.jpg} 
+  \end{figure}
+  che senza:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pt2.jpg} 
+  \end{figure}
+  Suppongo di voler modellare il sistema in modo che il buffer possa avere un
+  numero determinato di posizioni, per esempio 2 (il buffer può quindi
+  depositare fino a due elementi). Si ottiene quindi:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/pt3.jpg} 
+  \end{figure}
+  Dove si hanno due posizioni del buffer (e quindi basta che una sia vuota per
+  permettere al produttore di depositare) a disposizione del sistema. Si nota
+  come l'aumento dei buffer complica drasticamente la modellazione del sistema.
+  Si cerca quindi una soluzione più compatta, compattando gli eventi
+  \textit{deposita} e \textit{preleva} e dando nuova notazione al buffer. Si
+  ottiene:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/pt4.jpg} 
+  \end{figure}
+  con il buffer che diventa anche un \textbf{contatore} del numero di elementi
+  presenti al suo interno. Un buffer a due posizioni diventa quindi una
+  condizione non più booleana, detta \textbf{Posto}, con una \textbf{capacità}
+  pari a 2. Il produttore non può produrre oltre la capacità.\\
+  Con questa rappresentazione non ho più alcuna difficoltà nel rappresentare più
+  posizioni del buffer in quanto basta aumentare la capacità. Ho però perso
+  delle informazioni infatti non ho più una relazione di dipendenza tra dove si
+  deposita (se nella prima posizione o nella seconda) e dove si preleva.\\
+  Aggiungiamo un'altra complicanza: aggiungiamo un secondo consumatore:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/pt5.jpg} 
+  \end{figure}
+  Possiamo \textit{comprimere} nella stessa maniera, ottenendo, in quanto i due
+  consumatori hanno lo stesso modello di comportamento:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/pt6.jpg} 
+  \end{figure}
+  Anche qui perdo l'informazione riguardo quale dei due consumatori ha
+  effettivamente prelevato, riguardo quale dei due è pronto a \textit{prelevare}
+  e quale a \textit{consumare}, continuando ad ignorare anche la posizione
+  del buffer nei confronti della quale stanno agendo.\\
+  Si può arrivare ad avere due componenti identiche che sono concorrenti tra
+  loro. 
+\end{esempio}
+Le condizioni non sono più, in generale, booleane ma sono \textbf{posti}
+dotati di \textbf{contatori}, gli elementi all'interno sono detti
+\textbf{marche}. Ai posti si assegna anche una \textbf{capacità}. 
+\\
+Si ha inoltre che lo scatto di una transizione dipende dalla disponibilità
+delle risorse, per esempio un produttore può produrre $n$ elementi alla volta
+e il consumatore consumarne $m$. Si usano quindi archi pesati (se non indicato
+ovviamente ha peso 1, quello del normale check booleano di condizione attiva)
+tali che una transizione possa scattare sse i pesi vengono rispettati:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/pt7.jpg}
+  \caption{Esempi con la transizione $t_i$ non abilitata}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/pt8.jpg}
+  \caption{Esempio con la transizione $t_i$ abilitata, a sinistra il ``prima''
+    e a destra il ``dopo'' lo scatto di $t_i$}
+\end{figure}
+\newpage
+\begin{esempio}
+  Petri aveva introdotto l'uso delle reti anche per le reazioni chimiche, per
+  esempio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.35]{img/pt9.jpg}
+    \caption{Esempio con la modellazione della produzione di $H_2O$}
+  \end{figure}
+\end{esempio}
+\subsection{I Filosofi a Cena}
+Questo è un classico problema di sincronizzazione, introdotto da Dijkstra. Si ha
+un tavolo rotondo con 5 filosofi ($p_i,\,\i=0,\ldots 4$), ciascuno ha davanti un
+piatto di spaghetti e si hanno solo 5 forchette ($f_i,\,\i=0,\ldots 4$):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt10.jpg}
+  \caption{Rappresentazione schematica del problema dei 5 filosofi}
+\end{figure}
+Ogni filosofo ha lo stesso comportamento, un po' pensa e un po' mangia,
+prendendo prima la forchetta alla sua destra e poi quella alla sua sinistra
+(perché necessitano di due forchette per mangiare). Si ha quindi il
+\textit{deadlock} se tutti vogliono mangiare, prendendo tutti in primis una
+forchetta, impedendosi tutti a vicenda di mangiare (non potendo prendere due
+forchette) o si ha la \textit{starvation} in quanto potrebbero accordarsi per
+mangiare in quattro, impedendo a uno di mangiare.\\
+Si vuole modellare tale schema. Ogni filosofo può essere modellato come una rete
+elementare, che farà da componente al modello finale:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt11.jpg}
+\end{figure}
+con gli eventi \textit{upD} e \textit{upS}, dove il filosofo prende la forchetta
+destra e sinistra, e rispettivamente \textit{downD} e \textit{downS}, dove le
+mette giù. Si ha la condizione che specifica che il filosofo sta pensando e
+quella che mi segnala l'azione del mangiare, oltre alle due condizioni
+intermedie che separano le azioni tra forchetta sinistra e destra.\\
+Si modella anche la componente della forchetta, con gli eventi che segnalano se
+è depositata, \textit{down}, o meno, \textit{up}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt12.jpg}
+\end{figure}
+\newpage
+Combino quindi le due componenti per specificare il filosofo che prende la sua
+forchetta destra e poi la sinistra, quindi per ogni componente \textit{filosofo}
+si hanno due componenti \textit{forchetta}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt13.jpg}
+\end{figure}
+con la \textit{forchetta 1 (fork 1)} che sarà la forchetta destra e la
+\textit{forchetta 2 (fork 2)} che sarà la forchetta sinistra. Si hanno quindi
+diverse transizioni di sincronizzazione tra le due componenti (ogni volta che il
+filosofo interagisce con la forchetta).\\
+Bisogna aggiungere che ogni forchetta può essere presa da due filosofi, ognuna a
+destra di un filosofo e a sinistra di un altro:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt14.jpg}
+\end{figure}
+Ogni forchetta quindi si sincronizza alternativamente tra due filosofi, venendo
+presa da uno dei due filosofi. Si è arrivati quindi ad una \textbf{situazione di
+  conflitto}, o meglio ad una \textbf{situazione di confusione}.\\
+Per ora la soluzione di questo problema viene lasciato da parte per valutare il
+modello dello stesso.\\
+Si ha quindi una possibile rappresentazione del modello completo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt15.jpg}
+\end{figure}
+Ma ogni filosofo, come del resto ogni forchetta, si comporta nella stessa
+maniera. Si tenda quindi di \textit{ripiegare} il modello, modellando un
+un'unica componente filosofo con 5 marche distribuite nei vari stati locali del
+filosofo. Stesso discorso per le forchette. Ottengo quindi il seguente modello:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/pt16.jpg}
+\end{figure}
+Con le due componenti, \textit{filosofo} e \textit{forchetta}, entrambe
+inizializzate con 5 marche ciascuno. Questo modello però perde informazione
+sulla forchetta che un filosofo può prendere, si ha un radicale \textbf{cambio
+  di protocollo}. Un filosofo può prendere una qualsiasi forchetta e non più
+quella alla sua destra/sinistra. Non posso quindi usare le \textit{reti Posti e
+  Transizioni} in quanto perdo troppe informazioni.\\
+L'unica soluzione possibile è quindi quella di recuperare le informazioni perse
+inserendole nelle marche, alle quali viene aggiunta una struttura dati. Si ha
+così modo di distinguere i vari filosofi e le forchette. Per compattare il
+sistema devo quindi rendere più complessa l'essenza della marca, viene
+arricchita con una struttura dati.\\
+Si arriva così ad avere una \textbf{Rete di Alto Livello}, come, per esempio,
+una \textit{rete colorata}, a partire da un rete elementare.\\
+Distinguo quindi filosofi e forchette nei due insiemi di strutture dati:
+\begin{enumerate}
+  \item $Phil=\{p_0,\ldots, p_4\}$, insieme dei filosofi
+  \item $Fork=\{f_0,\ldots, f_4\}$, insieme delle forchette
+\end{enumerate}
+Si nota che per gli indici si ha una somma \textit{modulo 5}, ovvero gli indici
+rispondono alla regola:
+\[(i+1) \mbox{ mod } 5\]
+In modo che gli indici siano ordinati avendo inoltre lo 0 che segue il 4, in
+modo circolare.\\
+Si ottiene quindi, mantenendo il protocollo iniziale:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/pt17.jpg}
+\end{figure}
+Si mantiene quindi un modello simile a quello descritto sopra ma al posto di
+marche non strutturate si ha nel posto delle 5 forchette le marche dell'insieme
+\textit{Fork} e al posto dei 5 filosofi le marche dell'insieme \textit{Phil}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/pt18.jpg}
+\end{figure}
+Le transizioni scattano in determinate condizioni. Per esempio la prima
+transizione, relativa al fatto che il filosofo prende la forchetta alla sua
+destra, scatta sse con l'istanza filosofo $p_j$ e forchetta $f_i$ si ha che
+$i=j$ (ho quindi almeno una forchetta, almeno un filosofo e la forchetta deve
+essere quella alla sua destra, che, per come abbiamo modellato il problema, è
+quella con lo stesso indice). Sugli archi si hanno quindi annotate determinate
+variabili che denotano istanze. Per la forchetta a sinistra si usa il modulo
+5. Si procede quindi per i vari filosofi.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/pt19.jpg}
+  \caption{Esempio con il filosofo $p_3$ che ha già preso la forchetta alla sua
+    destra, $f_3$, e prende quella a sinistra, $f_4$}
+\end{figure}
+\textbf{Si ha quindi un prezzo per rappresentare in maniera compatta un sistema
+  elementare, mediante una rete di alto livello, ovvero l'arricchimento della
+  struttura dati}.
+\subsection{Formalizzazione delle Reti Posti e Transizioni}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
 % LocalWords:  side condition prod interleaving step semantics Petri deadlock
-% LocalWords:  Property diamond property sottografo diam postcondizione seqq
-% LocalWords:  conc conf backward confu mes Smith Einar Sottoreti sottorete
-% LocalWords:  sinc all'handshacking all'handshacking handshaking asinc
+% LocalWords:  Property diamond property sottografo diam postcondizione seqq pt
+% LocalWords:  conc conf backward confu mes Smith Einar Sottoreti sottorete upD
+% LocalWords:  sinc all'handshacking all'handshacking handshaking asinc primis
+% LocalWords:  Dijkstra starvation upS downD downS fork Phil mod

@@ -1402,7 +1402,7 @@ Passiamo ora alla formalizzazione:
 \begin{definizione}
   Si definisce un \textbf{sistema Posti e Transizioni (\textit{sistema P/T})} la
   sestupla: 
-  \[\Sigma=(S,T,F,K,W,M_0)\]
+  \[\Sigma=(S,T,F,K,W;M_0)\]
   dove:
   \begin{itemize}
     \item $(S,T,F)$ è una rete con:
@@ -1473,8 +1473,128 @@ Passiamo ora alla formalizzazione:
   \[M[t> \wedge\, \forall s\in S,\,\,M'(s)=M(s)-W(s,t)+W(t,s)\]
   quindi il nuovo posto avrà marcatura pari a quella precedente al più dei due
   contributi, il primo negativo e il secondo positivo, dei pesi dei due archi.
-  %9.40
 \end{definizione}
+\begin{definizione}
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si definisce
+  l'\textbf{insieme delle marcature raggiungibili}, dalla marcatura iniziale  di
+  $\Sigma$ come:
+  \[[M_0>\]
+  ed esso è il più piccolo insieme tale che:
+  \begin{itemize}
+    \item $M_0\in [M_0>$, ovvero ola marcatura iniziale appartiene all'insieme
+    delle marcature raggiungibili
+    \item se $M\in [M_0> \wedge\,\exists t\in T:\,M[t>M'$ allora $M'\in [M_0$,
+    ovvero se $M$ appartiene all'insieme delle marcature raggiungibili ed esiste
+    una transizione una transizione tale per cui $M$ va in $M'$ allora, di
+    conseguenza si ha che $M'$ appartiene all'insieme delle marcature
+    raggiungibili dallo stato iniziale
+  \end{itemize}
+  \emph{Anche questa è una definizione per induzione}
+\end{definizione}
+\begin{esempio}
+  Vediamo qualche esempio particolare (se la capacità non è specificata si ha
+  che essa è infinita):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pt22.jpg}
+    \caption{Lo scatto toglie due marche dall'input e ne mette una nell'output
+      ma la seconda volta $t$ non sarebbe più abilitata in quanto il posto in
+      output si satura alla prima transizione, è un caso di \textbf{contatto}}
+  \end{figure}
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pt23.jpg}
+    \caption{La transizione $t$ è abilitata avendo i posti in ingresso col
+      giusto numero di marche e in uscita ha un posto vuoto che può riempire a
+      piacere e lo stesso porto che prima aveva in input che può riempire con
+      una marca rispettando le regole di capacità}
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pt24.jpg}
+    \caption{La transizione $t$ non è abilitata, e non lo sarà mai in $M$ in
+      quanto la regola di scatto prevede che ci sia a priori una capacità
+      sufficiente nei posti di output, cosa che qui non accade avendo uno di
+      essi capacità uno, non si ragiona in modo sequenziale ``prima tolgo e poi
+      metto'', lo spazio deve essere disponibile a priori per far scattare la
+      transizione} 
+  \end{figure}
+  \newpage
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/pt25.jpg}
+    \caption{In questa rete si ha che $t_1$ e $t_2$ sono abilitate in $M$ ed
+      esse sono \textbf{concorrenti} in quanto lo scatto dell'una non disabilita
+      lo scatto dell'altra dovendo entrambe prelevare una marca da un posto che
+      ne contiene due per riversarne una ciascuna in un posto libero. Si ha
+      quindi concorrenza anche in corrispondenza di transizioni non
+      indipendenti}  
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/pt26.jpg}
+    \caption{In questa rete si ha che $t_1$ e $t_2$ sono in \textbf{conflitto} e
+      \textbf{non concorrenti} tra loro. Si ha infatti che lo scatto di una
+      disabilita quella dell'altra, visto che da sola $t_2$ svuoterebbe il posto
+      in input (se scatta prima $t_1$ poi ho una sola marca nello stato in input
+      disabilitando $t_2$ che ne richiede due, viceversa lo scatto di $t_2$
+      lascerebbe vuoto lo stato in input impedendo a $t_1$ di scattare). Il
+      conflitto è dato non dalla struttura della rete ma dalla sua marcatura
+      iniziale. Quindi in questa rete con questa marcatura può scattare una sola
+      delle due transizioni, inoltre $t_1$ potrebbe occorrere due volte senza
+      errori, essendo quindi, se occorre contemporaneamente per quelle due volte,
+      \textbf{concorrente con se stessa}. La doppia occorrenza di $t_1$, indicatat
+      con $2t_1$ è un \textbf{passo}}  
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pt27.jpg}
+    \caption{In questa rete si ha che $t_1$ è abilitata due volte, avendo
+      quindi $2t_1$ e lo è anche $t_2$, che può scattare solo una volta. Si ha
+      quindi che $t_1$ occorre concorrente con se stessa e contemporaneamente
+      concorrente con $t_2$. Si ha quindi che il \emph{multiset} $2t_1+t_2$ è un
+      \textbf{passo abilitato}} 
+  \end{figure}
+\end{esempio}
+Si da ora la definizione formale di \textit{multiset di transizioni abilitate}
+in un sistema:
+\begin{definizione}
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si definisce  un
+  \textbf{multiset} $U:T\to\mathbb{N}$ come una funzione che assegna ad una
+  transizione un numero naturale. Si ha inoltre che:
+  \begin{itemize}
+    \item un multiset è detto \textbf{concorrentemente abilitato} in
+    $M\in[M_0>$, quindi con $M$ marcatura raggiungibile. Detto in maniera
+    diversa $U$ è un passo $M[U>$. Un multiset è concorrentemente abilitato in
+    $M$ sse:
+    \[\forall s\in S,\,\,\sum_{t\in T}U(t)\cdot W(s,t)\leq M(s)\,\,\wedge\,\,
+      M(s)+\sum_{t\in T}U(t)\cdot W(t,s)\leq K\]
+    ovvero per ogni posto si devono avere un numero di marche nella marcatura
+    iniziale superiore al numero che posso togliere mediante le varie
+    transizioni nel multiset $U$. Inoltre le marche che devo aggiungere più il
+    numero di marche già presenti nel posto in output deve essere inferiore alla
+    capacità dell'output.\\
+    Questa condizione può essere riscritta come:
+    \[\sum_{t\in T}U(t)\cdot W(s,t)\leq M(s)\leq K(s)-\sum_{t\in T}U(t)\cdot
+      W(t,s)\]
+    \item un multiset $U$ abilitato in $M$ può occorrere generando $M'$, avendo
+    quindi:
+    \[M[U>M'\]
+    sse:
+    \[\forall s\in S\,\,M'(s)=M(s)-\sum_{t\in T}U(t)\cdot W(s,t)+\sum_{t\in
+        T}U(t)\cdot W(t,s)\]
+    quindi la marcatura $M'$ in un certo posto è uguale alla marcatura del posto
+    presente prima del passo al più dei contributi, positivi e negativi, delle
+    varie transizioni (positivi se si ha tale posto come output e negativi se lo
+    si ha come input)
+    \item $U_\Sigma$ è l'\textbf{insieme dei passi} di $\Sigma$ e viene definito
+    come:
+    \[U_\Sigma=\{U:T\to \mathbb{N}|\,\,\exists M,M'\in [M_0>:\,\,M[U>M'\}\]
+    ovvero l'insieme dei passi possibili tali per cui passo da una marcatura
+    raggiungibile ad un'altra attivando il passo
+  \end{itemize}
+\end{definizione}
+%26.45
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
@@ -1482,4 +1602,5 @@ Passiamo ora alla formalizzazione:
 % LocalWords:  Property diamond property sottografo diam postcondizione seqq pt
 % LocalWords:  conc conf backward confu mes Smith Einar Sottoreti sottorete upD
 % LocalWords:  sinc all'handshacking all'handshacking handshaking asinc primis
-% LocalWords:  Dijkstra starvation upS downD downS fork Phil mod sima
+% LocalWords:  Dijkstra starvation upS downD downS fork Phil mod sima multiset
+% LocalWords:  concorrentemente

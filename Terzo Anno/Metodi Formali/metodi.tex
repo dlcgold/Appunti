@@ -580,7 +580,7 @@ usando il \textbf{grafo dei casi raggiungibili}.
   \begin{itemize}
     \item $C_\Sigma$ è l'insieme dei nodi del grafo, ovvero gli stati globali
     sono i casi raggiungibili dal sistema $\Sigma$    
-    \item $U\Sigma$, è l'alfabeto, ovvero i passi del sistema rappresentano
+    \item $U_\Sigma$, è l'alfabeto, ovvero i passi del sistema rappresentano
     l'alfabeto 
     \item $A$ è l'insieme di archi etichettati, formalmente definito come:
     \[A=\{(c,U',c')|\,c,c'\in C_\Sigma, U\in U_\Sigma, c[U>c']\}\]
@@ -1559,7 +1559,7 @@ Passiamo ora alla formalizzazione:
 Si da ora la definizione formale di \textit{multiset di transizioni abilitate}
 in un sistema:
 \begin{definizione}
-  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si definisce  un
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si definisce un
   \textbf{multiset} $U:T\to\mathbb{N}$ come una funzione che assegna ad una
   transizione un numero naturale. Si ha inoltre che:
   \begin{itemize}
@@ -1594,7 +1594,154 @@ in un sistema:
     raggiungibile ad un'altra attivando il passo
   \end{itemize}
 \end{definizione}
-%26.45
+\begin{definizione}
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$, tale che $\forall s\in S
+  K(s)<\infty$, si definisce il \textbf{grafo di raggiungibilità}, indicato con
+  $RG(\Sigma)$, costruito solo con posti di capacità finita in quanto avere
+  capacità infinite comporterebbe avere un grafo infinito, come la quadrupla:
+  \[RG(\Sigma)=([M_0 >, U_\Sigma , A, M_0 )\]
+  dove, per rappresentare questo sistema di transizioni, si ha:
+  \begin{itemize}
+    \item $[M_0>$ che rappresenta le marcature raggiungibili dallo stato iniziale
+    del sistema $\Sigma$. Sono così rappresentati gli stati del sistema di
+    transizioni  
+    \item $U_\Sigma$ rappresenta l'insieme dei passi che rappresenta l'alfabeto
+    delle etichette degli archi
+    del sistema di transizioni
+    \item $A=\{(M,U,M'):\,M,M'\in [M_0>\,\wedge\, U\in U_\Sigma \,\wedge\,
+    M[U>M'\}$ dove, quindi dalla marcatura $M$ ho un arco, etichettato $U$, alla
+    marcatura $M'$ sse le due marcature sono raggiungibili dallo stato iniziale,
+    ed esiste un passo, nell'insieme dei passi, abilitato in $M$ tale per cui
+    posso passare dalla marcatura $M$ alla marcatura $M'$. È quindi la regola
+    che definisce come connettere mediante archi i vari stati
+    \item $M_0$ che rappresenta la marcatura iniziale del sistema nonché lo
+    stato iniziale del sistema di transizioni
+  \end{itemize}
+  Se $U$ è una singola transizione si ha il grafo di raggiungibilità
+  sequenziale, detto $SGR(\Sigma)$.\\
+  \textbf{La diamond property non è più valida in questa classe di reti a causa
+    dei \emph{self loop} che posso avere tra una transizione e un posto}
+\end{definizione}
+\begin{esempio}
+  Si prenda il sistema P/T $\Sigma$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/pt31.jpg} 
+  \end{figure}
+  \newpage
+  Si ha che lo scatto di $t_1$ e lo scatto di $t_2$ non può essere contemporaneo
+  in quanto si richiederebbero due marche nel posto $s$, devono quindi scattare
+  in sequenza. SI ottiene che il grafo dei casi raggiungibili è uguale a quello
+  dei casi raggiungibili sequenziale e quindi non vale la diamond property (non
+  potendo aggiungere alcun arco tra $\{s_1,s,s_2\}$ e $\{s\}$):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/pt32.jpg}
+  \end{figure}
+\end{esempio}
+\begin{definizione}
+  Dato un sistema P/T si ha che una transizione $t$ è in una \textbf{situazione
+    di contatto} nella marcatura $M$ sse:
+  \[\forall s\in S, W(s,t)\leq M(s)\,\wedge M(s)+W(t,s)>K(s)\]
+  ovvero una transizione è in una situazione di contatto in una certa marcatura
+  $M$ sse ha abbastanza marche nei posti in input ma non abbastnza nei posti in
+  output. Formalmente si ha che l'arco tra il posto in input e la transizioni ha
+  peso inferiore al numero di marche dell'input e la marcatura del posto output
+  più le marche che vengono aggiunte è maggiore della capacità del posto di
+  output stesso .\\
+  Un esempio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.65]{img/pt33.jpg}
+    \caption{Esempio di situazione di contatto}
+  \end{figure}
+\end{definizione}
+\newpage
+Si cerca di capire se è possibile trasformare la rete da una con contatti ad una
+senza modificarne il comportamento. Questo è possibile con la
+\textbf{complementazione}. Preso un posto $s$ se ne fa il complemento
+$\overline{s}$, ovvero si fa un altro posto che ha archi in output verso
+transizioni che sono di input a quelle del posto considerato e viceversa per gli
+archi in input. Il complemento è quindi collegato alle stesse transizioni del
+posto considerato ma con archi direzionati all'inverso. Per quanto riguarda il
+numero di marche del complemento bisogna avere che il numero di marche del posto
+e del suo complemento siano di somma pari alla capacità del posto (che è pari a
+quella del complemento), ovvero:
+\[M_0(\overline{s})=K(s)-M_0(s)\]
+Si può inoltre dimostrare che per ogni marcatura raggiungibile $M$ la somma
+delle marcature tra un posto e il suo complemento è sempre la medesima, comunque
+evolva il sistema:
+\[M(\overline{s})+M(s)=K(s)\]
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.65]{img/pt35.jpg}
+\end{figure}
+\begin{definizione}
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ è \textbf{senza contatti}
+  sse:
+  \[\forall M\in[M_0>,\,\forall t\in T,\forall s\in S\]
+  si ha:
+  \[M(s)\geq W(s,t)\Rightarrow M(s)+W(t,s)\leq K(s)\]
+  ovvero ogni volta che ho abbastanza marche in un posto di input ad una
+  transizione allora sicuramente non ne ho troppe nel posto di output
+\end{definizione}
+\begin{definizione}
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ senza contatti allora si
+  ha che una transizione $t\in T$ è abilitata in $M\in[M_0>$, che si indica
+  con $M[t>$, sse: 
+  \[\forall s\in S,\,\,M(s)\geq W(s,t)\]
+  ovvero sse nei posti in input ho abbastanza marche (trascurando di studiare
+  i posti in output essendo una rete senza contatti).\\
+  Si ha quindi che in assenza di contatti la capacità dei posti non gioca più
+  alcun ruolo nella regola di scatto in quanto controllo solo di avere
+  sufficienti marche in input per far scattare una transizione
+\end{definizione}
+\subsection{Reti Marcate}
+Si cerca di identificare i sistemi elementari come casi particolari dei sistemi
+P/T.
+\begin{definizione}
+   Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si ha che $\Sigma$ è una
+   \textbf{Rete Marcata} sse:
+   \[\forall s\in S,\,\,M_0(s)\in\mathbb{N}\,\wedge \,K(s)=\infty
+   \,\wedge\,\forall t\in T,\,\,W(s,t)\leq 1\,\wedge\, W(t,s)\leq 1 \]
+ ovvero per ogni posto la marcatura iniziale assegna un valore finito al posto
+ che però ha capacità infinita (che quindi non gioca nessun ruolo, non
+ vincolando lo scatto della transizione). Inoltre il peso di ogni arco deve
+ essere minore o uguale a uno, imponendo quindi che abbia o peso uno o peso
+ nullo (che segnala l'assenza dell'arco).\\
+ Questa sottoclasse delle reti P/T può essere denotata con la sola quadrupla:
+ \[\Sigma=(S,T,F;M_0)\]
+ in quanto la capacità, denotata dalla funzione $K$, e il peso degli archi,
+ denotato dalla funzione $W$, diventano ridondanti ed eliminabili dallo studio
+ della rete.
+\end{definizione}
+\begin{definizione}
+  Una rete marcata è definita \textbf{safe (sicura)} sse per ogni marcatura
+  raggiungibile, compresa quella iniziale, ogni posto contiene al massimo una
+  marca (tornando quindi ad una definizione simil booleana dello stato del posto
+  che o è vuoto o contiene una marca). Formalmente si ha che una rete marcata è
+  safe sse: 
+  \[\forall M\in[M_0>,\,\forall s\in S:\,\,M(s)\leq 1\]
+  \textbf{In una rete marcata i self-loop possono essere abilitati}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.75]{img/pt36.jpg}
+    \caption{Esempio di loop (o cappio) su una rete marcata}
+  \end{figure}
+  Si ricorda che in una rete elementare in ogni caso il self-loop non è
+  abilitato e questa è una delle differenze principale tra un sistema elementare
+  e una rete marcata, differenza alle quali si aggiungono anche il fatto che in
+  una rete marcata ho capacità infinita e non pari a uno e marcature di un posto
+  intere e non booleane. Sia nei sistemi elementari che nelle reti marcate ho
+  solo archi di peso 1. \\
+  Si ha di conseguenza che un \emph{sistema elementare puro}, ovvero un sistema
+  elementare che non presenta mai cappi, \emph{coincide}, $\cong$, con una
+  \emph{rete marcata pura e safe}, quindi senza cappi e con al più una marca per
+  posto (quindi o una marca o zero marche).
+  \\
+ \textit{ Poter vedere un sistema elementare come sottoclasse delle reti P/T
+   permette varie possibilità dal punto di vista pratico.}
+\end{definizione}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
@@ -1603,4 +1750,4 @@ in un sistema:
 % LocalWords:  conc conf backward confu mes Smith Einar Sottoreti sottorete upD
 % LocalWords:  sinc all'handshacking all'handshacking handshaking asinc primis
 % LocalWords:  Dijkstra starvation upS downD downS fork Phil mod sima multiset
-% LocalWords:  concorrentemente
+% LocalWords:  concorrentemente self abbastnza safe simil

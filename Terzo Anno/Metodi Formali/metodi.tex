@@ -1809,8 +1809,8 @@ viene quindi studiato il \textbf{problema della limitatezza}.
     insieme finito, e quindi il grafo di raggiungibilità (il grafo delle marcature)
     è finito sia nel caso sia standard che in quello sia sequenziale:
     \begin{itemize}
-      \item $RG(\Sigma)$ è finito
-      \item $CG(\Sigma)$ è finito
+      \item $SG(\Sigma)$ è finito
+      \item $SGR(\Sigma)$ è finito
     \end{itemize}
     \item \textit{\textbf{safe} (1-safe, sicuro)} sse $\forall s\in S$ e
     $\forall M\in 
@@ -1847,14 +1847,18 @@ concorrente che spesso non ha termine).
     \item $\Sigma$ è \textit{\textbf{1-live} (1-vivo)} sse $\forall t\in T$:
     \[\exists M\in [M_0>:\,\,M[t>\]
     ovvero sse ogni transizione può essere abilitata almeno una volta (ho sempre
-    una marcatura raggiungibile che abilita una transizione). Non avere un
-    sistema 1-live implica un errore nella modellazione dello stesso in quanto
-    si ha una transizione mai abilitata superflua
+    una marcatura raggiungibile che abilita una transizione).\\
+    \textit{Non avere un sistema 1-live implica un errore nella modellazione
+      dello stesso in quanto si ha una transizione mai abilitata superflua}
     \item $\Sigma$ è \textit{\textbf{live} (vivo)} sse $\forall t\in T$ e
     $\forall M\in[M_0>$:
     \[\exists M'\in[M>:\,\,M'[t>\]
     ovvero sse per ogni transizione e per ogni marcatura raggiungibile esiste
-    sempre un'altra marcatura raggiungibile che abilita la transizione
+    sempre un'altra marcatura raggiungibile che abilita la transizione.\\
+    \textit{Si ha che un sistema \emph{live} comporta che tale sistema sia anche
+      \emph{deadlock-free} mentre il fatto che un sistema sia
+      \emph{deadlock-free} non implica necessariamente che sia anche
+      \emph{live}} 
   \end{itemize}
 \end{definizione}
 \newpage
@@ -1864,7 +1868,7 @@ concorrente che spesso non ha termine).
     \centering
     \includegraphics[scale = 0.55]{img/ptc6.jpg}
     \caption{Esempio di sistema \emph{terminante} (quindi non deadlock-free), in
-    quanto scatta al più due volte}
+      quanto scatta al più due volte}
     \includegraphics[scale = 0.55]{img/ptc7.jpg}
     \caption{Esempio di sistema \emph{deadlock-free}, \emph{non terminante} e
       \emph{1-live} ma non live, in quanto può continuare a cicalare, ogni
@@ -1877,10 +1881,93 @@ concorrente che spesso non ha termine).
     \includegraphics[scale = 0.55]{img/ptc9.jpg}
     \caption{Esempio di sistema \emph{1-live} ma non \emph{live}, \emph{non
         terminante} e \emph{non deadlock-free}, in quanto potrebbe sia terminare
-    che non terminare non potendo permettere la riattivazione di tutte le
-    transizioni}  
+      che non terminare non potendo permettere la riattivazione di tutte le
+      transizioni}  
   \end{figure}
 \end{esempio}
+\newpage
+\subsubsection{Reversibilità}
+Un'altra proprietà di comportamento è quella della \textbf{reversibilità}, detta
+anche della \textbf{ciclicità}
+\begin{definizione}
+  Sia $\Sigma=(S,T,F,K,W;M_0)$ un sistema P/T. Si ha che $\Sigma$ è
+  \textit{\textbf{reversible} (reversibile} sse:
+  \[\forall M\in[M_0>:\,\,M_0\in[M>\]
+  ovvero se da una marcatura raggiungile da quella iniziale posso tornare alla
+  marcatura iniziale stessa.\\
+  \begin{figure}[H]
+    \includegraphics[scale = 0.55]{img/ptc10.jpg}
+    ~
+    \includegraphics[scale = 0.55]{img/ptc1.jpg}
+    \caption{A sinistra un esempio di sistema \emph{reversible} e a destra uno
+      \emph{non reversible}} 
+  \end{figure}
+  \textit{Si ha che avere un sistema \emph{reversible} e \emph{1-live} implica
+    avere un sistema \emph{live} ma non si ha per forza il contrario}
+\end{definizione}
+\subsubsection{Tecniche di Verifica delle Proprietà}
+La prima tecnica usata per studiare le proprietà sopra descritte è quello
+dell'analisi del grafo di raggiungibilità $RG(\Sigma)$ e di quello di
+raggiungibilità sequenziale $(SGR(\Sigma))$.\\
+Si ha innanzitutto che:
+\textit{Se $RG(\Sigma)$ è\textbf{ finito}, allora esistono algoritmi per
+  decidere le seguenti proprietà:}
+\begin{itemize}
+  \item un posto è \textit{safe, m-bounded, bounded}
+  \item il sistema $\Sigma$ è \textit{safe, n-bounded, limitato}
+  \item una transizione è \textit{\textbf{dead} (morta)},
+  \textit{1-live},\textit{ live} (\textit{live} se per ogni marcatura
+  raggiungibile ho un cammino che contiene tale transizione)
+  \item il sistema $\Sigma$ va in \textit{deadlock}, è \textit{deadlock-free,
+    1-live e live} 
+  \item il sistema $\Sigma$ è \textit{reversible}
+\end{itemize}
+\newpage
+Si hanno quindi due risultati interessati:
+\begin{enumerate}
+  \item \textit{un sistema $\Sigma$ \textbf{terminante}, ovvero che va in
+    \textbf{deadlock}, implica che il grafo di raggiungibilità $RG(\Sigma)$ ha
+    almeno un \textbf{nodo terminante}, ovvero un nodo da cui non escono archi,
+    e viceversa}.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ptc12a.jpg}
+    \includegraphics[scale = 0.6]{img/ptc12b.jpg}
+    \caption{Esempio di un sistema terminante, col suo grafo di raggiungibilità
+      che presenta, appunto, un nodo terminante, il nodo etichettato con
+      ``$0100$''}
+  \end{figure}
+  \item \textit{un sistema $\Sigma$ \textbf{reversible} implica che il grafo di
+    raggiungibilità $RG(\Sigma)$, come del resto anche quello sequenziale
+    $SRG(\Sigma)$, è \textbf{fortemente connesso}, e viceversa}.\\
+  Si ricorda che un grafo orientato è fortemente connesso se per ogni coppia di
+  nodi esiste un cammino orientato dal primo al secondo nodo.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ptc13.jpg}
+    \includegraphics[scale = 0.7]{img/ptc14.jpg}
+    \caption{Esempio di sistema \emph{live}, \emph{1-safe} e \emph{non
+        reversible} con il grafo di raggiungibilità, quindi, \emph{non
+        fortemente connesso}} 
+  \end{figure}
+\end{enumerate}
+\newpage
+Oltre allo studio del grafo di raggiungibilità si hanno altre tecniche di
+verifica delle proprietà, tra cui l'\textbf{analisi strutturale del grafo della
+  rete} che sfrutta: 
+\begin{itemize}
+  \item \textbf{tecniche di algebra lineare}, che sfruttano la rappresentazione
+  algebrica della rete, mediante:
+  \begin{itemize}
+    \item \textit{equazioni di stato} che descrivono la dinamica attraverso
+    operazioni algebriche tra matrici
+    \item \textit{S-invarianti} e \textit{T-invarianti}
+  \end{itemize}
+  \item \textbf{studio del grafo della rete, di particolari sottoinsiemi di
+    nodi e altre caratteristiche}
+  \item \textbf{condizioni necessarie e sufficienti per garantire proprietà di
+    comportamento di particolari sottoclassi di reti} 
+\end{itemize}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
@@ -1890,4 +1977,4 @@ concorrente che spesso non ha termine).
 % LocalWords:  sinc all'handshacking all'handshacking handshaking asinc primis
 % LocalWords:  Dijkstra starvation upS downD downS fork Phil mod sima multiset
 % LocalWords:  concorrentemente self abbastnza safe simil ptc Mayr bounded live
-% LocalWords:  overflow
+% LocalWords:  overflow reversible dead

@@ -1968,6 +1968,157 @@ verifica delle proprietà, tra cui l'\textbf{analisi strutturale del grafo della
   \item \textbf{condizioni necessarie e sufficienti per garantire proprietà di
     comportamento di particolari sottoclassi di reti} 
 \end{itemize}
+\subsubsection{Safety, Liveness e Fairness}
+Le proprietà che specificano il comportamento dei \textbf{sistemi concorrenti
+  e/o distribuiti} (detti anche \textbf{reattivi}) sono classificate in tre
+principali categorie, a seconda del tipo di comportamento che descrivono:
+\begin{enumerate}
+  \item \textbf{proprietà di safety}, che descrivono proprietà che non devono
+  mai accadere, dichiarano che ``mai accadranno comportamenti indesiderati''
+  (ad esempio: mai un semaforo avrà accese contemporaneamente le luci
+  verde e rossa; mai due semafori ad un incrocio saranno contemporaneamente
+  verdi). \\\textit{Nota: questa proprietà non ha nulla a che vedere con la
+    \emph{1-safeness} (la \emph{safeness}) delle reti P/T}
+  \item \textbf{proprietà di liveness}, che descrivono proprietà che devono
+  essere verificate da tutte le esecuzioni, dichiarano che ``prima o poi un
+  certo fatto deve accadere'' (ad esempio, prima o poi il semaforo diventa
+  verde) 
+  \item \textbf{proprietà di fairness}, che descrivono proprietà che
+  ``descrivono fatti che devono accadere infinitamente spesso'' (ad esempio, la
+  luce verde si accende infinitamente spesso)
+\end{enumerate}
+\subsection{Analisi Strutturale}
+Spesso studiare il grafo di raggiungibilità comporta un costo esponenziale nel
+numero dei posti della rete, le marcature sono almeno dell'ordine di
+$2^{posti}$. Si passa quindi dallo studio del grafo di raggiungibilità allo
+studio della rete stessa mediante la cosiddetta \textbf{analisi strutturale},
+che studia il \textbf{grafo della rete}
+\begin{definizione}
+  Sia $\Sigma=(S,T,F;M_0)$ una \textbf{rete marcata}, reti con capacità
+  dei posti illimitata e peso degli archi $\leq$ 1 (quindi o 0 o 1). Possiamo
+  quindi studiare alcune proprietà strutturali che danno indicazioni sulle
+  proprietà di comportamento:
+  \begin{itemize}
+    \item se un sistema $\Sigma$ è \emph{safe} e \emph{bounded} allora:
+    \[\forall x\in S\cup T,\,\,^\bullet x\neq \emptyset \wedge x^\bullet \neq
+      \emptyset\]
+    ovvero per ogni nodo del grafo della rete non si ha mai che tale nodo abbia
+    un insieme di pre-elementi vuoto (una transizione senza archi entranti
+    sarebbe sempre abilitata permettendole di scattare infinite volte, rendendo
+    il sistema \emph{non bounded}) e un insieme di post-elementi vuoto (una
+    transizione senza archi uscenti, al suo scatto, non svuota le marche prese
+    in input comportando il \emph{non bounded} del sistema). Analogamente si
+    ragiona per i posti.
+    \\ Questa è una \textbf{condizione} \textbf{necessaria}
+    \item se un sistema $\Sigma$ è \emph{safe} e \emph{bounded} allora
+    sicuramente il grafo della rete $(S,T,F)$ è \textbf{strettamente connesso}
+    (si ricorda che in un grafo strettamente connesso, presi due nodi, esiste
+    sempre un cammino tra essi)
+    \item se un sistema $\Sigma$ è \emph{safe} e \emph{bounded} allora:
+    \[\exists M\in[M_o>, \,\exists \sigma \in T^*:\,M[\sigma>M\]
+    \[\mbox{tale che tutte le transizioni in }T\mbox{ occorrono in }\sigma\]
+    ovvero esiste una marcatura raggiungibile ed esiste una sequenza di
+    transizioni tale che a partire da quella marcatura, con quella sequenza, si
+    torna nella stessa marcatura e in questa sequenza compaiono tutte le
+    transizioni del mio sistema.\\
+    \emph{Questa proprietà può essere analizzata sul grafo di raggiungibilità
+      e non sul grafo della rete}
+  \end{itemize}
+  Si hanno anche proprietà strutturali legate al fatto che il grafo della rete
+  $N=(S,T,F)$ sia connesso. Tale rete infatti è:
+  \begin{itemize}
+    \item \textbf{debolmente connessa} (detto anche solo \textbf{connessa}) sse:
+    \[\forall x,y\in S\cup T,\,\,(x,y)\in(F\cup F^{-1})^*\]
+    ovvero presi due nodi qualunque tra gli insiemi dei posti e delle
+    transizioni esiste un cammino non orientato ($(F\cup F^{-1})^*$, dove lo
+    star indica la chiusura transitiva) tra i due nodi
+    \item \textbf{strettamente connessa} sse:
+    \[\forall x,y\in S\cup T,\,\,(x,y)\in F^*\]
+    ovvero presi due nodi qualunque tra gli insiemi dei posti e delle
+    transizioni esiste un cammino orientato ($F^*$) tra i due nodi 
+  \end{itemize}
+  Inoltre si ha che:
+  \begin{itemize}
+    \item un \textbf{cammino semplice} di $N$ è una sequenza
+    \[x_1f_1x_2f_2\ldots f_{n-1}x_n\]
+    che non passa mai due volte per uno stesso nodo e per lo stesso arco,
+    ovvero, formalmente: 
+    \[x_i\in S\cup T \mbox{ e } f_i\in F\]
+    \item un \textbf{ciclo semplice} è un cammino semplice tale che $x_1 = x_n$,
+    ovvero il primo e l'ultimo nodo coincidono
+    \item una rete $N = (S, T , F )$ è \textbf{coperta da cicli} sse, $\forall
+    f\in F$, ovvero ogni arco, appartiene a qualche ciclo
+  \end{itemize}
+\end{definizione}
+Si ha la seguente proposizione:
+\begin{center}
+  Data una rete $N=(S,T,F)$ si ha che essa è \textbf{strettamente connessa} sse
+  $N$ è \textbf{debolmente connessa} e \textbf{coperta da cicli}
+\end{center}
+\newpage
+Si hanno poi delle proprietà strutturali per reti senza marcature:
+\begin{definizione}
+  Data una rete $N=(P,T,F)$ senza marcature (con capacità illimitata e peso
+  degli archi $\leq 1$) si ha che può essere definita:
+  \begin{itemize}
+    \item \textbf{strutturalmente limitata} se:
+    \[\forall M_0:\,\,(P,T,F;M_0) \mbox{ è limitata}\]
+    ovvero per ogni possibile marcatura iniziale il sistema è limitato
+    \item \textbf{strutturalmente viva} se:
+    \[\exists M_0:\,\,(P,T,F;M_0) \mbox{ è viva}\]
+    ovvero se esiste almeno una marcatura iniziale tale per cui il sistema è
+    vivo 
+    \item \textbf{ben formata (\textit{WF, well formed})} se:
+    \[\exists M_0:\,\,(N,M_0) \mbox{ è viva e limitata}\]
+    ovvero esiste almeno una marcatura tale per cui il sistema risulta essere
+    sia vivo che limitato
+  \end{itemize}
+\end{definizione}
+\begin{esempio}
+  Vediamo degli esempi per chiarire come la struttura della rete possa dare
+  indicazioni sul comportamento.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/as.jpg}
+    \caption{Esempio di rete \emph{strutturalmente limitata} \emph{non
+        strutturalmente viva} e \emph{non WF}, infatti $t_3$
+      scatta fino a svuotare i due pre-posti ma dopo lo scatto di una delle due
+      transizioni tra $t_1$ e $t_2$ impedisce lo scatto dell'altra, portando ad
+      uno stato di \emph{deadlock}}
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/as2.jpg}
+    \caption{Esempio di rete \emph{non strutturalmente limitata},
+      \emph{strutturalmente viva} e \emph{non WF}, infatti facendo scattare
+      $t_1$ accumulo una marca in $s_1$ e una in $s_2$. Facendo poi scattare le
+      altre due transizioni accumulo marche in $s_2$, in modo
+      illimitato. D'altro canto la rete è \emph{viva} in quanto può sempre
+      scattare una transizione} 
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/as3.jpg}
+    \caption{Esempio di rete \emph{strutturalmente limitata},
+      \emph{strutturalmente viva}, \emph{WF} e \emph{non reversible}, infatti in
+    ogni posto si ha sempre o una o zero marche e può sempre scattare almeno una
+    transizione}
+  \end{figure}
+\end{esempio}
+Si hanno anche altre proposizioni interessanti:
+\begin{itemize}
+  \item se una rete $N$ senza marcatura è \textbf{well formed} allora si ha che
+  $N$ è \textbf{coperta di cicli}.\\
+  \textit{È una condizione necessaria}
+  \item \textit{ricordando che $N$ è \textbf{strettamente connessa} sse
+    \textbf{debolmente connessa} e \textbf{coperta da cicli},} si ha che se $N$ è
+  \textbf{well formed} e \textbf{debolmente connessa} allora $N$ è
+  \textbf{strettamente connessa}
+\end{itemize}
+\textit{quindi se una rete\emph{ debolmente connessa} non è anche
+  \emph{strettamente connessa}, o \emph{coperta da cicli}, non esiste una
+  marcatura iniziale tale che il sistema così ottenuto sia \emph{vivo} e
+  \emph{limitato}} 
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
@@ -1977,4 +2128,5 @@ verifica delle proprietà, tra cui l'\textbf{analisi strutturale del grafo della
 % LocalWords:  sinc all'handshacking all'handshacking handshaking asinc primis
 % LocalWords:  Dijkstra starvation upS downD downS fork Phil mod sima multiset
 % LocalWords:  concorrentemente self abbastnza safe simil ptc Mayr bounded live
-% LocalWords:  overflow reversible dead
+% LocalWords:  overflow reversible dead Safety Liveness Fairness safety well WF
+% LocalWords:  liveness fairness safeness formed as

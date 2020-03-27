@@ -2758,7 +2758,7 @@ l'ampiezza del sistema di transizioni), che è direttamente proporzionale al
 numero di stati del sistema (lineare rispetto al numero degli stati), e rispetto
 alla lunghezza della formula che esprime la proprietà da testare.
 \newpage
-\subsubsection{Sintassi}
+\subsection{Sintassi}
 Vediamo innanzitutto la \textbf{sintassi} della logica PLTL.\\
 Si ha a che fare con un \textit{vocabolario} più ampio rispetto a quelli della
 logica proposizionale, vengono infatti aggiunti dei \textbf{connettivi} utili
@@ -2836,17 +2836,118 @@ alla rappresentazione temporale richiesta.
     linguaggi. \\
     In termini formali, la BNF può essere vista come un formalismo per descrivere
     grammatiche libere dal contesto.  \\
-    Una specifica BNF è un insieme di regole di derivazione ciascuna espressa nella forma:
+    Una specifica BNF è un insieme di regole di derivazione ciascuna espressa
+    nella forma: 
     \begin{center}
-
       \textit{<simbolo> ::= \_espressione\_}
-      
     \end{center}
   \end{shaded}
 \end{definizione}
 \newpage
-\subsubsection{Semantica}
-%lezione 3
+\subsection{Semantica}
+\begin{definizione}
+  La \textbf{semantica}, ovvero il significato dei connettivi della logica PLTL,
+  è data usando i cosiddetti \textbf{modelli lineari} (si ricorda l'uso di un
+  tempo lineare).\\
+  Si consideri una struttura algebrica di questo tipo:
+  \[M=\langle S,\,\rho, \,\to, \,\Vdash\rangle\]
+  dove:
+  \begin{itemize}
+    \item $S$ è un \textbf{insieme infinito di stati}, detti anche
+    \textbf{mondi}
+    \item $\rho \in S$ è uno stato del modello detto anche \textbf{root} o
+    \textbf{radice}. In tale stato viene codificato il \textbf{tempo zero}
+    \item $\to$ è una relazione binaria su $S$ detta \textbf{relazione di
+      transizione} la quale introduce un \textbf{ordinamento lineare} sugli
+    elementi di $S$. Si ha quindi che:
+    \[\to\,\subseteq S\times S\]
+    e, $\forall \alpha \in S$, \textbf{esiste ed è unico} $\beta\in S$ tale che
+    vale:
+    \[\alpha\to\beta\]
+    Preso quindi uno stato qualsiasi ho un solo modo per passare ad un altro
+    stato (esiste quindi un ``prima'' e un ``dopo'').\\
+    Inoltre vale che, $\forall \alpha\in S$, $\alpha\not\to \rho$, dove $\rho\in
+    S$ è l'unico elemento di $S$ a godere di questa proprietà (in quanto $\rho$
+    codifica il tempo zero). 
+    \item $\Vdash$ è una relazione binaria, inclusa in $S\times V$, detta
+    \textbf{relazione di soddisfacibilità}. Solitamente con $\alpha\Vdash\p$
+    si indica che $(\alpha,\p)\in\,\Vdash$ è valido, ovvero che $alpha$
+    \textbf{soddisfa} $p$, con $\alpha\in S$ e $p\in V$
+  \end{itemize}
+  La struttura $M$ viene detta \textbf{modello per PLTL}.\\
+  Si nota come questi modelli lineari seguano un ordinamento simile a quello che
+  si ha tra i numeri in $\mathbb{N}$.\\ 
+  Si nota come la semantica della logica PLTL sia drasticamente più complessa
+  di quella della logica classica proposizionale 
+\end{definizione}
+\newpage
+Bisogna dare ora significato ai connettivi PLTL. Per i connettivi della logica
+proposizionale si usano tavole di verità e induzione ma per la logica PLTL le
+cose sono un po' diverse.\\
+Per dare un significato alle formule del linguaggio PLTL bisogna basarsi sui
+modelli per PLTL
+\begin{definizione}
+  Siano:
+  \begin{itemize}
+    \item $M=\langle S,\,\rho, \,\to, \,\Vdash\rangle$ un modello per PLTL
+    \item $\alpha\in S$ uno stato
+    \item $A$ una formula del linguaggio PLTL
+  \end{itemize}
+  si ha che la \textbf{soddisfacibilità} di $A$ nello stato $\alpha$ di $M$
+  viene indicata con:
+  \[(M,\alpha)\Vdash A\]
+  e tale soddisfacibilità (o verità) della formula $A$ viene definita per
+  induzione sulla struttura di $A$ nel seguente modo:
+  \begin{enumerate}
+    \item se $A$ è una variabile proposizionale allora vale $(M,\alpha)\Vdash A$
+    sse $\alpha\Vdash A$ per la relazione $\Vdash$ definita da $M$. Questo è un
+    \textbf{caso base}
+    \item se $A$ è $\top$ allora vale $(M,\alpha)\Vdash\top$, ovvero il true è
+    \textbf{soddisfatto} o \textbf{forzato} ovunque. Il simbolo \emph{true} è
+    vero in ogni stato e in ogni modello (siamo nel concetto di tautologia).
+    Questo è un \textbf{caso base}
+    \item se $A$ è $\bot$ allora vale $(M,\alpha)\nVdash\bot$, ovvero il false
+    non è mai soddisfatto qualsiasi sia lo stato. Questo è un \textbf{caso base}
+    \item se $A$ è $B\land C$ (con $B$ e $C$ formule PLTL) allora vale
+    $(M,\alpha)\Vdash B\land C$ sse $(M,\alpha)\Vdash B$ e $(M,\alpha)\Vdash C$
+    \item se $A$ è $B\lor C$ (con $B$ e $C$ formule PLTL) allora vale
+    $(M,\alpha)\Vdash B\lor C$ sse $(M,\alpha)\Vdash B$ oppure $(M,\alpha)\Vdash
+    C$ 
+    \item se $A$ è $B\to C$ (con $B$ e $C$ formule PLTL) allora vale\\
+    $(M,\alpha)\Vdash B\to C$ sse $(M,\alpha)\nVdash B$ oppure $(M,\alpha)\Vdash
+    C$ 
+    \item se $A$ è $\neg B$ (con $B$ formula PLTL) allora vale
+    $(M,\alpha)\Vdash\neg B$ sse vale $(M,\alpha)\nVdash B$
+    \newpage
+    \item se $A$ è del tipo $\mathbf{X}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{X}\,B$ sse vale $(M,\beta)\Vdash B$ (ovvero quando $B$ è soddisfatto
+    nello stato $\beta$ di M), dove $\beta\in S$ è lo stato
+    successivo (nonché unico) ad $\alpha$, ovvero si ha $\alpha\to\beta$
+    \item se $A$ è del tipo $\mathbf{F}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{F}\,B$ sse esiste una sequenza finita
+    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+    0$, tale che $(M,\alpha_n)\Vdash B$ (ovvero sse esiste un punto ``nel
+    futuro'', ovvero $alpha_n$, che però potrebbe anche essere $\alpha_0$, dove
+    la formula $B$ è soddisfatta)
+    \item se $A$ è del tipo $B\,\mathbf{U}\,B$ allora vale $(M,\alpha)\Vdash
+    B\,\mathbf{U}\,C$ sse esiste una sequenza finita
+    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+    0$, tale che $(M,\alpha_n)\Vdash C$ e tale che $(M,\alpha_i)\Vdash
+    B,\,\,\,i=0,1,\ldots,n-1$ (ovvero deve esistere uno stato ``nel futuro'' di
+    $\alpha$ che soddisfa $C$ e uno stato intermedio a quello che soddisfa $C$
+    che soddisfi $B$) 
+    \item se $A$ è del tipo $\mathbf{G}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{G}\,B$ sse $(M,\alpha)\Vdash B$ e $(M,\beta)\Vdash \mathbf{G}\,B$
+    dove $\beta\in S$ è lo stato successivo (nonché unico) ad $\alpha$, ovvero
+    si ha $\alpha\to\beta$ (ovvero sse nello stato $\alpha$ è soddisfatto $B$ e
+    nello stato $\beta$ è soddisfatto $\mathbf{G}\,B$). Questa è una definizione
+    ricorsiva (anche se uso $\mathbf{G}\,B$ su uno stato successivo ad
+    $\alpha$)
+  \end{enumerate}
+  I primi 3 punti sono i casi base, quelli successivi sono i passi induttivi.\\
+  I primi 7 punti sono simili a quelli della logica proposizionale, se ci
+  limitiamo ad un solo mondo
+\end{definizione}
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
@@ -2861,4 +2962,4 @@ alla rappresentazione temporale richiesta.
 % LocalWords:  affinchè sottoformula insoddisfacibile Morgan Idempotenza Linear
 % LocalWords:  all'handshacking sottoformule Propositional Logic checking next
 % LocalWords:  tomorrow sometime globally always until true bottom label BNF
-% LocalWords:  Form
+% LocalWords:  Form root soddisfacibilità

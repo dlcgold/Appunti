@@ -83,6 +83,8 @@
   contenere errori, sia di stampa che di vero e proprio contenuto. Per
   eventuali proposte di correzione effettuare una pull request. Link: }
 \url{https://github.com/dlcgold/Appunti}.\\
+\textit{\textbf{Si segnala che le immagini sono tratte dalle slide del
+    corso}}.\\  
 \textbf{Grazie mille e buono studio!}
 \section{Contenuti del Corso}
 \textit{Il corso tratta di metodi e tecniche formali per specificare, disegnare e
@@ -3003,15 +3005,113 @@ nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
   crea una catena di stati che soddisfano sempre $B$ e anche $\mathbf{G}\,B$. Si
   dice che $\mathbf{G}\,B$ è \textbf{persistente in avanti}, ovvero dal tempo
   iniziale in cui si afferma un \emph{globally} si avrà che in ogni stato sarà
-  affermato il \emph{globally} 
+  affermato il \emph{globally}.\\
+  \newpage
+  Vediamo un esempio di modello infinito:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pltl6.png}
+    \caption{Esempio pratico di un modello PLTL con la rappresentazione dei vari
+    connettivi logici. \textbf{Errata corrige}: nella prima riga, a destra, non
+    è $\alpha\Vdash \square \, t$ bensì $\rho\Vdash \square \, t$}
+  \end{figure}
+  In questo modello la variabile proporzionale $t$ è sempre soddisfatta, in ogni
+  stato, e quindi si ha che vale la relazione:
+  \[\theta\Vdash t,\,\,\forall \theta \in S\]
+  Si usa, in generale, la stessa tecnica di analisi della logica proporzionale,
+  partendo dallo studio delle variabili e arrivando gradualmente allo studio
+  della formula finale più complessa
 \end{esempio}
-\newpage
 \begin{definizione}
   Quando $(M,\alpha)\Vdash A$ vale diremo che $M$ \textbf{soddisfa} $A$
   \textbf{nello stato} $\alpha$ o che $A$ \textbf{è vera nello stato} $\alpha$
   \textbf{di} $M$. Quando non dovesse esserci ambiguità circa il modello di cui
   si parla scriveremo semplicemente $\alpha\Vdash A$ invece di $(M,\alpha)\Vdash
   A$.  
+\end{definizione}
+\newpage
+Si nota come sia possibile stabilire un ordinamento lineare tra i vari stati
+del sistema, avendo una corrispondenza biunivoca tra il modello PLTL è la
+rappresentazione dei numeri naturali. Si ha quindi che $\rho$ rappresenta lo
+$0$ (il tempo zero) mentre gli archi $\to$ rappresentano il $+1$, ovvero il
+\textbf{successore}.\\ 
+Possiamo definire i modelli per PLTL in modo più compatto come una coppia
+$M=\langle \mathbb{N},\Vdash\rangle$, con $ \Vdash \subseteq \mathbb{N}\times
+V$. In questo modo $\mathbb{N}$ diventa l’insieme degli stati e, per ogni stato,
+specifica quali formule atomiche sono soddisfatte. \\
+Dato che implicitamente assumiamo che gli elementi di $\mathbb{N}$ si 
+susseguano esattamente nel modo standard, la nozione di soddisfacibilità di
+formule per il linguaggio PLTL può essere data in modo compatto.
+\begin{definizione}
+  Siano $M=\langle \mathbb{N},\Vdash\rangle$ un modello per PLTL, $t\in
+  \mathbb{N}$ e $A$ una formula del linguaggio PLTL.\\
+  La \textbf{soddisfacibilità di} $A$ \textbf{nello stato (o, detto meglio,
+    \emph{al tempo})} $t$ \textbf{di} $M$, indicata con:
+  \[(M,t)\Vdash A\]
+  \begin{center}
+    o più brevemente con:
+  \end{center}
+  \[t\Vdash A\]
+  viene definita per induzione sulla struttura di $A$ come segue:
+  \begin{enumerate}
+    \item nel caso $A$ sia una variabile proposizionale allora vale
+    $(M,t)\Vdash A$ sse vale $t\Vdash A$ per la relazione $\Vdash$ di $M$
+    \item nel caso $A$ sia $\top$ allora vale $(M,t)\Vdash \top$
+    \item nel caso $A$ sia $\bot$ allora vale $(M,t)\nVdash \bot$
+    \item nel caso $A$ sia $B\land C$ allora vale $(M,t)\Vdash B\land C$ sse
+    valgono $(M,t)\Vdash B$ e $(M,t)\Vdash C$
+    \item nel caso $A$ sia $B\lor C$ allora vale $(M,t)\Vdash B\lor C$ sse
+    valgono $(M,t)\Vdash B$ oppure $(M,t)\Vdash C$
+    \item nel caso $A$ sia $B\to C$ allora vale $(M,t)\Vdash B\to C$ sse
+    valgono $(M,t)\nVdash B$ oppure $(M,t)\Vdash C$
+    \item nel caso $A$ sia $\neg B$ allora vale $(M,t)\Vdash \neg B$ sse
+    $(M,t)\nVdash B$
+    \item nel caso $A$ sia del tipo $\mathbf{X}\,B$ allora vale $(M,t)\Vdash
+    \mathbf{X}\,B$ sse vale $(M,t+1)\Vdash B$
+    \item nel caso $A$ sia del tipo $\mathbf{F}\,B$ allora vale $(M,t)\Vdash
+    \mathbf{F}\,B$ sse $\exists\, t'\geq t$ tale che vale $(M,t')\Vdash B$
+    \item nel caso $A$ sia del tipo $B\mathbf{U}\,C$ allora vale $(M,t)\Vdash
+    B\mathbf{U}\,C$ sse $\exists\, t'\geq t$ tale che vale $(M,t')\Vdash C$ e,
+    per $t''=t,\ldots,t'$, vale $(M,t'')\Vdash B$
+    \item nel caso $A$ sia del tipo $\mathbf{G}\,A$ allora vale $(M,t)\Vdash
+    \mathbf{G}\,A$ sse $\forall\, t'\geq t$ vale $(M,t')\Vdash A$
+  \end{enumerate}
+  \textbf{I connettivi temporali vengono rappresentati in una forma
+    drasticamente più compatta grazie alla rappresentazione mediante numeri
+    naturali.}\\ 
+  Quindi, in questa \emph{scrittura alternativa}, ad ogni stato si associa un
+  numero intero e viceversa ad ogni intero viene associato uno stato. Questa
+  scrittura però non risulta comoda per la rappresentazione dei sistemi P/T,
+  dove non si ha una struttura obbligatoriamente lineare rappresentabile tramite
+  una sequenza di numeri naturali.
+\end{definizione}
+\begin{definizione}
+  Si definiscono nella logica PLTL i seguenti concetti:
+  \begin{itemize}
+    \item una formula $A$ è \textbf{soddisfacibile} nella logica PLTL se
+    esistono un modello $M=\langle \mathbb{N},\Vdash\rangle$ ed un tempo
+    $t\in\mathbb{N}$, tale che $(M,t)\Vdash A$
+    \item una formula $A$ è una \textbf{tautologia} nella logica PLTL se per
+    ogni modello $M=\langle \mathbb{N},\Vdash\rangle$ e per ogni tempo
+    $t\in\mathbb{N}$, vale che$ (M,t)\Vdash A$
+    \item una formula $A$ è una \textbf{contraddizione} nella logica PLTL se
+    $\neg A$ è una tautologia
+  \end{itemize}
+  Si nota l'analogia di questi concetti tra la logica PLTL e la logica classica
+  proporzionale.\\
+  Si nota che la soddisfacibilità di una formula al tempo $t$ dipende solo dal
+  tempo $t$ stesso e dai tempi seguenti: non dipende dal tempo \emph{passato}.\\
+  Se una formula è soddisfacibile al tempo $t$ lo è anche nel sotto-modello
+  ottenuto rimuovendo al modello iniziale tutti gli stati precedenti al tempo
+  $t$.\\
+  Si dice che: \textbf{lo stato presente ci dice tutto}
+\end{definizione}
+\begin{definizione}
+  Vengono quindi definite alcune proprietà dei connettivi temporali nella logica
+  PLTL:
+  \begin{itemize}
+    \item
+  \end{itemize}
 \end{definizione}
 \end{document}
 
@@ -3027,4 +3127,4 @@ nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
 % LocalWords:  affinchè sottoformula insoddisfacibile Morgan Idempotenza Linear
 % LocalWords:  all'handshacking sottoformule Propositional Logic checking next
 % LocalWords:  tomorrow sometime globally always until true bottom label BNF
-% LocalWords:  Form root soddisfacibilità pltl png
+% LocalWords:  Form root soddisfacibilità pltl png slide

@@ -79,13 +79,15 @@
     \ \thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 \newcommand{\floor}[1]{\lfloor #1 \rfloor}
-
+\newcommand{\MYhref}[3][blue]{\href{#2}{\color{#1}{#3}}}%
 \chapter{Introduzione}
 \textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta
   una revisione è altamente probabile (praticamente certo) che possano
   contenere errori, sia di stampa che di vero e proprio contenuto. Per
   eventuali proposte di correzione effettuare una pull request. Link: }
 \url{https://github.com/dlcgold/Appunti}.\\
+\textit{\textbf{Si segnala che le immagini sono tratte dalle slide del
+    corso}}.\\  
 \textbf{Grazie mille e buono studio!}
 \section{Contenuti del Corso}
 \textit{Il corso tratta di metodi e tecniche formali per specificare, disegnare e
@@ -2404,7 +2406,9 @@ Vediamo ora come rappresentare la regola di scatto usando le matrici.
 \end{definizione}
 \chapter{Logica PLTL}
 \section{Ripasso Logica Proposizionale}
-\emph{Si ringrazia Marco Natali per questo ripasso}\\
+\emph{Si ringrazia
+  \MYhref{https://github.com/bigboss98/appunti/tree/master/Fondamenti}{Marco
+  Natali} per questo ripasso}\\ 
 La logica è lo studio del ragionamento e dell’argomentazione e, in particolare,
 dei procedimenti inferenziali, rivolti a chiarire quali	procedimenti di pensiero
 siano validi e quali no. Vi sono molteplici tipologie di logiche, come ad
@@ -2761,7 +2765,7 @@ l'ampiezza del sistema di transizioni), che è direttamente proporzionale al
 numero di stati del sistema (lineare rispetto al numero degli stati), e rispetto
 alla lunghezza della formula che esprime la proprietà da testare.
 \newpage
-\subsubsection{Sintassi}
+\subsection{Sintassi}
 Vediamo innanzitutto la \textbf{sintassi} della logica PLTL.\\
 Si ha a che fare con un \textit{vocabolario} più ampio rispetto a quelli della
 logica proposizionale, vengono infatti aggiunti dei \textbf{connettivi} utili
@@ -2813,9 +2817,573 @@ alla rappresentazione temporale richiesta.
     \end{itemize}
     \item nient'altro appartiene all'insieme delle formule del linguaggio PLTL
   \end{itemize}
-  Quindi si nota come 
+  Quindi si nota come \textbf{l'insieme delle formule PLTL contiene quello delle
+    formule classiche della logica proporzionale}. Si ha quindi che l'insieme
+  delle formule PLTL non è altro che un'estensione di quello delle formule
+  classiche della logica proposizionale.\\
 \end{definizione}
-
+\begin{definizione}
+  La sintassi delle formule del linguaggio PLTL possono essere definite usando
+  anche la notazione \textbf{BNF (Backus-Naur Form o Backus Normal Form)},
+  ovvero, $\forall p\in V$:
+  \[A::=p\,|\,\top\,|\,\bot\,|\,(\neg A)\,|\,(A\land A)\,|\,(A\lor A)\,|\,(A\to
+    A)\,|\,(\mathbf{X}A)\,|\,\mathbf{F}A\,|\,\mathbf{G}A\,|\,(A\mathbf{U}A)\]
+  Non si è usata quindi una definizione ricorsiva ma viene invece usata una
+  \textbf{grammatica}\\
+  \begin{shaded}
+    La BNF (Backus-Naur Form o Backus Normal Form) è una metasintassi, ovvero un
+    formalismo attraverso cui è possibile descrivere la sintassi di linguaggi
+    formali (il prefisso meta ha proprio a che vedere con la natura circolare di
+    questa definizione). Si tratta di uno strumento molto usato per descrivere
+    in modo preciso e non ambiguo la sintassi dei linguaggi di programmazione,
+    dei protocolli di rete e così via, benché non manchino in letteratura esempi
+    di sue applicazioni a contesti anche non informatici e addirittura non
+    tecnologici. La BNF viene usata nella maggior parte dei testi sulla teoria
+    dei linguaggi di programmazione e in molti testi introduttivi su specifici
+    linguaggi. \\
+    In termini formali, la BNF può essere vista come un formalismo per descrivere
+    grammatiche libere dal contesto.  \\
+    Una specifica BNF è un insieme di regole di derivazione ciascuna espressa
+    nella forma: 
+    \begin{center}
+      \textit{<simbolo> ::= \_espressione\_}
+    \end{center}
+  \end{shaded}
+\end{definizione}
+\newpage
+\subsection{Semantica}
+\begin{definizione}
+  La \textbf{semantica}, ovvero il significato dei connettivi della logica PLTL,
+  è data usando i cosiddetti \textbf{modelli lineari} (si ricorda l'uso di un
+  tempo lineare).\\
+  Si consideri una struttura algebrica di questo tipo:
+  \[M=\langle S,\,\rho, \,\to, \,\Vdash\rangle\]
+  dove:
+  \begin{itemize}
+    \item $S$ è un \textbf{insieme infinito di stati}, detti anche
+    \textbf{mondi}
+    \item $\rho \in S$ è uno stato del modello detto anche \textbf{root} o
+    \textbf{radice}. In tale stato viene codificato il \textbf{tempo zero}
+    \item $\to$ è una relazione binaria su $S$ detta \textbf{relazione di
+      transizione} la quale introduce un \textbf{ordinamento lineare} sugli
+    elementi di $S$. Si ha quindi che:
+    \[\to\,\subseteq S\times S\]
+    e, $\forall \alpha \in S$, \textbf{esiste ed è unico} $\beta\in S$ tale che
+    vale:
+    \[\alpha\to\beta\]
+    Preso quindi uno stato qualsiasi ho un solo modo per passare ad un altro
+    stato (esiste quindi un ``prima'' e un ``dopo'').\\
+    Inoltre vale che, $\forall \alpha\in S$, $\alpha\not\to \rho$, dove $\rho\in
+    S$ è l'unico elemento di $S$ a godere di questa proprietà (in quanto $\rho$
+    codifica il tempo zero). 
+    \item $\Vdash$ è una relazione binaria, inclusa in $S\times V$, detta
+    \textbf{relazione di soddisfacibilità}. Solitamente con $\alpha\Vdash\p$
+    si indica che $(\alpha,\p)\in\,\Vdash$ è valido, ovvero che $alpha$
+    \textbf{soddisfa} $p$, con $\alpha\in S$ e $p\in V$
+  \end{itemize}
+  La struttura $M$ viene detta \textbf{modello per PLTL}.\\
+  Si nota come questi modelli lineari seguano un ordinamento simile a quello che
+  si ha tra i numeri in $\mathbb{N}$.\\ 
+  Si nota come la semantica della logica PLTL sia drasticamente più complessa
+  di quella della logica classica proposizionale 
+\end{definizione}
+\newpage
+Bisogna dare ora significato ai connettivi PLTL. Per i connettivi della logica
+proposizionale si usano tavole di verità e induzione ma per la logica PLTL le
+cose sono un po' diverse.\\
+Per dare un significato alle formule del linguaggio PLTL bisogna basarsi sui
+modelli per PLTL
+\begin{definizione}
+  Siano:
+  \begin{itemize}
+    \item $M=\langle S,\,\rho, \,\to, \,\Vdash\rangle$ un modello per PLTL
+    \item $\alpha\in S$ uno stato
+    \item $A$ una formula del linguaggio PLTL
+  \end{itemize}
+  si ha che la \textbf{soddisfacibilità} di $A$ nello stato $\alpha$ di $M$
+  viene indicata con:
+  \[(M,\alpha)\Vdash A\]
+  e tale soddisfacibilità (o verità) della formula $A$ viene definita per
+  induzione sulla struttura di $A$ nel seguente modo:
+  \begin{enumerate}
+    \item se $A$ è una variabile proposizionale allora vale $(M,\alpha)\Vdash A$
+    sse $\alpha\Vdash A$ per la relazione $\Vdash$ definita da $M$. Questo è un
+    \textbf{caso base}
+    \item se $A$ è $\top$ allora vale $(M,\alpha)\Vdash\top$, ovvero il true è
+    \textbf{soddisfatto} o \textbf{forzato} ovunque. Il simbolo \emph{true} è
+    vero in ogni stato e in ogni modello (siamo nel concetto di tautologia).
+    Questo è un \textbf{caso base}
+    \item se $A$ è $\bot$ allora vale $(M,\alpha)\nVdash\bot$, ovvero il false
+    non è mai soddisfatto qualsiasi sia lo stato. Questo è un \textbf{caso base}
+    \item se $A$ è $B\land C$ (con $B$ e $C$ formule PLTL) allora vale
+    $(M,\alpha)\Vdash B\land C$ sse $(M,\alpha)\Vdash B$ e $(M,\alpha)\Vdash C$
+    \item se $A$ è $B\lor C$ (con $B$ e $C$ formule PLTL) allora vale
+    $(M,\alpha)\Vdash B\lor C$ sse $(M,\alpha)\Vdash B$ oppure $(M,\alpha)\Vdash
+    C$ 
+    \item se $A$ è $B\to C$ (con $B$ e $C$ formule PLTL) allora vale\\
+    $(M,\alpha)\Vdash B\to C$ sse $(M,\alpha)\nVdash B$ oppure $(M,\alpha)\Vdash
+    C$ 
+    \item se $A$ è $\neg B$ (con $B$ formula PLTL) allora vale
+    $(M,\alpha)\Vdash\neg B$ sse vale $(M,\alpha)\nVdash B$
+    \newpage
+    \item se $A$ è del tipo $\mathbf{X}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{X}\,B$ sse vale $(M,\beta)\Vdash B$ (ovvero quando $B$ è soddisfatto
+    nello stato $\beta$ di M), dove $\beta\in S$ è lo stato
+    successivo (nonché unico) ad $\alpha$, ovvero si ha $\alpha\to\beta$
+    \item se $A$ è del tipo $\mathbf{F}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{F}\,B$ sse esiste una sequenza finita
+    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+    0$, tale che $(M,\alpha_n)\Vdash B$ (ovvero sse esiste un punto ``nel
+    futuro'', ovvero $alpha_n$, che però potrebbe anche essere $\alpha_0$, dove
+    la formula $B$ è soddisfatta)
+    \item se $A$ è del tipo $B\,\mathbf{U}\,B$ allora vale $(M,\alpha)\Vdash
+    B\,\mathbf{U}\,C$ sse esiste una sequenza finita
+    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+    0$, tale che $(M,\alpha_n)\Vdash C$ e tale che $(M,\alpha_i)\Vdash
+    B,\,\,\,i=0,1,\ldots,n-1$ (ovvero deve esistere uno stato ``nel futuro'' di
+    $\alpha$ che soddisfa $C$ e uno stato intermedio a quello che soddisfa $C$
+    che soddisfi $B$) 
+    \item se $A$ è del tipo $\mathbf{G}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{G}\,B$ sse $(M,\alpha)\Vdash B$ e $(M,\beta)\Vdash \mathbf{G}\,B$
+    dove $\beta\in S$ è lo stato successivo (nonché unico) ad $\alpha$, ovvero
+    si ha $\alpha\to\beta$ (ovvero sse nello stato $\alpha$ è soddisfatto $B$ e
+    nello stato $\beta$ è soddisfatto $\mathbf{G}\,B$). Questa è una definizione
+    ricorsiva (anche se uso $\mathbf{G}\,B$ su uno stato successivo ad
+    $\alpha$)
+  \end{enumerate}
+  I primi 3 punti sono i casi base, quelli successivi sono i passi induttivi.\\
+  I primi 7 punti sono simili a quelli della logica proposizionale, se ci
+  limitiamo ad un solo mondo
+\end{definizione}
+\begin{esempio}
+  Graficamente si ha qualcosa del tipo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.263]{img/pltl.png}
+  \end{figure}
+  \textbf{che prosegue infinitamente}. Si nota che in ogni stato si specifica se
+  una variabile proposizionale (che sono infinite) è soddisfatta e, per ciascuna
+  variabile, si definisce una sorta di \textit{tabella di verità}, che
+  specificare la soddisfacibilità di una variabile in un determinato stato
+\end{esempio}
+Si nota che la definizione di \textbf{modello PLTL} non esclude che due stati
+diversi possano soddisfare le stesse variabili, ovvero che si possano comportare
+nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
+\begin{esempio}
+  Possiamo anche, per esempio, dare una rappresentazione grafica dei nuovi
+  connettivi, per esempio del \textbf{next}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pltl2.png}
+  \end{figure}
+  Ovvero in $\alpha$ è soddisfatto $B$, $\alpha\Vdash\mathbf{X}B$, sse nello
+  stato successivo $\beta$ è soddisfatto $B$.\\
+  Vediamo anche il connettivo \textbf{future}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.27]{img/pltl3.png}
+  \end{figure}
+  Si nota che se posso affermare che nello stato $\alpha$ si possa affermare
+  $\mathbf{F}\,B$ allora tutti gli elementi della sequenza finita possono
+  affermare $\mathbf{F}B$ (compreso l'ultimo stato stesso e compresa l'ipotetica
+  radice).
+  \newpage
+  Questa proprietà è detta \textbf{persistenza all'indietro}, ovvero se
+  un certo stato soddisfa una formula nel futuro allora tutti gli stati
+  nell'intervallo possono fare la medesima affermazione (estremi inclusi).\\
+  Vediamo ora il connettivo \textbf{until}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.27]{img/pltl4.png}
+  \end{figure}
+  Se però si avesse un lasso di tempo nullo non avrei bisogno della
+  soddisfacibilità di $B$ (infatti si ha che $(M,\alpha_i)\Vdash
+  B,\,\,\,i=0,1,\ldots,n-1$).\\ 
+  Vediamo infine il connettivo \textbf{globally}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.35]{img/pltl5.png}
+  \end{figure}
+  si può letteralmente visualizzare la definizione ricorsiva del connettivo. Si
+  crea una catena di stati che soddisfano sempre $B$ e anche $\mathbf{G}\,B$. Si
+  dice che $\mathbf{G}\,B$ è \textbf{persistente in avanti}, ovvero dal tempo
+  iniziale in cui si afferma un \emph{globally} si avrà che in ogni stato sarà
+  affermato il \emph{globally}.\\
+  \newpage
+  Vediamo un esempio di modello infinito:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pltl6.png}
+    \caption{Esempio pratico di un modello PLTL con la rappresentazione dei vari
+    connettivi logici. \textbf{Errata corrige}: nella prima riga, a destra, non
+    è $\alpha\Vdash \square \, t$ bensì $\rho\Vdash \square \, t$}
+  \end{figure}
+  In questo modello la variabile proporzionale $t$ è sempre soddisfatta, in ogni
+  stato, e quindi si ha che vale la relazione:
+  \[\theta\Vdash t,\,\,\forall \theta \in S\]
+  Si usa, in generale, la stessa tecnica di analisi della logica proporzionale,
+  partendo dallo studio delle variabili e arrivando gradualmente allo studio
+  della formula finale più complessa
+\end{esempio}
+\begin{definizione}
+  Quando $(M,\alpha)\Vdash A$ vale diremo che $M$ \textbf{soddisfa} $A$
+  \textbf{nello stato} $\alpha$ o che $A$ \textbf{è vera nello stato} $\alpha$
+  \textbf{di} $M$. Quando non dovesse esserci ambiguità circa il modello di cui
+  si parla scriveremo semplicemente $\alpha\Vdash A$ invece di $(M,\alpha)\Vdash
+  A$.  
+\end{definizione}
+\newpage
+Si nota come sia possibile stabilire un ordinamento lineare tra i vari stati
+del sistema, avendo una corrispondenza biunivoca tra il modello PLTL è la
+rappresentazione dei numeri naturali. Si ha quindi che $\rho$ rappresenta lo
+$0$ (il tempo zero) mentre gli archi $\to$ rappresentano il $+1$, ovvero il
+\textbf{successore}.\\ 
+Possiamo definire i modelli per PLTL in modo più compatto come una coppia
+$M=\langle \mathbb{N},\Vdash\rangle$, con $ \Vdash \subseteq \mathbb{N}\times
+V$. In questo modo $\mathbb{N}$ diventa l’insieme degli stati e, per ogni stato,
+specifica quali formule atomiche sono soddisfatte. \\
+Dato che implicitamente assumiamo che gli elementi di $\mathbb{N}$ si 
+susseguano esattamente nel modo standard, la nozione di soddisfacibilità di
+formule per il linguaggio PLTL può essere data in modo compatto.
+\begin{definizione}
+  Siano $M=\langle \mathbb{N},\Vdash\rangle$ un modello per PLTL, $t\in
+  \mathbb{N}$ e $A$ una formula del linguaggio PLTL.\\
+  La \textbf{soddisfacibilità di} $A$ \textbf{nello stato (o, detto meglio,
+    \emph{al tempo})} $t$ \textbf{di} $M$, indicata con:
+  \[(M,t)\Vdash A\]
+  \begin{center}
+    o più brevemente con:
+  \end{center}
+  \[t\Vdash A\]
+  viene definita per induzione sulla struttura di $A$ come segue:
+  \begin{enumerate}
+    \item nel caso $A$ sia una variabile proposizionale allora vale
+    $(M,t)\Vdash A$ sse vale $t\Vdash A$ per la relazione $\Vdash$ di $M$
+    \item nel caso $A$ sia $\top$ allora vale $(M,t)\Vdash \top$
+    \item nel caso $A$ sia $\bot$ allora vale $(M,t)\nVdash \bot$
+    \item nel caso $A$ sia $B\land C$ allora vale $(M,t)\Vdash B\land C$ sse
+    valgono $(M,t)\Vdash B$ e $(M,t)\Vdash C$
+    \item nel caso $A$ sia $B\lor C$ allora vale $(M,t)\Vdash B\lor C$ sse
+    valgono $(M,t)\Vdash B$ oppure $(M,t)\Vdash C$
+    \item nel caso $A$ sia $B\to C$ allora vale $(M,t)\Vdash B\to C$ sse
+    valgono $(M,t)\nVdash B$ oppure $(M,t)\Vdash C$
+    \item nel caso $A$ sia $\neg B$ allora vale $(M,t)\Vdash \neg B$ sse
+    $(M,t)\nVdash B$
+    \item nel caso $A$ sia del tipo $\mathbf{X}\,B$ allora vale $(M,t)\Vdash
+    \mathbf{X}\,B$ sse vale $(M,t+1)\Vdash B$
+    \item nel caso $A$ sia del tipo $\mathbf{F}\,B$ allora vale $(M,t)\Vdash
+    \mathbf{F}\,B$ sse $\exists\, t'\geq t$ tale che vale $(M,t')\Vdash B$
+    \item nel caso $A$ sia del tipo $B\mathbf{U}\,C$ allora vale $(M,t)\Vdash
+    B\mathbf{U}\,C$ sse $\exists\, t'\geq t$ tale che vale $(M,t')\Vdash C$ e,
+    per $t''=t,\ldots,t'$, vale $(M,t'')\Vdash B$
+    \item nel caso $A$ sia del tipo $\mathbf{G}\,A$ allora vale $(M,t)\Vdash
+    \mathbf{G}\,A$ sse $\forall\, t'\geq t$ vale $(M,t')\Vdash A$
+  \end{enumerate}
+  \textbf{I connettivi temporali vengono rappresentati in una forma
+    drasticamente più compatta grazie alla rappresentazione mediante numeri
+    naturali.}\\ 
+  Quindi, in questa \emph{scrittura alternativa}, ad ogni stato si associa un
+  numero intero e viceversa ad ogni intero viene associato uno stato. Questa
+  scrittura però non risulta comoda per la rappresentazione dei sistemi P/T,
+  dove non si ha una struttura obbligatoriamente lineare rappresentabile tramite
+  una sequenza di numeri naturali.
+\end{definizione}
+\begin{definizione}
+  Si definiscono nella logica PLTL i seguenti concetti:
+  \begin{itemize}
+    \item una formula $A$ è \textbf{soddisfacibile} nella logica PLTL se
+    esistono un modello $M=\langle \mathbb{N},\Vdash\rangle$ ed un tempo
+    $t\in\mathbb{N}$, tale che $(M,t)\Vdash A$
+    \item una formula $A$ è una \textbf{tautologia} nella logica PLTL se per
+    ogni modello $M=\langle \mathbb{N},\Vdash\rangle$ e per ogni tempo
+    $t\in\mathbb{N}$, vale che$ (M,t)\Vdash A$
+    \item una formula $A$ è una \textbf{contraddizione} nella logica PLTL se
+    $\neg A$ è una tautologia
+  \end{itemize}
+  Si nota l'analogia di questi concetti tra la logica PLTL e la logica classica
+  proporzionale.\\
+  Si nota che la soddisfacibilità di una formula al tempo $t$ dipende solo dal
+  tempo $t$ stesso e dai tempi seguenti: non dipende dal tempo \emph{passato}.\\
+  Se una formula è soddisfacibile al tempo $t$ lo è anche nel sotto-modello
+  ottenuto rimuovendo al modello iniziale tutti gli stati precedenti al tempo
+  $t$.\\
+  Si dice che: \textbf{lo stato presente ci dice tutto}
+\end{definizione}
+\subsection{Proprietà dei Connettivi Temporali}
+\begin{definizione}
+  Vengono quindi definite alcune proprietà dei connettivi temporali nella logica
+  PLTL:
+  \begin{itemize}
+    \item se vale $(M,t)\Vdash \mathbf{F}\,A$ allora $\forall t'\leq t$ vale
+    $(M,t')\Vdash \mathbf{F}\,A$, quindi il \emph{future} è \textbf{persistente
+      all'indietro}
+    \item se vale $(M,t)\Vdash \mathbf{G}\,A$ allora $\forall t'\geq t$ vale
+    $(M,t')\Vdash \mathbf{G}\,A$, quindi il \emph{globally} è
+    \textbf{persistente in avanti}
+    \newpage
+    \item se vale $(M,t)\nVdash A\,\mathbf{U}\,B$ allora per definizione del
+    significato di \textbf{U} ci sono due casi:
+    \begin{enumerate}
+      \item non esiste alcuno stato che renda vera $B$, ovvero $\forall t'\geq
+      t$ vale che $(M,t')\nVdash B$. Detto in maniera equivalente
+      $\forall t'\geq t$ vale $(M,t')\Vdash\neg B$, ovvero $(M,t')\Vdash
+      \mathbf{G}\neg B$
+      \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.35]{img/pltl7.png}
+        \caption{Rappresentazione grafica del punto 1}
+      \end{figure}
+      \item si ha che il precedente è falso, ovvero $\exists\,t'\geq t$ tale che
+      $(M,t')\Vdash B$, quindi $\exist\,\,t''$ tale che $t\leq t''< t$ tale che
+      che $(M,t'')\nVdash A$
+      \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.35]{img/pltl8.png}
+        \caption{Rappresentazione grafica del punto 2}
+      \end{figure}
+    \end{enumerate}
+    \newpage
+    \item se vale $(M,t)\Vdash B\,\mathbf{U}\,C$ allora $\exists\, t'\geq t$
+    tale che $(M,t')\Vdash C$ e tale che, per $t''=t,\ldots,t'-1$,
+    $(M,t'')\Vdash B$. Questo implica che, per $t''=t,\ldots,t'$, $(M,t'')\Vdash
+    B\,\mathbf{U}\,C$. Graficamente:
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.3]{img/pltl9.png}
+    \end{figure}
+    \item si ha che $\mathbf{G}\,A\to A$ è una \textbf{tautologia} in quanto se
+    si ha che $(M,t)\Vdash \mathbf{G}\,A$ allora si ha che $(M,t)\Vdash A$ per
+    definizione del connettivo \emph{globally} e per il significato di
+    \emph{implicazione}
+    \item si ha che $\mathbf{G}\,A$ è \emph{equivalente} a
+    $\overbrace{\mathbf{G}\ldots\mathbf{G} }^{\mbox{2 o
+        più}}A$. \emph{Dimostrazione nel file delle esercitazioni}
+    \item si ha che $A\to \mathbf{F}\,A$ è una
+    \emph{tautologia} in quanto se si ha che $(M,t)\Vdash A$ allora
+    si ha che $(M,t)\Vdash\mathbf{F} A$ per definizione del connettivo \emph{future} e per
+    il significato di \emph{implicazione}
+    \item si ha che $\mathbf{F}\,A$ è \emph{equivalente} a
+    $\overbrace{\mathbf{F}\ldots\mathbf{F} }^{\mbox{2 o
+        più}}A$. \emph{Dimostrazione nel file delle esercitazioni}
+    \item si ha che $B\to A\,\mathbf{U}B$ è una \textbf{tautologia} in quanto se
+    si ha che $(M,t)\Vdash B$ allora si ha che $(M,t)\Vdash A\,\mathbf{U}\,B$
+    per definizione del connettivo \emph{until} e per il significato di
+    \emph{implicazione}
+    \item si ha che $(A\,\mathbf{U}\,B)\to\mathbf{F}\,B$ è una \emph{tautologia}.
+    \emph{Dimostrazione nel file delle esercitazioni}
+    \item si ha che $\mathbf{F}\,A\to \top\,\mathbf{U}A$ è una
+    \textbf{tautologia}. \emph{Dimostrazione nel file delle esercitazioni}
+    \item si ha che $\neg\mathbf{G}\,A$ è \emph{equivalente} a
+    $\neg\mathbf{F}\,A$. Infatti si dimostra che vale $(M,t)\Vdash \neg
+    \mathbf{G}\,A$ sse vale $(M,t)\nVdash \neg \mathbf{F}\,A$, infatti, per il
+    significato del connettivo $\neg$, $(M,t)\nVdash\mathbf{G}\,A$ vale sse
+    vale anche $(M,t)\Vdash\mathbf{F}\neg A$. Inoltre, per definizione di
+    $\mathbf{G}$, si ha che $(M,t)\nVdash\mathbf{G}\,A$ sse $\exists t'\geq t$
+    tale che vale $(M,t')\Vdash A$ sse, sempre per il significato del connettivo
+    $\neg$, vale $(M,t')\Vdash \neg A$, che a sua volta vale, per il significato
+    di $\mathbf{F}$, sse $(M,t)\Vdash\mathbf{F} \neg A$. Graficamente:
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.4]{img/pltl10.png}
+    \end{figure}
+    \item si ha che $\neg\mathbf{F}\,A$ è \emph{equivalente} a
+    $\neg\mathbf{G}\,A$. Infatti si dimostra che vale $(M,t)\Vdash \neg
+    \mathbf{F}\,A$ sse vale $(M,t)\nVdash \neg \mathbf{G}\,A$, infatti, per il
+    significato del connettivo $\neg$, $(M,t)\nVdash\mathbf{F}\,A$ vale sse
+    vale anche $(M,t)\Vdash\mathbf{G}\neg A$. Inoltre, per definizione di
+    $\mathbf{G}$, si ha che $(M,t)\nVdash\mathbf{F}\,A$ sse $\forall t'\geq t$
+    vale $(M,t')\Vdash A$ sse, sempre per il significato del connettivo
+    $\neg$, vale $(M,t')\Vdash \neg A$, che a sua volta vale, per il significato
+    di $\mathbf{G}$, sse $(M,t)\Vdash\mathbf{G} \neg A$. Graficamente:
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.4]{img/pltl11.png}
+    \end{figure}
+    \newpage
+    \item si ha che $\mathbf{G}\,A$ è \emph{equivalente} a
+    $\neg(\top\mathbf{U}\neg A)$. Bisogna dimostrare che vale
+    $(M,t)\Vdash\mathbf{G}\,A$ sse vale $(M,t)\Vdash\neg(\top\mathbf{U}\neg A)$.
+    Per il significato di $\neg$ si che $(M,t)\Vdash\mathbf{G}\,A$ vale sse
+    vale $(M,t)\nVdash\top\mathbf{U}\neg A$. Se si suppone che
+    $(M,t)\Vdash\mathbf{G}\,A$ vale allora si ha che, $\forall t'\geq t$,
+    valgono:
+    \begin{itemize}
+      \item $(M,t')\Vdash A$
+      \item $(M,t')\nVdash \neg A$
+    \end{itemize}
+    Dato che non si può esibire un tempo $t'\geq t$ tale che $(M,t')\Vdash
+    \neg A$ per definizione del connettivo $\mathbf{U}$ si che val
+    $(M,t)\Vdash\neg(\top\mathbf{U}\neg A)$ e quindi vale $(M,t)\nVdash
+    (\top\mathbf{U}\,\neg A)$.\\
+    Dato che qui l’operando di sinistra di $\mathbf{B}$ è la formula $\top$, la
+    quale è soddisfatta in ogni possibile stato, segue che se vale $(M,t)\nVdash
+    (\top\mathbf{U}\,\neg A)$ allora, $\forall t'\geq t$, vale $(M,t')\nVdash
+    \neg A$ e quindi, $\forall t'\geq t$, valgono:
+    \begin{itemize}
+      \item $(M,t')\Vdash\neg\neg A$
+      \item $(M,t')\Vdash A$, che è la definizione di $\mathbf{G}$
+    \end{itemize}
+    Per cui si è dimostrato che $(M,t)\Vdash \mathbf{G}\,A$. Graficamente:
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.45]{img/pltl12.png}
+      \includegraphics[scale = 0.45]{img/pltl13.png}
+    \end{figure}
+    \newpage
+    \item si ha che le formule $\mathbf{X}(A\lor B)$ e
+    $\mathbf{X}\,A\lor\mathbf{X}\,B$ sono \emph{equivalenti}.
+    \emph{Dimostrazione nel file delle esercitazioni}
+    \item le formule $\mathbf{X}\,\mathbf{G}\,A$ e $\mathbf{G}\,\mathbf{X}\, A$
+    sono \emph{equivalenti}. \emph{Dimostrazione nel file delle esercitazioni}
+    \item le formule $\mathbf{X}\,\mathbf{F}\,A$ e $\mathbf{F}\,\mathbf{X}\, A$
+    sono \emph{equivalenti}. \emph{Dimostrazione nel file delle esercitazioni}
+    \item le formule $\mathbf{G}\,\mathbf{F}\,\mathbf{G}\,A$ e
+    $\mathbf{F}\,\mathbf{G}\, A$  sono \emph{equivalenti}.
+    \emph{Dimostrazione nel file delle esercitazioni}
+     \item le formule $\mathbf{F}\,\mathbf{G}\,\mathbf{F}\,A$ e
+    $\mathbf{G}\,\mathbf{F}\, A$  sono \emph{equivalenti}.
+    \emph{Dimostrazione nel file delle esercitazioni}
+  \end{itemize}
+\end{definizione}
+\chapter{Seminario sul Teorema di Incompletezza}
+Si parla del \textbf{teorema di incompletezza di Godel}. Come punto di partenza
+\textit{storico} si parla di Hilbert, che pensava alla matematica come un
+sistema puramente formale, introducendo i concetti di \textbf{coerenza e
+  completezza della matematica}. Con coerenza si intende che non si possono
+dimostrare contraddizioni mentre con completezza si indica che si può dimostrare
+la correttezza o meno di un enunciato. Ci si basa anche sull'\textbf{aritmetica
+  di Peano}, ovvero un insieme di assiomi da cui si derivano tutte le proprietà
+dei numeri. \\
+Godel cerca di dimostrare coerenza e completezza dell'aritmetica.
+\begin{definizione}
+  Un \textbf{sistema formale} è definito da un linguaggio in cui si possono
+  scrivere \textbf{formule e assiomi}, si possono definire \textbf{regole di
+    inferenza} che portano all'ottenimento di \textbf{teoremi
+    (\textit{enunciati})}. Un enunciato interpretato in un modello può essere
+  vero o falso
+\end{definizione}
+\begin{definizione}
+  Un sistema formale $S$ espresso nel linguaggio $L$ è \textbf{sintatticamente
+    coerente} se non esiste una formula $\alpha$ tale che siano dimostrabili sia
+  $\alpha$ che $\neg \alpha$.\\
+  Un sistema formale $S$ espresso nel linguaggio $L$ è \textbf{semanticamente
+    coerente (correttezza)} se non è in grado di dimostrare nessuna formula che
+  sia falsa.
+\end{definizione}
+\begin{definizione}
+  Un sistema formale $S$ espresso nel linguaggio $L$ è \textbf{sintatticamente
+    completo} se data una formula $\alpha$ o è dimostrabile $\alpha$ o
+  $\neg\alpha$.\\
+  Un sistema formale $S$ espresso nel linguaggio $L$ è \textbf{semanticamente
+    completo} se è in grado di dimostrare tutte le formule vere.
+\end{definizione}
+Il linguaggio naturale permette l'\textbf{autoriferimento} delle frasi, quando
+una frase predica qualcosa di se stessa, comportando spesso contraddizioni.
+\begin{esempio}
+  per esempio:
+  \begin{center}
+    \textit{questa frase si compone di sette parole}
+    \\o\\
+    \textit{questa frase è falsa}
+  \end{center}
+\end{esempio}
+Una soluzione a questo problema classificando questo tipo di frasi in:
+\begin{itemize}
+  \item \textbf{vere}
+  \item \textbf{false}
+  \item \textsc{ne vere ne false} (come il secondo esempio)
+\end{itemize}
+ma una frase come:
+\begin{center}
+  \textit{questa frase non è vera}
+\end{center}
+rompe questa divisione tripartita. \\
+I teoremi di Godel parlano di sistemi formali.
+\begin{definizione}
+  Un sistema formale è definito da:
+  \begin{itemize}
+    \item un alfabeto ($=,\land,\lor, \neg \to, \exists, \leftrightarrow,
+    \forall, x_i, (,),0,',+,\times$, l'apice specifica il successore)
+    \item un linguaggio con formule, enunciati e variabili libere ($a[x],
+    a[x/n]$, dove $x$ è variabile libera e $x/n$ indica che tutte le variabili
+    $x$ sono state sostituite con $n$) 
+    \item degli assiomi
+    \item delle regole di inferenza per costruire nuovi enunciati a partire da
+    altri enunciati
+  \end{itemize}
+  Si ha quindi una grammatica per costruire e riconoscere frasi corrette.\\
+  Si ha che una \textbf{dimostrazione} è una sequenza di formule derivate a
+  vicenda con delle regole di inferenza.
+  \begin{esempio}
+    posso riscrivere, per esempio, il principio di induzione:
+    \[\alpha[x/0]\to(\forall x(\alpha[x]\to \alpha[x'])\to \forall x\alpha[x])\]
+  \end{esempio}  
+\end{definizione}
+\newpage
+Godel si chiede se è possibile dimostrare se la correttezza e la completezza
+dell'aritmetica.
+\begin{teorema}
+  Dato un enunciato $G$ nel sistema formale $S$ che, interpretato dice:
+  \begin{center}
+    G non è dimostrabile in S
+  \end{center}
+  allora:
+  \begin{itemize}
+    \item se $G$ fosse dimostrabile in $S$ sarebbe \textbf{semanticamente
+      incoerente} 
+    \item se $G$ non fosse dimostrabile in $S$ sarebbe un \textbf{enunciato
+      vero} e $S$ sarebbe \textbf{semanticamente incompleto}
+  \end{itemize}
+  Godel trovò nell'aritmetica un enunciato di questo tipo
+\end{teorema}
+Dato che una formula dell'aritmetica parla di numeri si cerca un modo per
+associare alle formule del sistema formale dell'aritmetica un numero. Si parte
+associando un numero ad ogni simbolo dell'alfabeto del sistema (per esempio,
+associando solo numeri dispari $g(0)=3,\,g(')=5,\,g(x)=31,\ldots$). Un alfabeto
+è infinitamente numerabile. Godel asserisce che:
+\begin{definizione}
+  Una formula $\alpha$ è una sequenza di simboli $k_1,\ldots,k_M$, allora:
+  \[g(\alpha)=2^{g(k_1)}3^{g(k_2)}5^{g(k_3)}\ldots\]
+  ottenendo quindi numeri pari associati delle formule (grazie al
+  $2^x$ iniziale, inoltre tutti gli esponenti sono dispari).\\
+  Una dimostrazione $\Delta$ è una sequenza di formule
+  $\alpha_1,\ldots,\alpha_k$, allora si ha che:
+  \[g(\Delta)=2^{g(\alpha_1)}3^{g(\alpha_2)}5^{g(\alpha_3)}\ldots\]
+  che è iniettiva.\\
+  Il numero, detto \textbf{numero di Godel} sarà sempre diverso da quello di una
+  formula in quanto ho esponenti pari
+\end{definizione}
+Una formula $\alpha[x,y]$ con due variabili libere corrisponde ad una relazione
+binaria $R(x,y)$ sul dominio in cui interpretiamo il linguaggio e si ha:
+\[R(m,n)\to\alpha[x/m,y/n]\]
+Se ho una formula con una sola variabile libera $\alpha[x]$ corrisponde a un
+predicato $P(x)$ sul dominio:
+\[P(m)\leftrightarrow \vdash\alpha[x/m]\]
+e in questo caso $\alpha[x]$ determina un sottoinsieme del dominio
+\begin{definizione}
+  Preso un enunciato $F$ con una dimostrazione $\Delta=F_1,\ldots,F$ e presi i
+  numeri di Godel di $\Delta$ e $F$, considerandoli come coppia ordinata di
+  numeri si può asserire che l'insieme delle coppie formate in questo modo
+  prendendo tutte le dimostrazioni in $S$ definisce una relazione binaria sul
+  dominio di $\mathbb{N}$ $Dim$.\\
+  La relazione $Dim$ è rappresenta in $S$ da una formula con due variabili
+  libere.\\
+  Si ha che $Dim$ è \textbf{decidibile} in $S$
+\end{definizione}
+Nell'aritmetica di Peano esiste una formula decidibile $Dim(x,y)$ tale che
+$\vdash Dim(m,n)$ sse $M$ è il numero di Godel di una dimostrazione della
+formula il cui numero di Godel è $n$.\\
+Si costruisce quindi una formula:
+\[\exists x(Dim(x,y))\]
+che dice che $y$ è un teorema (detto altrimenti che $y$ è dimostrabile) e si
+indica con:
+\[Teor(y)=\exists x(Dim(x,y))\]
+Si ha che $Teor(y)$   
+lemma diagonale:
+numero associatoa beta ha proprietà alpha, beta afferma di avere la pripruetà
+alpha
+in aritemica quindi ho fmurle che dicono di se stesse di non essere dimostrabili
+quindi l'artiemtica è incompelta
 \end{document}
 
 % LocalWords:  postcondizioni LocalWords estensionalità jpg img sse pre sem seq
@@ -2829,6 +3397,8 @@ alla rappresentazione temporale richiesta.
 % LocalWords:  liveness fairness safeness formed as forward Parikh firing PLTL
 % LocalWords:  affinchè sottoformula insoddisfacibile Morgan Idempotenza Linear
 % LocalWords:  all'handshacking sottoformule Propositional Logic checking next
-% LocalWords:  tomorrow sometime globally always until true bottom label
+% LocalWords:  tomorrow sometime globally always until true bottom label BNF
+% LocalWords:  Form root soddisfacibilità pltl png slide Godel Peano sull
+% LocalWords:  autoriferimento iniettiva
 
-\message{ !name(metodi.tex) !offset(-2834) }
+\message{ !name(metodi.tex) !offset(-3404) }

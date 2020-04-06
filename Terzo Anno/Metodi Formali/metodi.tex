@@ -2656,7 +2656,7 @@ comportamento di una rete.
     }N:\,\,\underline{J}(t)>0\]
   ovvero per ogni transizione esiste almeno un T-invariante che assegna a quella
   transizione un valore positivo
-\\end{definizione}
+\end{definizione}
 \begin{teorema}
   Vediamo il teorema detto \textbf{condizione necessaria per la vivezza e
     limitatezza}.\\
@@ -3605,12 +3605,100 @@ formule per il linguaggio PLTL può essere data in modo compatto.
   \end{itemize}
 \end{definizione}
 \subsection{Concetti e Proprietà in Logica PLTL}
-
-
-
-
-
-
+Vediamo quindi diversi concetti esprimibili in logica PLTL.\\
+Un primo concetto è quello di espriremere un evento che deve avvenire un numero
+infinito di volte, non necessariamente di seguito. Si parla di
+\textit{fairness}.\\
+Data una proprietà $A$ si vuole che diventi vera infinitamente spesso, ovvero è
+sempre vero che prima o poi $A$ diventi vera:
+\[\mathbf{GF}\,A\]
+\textit{Si nota che comunque non si previene che possa essere vero $\neg A$ in
+  un certo momento}. Infatti si ha un esempio semplificato dove $A$ diventa una
+semplice variabile proporzionale $p$ (che quindi è sicuramente soddisfacibile):
+\begin{esempio}
+  La formula $\mathbf{GF}\,p\land \mathbf{GF}\neg p$ è soddisfacibile anche se
+  $p\land\neg p$ è una contraddizione.\\
+  Si definisce quindi un modello $M=\langle\mathbb{N},\Vdash\rangle$ dove la
+  relazione di soddisfacibilità per la variabile $p$ è così definita:
+  \[\Vdash\,\subseteq\{(i, p) |\,\, i \bmod 2 == 0\}\]
+  dove $p$ è vera negli stati/tempi $i$ pari e falsa in quelli dispari (dove è
+  vero $\neg p$).\\
+  Graficamente:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pltl18.png}
+  \end{figure}
+  Si nota che ovunque in questa catena di stati si può affermare $\mathbf{F}\,p$
+  e anche $\mathbf{F}\neg p$ in quanto al più basta aspettare uno stato per
+  ottenere quella condizione. Inoltre essendo i due \emph{future} sempre
+  soddisfatti posso anche affermare che sono soddisfatti i \emph{globally} dei
+  due \emph{future} e quindi $\mathbf{GF}\,p\land \mathbf{GF}\neg p$ è
+  soddisfatta ovunque.
+\end{esempio}
+Si è quindi esibito uno degli infiniti modelli per $\mathbf{GF}\,A$ (banalmente,
+per esempio, si potevano usare i moduli di un qualsiasi altro numero diverso da
+due etc$\ldots$).\\
+È possibile anche complicare la situazione, usando per esempio due variabili:
+\begin{esempio}
+  Si ha che la formula:
+  \[\mathbf{GF}(p\land q)\land\mathbf{GF}(p\land \neg q)\land \mathbf{GF}(\neg
+    p\land q)\land \mathbf{GF}(\neg p\land \neg q)\]
+  è soddisfacibile anche se ogni coppia do formule rappresenta una
+  contraddizione.\\
+  Per esempio definiamo un modello $M=\langle\mathbb{N},\Vdash\rangle$ dove la
+  relazione di soddisfacibilità è definita come:
+  \[\Vdash\, \subseteq\{(i,p)|\,\,i\bmod 2 == 0\}\cup \{(i,q)|\,\,i\bmod 4 ==
+    0\mbox{ oppure }i\bmod 4 == 1\}\]
+  \newpage
+  Si hanno così i seguenti casi:
+  \begin{itemize}
+    \item $p\land q$ è soddisfatta nei tempi/stati multipli di 4 (0 incluso)
+    \item $p\land \neg q$ è soddisfatta nei tempi che diviso 4 danno resto 2
+    \item $\neg p\land q$ è soddisfatta nei tempi che diviso 4 danno resto 1
+    \item $\neg p\land\neg q$ è soddisfatta nei tempi che diviso 4 danno resto 3
+  \end{itemize}
+  Graficamente:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pltl19.jpg}
+  \end{figure}
+  Quindi per esempio $p\land q$ è soddisfatta in 0 (e lo sarà in 4 etc$\ldots$).
+  E visto che ogni coppia di formule è soddisfatta a stati alterni infinitamente
+  si ha, in ogni stato, la validità del \emph{globally} e del \emph{future}.\\
+  Si potrebbe anche dire che vale il \emph{globally} totale della formula
+  iniziale. 
+\end{esempio}
+Un secondo concetto è quello di espriremere un evento che prima o poi diventa
+vero e, una volta diventato tale, resta vero per sempre, ovvero, data una
+proprietà $A$, si ha che:
+\[\mathbf{FG}\,A\]
+Si nota però fin da subito che la formula:
+\[\mathbf{FG}\,p\land \mathbf{FG}\neg p\]
+\textbf{non è soddisfacibile}, in quanto se assumo che da un certo tempo in poi
+una formula è sempre vera non posso asserire anche che da un certo tempo in poi
+quella formula sia falsa.\\
+Procedendo in modo formale argomentiamo \textbf{per assurdo}.
+Si supponga che esista un modello $M=\langle \mathbb{N}m\Vdash\rangle$ che
+soddisfi la formula data. Mi serve quindi, al tempo 0:
+\[(M,0)\Vdash \mathbf{FG}\,p\land \mathbf{FG}\neg p\to (M,0)\Vdash
+  \mathbf{FG}\,p\land (M,0)\Vdash \mathbf{FG}\neg p\]
+e so che, per il significato del connettivo \emph{future}:
+\begin{itemize}
+  \item da $\mathbf{FG}\,p$ segue che esiste un tempo $t'$ tale che
+  $(M,t')\Vdash\mathbf{G}\,p$
+  \item da $\mathbf{FG}\neg p$ segue che esiste un tempo $t''$ tale che
+  $(M,t'')\Vdash\mathbf{G}\neg p$
+\end{itemize}
+ma, sia per $t'\geq t''$ che per $t'\leq t''$ si ha una contraddizione:
+\begin{itemize}
+  \item se $t'\geq t''$ allora $(M,t')\Vdash p$ e $(M,t')\Vdash \neg p$
+  \item se $t'\leq t''$ allora $(M,t'')\Vdash p$ e $(M,t'')\Vdash \neg p$
+\end{itemize}
+che sono entrambe \textbf{contraddizioni} in quanto una formula non può essere
+contemporaneamente sia vera che falsa in un determinato tempo.\\
+\textit{Siccome nei modelli PLTL i tempi sono comparabili, segue che è assurda
+  l’ipotesi che la formula data sia soddisfacibile in qualche modello PLTL}.\\
+Si poteva arrivare al medesimo risultato studiando i tableau.\\
 
 
 
@@ -3679,7 +3767,7 @@ Una soluzione a questo problema classificando questo tipo di frasi in:
 \begin{itemize}
   \item \textbf{vere}
   \item \textbf{false}
-  \item \textsc{né vere né false} (come il secondo esempio)
+  \item \textbf{né vere né false} (come il secondo esempio)
 \end{itemize}
 ma una frase come:
 \begin{center}
@@ -3804,4 +3892,5 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  all'handshacking sottoformule Propositional Logic checking next
 % LocalWords:  tomorrow sometime globally always until true bottom label BNF
 % LocalWords:  Form root soddisfacibilità pltl png slide Godel Peano sull cap
-% LocalWords:  autoriferimento iniettiva G\"{o}del Bernardinello
+% LocalWords:  autoriferimento iniettiva G\"{o}del Bernardinello espriremere
+% LocalWords:  tableau

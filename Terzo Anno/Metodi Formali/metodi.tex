@@ -3606,8 +3606,8 @@ formule per il linguaggio PLTL può essere data in modo compatto.
 \end{definizione}
 \subsection{Concetti e Proprietà in Logica PLTL}
 Vediamo quindi diversi concetti esprimibili in logica PLTL.\\
-Un primo concetto è quello di espriremere un evento che deve avvenire un numero
-infinito di volte, non necessariamente di seguito. Si parla di
+Un primo concetto è quello di espriremere \textit{un evento che deve avvenire un
+  numero infinito di volte, non necessariamente di seguito}. Si parla di
 \textit{fairness}.\\
 Data una proprietà $A$ si vuole che diventi vera infinitamente spesso, ovvero è
 sempre vero che prima o poi $A$ diventi vera:
@@ -3668,9 +3668,9 @@ due etc$\ldots$).\\
   Si potrebbe anche dire che vale il \emph{globally} totale della formula
   iniziale. 
 \end{esempio}
-Un secondo concetto è quello di espriremere un evento che prima o poi diventa
-vero e, una volta diventato tale, resta vero per sempre, ovvero, data una
-proprietà $A$, si ha che:
+Un secondo concetto è quello di espriremere un \textit{evento che prima o poi
+  diventa vero e, una volta diventato tale, resta vero per sempre}, ovvero, data
+una proprietà $A$, si ha che:
 \[\mathbf{FG}\,A\]
 Si nota però fin da subito che la formula:
 \[\mathbf{FG}\,p\land \mathbf{FG}\neg p\]
@@ -3698,20 +3698,113 @@ che sono entrambe \textbf{contraddizioni} in quanto una formula non può essere
 contemporaneamente sia vera che falsa in un determinato tempo.\\
 \textit{Siccome nei modelli PLTL i tempi sono comparabili, segue che è assurda
   l’ipotesi che la formula data sia soddisfacibile in qualche modello PLTL}.\\
-Si poteva arrivare al medesimo risultato studiando i tableau.\\
-
-
-
-
-
-
-
-
-
-
-
-
-
+Si poteva arrivare al medesimo risultato studiando i tableau.\\\\
+Vediamo un ulteriore concetto, quello in cui \textit{prima o poi un evento
+  diventa vero e da quel punto è garantito che l'evento sia vero con
+  cadenza/periodo pari a $n$}. Data quindi una formula $A$ si ha che:
+\[\mathbf{F}\,A\land\mathbf{G}(A\to\underbrace{
+    \mathbf{X}\ldots\mathbf{X}}_{n\mbox{ volte, } n\geq 1}\,A)\]
+Quindi bisogna attendere al massimo $n$ stati perché $A$ diventi vera, dove $n$
+è in numero di $\mathbf{X}$ innestati. Si garantisce la frequenza minima con cui
+$A$ diventa vera.
+\begin{esempio}
+  Vediamo un esempio.\\
+  Possiamo osservare la seguente formula \textbf{soddisfacibile}:
+  \[\mathbf{F}\,p\land \mathbf{G}(p\to\mathbf{XX}\,p)\land\mathbf{F}\neg p\land
+    \mathbf{G}(\neg p\to\mathbf{XX}\neg p)\]
+  dove se $p$ diventa vera si ha che poi essa lo diventa a cadenza di due stati
+  e, di conseguenza, anche $\negn p$ seguirà la stessa cadenza.\\ 
+  Possiamo infatti definire, per esempio, un modello $M=\langle
+  \mathbb{N},\Vdash\rangle$ con:
+  \[\Vdash=\{(i,p)|\,i\bmod 2==0\}\]
+  $p$ sarà vero nei tempi pari e $\neg p$ sarà vero nei tempi dispari.
+  formalmente si ha quindi che:
+  \begin{itemize}
+    \item $\forall t\in\mathbb{N}$ (con $t$ stato) tale che $t\bmod 2 == 0$
+    valgono:
+    \[(M,t)\Vdash p \mbox{ e } (M,t)\Vdash\mathbf{XX}\,p\]
+    \item $\forall t\in\mathbb{N}$ (con $t$ stato) tale che $t\bmod 2 == 1$
+    valgono:
+    \[(M,t)\Vdash \neg p \mbox{ e } (M,t)\Vdash\mathbf{XX}\neg p\]
+    \item $\forall t\in\mathbb{N}$ (con $t$ stato) valgono:
+    \[(M,t)\Vdash p \to \mathbf{XX}\,p \mbox{ e }(M,t)\Vdash \neg p\to
+      \mathbf{XX}\neg p\]
+    e quindi, sempre $\forall t\in\mathbb{N}$, valgono:
+    \[(M,t)\Vdash \mathbf{G}(p\to\mathbf{XX}\,p)\mbox{ e
+      }(M,t)\Vdash\mathbf{G}(p\to\mathbf{XX}\neg p)\]
+  \end{itemize}
+  \emph{Si nota quindi come la formula sia soddisfa nel modello} $M$.\\
+  Graficamente, specificando completamente solo le formule dei tempi pari:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pltl20.jpg}
+  \end{figure}
+\end{esempio}
+\begin{esempio}
+  Vediamo ora la dimostrazione della \textbf{non soddisfacibilità} della
+  formula:
+  \[\mathbf{F}\,p\land \mathbf{G}(p\to \mathbf{X}\,p)\land \mathbf{F}\neg
+    p\land \mathbf{}(\neg p\to \mathbf{X}\neg p)\]
+  Si procede \textbf{per assurdo}. Si supponga di avere un modello $M=\langle
+  mathbb{N},\Vdash\rangle$ in cui la formula è soddisfacibile. Si ha quindi che
+  $\exists\,t\in\mathbb{N}$ (con $t$ tempo) che soddisfa la formula. Di
+  conseguenza esistono due tempo, $t',t''\in \mathbb{N}$ tali che:
+  \[t'\geq t,\,t''\geq t,\,(M,t')\Vdash p \mbox{ e }(M,t'')\Vdash \neg p\]
+  ne segue che:
+  \[t'\neq t'',\,(M,t')\Vdash\mathbf{X}\,p,\,(M,t'+1)\Vdash
+    p,\,(M,t'')\Vdash\mathbf{X}\neg p\mbox{ e }(M,t''+1)\Vdash \neg p\]
+  quindi $\exists\,t''\in\mathbb{N}$ tale che:
+  \[t'''\geq t',\,t'''\geq t''\mbox{ e }(M,t''')\Vdash p\mbox{ e
+    }(M,t''')\Vdash \neg p\]
+  \emph{Questo è impossibile per un modello, quindi è un assurdo assumere che
+    esista una modello per la formula data. Si è arrivati ad una
+    \textbf{contraddizione}}.
+\end{esempio}
+\newpage
+Vediamo un ultimo concetto come esempio, quello i cui \textit{prima o poi un
+  evento diventa vero e da quel momento in poi, ciclicamente, diventa vero
+  quell'evento insieme ad altri due eventi.} \\
+Si ha quindi la formula, per esempio con periodo complessivo nove:
+\[\mathbf{F}\,A\land \mathbf{G}(A\to \mathbf{XXX}\,B)\land \mathbf{G}(B\to
+  \mathbf{XXX}\,C)\land \mathbf{G}(C\to\mathbf{XXX}\,A)\]
+Viene quindi generato un \textbf{ciclo} (dopo che ho visto $A$ aspetto tre stati
+per vedere $B$, a questo punto altri tre stati per vedere $C$ e infine, dopo
+altri tre stati torno a vedere $A$).
+\begin{esempio}
+  Vediamo un esempio semplificato con periodo pari a due.\\
+  Si ha la formula:
+  \[\mathbf{F}\,p\land \mathbf{G}(p\to \mathbf{X}\neg p)\land\mathbf{G}(\neg
+    p\to\mathbf{X}\,p)\]
+  Questa formula è \textbf{soddisfacibile} ed afferma che prima o poi $p$
+  diventa vera e da tal punto in poi $p$ diventerà vera con esattamente periodo
+  due (ogni due stati). 
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio più complesso del precedente, con due variabili
+  proposizionale: 
+  \[\mathbf{F}\,p\]
+  \[\land\]
+  \[\mathbf{G}(p\to(\neg q\land \mathbf{X}\neg(p\lor q)\land
+    \mathbf{XX}\neg(p\lor q)\land \mathbf{XXX}\,q))\]
+  \[\land\]
+  \[\mathbf{G}(q\to (\neg p\land \mathbf{X}\neg(p\lor q)\land \mathbf{XX}\neg
+    (p\lor q)\land\mathbf{XXX}\,p))\] 
+  la quale afferma che prima poi $p$ è soddisfatta ed inoltre $p$ è soddisfatta
+  infinitamente spesso con periodo 6, $q$ è soddisfatta infinitamente spesso con
+  periodo 6, se $p$ è vera, allora bisogna attendere esattamente 3 stati
+  affinchè $q$ diventi vera e se $q$ è vera, allora bisogna attendere
+  esattamente 3 stati affinchè $p$ diventi vera. Un modello per la formula
+  soddisfa $p$ nei tempi multipli di 6 e soddisfa $q$ nei tempi che diviso per 6
+  danno resto 3 (quindi 3, 9, 15,$\ldots$). Anche in questo caso si ha un
+  \textbf{ciclo} che parte nel momento in cui soddisfo $p$ la prima volta.
+\end{esempio}
+Nel file delle esercitazioni si trovano ulteriori esempi, oltre alla citazione
+di testi con vari esempi:
+\begin{itemize}
+  \item contatore modulo quattro
+  \item semaforo stradale
+\end{itemize}
+\chapter{Model Checking}
 
 
 
@@ -3722,9 +3815,9 @@ Si poteva arrivare al medesimo risultato studiando i tableau.\\
 \textit{\textbf{Nota: queste note, prese durante il seminario del prof
     Bernardinello tenuto il 1 Aprile 2020 sono incomplete, parziali e
     probabilmente scorrette in determinati punti.}}\\\\
-Si parla del \textbf{teorema di incompletezza di G\"{o}del}. Come punto di partenza
-\textit{storico} si parla di Hilbert, che pensava alla matematica come un
-sistema puramente formale, introducendo i concetti di \textbf{coerenza e
+Si parla del \textbf{teorema di incompletezza di G\"{o}del}. Come punto di
+partenza \textit{storico} si parla di Hilbert, che pensava alla matematica come
+un sistema puramente formale, introducendo i concetti di \textbf{coerenza e
   completezza della matematica}. Con coerenza si intende che non si possono
 dimostrare contraddizioni mentre con completezza si indica che si può dimostrare
 la correttezza o meno di un enunciato. Ci si basa anche sull'\textbf{aritmetica
@@ -3826,8 +3919,8 @@ associando solo numeri dispari $g(0)=3,\,g(')=5,\,g(x)=31,\ldots$). Un alfabeto
   $\alpha_1,\ldots,\alpha_k$, allora si ha che:
   \[g(\Delta)=2^{g(\alpha_1)}3^{g(\alpha_2)}5^{g(\alpha_3)}\ldots\]
   che è iniettiva.\\
-  Il numero, detto \textbf{numero di G\"{o}del} sarà sempre diverso da quello di una
-  formula in quanto ho esponenti pari
+  Il numero, detto \textbf{numero di G\"{o}del} sarà sempre diverso da quello di
+  una formula in quanto ho esponenti pari
 \end{definizione}
 Una formula $\alpha[x,y]$ con due variabili libere corrisponde ad una relazione
 binaria $R(x,y)$ sul dominio in cui interpretiamo il linguaggio e si ha:

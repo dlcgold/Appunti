@@ -3089,11 +3089,226 @@ Completiamo ora quanto detto per i T-invarianti:
   \begin{itemize}
     \item se $N = (P, T , F )$ è \textbf{WF} allora \textbf{$N$ non è per forza
       coperta da S-invarianti}
-     \item se $N = (P, T , F )$ è \textbf{coperta da S-Invarianti e
-       T-invarianti} allora $N$ è \textbf{coperta da cicli} inoltre se $N$ è
-     anche debolmente connessa allora sicuramente è strettamente connessa 
+    \item se $N = (P, T , F )$ è \textbf{coperta da S-Invarianti e
+      T-invarianti} allora $N$ è \textbf{coperta da cicli} inoltre se $N$ è
+    anche debolmente connessa allora sicuramente è strettamente connessa 
   \end{itemize}
 \end{teorema}
+\subsubsection{Esempi Complessi per lo Studio degli Invarianti}
+Si vedono in questa sezione alcuni esempi complessi riguardo l'uso degli
+invarianti per lo studio delle reti, per discutere le proprietà di
+comportamento.
+\begin{esempio}
+  Vediamo innanzitutto l'esempio di una \emph{catena di produzione}, composta da
+  \emph{due macchine}, \emph{un robot} e un \emph{magazzino}
+  \footnote{Esempio ed immagini tratte da: M. Silva, E. Teruel, J.M. Colom,
+    Linear Algebraic and Linear Programming Techniques for the Analysis of
+    Place/Transition Net Systems, in LNCS 1491, Springer 1998 (articolo presente
+    sulla pagina e-learning del corso)}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ca.jpg}
+    \caption{Rappresentazione stilizzata del sistema \emph{catena di produzione}
+      in analisi, con le macchine che interagiscono condividendo l'uso di un
+      robot e che si trasmettono componenti semi-lavorate} 
+  \end{figure}
+  \newpage
+  tale sistema potrebbe essere modellato dalla seguente rete di Petri:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ca2.jpg}
+    \caption{Rappresentazione della rete di Petri per il sistema \emph{catena di
+        produzione} con due macchine, un robot e un buffer di capacità pari ad
+      otto}  
+  \end{figure}
+  Nel dettaglio si ha quindi una fase della catena di produzione dove dei pezzi
+  semi-lavorati arrivano tramite un nastro trasportatore, vengono prelevati da
+  un robot e posti nella prima macchina. Una volta che la prima macchina ha
+  terminato il robot pone il pezzo appena lavorato in un posto libero del
+  buffer, a forma di semicerchio, che conta otto possibili posizioni (il buffer
+  può essere anch'esso considerato come un nastro trasportatore). Il buffer pian
+  piano, essendo un nastro trasportatore, avvicina i pezzi alla seconda
+  macchina, che vengono, sempre dal robot, trasferiti uno alla volta dal buffer
+  alla macchina. Dopo la lavorazione della seconda macchine sarà sempre il robot
+  che porrà il pezzo su un nastro trasportatore che porterà via il pezzo
+  lavorato. Il robot è ovviamente in \textbf{mutua esclusione}.\\
+  \newpage
+  Studiamo le componenti della rete, partendo da quelle che interessano la prima
+  macchina:
+  \begin{itemize}
+    \item il posto \textbf{wait\_raw} rappresenta il fatto che la prima macchina
+    aspetta un pezzo dal nastro trasportatore in ingresso
+    \item la transizione \textbf{t1}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), rappresenta il prelevamento dal
+    nastro del pezzo e il suo collocamento nella prima macchina, il cui
+    caricamento in corso è rappresentato dal posto \textbf{load} 
+    \item la transizione \textbf{t2} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R}, e porta al posto \textbf{op1}, che
+    rappresenta lo stato di uso della prima macchina
+    \item la transizione \textbf{t3} rappresenta la fine della lavorazione della
+    prima macchina e porta al posto \textbf{wait\_dep}, indicante che la
+    macchina è pronta a depositare nel buffer
+    \item la transizione \textbf{t1}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), porta al posto \textbf{deposit},
+    che rappresenta l'azione del depositare il pezzo nel buffer a otto
+    posti. Questa transizione può scattare solo se il posto \textbf{empty}, che
+    rappresenta il numero di posizioni libere nel buffer, ha almeno una marca
+    \item la transizione \textbf{t5} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R} e pone una marca nel posto
+    \textbf{object}, che rappresenta i pezzi attualmente posti nel
+    buffer. Infine si notifica, mediante l'attivazione del il posto
+    \textbf{wait\_raw}, che la macchina è nuovamente libera e pronta a ricevere
+    un nuovo pezzo
+  \end{itemize}
+  Passiamo ora alla seconda macchina:
+  \begin{itemize}
+    \item il posto \textbf{wait\_with} rappresenta il fatto che la seconda
+    macchina aspetta di poter prelevare un pezzo dal buffer
+    \item la transizione \textbf{t9}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), rappresenta il prelevamento di un
+    pezzo dal buffer (se non vuoto), rimuovendo una marca dal posto
+    \textbf{object}, portando al posto \textbf{withdrawal} che rappresenta lo
+    stato di prelevamento di un pezzo dal buffer
+    \item la transizione \textbf{t10} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R} e aggiunge una marca al posto
+    \textbf{empty}, segnalando che è stato liberato un posto nel buffer. La
+    transizione porta al posto \textbf{op2}, che rappresenta lo stato di uso
+    della seconda macchina
+    \item la transizione \textbf{t6} rappresenta la fine della lavorazione della
+    seconda macchina e porta al posto \textbf{wait\_free}, indicante che la
+    macchina è pronta a depositare il pezzo lavorato sul nastro trasportatore in
+    uscita
+    \item la transizione \textbf{t7}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), rappresenta il caricamento del
+    pezzo lavorato sul nastro in uscita e infatti porta al posto \textbf{unload}
+    \item la transizione \textbf{t8} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R} e notifica che la seconda macchina è
+    nuovamente pronta a prelevare un pezzo dal buffer, infatti viene riattivato
+    il posto \textbf{wait\_with}
+  \end{itemize}
+  Dato questo modello si possono calcolare gli S-invarianti. Nel dettaglio
+  si scopre che esistono quattro S-invarianti minimali (\textit{non vengono
+    effettuati i conti per ottenerli}):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.59]{img/ca3.jpg}
+    \caption{Divisione dei quattro S-invarianti minimali per il sistema
+      \emph{catena di produzione}, due rappresentano i due cicli delle \emph{due
+        macchine}, uno rappresenta le operazioni effettuate tramite il
+      \emph{robot} e uno rappresenta le operazioni di deposito nel \emph{buffer
+        ad otto posti} o il prelevamento dallo stesso}
+  \end{figure}
+  \newpage
+  Consideriamo ora uno per uno questi S-invarianti (con le sotto-reti
+  ottenute).\\
+  Si ricorda la \textbf{legge della conservazione delle marche}, per
+  $\underline{I}$ S-invariante:
+  \[\underline{I}\cdot \underline{M}=\underline{I}\cdot \underline{M_0}\]
+  Studiamo quindi la sottorete data dall'S-invariante per la prima macchina. Si
+  ottiene che:
+  \[M(\mbox{wait\_raw})+M(\mbox{load})+M(\mbox{op1})+M(\mbox{wait\_dep})+
+    M(\mbox{deposit})=1\]
+  ovvero la somma delle marche contenute nei vari posti in una data marcatura è
+  sempre uguale a quella nella marcatura iniziale (che, presentando solo una
+  marca in \textbf{wait\_raw}, è pari a 1).\\
+  Analogamente si ha per la seconda macchina:
+  \[M(\mbox{op2})+M(\mbox{wait\_free})+M(\mbox{unload})+M(\mbox{withdrawal})=1\]
+  Si nota quindi che le due macchine possono ciascuna effettuare una sola delle
+  operazioni alla volta.\\
+  Passiamo ora all'S-invariante relativo all'uso del robot. Si ha quindi che:
+  \[M(\mbox{R})+M(\mbox{load})+M(\mbox{unload})+M(\mbox{deposit})+
+    M(\mbox{withdrawal})=1\]
+  Si nota quindi che il robot può effettuare una sola operazione per volta.\\
+  E infine passiamo all'S-invariante relativo all'uso del buffer, che ricordiamo
+  avere otto posizioni da usare e infatti:
+  \[M(\mbox{empty})+M(\mbox{deposit})+M(\mbox{object})+M(\mbox{withdrawal})=8\]
+  Inoltre, data la \textbf{legge di conservazione delle marche}, data una
+  qualsiasi marcatura raggiungibile da quella iniziale e dati i quattro
+  S-invarianti minimali, con le 4 equazioni sopra descritte, si possono fare
+  diverse deduzioni sul comportamento del sistema. Si può quindi dire che: 
+  \begin{itemize}
+    \item il sistema è \textbf{limitato}. Infatti poiché $\forall
+    s\in S,\,\,\,M(s)\geq 0$ (ovvero al più o marcature nulle in ogni posto) ho
+    anche che la rete è \textbf{coperta da S-invarianti} (quindi ogni posto
+    appartiene ad un S-invariante) e, in particolare, si può dire che:
+    \[\forall s\in S\backslash\{\mbox{empty, object}\}\,\,\,M(s)\leq 1\,\, \land
+      \,\,M(\mbox{empty})\leq 8\,\, \land\,\,  M(\mbox{object})\leq 8\]
+    ovvero tutti i posti tranne \textbf{empty} e \textbf{object} hanno al più una
+    marca (o una o nessuna), essendo quindi il sistema \textit{1-bounded} su tali
+    posti, mentre \textbf{empty} e \textbf{object} ne hanno al più 8
+    \item si ha la \textbf{mutua esclusione} tra i posti dei seguenti insiemi:
+    \begin{itemize}
+      \item $\{\mbox{wait\_raw, load, op1, wait\_dep, deposit}\}$
+      \item $\{\mbox{op2, wait\_free, unload, wait\_with, withdrawal}\}$
+      \item $\{\mbox{R, load, unload, deposit, withdrawal}\}$
+    \end{itemize}
+    sempre poiché $\forall s\in S,\,\,\,M(s)\geq 0$ (ovvero al più o marcature
+    nulle in ogni posto). Si nota che sono gli insiemi corrispondenti alle
+    sotto-reti definite dagli S-invarianti che hanno marcatura iniziale pari a 1 e
+    quindi non si avranno mai due posti interni ad una di queste reti
+    contemporaneamente marcati
+  \end{itemize}
+  Si ricerca quindi di dimostrare anche l'\textbf{assenza di deadlock} partendo
+  dagli S-invarianti. In questo caso non si ha una semplice deduzione (come nei
+  due precedenti) in quanto non si ha una condizione che garantisca tale
+  proprietà. Si può però fare, talvolta, un ragionamento che parte dagli
+  S-invarianti per dimostrare tale proprietà.\\
+  Si procede \textbf{per contraddizione} cercando di costruire una marcatura $M$
+  tale che:
+  \begin{itemize}
+    \item le quattro equazioni sopra siano soddisfatte
+    \item non abiliti alcuna transizione $t$, ovvero, formalmente:
+    \[\forall t\in T:\,\nexists M[t>\]
+    ovvero $M$ deve essere una marcatura di deadlock
+  \end{itemize}
+  Si prenda quindi la rete del sistema \emph{catena di produzione}.
+  \\
+  Per avere una marcatura di deadlock innanzitutto si deve avere che i
+  posti:\textbf{load}, \textbf{op1}, \textbf{deposit}, \textbf{op2},
+  \textbf{unload}, e \textbf{withdrawal} non devono essere marcati in quanto
+  sono precondizioni uniche, rispettivamente, delle transizioni \textbf{t2},
+  \textbf{t3}, \textbf{t5}, \textbf{t6}, \textbf{t8} e \textbf{t10} (se le
+  precondizioni sono marcate la transizione può scattare).\\
+  Partendo da questo presupposto torniamo alle quattro equazioni e imponiamo che
+  le marche in tali posti siano pari a 0, ottenendo, di conseguenza:
+  \begin{itemize}
+    \item $M(wait\_raw) + M(wait\_dep) = 1$
+    \item $M(wait\_free) + M(wait\_with) = 1$
+    \item $M(R) = 1$. Questa equazione implica che \textbf{R} deve essere
+    marcato e quindi $\mathbf{R}\in \,^\bullet t1$ e $\mathbf{R}\in \,^\bullet
+    t7$ (ovvero \textbf{R} è precondizione di \textbf{t1} e \textbf{t7})
+    \item $M(empty) + M(object) = 8$
+  \end{itemize}
+  L'analisi fatta su \textbf{R} implica che, al fine di ottenere una marcatura
+  di deadlock, bisogna impedire che la marcatura sia abilitata in \textbf{t1} e
+  in \textbf{t7}, ovvero, formalmente:
+  \[\nexists M \mathbf{ t.c. } M[t1> \mbox{ e } M[t7>\]
+  Dalla rete si nota che per permettere questa cosa i posti \textbf{wait\_raw} e
+  \textbf{wait\_free} non devono essere marcati e quindi, ponendo a 0 le marche
+  in tali posti, si ottiene un'ulteriore semplificazione delle 4 equazioni:
+  \begin{itemize}
+    \item $M(wait\_dep) = 1$
+    \item $M(wait\_with) = 1$
+    \item $M(R) = 1$
+    \item $M(empty) + M(object) = 8$
+  \end{itemize}
+  Quindi per impedire $M[t1> \mbox{ e } M[t7>$ \textbf{wait\_raw} e
+  \textbf{wait\_free} non devono essere marcati mentre \textbf{R},
+  \textbf{wait\_dep} e \textbf{wait\_with} devono essere marcati.\\
+  Restano quindi da studiare \textbf{t4} e \textbf{t9} che ancora potrebbero
+  scattare. Si ha che $\mathbf{empty}\in \,^\bullet t4$ e $\mathbf{object}\in
+  \,^\bullet t9$. Per impedire queste due  transizioni \textbf{empty} e
+  \textbf{object} non dovrebbero essere marcati ma questo è in
+  \textbf{contraddizione} con $M(empty) + M(object) = 8$ quindi:
+  \begin{center}
+    \textbf{una marcatura di deadlock non è raggiungibile}
+  \end{center}
+  in quanto non è possibile raggiungere una marcatura in cui nessuna transizione
+  è abilitata.\\
+  Quindi si è riuscito ad ottenere un risultato in merito al deadlock anche
+  senza una condizione specifica che garantisca tale proprietà ma solo studiando
+  gli S-invarianti.
+\end{esempio}
 
 
 
@@ -3106,13 +3321,14 @@ Completiamo ora quanto detto per i T-invarianti:
 
 
 
-
-
-\chapter{Logica PLTL}
+\chapter{Logica PLTL}
 \section{Ripasso Logica Proposizionale}
 \emph{Si ringrazia
   \MYhref{https://github.com/bigboss98/appunti/tree/master/Fondamenti}{Marco
-  Natali} per questo ripasso}\\ 
+    Natali}
+  \footnote{Link al repository:
+    https://github.com/bigboss98/appunti/tree/master/Fondamenti} per questo
+  ripasso}\\   
 La logica è lo studio del ragionamento e dell’argomentazione e, in particolare,
 dei procedimenti inferenziali, rivolti a chiarire quali	procedimenti di pensiero
 siano validi e quali no. Vi sono molteplici tipologie di logiche, come ad
@@ -4385,7 +4601,10 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  liveness fairness safeness formed as forward Parikh firing PLTL
 % LocalWords:  affinchè sottoformula insoddisfacibile Morgan Idempotenza Linear
 % LocalWords:  all'handshacking sottoformule Propositional Logic checking next
-% LocalWords:  tomorrow sometime globally always until true bottom label BNF
+% LocalWords:  tomorrow sometime globally always until true bottom label BNF of
 % LocalWords:  Form root soddisfacibilità pltl png slide Godel Peano sull cap
 % LocalWords:  autoriferimento iniettiva G\"{o}del Bernardinello espriremere
-% LocalWords:  tableau github ciclano
+% LocalWords:  tableau github ciclano https repository Programming Techniques
+% LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom
+% LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
+% LocalWords:  witdrawal upload unload withdrawal

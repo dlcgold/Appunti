@@ -3366,6 +3366,292 @@ esempio).
 Con i due esempi precedenti si è quindi visto come l'aggiunta di una marca sia
 sufficiente a cambiare completamente le proprietà di comportamento della rete
 associata ad un determinato sistema.
+\subsection{Sottoclassi}
+Si considerano reti di Petri marcate $\Sigma = (N,M_0)$, con $N=(S,T,F)$,
+capacità illimitata e peso degli archi pari a uno. Si studiano tre particolari
+sottoclassi di tali reti:
+\begin{enumerate}
+  \item \textbf{S-sistemi}, che possono presentare \textit{conflitti} ma non
+  \textit{sincronizzazioni} 
+  \item \textbf{T-sistemi}, che possono presentare \textit{sincronizzazioni} ma
+  non \textit{conflitt}i
+  \item \textbf{reti Free-choice}, che possono presentare sia \textit{conflitti}
+  che \textit{sincronizzazioni} ma non \textit{confusione} (e che verranno
+  trattati per motivi teorici in una successiva sottosezione)
+\end{enumerate}
+\subsubsection{S-sistemi}
+Sono il tipo di sottoclasse più semplice da studiare e sono detti anche
+\textbf{macchine a stati}, in quanto c'è una corrispondenza con gli
+\textit{automi a stati finiti} (anche se non si studiano in quanto accettatori
+di linguaggi).
+\begin{definizione}
+  Si definisce S-sistema un sistema $\Sigma = (N,M_0)$ la cui rete $N=(S,T,F)$ è
+  \textbf{senza sincronizzazioni}, in quanto, formalmente:
+  \[\forall t\in T, |^\bullet t|=|t^\bullet|=1\]
+  ovvero ogni transizione ha esattamente un solo posto in input e uno solo in
+  output (cosa che potrebbe comportare l'eliminazione di archi per via dello
+  studio della transitività, portando ad un \textit{sistema di transizioni}).\\
+  Si ha che le transizioni, quindi, non devono \textit{sincronizzare} diverse
+  precondizioni o attivare diverse postcondizioni.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ssi.jpg}
+    \caption{Esempio di sistema che \textbf{non} è \emph{S-sistema} in quanto
+      $t1$ ha due archi uscenti}
+  \end{figure}
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ssi2.jpg}
+    \caption{Esempio di sistema che è anche \emph{S-sistema} (o
+      \emph{macchina a stati}), nonostante si abbiano transizioni che possono
+      occorrere concorrentemente non si ha alcuna sincronizzazione} 
+  \end{figure}
+\end{definizione}
+Vediamo ora le proprietà di comportamento degli S-sistemi.\\
+\begin{teorema}
+  Vediamo innanzitutto la \textbf{proprietà fondamentale degli S-sistemi}.\\
+  Sia $\Sigma=(N,M_0)$, con $N=(S,T,F)$, un \textbf{S-sistema connesso} (per non
+  dover considerare ogni sottorete connessa), allora:
+  \[\forall M\in M_0[>,\,\, M(S)=M_0(S),\,\mbox{ con }M_i(S)=\sum_{s\in
+      S}M_i(s)\]
+  infatti, avendo ogni transizione un arco entrante e uno uscente, una qualsiasi
+  transizione non modificherà il numero complessivo di marche nei posti (in
+  quanto verrà spostata una marca dal posto di input a quello di output, unico),
+  quindi, per ogni marcatura raggiungibile da quella iniziale, la somma delle
+  marche nei posti in quella data marcatura resta \textbf{costante} e uguale a
+  quella della marcatura iniziale.\\
+  La somma delle marche è quindi una \textbf{proprietà invariante} di questo
+  sistema.
+\end{teorema}
+Questa proprietà ha diverse implicazioni:
+\begin{itemize}
+  \item la rete $N$ è \textbf{coperta da un S-invariante}, in quanto
+  $\underline{I}\cdot \underline{N}=\underline{0}$, con
+  $\underline{I}=\underline{1}$ in quanto l'S-invariante identifica tutti i
+  posti della rete
+  \item \textbf{ogni S-sistema è limitato}, in quanto non possono essere
+  accumulate marche essendo il loro numero costante
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.47]{img/ssi3.jpg}
+  \caption{Esempio di S-sistema che nonostante la sua evoluzione mantiene
+    costante il numero complessivo di marche (ovvero quattro)} 
+\end{figure}
+Ci sono anche proprietà legate al fatto che la rete di un S-sistema sia connessa
+o meno (ovvero se presi due nodi qualsiasi si ha un cammino orientato tra il
+primo e il secondo).\\
+\begin{teorema}
+  Si ha il teorema della \textbf{vivezza per gli S-sistemi} 
+  Sia $\Sigma=(N,M_0)$, con $N=(S,T,F)$, un \textbf{S-sistema}. Si ha che:
+  \begin{itemize}
+    \item se $\Sigma=(N,M_0)$ è \textbf{vivo} sse $N$ è \textbf{strettamente
+      connessa} e $M_0(S)>0$ (quindi almeno un posto è marcato). Questa è una
+    \textbf{condizione necessaria e sufficiente}, quindi se una rete è
+    strettamente connessa, con almeno un posto marcato nella marcatura iniziale,
+    si ha che il sistema è vivo
+    \item se $\Sigma=(N,M_0)$ è \textbf{vivo} e \textbf{n-limitato} sse $N$ è
+    \textbf{strettamente connessa} e $0< M_0(S)\leq n$ (quindi almeno un posto è
+    marcato ma con cardinalità di marche massima pari a $n$). Questa è una 
+    \textbf{condizione necessaria e sufficiente}, quindi se una rete è
+    strettamente connessa, con almeno un posto marcato e con al più $n$ marche
+    su ogni posto nella marcatura iniziale, si ha che il sistema è vivo e
+    n-limitato 
+  \end{itemize}
+\end{teorema}
+Questo risultato permette anche di esprimere qualcosa sulla raggiungibilità in
+tali sistemi:
+\begin{teorema}
+  Si ha infatti il teorema della \textbf{raggiungibilità per gli S-sistemi}.\\
+  Sia $\Sigma=(N,M_0)$, con $N=(S,T,F)$, \textbf{un S-sistema vivo} e sia
+  $M:S\to\mathbb{N}$ una \textbf{marcatura}. Allora si ha che:
+  \[M\in [M_0>] \Longleftrightarrow M_0(S)=M(S)\]
+  ovvero la marcatura è raggiungibile da quella iniziale sse il numero
+  complessivo di marche in tale marcatura è pari a quello della marcatura
+  iniziale e viceversa. 
+\end{teorema}
+\subsubsection{T-sistemi}
+Passiamo ora al secondo tipo di sottoclasse, i \textbf{T-sistemi}, detti anche
+\textbf{grafi marcati}. Questi sistemi sono in \textbf{``dualità''} con gli
+\textit{S-sistemi} (come da regola non scritta delle reti di Petri: \textit{ad
+  ogni concetto corrisponde un suo concetto duale}).
+\begin{definizione}
+  Si definisce T-sistema un sistema $\Sigma = (N,M_0)$ la cui rete $N=(S,T,F)$ è
+  \textbf{senza conflitti}, in quanto, formalmente:
+  \[\forall s\in S, |^\bullet s|=|s^\bullet|=1\]
+  ovvero per ogni posto si ha un solo arco entrante e uno uscente, e quindi una
+  sola pre-transizione ed un'unica post-transizione, impedendo quindi
+  l'esistenza di \textbf{conflitti} (ma non avendo alcuna imposizione dal punto
+  di vista degli archi entranti e uscenti dalle transizioni si può avere la
+  \textbf{sincronizzazione}).\\
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/tsi.jpg}
+    \caption{Esempi di T-sistemi, dove si nota la presenza di transizioni con
+      più archi entranti o uscenti}  
+  \end{figure}
+  Non essendoci \textbf{conflitti} si può asserire che i sistemi sono
+  \textbf{deterministici}, essendoci sincronizzazione
+\end{definizione}
+Con i T-sistemi possono essere fatte delle definizioni aggiuntive.
+\begin{definizione}
+  Sia dato un sistema $\Sigma = (N,M_0)$, con rete $N=(S,T,F)$, che è un
+  T-sistema. Allora si hanno le seguenti considerazioni:
+  \begin{itemize}
+    \item un \textbf{ciclo semplice} di $N$ è una sequenza di \textit{nodi}
+    $\gamma \in S\cup T$, del tipo $\gamma=x_1,\ldots,x_n$ tale che:
+    \[(x_1,x_2)\in F,\ldots,(x_{n-1},x_{n})\in F\mbox{ e } (x_n,x_1)\in F\]
+    \[\mbox{ e dove } x_i\neq x_j,\,\,i,j=1,\ldots n\]
+    ovvero una sequenza di nodi tale per cui tra un nodo e il successivo esiste
+    un arco orientato ed esiste anche un arco orientato tra l'ultimo nodo e il
+    primo. Si ha quindi che tutti i nodi possibili sono diversi tra loro
+    \item sia $\gamma$ un ciclo semplice di $N$, sia $M$ una marcatura $M:S\to
+    \mathbb{N}$ e sia $R$ l'insieme dei posti di $\gamma$, allora \textbf{il
+      numero di marche del ciclo $\gamma$} è pari a:
+    \[M(\gamma)=M(R)\]
+    ovvero il numero di marche del ciclo $\gamma$ è pari a quello dell'insieme
+    $R$.
+    \item un ciclo $\gamma$ è \textbf{marcato} sse:
+    \[M(\gamma)>0\]
+    ovvero se ho almeno un posto del ciclo marcato
+  \end{itemize}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/tsi2.jpg}
+    \caption{Esempi di un T-sistema con due cicli semplici e marcati:\\
+      $s1\,t1\,s2\,t2$, con una marca nella marcatura iniziale, e
+      $s4\,t3\,s5\,t4$, con un numero complessivo di marche nella marcatura
+      iniziale pari a 3} 
+  \end{figure}
+  (Si ricorda che la copertura di cicli comporta che una rete connessa sia
+  \emph{strettamente connessa})
+\end{definizione}
+Vediamo ora alcuni teoremi fondamentali per i T-sistemi.
+\begin{teorema}
+  Si ha innanzitutto il teorema della \textbf{proprietà fondamentale dei
+    T-sistemi}.\\
+  Sia dato un T-sistema $\Sigma = (N,M_0)$, con rete $N=(S,T,F)$. Sia inoltre
+  $\gamma$ un \textbf{ciclo semplice} di $N$. Allora:
+  \[\forall M\in [M_0>,\,\,M(\gamma) = M_0(\gamma)\]
+  ovvero il numero complessivo di marche su un ciclo rimane costante tra la
+  marcatura iniziale e ogni marcatura raggiungibile da essa
+\end{teorema}
+\begin{proof}
+  Se una transizione $t$ non appartiene al ciclo $\gamma$, allora il suo scatto
+  non modifica il numero di marche su $\gamma$, se invece $t$ appartiene a
+  $\gamma$, allora esattamente uno dei suoi posti di input e uno dei suoi posti
+  di output appartengono a $\gamma$, e quindi lo scatto di $t$ non modifica il
+  numero complessivo di marche in $\gamma$, nonostante possa modificare il
+  numero complessivo di marche del sistema. 
+\end{proof}
+\newpage
+\begin{teorema}
+  Vediamo anche il teorema di \textbf{vivezza dei T-sistemi}.\\
+   Sia dato un T-sistema $\Sigma = (N,M_0)$, con rete $N=(S,T,F)$. Si ha che
+   tale T-sistema è \textbf{vivo} sse per ogni ciclo semplice $\gamma$ di $N$ si
+   ha che:
+   \[M_0(\gamma)>0\]
+   ovvero se ogni ciclo è marcato nella marcatura iniziale (ovvero almeno un
+   posto del ciclo è marcato)
+\end{teorema}
+\begin{proof}
+  Infatti si ha che un ciclo non è marcato, rimane non marcato (per la
+  proprietà fondamentale dei T-sistemi) e tutte le transizioni in quel ciclo non
+  possono mai scattare e quindi si avrebbe un sistema \textbf{non vivo}. \\
+  D'altro canto l'altro ``verso'' della dimostrazione e per induzione (ma si può
+  dimostrare che se un sistema è vivo allora necessariamente ogni ciclo semplice
+  è marcato nella marcatura iniziale) 
+\end{proof}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/tsi3.jpg}
+  \caption{Esempio di un \emph{T-sistema vivo}. Si nota che tale sistema non è
+    \emph{coperto da cicli} ed è \emph{non-limitato}}
+  \includegraphics[scale = 0.6]{img/tsi4.jpg}
+  \caption{Esempio di un \emph{T-sistema non vivo} in quanto il ciclo semplice
+    $t3\,s4\,t4\,s5$ non è marcato, si ha quindi che $t3$ e $t4$ non
+    possono mai scattare}
+  \includegraphics[scale = 0.5]{img/tsi5.jpg}
+  \caption{Esempio di un \emph{T-sistema non vivo e in deadlock}, infatti si ha
+    un ciclo semplice non marcato, segnalato in rosso}
+\end{figure}
+\newpage
+Cerchiamo ora di unire i concetti di \textit{T-sistemi} e \textit{T-invarianti}.
+\begin{teorema}
+  Vediamo il teorema dei \textbf{T-invarianti dei T-sistemi}.\\
+  Sia $\Sigma =(N,M_0)$ un T-sistema. Se $N=(S,T,F)$ è \textbf{connessa} allora
+  esiste un vettore $\underline{J}:T\to \mathbb{Q}$ che è un T-invariante sse:
+  \[\underline{J}=(x\ldots x)\mbox{, per qualche }x\]
+  ovvero il vettore deve selezionare tutte le transizioni per essere
+  T-invariante.\\
+  \textbf{Cioè ogni transizione appartiene al supporto del T-invariante}.\\
+  In altre parole i T-sistemi sono \textbf{coperti da T-invarianti} 
+\end{teorema}
+Vediamo ora un altro teorema fondamentale.
+\begin{teorema}
+  Si ha il teorema della \textbf{vivezza di T-sistemi strettamente connessi}.\\
+  Sia $\Sigma =(N,M_0)$ un T-sistema. Se $N=(S,T,F)$ è \textbf{strettamente
+    connessa} allora le seguenti affermazioni sono equivalenti:
+  \begin{itemize}
+    \item $\Sigma =(N,M_0)$ è \textbf{vivo}
+    \item $\Sigma =(N,M_0)$ è \textbf{deadlock-free}
+    \item $\Sigma =(N,M_0)$ ammette una \textbf{sequenza infinita di
+      transizioni} 
+  \end{itemize}
+  Tutto ciò sse la rete è \textbf{strettamente connessa}, infatti:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/tsi4.jpg}
+    \caption{Esempio di un \emph{T-sistema non vivo} in quanto il ciclo semplice
+      $t3\,s4\,t4\,s5$ non è marcato, si ha quindi che $t3$ e $t4$ non
+      possono mai scattare, ma che non ha rete strettamente connessa e ha una
+      rete che ammette una sequenza infinita: $t1\,t2$}
+  \end{figure}
+\end{teorema}
+Vediamo ora la limitatezza dei T-sistemi.
+\begin{teorema}
+  Si ha ora il teorema della \textbf{limitatezza dei T-sistemi vivi}.\\
+   Sia $\Sigma =(N,M_0)$ un T-sistema \textbf{vivo}. Si ha che tale T-sistema è
+   \textbf{n-limitato} sse, $\forall s\in S$, esiste un ciclo semplice $\gamma$
+   tale che:
+   \[s\in \gamma\land M_0(\gamma)\leq n\]
+   ovvero se per ogni posto esiste un ciclo con al più $n$ marche (visto che
+   ogni ciclo mantiene un numero fissato di marche)
+\end{teorema}
+\begin{corollario}
+   Sia $\Sigma =(N,M_0)$ un T-sistema \textbf{vivo}. Si ha che tale T-sistema è
+   \textbf{n-limitato} sse $N$ è \textbf{strettamente connessa}
+\end{corollario}
+Quindi si può dire che un T-sistema è \textbf{vivo} e \textbf{n-limitato} sse:
+\begin{itemize}
+  \item nessun ciclo è senza marche (ogni ciclo ha almeno una marca), per la
+  vivezza 
+  \item ogni posto appartiene a un ciclo con $n$ marche, per la limitatezza
+\end{itemize}
+\begin{teorema}
+  La rete $N$ di un T-sistema (che chiamiamo \textbf{T-rete}) è
+  \textbf{strutturalmente viva} e \textbf{1-limitata}, implicando che:
+  \[\exists M_0\mbox{ t.c. }\Sigma=(N,M_0) \mbox{ che è un T-sistema vivo e
+      1-limitato}\]
+  ovvero ammette una marcatura che comporta un T-sistema vivo e 1-limitato
+  sse $N$ è \textbf{strettamente connessa}.\\
+  Esiste un algoritmo che calcola, a partire da una rete strutturalmente viva e
+  1-limitata, la marcatura iniziale per permettere l'esistenza di un T-sistema
+  vivo e 1-limitato ottenibile da tale rete
+\end{teorema}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/tsi6.jpg}
+  \caption{Esempio di un \emph{T-sistema vivo e 1-limitato} (il sistema è
+    coperto da cicli). Si nota però che esiste un ciclo semplice (quello
+    interno) contenente 3 marche, ma ogni posto appartiene a un ciclo semplice
+    con un’unica marca (infatti sia il ciclo esterno che i quattro cicli
+    semplici laterali contengono una marca) e quindi il sistema è 1-limitato}  
+\end{figure}
+\subsection{Sifoni e Trappole}
+
+
+
 
 
 
@@ -4661,4 +4947,5 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  tableau github ciclano https repository Programming Techniques
 % LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom
 % LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
-% LocalWords:  witdrawal upload unload withdrawal
+% LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi
+% LocalWords:  bigboss

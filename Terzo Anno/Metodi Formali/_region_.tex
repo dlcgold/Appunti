@@ -1424,7 +1424,7 @@ Passiamo ora alla formalizzazione:
     implicherebbe che il posto non potrebbe mai essere occupato, rendendo la
     modellazione di un tale posto inutile. $K$ è detta \textbf{funzione
       capacità dei posti}.
-    \item $W:F\to\mathbb{N}\cup \{\infty\}$  che rappresenta una funzione che
+    \item $W:F\to\mathbb{N}$ che rappresenta una funzione che
     assegna ad ogni arco un peso mediante un valore naturale che stavolta può
     essere, oltre che infinito, anche zero. $W$ è detta \textbf{funzione peso
       degli archi}
@@ -1600,8 +1600,8 @@ in un sistema:
   \end{itemize}
 \end{definizione}
 \begin{definizione}
-  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$, tale che $\forall s\in S
-  K(s)<\infty$, si definisce il \textbf{grafo di raggiungibilità}, indicato con
+  Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si definisce il
+  \textbf{grafo di raggiungibilità}, indicato con
   $RG(\Sigma)$, costruito solo con posti di capacità finita in quanto avere
   capacità infinite comporterebbe avere un grafo infinito, come la quadrupla:
   \[RG(\Sigma)=([M_0 >, U_\Sigma , A, M_0 )\]
@@ -1647,13 +1647,15 @@ in un sistema:
 \begin{definizione}
   Dato un sistema P/T si ha che una transizione $t$ è in una \textbf{situazione
     di contatto} nella marcatura $M$ sse:
-  \[\forall s\in S, W(s,t)\leq M(s)\,\wedge M(s)+W(t,s)>K(s)\]
-  ovvero una transizione è in una situazione di contatto in una certa marcatura
-  $M$ sse ha abbastanza marche nei posti in input ma non abbastnza nei posti in
-  output. Formalmente si ha che l'arco tra il posto in input e la transizioni ha
-  peso inferiore al numero di marche dell'input e la marcatura del posto output
-  più le marche che vengono aggiunte è maggiore della capacità del posto di
-  output stesso .\\
+  \[\forall s\in S, W(s,t)\leq M(s)\,\wedge\,\exists\, s\in S:\,
+    M(s)+W(t,s)>K(s)\] 
+  
+  ovvero una transizione  in una situazione di contatto se tutti i suoi
+  pre-posti hanno abbastanza marche e almeno uno dei suoi post-posti ne ha
+  troppe per permettere il suo scatto. Formalmente si ha che l'arco tra il posto
+  in input e la transizioni ha peso inferiore al numero di marche dell'input e
+  la marcatura del posto output più le marche che vengono aggiunte è maggiore
+  della capacità del posto di output stesso.\\
   Un esempio:
   \begin{figure}[H]
     \centering
@@ -2476,7 +2478,7 @@ Vediamo ora di formalizzare questa definizione:
   Dato un sistema P/T $\Sigma=(S,T,F,W;M_0)$ con matrice di incidenza
   $\underline{N}$ si ha che:
   \begin{itemize}
-    \item un vettore $\underline{J}:|T|\to\mathbb{Z}$ è un \textbf{T-invariante}
+    \item un vettore $\underline{J}:T\to\mathbb{Z}$ è un \textbf{T-invariante}
     sse $\underline{N}\cdot\underline{J}=\underline{0}$. Ovvero dato un vettore
     colonna di cardinalità pari al numero di transizioni della rete che assegna
     un valore intero è un T-invariante sse moltiplicato alla matrice di
@@ -3050,7 +3052,7 @@ Anche per gli S-invarianti vediamo un esempio complesso:
   necessariamente ogni S-invariante $\underline{I}$ non negativo deve essere
   marcato nella marcatura iniziale $M_0$, ovvero:
   \[\underline{I}\cdot \underline{M_0}>0\]
-  in quanto altrimenti le transizioni in $^\bullet S_I\cup S_)^\bullet$
+  in quanto altrimenti le transizioni in $^\bullet S_I\cup S_I^\bullet$
   sarebbero \textbf{morte}, le transizioni connesse a questi posti infatti non
   scatterebbero mai.
 \end{teorema}
@@ -3079,9 +3081,539 @@ Completiamo ora quanto detto per i T-invarianti:
   Sia $N = (P, T, F )$ (non marcata) essa è \textbf{ben formata (WF)} sse
   $\exists\,M_0:(N,M_0)$ è \textbf{viva e limitata}, quindi:
   \begin{itemize}
-    \item $N = (P, T , F )$ è WF sse $N$ è 
+    \item se $N = (P, T , F )$ è \textbf{WF} allora $N$ è \textbf{coperta da
+      cicli} 
+    \item se $N = (P, T , F )$ è \textbf{WF} e \textbf{debolmente connessa}
+    allora $N$ è \textbf{strettamente connessa}
+    \item se $N = (P, T , F )$ è \textbf{WF} allora \textbf{$N$ è coperta
+      da T-invarianti} (cosa che comunque non garantisce la vivezza)
+  \end{itemize}
+  Inoltre, sfruttando anche gli S-invarianti si ha che:
+  \begin{itemize}
+    \item se $N = (P, T , F )$ è \textbf{WF} allora \textbf{$N$ non è per forza
+      coperta da S-invarianti}
+    \item se $N = (P, T , F )$ è \textbf{coperta da S-Invarianti e
+      T-invarianti} allora $N$ è \textbf{coperta da cicli} inoltre se $N$ è
+    anche debolmente connessa allora sicuramente è strettamente connessa 
   \end{itemize}
 \end{teorema}
+\subsubsection{Esempi Complessi per lo Studio degli Invarianti}
+Si vedono in questa sezione alcuni esempi complessi riguardo l'uso degli
+invarianti per lo studio delle reti, per discutere le proprietà di
+comportamento.
+\begin{esempio}
+  Vediamo innanzitutto l'esempio di una \emph{catena di produzione}, composta da
+  \emph{due macchine}, \emph{un robot} e un \emph{magazzino}
+  \footnote{Esempio ed immagini tratte da: M. Silva, E. Teruel, J.M. Colom,
+    Linear Algebraic and Linear Programming Techniques for the Analysis of
+    Place/Transition Net Systems, in LNCS 1491, Springer 1998 (articolo presente
+    sulla pagina e-learning del corso)}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ca.jpg}
+    \caption{Rappresentazione stilizzata del sistema \emph{catena di produzione}
+      in analisi, con le macchine che interagiscono condividendo l'uso di un
+      robot e che si trasmettono componenti semi-lavorate} 
+  \end{figure}
+  \newpage
+  tale sistema potrebbe essere modellato dalla seguente rete di Petri:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ca2.jpg}
+    \caption{Rappresentazione della rete di Petri per il sistema \emph{catena di
+        produzione} con due macchine, un robot e un buffer di capacità pari ad
+      otto}  
+  \end{figure}
+  Nel dettaglio si ha quindi una fase della catena di produzione dove dei pezzi
+  semi-lavorati arrivano tramite un nastro trasportatore, vengono prelevati da
+  un robot e posti nella prima macchina. Una volta che la prima macchina ha
+  terminato il robot pone il pezzo appena lavorato in un posto libero del
+  buffer, a forma di semicerchio, che conta otto possibili posizioni (il buffer
+  può essere anch'esso considerato come un nastro trasportatore). Il buffer pian
+  piano, essendo un nastro trasportatore, avvicina i pezzi alla seconda
+  macchina, che vengono, sempre dal robot, trasferiti uno alla volta dal buffer
+  alla macchina. Dopo la lavorazione della seconda macchine sarà sempre il robot
+  che porrà il pezzo su un nastro trasportatore che porterà via il pezzo
+  lavorato. Il robot è ovviamente in \textbf{mutua esclusione}.\\
+  \newpage
+  Studiamo le componenti della rete, partendo da quelle che interessano la prima
+  macchina:
+  \begin{itemize}
+    \item il posto \textbf{wait\_raw} rappresenta il fatto che la prima macchina
+    aspetta un pezzo dal nastro trasportatore in ingresso
+    \item la transizione \textbf{t1}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), rappresenta il prelevamento dal
+    nastro del pezzo e il suo collocamento nella prima macchina, il cui
+    caricamento in corso è rappresentato dal posto \textbf{load} 
+    \item la transizione \textbf{t2} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R}, e porta al posto \textbf{op1}, che
+    rappresenta lo stato di uso della prima macchina
+    \item la transizione \textbf{t3} rappresenta la fine della lavorazione della
+    prima macchina e porta al posto \textbf{wait\_dep}, indicante che la
+    macchina è pronta a depositare nel buffer
+    \item la transizione \textbf{t1}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), porta al posto \textbf{deposit},
+    che rappresenta l'azione del depositare il pezzo nel buffer a otto
+    posti. Questa transizione può scattare solo se il posto \textbf{empty}, che
+    rappresenta il numero di posizioni libere nel buffer, ha almeno una marca
+    \item la transizione \textbf{t5} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R} e pone una marca nel posto
+    \textbf{object}, che rappresenta i pezzi attualmente posti nel
+    buffer. Infine si notifica, mediante l'attivazione del il posto
+    \textbf{wait\_raw}, che la macchina è nuovamente libera e pronta a ricevere
+    un nuovo pezzo
+  \end{itemize}
+  Passiamo ora alla seconda macchina:
+  \begin{itemize}
+    \item il posto \textbf{wait\_with} rappresenta il fatto che la seconda
+    macchina aspetta di poter prelevare un pezzo dal buffer
+    \item la transizione \textbf{t9}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), rappresenta il prelevamento di un
+    pezzo dal buffer (se non vuoto), rimuovendo una marca dal posto
+    \textbf{object}, portando al posto \textbf{withdrawal} che rappresenta lo
+    stato di prelevamento di un pezzo dal buffer
+    \item la transizione \textbf{t10} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R} e aggiunge una marca al posto
+    \textbf{empty}, segnalando che è stato liberato un posto nel buffer. La
+    transizione porta al posto \textbf{op2}, che rappresenta lo stato di uso
+    della seconda macchina
+    \item la transizione \textbf{t6} rappresenta la fine della lavorazione della
+    seconda macchina e porta al posto \textbf{wait\_free}, indicante che la
+    macchina è pronta a depositare il pezzo lavorato sul nastro trasportatore in
+    uscita
+    \item la transizione \textbf{t7}, mediante il robot rappresentato dal posto
+    \textbf{R} (che deve essere disponibile), rappresenta il caricamento del
+    pezzo lavorato sul nastro in uscita e infatti porta al posto \textbf{unload}
+    \item la transizione \textbf{t8} rende nuovamente disponibile il robot
+    rappresentato dal posto \textbf{R} e notifica che la seconda macchina è
+    nuovamente pronta a prelevare un pezzo dal buffer, infatti viene riattivato
+    il posto \textbf{wait\_with}
+  \end{itemize}
+  Dato questo modello si possono calcolare gli S-invarianti. Nel dettaglio
+  si scopre che esistono quattro S-invarianti minimali (\textit{non vengono
+    effettuati i conti per ottenerli}):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.59]{img/ca3.jpg}
+    \caption{Divisione dei quattro S-invarianti minimali per il sistema
+      \emph{catena di produzione}, due rappresentano i due cicli delle \emph{due
+        macchine}, uno rappresenta le operazioni effettuate tramite il
+      \emph{robot} e uno rappresenta le operazioni di deposito nel \emph{buffer
+        ad otto posti} o il prelevamento dallo stesso}
+  \end{figure}
+  \newpage
+  Consideriamo ora uno per uno questi S-invarianti (con le sotto-reti
+  ottenute).\\
+  Si ricorda la \textbf{legge della conservazione delle marche}, per
+  $\underline{I}$ S-invariante:
+  \[\underline{I}\cdot \underline{M}=\underline{I}\cdot \underline{M_0}\]
+  Studiamo quindi la sottorete data dall'S-invariante per la prima macchina. Si
+  ottiene che:
+  \[M(\mbox{wait\_raw})+M(\mbox{load})+M(\mbox{op1})+M(\mbox{wait\_dep})+
+    M(\mbox{deposit})=1\]
+  ovvero la somma delle marche contenute nei vari posti in una data marcatura è
+  sempre uguale a quella nella marcatura iniziale (che, presentando solo una
+  marca in \textbf{wait\_raw}, è pari a 1).\\
+  Analogamente si ha per la seconda macchina:
+  \[M(\mbox{op2})+M(\mbox{wait\_free})+M(\mbox{unload})+M(\mbox{withdrawal})=1\]
+  Si nota quindi che le due macchine possono ciascuna effettuare una sola delle
+  operazioni alla volta.\\
+  Passiamo ora all'S-invariante relativo all'uso del robot. Si ha quindi che:
+  \[M(\mbox{R})+M(\mbox{load})+M(\mbox{unload})+M(\mbox{deposit})+
+    M(\mbox{withdrawal})=1\]
+  Si nota quindi che il robot può effettuare una sola operazione per volta.\\
+  E infine passiamo all'S-invariante relativo all'uso del buffer, che ricordiamo
+  avere otto posizioni da usare e infatti:
+  \[M(\mbox{empty})+M(\mbox{deposit})+M(\mbox{object})+M(\mbox{withdrawal})=8\]
+  Inoltre, data la \textbf{legge di conservazione delle marche}, data una
+  qualsiasi marcatura raggiungibile da quella iniziale e dati i quattro
+  S-invarianti minimali, con le 4 equazioni sopra descritte, si possono fare
+  diverse deduzioni sul comportamento del sistema. Si può quindi dire che: 
+  \begin{itemize}
+    \item il sistema è \textbf{limitato}. Infatti poiché $\forall
+    s\in S,\,\,\,M(s)\geq 0$ (ovvero al più o marcature nulle in ogni posto) ho
+    anche che la rete è \textbf{coperta da S-invarianti} (quindi ogni posto
+    appartiene ad un S-invariante) e, in particolare, si può dire che:
+    \[\forall s\in S\backslash\{\mbox{empty, object}\}\,\,\,M(s)\leq 1\,\, \land
+      \,\,M(\mbox{empty})\leq 8\,\, \land\,\,  M(\mbox{object})\leq 8\]
+    ovvero tutti i posti tranne \textbf{empty} e \textbf{object} hanno al più una
+    marca (o una o nessuna), essendo quindi il sistema \textit{1-bounded} su tali
+    posti, mentre \textbf{empty} e \textbf{object} ne hanno al più 8
+    \item si ha la \textbf{mutua esclusione} tra i posti dei seguenti insiemi:
+    \begin{itemize}
+      \item $\{\mbox{wait\_raw, load, op1, wait\_dep, deposit}\}$
+      \item $\{\mbox{op2, wait\_free, unload, wait\_with, withdrawal}\}$
+      \item $\{\mbox{R, load, unload, deposit, withdrawal}\}$
+    \end{itemize}
+    sempre poiché $\forall s\in S,\,\,\,M(s)\geq 0$ (ovvero al più o marcature
+    nulle in ogni posto). Si nota che sono gli insiemi corrispondenti alle
+    sotto-reti definite dagli S-invarianti che hanno marcatura iniziale pari a 1 e
+    quindi non si avranno mai due posti interni ad una di queste reti
+    contemporaneamente marcati
+  \end{itemize}
+  Si ricerca quindi di dimostrare anche l'\textbf{assenza di deadlock} partendo
+  dagli S-invarianti. In questo caso non si ha una semplice deduzione (come nei
+  due precedenti) in quanto non si ha una condizione che garantisca tale
+  proprietà. Si può però fare, talvolta, un ragionamento che parte dagli
+  S-invarianti per dimostrare tale proprietà.\\
+  Si procede \textbf{per contraddizione} cercando di costruire una marcatura $M$
+  tale che:
+  \begin{itemize}
+    \item le quattro equazioni sopra siano soddisfatte
+    \item non abiliti alcuna transizione $t$, ovvero, formalmente:
+    \[\forall t\in T:\,\nexists M[t>\]
+    ovvero $M$ deve essere una marcatura di deadlock
+  \end{itemize}
+  Si prenda quindi la rete del sistema \emph{catena di produzione}.
+  \\
+  Per avere una marcatura di deadlock innanzitutto si deve avere che i
+  posti:\textbf{load}, \textbf{op1}, \textbf{deposit}, \textbf{op2},
+  \textbf{unload}, e \textbf{withdrawal} non devono essere marcati in quanto
+  sono precondizioni uniche, rispettivamente, delle transizioni \textbf{t2},
+  \textbf{t3}, \textbf{t5}, \textbf{t6}, \textbf{t8} e \textbf{t10} (se le
+  precondizioni sono marcate la transizione può scattare).\\
+  Partendo da questo presupposto torniamo alle quattro equazioni e imponiamo che
+  le marche in tali posti siano pari a 0, ottenendo, di conseguenza:
+  \begin{itemize}
+    \item $M(wait\_raw) + M(wait\_dep) = 1$
+    \item $M(wait\_free) + M(wait\_with) = 1$
+    \item $M(R) = 1$. Questa equazione implica che \textbf{R} deve essere
+    marcato e quindi $\mathbf{R}\in \,^\bullet t1$ e $\mathbf{R}\in \,^\bullet
+    t7$ (ovvero \textbf{R} è precondizione di \textbf{t1} e \textbf{t7})
+    \item $M(empty) + M(object) = 8$
+  \end{itemize}
+  L'analisi fatta su \textbf{R} implica che, al fine di ottenere una marcatura
+  di deadlock, bisogna impedire che la marcatura sia abilitata in \textbf{t1} e
+  in \textbf{t7}, ovvero, formalmente:
+  \[\nexists M \mathbf{ t.c. } M[t1> \mbox{ e } M[t7>\]
+  Dalla rete si nota che per permettere questa cosa i posti \textbf{wait\_raw} e
+  \textbf{wait\_free} non devono essere marcati e quindi, ponendo a 0 le marche
+  in tali posti, si ottiene un'ulteriore semplificazione delle 4 equazioni:
+  \begin{itemize}
+    \item $M(wait\_dep) = 1$
+    \item $M(wait\_with) = 1$
+    \item $M(R) = 1$
+    \item $M(empty) + M(object) = 8$
+  \end{itemize}
+  Quindi per impedire $M[t1> \mbox{ e } M[t7>$ \textbf{wait\_raw} e
+  \textbf{wait\_free} non devono essere marcati mentre \textbf{R},
+  \textbf{wait\_dep} e \textbf{wait\_with} devono essere marcati.\\
+  Restano quindi da studiare \textbf{t4} e \textbf{t9} che ancora potrebbero
+  scattare. Si ha che $\mathbf{empty}\in \,^\bullet t4$ e $\mathbf{object}\in
+  \,^\bullet t9$. Per impedire queste due  transizioni \textbf{empty} e
+  \textbf{object} non dovrebbero essere marcati ma questo è in
+  \textbf{contraddizione} con $M(empty) + M(object) = 8$ quindi:
+  \begin{center}
+    \textbf{una marcatura di deadlock non è raggiungibile}
+  \end{center}
+  in quanto non è possibile raggiungere una marcatura in cui nessuna transizione
+  è abilitata.\\
+  Quindi si è riuscito ad ottenere un risultato in merito al deadlock anche
+  senza una condizione specifica che garantisca tale proprietà ma solo studiando
+  gli S-invarianti.
+\end{esempio}
+\newpage
+Si mostrano ora due esempi mostrano che aggiungendo anche una sola marca il
+comportamento di un sistema può cambiare totalmente, infatti si può perdere sia
+la \textbf{vivezza} (primo esempio) che la \textbf{limitatezza} (secondo
+esempio). 
+\begin{esempio}
+  Sia dato $\Sigma = (N,M_0)$ con la sua matrice di incidenza, i due
+  S-invarianti $\underline{I_1}$ (che comporta che tra posti $b2$ e $b3$ ci sia
+  sempre al più una marca in totale) e $\underline{I_2}$ (che comporta che tra
+  posti $b1$, $b4$, $b5$, $b6$ e $b7$ ci siano sempre al più due marche in
+  totale) e il T-invariante $\underline{J}$. Si ha che i due S-invarianti
+  \textbf{coprono} la rete $N$. Si ha quindi:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/es1.jpg}
+    \includegraphics[scale = 0.55]{img/es2.jpg}    
+  \end{figure}
+  si nota che il T-invariante copre tutte le transizioni, quindi:
+  \[M_0 [t1\,\,t2\,\,t3\,\,t4\,\, t5 > M_0\]
+  Si ha quindi che $\Sigma$ è \textbf{vivo} e \textbf{2-limitato}.\\
+  Modifichiamo ora la marcatura iniziale aggiungendo una marca in $b2$,
+  ottenendo $\Sigma' = (N',M_0')$ che invece comporta una possibile situazione
+  di deadlock
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.435]{img/es3.jpg}
+    \includegraphics[scale = 0.435]{img/es4.jpg}   
+    \caption{Si nota come $M_0' [t1\,\, t1 > M_1'$ porti ad una situazione di
+      deadlock, comportando che $\Sigma'$ sia \textbf{2-limitato},
+      \textbf{1-vivo} ma \textbf{non deadlock-free} e quindi \textbf{non vivo}}
+  \end{figure}
+\end{esempio}
+\newpage
+\begin{esempio}
+  Sia dato $\Sigma = (N,M_0)$, \textbf{vivo} e \textbf{1-limitato} (sistema la
+  cui presenza di cappi impedisce la realizzazione della matrice di incidenza):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/es5.jpg}  
+  \end{figure}
+  si può notare che:
+  \[M_0 [t1\,\,t2\,\,t3\,\,t4\,\, t5\,\,t6 > M_0\]
+  Si aggiunge ora una marcatura nel posto $s$, ottenendo $\Sigma' = (N',M_0')$: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/es6.jpg}  
+  \end{figure}
+  si nota che:
+  \[M_0'=M_0(s_i)\land M_0'(s)=M_0(s) + 1\]
+  Questa aggiunta crea un sistema che \textbf{non è limitato} infatti si ha che
+  $M_0'[t1\,\, t3\,\,t4\,\, t6 > M'$ può essere ripetuta infinite volte,
+  caricando di marche in maniera illimitata i posti $s2$ e $s5$. Esiste quindi
+  almeno una sequenza di transizioni che rende il sistema \textbf{non limitato}.
+\end{esempio}
+Con i due esempi precedenti si è quindi visto come l'aggiunta di una marca sia
+sufficiente a cambiare completamente le proprietà di comportamento della rete
+associata ad un determinato sistema.
+\subsection{Sottoclassi}
+Si considerano reti di Petri marcate $\Sigma = (N,M_0)$, con $N=(S,T,F)$,
+capacità illimitata e peso degli archi pari a uno. Si studiano tre particolari
+sottoclassi di tali reti:
+\begin{enumerate}
+  \item \textbf{S-sistemi}
+  \item \textbf{T-sistemi}
+  \item \textbf{reti Free-choice}
+\end{enumerate}
+\subsubsection{S-sistemi}
+Sono il tipo di sottoclasse più semplice da studiare e sono detti anche
+\textbf{macchine a stati}, in quanto c'è una corrispondenza con gli
+\textit{automi a stati finiti} (anche se non si studiano in quanto accettatori
+di linguaggi).
+\begin{definizione}
+  Si definisce S-sistema un sistema $\Sigma = (N,M_0)$ la cui rete $N=(S,T,F)$ è
+  \textbf{senza sincronizzazioni}, in quanto, formalmente:
+  \[\forall t\in T, |^\bullet t|=|t^\bullet|=1\]
+  ovvero ogni transizione ha esattamente un solo posto in input e uno solo in
+  output (cosa che potrebbe comportare l'eliminazione di archi per via dello
+  studio della transitività, portando ad un \textit{sistema di transizioni}).\\
+  Si ha che le transizioni, quindi, non devono \textit{sincronizzare} diverse
+  precondizioni o attivare diverse postcondizioni.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ssi.jpg}
+    \caption{Esempio di sistema che \textbf{non} è \emph{S-sistema} in quanto
+      $t1$ ha due archi uscenti}
+  \end{figure}
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ssi2.jpg}
+    \caption{Esempio di sistema che è anche \emph{S-sistema} (o
+      \emph{macchina a stati}), nonostante si abbiano transizioni che possono
+      occorrere concorrentemente non si ha alcuna sincronizzazione} 
+  \end{figure}
+\end{definizione}
+Vediamo ora le proprietà di comportamento degli S-sistemi.\\
+\begin{teorema}
+  Vediamo innanzitutto la \textbf{proprietà fondamentale degli S-sistemi}.\\
+  Sia $\Sigma=(N,M_0)$, con $N=(S,T,F)$, un \textbf{S-sistema connesso} (per non
+  dover considerare ogni sottorete connessa), allora:
+  \[\forall M\in M_0[>,\,\, M(S)=M_0(S),\,\mbox{ con }M_i(S)=\sum_{s\in
+      S}M_i(s)\]
+  infatti, avendo ogni transizione un arco entrante e uno uscente, una qualsiasi
+  transizione non modificherà il numero complessivo di marche nei posti (in
+  quanto verrà spostata una marca dal posto di input a quello di output, unico),
+  quindi, per ogni marcatura raggiungibile da quella iniziale, la somma delle
+  marche nei posti in quella data marcatura resta \textbf{costante} e uguale a
+  quella della marcatura iniziale.\\
+  La somma delle marche è quindi una \textbf{proprietà invariante} di questo
+  sistema.
+\end{teorema}
+Questa proprietà ha diverse implicazioni:
+\begin{itemize}
+  \item la rete $N$ è \textbf{coperta da un S-invariante}, in quanto
+  $\underline{I}\cdot \underline{N}=\underline{0}$, con
+  $\underline{I}=\underline{1}$ in quanto l'S-invariante identifica tutti i
+  posti della rete
+  \item \textbf{ogni S-sistema è limitato}, in quanto non possono essere
+  accumulate marche essendo il loro numero costante
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.47]{img/ssi3.jpg}
+  \caption{Esempio di S-sistema che nonostante la sua evoluzione mantiene
+    costante il numero complessivo di marche (ovvero quattro)} 
+\end{figure}
+Ci sono anche proprietà legate al fatto che la rete di un S-sistema sia connessa
+o meno (ovvero se presi due nodi qualsiasi si ha un cammino orientato tra il
+primo e il secondo).\\
+\begin{teorema}
+  Si ha il teorema della \textbf{vivezza per gli S-sistemi} 
+  Sia $\Sigma=(N,M_0)$, con $N=(S,T,F)$, un \textbf{S-sistema}. Si ha che:
+  \begin{itemize}
+    \item se $\Sigma=(N,M_0)$ è \textbf{vivo} sse $N$ è \textbf{strettamente
+      connessa} e $M_0(S)>0$ (quindi almeno un posto è marcato). Questa è una
+    \textbf{condizione necessaria e sufficiente}, quindi se una rete è
+    strettamente connessa, con almeno un posto marcato nella marcatura iniziale,
+    si ha che il sistema è vivo
+    \item se $\Sigma=(N,M_0)$ è \textbf{vivo} e \textbf{n-limitato} sse $N$ è
+    \textbf{strettamente connessa} e $0< M_0(S)\leq n$ (quindi almeno un posto è
+    marcato ma con cardinalità di marche massima pari a $n$). Questa è una 
+    \textbf{condizione necessaria e sufficiente}, quindi se una rete è
+    strettamente connessa, con almeno un posto marcato e con al più $n$ marche
+    su ogni posto nella marcatura iniziale, si ha che il sistema è vivo e
+    n-limitato 
+  \end{itemize}
+\end{teorema}
+Questo risultato permette anche di esprimere qualcosa sulla raggiungibilità in
+tali sistemi:
+\begin{teorema}
+  Si ha infatti il teorema della \textbf{raggiungibilità per gli S-sistemi}.\\
+  Sia $\Sigma=(N,M_0)$, con $N=(S,T,F)$, \textbf{un S-sistema vivo} e sia
+  $M:S\to\mathbb{N}$ una \textbf{marcatura}. Allora si ha che:
+  \[M\in [M_0>] \Longleftrightarrow M_0(S)=M(S)\]
+  ovvero la marcatura è raggiungibile da quella iniziale sse il numero
+  complessivo di marche in tale marcatura è pari a quello della marcatura
+  iniziale e viceversa. 
+\end{teorema}
+\subsubsection{T-sistemi}
+Passiamo ora al secondo tipo di sottoclasse, i \textbf{T-sistemi}, detti anche
+\textbf{grafi marcati}. Questi sistemi sono in \textbf{``dualità''} con gli
+\textit{S-sistemi} (come da regola non scritta delle reti di Petri: \textit{ad
+  ogni concetto corrisponde un suo concetto duale}).
+\begin{definizione}
+  Si definisce T-sistema un sistema $\Sigma = (N,M_0)$ la cui rete $N=(S,T,F)$ è
+  \textbf{senza conflitti}, in quanto, formalmente:
+  \[\forall s\in S, |^\bullet s|=|s^\bullet|=1\]
+  ovvero per ogni posto si ha un solo arco entrante e uno uscente, e quindi una
+  sola pre-transizione ed un'unica post-transizione, impedendo quindi
+  l'esistenza di \textbf{conflitti} (ma non avendo alcuna imposizione dal punto
+  di vista degli archi entranti e uscenti dalle transizioni si può avere la
+  \textbf{sincronizzazione}).\\
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/tsi.jpg}
+    \caption{Esempi di T-sistemi, dove si nota la presenza di transizioni con
+      più archi entranti o uscenti}  
+  \end{figure}
+  Non essendoci \textbf{conflitti} si può asserire che i sistemi sono
+  \textbf{deterministici}, essendoci sincronizzazione
+\end{definizione}
+Con i T-sistemi possono essere fatte delle definizioni aggiuntive.
+\begin{definizione}
+  Sia dato un sistema $\Sigma = (N,M_0)$, con rete $N=(S,T,F)$, che è un
+  T-sistema. Allora si hanno le seguenti considerazioni:
+  \begin{itemize}
+    \item un \textbf{ciclo semplice} di $N$ è una sequenza di \textit{nodi}
+    $\gamma \in S\cup T$, del tipo $\gamma=x_1,\ldots,x_n$ tale che:
+    \[(x_1,x_2)\in F,\ldots,(x_{n-1},x_{n})\in F\mbox{ e } (x_n,x_1)\in F\]
+    \[\mbox{ e dove } x_i\neq x_j,\,\,i,j=1,\ldots n\]
+    ovvero una sequenza di nodi tale per cui tra un nodo e il successivo esiste
+    un arco orientato ed esiste anche un arco orientato tra l'ultimo nodo e il
+    primo. Si ha quindi che tutti i nodi possibili sono diversi tra loro
+    \item sia $\gamma$ un ciclo semplice di $N$, sia $M$ una marcatura $M:S\to
+    \mathbb{N}$ e sia $R$ l'insieme dei posti di $\gamma$, allora \textbf{il
+      numero di marche del ciclo $\gamma$} è pari a:
+    \[M(\gamma)=M(R)\]
+    ovvero il numero di marche del ciclo $\gamma$ è pari a quello dell'insieme
+    $R$.
+    \item un ciclo $\gamma$ è \textbf{marcato} sse:
+    \[M(\gamma)>0\]
+    ovvero se ho almeno un posto del ciclo marcato
+  \end{itemize}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/tsi2.jpg}
+    \caption{Esempi di un T-sistema con due cicli semplici e marcati:\\
+      $s1\,t1\,s2\,t2$, con una marca nella marcatura iniziale, e
+      $s4\,t3\,s5\,t4$, con un numero complessivo di marche nella marcatura
+      iniziale pari a 3} 
+  \end{figure}
+  (Si ricorda che la copertura di cicli comporta che una rete connessa sia
+  \emph{strettamente connessa})
+\end{definizione}
+Vediamo ora alcuni teoremi fondamentali per i T-sistemi.
+\begin{teorema}
+  Si ha innanzitutto il teorema della \textbf{proprietà fondamentale dei
+    T-sistemi}.\\
+  Sia dato un T-sistema $\Sigma = (N,M_0)$, con rete $N=(S,T,F)$. Sia inoltre
+  $\gamma$ un \textbf{ciclo semplice} di $N$. Allora:
+  \[\forall M\in [M_0>,\,\,M(\gamma) = M_0(\gamma)\]
+  ovvero il numero complessivo di marche su un ciclo rimane costante tra la
+  marcatura iniziale e ogni marcatura raggiungibile da essa
+\end{teorema}
+\begin{proof}
+  Se una transizione $t$ non appartiene al ciclo $\gamma$, allora il suo scatto
+  non modifica il numero di marche su $\gamma$, se invece $t$ appartiene a
+  $\gamma$, allora esattamente uno dei suoi posti di input e uno dei suoi posti
+  di output appartengono a $\gamma$, e quindi lo scatto di $t$ non modifica il
+  numero complessivo di marche in $\gamma$, nonostante possa modificare il
+  numero complessivo di marche del sistema. 
+\end{proof}
+\newpage
+\begin{teorema}
+  Vediamo anche il teorema di \textbf{vivezza dei T-sistemi}.\\
+   Sia dato un T-sistema $\Sigma = (N,M_0)$, con rete $N=(S,T,F)$. Si ha che
+   tale T-sistema è \textbf{vivo} sse per ogni ciclo semplice $\gamma$ di $N$ si
+   ha che:
+   \[M_0(\gamma)>0\]
+   ovvero se ogni ciclo è marcato nella marcatura iniziale (ovvero almeno un
+   posto del ciclo è marcato)
+\end{teorema}
+\begin{proof}
+  Infatti si ha che un ciclo non è marcato, rimane non marcato (per la
+  proprietà fondamentale dei T-sistemi) e tutte le transizioni in quel ciclo non
+  possono mai scattare e quindi si avrebbe un sistema \textbf{non vivo}. \\
+  D'altro canto l'altro ``verso'' della dimostrazione e per induzione (ma si può
+  dimostrare che se un sistema è vivo allora necessariamente ogni ciclo semplice
+  è marcato nella marcatura iniziale) 
+\end{proof}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/tsi3.jpg}
+  \caption{Esempio di un \emph{T-sistema vivo}. Si nota che tale sistema non è
+    \emph{coperto da cicli} ed è \emph{non-limitato}}
+  \includegraphics[scale = 0.6]{img/tsi4.jpg}
+  \caption{Esempio di un \emph{T-sistema non vivo} in quanto il ciclo semplice
+    $t3\,s4\,t4\,s5$ non è marcato, si ha quindi che $t3$ e $t4$ non
+    possono mai scattare}
+  \includegraphics[scale = 0.5]{img/tsi5.jpg}
+  \caption{Esempio di un \emph{T-sistema non vivo e in deadlock}, infatti si ha
+    un ciclo semplice non marcato, segnalato in rosso}
+\end{figure}
+\newpage
+Cerchiamo ora di unire i concetti di \textit{T-sistemi} e \textit{T-invarianti}.
+\begin{teorema}
+  Vediamo il teorema dei \textbf{T-invarianti dei T-sistemi}.\\
+  Sia $\Sigma =(N,M_0)$ un T-sistema. Se $N=(S,T,F)$ è \textbf{connessa} allora
+  esiste un vettore $\underline{J}:T\to \mathbb{Q}$ che è un T-invariante sse:
+  \[\underline{J}=(x\ldots x)\mbox{, per qualche }x\]
+  ovvero il vettore deve selezionare tutte le transizioni per essere
+  T-invariante.\\
+  \textbf{Cioè ogni transizione appartiene al supporto del T-invariante}.\\
+  In altre parole i T-sistemi sono \textbf{coperti da T-invarianti} 
+\end{teorema}
+Vediamo ora un altro teorema fondamentale.
+\begin{teorema}
+  Si ha il teorema della \textbf{vivezza di T-sistemi strettamente connessi}.\\
+  Sia $\Sigma =(N,M_0)$ un T-sistema. Se $N=(S,T,F)$ è \textbf{strettamente
+    connessa} allora le seguenti affermazioni sono equivalenti:
+  \begin{itemize}
+    \item $\Sigma =(N,M_0)$ è \textbf{vivo}
+    \item $\Sigma =(N,M_0)$ è \textbf{deadlock-free}
+    \item $\Sigma =(N,M_0)$ ammette una \textbf{sequenza infinita di
+      transizioni} 
+  \end{itemize}
+  Tutto ciò sse la rete è \textbf{strettamente connessa}, infatti:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/tsi4.jpg}
+    \caption{Esempio di un \emph{T-sistema non vivo} in quanto il ciclo semplice
+      $t3\,s4\,t4\,s5$ non è marcato, si ha quindi che $t3$ e $t4$ non
+      possono mai scattare, ma che non ha rete strettamente connessa e ha una
+      rete che ammette una sequenza infinita: $t1\,t2$}
+  \end{figure}
+\end{teorema}
+Vediamo ora la limitatezza dei T-sistemi.
+\begin{teorema}
+  Si ha ora il teorema della 
+\end{teorema}
+
+
+
 
 
 
@@ -3100,7 +3632,10 @@ Completiamo ora quanto detto per i T-invarianti:
 \section{Ripasso Logica Proposizionale}
 \emph{Si ringrazia
   \MYhref{https://github.com/bigboss98/appunti/tree/master/Fondamenti}{Marco
-  Natali} per questo ripasso}\\ 
+    Natali}
+  \footnote{Link al repository:
+    https://github.com/bigboss98/appunti/tree/master/Fondamenti} per questo
+  ripasso}\\   
 La logica è lo studio del ragionamento e dell’argomentazione e, in particolare,
 dei procedimenti inferenziali, rivolti a chiarire quali	procedimenti di pensiero
 siano validi e quali no. Vi sono molteplici tipologie di logiche, come ad
@@ -4373,9 +4908,13 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  liveness fairness safeness formed as forward Parikh firing PLTL
 % LocalWords:  affinchè sottoformula insoddisfacibile Morgan Idempotenza Linear
 % LocalWords:  all'handshacking sottoformule Propositional Logic checking next
-% LocalWords:  tomorrow sometime globally always until true bottom label BNF
+% LocalWords:  tomorrow sometime globally always until true bottom label BNF of
 % LocalWords:  Form root soddisfacibilità pltl png slide Godel Peano sull cap
 % LocalWords:  autoriferimento iniettiva G\"{o}del Bernardinello espriremere
-% LocalWords:  tableau github ciclano
+% LocalWords:  tableau github ciclano https repository Programming Techniques
+% LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom
+% LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
+% LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi
+% LocalWords:  bigboss
 
-\message{ !name(metodi.tex) !offset(-4381) }
+\message{ !name(metodi.tex) !offset(-4920) }

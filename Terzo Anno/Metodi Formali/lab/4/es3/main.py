@@ -11,7 +11,8 @@ def purificate(inputfile, outputfile):
     tra = [line.split()[3] for line in lines
            if len(line) != 0 and line[0] == 't']
     edg = [str.format("{} {} {}", line.split()[1], line.split()[2], line.split()[3])
-           for line in lines if len(line) != 0 and line[0] == 'e']
+          for line in lines  if len(line) != 0 and line[0] == 'e']
+
 
     with open(outputfile, 'w+') as file:
         for elem in pos:
@@ -28,14 +29,14 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "hi:o:", ["ifile=", "ofile="])
     except getopt.GetoptError as err:
         print(err)
-        print('main.py -i <inputfile.ndr> -o <outputfile>')
+        print('main.py -i <inputfile.ndr> (no curved edges) -o <outputfile>')
         sys.exit(2)
     if len(opts) == 0:
-        print('main.py -i <inputfile.ndr> -o <outputfile>')
+        print('main.py -i <inputfile.ndr> (no curved edges) -o <outputfile>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('main.py -i <inputfile.ndr> -o <outputfile>')
+            print('main.py -i <inputfile.ndr> (no curved edges) -o <outputfile>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
@@ -45,7 +46,7 @@ def main():
     #print('Output file is "', outputfile)
     purificate(inputfile, str.format("{}{}", outputfile, '.part'))
     subprocess.call(('./a.out', str.format("{}{}", outputfile, '.part')))
-    subprocess.call(('rm', str.format("{}{}", outputfile, '.part')))
+    #subprocess.call(('rm', str.format("{}{}", outputfile, '.part')))
     subprocess.call(('xdot', str.format("{}{}", outputfile, '.dot')))
 if __name__ == "__main__":
     main()

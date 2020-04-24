@@ -3,9 +3,10 @@
 
 std::string mToStr(std::vector<int> m){
   std::string result = "";
-  for(auto elem: m)
-    result += (std::to_string(elem) + " ");
-  result += "\b";
+  result += std::to_string(m[0]);
+  for(unsigned int i = 1; i < m.size(); i++)
+    result += (" " + std::to_string(m[i]));
+  //result += "\b";
   return result;
 }
 

@@ -4929,12 +4929,109 @@ altri tre stati torno a vedere $A$).
   danno resto 3 (quindi 3, 9, 15,$\ldots$). Anche in questo caso si ha un
   \textbf{ciclo} che parte nel momento in cui soddisfo $p$ la prima volta.
 \end{esempio}
-Nel file delle esercitazioni si trovano ulteriori esempi, oltre alla citazione
-di testi con vari esempi:
+\newpage
+\subsection{Esempio: Contatore Modulo Quattro}
+Vediamo l'esempio del \textbf{contatore modulo \footnote[quattro]{C. Baier
+    J. Katoen. Principles of Model Checking. The MIT Press Cambridge}}.\\
+
+Un contatore modulo 4 è costruito in modo da emettere in output 1 ogni 4 cicli,
+0 altrimenti. Il contatore è 
+costruito usando due registri binari $r_1$ e $r_0$ ed il valore assunto dal
+contatore è dato da $i = 2r_1 + r_0$ . Il valore di $i$ è incrementato di $1
+\bmod 4$ ad ogni ciclo. Il contatore emette in output il valore 1 quando $i$
+vale 0. Si ha la comodità che i valori binari sono facilmente mappabili in
+\textit{true} e \textit{false}. Si hanno quindi le seguenti variabili
+proposizionali:
 \begin{itemize}
-  \item contatore modulo quattro
-  \item semaforo stradale
+  \item $r_0$ che rappresenta l'omonimo registro e contiene il valore 1
+  \item $r_1$ che rappresenta l'omonimo registro e contiene il valore 1 
+  \item $y$ che è il valore in output e contiene 1
 \end{itemize}
+Possiamo quindi esprimere diverse specifiche in LTL:
+\begin{itemize}
+  \item il contatore emette 1 infinitamente spesso:
+  \[\mathbf{GF}\,y\]
+  \item ogni volta che il contatore emette 1, i vale 0 e viceversa:
+  \[\mathbf{G}(y\leftrightarrow \neg r_1 \land \neg r_0)\]
+  \item ogni volta che il contatore emette 1, nei successivi tre stati esso
+  emette 0:
+  \[\mathbf{G}(y\rightarrow (\mathbf{X}\,\neg y\land \mathbf{XX}\,\neg y\land
+    \mathbf{XXX}\, \neg y))\]
+  \item vale sempre che entro 4 cicli il contatore emette 1:
+  \[\mathbf{G}(y\lor \mathbf{X}\,y\lor\mathbf{XX}\,y\lor \mathbf{XXX}y)\]
+  \textit{Nota che le ultime due formule messe assieme indicano che esattamente
+    ogni 4 cicli viene emesso un 1}
+  \item ogni volta che i vale 0, nel successivo stato i vale 1:
+  \[\mathbf{G}(y\rightarrow \mathbf{X}(\neg r_1\land r_0))\]
+  oppure:
+  \[\mathbf{G}((\neg r_0\land \neg r_1)\rightarrow\mathbf{X}(\nge r_1\land
+    r_0))\]
+  \item il registro $r_0$ cambia valore con frequenza 1, cioè se al tempo $t$ il
+  registro assume un certo valore, al tempo $t + 1$ tale valore sarà diverso:
+  \[\mathbf{G}(r_o\rightarrow \mathbf{X}\neg r_0)\land\mathbf{G}(\neg
+    r_0\rightarrow \mathbf{X}\,r_0)\]
+  \item il registro $r_1$ cambia valore con frequenza 2, cioè se al tempo $t$ il
+  registro assume un valore ed al tempo $t + 1$ assume il valore complemento
+  allora al tempo $t + 2$ mantiene il valore assunto al tempo $t + 1$ ed al
+  tempo $t + 3$ assume il valore complemento rispetto al valore assunto al tempo
+  $t + 2$:
+  \[\mathbf{G(r_!\land \mathbf{X}\,r_1\rightarrow \mathbf{XX}\neg r_1)\land
+      \mathbf{G}(r_0\land \mathbf{X}\neg r_1\rightarrow\mathbf{XX}\,r_1)}\]
+  \item quando $r_$0 passa da 1 a 0 il registro $r_1$ cambia il proprio valore
+  (passando da 0 a 1 o da 1 a zero):
+  \[\mathbf{G}(r_0\land \mathbf{X}\neg r_0\land r_1\rightarrow\mathbf{X}\neg
+    r_1)\land \mathbf{G}(r_0\land \mathbf{X}\neg r_0\land \neg
+    r_1\rightarrow\mathbf{X}\,r_1)\]
+  \item se $r_0$ passa da 0 a 1 il registro $r_1$ non cambia il proprio valore:
+  \[\mathbf{G}(\neg r_0\land \mathbf{X}\,r_0\rightarrow
+    ((r_1\land\mathbf{X}\,r_1)\lor(\neg r_1\land\mathbf{X}\neg r_1)))\]
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4.jpg}
+  \caption{Sistema di transizione relativo al contatore modulo quattro, con i 4
+    stati etichettati con i valori in base 10 rappresentabili con il modulo
+    quattro}
+\end{figure}
+\newpage
+\subsection{Esempio: il Semaforo Stradale}
+Consideriamo di voler specificare il comportamento di un \textbf{semaforo}
+semplificato, il quale ha tre luci di colore \textbf{verde}, \textbf{giallo} e
+\textbf{rosso}. In ogni momento del funzionamento del semaforo solamente una
+delle tre luci è accesa. Il semaforo le accende ciclicamente in
+sequenza. Introduciamo tre variabili proposizionali \textbf{v},
+\textbf{g} e \textbf{r} una  per ciascuna luce che può essere
+\textbf{accesa o spenta}. Posso esprimere le seguenti specifiche in LTL:
+\begin{itemize}
+  \item la luce verde si accende infinitamente spesso:
+  \[\mathbf{GF}\,v\]
+  \item ogni volta che la luce è gialla, nello stato immediatamente successivo
+  la luce è rossa:
+  \[\mathbf{G}(g\rightarrow\mathbf{X}\,r)\]
+  \item ogni volta che la luce è gialla, nel futuro prima o poi diventa rossa e
+  nel frattempo è rimasta gialla:
+  \[\mathbf{G}(g\rightarrow\mathbf{X}(g\cup r))\]
+  \item accensione in sequenza delle luci:
+  \[\mathbf{G}((g\rightarrow\mathbf{X}\,r)\land(r\rightarrow\mathbf{X}\,v)
+    \land(v\rightarrow\mathbf{X}\,g))\]
+  \textit{Un semaforo che rispetti questa specifica cambia colore delle luci per
+    ogni transizione, cioè nel sistema di transizione non possono 
+    esistere due stati consecutivi con la medesima luce accesa}
+  \item accensione in sequenza delle luci (versione con durata finita ma
+  arbitraria):
+  \[\mathbf{G}((g\rightarrow\mathbf{X}(g\cup r))\land
+    (r\rightarrow\mathbf{X}(r\cup v))\land(v\rightarrow\mathbf{X}(v\cup g)))\]
+\end{itemize}
+Facciamo notare che le specifiche date sopra non vietano il fatto che ad esempio
+due luci possano essere accese contemporaneamente. Ad esempio un semaforo che
+accenda in contemporanea le luci rossa e verde. Quello che manca è una formula
+che specifichi il fatto che esattamente una tra le tre luci è accesa:
+\[\mathbf{G}((v\land \neg g\land\neg r)\lor(\neg v\land g\land \neg r)\lor(\neg
+  v\land \neg g\land r))\]
+Se pensiamo alla variante del semoforo ”all’italiana” dove le luci verde e gialla sono accese assieme, una tale
+comportamento è descritto dalla formula:
+\[\mathbf{G}((v\land \neg g\land\neg r)\lor(v\land g\land \neg r)\lor(\neg
+  v\land \neg g\land r))\]
 \chapter{Model Checking}
 
 
@@ -4944,7 +5041,7 @@ di testi con vari esempi:
 
 \chapter{Seminario sul Teorema di Incompletezza}
 \textit{\textbf{Nota: queste note, prese durante il seminario del prof
-    Bernardinello tenuto il 1 Aprile 2020 sono incomplete, parziali e
+    Bernardinello, tenuto il 1 Aprile 2020, sono incomplete, parziali e
     probabilmente scorrette in determinati punti.}}\\\\
 Si parla del \textbf{teorema di incompletezza di G\"{o}del}. Come punto di
 partenza \textit{storico} si parla di Hilbert, che pensava alla matematica come
@@ -5121,4 +5218,4 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom
 % LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
 % LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi
-% LocalWords:  bigboss dell sif sfi
+% LocalWords:  bigboss dell sif sfi Baier mappabili LTL

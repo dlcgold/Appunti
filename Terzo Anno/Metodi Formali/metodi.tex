@@ -3834,7 +3834,7 @@ trappole anche per lo studio della reversibilità.
 \end{figure}
 \subsection{Sistemi Free-Choice}
 
-\chapter{Logica PLTL}
+\chapter{Logica PLTL e Model Checking}
 \section{Ripasso Logica Proposizionale}
 \emph{Si ringrazia
   \MYhref{https://github.com/bigboss98/appunti/tree/master/Fondamenti}{Marco
@@ -5018,9 +5018,10 @@ sequenza. Introduciamo tre variabili proposizionali \textbf{v},
     ogni transizione, cioè nel sistema di transizione non possono 
     esistere due stati consecutivi con la medesima luce accesa}
   \item accensione in sequenza delle luci (versione con durata finita ma
-  arbitraria):
-  \[\mathbf{G}((g\rightarrow\mathbf{X}(g\cup r))\land
-    (r\rightarrow\mathbf{X}(r\cup v))\land(v\rightarrow\mathbf{X}(v\cup g)))\]
+  arbitraria, usando quindi l'\textbf{until}):
+  \[\mathbf{G}((g\rightarrow\mathbf{X}(g\,\mathbf{U}\ r))\land
+    (r\rightarrow\mathbf{X}(r\,\mathbf{U}\
+    v))\land(v\rightarrow\mathbf{X}(v\,\mathbf{U}\, g)))\] 
 \end{itemize}
 Facciamo notare che le specifiche date sopra non vietano il fatto che ad esempio
 due luci possano essere accese contemporaneamente. Ad esempio un semaforo che
@@ -5028,13 +5029,153 @@ accenda in contemporanea le luci rossa e verde. Quello che manca è una formula
 che specifichi il fatto che esattamente una tra le tre luci è accesa:
 \[\mathbf{G}((v\land \neg g\land\neg r)\lor(\neg v\land g\land \neg r)\lor(\neg
   v\land \neg g\land r))\]
-Se pensiamo alla variante del semoforo ”all’italiana” dove le luci verde e gialla sono accese assieme, una tale
-comportamento è descritto dalla formula:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/semp.jpg}
+  \caption{Sistema di transizione relativo al sistema del semaforo (non
+    all'italiana)} 
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/semp2.jpg}
+  \caption{Rete di Petri relativa al sistema del semaforo (non all'italiana). SI
+  nota che una rete di Petri di questo tipo è poco sensata, a differenza di una
+  dedicata alla sincronizzazione di più semafori}
+\end{figure}
+Se pensiamo alla variante del semoforo ``all'italiana'' dove le luci verde e
+gialla sono accese assieme, una tale comportamento è descritto dalla formula:
 \[\mathbf{G}((v\land \neg g\land\neg r)\lor(v\land g\land \neg r)\lor(\neg
   v\land \neg g\land r))\]
-\chapter{Model Checking}
-
-
+\newpage
+\section{Model Checking}
+Il \textbf{Model Checking} è una tecnica per analizzare sistemi.\\
+Partiamo dall'esempio del contatore modulo quattro sopra discusso. Supponiamo di
+aver modellato correttamente il sistema (nel dettaglio il sistema di
+transizione) e ci poniamo di verificare tale correttezza, dimostrando che il
+modello soddisfa le varie proprietà elencate nei cari punti dell'esempio (che
+supponiamo correttamente espresse, nonché correttamente tradotte in linguaggio
+logico). Vogliamo dimostrare formalmente, quindi, tale correttezza e verificare
+in quali stati del sistema di transizione vale una data proprietà basandoci sul
+fatto che proprietà e sistema sono di per se ben espressi. Sia quindi data una
+formula PLTL $A$ e un sistema di transizione $S$. Bisogna verificare la
+soddisfacibilità di una formula $A$ in un sistema di transizione $S$, ovvero che
+$S$ soddisfi $A$. Questa verifica è il \textit{model checking}.\\
+\textbf{Il modello in model checking è il sistema di transizione $S$}.\\
+Nell'esempio del contatore modulo quattro abbiamo a che fare con una struttura
+finita e dotata di ciclo ma noi abbiamo studiato la soddisfacibilità di formule
+in modelli PLTL, che ha modelli \textit{lineari} e \textit{infiniti}. Si procede
+quindi con lo \textbf{srotolamento} della struttura finita con loop, al fine di
+ottenerne una infinita e senza loop (lineare), che chiameremo $M$:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/sro.jpg}
+  \caption{Srotolamento del sistema di transizione relativo al contatore modulo
+    quattro} 
+\end{figure}
+A questo punto la semantica dei connettivi PLTL ci consente di stabilire, per un
+dato tempo $t$, se una formula PLTL $A$ è soddisfatta sfruttando tale struttura
+$M$. Analogamente si può procedere con $S$, senza quindi srotolamento, che offre
+il vantaggio di essere finito, fornendo quindi una verifica
+\textbf{matematicamente ben data}, e di essere una procedura terminante.\\
+\textit{Si ricorda che ancora si parla di sistemi privi di
+  \textbf{branching}}.\\
+La verifica dipende dal numero di stati e dalla lunghezza della formula.\\
+Riprendiamo quindi il sistema di transizione dove possiamo affermare che
+$\mathbf{F}\,y$ e $\mathbf{GF}\,y$ sono vere in ogni stato (cosa che sarebbe
+verificabile, ovviamente, anche nel caso della struttura srotolata, come
+spiegato durante la trattazione della logica PLTL, sfruttando tempi multipli di
+quattro etc$\ldots$).
+\subsection{Algoritmo di Etichettatura}
+Studiamo come etichettare i nodi del sistema di transizione. Si studia
+l'\textbf{algoritmo di etichettatura} che è algoritmo che ci permette di
+determinare la soddisfacibilità di una formula in un certo stato del sistema di
+transizione, al fine di ottenere, per esempio (come descritto nella pagina
+precedente): 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4c.jpg}
+\end{figure}
+Questo algoritmo è giustificato dalla semantica dei connettivi e procede
+mediante essi. Questo algoritmo è basato sulla \textbf{programmazione dinamica}
+e che prevede di riempire le celle di una tabella $Tab$ bidimensionale in cui
+gli stati del modello (infiniti nel caso di un modello PLTL, ma finiti nel caso
+di un sistema di transizione) ne intestano le colonne e le sottoformule della
+formula $A$ da verificare ne intestano le righe. Ogni cella di $Tab$ assume un
+valore binario, per concretezza diciamo 1 o 0, come 
+segue:
+\begin{center}
+  le cella di $Tab$ alle coordinate $(B, t)$ contiene il valore 1 se vale
+  $(M,t)\VdashB$, altrimenti contiene 0.  
+\end{center}
+Partiamo con una \textbf{procedura non terminante di etichettatura per PLTL}.\\
+Le celle di $Tab$ vengono riempite induttivamente secondo lo schema standard
+della programmazione dinamica:\\
+\textbf{caso base:}\\
+per ogni variabile proposizionale $p$ che occorre in $A$ si assegna la riga
+della tabella relativa a $p$ come segue:
+\[
+  \begin{cases}
+    Tab[p, t] = 1 &\mbox{se vale } t\Vdash p\\
+    Tab[p, t] = 0 &\mbox{altrimenti}
+  \end{cases}
+\]
+\newpage
+\textbf{passo induttivo:}\\
+per ogni sottoformula $B$ di $A$, assegniamo la riga di $B$ se sono noti
+i valori per le sottoformule di $B$ come segue:
+\begin{itemize}
+  \item se $B$ è del tipo $\mathbf{X}\,C$ allora:
+  \[Tab[\mathbf{X}\, C, t] = Tab[C, t + 1]\]
+  \item se $B$ è del tipo $\mathbf{G}\,C$ allora si procede come segue:
+  \begin{enumerate}
+    \item \textbf{inizializzazione:} $\forall\,t\geq 0$ assegna a
+    $Tab[\mathbf{G}\,C, t]$ il valore in $Tab[C, t]$
+    \item \textbf{iterazione:}
+    \begin{itemize}
+      \item $\forall\,t\geq 0$ se $Tab[\mathbf{G}\,C, t] = 1$ allora assegna
+      a $Tab[\mathbf{G}\, C, t]$ il valore assunto da \\$Tab[\mathbf{G}\, C,
+      t+1]$
+      \item ripeti il passo precedente se qualche valore è stato cambiato
+    \end{itemize}
+  \end{enumerate}
+  \item se $B$ è del tipo $\mathbf{F}\,C$ allora si procede come segue:
+  \begin{enumerate}
+    \item \textbf{inizializzazione:} $\forall\,t\geq 0$ assegna a
+    $Tab[\mathbf{F}\,C, t]$ il valore in $Tab[C, t]$
+    \item \textbf{iterazione:}
+    \begin{itemize}
+      \item $\forall\,t\geq 0$ se $Tab[\mathbf{F}\,C, t] = 1$ allora assegna
+      a $Tab[\mathbf{F}\, C, t]$ il valore assunto da \\$Tab[\mathbf{F}\, C,
+      t+1]$
+      \item ripeti il passo precedente se qualche valore è stato cambiato
+    \end{itemize}
+  \end{enumerate}
+  \item se $B$ è del tipo $C\,\mathbf{U}\,D$ allora si procede come segue:
+  \begin{enumerate}
+    \item \textbf{inizializzazione:} $\forall\,t\geq 0$ assegna a
+    $Tab[C\,\mathbf{U}\,D, t]$ il valore in $Tab[D, t]$
+    \item \textbf{iterazione:}
+    \begin{itemize}
+      \item $\forall\,t\geq 0$ se $Tab[C\,\mathbf{U}\,D, t] = 1$ e
+      $Tab[C,1]=1$ allora assegna a $Tab[C\,\mathbf{U}\,D, t]$ il valore
+      assunto da $Tab[C\,\mathbf{U}\,D, t+1]$ 
+      \item ripeti il passo precedente se qualche valore è stato cambiato
+    \end{itemize}
+  \end{enumerate}
+  \item se $B$ è del tipo $C \land D$, $Tab[C \land D, t] = Tab[C, t] \cdot
+  Tab[D, t]$  
+  \item se $B$ è del tipo $C \lor D$, $Tab[C \lor D, t] = 1$ se $Tab[C, t] = 1$ o
+  $Tab[D, t] = 1$, $Tab[C \lor D, t] = 0$ altrimenti
+  \item se $B$ è del tipo $\neg C$, $Tab[\neg C, t] = 1 − Tab[C, t]$
+  \item se $B$ è del tipo $C \to D$, $Tab[C \to D, t] = 1$ se $Tab[C, t] = 0$ o
+  $Tab[D, t] = 1$, $Tab[C \lor D, t] = 0$ altrimenti
+\end{itemize}
+\textit{La procedura data sopra è matematicamente ben definita. Però, dato che
+  un modello PLTL è un oggetto infinito, la procedura non può essere considerata
+  un algortimo perchè alcuni passi sono infiniti. Quando applicata ad un sistema
+  di transizione lineare, la descrizione fornita sopra, con piccoli cambiamenti,
+  diventa un algoritmo di model checking.}
 
 
 
@@ -5218,4 +5359,4 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom
 % LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
 % LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi
-% LocalWords:  bigboss dell sif sfi Baier mappabili LTL
+% LocalWords:  bigboss dell sif sfi Baier mappabili LTL sro branching semp Tab

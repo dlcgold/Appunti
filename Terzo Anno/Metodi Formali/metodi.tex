@@ -5175,7 +5175,116 @@ i valori per le sottoformule di $B$ come segue:
   un modello PLTL è un oggetto infinito, la procedura non può essere considerata
   un algortimo perchè alcuni passi sono infiniti. Quando applicata ad un sistema
   di transizione lineare, la descrizione fornita sopra, con piccoli cambiamenti,
-  diventa un algoritmo di model checking.}
+  diventa un algoritmo di model checking.}\\
+Si ha quindi un \textbf{sistema di transizione lineare} $M=(S,\to,\Vdash)$
+definito come segue:
+\begin{itemize}
+  \item $S=\{s_0\ldots,s_n\}$, insieme degli stati
+  \item $\to=\{(s_0,s_1),\ldots,(s_{n-1},s_n)(s_n,s_k)\},\,k\in\{0\ldots n\}$,
+  insieme degli archi che connette un nodo al successore più l'arco del loop
+  \item $\Vdash\subseteq S\times V$, relazione di soddisfacibilità (?)
+\end{itemize}
+Si ha quindi un insieme di stati consecutivi collegati al successore (unico) da
+un arco. Si ha inoltre un ciclo che dal nodo finale riporta ad un nodo della
+sequenza.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/sro2.jpg}
+  \caption{Esempio di sistema di transizione lineare} 
+\end{figure}
+\textit{Si nota che il sistema di transizioni che modella il contatore modulo
+  quattro è un sistema di transizione lineare}
+\newpage
+Ripartendo quindi dal sistema:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/4c2.jpg} 
+\end{figure}
+proviamo a studiare la soddisfacibilità di $\mathbf{Gf}\,y$ usando l'algoritmo
+di etichettatura.\\
+Partiamo con dire che:
+\begin{center}
+  $\mathbf{F}\,y$ è soddisfatto negli stati in cui $y$ è soddisfatto
+\end{center}
+quindi si può sistemare l'etichettatura:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/4c3.jpg} 
+\end{figure}
+ma sappiamo che:
+\begin{center}
+  tutti gli stati precedenti a quello in cui vale $\mathbf{F}\,y$ soddisfano
+  anch'essi $\mathbf{F}\,y$
+\end{center}
+avendo che lo stato 0 soddisfa $\mathbf{F}\,y$ si ha quindi che anche lo stato
+precedente 3 lo soddisfa:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 2]{img/4c4.jpg} 
+\end{figure}
+\newpage
+ma iterando nella stessa maniera si arriva a dire che lo stesso anche per gli
+altri due stati (dallo stato 3 allo stato 2 e dallo stato 2 allo stato 1):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4c5.jpg} 
+\end{figure}
+Passiamo ora al connettivo \textbf{G} sapendo che:
+\begin{center}
+  tutti gli stati che soddisfano l'argomento di \textbf{G} sono candidati a
+  soddisfare la formula
+\end{center}
+ed essendo, nel nostro caso, candidati tutti gli stati (tutti soddisfano
+$\mathbf{F}\,y$) e quindi tutti ricevono l'etichetta $\mathbf{GF}\,y$:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4c.jpg} 
+\end{figure}
+L'algoritmo ora prevederebbe di cancellare $\mathbf{GF}\,y$ da quegli stati il
+cui successore non ha l'etichetta $\mathbf{GF}\,y$ ma nel caso in esame non
+accade mai (dato che tutti gli stati presentano quell'etichettatura). Questa
+procedura è necessaria in quanto la sola condizione per la quale \textit{tutti
+  gli stati che soddisfano l'argomento di \textbf{G} sono candidati a soddisfare
+  la formula} non è sufficiente essendoci la persistenza in avanti (se uno stato
+successivo non ha l'\textbf{always} non potrebbe averlo uno stato precedente e
+quello precedente al precedente e così via).
+\newpage
+Vediamo un altro esempio per studiare l'\textbf{until}.\\
+Si ha il sistema:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4c6.jpg} 
+\end{figure}
+e si vuole studiare la formula $t\,\mathbf{U}\,p$.\\
+Sappiamo, dalla semantica dell'\textbf{until}, che:
+\begin{center}
+  i nodi che soddisfano $p$ certamente soddisfano $t\,\mathbf{U}\,p$
+\end{center}
+quindi si ha in primis che:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4c7.jpg} 
+\end{figure}
+ora bisogna studiare gli stati che vedono lo stato 2 nel proprio futuro, per
+vedere se si può arricchire l'etichettatura. Algoritmicamente parto dallo stato
+0. Vedo che lo stato 0 soddisfa $t$ ma non so ancora se il successore soddisfi
+$t\,\mathbf{U}\,p$. Quindi non posso giustificare che lo stato 0 soddisfi
+$t\,\mathbf{U}\,p$. Passo quindi allo stato 1, che soddisfa $t$ e che ha lo
+stato successore che soddisfa $t\,\mathbf{U}\,p$. Quindi lo stato 1 soddisfa
+$t\,\mathbf{U}\,p$ e di conseguenza, dovendo poi ricominciare dall'inizio col
+``ciclo'' di studio dei nodi (dovendo studiare i predecessori dei nodi che
+soddisfano $t\,\mathbf{U}\,p$), scopro che anche lo stato 0 soddisfa
+$t\,\mathbf{U}\,p$ (vedendo nel futuro uno stato che soddisfa $p$, lo stato 2,
+soddisfacendo $t$ e avendo successore che soddisfa $t\,\mathbf{U}\,p$): 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/4c8.jpg} 
+\end{figure}
+posso quindi interrompere lo studio degli stati sapendo che non potrò più
+modificare nulla.
+
+
+
 
 
 

@@ -3833,6 +3833,150 @@ trappole anche per lo studio della reversibilità.
     marcatura che svuoti completamente la trappola}  
 \end{figure}
 \subsection{Sistemi Free-Choice}
+Le \textbf{reti Free-Choice} sono sottoclassi di reti di Petri marcate $\Sigma=
+(N, M_0 )$, con $N = (S, T .F )$, in cui si assume
+capacità illimitata e peso degli archi uguale a uno, dove si possono avere
+\textbf{conflitti} e \textbf{sincronizzazioni} (quindi posti e transizioni
+possono avere molteplici archi entranti e/o uscenti) ma \textbf{non
+  confusione} (ovvero mescolamenti pericolosi di conflitti e concorrenza).\\ 
+\begin{teorema}
+  Un sistema  $\Sigma= (N, M_0 )$ è \textbf{Free-Choice} se lo è la rete $N$
+\end{teorema}
+\begin{definizione}
+  Definiamo quindi formalmente una \textbf{rete Free-Choice}.\\
+  Una rete $N = (S, T .F )$ è Free-Choice se ammette \emph{sincronizzazioni} e
+  \emph{conflitti} ma è \emph{senza confusione}, cioè tale che:
+  \[\forall t_1,t_2\in T\,\,\,^\bullet t_1\cap \,^\bullet t_2\neq
+    \emptyset\Rightarrow \,\,^\bullet t_1=\,^\bullet t_2\]
+  ovvero per ogni coppia di transizioni, se queste hanno almeno una
+  precondizione comune, essendo quindi in \emph{conflitto}, allora tutte le loro
+  precondizioni coincidono.
+  \begin{center}
+    o equivalentemente
+  \end{center}
+  \[\forall s_1,s_2\in S\,\, s_1^\bullet\cap s_2^\bullet\neq
+    \emptyset\Rightarrow \, s_1^\bullet=s_2^\bullet\]
+  ovvero per ogni coppia di posti, se queste hanno almeno una post-transizione
+  comune, essendo quindi in \emph{sincronizzazione}, allora tutte le loro
+  post-transizioni coincidono.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/fc1.jpg}
+    \caption{Una \emph{rete NON Free-Choice} (le transizioni sono in conflitto
+      ma non hanno tutte le precondizioni coincidenti e i posti sono in
+      sincronizzazione ma non hanno post-transizioni coincidenti)}
+    \includegraphics[scale = 0.6]{img/fc2.jpg}
+    \caption{Una \emph{rete Free-Choice} (posti e transizioni soddisfano la
+      definizione)} 
+  \end{figure}
+\end{definizione}
+\newpage
+\begin{teorema}
+  Vediamo la \textbf{proprietà fondamentale delle reti Free-Choice}.\\
+  Sia $N$ una rete Free-Choice, $s \in S $ un certo posto e $M : S\to
+  \mathbb{N}$ una marcatura della rete. Si ha che se $M$ abilita qualche
+  transizione in $s^\bullet$ (quindi qualche post-transizione del posto scelto),
+  allora abilita ogni transizione in $s^\bullet$, ovvero ogni post-transizione
+  del posto scelto 
+\end{teorema}
+La condizione sufficiente per l’\textbf{assenza di deadlock} per sistemi marcati
+(se ogni sifone proprio contiene una trappola marcata, allora il sistema è
+deadlock-free) diventa\textbf{ necessaria e sufficiente} per la vivezza nei
+sistemi Free-Choice 
+\begin{teorema}
+  Vediamo la \textbf{condizione necessaria e sufficiente per la vivezza di
+    sistemi Free-Choice}.\\
+  Un sistema Free-Choice $\Sigma=(N,M_0)$ è \textbf{vivo} sse ogni
+  \textbf{sifone proprio} contiene una \textnormal{trappola marcata}.\\
+  Questa condizione è anche chiamata \textbf{teorema di Commoner/Hack} 
+\end{teorema}
+\begin{corollario}
+  Un sistema Free-Choice $\Sigma=(N,M_0)$ è \textbf{vivo} sse ogni sifone
+  \textbf{proprio minimale} contiene una \textbf{trappola massimale marcata}.\\
+  \textit{Quindi non serve analizzare tutti i sifoni ma solo quelli minimali,
+    anche se ci può essere un numero esponenziale, rispetto ai nodi della rete,
+    di sifoni minimali. Quindi nonostante la semplificazione della ricerca si ha
+  un algoritmo esponenziale. È stato dimostrato che il problema è
+  \textbf{NP-completo}} 
+\end{corollario}
+\textbf{Questo teorema vale solo per i sistemi Free-Choice!}
+\begin{esempio}
+  Vediamo due sistemi non Free-Choice che dimostrano questo fatto:\\
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/fc3.jpg}
+    \caption{Primo esempio di \emph{sistema NON Free-Choice}, con $\{s1,s2\}$
+      che sono un sifone e contemporaneamente trappola marcata ma il sistema è
+      \emph{non vivo} (anche se il sifone contiene una trappola
+      marcata). Inoltre è \emph{deadlock-free}}
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/fc4.jpg}
+    \caption{Secondo esempio di \emph{sistema NON Free-Choice}, con
+      $\{s1,s2,s3,s4\}$ che è un sifone che non contiene una trappola marcata
+      $Q$ (se si avesse $s4\in Q$ allora si avrebbe anche $s6\in Q$) ma il
+      sistema è \emph{vivo}, nonostante appunto il sifone non contenga una
+      trappola marcata} 
+  \end{figure}
+\end{esempio}
+\begin{esempio}
+  Vediamo anche un sistema Free-Choice \textbf{non vivo}:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/fc5.jpg}
+    \caption{Esempio di \emph{sistema Free-Choice} \textbf{non vivo} (si ha un
+      deadlock in $M=\{s3,s4\}$). Si ha che $\{s1,s2,s5\} $ è un sifone che però
+    non contiene una trappola $Q$ marcata (che dovrebbe contenere $s1$, ma se lo
+    contenesse dovrebbe contenere anche $s3$ infatti, se $s1 \in Q$ allora anche
+    $s3 \in Q$) e quindi non può essere vivo per il teorema di Commoner/Hack}  
+\end{figure}
+\end{esempio}
+\begin{teorema}
+  Vediamo il teorema della \textbf{relazione tra vivezza e assenza di
+    deadloc}k.\\
+  Sia $\Sigma$ un sistema Free-Choice \textbf{limitato e strettamente
+    connesso}. Allora si ha che il sistema è \textbf{vivo} sse è 
+  \textbf{deadlock-free} 
+\end{teorema}
+\begin{esempio}
+  Vediamo due sistemi Free-Choice che dimostrano questo fatto:\\
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/fc6.jpg}
+    \caption{Primo esempio di \emph{sistema Free-Choice} (e anche senza
+      conflitti), \emph{limitato} e \emph{non strettamente
+        connesso}. Nonostante il sistema sia \emph{deadlock-free} non è
+      \emph{vivo} (infatti $t1$ non scatterà più dopo il primo scatto) in
+      quanto, per il teorema, \emph{non strettamente connesso}} 
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.65]{img/fc7.jpg}
+    \caption{Secondo esempio di \emph{sistema Free-Choice}, \emph{non limitato}
+      e \emph{strettamente connesso}. Nonostante il sistema sia
+      \emph{deadlock-free} non è \emph{vivo} (infatti $t4$ e $t5$ non
+      scatteranno mai) in quanto, per il teorema, \emph{non limitato} (si
+      accumulano marche in $s3$)}  
+  \end{figure}
+ \textbf{ Questo non vale per sistemi non Free-Choice:}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/fc3.jpg}
+    \caption{Secondo esempio di \emph{sistema non Free-Choice}, \emph{limitato}
+      e \emph{strettamente connesso}. Nonostante il sistema sia
+      \emph{deadlock-free} non è \emph{vivo} (infatti $t3$ non scatterà mai) in
+      quanto, non essendo Free-Choice, non si può applicare il teorema} 
+  \end{figure}
+\end{esempio}
+
+
+
+
+
+
+
+
 
 \chapter{Logica PLTL e Model Checking}
 \section{Ripasso Logica Proposizionale}
@@ -5465,7 +5609,8 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  Form root soddisfacibilità pltl png slide Godel Peano sull cap
 % LocalWords:  autoriferimento iniettiva G\"{o}del Bernardinello espriremere tr
 % LocalWords:  tableau github ciclano https repository Programming Techniques
-% LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom
+% LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom fc
 % LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
 % LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi
 % LocalWords:  bigboss dell sif sfi Baier mappabili LTL sro branching semp Tab
+% LocalWords:  Commoner Hack

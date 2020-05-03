@@ -14,23 +14,23 @@ std::mutex mutexin;
 std::mutex mutexout;
 
 void thread_car(int id) {
+  // abbellimento id
   id += 1;
-  // check parcheggio pieno
-  //std::unique_lock<std::mutex> lockin(mutexin);
+
+  // tentativo inserimento macchina
   mutexin.lock();
   std::cout << "prova ad entrare macchina " << id << "\n";
-
   mutexin.unlock();
+  
+  // check parcheggio pieno
   std::unique_lock<std::mutex> lockin(mutexin);
-  // std::unique_lock<std::mutex> lockout(mutexout);
-
   while(park_spaces <= 0){
     std::cout << "full\n";
     freeSpace.wait(lockin);
     mutexin.lock();
-
   }
-  // std::cout << "entra macchina " << id << "\n";
+
+  // inserimento macchina e occupamento posto
   park_spaces--;
   std::cout << "entra macchina " << id << ", "
 	    << "numero di posti liberi: " << park_spaces << "\n";
@@ -38,6 +38,8 @@ void thread_car(int id) {
   mutexin.unlock();
   mutexout.lock();
   usleep(1000000);
+
+  //uscita macchina ed eventuale segnale per sbloccare ingresso
   std::cout << "esce macchina " << id << ", "
 	    << "numero di posti liberi: " << park_spaces << "\n";
   park_spaces++;

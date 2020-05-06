@@ -4207,6 +4207,179 @@ quelle che ammettono una certa marcatura iniziale per cui diventano sistemi
   che diventano Well Formed con il rango della loro matrice di incidenza,
   mediante il cosiddetto \textbf{teorema del rango}
 \end{teorema}
+\subsection{Teoremi del Rango}
+Si studia quindi come il rango della matrice di incidenza di una rete, assieme
+all'analisi del grafo, può dare informazioni sulle proprietà di comportamento.\\
+Si cercherà di capire se una rete è Well-Formed (WF). Si riusciranno, a
+differenza di quanto descritto precedentemente ad ottenere risultati in tempi
+polinomiali.  
+\begin{teorema}
+Sia $N = (P, T , F )$ debolmente connessa e con peso degli archi in $\{0, 1\}$ e
+sia $N$ la sua matrice di incidenza (usiamo la stessa notazione $N$ sia per la
+rete che per la matrice di incidenza). Si ha che:
+\begin{itemize}
+  \item se $N$ è coperta da S-invarianti allora:
+  \[rango(N) \leq |S| − 1\]
+  questo in quanto il rango identifica il massimo numero di vettori riga o
+  colonna \textbf{linearmente indipendenti}, quindi se la rete è coperta da
+  S-invarianti almeno uno di questi vettori è combinazione lineare degli altri e
+  quindi il rango è al massimo il numero dei posti meno 1
+  \item se $N$ è coperta da T-invarianti allora:
+  \[rango(N) \leq |T| − 1\]
+  se la rete è coperta da T-invarianti almeno uno di questi vettori è
+  combinazione lineare degli altri e quindi il rango è al massimo il numero
+  delle transizioni meno 1
+  \item se $N$ è coperta da S-invarianti e T-invarianti allora:
+  \[rango(N) \leq  \min(|S|, |T|) − 1\]
+\end{itemize}
+Oltre al rango bisogna studiare il grafo della rete rispetto ai conflitti (in
+quanto le situazioni di deadlock si vengono a creare quando le sincronizzazioni
+risolvono il conflitto in modo diverso)
+\end{teorema}
+
+\begin{definizione}
+  Definiamo il \textbf{Conflict-Cluster} ma per farlo servono alcune definizioni
+  aggiuntive.\\
+  Sia $ N = (P, T , F )$ una rete e $t, t'\in T,\,\,\,t\neq t'$ due transizioni
+  diverse. Possiamo quindi definire una relazione $\sim_0$ tra coppie di
+  transizioni:
+  \[\sim_0\subseteq T\times T\]
+  tale che $t\sim_0t'$ sse:
+  \[^\bullet t\cap \,^\bullet t'\neq \emptyset\]
+  ovvero sse le transizioni sono in conflitto avendo almeno una precondizione in
+  comune.//
+  Si ha quindi che $\sim_0$ è \textbf{simmetrica ma non transitiva}.\\
+  Definiamo anche la \textbf{chiusura riflessiva e transitiva} di $\sim_o$, che
+  indichiamo con $\sim\subseteq T\times T$. $\sim$ è una \textbf{relazione di
+    equivalenza} (essendo anche simmetrica).
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/cc.jpg}
+    \caption{Esempio con $t1\sim_0 t2$ e $t2\sim_0 t3$ ma $t1\not\sim_0 t3$
+      e infatti lo scatto di $t1$ o $t3$ non preclude lo scatto dell'altra ma si
+      ha che $t1\sim t3$}
+  \end{figure}
+  Possiamo quindi definire un \textbf{conflict-cluster} di $N$ come una
+  \textbf{classe di equivalenza di} $T_{\backslash\sim}$ ovvero, formalmente:
+  \[[t]=\{t'\in T|\,t'\sim t\}\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/cc2.jpg}
+    \caption{Nell'area rossa il conflict cluster}
+  \end{figure}
+  quindi il conflict-cluster è l'insieme di tutte le transizioni che sono in
+  relazione $\sim$ tra loro.\\
+  Definisco $CC_N$ l'insieme di tutti i Conflict-Cluster di una rete $N$
+\end{definizione}
+Si ha una proprietà importante. Sia$ N = (P, T , F ) $una rete e $t\in T$ una
+transizione. Sia inoltre $^\bullet[t]=\big\cup_{t'\in [t]}\,^\bullet t'$, ovvero
+per ogni classe di equivalenza $[t]$ considero l'insieme di tutti i posti di
+ingresso di questo cluster (facendo l'unione di tutte le precondizioni delle
+transizioni nel cluster), allora si ha che:
+\[\forall t_1,t_2\in T:\,\,\,t_1\not\sim t_2, \,^\bullet [t_1]\cap \,^\bullet
+  [t_2]  = \emptyset\]
+quindi se due transizioni appartengono a due cluster diversi si ha che i due
+cluster hanno precondizioni disgiunte.\\
+Quindi se la rete è strettamente connessa i nodi della rete possono essere
+ripartiti in sottoinsiemi disgiunti:
+\[\{[t]\cup\,^\bullet [t]|\,t\in T\}\]
+vengono quindi ripartite non solo le transizioni ma anche i loro preposti
+\begin{teorema}
+  Possiamo quindi enunciare il \textbf{primo teorema del rango}, che ci da la
+  \textbf{condizione sufficiente per l'esistenza di una marcatura viva}.\\ 
+  Sia $N = (P, T , F )$ \textbf{debolmente connessa, coperta da S-invarianti e
+    da T-invarianti}. Si dimostra quindi che:
+  \[rango(N)<|CC_N|\Rightarrow \exists M:(N,M) \mbox{ è vivo}\]
+  quindi se il rango è minore del numero dei cluster allora si ha almeno una
+  marcatura per cui il sistema è vivo ed essendo coperta da S-invarianti è
+  anche limitato. Si ha quindi che il sistema è WF.
+\end{teorema}
+\begin{esempio}
+  Prendiamo l'esempio base di mutua esclusione e indichiamo cluster e matrice di
+  incidenza:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/cc3.jpg}
+  \end{figure}
+  Si hanno quindi 3 cluster (quindi $CC_N=3$), 3 S-invarianti (uno per
+  $\{s1,s2\}$, uno per $\{s4,s\}$ e uno per $\{s2,s3,s4\}$) e 2 T-invarianti
+  (uno per $\{t1,t2\}$ e uno per $\{t3,t4\}$). Calcolando il rango della matrice
+  ottengo che esso è pari a 2 (infatti la colonna $t1$ è pari a $-t2$ e la
+  colonna $t3$ è pari a $-t4$) e quindi è minore a $CC_N$ implicando che la rete
+  $N$ ammette una marcatura $M$ tale che $(N, M)$ è vivo. \\
+  Vediamo un esempio di rete free-choice non WF (potendo andare in deadlock,
+  come visibile a destra):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/cc4.jpg}
+  \end{figure}
+  La rete, come già visto, è coperta da 2 T-invarianti (evidenziati a sinistra)
+  e da 2 S-invarianti (evidenziati a destra). Non esiste alcuna marcatura tale
+  per cui il sistema sia vivo, infatti, studiando cluster e matrice di
+  incidenza: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/cc5.jpg}
+  \end{figure}
+  scopriamo che ha rango pari a 4 (avendo $t1=-(t6+t4)$ e $t3=-(t5+t2)$) e 4
+  cluster e quindi $rango(N)\not < |CC_N|$.
+\end{esempio}
+Se ho solo che $rango(N)\not < |CC_N|$ non posso dire nulla (potrei avere
+comunque un sistema vivo) essendo una condizione sufficiente ma \textbf{non
+  necessaria}.
+\newpage
+\begin{definizione}
+  Definiamo il concetto di \textbf{presets} di una rete $N$.\\
+  Sia$ N = (P, T , F )$ una rete. Definiamo così i presets di tale rete:
+  \[PRESETS_N=\{\,^\bullet t|\,t\in T\land \,^\bullet t\neq \emptyset\}\]
+  ovvero un preset è un insieme di precondizioni di una stessa transizione e il
+  presets è l'insieme dei preset.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/cc6.jpg}
+    \caption{Rete con $PRESETS_N=\{\{s1\},\{s1,s2\},\{s2\}\}$ (rispettivamente
+      su $t1$, $t2$ e $t3$)}
+  \end{figure}
+\end{definizione}
+\begin{teorema}
+  Vediamo quindi il \textbf{secondo teorema del rango} che ci da una
+  \textbf{condizione necessaria per l’esistenza di una marcatura viva}.\\ 
+  Sia $N = (P, T , F )$ una rete debolmente connessa e coperta da
+  S-invarianti. Allora si ha che:
+  \[\mbox{se }\exists M:(N,M) \mbox{ è vivo allora necessariamente }
+    rango(N)<|PRESETS_N|\]  
+\end{teorema}
+\begin{esempio}
+  Vediamo un esempio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.65]{img/cc7.jpg}
+  \end{figure}
+  abbiamo che $(N, M)$, con $M = \{s1 , s2 \}$ è vivo e infatti:
+  \[PRESETS_N = \{\s 1 \}, \{s 1 , s 2 \}, \{s 2 \}, \{s 3 , s 4 \}\}\]
+  quindi $|PRESETS_N|=4$. Si calcola che $rango(N)=2$ e quindi si ha:
+  $rango(N)<|PRESETS_N|$.
+  \newpage
+  Riprendiamo la rete free-choice non WF:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.65]{img/cc8.jpg}
+  \end{figure}
+  si ha $rango(N)=4$ e $|PRESETS_N|=4$. Si ha quindi $rango(N)\not<|PRESETS_N|$
+  infatti non esiste una marcatura tale che $(N, M)$ sia vivo.
+\end{esempio}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6014,4 +6187,5 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with nl
 % LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi pl
 % LocalWords:  bigboss dell sif sfi Baier mappabili LTL sro branching semp Tab
-% LocalWords:  Commoner Hack nfc sottoalbero all
+% LocalWords:  Commoner Hack nfc sottoalbero all Conflict conflict preset
+% LocalWords:  presets

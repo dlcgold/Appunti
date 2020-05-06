@@ -3983,16 +3983,282 @@ sistemi Free-Choice
   Si nota innanzitutto che si ha un unico conflitto, tra $t1$ e $t2$ (che hanno
   come preposto condiviso $s1$). Continuando lo studio si notano anche:
   \begin{itemize}
-    \item $R=\{s1 , s3 , s4 , s5\}$ che è un \textbf{sifone}, infatti si ha che:
+    \item $R=\{s1 , s3 , s4 , s5\}$ che è un \textbf{sifone} (si nota che sono i
+    posti ``riempiti'' in azzurro nella rete), infatti si ha che:
     \[^\bullet R=\{t2 , t3 , t4 , t5\}\subseteq\{t1, t2 , t3 , t4 ,
       t5\}=R^\bullet\]
-    \item $Q = \{s3 , s5 \}$ che è una 
+    \item $Q = \{s3 , s5 \}$ che è una \textbf{trappola} (si nota che sono i
+    posti ``cerchiati'' in grassetto nella rete), infatti si ha che:
+    \[Q^\bullet=\{t3,t5\}\subseteq\{t2,t3,t5\}=\,^\bullet Q\]
+  \end{itemize}
+  Studiamo quindi alcune possibili marcature iniziali (che comportano entrambe
+  che il sistema sia \textbf{non limitato}):
+  \begin{itemize}
+    \item se $M_0=\{s1\}$ allora il sifone $R$ non contiene alcuna trappola $Q$
+    marcata (in quanto se ci fosse $s1\in Q$ allora, obbligatoriamente, si
+    dovrebbe avere $s2\in Q$ per avere la trappola marcata, in quanto se la
+    transizione toglie da $s1$ deve mettere in $s2$). Ne segue quindi che
+    il sistema va in \textbf{deadlock} subito dopo $t1$
+    \item se $M_0=\{s1,s3\}$ allora ogni sifone contiene una trappola marcata
+    (quindi, per esempio, usando i due sistemi definiti, $Q\subseteq R$ cosa che
+    si può dimostrare per ogni sifone) e quindi il sistema è \textbf{vivo}, per
+    il teorema di Commoner/Hack
   \end{itemize}
 \end{esempio}
-
-
-
-
+\subsubsection{S-Componenti e T-Componenti}
+Per studiare la limitatezza delle reti Free-Choice bisogna introdurre due nuovi
+concetti: \textbf{S-componenti} e \textbf{T-Componenti}
+\begin{definizione}
+  Sia $N = (S, T , F )$ una rete e $N_1 = (S_1 , T_1 , F_1 )$ una sottorete, con
+  $s_1\subseteq S$ e $T_1\subseteq T$. Si ha che:
+  \begin{itemize}
+    \item $N_1$ è una S-componente di $N$ se:
+    \[T_1=\,^\bullet S_1\cup S_1^\bullet \,\,\,\land \,\,\,\forall t\in
+      T_1:\,\, |\,^\bullet t\cap S_1|\leq 1 \geq |t^\bullet \cap S_1|\]
+    ovvero se la sottorete $N_1$ è generata dal sottoinsieme di posti $S_1$,
+    ovvero dalle transizioni (in $T_1$) che sono tutte quelle che toccano $S_1$
+    (essendo o pre-transizioni o post-transizioni di un posto in $S_1$) ed
+    inoltre $N_1$ è tale per cui ogni transizione in $T_1$ ha al più un arco
+    entrante e uno uscente che la collega ai posti di $S_1$
+    \item $N_1$ è una T-componente di $N$ se:
+    \[S_1\=\,^\bullet T_1\cup T_1^\bullet \,\,\,\land \,\,\,\forall s\in
+      S_1:\,\, |\,^\bullet s\cap T_1|\leq 1 \geq |s^\bullet \cap T_1|\]
+    ovvero se la sottorete $N_1$ è generata dal sottoinsieme di transizioni
+    $T_1$, ovvero dai posti (in $S_1$) che sono tutti quelli che toccano $T_1$
+    (essendo o pre-condizioni o post-condizioni di una transizione in $T_1$) ed
+    inoltre $N_1$ è tale per cui ogni posto in $S_1$ ha al più un arco
+    entrante e uno uscente che la collega alle transizioni di $T_1$
+  \end{itemize}
+\end{definizione}
+S-Componenti e T-componenti hanno diverse proprietà:
+\begin{itemize}
+  \item Se $N_1$ è una \textbf{S-componente strettamente connessa} di $N$,
+  allora:
+  \begin{itemize}
+    \item $N_1$ (vista come rete a se stante) è detta \textbf{S-rete}, infatti:
+    \[\forall t\in T_1:\,|\,^\bullet t|=|t^\bullet|=1\]
+    ovvero ogni transizione ha esattamente un posto in ingresso e uno in uscita
+    (quindi come rete marcata sarebbe un S-sistema)
+    \item $S_1$ è un \textbf{sifone minimale} e una \textbf{trappola minimale}
+    di $N$
+    \item $S_1$ identifica un \textbf{S-invariante} di $N$
+  \end{itemize}
+  \item Se $N_1$ è una \textbf{T-componente strettamente connessa} di $N$,
+  allora:
+  \begin{itemize}
+    \item $N_1$ (vista come rete a se stante) è detta \textbf{T-rete}, infatti:
+    \[\forall s\in S_1:\,|\,^\bullet s|=|s^\bullet|=1\]
+    ovvero ogni posto ha esattamente una transizione in ingresso e uno in uscita
+    (quindi come rete marcata sarebbe un T-sistema)
+    \item $S_1$ identifica un \textbf{T-invariante} di $N$
+  \end{itemize}
+\end{itemize}
+Vediamo un esempio:
+\begin{esempio}
+  Prendiamo la seguente rete Free-Choice:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/fc9.jpg} 
+  \end{figure}
+  si ha che tale rete è \textbf{coperta da due S-componenti} (in rosso e blu,
+  nell'immagine sotto a sinistra, si hanno le due S-reti) ed è anche
+  \textbf{coperta da due T-componenti} (in viola e blu, nell'immagine sotto a
+  destra, si hanno le due T-reti). Queste S-componenti e queste T-componenti
+  sono \textbf{strettamente connesse}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/fc10.jpg}
+    \includegraphics[scale = 0.5]{img/fc11.jpg} 
+  \end{figure}
+\end{esempio}
+\newpage
+\begin{teorema}
+  Vediamo il \textbf{teorema della copertura da S-invarianti}.\\
+  Sia $\Sigma=(N,M_0)$ un sistema Free-Choice \textbf{vivo}. Si ha che $\Sigma$
+  è \textbf{n-limitato} sse la rete sottostante $N$ è \textbf{coperta da
+    S-componenti strettamente connesse} ciascuna con al più $n$ marche in $M_0$,
+  marcatura iniziale. Questa è una \textbf{condizione necessaria e sufficiente}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/fc12.jpg}
+    \caption{Esempio di un sistema Free-Choice con la rete discussa
+      precedentemente con una marcatura iniziale. La rete è coperta da 2
+      S-componenti (in blu e rosso) strettamente connesse, ciascuna contenente
+      una marca. Si può dimostrare che il sistema è \emph{vivo} mentre, per il
+      teorema appena enunciato, essendo la rete coperta da S-componenti
+      strettamente connesse, si dimostra che è \emph{1-limitato}}  
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.45]{img/fc13.jpg}
+    \caption{Esempio di un sistema Free-Choice \emph{vivo} ma con rete $N$ non
+      coperta da S-componenti (in quanto il posto $s3$ dovrebbe essere in una
+      sottorete che include $t2$, $t3$ e $t5$ ma, prendendo $t2$ dovrei avere un
+      arco entrante in essa, obbligandomi a includere $s1$ in tale sottorete,
+      cosa che obbligherebbe a prendere le transizioni collegate a $s1$
+      ottenendo però così che $t3$ avrebbe più archi entranti), quindi il
+      sistema è \emph{non limitato} (infatti su $s3$ si accumulano marche)}  
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.45]{img/fc14.jpg}
+    \caption{Riprendendo l'esempio sopra si ha che la rete è coperta da due
+      T-componenti (in viola e blu) ma La T-componente generata da $\{t2 , t4
+      \}$ non è strettamente connessa (a causa dell'arco tra $t2$ e $s3$, in
+      quanto non esiste un cammino da $s3$ ad un altro elemento della
+      componente viola). La componente blu è strettamente connessa}   
+  \end{figure}
+\end{teorema}
+\begin{teorema}
+  Analogamente si ha il \textbf{teorema della copertura da T-componenti}.\\
+  Sia $\Sigma=(N,M_0)$ un sistema Free-Choice. Si ha che se $\Sigma$
+  è \textbf{vivo} e \textbf{limitato} allora $N$ è \textbf{coperta da
+    T-componenti strettamente connesse}. Inoltre per ogni T-componente connessa
+  $N_1$: 
+  \[\exists M\in [M_0> \mbox{ t.c. } (N_1,M_{\backslash N_1})\mbox{ è viva e
+      limitata}\]
+  ovvero esiste una marcatura raggiungibile da quella iniziale tale che la
+  componente con quella marcatura risulta viva e limitata
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/fc15.jpg}
+    \includegraphics[scale = 0.4]{img/fc16.jpg}
+    \caption{Rete analizzata precedentemente coperta da due T-componenti
+      strettamente connesse. Se prendo la T-componente viola, con la sua
+      marcatura, si ha che non è viva e limitata ma si può dimostrare che esiste
+      una marcatura (dove i due posti più in basso sono marcati) raggiungibile
+      da quella iniziale tale per cui la sottorete viola è viva e limitata. In
+      tale marcatura è viva e limitata anche la componente blu, quindi entrambe
+      $(N_i,M_{\backslash N_i})$ sono vive e limitate}    
+  \end{figure}
+\end{teorema}
+\begin{esempio}
+  Vediamo un ulteriore esempio.\\
+  Si ha il sistema:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/fc18.jpg}
+  \end{figure}
+  con evidenziate a sinistra le S-componenti e a destra le T-componenti.\\
+  La rete Free-Choice, quindi, è coperta da S-componenti e da T-componenti
+  strettamente connesse. Ma con lo scatto di $t2$ e $t4$ si arriva a:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.55]{img/fc17.jpg}
+  \end{figure}
+  si ha un sistema \textbf{Free-Choice coperto da S-componenti e da T-componenti
+    strettamente connesse} e in \textbf{deadlock}.\\
+  Si ha che $\{s 1 , s 2 , s 3 , s 5 \}$ è un sifone marcato in $M_0 = \{s 1 , s
+  2 \}$, ma non contiene una trappola marcata (per esempio se la trappola
+  contiene $s 1$ deve contenere anche sia $s 3$ che $s 4$), si hanno infatti: 
+  \begin{itemize}
+    \item $\{s 1 , s 2 , s 3 , s 5 \},\, \{s 1 , s 2 , s 4 , s 6\}, \,\{s 1 , s
+    2 , s 3 , s 4 \}, \,\{s 1 , s 2 , s 5 , s 6 \}$ che sono \textbf{sifoni
+      ma non trappole}
+    \item $\{s 1 , s 3 , s 4 \}, \,\{s 2 , s 5 , s 6 \},\, \{s 1 , s 2 , s 3 , s
+    4 , s 5 , s 6 \} $ che sono \textbf{sifoni e trappole}
+    \item $\{s 2 , s 4 , s 5 , s 6 \}, \,\{s 2 , s 3 , s 5 , s 6 \}, \,\{s 1 , s
+    3 , s 4 , s 5 \}, \,\{s 1 , s 3 , s 4 , s 6 \} $ che sono \textbf{trappole
+      ma non sifoni}
+  \end{itemize}
+\end{esempio}
+Vediamo un altro esempio interessante:
+\begin{esempio}
+  Prendiamo il sistema:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/nfc.jpg}
+  \end{figure}
+  Si ha la rete è:
+  \begin{itemize}
+    \item \textbf{marcata sequenziale deterministica} (la sequenza $t 1 t 2 t 1
+    t 3$ rigenera la marcatura iniziale e può essere ripetuta un numero infinito
+    di volte)
+    \item \textbf{non Free-Choice}, nonostante ci siano si un conflitto che una
+    sincronizzazione (quindi non è ne 
+    S-sistema ne T-sistema)
+    \item \textbf{viva e limitata} (nonché \textbf{1-safe})
+  \end{itemize}
+  Il sistema è coperto da 2 S-componenti (in blu e nero) strettamente connesse e
+  da un T-invariante $\underline{J^T}=[2\,\,\,1\,\,\,1]$ ma non da una
+  T-componente 
+\end{esempio}
+\subsubsection{Reti Free-Choice Well Formed (WF)}
+Sono state caratterizzate le \textbf{reti Free-Choice Well Formed}, ovvero
+quelle che ammettono una certa marcatura iniziale per cui diventano sistemi
+\textbf{vivi} e \textbf{limitati}
+\begin{teorema}
+  Si ha il \textbf{teorema di caratterizzazione di reti Free-Choice WF}.\\
+  Sia $N$ una \textbf{rete Free-Choice connessa}. Si ha che:
+  \begin{itemize}
+    \item $N$ è \textbf{strutturalmente viva} (ovvero $\exists M_0:\,(N,M_0)$ è
+    vivo, ovvero si ha una marcatura iniziale per il quale il sistema è vivo)
+    sse ogni \textbf{sifone proprio} contiene una \textbf{trappola
+      propria}. Questa è una riformulazione del \textbf{teorema di
+      Commoner/Hack} 
+    \item $N$ è \textbf{strutturalmente limitato} (ovvero $\exists
+    M_0:\,(N,M_0)$ è vivo e limitato, ovvero si ha una marcatura iniziale per il
+    quale il sistema è vivo e limitato) sse $N$ è \textbf{strutturalmente viva
+      ed è coperta da S-componenti strettamente connesse}
+    \item se $N$ è \textbf{Well Formed} allora $N$ è \textbf{coperta da
+      T-componenti strettamente connesse} 
+  \end{itemize}
+  \textit{Decidere se una rete Free-choice è strutturalmente viva è un problema
+    NP-completo}\\
+  Esiste una caratterizzazione di reti Free-choice Well Formed in \textbf{tempo
+    polinomiale} sfruttando la relazione tra la struttura delle reti Free-Choice
+  che diventano Well Formed con il rango della loro matrice di incidenza,
+  mediante il cosiddetto \textbf{teorema del rango}
+\end{teorema}
+\subsection{Teoremi del Rango}
+Si studia quindi come il rango della matrice di incidenza di una rete, assieme
+all'analisi del grafo, può dare informazioni sulle proprietà di comportamento.\\
+Si cercherà di capire se una rete è Well-Formed (WF). Si riusciranno, a
+differenza di quanto descritto precedentemente ad ottenere risultati in tempi
+polinomiali.  
+\begin{teorema}
+Sia $N = (P, T , F )$ debolmente connessa e con peso degli archi in $\{0, 1\}$ e
+sia $N$ la sua matrice di incidenza (usiamo la stessa notazione $N$ sia per la
+rete che per la matrice di incidenza). Si ha che:
+\begin{itemize}
+  \item se $N$ è coperta da S-invarianti allora:
+  \[rango(N) \leq |S| − 1\]
+  questo in quanto il rango identifica il massimo numero di vettori riga o
+  colonna \textbf{linearmente indipendenti}, quindi se la rete è coperta da
+  S-invarianti almeno uno di questi vettori è combinazione lineare degli altri e
+  quindi il rango è al massimo il numero dei posti meno 1
+  \item se $N$ è coperta da T-invarianti allora:
+  \[rango(N) \leq |T| − 1\]
+  se la rete è coperta da T-invarianti almeno uno di questi vettori è
+  combinazione lineare degli altri e quindi il rango è al massimo il numero
+  delle transizioni meno 1
+  \item se $N$ è coperta da S-invarianti e T-invarianti allora:
+  \[rango(N) \leq  \min(|S|, |T|) − 1\]
+\end{itemize}
+Oltre al rango bisogna studiare il grafo della rete rispetto ai conflitti (in
+quanto le situazioni di deadlock si vengono a creare quando le sincronizzazioni
+risolvono il conflitto in modo diverso)
+\begin{definizione}
+  Definiamo il \textbf{Conflict-Cluster} ma per farlo servono alcune definizioni
+  aggiuntive.\\
+  Sia $ N = (P, T , F )$ una rete e $t, t'\in T,\,\,\,t\neq t'$ due transizioni
+  diverse. Possiamo quindi definire una relazione $\sim_0$ tra coppie di
+  transizioni:
+  \[\sim_0\subseteq T\times T\]
+  tale che $t\sim_0t'$ sse:
+  \[^\bullet t\cap \,^\bullet t'\neq \emptyset\]
+  ovvero sse le transizioni sono in conflitto avendo almeno una precondizione in
+  comune.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/cc.jpg}
+    \caption{Esempio con $t1\sim_0 t2$ e $t2\sim_0 t3$ ma $t1\not\sim_0 t3$
+      e infatti lo scatto di $t1$ o $t3$ non preclude lo scatto dell'altra}
+  \end{figure}
+  Si ha quindi che $\sim_0$ è \textbf{simmetrica ma non transitiva}.\\
+  Definiamo anche la chiusura riflessiva e transitiva
+\end{definizione}
+\end{teorema}
 
 
 
@@ -5445,11 +5711,176 @@ soddisfacendo $t$ e avendo successore che soddisfa $t\,\mathbf{U}\,p$):
 \end{figure}
 posso quindi interrompere lo studio degli stati sapendo che non potrò più
 modificare nulla.
+\subsubsection{Algoritmo di Etichettatura per il Caso Generale}
+\textit{Il procedimento induttivo si può trovare negli appunti del docente ma è
+  opzionale. È un algoritmo di programmazione dinamica}.\\
+Vediamo in primis di definire lo srotolamento nel caso generale:
+\begin{definizione}
+  Si ha il seguente sistema di transizione non lineare:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/nl.jpg} 
+  \end{figure}
+  (\textit{la freccia entrante in 0 specifica che quello è lo stato
+    iniziale}).\\
+  Si nota che da 0 posso passare a 1 o 2 per poi tornare indietro, ripetendo poi
+  infinitamente questi due passaggi.\\
+  Se srotoliamo questo sistema di transizione otteniamo un \textbf{albero
+    ``infinito''} (nonostante il sistema di transizione sia finito, con un
+  numero di variabili e di casi diversi finito), facendo una
+  visita del grafo \textbf{in ampiezza di Dijkstra}:  
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/nl2.jpg} 
+  \end{figure}
+  Questo accade se uno stato ha \textbf{più successori immediati} \\
+  (rispetto a $\to$).\\
+  I vari \textbf{livelli dell'albero} rappresentano l'\textbf{aumento del
+    tempo}.\\
+  Siamo usciti dal \textbf{mondo deterministico}.\\
+  I \textbf{percorsi} dell'albero sono ``stretti parenti'', al passare del
+  tempo, dei \textbf{modelli PLTL} (nel momento in cui aggiungo le variabili
+  proposizionali valide dei vari stati). L'albero contiene quindi tanti modelli
+  PLTL, uno per percorso. Si definisce \textbf{traccia} un percorso dell'albero
+  e anche una sequenza di evoluzioni dentro il sistema di transizione seguendo
+  le frecce.\textbf{ La traccia non finisce mai}.\\
+  Nell'esempio diciamo di partire da 0 ma potremmo partire da un altro stato, si
+  ha quindi che lo srotolamento nel caso generale \textbf{non è univoco} (anche
+  se poi basta prendere il sottoalbero che parte da uno stato anziché da un
+  altro, motivo per cui lo stato di partenza non è di particolare interesse)
+\end{definizione}
+PLTL è quindi una \textbf{logica basata su tracce}, cioè la semantica dei
+connettivi è definita su tracce e viceversa ad ogni traccia è possibile, 
+in modo ovvio, associare un modello per PLTL.\\
+Uno però non può più usare banalmente gli operatori di PLTL, in quanto si ha a
+che fare con qualcosa di non deterministico, si ha infatti a che fare con più
+tracce.\\
+Si procede quindi così:
+\begin{definizione}
+  dati un sistema di transizione $M=\langle S,\to,\Vdash\rangle$ fissato uno stato
+  $s\in S$ e data una formula $A$, volendo usare PLTL per fare model checking
+  abbiamo due scelte:
+  \begin{enumerate}
+    \item \textbf{model checking esistenziale}: verifichiamo che $A$ sia
+    soddisfatta in \textbf{almeno una traccia} (nello srotolamento o
+    nell'evoluzione del sistema di transizione) che parte da $s$.
+    Diremo che $A$ è soddisfatta nello stato $s$ di $M$, formalmente $\langle
+    M,s\rangle\Vdash A$, se esiste una traccia (o comunque una possibile
+    evoluzione di archi nel sistema di transizione) $\pi$ che parte da $s$ e
+    soddisfa $A$
+    \item \textbf{model checking universale}: verifichiamo che $A$ sia
+    soddisfatta in \textbf{tutte le tracce} (nello srotolamento o
+    nell'evoluzione del sistema di transizione) che partono da $s$. Diremo che:
+    $A$ è soddisfatta nello stato $s$ di $M$, formalmente $\langle
+    M,s\rangle\Vdash A$, se per ogni traccia (o comunque per tutte le
+    evoluzioni di archi nel sistema di transizione) $\pi$ che parte da $s$ è
+    soddisfa $A$ 
+  \end{enumerate}
+\end{definizione}
+\newpage
+Vediamo ora vari esempi, partendo da un sistema di transizione banale (con stato
+iniziale 1, per quanto ininfluente come informazione):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/nl3.jpg} 
+\end{figure}
+Iniziamo valutando il \textbf{next}, che indichiamo con $\circ$. Partendo dal
+sistema sopra rappresentato studiamo  se esiste un percorso che parte dallo
+stato 1 e soddisfi $\circ p$. Si ha che esso
+esiste solo per una traccia (essendo $p$ valido nello stato 2) e quindi è
+soddisfatto per il model checking esistenziale ma non per quello universale
+(quindi non potrebbe etichettare lo stato 1 con $\circ p$ 
+universalmente). Si
+ha quindi: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.32]{img/nl4.jpg} 
+\end{figure}
+$\circ p$ sarebbe valido anche nello stato 2 (per il ciclo).
+Si potrebbe modificare il sistema di partenza in:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/nl5.jpg} 
+\end{figure}
+ottenendo che $\circ p$ nello stato 1 è soddisfatto anche nel caso del model
+checking universale (avendo $p$ soddisfatto sia nello stato 2 che nel 3). Si
+ottiene infatti:  
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.32]{img/nl6.jpg} 
+\end{figure}
+$\circ p$ sarebbe valido anche nello stato 2 e nello stato 3 (per i 2 cicli).
+\newpage
+Passiamo allo studio del \textbf{future}, che indichiamo con $\diamond$ (che
+ricordiamo essere ``persistente all'indietro'', quindi tutti gli stati
+precedenti ad uno che soddisfa $\diamond$ soddisfano $\diamond$). Come
+prima ci chiediamo se esiste un percorso che parte dallo stato 1 e soddisfi
+$\diamond p$. Come prima allo stato 
+2 ho $\diamond p$ per il ciclo e in ogni caso, essendo $p$ soddisfatto in 2, nel
+futuro di 1 si ha $p$ in almeno un caso, quindi è soddisfatto per il model
+checking esistenziale ma non per quello universale ($p$ non è soddisfatto in
+3 e quindi non potrebbe etichettare lo stato 1 con $\diamond p$
+universalmente).
+Si potrebbe anche ragionare con la ``persistenza indietro'' sullo stato
+2. Si ha quindi (partendo dal modello di sinistra e aggiornando le etichettatura
+muovendosi al modello successivo):  
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.33]{img/nl8.jpg} 
+\end{figure}
+Si potrebbe modificare il sistema di partenza ottenendo che $\diamond p$ nello
+stato 1 è soddisfatto anche nel caso del model checking universale. Una modifica
+valida sarebbe (in modo da poter procedere in modo speculare sullo stato 3):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.35]{img/nl9.jpg} 
+\end{figure}
 
-
-
-
-
+Passiamo allo studio del \textbf{globally}, che indichiamo con $\square$.
+Come prima ci chiediamo se esiste un percorso che parte dallo stato 1 e soddisfi
+$\square p$. Uno stato per poter soddisfare $\square p$ necessariamente deve
+soddisfare $p$, quindi 1 e 2 possono soddisfare $\square p$. Verifico poi se
+effettivamente in quegli stati $\square p$ sia soddisfatto (deve esistere un
+successore marcato con $\square p$). Per il secondo stato non c'è problema
+essendoci il ciclo e per il primo pure (basta uno stato successore).
+\newpage
+Si ha quindi che vale il model checking esistenziale ma non universale (a causa
+dello stato 3 non potremmo dire che 1 soddisfi $\square p$):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/pl10.jpg} 
+\end{figure}
+\textit{nel modello finale in 1 si ha $p,\square p$ non solo $\square p$}.\\
+Si potrebbe modificare il sistema di partenza ottenendo che $\square p$ nello
+stato 1 è soddisfatto anche nel caso del model checking universale:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/pl11.jpg}
+  \includegraphics[scale = 0.4]{img/pl12.jpg}
+\end{figure}
+Il primo passaggio in cui si decide in che condizioni può valere una certa
+formula in un certo stato è detto \textbf{inizializzazione} (negli esempi per
+esempio quando mettiamo i vari $\diamond p$ o $\square p$ all'inizio).\\
+Passiamo all'\textbf{until}, che indichiamo con \textbf{U}. Come prima ci
+chiediamo se esiste un percorso che parte dallo stato 1 e soddisfi 
+$q\,\mathbf{U}\,p$. Partiamo con l'inizializzazione che assicura
+$q\,\mathbf{U}\,p$ nello stato 2 (essendo $p$ soddisfatta in 2 e $q$ in un
+predecessore, ovvero 1) e quindi, essendo ``persistente all'indietro'',
+anche per lo stato 1 (dove è soddisfatto $q$, permettendo quindi
+l'\textbf{until}). Si ha quindi che vale il model checking esistenziale ma non
+universale (a causa dello stato 3 non potremmo dire che 1 soddisfi
+$q\,\mathbf{U}\,p$):   
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/u1.jpg} 
+\end{figure}
+\newpage
+Si potrebbe modificare il sistema di partenza ottenendo che $q\,\mathbf{U}\,p$
+nello stato 1 è soddisfatto anche nel caso del model checking universale:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/u2.jpg}
+\end{figure}
 
 
 \chapter{Seminario sul Teorema di Incompletezza}
@@ -5629,9 +6060,9 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  autoriferimento iniettiva G\"{o}del Bernardinello espriremere tr
 % LocalWords:  tableau github ciclano https repository Programming Techniques
 % LocalWords:  Springer LNCS and learning Systems Transition Algebraic Colom fc
-% LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with
-% LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi
+% LocalWords:  Teruel wait raw load dispoibile dep deposit empty object with nl
+% LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi pl
 % LocalWords:  bigboss dell sif sfi Baier mappabili LTL sro branching semp Tab
-% LocalWords:  Commoner Hack
+% LocalWords:  Commoner Hack nfc sottoalbero all Conflict
 
-\message{ !name(metodi.tex) !offset(-5637) }
+\message{ !name(metodi.tex) !offset(-6068) }

@@ -20,7 +20,7 @@ std::vector<int> strToM(std::string str){
   return elemsI;
 }
 
-petriNet getNet(std::string filename) {
+petriNet getNet(std::string filename, int limit) {
 
   std::ifstream inp(filename);
   std::vector<std::string> pos;
@@ -64,7 +64,7 @@ petriNet getNet(std::string filename) {
   }
 
   
-  petriNet pnet(numberPos, numberTra, forw, backw, initial_marc);
+  petriNet pnet(numberPos, numberTra, forw, backw, initial_marc, limit);
   return pnet;
 }
 
@@ -172,7 +172,6 @@ void petriNet::createGraph(){
   std::set<std::string> nodes;
   auto curr = mi;
   nodes.insert(mToStr(curr));
-
   std::set<std::string>::iterator node;
   for(node = nodes.begin(); node != nodes.end(); node++){
     unsigned int s = nodes.size();
@@ -189,6 +188,9 @@ void petriNet::createGraph(){
     }
     if(s != nodes.size()){
       node = nodes.begin();
+    }
+    if((int)nodes.size() > limit){
+      break;
     }
   }
   dotsString = "digraph G {\n";

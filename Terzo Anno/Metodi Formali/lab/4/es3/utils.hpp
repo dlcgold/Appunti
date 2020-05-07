@@ -19,12 +19,13 @@ private:
   std::vector<int> getCol(std::vector<std::vector<int> >, int);
   std::vector<int> sumVec(std::vector<int>, std::vector<int>);
   std::vector<int> subVec(std::vector<int>, std::vector<int>);
+  int limit;
 public:
    petriNet(int p, int t,
 	    std::vector<std::vector<int>> f,
 	    std::vector<std::vector<int>> b,
-	    std::vector<int> m) : pos(p), tra(t), forward(f), backward(b), mi(m)
-  {}
+	    std::vector<int> m, int l) : pos(p), tra(t), forward(f),
+					 backward(b), mi(m), limit(l) {}
   
   const std::vector<int> get_mi() const;
   const std::vector<std::vector<int> > get_backward() const ;
@@ -39,5 +40,5 @@ public:
   
 };
 
-petriNet getNet(std::string);
+petriNet getNet(std::string, int);
 

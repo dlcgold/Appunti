@@ -46,17 +46,9 @@ def main():
         elif opt in ("-l", "--limit"):
             limit = arg
              
-    #print('Input file is "', inputfile)
-    #print('Output file is "', outputfile)
+
     purificate(inputfile, str.format("{}{}", outputfile, '.part'))
-    # print(str.format("{}{} {}", outputfile, '.part', limit))
-    # rm = subprocess.Popen(('rm', str.format("{}{}", outputfile, '.dot')))
-    # rm.wait()
     subprocess.call(['./a.out', str.format("{}{}", outputfile, '.part'), str(limit)])
-    #print(str.format("{}{} {}", outputfile, '.part', limit))
-    # p1.wait()
     subprocess.call(('xdot', str.format("{}{}", outputfile, '.dot')))
-    #cmd = str.format("./a.out {}{} {} && xdot {}{}", outputfile, '.part', limit, outputfile, '.dot')
-    # subprocess.Popen(cmd)
 if __name__ == "__main__":
     main()

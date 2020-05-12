@@ -6208,6 +6208,101 @@ nello stato 1 è soddisfatto anche nel caso del model checking universale:
   \centering
   \includegraphics[scale = 0.3]{img/u2.jpg}
 \end{figure}
+\subsubsection{Esempio della Mutua Esclusione}
+Vediamo quindi lo studio famoso della mutua esclusione. Si ha la seguente rete
+di Petri:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/me.jpg}
+\end{figure}
+si hanno quindi due processi che condividono una risorsa (lo stato $q$
+stabilisce se un processo può entrare nella regione critica, se $q$ è marcato
+nessun processo è nella sezione critica, se è marcato uno dei due processi è
+nella sezione critica).
+Il primo processo è formato dallo stato $p$ (fuori dalla regione critica) e
+dallo stato $s$ (dentro la regione critica), con le due transizioni $t1$ e
+$t2$. Analogamente secondo il processo è formato dallo stato $r$ (fuori dalla
+regione critica) e dallo stato $t$ (dentro la regione critica), con le due
+transizioni $t3$ e $t4$.
+\newpage
+A partire da questa marcatura iniziale (che permette ad uno dei due processi di
+partire) si calcola il sistema di transizione (sulla carta potrei avere fino a
+$2^{|posti|}=32$ stati nel grafo ma ovviamente sono meno nella realtà, per i
+vincoli della rete di Petri, ovvero solo tre):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/me2.jpg}
+\end{figure}
+\textit{L'etichettatura degli archi tramite le transizioni è superflua}.\\
+Gli stati verranno associati alle variabili proposizionali. \\
+Ci proponiamo di verificare la mutua esclusione, dimostrando che non possono
+esserci mai contemporaneamente due marche in $s$ e $t$ (detto altrimenti che la
+somma delle marche tra $s$ e $t$ sia al più pari a 1). In termini, formali, di
+model checking devo dimostrare, per esempio, uno tra:
+\begin{itemize}
+  \item $\square\neg(s\land t)$ è soddisfatta per ogni percorso a partire dallo
+  stato 0
+  \item $\diamond(s\land t)$ non è mai soddisfatta comunque si proceda a partire
+  dallo stato 0 
+\end{itemize}
+Vediamo il primo esempio (il secondo è immediato da dimostrare). Si ha che
+$s\land t$ non è soddisfatta in alcuno stato, dove però è soddisfatta la sua
+negazione $\neg(s\land t)$. Estendo quindi di conseguenza l'etichettatura:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/m3.jpg}
+\end{figure}
+\newpage
+Procedo quindi studiando $\square$ etichettando i potenziali stati, secondo
+l'algoritmo di etichettatura (ovvero quelli che soddisfano l'argomento del
+globally): 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/me4.jpg}
+\end{figure}
+Verificando che non vanno, sempre secondo l'algoritmo di etichettatura,
+cancellate eventuali etichettature create nel passaggio precedente (non si hanno
+stati etichettati con globally che hanno come vicini stati non etichettati dal
+globally) possiamo concludere, avendo raggiunto il punto fisso,  di aver
+dimostrato formalmente che la rete di Petri in analisi soddisfa la mutua
+esclusione.\\ 
+Si cerca ora di dimostrare se sia possibile che il processo di sinistra non
+entri mai in sezione critica (facendo evolvere solo quello di destra). Voglio
+quindi dimostrare se esiste un percorso dove $s$ è sempre falsa, ovvero,
+formalmente, $\square\neg s$ (ovviamente si potrebbe fare lo stesso ragionamento
+sul processo di destra).\\
+Vediamo quindi dove vale $\neg s$ ed etichettiamo di conseguenza. Etichettiamo
+inoltre i candidati per il globally:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/me5.jpg}
+  \includegraphics[scale = 0.4]{img/me6.jpg}
+\end{figure}
+%\newpage
+Procediamo ora cancellando l'etichettatura del globally dagli stati etichettati
+con globally che hanno come vicini solo (siamo nel caso esistenziale e non
+universale) stati non etichettati dal globally, ovvero, nel nostro caso,
+nessuno. Siamo giunti ad un punto fisso e possiamo dire che, purtroppo, è
+possibile che il processo di sinistra non entri mai in sezione critica, avendo
+lo stato 0 e lo stato 2 l'etichettatura $\square\neg s$. Bisognerebbe rivedere
+il progetto per garantire migliore equità
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 \chapter{Seminario sul Teorema di Incompletezza}

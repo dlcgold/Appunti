@@ -4716,6 +4716,284 @@ Ricordiamo alcune proprietà delle reti duali/inverse:
   In ogni caso in tutte le trasformazioni si hanno esattamente due cluster.
 \end{esempio}
 \subsection{Distanza Sincronica}
+La \textbf{distanza sincronica} è stata definita per misurare il \textbf{grado
+  di dipendenza tra le occorrenze delle transizioni}, corrisponde al 
+\textbf{limite superiore alla frequenza relativa delle occorrenze delle
+  transizioni}. \\
+\textit{Intuitivamente, la distanza sincronica tra due transizioni misura quante
+  volte al massimo una delle due transizioni può occorrere tra due occorrenze
+  dell’altra transizione, e questo in ogni possibile esecuzione del sistema.}\\
+La distanza sincronica viene specificata mediante il simbolo $\sigma$.
+\begin{esempio}
+  Vediamo qualche esempio per chiarire meglio il concetto.
+  \\
+  Partiamo con una prima rete:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ds.jpg}
+  \end{figure}
+  in questo caso abbiamo un comportamento ciclico del tipo:
+  \[a\,\,b\,\,a\,\,b\,\,a\ldots\]
+  si nota che tra due occorrenze diverse di $a$ si ha una ed una sola occorrenza
+  di $b$ e quindi la distanza sincronica tra le due transizioni è pari a 1,
+  ovvero, formalmente:
+  \[\sigma(a,b)=1\]
+  Vediamo un'altra rete:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ds2.jpg}
+  \end{figure}
+  in questo caso si ha che nella configurazione iniziale possono scattare sia
+  $a$ che $b$ e che, solo dopo lo scatto di entrambe posso avere lo scatto di
+  $c$. Posso avere quindi $a\,\,b\,\,c$ o $b\,\,a\,\,c$ che vengono ripetute
+  ciclicamente (magari si ha sempre una sola delle due sequenza o magari sono
+  miste). Ipotizziamo i quattro possibili cicli dove studiare $\sigma(a,b)$
+  \begin{itemize}
+    \item $a\,\,b\,\,c\,\,a\,\,b\,\,c$, quindi si ha che $\sigma(a,b) = 1$
+    \item $b\,\,a\,\,c\,\,b\,\,a\,\,c$, quindi si ha che $\sigma(a,b) = 1$
+    \item $a\,\,b\,\,c\,\,b\,\,a\,\,c$, quindi si ha che $\sigma(a,b) = 2$
+    \item $b\,\,a\,\,c\,\,a\,\,b\,\,c$, quindi si ha che $\sigma(a,b) = 0$
+  \end{itemize}
+  e quindi, sapendo che dobbiamo prendere il massimo delle volte in cui una
+  delle due transizioni può occorrere tra due occorrenze dell’altra transizione
+  si ha che:
+  \[\sigma(a,b) = 2\]
+  \newpage
+  Vediamo un'altra rete:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ds3.jpg}
+  \end{figure}
+  In questa rete studiamo la distanza tra $a$ e $d$ e ci accorgiamo che il
+  processo di sinistra (con le transizioni $a$, $b$ e $c$) può ``ciclare''
+  infinitamente senza che cicli mai il processo a destra (con le transizioni
+  $d$, $e$ ed $f$) ma anche viceversa. Qualora sia il ciclo di destra a
+  ``ciclare'' infinitamente si avrebbe che tra due occorrenze di $a$ ci
+  sarebbero un numero qualsiasi di occorrenze di $d$ (qualora il conflitto tra
+  $b$ ed $e$ si risolvesse sempre in favore di $e$) e questo formalmente si
+  indica con:
+  \[\sigma(a,d) = \omega\]
+  con $\omega$ che rappresenta un qualsiasi numero arbitrariamente grande
+\end{esempio}
+Vediamo quindi nel dettaglio un modo per misurare la distanza sincronica. Una
+tecnica consiste nell'aggiungere un posto $s$, marcato in modo da non modificare
+la natura del sistema, che collega le due transizioni di cui voglio misurare la
+distanza sincronica (se voglio calcolare $\sigma(x,y)$, $s$ sarà postcondizione
+di $x$ e precondizione di $y$). La distanza sincronica viene quindi definita
+come la \textbf{massima variazione del numero di marche in $s$}, per ogni
+possibile comportamento del sistema. In pratica la distanza sincronica è il
+limite del numero di marche che possono essere contenute in $s$.
+\newpage
+\begin{esempio}
+  Riprendendo gli esempi sopra aggiungiamo i nodi $s$ (eventualmente marcati per
+  permettere la normale esecuzione, per esempio se non fosse marcato nel secondo
+  potrebbe scattare solo $a$ e non anche $b$) e lasciamo che la rete venga
+  eseguita: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ds4.jpg}
+    \includegraphics[scale = 0.7]{img/ds5.jpg}
+  \end{figure}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ds6.jpg}
+  \end{figure}
+  nel nodo $s$ la marcatura $n$ è da leggersi come $\omega$
+\end{esempio}
+La distanza sincronica viene usata per:
+\begin{itemize}
+  \item studiare la relazione di dipendenza tra due eventi o coppie di insiemi
+  di eventi
+  \item specificare proprietà da implementare con la rete
+\end{itemize}
+\newpage
+\begin{definizione}
+  In base alla distanza sincronica tra due transizioni si possono definire delle
+  proprietà:
+  \begin{itemize}
+    \item $\sigma(a,b)=1$ implica che tra le due transizioni si ha una relazione
+    di \textbf{dipendenza causale}, ovvero una relazione di \textbf{stretta
+      alternanza} tra l'esecuzione di una transizione e l'altra
+    \item $\sigma(a,b)\geq 2$ implica che tra le due transizioni si ha una
+    relazione di \textbf{indipendenza} e di \textbf{concorrenza} tra
+    le due transizioni
+    \item $\sigma(a,b)=0$ implica che uno dei due eventi occorre solamente se
+    occorre anche l'altro. Questo implica che le due transizioni, che magari
+    appartengono a due componenti diverse, rappresentano il medesimo evento. Si
+    ha quindi che le due transizioni sono in \textbf{sincronizzazione}, in senso
+    stretto (si parla quindi, per esempio, di \textbf{hand-shaking})
+  \end{itemize}
+  queste proprietà ci permettono si sapere come modellare una rete al fine
+  di ottenere determinati comportamenti tra transizioni ed, eventualmente, tra
+  diverse sotto-reti
+\end{definizione}
+\subsection{Reti di Petri e Linguaggi}
+Le reti di Petri sono state introdotte come strumento per studiare il flusso di
+informazione tra componenti di un sistema e per modellare le interazioni tra le
+componenti di un sistema e non sono state introdotte come riconoscitori di
+linguaggi anche se possono essere utilizzate anche sotto questo punto di
+vista. Fin dagli anni settanta, periodo di forte studio della \textbf{teoria dei
+linguaggi formali}, sono state confrontate come modello riconoscitore di
+linguaggi.\\
+A tale scopo si usa una variante delle reti di Petri, ovvero le \textbf{reti di
+  Petri marcate etichettate}
+\begin{definizione}
+  Una rete di Petri marcata etichettata è definita da una coppia $(\Sigma, l)$,
+  dove:
+  \begin{itemize}
+    \item $\Sigma =(S, T , F , W ,M_0)$ è una \textbf{rete di Petri marcata}
+    \item $l:T\to A\cup\{\lambda\}$ è la \textbf{funzione di etichettatura}
+    delle transizioni $T$, dove:
+    \begin{itemize}
+      \item $A$ è l'\textbf{alfabeto}, ovvero un insieme finito di simboli
+      \item $\lambda$ è il \textbf{simbolo vuoto} e \textbf{simbolo neutro della
+        concatenazione} (a volte si usare $\varepsilon$ al posto di $\lambda$)
+    \end{itemize}
+  \end{itemize}
+  si ha quindi che le trasposizioni sono etichettate tramite l'alfabeto (che
+  rappresenta l'alfabeto delle stringhe che verranno riconosciute) e il
+  simbolo $\lambda$. \\
+  La funzione di etichettatura può avere diverse varianti e comunque viene
+  estesa ad un omomorfismo $l:T^*\to A^*$ (\emph{parte non chiara nella
+    video-lezione}).\\
+  Si definisce $L(\Sigma, l)$ come il \textbf{linguaggio di una rete di Petri
+    marcata etichettata} ed è l'insieme delle stringhe che corrispondono alle
+  possibili sequenze di esecuzione. Inoltre, a seconda di diversi vincoli
+  imposti alla funzione di etichettatura, si ottengono tre diverse classi di
+  linguaggi:
+  \begin{enumerate}
+    \item \textbf{linguaggi liberi (free)}, dove transizioni diverse hanno
+    etichette diverse e le transizioni non sono etichettate con $\lambda$
+    ($e\neq \lambda$). In determinati casi addirittura non si considera la
+    funzione di etichettatura ma solo la sequenza di transizioni
+    \item \textbf{etichettatura generica, senza $\lambda$}, dove transizioni
+    diverse possono avere la stessa etichetta (nell'insieme dell'alfabeto $A$) e
+    le transizioni non sono etichettate con $\lambda$ 
+    \item \textbf{etichettatura generica, con $\lambda$}, dove transizioni
+    diverse possono avere la stessa etichetta, inoltre alcune transizioni
+    possono essere etichettate con $\lambda$, l’elemento neutro della
+    concatenazione
+  \end{enumerate}
+  \textit{Solitamente le reti di Petri marcate etichettate sono illimitate}
+\end{definizione}
+Data una rete di Petri marcata etichettata $(\Sigma, I)$ si definiscono quattro
+tipi diversi di linguaggi, a seconda delle marcature finali, dette
+\textbf{marcature di accettazione} (che sono in analogia con gli stati finali di
+un automa), considerate: 
+\begin{enumerate}
+  \item \textbf{linguaggio di tipo L}, dove si ha:
+  \[L(\Sigma,l)=\{v\in A^*|\,\exists w\in T^*:l(w)=v\,\land\, M_0[w>M\,\land\,
+    M\in F\}\]
+  ovvero è il linguaggio per cui viene fissato un insieme $F$ di marcature
+  finali a priori e il linguaggio associato alla rete sarà l'insieme di tutte le
+  sequenze in $A^*$ in modo tale che esista una sequenza di transizioni $w$ tale
+  che la funzione di etichettatura su tale sequenza si transizioni sia uguale
+  ad una sequenza di $A^*$. Tale sequenza di transizioni deve essere abilitata
+  nella marcatura iniziale e deve essere una marcatura di accettazione
+  \item \textbf{linguaggio di tipo G}, dove si ha:
+  \[L(\Sigma,l)=\{v\in A^*|\,\exists w\in T^*:l(w)=v\,\land\, M_0[w>M'\,\land\,
+    M\geq M\in F\}\]
+  ovvero si richiede che si raggiunga una qualsiasi marcatura $M'$ che copre una
+  marcatura $M$ dell'insieme delle marcature di accettazione, ovvero che abbia
+  almeno tante marche (posso quindi averne di più) quante quelle di una delle
+  marcature di accettazione, ovvero $M\geq M\in F$
+  \item \textbf{linguaggio di tipo T}, dove si ha:
+  \[L(\Sigma,l)=\{v\in A^*|\,\exists w\in T^*:l(w)=v\,\land\, M_0[w>M\,\land\,
+    M \mbox{ è in deadlock}\}\]
+  ovvero si richiede che il sistema raggiunga una marcatura di deadlock e quindi
+  saranno quelle in $A^*$ tali per cui esiste una sequenza di transizioni (che
+  ha come immagine $v\in A^*$) che porti ad una marcatura $M$ in deadlock
+  \item \textbf{linguaggio di tipo P}, dove si ha:
+  \[L(\Sigma,l)=\{v\in A^*|\,\exists w\in T^*:l(w)=v\,\land\, M_0[w>M\]
+  ovvero dove ogni marcatura raggiungibile da quella iniziale è considerata come
+  marcatura di accettazione. Un linguaggio di tipo P è un prefisso di qualsiasi
+  linguaggio di tipo L, G o T (\textit{prefix property})
+\end{enumerate}
+\textit{\textbf{Combinando i tre diversi tipi di etichettatura con i quattro
+    diversi tipi di stati finali (di accettazione) si ottengono dodici classi di
+    linguaggi diversi.}}\footnote{si veda ad esempio l’articolo di
+  J. L. Peterson, disponibile nella pagina del corso, per una più precisa
+  classificazione e discussione} \\ 
+\begin{esempio}
+  Vediamo un esempio chiarificatore. Prendiamo in analisi la seguente rete:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/l.jpg}
+  \end{figure}
+  Sia inoltre $F=\{[0\,\,0\,\,0\,\,0\,\,1]\}$ (ovvero la marcatura che assegna
+  una sola marca in $s5$).
+  \newpage
+  Se, oltre etichettatura già specificata nella rete, si ha che $l(t2)=d$ e
+  $l(t4)=f$ si possono avere: 
+  \begin{itemize}    
+    \item un linguaggio di tipo L: $L(\Sigma,l)=\{a^ndb^nfc^n|\,n\geq 0\}$,
+    infatti ho un cappio tra $t1$, etichettata con $a$ e $s1$, marcata nella
+    marcatura iniziale, che genera $a^n$. Se scatta $t2$, etichettata con $d$
+    metto una marca in $s3$, in cappio con $t3$, marcata con $b$, che genera
+    $b^n$ (``ciclerà'' esattamente il numero di volte in cui è scattato il primo
+    ciclo per svuotare $s2$). A questo punto può scattare $t4$, marcata con $f$,
+    mettendo una marca in $s5$, raggiungendo quindi una marcatura finale. Si ha
+    però che c'è un cappio tra $t5$ e, marcato con $t$ ed $s5$, che comporta $c^n$
+    (``ciclerà'' esattamente il numero di volte in cui è scattato il secondo 
+    ciclo per svuotare $s4$). Si ricorda che
+    $n$ può essere uguale a 0 (per esempio può scattare subito $t2$ senza che
+    scatti mai $t1$ comportando che non scatti mai nessun altro ciclo infatti
+    scatterà subito dopo $t4$ portando alla marcatura finale)
+    \item un linguaggio di tipo G: $L(\Sigma,l)=\{a^mdb^nfc^k|\,m\geq n\geq
+    k\geq 0\}$, dove $t1$ eventualmente scatta un certo numero $m$ di volte, poi
+    scatta $t2$, poi $t3$ un certo numero $n$ di volte (al più il numero di volte
+    che è scattato $t1$ in quanto svuota $s2$ ma volendo anche meno, $m\geq n$),
+    poi scatta $t4$ e infine $t5$ un certo numero $k$ di volte (al più il numero
+    di volte che è scattato $t3$ in quanto svuota $s4$ ma volendo anche meno
+    $n\geq k$)
+    \item un linguaggio di tipo T: $L(\Sigma,l)=\{a^mdb^nfc^n|\,m\geq n\geq 0\}$
+    dove $t1$ eventualmente scatta un certo numero $m$ di volte, poi
+    scatta $t2$, poi $t3$ un certo numero $n$ di volte ma ,eventualmente, con
+    $n<m$ lasciando quindi delle marche in $s2$, poi scatta $t4$ e infine $t5$ che
+    svuota $s4$. Si  arriva quindi ad avere una marca in $s5$ ma con,
+    eventualmente, delle marche in $s2$, che comporterebbe una situazione di
+    deadlock 
+    \item un linguaggio di tipo P: \\
+    $L(\Sigma,l)=\{w\in A^*| w\mbox{ è prefisso di } a^mdb^nfc^k,\,m\geq n\geq
+    k\geq 0\}$ in quanto ogni marcatura raggiungibile è considerata come finale
+    e quindi possono fermarmi a qualsiasi step intermedio visto nel caso del
+    linguaggio di tipo G
+  \end{itemize}
+  Se invece, oltre etichettatura già specificata nella rete, si ha che
+  $l(t2)=a$ e $l(t4)=b$, avendo quindi etichette ripetute, posso avere, per il
+  tipo L, $L(\Sigma,l)=\{a^nb^nc^{n-1}|\,n> 0\}$, avendo una $a$ ed una $b$ in
+  più del numero di $c$.\\
+  Se invece si ha che $l(t2)=l(t4)=\lambda$, avendo quindi etichette con il
+  simbolo vuoto, posso avere, per il tipo L, $L(\Sigma,l)=\{a^nb^nc^n|\,n\geq
+  0\}$.\\
+  Se invece si ha che $l(t2)=l(t3)=l(t4)=l(t5)=\lambda$, avendo quindi
+  etichette con il simbolo vuoto, posso avere, per il tipo L,
+  $L(\Sigma,l)=\{a^*\}$, ovvero qualsiasi sequenza di $a$
+\end{esempio}
+Si ha quindi che i linguaggi riconosciuti dalle reti di Petri marcate
+etichettate contengono propriamente \textbf{linguaggi regolari} (che vengono
+analogamente riconosciuti da una automa a stati finiti, infatti posso vedere un
+S-sistema mono-marcato come automa a stati finiti e infatti un S-sistema
+riconosce un linguaggio regolare) e non propriamente \textbf{linguaggi
+  context-free}. \textit{I linguaggi riconosciuti dalle reti di Petri contengono
+  i linguaggi regolari e sono contenuti nei linguaggi dipendenti dal contesto
+  (tipo 1). La classe dei linguaggi context-free e quella dei linguaggi
+  riconosciuti da reti di Petri hanno linguaggi in comune ma non sono l’una
+  contenuta nell’altra (alcuni linguaggi context-free possono essere
+  riconosciuti da una rete di Petri e viceversa alcune reti di Petri riconoscono
+  linguaggi che non sono context-free).}.\\
+\textbf{Le reti di Petri quindi non solo non riconoscono tutti il linguaggi di
+  tipo 1 ma nemmeno quelli di tipo 0 e quindi si può dire che le reti di Petri
+  non hanno la potenza computazionale delle macchine di Turing}
+\subsection{Estensioni delle Reti di Petri}
+Tramite alcune estensioni si può far si che le reti di Petri arrivino alla
+stessa potenza computazionale delle macchine di Turing.
+
+
+
+
+
+
 \chapter{Logica PLTL e Model Checking}
 \section{Ripasso Logica Proposizionale}
 \emph{Si ringrazia
@@ -6612,4 +6890,5 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi pl
 % LocalWords:  bigboss dell sif sfi Baier mappabili LTL sro branching semp Tab
 % LocalWords:  Commoner Hack nfc sottoalbero all Conflict conflict preset dual
-% LocalWords:  presets reverse rd dim
+% LocalWords:  presets reverse rd dim ds ciclare shaking accettatore prefix
+% LocalWords:  Peterson context

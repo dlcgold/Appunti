@@ -4987,7 +4987,187 @@ riconosce un linguaggio regolare) e non propriamente \textbf{linguaggi
   non hanno la potenza computazionale delle macchine di Turing}
 \subsection{Estensioni delle Reti di Petri}
 Tramite alcune estensioni si può far si che le reti di Petri arrivino alla
-stessa potenza computazionale delle macchine di Turing.
+stessa potenza computazionale ed espressiva delle macchine di Turing. Queste
+estensioni vengono create mediante particolari tipi di archi.\\
+\subsubsection{Archi Inibitori e Test Zero}
+\begin{definizione}
+  Un\textbf{ arco inibitore} tra un posto $p$ ed una transizione $t$ viene
+  indicato mediante un ``pallino'' al posto della classica freccia:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/inib.jpg}
+  \end{figure}
+  e viene però formalmente scritto come se fosse un arco normale, ovvero:
+  \[(p,t)\]
+  Se pensiamo alla transizione $t$ si ha che essa è abilitata se:
+  \begin{itemize}
+    \item è abilitata senza considerare l’arco inibitore (valutando posti in
+    ingresso e posti in uscita senza considerare il posto collegato tramite arco
+    inibitore)
+    \item non ho marche nel posto $p$, quindi $M(p)=0$, questo è il cosiddetto
+    \textbf{test zero}
+  \end{itemize}
+  Se lo scatto può avvenire se ha che per tutti i posti collegato con archi
+  normali si seguono le solite regole mentre il numero di marche in $p$ non
+  viene modificato
+\end{definizione}
+Se si ha che la capacità del posto $p$ è \textbf{limitata} posso costruire una
+rete di Petri anche senza l'arco inibitore ottenendo lo stesso
+risultato. Procediamo togliendo il vincolo di capacità al posto e inserendo
+quindi il posto complementare a $p$. Si ha quindi che il posto $p$ sarà vuoto
+sse il posto complementare ha tante marche quanto la precedente capacità di
+$p$. Si ha quindi che la transizione prima legata a $p$ mediante l'arco
+inibitore ora è collegata mediante cappio con archi normali, pesati quanto la
+vecchia capacità di $p$, al complemento del posto $p$, potendo scattare solo se
+tale complemento ha un numero di marche pari alla vecchia capacità di $p$ (cosa
+che implica che $p$ sia vuoto).
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/inib2.jpg}
+  \includegraphics[scale = 0.7]{img/inib4.jpg}
+  \caption{Esempio di rimozione di arco inibitore tra $p$ e $t1$}
+\end{figure}
+Ovviamente questo ragionamento è realizzabile solo se la capacità di $p$ non è
+limitata. Qualora fosse illimitata dovrei avere il complemento con infinite
+marche collegato alla transizione con archi infinitamente pesati. Sarebbe una
+situazione alquanto irrealistica, dovendo lavorare con il concetto di infinito. 
+In tal caso quindi si deve usare per forza l'arco inibitore e non si può
+modellare una rete che abbia lo stesso comportamento senza tale arco.\\
+Il poter effettuare il \textbf{test zero} è una delle capacità tipiche per cui
+si ottiene la \textbf{macchina di Turing} ed è stato dimostrato che le reti di
+Petri con archi inibitori hanno la stessa capacità espressiva delle macchine di
+Turing.\\
+Vediamo quindi alcuni esempi interessanti di utilizzo dell'arco inibitore,
+comodo in situazioni in cui bisogna stabilire una \textbf{priorità}:
+\begin{esempio}
+  Vediamo il solito esempio della mutua esclusione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/inib3.jpg}
+  \end{figure}
+  dove si hanno due processi è una risorsa condivisa $b4$. È un tipico caso di
+  confusione, dove, per esempio, $t1$ e $t6$ sono concorrenti ma se scatta $t6$
+  per primo si ha un conflitto tra $t1$ e $t4$ mentre se scatta subito $t1$ non
+  ci sono problemi.\\
+  Voglio quindi attribuire priorità a $t4$ rispetto a $t1$, ovvero nella
+  marcatura $\{b1,b4,b6\}$, con $t1$ e $t4$ abilitate, voglio che $t4$ scatti
+  per primo. Per farlo aggiungo un arco inibitore tra $b6$ e $t1$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/inib5.jpg}
+  \end{figure}
+  \newpage
+  quindi, in $\{b1,b4,b6\}$ (raggiunta dopo lo scatto eventualmente di $t6$),
+  $t1$ non può scattare avendo una marca in $b6$, si 
+  dà quindi alla transizione $t4$ priorità sulla transizione $t1$.\\
+  Otteniamo lo stesso comportamento senza arco inibitore, essendo $b6$
+  1-limitato. Aggiungo quindi il complemento:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.57]{img/inib6.jpg}
+  \end{figure}
+  Si ha ora che $t1$ e $t6$ non più sono concorrenti bensì sono in
+  conflitto, avendo in comune la precondizione $notb6$. Inoltre, in questo modo,
+  $t1$ e $t4$ non sono più in conflitto, infatti solo una delle due transizioni
+  è abilitata. 
+\end{esempio}
+\begin{esempio}
+  Gli archi inibitori permettono di modellare un interrupt\footnote{Esempio
+    tratto da un articolo di H. J. Genrich '86}:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.57]{img/inib8.jpg}
+    \caption{Nella figura l'arco inibitore è quello tratteggiato}
+  \end{figure}
+  
+  Nel sistema si hanno due cicli, $a$ e $b$. Normalmente si ha il ciclo $a$ ma
+  se scatta l'interrupt (per esempio in caso di situazione anomala) parte il
+  ciclo $b$ (che per esempio effettua attività di recovery). Qualora si avesse
+  un limite superiore di numero di interrupt, avendo $I$ di capacità limitata,
+  potrei anche usare una rete di Petri senza arco inibitore (in generale gli
+  interrupt esterni non hanno un limite superiore).
+\end{esempio}
+\subsubsection{Read Arcs}
+Partiamo da un esempio di mutua esclusione:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/ra.jpg}
+\end{figure}
+dove $a$ e $b$ possono essere eseguite in qualsiasi ordine, dove infatti
+il passo $\{a, b\}$ non è abilitato. Si ha quindi che $a$ e $b$ non sono
+concorrenti ed entrambe devono usare la risorsa $s3$ in mutua esclusione.\\
+I \textbf{read arcs} permettono l'accesso concorrente:
+\begin{definizione}
+  I read arcs permettono di modellare l’accesso concorrente a risorse condivise
+  e vengono rappresentati mediante archi non orientati. Vengono usati per
+  esempio per l'accesso ad un database, la lettura senza consumo della risorsa,
+  la lettura in una memoria condivisa etc$\ldots$ \\
+  (Le proprietà sono meglio discusse nell'esempio sotto)
+\end{definizione}
+Riprendendo l'esempio, al posto dei cappi tra $a$, $b$ e $s3$ si usano i read
+arcs, permettendo accesso concorrente:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/ra2.jpg}
+\end{figure}
+\newpage
+Si ha che:
+\begin{itemize}
+  \item $s3$ deve essere marcato affinchè $a$ e/o $b$ siano abilitate
+  \item lo scatto di $a$ o di $b$ non modifica la marcatura di $s3$
+  \item il passo $\{a, b\}$ ora è abilitato:
+  \[\{s1,s2,s3\}[\{a,b\}>\{s3,s4,s5\}\]
+  \item $a$ e $b$ sono concorrenti e possono occorrere in qualsiasi ordine
+\end{itemize}
+\subsubsection{Reset Arcs}
+\begin{definizione}
+  Un reset arc tra un posto ed una transizione comporta che la transizione è
+  abilitata se è abilitata senza considerare il reset arc e lo è
+  indipendentemente dal numero di marche nel posto. I reset arcs sono indicati
+  mediante un rombo al posto della freccia
+\end{definizione}
+Per chiarire meglio vediamo l'esempio:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/ra3.jpg}
+\end{figure}
+dove:
+\begin{itemize}
+  \item $a$ è abilitata indipendentemente dalla marcatura di $s3$ (se $s3$ non è
+  marcato $a$ può comunque scattare se è marcato $s1$)
+  \item lo scatto di $a$ \textbf{svuota} in ogni caso $s3$. In questa
+  configurazione si avrebbe:
+  \[\{s1 , s2 , s3 \}[a > \{s2 , s4 \}\]
+  ma se $s3$ fosse vuoto si avrebbe:
+  \[\{s1 , s2 \}[a > \{s2 , s4 \}\]
+  \item il passo $\{a, b\}$ è abilitato, così come la sequenza $ba$, ovvero se
+  scatta prima $b$ poi può scattare $a$ (potendo scattare anche con $s3$ vuoto)
+  \item lo scatto di $a$ disabilita $b$, perché \textbf{svuota} $s3$, e quindi
+  la sequenza $ab$ non è ammessa ($b$ non può scattare se $s3$ è vuoto), infatti
+  se $s3$ non è marcato o se scatta prima $a$, allora $b$ non è abilitata e non
+  può occorrere
+\end{itemize}
+Questa estensione non è potente quanto gli archi inibitori
+\subsubsection{Ultime Considerazioni sulle Estensioni delle Reti di Petri}
+Esistono altre estensioni, per esempio assegnando strutture dati alle marche,
+ottenendo le \textbf{reti ad alto livello}, che vedremo.\\
+Esistono comunque altre varianti anche se la più studiata è quella estesa
+tramite archi inibitori che permettono di raggiungere l'espressività delle
+macchine di Turing.\\
+Aumentare la potenza espressiva riduce però le \textbf{tecniche di analisi},
+inoltre inoltre alcune proprietà diventano indecidibili per queste classi di
+reti.\\
+Ad esempio, la \textbf{raggiungibilità diventa indecidibile} nel caso di reti
+con archi inibitori o con reset; inoltre nel caso di reti con archi reset non ha
+più senso verificare l’\textbf{esistenza degli S-invarianti} (in quanto il reset
+altera l'invarianza rispetto al numero di marche presenti) e quindi anche la
+\textbf{limitatezza diventa indecidibile} per questa classe.\\
+Esistono vari studi comunque che analizzano la rappresentazione della semantica
+di queste classi di reti e il comportamento di sistemi modellati da tali reti.
+
+
+
+
 
 
 
@@ -6890,5 +7070,6 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  witdrawal upload unload withdrawal choice accettatori ssi tsi pl
 % LocalWords:  bigboss dell sif sfi Baier mappabili LTL sro branching semp Tab
 % LocalWords:  Commoner Hack nfc sottoalbero all Conflict conflict preset dual
-% LocalWords:  presets reverse rd dim ds ciclare shaking accettatore prefix
-% LocalWords:  Peterson context
+% LocalWords:  presets reverse rd dim ds ciclare shaking accettatore prefix ra
+% LocalWords:  Peterson context inib interrupt Genrich recovery Read arcs read
+% LocalWords:  Reset reset arc

@@ -35,15 +35,40 @@
 \usepackage[cache=false]{minted}
 \usepackage{mathtools}
 \usepackage[noend]{algpseudocode}
+
 \usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute
     ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute
     ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every
   entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute
   /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every
   relationship /.style={draw=Chartreuse2,
-    fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}} 
-
-
+    fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
+  \usetikzlibrary{arrows.meta}
+  \usetikzlibrary{decorations.markings}
+  \usetikzlibrary{arrows,shapes,backgrounds,petri}
+\tikzset{
+  place/.style={
+        circle,
+        thick,
+        draw=black,
+        minimum size=6mm,
+    },
+  transition/.style={
+    rectangle,
+    thick,
+    fill=black,
+    minimum width=8mm,
+    inner ysep=2pt
+  },
+  transitionv/.style={
+    rectangle,
+    thick,
+    fill=black,
+    minimum height=8mm,
+    inner xsep=2pt
+    }
+  } 
+\usetikzlibrary{automata,positioning}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -6868,9 +6893,409 @@ con globally che hanno come vicini solo (siamo nel caso esistenziale e non
 universale) stati non etichettati dal globally, ovvero, nel nostro caso,
 nessuno. Siamo giunti ad un punto fisso e possiamo dire che, purtroppo, è
 possibile che il processo di sinistra non entri mai in sezione critica, avendo
-lo stato 0 e lo stato 2 l'etichettatura $\square\neg s$. Bisognerebbe rivedere
-il progetto per garantire migliore equità.\\
-\textbf{Ulteriori esempi nella lezione 8 di esercitazioni}\\
+lo stato 0 e lo stato 2 l'etichettatura $\square\neg s$.
+\newpage
+Bisognerebbe quindi rivedere il progetto per garantire una migliore equità.\\
+Una soluzione è rappresentata, per esempio, dalla seguente rete:
+\begin{center}
+  \begin{tikzpicture}[node distance=2.5cm,bend angle=45,auto]
+    \node [place] (p1) [label=above:$p_1$] {};
+    \node [](sep) [right of = p1]{};
+    \node [place, tokens=1] (p7) [right of = sep, label=above:$p_7$] {};
+    \node [](sep2) [right of = p7]{};
+    \node [place] (p4) [right of = sep2, label=above:$p_4$] {};
+    \node [transition] (t1) [below of = p1, label=left:$t_1$] {};
+    \node [transition] (t4) [below of = p4, label=right:$t_4$] {};
+    \node [place] (p8) [below of = p7, label=above:$p_8$] {};
+    \node [place] (p2) [below of = t1, label=left:$p_2$] {};
+    \node [place] (p5) [below of = t4, label=right:$p_5$] {};
+    \node [transition] (t8) [left of = p5, label=right:$t_8$]  {};
+    \node [transition] (t2) [below of = p2, label=left:$t_2$] {};
+    \node [transition] (t7) [right of = t2, label=left:$t_7$] {};
+    \node [transition] (t5) [below of = p5, label=right:$t_5$] {};
+    \node [place, tokens=1] (p3) [below of = t2, label=left:$p_3$] {};
+    \node [place, tokens=1] (p6) [below of = t5, label=right:$p_6$] {};
+    \node [transition] (t3) [below of = p3, label=left:$t_3$] {};
+    \node [transition] (t6) [below of = p6, label=right:$t_6$] {};
+    \path[-{Latex[width=2mm]}]
+
+    (p1) edge (t1)
+    (t1) edge (p2)
+    (p2) edge (t2)
+    (t2) edge (p3)
+    (p3) edge (t3)
+    (t3) edge [bend left = 25] (p1)
+    (p4) edge (t4)
+    (t4) edge (p5)
+    (p5) edge (t5)
+    (t5) edge (p6)
+    (p6) edge (t6)
+    (t6) edge [bend right = 25] (p4)
+    (p7) edge [bend right = 25] (t1)
+    (p7) edge (t8)
+    (p4) edge (t8)
+    (p8) edge [bend left = 25] (t4)
+    (p8) edge (t7)
+    (p1) edge (t7)
+    (p6) edge [bend left = 15] (t7)
+    (t7) edge [bend right = 35] (p6)
+    (t7) edge (p2)
+    (t2) edge [bend left = 25] (p8)
+    (t8) edge [bend left = 15] (p3)
+    (p3) edge [bend right = 35] (t8)
+    (t8) edge [bend right = 25] (p5)
+    (t5) edge [bend left = 75] (p7);
+  \end{tikzpicture}
+\end{center}
+Si nota come i due processi sono ora descritti mediante 3 stati, aggiungendo
+$p_3$ al processo di sinistra e $p_6$ a quello di destra, stati che
+rappresentano l'inattività del processo o che comunque stanno facendo
+un'elaborazione indipendente dalla sezione critica, quindi $p_1$ e $p_4$
+rappresentano la richiesta di accesso alla sezione critica mentre $p_2$ e $p_5$
+rappresentano che rispettivamente uno dei processi è in sezione critica. Per
+quanto riguarda le transizioni $t_1$ e $t_4$ si ha che esse governano l'entrata
+in sezione critica. Per entrare in sezione critica deve essere marcato $p_7$,
+che indica sia che la sezione critica è disponibile e che il processo di
+sinistra ha priorità in accesso ad essa. Con le transizioni $t_2$ e $t_5$ si
+esce dalla sezione critica. Con le transizioni $t_3$ e $t_6$ si descrive la
+richiesta di accesso alla sezione critica. Studiamo meglio il processo di
+sinistra. Si ha che anche la transizione $t_7$ permette l'accesso in sezione
+critica. Questa transizione richiede una marca in $p_1$, in quanto serve
+la richiesta alla sezione critica, una marca in $p_8$ (che rappresenta il fatto
+che la priorità passa al processo di destra) e una in $p_6$ (il processo di
+destra non deve essere in fase di richiesta o dentro la sezione critica). Tutto
+ciò si traduce in ``il processo di sinistra può entrare in sezione critica, se
+ne fa richiesta, anche se fosse il turno del processo di destra, purché quello
+di destra non ne stia facendo richiesta''. Con un cappio tra $p_6$ e $t_7$ si
+rappresenta come tutto ciò non influisca il processo di destra. Inoltre,
+all'uscita della sezione critica, si ha che il ``turno'' passa comunque al
+processo di destra (si ha infatti l'arco tra $p_2$ e $t_8$). Tutto il discorso è
+applicabile anche per il processo di destra, con $p_8$ e $t_8$ al posto di $p_7$
+e $t_7$ e con i ragionamenti applicati all'esecuzione del processo di destra e
+non a quello di sinistra.\\
+Si è quindi risolto il problema che un processo attenda infinitamente di entrare
+in sezione critica (si può dimostrare in modo esistenziale che, per esempio,
+$\diamond p_1\to\square \neg p_2$ non è soddisfatta)
+\newpage
+\subsubsection{Il problema dei lettori e scrittori}
+Si consideri un sistema in cui alcuni processi sono etichettati come lettori ed
+altri come scrittori. Essi condividono una variablile. Gli scrittori modificano
+l’oggetto, mentre i lettori non lo modificano mai. Ne segue che ogni processo
+scrittore deve mutuamente escludere tutti gli altri processi del sistema, mentre
+i processi lettori possono accedere simultaneamente al dato condiviso. Si
+richiede di progettare una rete di Petri condizioni ed eventi che non vada in
+deadlock e non permetta violazioni della mutua esclusione per i seguenti casi: 
+\begin{itemize}
+  \item vi sono due lettori ed uno scrittore
+  \item vi sono tre processi che prima di accedere al dato decidono se vogliono
+  essere lettori o scrittori 
+\end{itemize}
+
+Vediamo la rete (con i due lettori in altro e lo scrittore in basso):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/sl.jpg}
+\end{figure}
+I lettori hanno uno stato ($a$ e $x$) che rappresentano che sono fuori dalla
+sezione critica ``in lettura'' e uno ($b$ e $y$) per dire che sono dentro. Anche
+lo scrittore ha lo stato $p$ per indicare che vuole entrare in sezione critica e
+il posto $q$ per dire che è dentro. I posti $k1$ e $k2$ abilitano il
+corrispettivo lettore ad entrare in sezione critica e sono indipendenti dai
+processi di lettura ma questi due posti vengono abilitati dal fatto che lo
+scrittore esce dalla sezione critica e disabilitati quanto entra. Questo schema
+può essere facilmente esteso aggiungendo lettori e scrittori.
+Vediamo anche il sistema di transizione (si ricorda che l'etichettatura delle
+transazioni è inutile):
+\begin{center}
+  \begin{tikzpicture}[[shorten >=1pt,node distance=3.8cm,on grid,auto]
+    \node[] (q_1) {$\alpha_1=\{1,k1,k2,z,p\}$};
+    \node[] (q_4) [below right=of q_1] {$\alpha_4=\{a,k1,y,p\}$};
+    \node[] (q_2) [below left=of q_1] {$\alpha_2=\{b,k2,z,p\}$};
+    \node[] (q_5) [above right =of q_4] {$\alpha_5=\{a,q,x\}$};
+    \node[] (q_3) [below right =of q_2] {$\alpha_3=\{b,q,p\}$};
+    \path[-{Latex[width=2mm]}]
+    (q_1) edge [bend left = 10] node [below right] {$\{t_1\}$} (q_2)
+    (q_2) edge [bend left = 10] node [above left] {$\{t_2\}$} (q_1)
+    (q_2) edge [bend left = 10] node [above right] {$\{t_3\}$} (q_3)
+    (q_3) edge [bend left = 10] node [below left] {$\{t_4\}$} (q_2)
+    (q_3) edge [bend left = 10] node [above left] {$\{t_2\}$} (q_4)
+    (q_4) edge [bend left = 10] node [below right] {$\{t_1\}$} (q_3)
+    (q_4) edge [bend left = 10] node [below left] {$\{t_4\}$} (q_1)
+    (q_1) edge [bend left = 10] node [above right] {$\{t_3\}$} (q_4)
+    (q_1) edge [bend left = 10] node [above] {$\{t_5\}$} (q_5)
+    (q_5) edge [bend left = 10] node [above] {$\{t_6\}$} (q_1)
+    ;
+  \end{tikzpicture}
+\end{center}
+Anche questo progetto presenta il problema di avere la possibilità che un
+processo non entri mai in sezione critica.\\
+In ogni caso si vorrebbe verificare la mutua esclusione, verificando, per
+esempio: 
+\begin{itemize}
+  \item universalmente che valga:
+  \[\square((b\,\lor\,y)\to \neg q)\land \square(q\to
+    \neg(b\,\lor\,y))\]
+  ovvero la garanzia della mutua esclusione (se lo scrittore è in sezione
+  critica ($q$) non lo sono i lettori ($b$ e $y$) e viceversa)
+  \item in modo esistenziale che valga:
+  \[\diamond(b\,\land\,q)\lor\diamond(y\land q)\]
+  ovvero non deve esistere un momento in cui un lettore e lo scrittore sono
+  entrambi in sezione critica
+\end{itemize}
+\newpage
+Vediamo una breve verifica tabellare d:ella prima formula
+\begin{center}
+  \begin{tabular}{c|c|c|c|c|c}
+    & $\alpha_1$ & $\alpha_2$ & $\alpha_3$ & $\alpha_4$ & $\alpha_5$ \\
+    \hline
+    $a$ & 1 & 0 & 0 & 1 & 1\\
+    \hline
+    $b$ & 0 & 1 & 1 & 0 & 0\\
+    \hline
+    $q$ & 0 & 0 & 0 & 0 & 1\\
+    \hline
+    $y$ & 0 & 0 & 1 & 1 & 0\\
+    \hline
+    $\neg q$ & 1 & 1 & 1 & 1 & 0\\
+    \hline
+    $b\,\lor \,y$ & 0 & 1 & 1 & 1 & 0\\
+    \hline
+    $\neg(b\,\lor \,y)$ & 1 & 0 & 0 & 0 & 1\\
+    \hline
+    $(b\,\lor\,y)\to \neg q$ & 1 & 1 & 1 & 1 & 1\\
+    \hline
+    $\square(b\,\lor\,y)\to \neg q)$ & 1 & 1 & 1 & 1 & 1\\
+    \hline
+    $q\to\neg(b\,\lor\,y)$ & 1 & 1 & 1 & 1 & 1\\
+    \hline
+    $\square(q\to\neg(b\,\lor\,y))$ & 1 & 1 & 1 & 1 & 1\\                          
+  \end{tabular}
+\end{center}
+Il problema con uno scrittore e $n$ lettori può essere facilmente rappresentato
+mediante una rete posti e transizioni:
+\begin{center}
+  \begin{tikzpicture}[node distance=2.5cm,bend angle=45,auto]
+    \node [place] (p1) [label=above:$a$] {$n$};
+    \node [](sep) [right of = p1]{};
+    \node [place, tokens=1] (p4) [right of = sep, label=above:$x$] {};
+    \node [transition] (t1) [below of = p1, label=left:$t_1$] {};
+    \node [transition] (t4) [below of = p4, label=right:$t_2$] {};
+    \node [place] (p2) [below of = t1, label=left:$b$] {};
+    \node [place] (p5) [below of = t4, label=right:$y$] {};
+    \node [transition] (t2) [below of = p2, label=left:$t_3$] {};
+    \node [transition] (t5) [below of = p5, label=right:$t_4$] {};
+    \node [place] (p3) [right of = p2, label=below:$key$] {$n$};
+    \path[-{Latex[width=2mm]}]
+
+    (p1) edge (t1)
+    (t1) edge (p2)
+    (p2) edge (t2)
+    (t2) edge [bend left = 35] (p1)
+    (p4) edge (t4)
+    (t4) edge (p5)
+    (p5) edge (t5)
+    (t5) edge [bend right = 35] (p4)
+    (t2) edge (p3)
+    (t5) edge node {$n$} (p3) 
+    (p3) edge (t1)
+    (p3) edge node {$n$} (t4);
+    
+  \end{tikzpicture}
+\end{center}
+dove la risorsa condivisa rappresentata da $key$ viene interamente svuotata
+delle sue $n$ marche dallo scrittore (processo di destra) di modo che nessun
+lettore possa entrare in sezione critica (mentre gli $n$ possono entrare tutti
+in quanto l'ingresso consuma una sola marca). Si perde informazione sul
+comportamento del singolo lettore. Ovviamente il sistema di transizioni
+``esplode'' in questo caso.\\
+\textbf{Nella lezione nove parte tre ulteriori varianti di lettori-scrittori.}
+\subsubsection{Problema del Banchiere}
+Usare una rete di Petri posti/transizioni per modellare un sistema composto da
+un banchiere che possiede 10 unità di denaro e due clienti $X$ e $Y$ che
+richiedono un prestito rispettivamente di 6 ed 8 unità di denaro. Il prestito
+viene elargito nel tempo una unità alla volta. Quando il banchiere termina
+l’elargizione dell’intero prestito, il cliente lo restituisce \textbf{in
+  blocco}. \\
+Vediamo la rete:
+
+\begin{center}
+  \begin{tikzpicture}[node distance=2.5cm,bend angle=45,auto]
+    \node [place] (b) [label=above:$B$] {$10$};
+    \node [](sep) [below of = b]{};
+
+    \node [transition] (ey) [left of = sep, label=right:$E_Y$]  {};
+    \node [transition] (ex) [right of = sep, label=left:$E_X$] {};
+    \node [place] (my) [below right of = ey, label=above:$M_Y$] {$8$};
+    \node [place] (py) [below left of = ey, label=above:$P_Y$] {};
+    \node [transitionv] (ry) [left of = py, label=left:$R_Y$] {};
+    \node [place] (mx) [below left of = ex, label=above:$M_X$] {$6$};
+    \node [place] (px) [below right of = ex, label=above:$P_X$] {};
+    \node [transitionv] (rx) [right of = px, label=right:$R_X$] {};
+    
+    
+    \path[-{Latex[width=2mm]}]
+    (b) edge (ey)
+    (b) edge (ex)
+    (ex) edge (px)
+    (ey) edge (py)
+    (px) edge (rx)
+    (py) edge (ry)
+    (rx) edge node [above] {$6$} (b)
+    (ry) edge node {$8$} (b)
+    (rx) edge [bend left = 25] node [below] {$6$} (mx)
+    (ry) edge [bend right = 25] node [below] {$8$} (my)
+    (mx) edge (ex)
+    (my) edge (ey)
+    ;
+  \end{tikzpicture}
+\end{center}
+Nel dettaglio si hanno 5 posti:
+\begin{itemize}
+  \item $B$, che rappresenta le unità di denaro possedute dal
+  banchiere. Inizialmente $B$ contiene 10 token 
+  \item $P_X$, che rappresenta il prestito che il cliente $X$ ha
+  ricevuto. Inizialmente $P_X$ non contiene token 
+  \item $M_X$, che rappresenta le unità che mancano per coprire la
+  richiesta. Inizialmente $M_X$ contiene 6 token 
+  \item $P_Y$, che rappresenta il prestito che il cliente $Y$ ha
+  ricevuto. Inizialmente $P_Y$ non contiene token 
+  \item $M_Y$, che rappresenta le unità che mancano per coprire la
+  richiesta. Inizialmente $M_Y$ contiene 8 token 
+\end{itemize}
+\newpage
+e 4 transizioni:
+\begin{itemize}
+  \item $E_X$, che rappresenta l’erogazione del prestito. $E _$ ha $B$ e $M_X$
+  come input, $P_X$ come output. Il peso degli archi è uno
+  \item $R_X$, che rappresenta la restituzione. $R_X$ ha $P_X$ come input e $B$
+  come output. Il peso degli archi entranti ed uscenti da $R_X$ è pari a 6
+  \item $E_Y$, che rappresenta l’erogazione del prestito. $E_Y$ ha $B$ e $M_Y$
+  come input e $P_Y$ come output. Il peso degli 
+  archi è uno
+  \item $R_Y$, che rappresenta la restituzione. $R_Y$ ha $P_Y$ come input e $B$
+  come output. Il peso degli archi entranti ed  uscenti da $R_Y$ è pari a 8
+\end{itemize}
+La rete descritta può andare in deadlock: si consideri il caso in cui i clienti
+hanno una richiesta pendente di 4 unità ciascuno. In base ai numeri del
+problema, segue che il banchiere ha elargito 6 unità di denaro e gliene restano
+4. A questo punto, se il banchiere soddisfa con qualche unità di denaro entrambi
+i clienti, ne segue che nessuno dei due raggiunge la richiesta pari a
+zero. Questo implica che nessuno dei posti di prestito $P_X$ e $P_Y$ ha un
+numero sufficiente di token per attivare le transizioni di restituzione $R_X$ o
+$R_Y$. Più in generale, la rete descritta può andare in deadlock qualora la
+successione di unità di denaro elargite dovesse lasciare il banchiere con meno
+unità di denaro rispetto ai prestiti ancora da soddisfare per entrambi i
+clienti.  \\
+Vediamo un sistema di transizione semplificato ipotizzando che il banchiere
+abbia 2 denari e che presti 2 sia a $X$ che a $Y$ (le triple sono
+$B,M_Y,M_X$). Si ha il deadlock se si da un denaro a $X$ e uno a $Y$ arrivando
+in $\{0,1,1\}$:
+\begin{center}
+  \begin{tikzpicture}[[shorten >=1pt,node distance=3.7cm,on grid,auto]
+    \node[] (q_1) {$\{2,2,2\}$};
+    \node[] (q_2) [below right=of q_1] {$\{1,2,1\}$};
+    \node[] (q_3) [below left=of q_1] {$\{1,1,2\}$};
+    \node[] (q_4) [below right=of q_3] {$\{0,1,1\}$};
+    \node[] (q_5) [below left =of q_3] {$\{0,0,2\}$};
+    \node[] (q_6) [below right =of q_2] {$\{0,2,0\}$};
+
+    \path[-{Latex[width=2mm]}]
+    %\path[->]
+    (q_1) edge (q_2)
+    (q_1) edge (q_3)
+    (q_3) edge (q_4)
+    (q_3) edge (q_5)
+    
+    (q_2) edge (q_6)
+    (q_2) edge (q_4)
+    (q_5) edge [bend left = 25] (q_1)
+    (q_6) edge [bend right = 25] (q_1)
+    (q_4) edge [loop below] (q_4)
+    ;
+  \end{tikzpicture}
+\end{center}
+Introduciamo una soluzione che eviti il deadlock. Dalle osservazioni fatte sopra
+è chiaro che il deadlock è dovuto alla strategia di erogazione del prestito,
+quindi nulla c’entrano le transizioni di restituzione. L’idea alla base delle
+due soluzioni qui sotto proposte è la seguente: se si raggiunge il caso limite
+di due richieste pari a 4 allora allora il primo cliente che ottiene una unità
+otterrà anche le rimanenti e l’altro cliente non riceverà nulla fino a che il
+cliente che ha ottenuto l’intero prestito non lo restituirà. Abbiamo diversi
+modi di raggiungere questo obiettivo (tenendo i dati iniziali del problema):
+\begin{itemize}
+\item la transizione $E_X$ non può scattare se $M_Y$ è inferiore a 4 e
+analogamente, la transizione $E_Y$ non può scattare se $M_X$ è inferiore a 4.
+L’idea di questa soluzione è che un cliente non può ottenere una unità di
+prestito se l’altro è abbastanza vicino dall’ottenere l’intero prestito. In base
+ai numeri del nostro problema abbastanza vicino significa che mancano meno di 4
+unità per completare l’intero prestito. Lo svantaggio di questa soluzione è che
+se ad esempio $M_X$ è inferiore a quattro, nessuna unità verrà erogata a $Y$,
+anche se egli nulla ha ancora ricevuto e dandogli una unità non porterebbe il
+sistema in deadlock
+\item le transizioni di erogazione vengono sdoppiate in due transizioni di
+erogazione; ad esempio, invece di avere solo $E_Y$ la rete contiene $E_Y'$ e
+$E_Y''$. $E_Y'$ e $E_Y''$ sono sempre due transizioni di erogazione. E $Y_0$ ha
+come input i posti $B$ e $M_Y$ con peso 5 e output $P_Y$ e $M_Y$ con peso
+4. Tale transizione garantisce che finchè mancano più di 4 unità di prestito, il
+cliente $Y$, che ha richiesto otto unità, possa ricevere delle unità di
+prestito. La transizione E $E_Y''$ ha come input i posti $B$, $M_Y$ e $M_X$,
+quest’ultimo con peso 4, e come output M X con peso quattro e $P_Y$. La
+transizione $E_Y''$ non può essere attivata qualora $M_X$ fosse inferiore a
+quattro. Quindi, se il cliente $Y$ ha già ottenuto 4 unità e gliene mancano 4
+non otterrà alcuna ulteriore unità di prestito se il cliente $X$ ne ha già
+ottenute 3. Comunque $Y$ potrà ottenere unità di prestito qualora gliene
+mancassero almeno 5 (cioè ne avesse già ottenute massimo 3) indipendentemente
+dalle unità già erogate a $X$. Lo stesso schema di sdoppiamento si applica alla
+transizione $E_X$ relativa al cliente $X$. Circa il processo di restituzione
+nulla cambia rispetto alle soluzioni precedenti. 
+\end{itemize}
+\newpage
+Vediamo la rete di questa seconda soluzione:
+\begin{center}
+  \begin{tikzpicture}[node distance=3.5cm,bend angle=45,auto]
+    \node [place] (b) [label=above:$B$] {$10$};
+    \node [](sep) [below of = b]{};
+
+    \node [transition] (ey2) [left of = sep, label=left:$E_Y''$]  {};
+    \node [transition] (ex) [right of = sep, label=left:$E_X'$] {};
+    \node [transition] (ey) [left of = ey2, label=left:$E_Y'$]  {};
+    \node [transition] (ex2) [right of = ex, label=right:$E_X''$] {};
+    \node [place] (my) [below of = ey2, label=left:$M_Y$] {$8$};
+    \node [place] (py) [below of = ey, label=left:$P_Y$] {};
+    \node [transition] (ry) [below right of = py, label=below:$R_Y$] {};
+    \node [place] (mx) [below of = ex2, label=right:$M_X$] {$6$};
+    \node [place] (px) [below of = ex, label=left:$P_X$] {};
+    \node [transition] (rx) [below left of = mx, label=below:$R_X$] {};
+    
+    
+    \path[-{Latex[width=2mm]}]
+    (b) edge (ey)
+    (b) edge (ex)
+    (b) edge (ey2)
+    (b) edge (ex2)
+    (ex) edge (px)
+    (ey) edge (py)
+    (ey) edge [bend left = 25] node [above] {$4$} (my)
+    (my) edge [bend left = 25] node [below] {$5$} (ey)
+    (ey2) edge [bend left = 25] (py)
+    (ry) edge [bend right = 25] node [above left] {$8$} (my)
+    (ry) edge [bend right = 25] node {$8$} (b)
+    (my) edge (ey2)
+    (py) edge  node {$8$} (ry)
+    (ex2) edge [bend left = 25] (px)
+    (ex) edge [bend left = 25] node [above] {$4$} (mx)
+    (mx) edge [bend left = 25] node [below] {$5$} (ex)
+    (mx) edge (ex2)
+    (rx) edge [bend left = 25] node [above right] {$6$} (b)
+    (px) edge node {$6$} (rx)
+    (rx) edge [bend right = 25] node [above left] {$6$} (mx)
+    (ey2) edge [bend left = 15] node [below right] {$4$} (mx)
+    (mx) edge [bend left = 35] node [below] {$4$} (ey2)
+    (my) edge [bend left = 35] node [below right] {$4$} (ex2)
+    (ex2) edge [bend left = 8] node [below right] {$4$} (my)
+    ;
+  \end{tikzpicture}
+\end{center}
 
 
 
@@ -7072,4 +7497,5 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  Commoner Hack nfc sottoalbero all Conflict conflict preset dual
 % LocalWords:  presets reverse rd dim ds ciclare shaking accettatore prefix ra
 % LocalWords:  Peterson context inib interrupt Genrich recovery Read arcs read
-% LocalWords:  Reset reset arc
+% LocalWords:  Reset reset arc above tokens right transition place left sl ey
+% LocalWords:  petri esistenzialmente token py my ry px quest below sep rx

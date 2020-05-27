@@ -5203,16 +5203,197 @@ altera l'invarianza rispetto al numero di marche presenti) e quindi anche la
 \textbf{limitatezza diventa indecidibile} per questa classe.\\
 Esistono vari studi comunque che analizzano la rappresentazione della semantica
 di queste classi di reti e il comportamento di sistemi modellati da tali reti.
-
-
-
-
-
-
-
-
-
-
+\section{Reti di Petri Colorate}
+Vengono introdotte in modo molto generale le \textbf{reti colorate}, che sono
+reti P/T di alto livello, producendo un risultato più compatto avendo,
+eventualmente, una parziale perdita di informazione. Le marche, qui
+dette \textbf{colori}, sono più complesse e contengono varie informazioni.\\
+Le reti colorate possono rappresentare le stesse proprietà di un sistema
+elementare tramite l'operazione detta \textbf{folding}.\\
+Il modo migliore è introdurre le reti colorate tramite un esempio:
+\begin{esempio}
+  Vediamo un esempio che tratta il meccanismo di coordinamento con lo starter di
+  una gara automobilistica.\\
+  Vediamo il coordinamento per la partenza con due auto $a$ e $b$ e lo starter:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/c.jpg}
+  \end{figure}
+  quando le auto sono pronte a partire scattano $t1$ e $t4$, abilitando $t3$ che
+  rappresenta l'azione dello starter che scattando avvia il segnale di partenza
+  alle due auto, terminando il suo servizio.\\
+  Partendo da questo sistema elementare costruiamo la rete colorata. Si ha che i
+  comportamenti delle due auto sono isomorfi. Possiamo pensare di piegare la
+  rete per avere le due auto vicine nel disegno, ottenendo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c1.jpg}
+  \end{figure}
+  si vede come diverse transizioni e posti possono essere raggruppati:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c3.jpg}
+  \end{figure}
+  Si può quindi ottenere una rete P/T:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c5.jpg}
+  \end{figure}
+  si perde però così la distinzione tra le due auto. Vogliamo evitare di perdere
+  questa informazione ma mantenendo la stessa compattezza. Procediamo per
+  steps.
+  \newpage
+  partiamo dai posti.\\
+  Innanzitutto si associa ad ogni token un colore, ovvero un tipo di dato
+  qualsiasi (volendo anche un'altra rete, ottenendo una \textbf{rete di
+    rete}). Si ottiene il tipo $cars$ e il tipo $starter$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/c7.jpg}
+  \end{figure}
+  se ad un posto non è assegnato un tipo si presuppone che il tipo sia il solito
+  token non strutturato. Studiamo ora le transizioni. Per differenziarle a
+  seconda degli oggetti del posto che le fa scattare si ha che gli archi vengono
+  etichettati col nome dell'oggetto interessato. Anche qui qualora un arco non
+  fosse etichettato si sottintende un normale arco tipico di una rete
+  elementare. Abbiamo ottenuto una rete colorata \textbf{arc-costant} in quanto
+  gli archi sono etichettai da  costanti.\\
+  Aggiungiamo quindi anche i posti rappresentati i messaggi verso lo starter,
+  aggiungendo i colori $ready$ e $start$. Si hanno due elementi per entrambi
+  colori per rappresentare i messaggi di entrambe le auto:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/c9.jpg}
+  \end{figure}
+  si è ridotta ulteriormente la perdita di informazione rispetto alla rete P/T
+  in quanto so quale macchine è legata ad un segnale.
+  \newpage
+  Studiamo quindi la regola di scatto. Gli archi possono anche essere
+  etichettati da multinsiemi ($a+b$ rappresenta $\{a,b\}$ e $2\cdot b$
+  rappresenta $\{b,b\}$).
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/c10.jpg}
+  \end{figure}
+  Nel primo disegno la transizione preleva $\{a,b\}$ dal primo posto e
+  $\{b,b\}$ dal secondo, ponendo poi $b$ in entrambi i posti in uscita. Nel
+  secondo disegno si ha il risultato dello scatto della transizione.\\
+  Voglio migliorare ancora la rete colorata, facendo il folding per le due auto,
+  al fine di ottenere:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c12.jpg}
+  \end{figure}
+  Si aggiunge quindi una \textbf{modalità di scatto} alle transizioni, in modo
+  che la transizione possa variare la regola di scatto in base all'oggetto in
+  input.
+  \newpage
+  Introduciamo quindi le \textbf{variabili}, per etichettare gli archi. Le
+  variabili hanno un tipo ben preciso e regolano la regola di scatto, infatti
+  nelle transizioni si avranno delle \textbf{guardie} che si basano sulla
+  variabile al fine di definire lo scatto (tramite regole logiche):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/c15.jpg}
+  \end{figure}
+  $s$ potrebbe anche essere considerata come una costante in quanto è una
+  variabile che può assumere un solo valore. In generale nelle reti colorate gli
+  archi sono \textbf{etichettati da variabili}. Vediamo quindi la regola di
+  scatto in tale caso:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c16.jpg}
+  \end{figure}
+  Dove si nota come le variabili assumono un significato tale da soddisfare la
+  transizione, ottenendo una certa modalità.\\
+  Nonostante siano rappresentati 3 step successivi lo scatto è
+  \textbf{simultaneo e istantaneo} per definizione, in quanto il modello si
+  concentra su una rappresentazione qualitativa e non quantitativa (scopo delle
+  \textbf{reti temporizzate} che si occupano di studiare le prestazione dei
+  sistemi, assegnando un tempo alle transizioni, o delle \textbf{reti di Petri
+    stocastiche}, che assegnano una distribuzione di probabilità alle
+  transizioni).\\
+  Si arriva quindi alla rete finale:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c18.jpg}
+  \end{figure}
+\end{esempio}
+\begin{esempio}
+  Tornando sull'analisi dei tipi in una rete colorata si ha che essi possono
+  avere un tipo ``tipico'' dell'informatica, come un intero, per esempio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/c17.jpg}
+  \end{figure}
+  dove lo scatto della transizione porta a $[4\,\,\,3]$
+\end{esempio}
+\subsection{Alternating Bit Protocol}
+Passiamo quindi alla descrizione di un esempio famoso in letteratura, quello
+relativo al \textbf{Alternating Bit Protocol}\footnote{cap.8.3 di C.Girault,
+  R.Valk,Petri Nets for Systems Engineering}.\\
+La caratteristica di questo protocollo è quella di avere due postazioni $X$ e
+$Y$ che si scambiano messaggi (dal primo al secondo). Le due postazioni usano un
+solo canale di comunicazione che però può essere usato in entrambe le direzioni
+ma una sola direzione per volta (\textit{half mutex channel}). Il protocollo
+garantisce che viene mandato un solo messaggio per volta e garantisce che il
+messaggio sia ricevuto prima di mandarne un altro (tramite un bit di
+controllo). Modellando il \textit{data link layer} solo da $X$ a $Y$, si ha che: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/abt.jpg}
+\end{figure}
+L'invio è con la transizione $A$ e la ricezione con la transizione $B$. Con $/1$
+indico la capacità del posto (volendo inviare un solo messaggio per volta).\\
+Per rimuovere il vincolo di capacità uso i posti complementari:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/abt2.jpg}
+\end{figure}
+Abbiamo quindi garanzia del preservamento dell'ordine dei messaggi ma si sta
+imponendo la non perdita di un messaggio (fattore non trascurabile).
+\newpage
+Aggiungiamo quindi il rilevamento di errori tramite un segnale:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/abt3.jpg}
+\end{figure}
+dove un dato $d$ può essere trasmetto correttamente o meno, diventando in tal
+caso $F$, in entrambe le direzioni. Inseriamo questa specifica ne protocollo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.65]{img/abt4.jpg}
+\end{figure}
+Ma bisognerebbe specificare che le due transizioni centrali (non di fail) non
+possono scattare contemporaneamente.
+\newpage
+Vediamo quindi una rete colorata per tale protocollo con una legenda con le
+specifiche dei colori ($F$ specifica un fail, $0$ e $1$ il bit): 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/abt5.jpg}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/abt6.jpg}
+\end{figure}
+La marcatura iniziale è così definita:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.55]{img/abt7.jpg}
+\end{figure}
+\textbf{Simulazione completa della rete sulle slide numero 15b}
+\newpage
+Con delle operazioni di \textbf{unfolding} posso quindi riottenere la rete
+elementare a partire da quella colorata:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.72]{img/abt12.jpg}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.72]{img/abt13.jpg}
+\end{figure}
 \chapter{Logica PLTL e Model Checking}
 \section{Ripasso Logica Proposizionale}
 \emph{Si ringrazia
@@ -7512,4 +7693,6 @@ Diamo ora i 2 \textbf{teoremi di G\"{o}del}:
 % LocalWords:  presets reverse rd dim ds ciclare shaking accettatore prefix ra
 % LocalWords:  Peterson context inib interrupt Genrich recovery Read arcs read
 % LocalWords:  Reset reset arc above tokens right transition place left sl ey
-% LocalWords:  petri esistenzialmente token py my ry px quest below sep rx
+% LocalWords:  petri esistenzialmente token py my ry px quest below sep rx half
+% LocalWords:  folding starter steps costant multinsiemi Alternating Protocol
+% LocalWords:  mutex channel abp abt layer preservamento fail unfolding

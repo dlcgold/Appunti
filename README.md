@@ -6,6 +6,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/issues)
 [![GitHub contributors](https://img.shields.io/github/contributors/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/graphs/contributors)
 [![GitHub last commit](https://img.shields.io/github/last-commit/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/commits)
+[![License](https://img.shields.io/badge/license-energy%20drink-yellow.svg)](https://github.com/dlcgold/energy_drink-license)
 
 Appunti dei corsi della facoltà di **Informatica** all'_Università degli Studi di Milano - Bicocca_ (**unimib**).
 
@@ -64,5 +65,4 @@ Contributi di ogni tipo sono ben accetti.
 Tutte le persone che hanno pubblicamente contribuito alla stesura di questi appunti sono elencate [qui](https://github.com/dlcgold/Appunti/graphs/contributors) e direttamente all'interno degli stessi.
 
 ### License
-These codes are licensed by [ENERGY_DRINK-WARE](https://github.com/dlcgold/energy_drink-license) license
-[![Energy Drink License :boom:](https://img.shields.io/badge/-Energy%20Drink-yellow.svg)](https://github.com/dlcgold/energy_drink-license)
+These codes are licensed by [ENERGY_DRINK-WARE](https://github.com/dlcgold/energy_drink-license) license.

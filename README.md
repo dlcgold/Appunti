@@ -24,13 +24,13 @@ xelatex -synctex=1 -interaction=nonstopmode --shell-escape file.tex
 ### Stato del completamento
 Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in fase di stesura.
 
-##### I anno
+##### I anno Triennale
 - [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
 - [x] Fondamenti dell'Informatica
 
-##### II anno
+##### II anno Triennale
 - [ ] Metodi Algebrici per l'Informatica
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
@@ -39,11 +39,18 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [ ] Sistemi Distribuiti
 
 
-##### III anno
+##### III anno Triennale
 - [x] Analisi e Progetto di Algoritmi (obbligatorio)
 - [ ] Elementi di Bioinformatica
 - [x] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (con assignment)
 - [x] Metodi Formali
+
+#### I anno Magistrale
+- [ ] Archietture Dati
+- [ ] Machine Learning
+- [ ] Modelli della Concorrenza
+- [ ] Processo e Sviluppo Software
+- [ ] Teoria della Computazione
 
 ### Altro
 Suggeriamo queste repository open:

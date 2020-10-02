@@ -33,7 +33,7 @@ var anno2 = [
 ]
 var anno3 = [
     {"title": "Analisi e progetto di Algoritmi", "pdf": "https://github.com/dlcgold/Appunti/raw/master/Triennale/Terzo%20Anno/Analisi%20e%20Progetto%20di%20Algoritmi/algoritmi2.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Analisi%20e%20Progetto%20di%20Algoritmi"},
-    {"title": "Elementi di Bioinformatica", "pdf": "https://github.com/dlcgold/Appunti/raw/master/Triennale/Terzo%20Anno/Elementi%20di%20Bioinformatica/bioinformatica.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Elementi%20di%20Bioinformatica"},
+    {"title": "Elementi di Bioinformatica (incompleto)", "pdf": "https://github.com/dlcgold/Appunti/raw/master/Triennale/Terzo%20Anno/Elementi%20di%20Bioinformatica/bioinformatica.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Elementi%20di%20Bioinformatica"},
     {"title": "Metodi Formali", "pdf": "https://github.com/dlcgold/Appunti/raw/master/Triennale/Terzo%20Anno/Metodi%20Formali/metodi.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Metodi%20Formali"},
     {"title": "Ricerca Operativa e Pianificazione delle risorse", "pdf": "https://github.com/dlcgold/Appunti/raw/master/Triennale/Terzo%20Anno/Ricerca%20Operativa%20e%20Pianificazione%20delle%20Risorse/ro.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Ricerca%20Operativa%20e%20Pianificazione%20delle%20Risorse"},
     {"title": "Programmazione C++", "pdf": "", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Programmazione%20C%2B%2B"}

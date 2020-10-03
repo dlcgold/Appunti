@@ -45,7 +45,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (con assignment)
 - [x] Metodi Formali
 
-#### I anno Magistrale
+##### I anno Magistrale
 - [ ] Archietture Dati
 - [ ] Machine Learning
 - [ ] Modelli della Concorrenza

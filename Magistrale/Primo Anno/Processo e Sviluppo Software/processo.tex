@@ -251,10 +251,166 @@ importanza (con anche la solita collezione di feedback). In \textit{extreme
   \caption{Rappresentazione grafica dell'extreme programming}
   \label{extreme}
 \end{figure}
+\chapter{DevOps}
+Nel tempo si è passato dal \textit{modello waterfall} (dove tutto era definito
+ad inizio progetto) al \textit{modello agile}. Negli ultimi tempi si è
+sviluppato un altro metodo, chiamato \textbf{DevOps}, dove anche la parte di
+\textit{operation} deve essere agile, ovvero il rilascio in produzione e il
+\textit{deployment} devono essere agili quanto lo sviluppo. Amazon, Netflix,
+Facebook e molte altre società già adottano le pratiche \textit{DevOps.}\\
+Nel \textit{DevOps} i team di sviluppo e operation sono indipendenti tra loro,
+diminuendo il costo di impegno necessario al team di sviluppo per la parte di
+deployment (che viene resa anche più sicura grazie alla diminuzione
+dell'intervento umano in favore di automazioni). Inoltre, avendo i due team dei
+tempi di lavoro diversi, si riesce a prevenire ritardi causati dalla non
+organicità delle operazioni.\\
+DevOps promuove la collaborazione tra di due team al fine di ottenere una sorta
+di team unico che curi sia sviluppo che operation.\\
+DevOps include quindi diversi processi che vengono automatizzati:
+\begin{itemize}
+  \item Continuous Development
+  \item Continuous Integration
+  \item Continuous Testing
+  \item Continuous Deployment (anche con tecnologie di virtualizzazione e
+  con l'uso di \textit{container} in \textit{ambiente cloud})
+  \item Continuous Monitoring
+\end{itemize}
+Con DevOps il feedback arriva in primis dal software (i tool di
+\textit{monitor}) inoltre il focus viene spostato sui processi automatici.\\
+Nel DevOps si introducono nuovi ruoli:
+\begin{itemize}
+  \item il \textbf{DevOps Evangelist}, simile allo \textit{scrum master},
+  supervisiona l'intero processo di DevOps
+  \item l'\textbf{automation expert}, dedicato a curare gli aspetti di
+  automatismo 
+  \item un \textbf{Security Engineer}
+  \item un \textbf{Software Developer}, nonché \textbf{Tester}
+  \item un \textbf{Quality Assurance}, che verifica la qualità del prodotto
+  rispetto ai requisiti
+  \item un \textbf{Code Release Manager}, che si occupa sull'infrastruttura e
+  sul deploy della release
+\end{itemize}
+Il DevOps (figura \ref{devops}) si basa su sei principi base:
+\begin{enumerate}
+  \item \textbf{Customer-Centric Action}, ovvero il committente è al centro
+  dell'azione 
+  \item \textbf{End-To-End Responsibility}, ovvero il team gestisce interamente
+  il prodotto, avendone responsabilità totale
+  \item \textbf{Continuous Improvement}, ovvero cercare continuamente di
+  migliorare senza sprechi il prodotto finale e i servizi
+  \item \textbf{Automate everything}, ovvero cercare di automatizzare l'intera
+  infrastruttura di processo, dalle attività di testing e integrazione fino ad
+  arrivare alla costruzione della release e del deployment
+  \item \textbf{Work as one team}, ovvero unificare tutti gli aspetti sotto un
+  unico team o comunque con due team che collaborano fortemente come se fossero
+  uno 
+  \item \textbf{Monitor and test everything}, ovvero testare e monitorare
+  costantemente il prodotto
+\end{enumerate}
+\textit{Il quarto e il sesto punto sono i due punti tecnici principali}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.6]{img/devops.jpg}
+  \caption{Rappresentazione famosa del \textit{lifecycle} di DevOps, con le due
+    parti, con le relative parti fondamentali, di sviluppo e operation distinte
+    dai colori ma unite in un singolo metodo unico}
+  \label{devops}
+\end{figure}
+\subsection{Build, Test e Release}
+Partiamo dalla parte ``dev'' di DevOps.\\
+Bisogna pensare a questi step in ottica di automatismo vicina al DevOps. \\
+Innanzitutto bisogna introdurre i sistemi di \textbf{version control}, in primis
+\textbf{Git}, un sistema di version control \textbf{distribuito}, dove ogni
+utente ha una copia della repository (con la storia dei cambiamenti), con la
+quale interagisce tramite \textit{commit} e \textit{update}. Esiste poi una
+repository lato server per permettere di condividere i vari cambiamenti tramite
+sincronizzazione.\\
+\textbf{Git} permette anche lo sviluppo \textit{multi-branch} per permettere di
+lavorare su più branch, pensando allo sviluppo separato dove ogni branch alla
+fine può essere unito (\textit{merge}) con quello principale (solitamente
+chiamato \textit{master}). Un altro branch standard è quello di sviluppo, detto
+\textit{develop}. Un altro ancora è quello detto \textit{hotfix}, per le
+modifiche più urgenti, che vive in uno stadio intermedio tra i due
+sopracitati, prima ancora del branch \textit{develop}. Volendo ciascuna feature
+può essere creata in un branch dedicati. Si procede con le versioni
+``merge-ndo'' quando necessario, ``step by step'' fino ad un branch
+\textit{release} per poi andare dopo il testing su \textit{master}. Sul branch
+\textit{release} possono essere effettuati fix che poi verranno riportati anche
+in \textit{develop}.\\
+Lo sviluppo su multi-branch si collega alle operazioni di verifica che possono
+essere attivate automaticamente a seconda dell'evoluzione del codice su ogni
+branch. Avendo ogni branch una precisa semantica possiamo definire precise
+attività di verifica, corrispondenti a \textit{pipelines} precise, solitamente
+innescate da un \textit{push} di codice su un certo branch, in modo sia
+automatico che manuale. Le pipeline vengono attivate in fase di test di un
+componente, in fase di creazione di un sottosistema, di assembramento di un
+sistema intero o di deployment in produzione. Si hanno quindi quattro fasi:
+\begin{enumerate}
+  \item component phase
+  \item subsystem phase
+  \item system phase
+  \item production phase
+\end{enumerate}
+Spesso le pipelines sono usate
+come \textit{quality gates} per valutare se un push può essere accettato in un
+certo branch. Una pipeline può essere anche regolata temporalmente, in modo che
+avvenga solo ad un certo momento della giornata.
+\subsubsection{Component phase e Subsystem phase}
+Dove il fuoco è sulla più piccola unità testabile che viene aggiornata (una
+classe, un metodo etc$\ldots$) che non può essere eseguita senza l'intero
+sistema. In tal caso si può fare:
+\begin{itemize}
+  \item code review
+  \item unit testing
+  \item static code analysis
+\end{itemize}
+Un cambiamento può anche essere testato nell'ambito del sottosistema di cui fa
+parte, in tal caso si hanno anche check di prestazioni e sicurezza. Il servizio
+però potrebbe essere da testare in isolamento rispetto ad altri servizi, usando
+quindi dei \textit{mocks} o degli \textit{stubs}, ovvero creando degli alter ego
+dei servizi mancanti in modo che il servizio da testare possa funzionare.
+\subsubsection{System phase}
+In questo caso si testa l'intero sistema che viene ``deployato'' in ambiente di
+test. Si hanno:
+\begin{itemize}
+  \item integration tests
+  \item performance tests
+  \item security tests
+\end{itemize}
+Tutti test che richiedono l'interezza del sistema e sono spesso molto
+dispendiosi e quindi bisogna regolare la frequenza di tali test in molti casi
+(sfruttando ad esempio la notte).
+\subsubsection{Production phase}
+Questa fase è legata alla necessità di creare gli artefatti che andranno
+direttamente ``sul campo'', ovvero il deployment in produzione. In tale fase
+potrebbe essere necessario creare container o macchine virtuali. In tal caso si
+hanno dei check molto veloci sugli artefatti finali (che non siano per esempio
+corretti), dando per assodato che la qualità del codice sia già stata
+testata. Si hanno quindi strategie anche di \textit{deployment incrementale},
+per cui esistono più versioni del software contemporaneamente con diversa
+accessibilità per gli utenti finale (accessibilità che viene man mano
+scalata). In tal caso si usano anche vari tool di monitor. Si hanno anche
+eventualmente tecniche di \textit{zero downtime} (dove il software non è mai in
+uno stato \textit{unstable}).\\
+\begin{shaded}
+  \textit{Fasi diverse corrispondono a branch diversi}
+\end{shaded}
+\subsection{Deploy, Operate e Monitor}
+Studiamo ora la parte ``Ops'' di DevOps.\\
+
 \end{document}
 % LocalWords:  Machine Learning waterfall png img slides jpg testing self step
-% LocalWords:  organizing continuous refactoring Scrum scrum product backlog
+% LocalWords:  organizing continuous refactoring Scrum scrum product backlog as
 % LocalWords:  items dev members owner definzione stakeholders planning daily
-% LocalWords:  review retrospective Programming Extreme extreme programming
+% LocalWords:  review retrospective Programming Extreme extreme programming one
 % LocalWords:  stories Short Releases Metaphor Simple Pair Collective Ownership
-% LocalWords:  Integration Customer Coding workspace collective ownership
+% LocalWords:  Integration Customer Coding workspace collective ownership cloud
+% LocalWords:  DevOps operation deployment Amazon Netflix Facebook Development
+% LocalWords:  Monitoring primis monitoring tool Evangelist automation expert
+% LocalWords:  Security Engineer Developer Quality Assurance deploy Centric and
+% LocalWords:  Action Responsibility Improvement Automate everything Work Git
+% LocalWords:  devops lifecycle Build version control repository commit update
+% LocalWords:  branch develop merge ndo hotfix feature fix pipelines push gates
+% LocalWords:  quality phase component subsystem system production unit static
+% LocalWords:  analysis mocks stubs deployato integration security tests
+% LocalWords:  downtime unstable

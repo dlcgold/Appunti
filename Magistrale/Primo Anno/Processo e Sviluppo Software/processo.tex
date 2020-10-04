@@ -316,7 +316,7 @@ Il DevOps (figura \ref{devops}) si basa su sei principi base:
     dai colori ma unite in un singolo metodo unico}
   \label{devops}
 \end{figure}
-\subsection{Build, Test e Release}
+\section{Build, Test e Release}
 Partiamo dalla parte ``dev'' di DevOps.\\
 Bisogna pensare a questi step in ottica di automatismo vicina al DevOps. \\
 Innanzitutto bisogna introdurre i sistemi di \textbf{version control}, in primis
@@ -392,12 +392,153 @@ accessibilità per gli utenti finale (accessibilità che viene man mano
 scalata). In tal caso si usano anche vari tool di monitor. Si hanno anche
 eventualmente tecniche di \textit{zero downtime} (dove il software non è mai in
 uno stato \textit{unstable}).\\
-\begin{shaded}
-  \textit{Fasi diverse corrispondono a branch diversi}
-\end{shaded}
-\subsection{Deploy, Operate e Monitor}
+\\
+\textbf{Fasi diverse corrispondono a branch diversi}
+\section{Deploy, Operate e Monitor}
 Studiamo ora la parte ``Ops'' di DevOps.\\
-
+Si studia l'evoluzione automatica del software da una versione all'altra in
+produzione. Avanzare di versione in modo \textit{naive} e istantaneo è troppo
+rischioso (qualora la nuova versione fosse corrotta non si avrebbe controllo
+sull'update) e quindi spesso non attuabile (spesso anche per ragioni tecniche).
+Si ha quindi un insieme di tecniche che si basano in primis
+sull'\textit{evoluzione incrementale}. Tali tecniche si distinguono in base alla
+dimensione su cui sono incrementati:
+\begin{itemize}
+  \item \textbf{Incremental wrt users:} \textit{Dark launching, Canary releases
+    (and User Experimentation)}, ovvero legata agli utenti esposti alla nuova
+  release
+  \item \textbf{Incremental wrt requests:} \textit{Gradual upgrades/rollout},
+  ovvero legata alle richieste per la nuova release
+  \item \textbf{Incremental wrt components/replicas:} \textit{Rolling upgrade},
+  incentrata sulle componenti che vengono aggiornate
+  \item \textbf{Non-incremental with backups:} \textit{Green/blue deployment,
+    Rainbow deployment}, non incrementali ma che offrono comunque un backup di
+  sicurezza  
+\end{itemize}
+Tali schemi possono essere usati in un contesto DevOps.\\
+Per studiare la prima tipologia (\textit{Incremental wrt users}) abbiamo:
+\begin{itemize}
+  \item \textbf{Dark launching} che arriva
+  dal mondo di Facebook dal 2011. In tale schema 
+  l'update è esposto solo ad una parte della popolazione, per la quale viene
+  effettuato il deployment per studiare gli effetti (tramite continuous
+  monitoring) ed eventuali modifiche e migliorie al software, che infine verrà
+  deployato per il resto della popolazione in modo comunque incrementale fino a
+  che l'intera popolazione godrà della feature. Spesso usata per front-end 
+  \item \textbf{Canary releases}, che studia l'impatto di update relativi al
+  back-end
+\end{itemize}
+tali schemi spesso sono usati di pari passo per le varie sezioni del software,
+nonché possono essere usati in modo intercambiabile.\\
+Collegato a questi schemi si ha l'approccio basato sull'\textbf{user
+  experimentation}, che non è un reale schema di gestione dell'evoluzione del
+software ma è comunque correlato agli schemi sopra descritti. In questo
+approccio si studiano diverse varianti del sistema e il loro impatto esponendole
+agli utenti (perlomeno ad una sottoparte degli stessi in modo incrementale),
+cercando di capire per l'utente cosa sia meglio e come (si ispira 
+alla \textit{sperimentazione scientifico}). Si hanno quindi più release diverse,
+per parti di popolazione comparabili, tra le quali si sceglierà la migliore.\\
+Per la seconda tipologia (\textit{Incremental wrt requests}) si ha una divisione
+a seconda delle richieste fatte dagli utenti (esempio un momento d'uso diverso
+porta all'uso di componenti diverse), detto \textit{gradual rollout}. Si ha
+quindi un \textit{load balancer} che 
+permette la coesistenza di due versioni, una nuova e una vecchia, dello stesso
+servizio. In modo graduale, partendo da pochissime, si passano le richieste alla
+versione nuova per poter studiare e testare la nuova versione (in caso di
+problemi il load balancer dirotterà tutte le richieste alla vecchia
+versione). Alla fine tutto il traffico sarà diretto verso la nuova versione,
+mentre la vecchia verrà dismessa.\\
+Per la terza tipologia (\textit{Incremental wrt components/replicas}), si ha lo
+schema del \textit{rolling upgrade}, dove l'upgrade non riguarda un singolo
+upgrade ma tanti componenti di un sistema distribuito, verificando efficacia
+di ogni singolo update tramite il continuous monitoring prima di effettuare
+l'upgrade di un'altra componente. La stessa idea su applica anche a diverse
+versioni dello stesso prodotto, aggiornandone una prima e poi le altre
+progressivamente. Le nuove versioni delle componenti ``upgradate'' devono essere
+compatibili con quelle ancora prive di upgrade.\\
+Per la quarta tipologia (\textit{Non-incremental with backups}) si ha il
+\textbf{blue/green deployment}, dove vengono isolate due copie della stessa
+infrastruttura (anche hardware), dove una ospita la versione nuove l'altra la
+vecchia. Un router ridireziona le richieste degli utenti verso le due unità e
+quella che ospita la nuova 
+versione subirà le solite operazioni di test, che, se superate, porteranno il
+router a direzionare verso quella unità, ignorando la vecchia. Se ci sono
+problemi si fa rollback alla vecchia unità che rimane come backup. Questo schema
+può essere generalizzato nel \textbf{rainbow deployment} dove il momento di
+coesistenza tra le due versioni (se non più versioni) viene prolungato al fine
+che vecchie richieste che richiedono una lunga elaborazione vengano elaborate
+dall'unità vecchia mentre le nuove dall'unità nuova.\\
+\textbf{In ogni caso le applicazioni devono essere costruite per supportare
+  tutti questi schemi di deployment (a causa di stati delle applicazioni,
+  backward compatibility etc$\ldots$)}
+\subsection{Deployable units}
+Il caso più tipico in meritò alle unità dove fare deployment è il mondo del
+\textbf{cloud}, con \textbf{unità virtualizzate e virtual machine (VM)}, dove
+magari ogni servizio vive in una diversa VM. Si hanno diversi casi in merito a
+questo tipo di deployment:
+\begin{itemize}
+  \item \textbf{cloud} basato su \textbf{VMs}, dove si ha un'infrastruttura
+  gestita dal cloud provider che gestisce l'hardware e l'hypervisor. Ogni VM,
+  che sono le nostre unità di deployment, ha
+  un sistema operativo arbitrario che lavora con l'hardware mostrato
+  dall'hypervisor. Ogni VM avrà una o più applicazioni e fare deployment porterà
+  all'update di una o più VM. In alcuni casi si fa deployment di intere VM e in
+  altri si modifica il software di una VM già in esecuzione. L'ambiente cloud
+  solitamente è \textbf{multi-tenant} (ovvero su una piattaforma unica di un
+  provider si hanno più VM di diverse organizzazioni). Una VM è grossa in quanto
+  contiene un sistema operativo intero e la loro gestione può quindi essere
+  difficoltosa
+  \item \textbf{cloud} basato su \textbf{containers} che risolvono il problema
+  della grandezza delle VM. In questo caso lo schema è il medesimo ma si ha un
+  \textbf{container engine} al posto dell'hypervisor e ogni container non
+  contiene l'intero sistema operativo ma solo il minimo necessario al
+  funzionamento dell'applicazione (il sistema operativo viene condiviso dalla
+  macchina sottostante, riducendo il volume dei singoli containers). In questo
+  caso lo schema di update spesso consiste nel distruggere e ricreare i singoli
+  containers. Anche qui si ha un contesto \textit{multi-tenant}
+  \item \textbf{bare metal}, dove i provider offrono direttamente risorse
+  hardware, guadagnando prestazioni ma aumentano anche i costi economici , che
+  vengono comunque gestite dal cloud provider. Non si ha 
+  virtualizzazione ma accesso diretto alle risorse su cui fare
+  deployment. Questa è una soluzione tipicamente \textbf{single-tenant} (sulla
+  macchina gira il software di una sola organizzazione)
+  \item \textbf{server dedicati}, un metodo ormai superato con difficoltà
+  causate dall'uso di script, shell e connessione \textit{ftp} completamente
+  autogestiti dall'organizzazione e non da un provider
+\end{itemize}
+Il deployment ``stile cloud'' non è comunque l'unico possibile e un esempio
+quotidiano è il deployment di app mobile sui vari store, dove il back-end
+probabilmente sarò gestito come sopra spiegato, mentre l'app in sé viene
+rilasciata negli store e sarà l'utente finale a fare il deployment installando
+l'app sul proprio device. Le forme di monitoraggio e di feedback sono spesso
+diverse e provengono dagli utenti finali stessi.
+\subsection{Monitor}
+In ambiente cloud ci sono tante soluzioni per il \textbf{monitoring}, ad esempio
+lo \textbf{stack di ELK}, formato da:
+\begin{itemize}
+  \item \textbf{Elasticsearch}
+  \item \textbf{Logstash}
+  \item \textbf{Kibana}
+\end{itemize}
+I dati, ad esempio log o metriche d'uso hardware, vengono raccolti e passano da
+\textbf{Logstash}, finendo in un database, per la memorizzazione di \textit{time
+series} (serie temporali) di dati (questo in primis per le metriche d'uso che
+per i log), gestito da \textbf{Elasticsearch} e venendo visualizzati da una
+dashboard grafica, gestita da \textbf{Kibana}. Si ha quindi un ambiente di
+\textbf{continuous monitoring}
+\subsection{DevOps tools}
+Ogni step del DevOps è gestito tramite moderne tecnologie e tools , con varie
+alternative per ogni fase (per questo servono figure 
+esperte per ogni step). Vediamo qualche esempio (in ottica più spinta ad un
+progetto in Java):
+\begin{itemize}
+  \item code: Git, Svn, Jira, Ecplipse
+  \item build: Apache Ant, Maven, Gradle
+  \item test: JUnit
+  \item release: Jenkins, Bamboo
+  \item deploy: Pupper, Chef, Ansible, SaltStack
+  \item monitor: New Relic, Sensu, Splunk, Nagios
+\end{itemize}
 \end{document}
 % LocalWords:  Machine Learning waterfall png img slides jpg testing self step
 % LocalWords:  organizing continuous refactoring Scrum scrum product backlog as
@@ -412,5 +553,16 @@ Studiamo ora la parte ``Ops'' di DevOps.\\
 % LocalWords:  devops lifecycle Build version control repository commit update
 % LocalWords:  branch develop merge ndo hotfix feature fix pipelines push gates
 % LocalWords:  quality phase component subsystem system production unit static
-% LocalWords:  analysis mocks stubs deployato integration security tests
-% LocalWords:  downtime unstable
+% LocalWords:  analysis mocks stubs deployato integration security tests Ops VM
+% LocalWords:  downtime unstable naive Incremental wrt users Dark launching VMs
+% LocalWords:  Canary releases Experimentation requests Gradual upgrades Green
+% LocalWords:  rollout upgrade Rolling replicas components with backups Rainbow
+% LocalWords:  incremental back experimentation load balancer gradual rolling
+% LocalWords:  upgradate green router ridireziona rollback rainbow bacward ftp
+% LocalWords:  compatibility backward Deployable units virtual machine shell
+% LocalWords:  containers l'hypervisor dall'hypervisor tenant engine app store
+% LocalWords:  dell'hypervisor dell'hypervisor l'hypervisor dall'hypervisor ELK
+% LocalWords:  device stack Elasticsearch Kibana Logstash log series dashboard
+% LocalWords:  tools Svn Ecplipse build Ant Java Maven Gradle JUnit Jenkins
+% LocalWords:  Bamboo Ansible Pupper Saltstack SaltStack Relic Sensu Splunk
+% LocalWords:  Nagios

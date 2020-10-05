@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt, oneside]{book}
+\message{ !name(archid.tex)}\documentclass[a4paper,12pt, oneside]{book}
 
 % \usepackage{fullpage}
 \usepackage[italian]{babel}
@@ -90,6 +90,9 @@
 
 \pgfplotsset{compat=1.13}
 \begin{document}
+
+\message{ !name(archid.tex) !offset(-3) }
+
 \maketitle
 
 \definecolor{shadecolor}{gray}{0.80}
@@ -427,169 +430,8 @@ presenti simultaneamente):
   \item l'archivio informativo è distribuito su più nodi (\textbf{base di dati
   distribuita}) 
 \end{itemize}
-La distribuzione si dice essere \textbf{ortogonale e trasparente} agli altri.\\
-Capire cosa distribuire è una parte consistente dello studio di come costruire
-un'architettura distribuita (magari frutto di situazioni particolari come la
-``fusione'' di due sistemi a causa di un'acquisizione aziendale etc$\ldots$ dove
-diverse logiche applicative e diverse strutture dati possono creare situazioni
-molto pericolose).\\
-Possiamo classificare i db distribuiti. Si ha innanzitutto che un \textbf{DBMS
-Distribuito Eterogeneo Autonomo} e’ in generale una federazione di DBMS che
-collaborano nel fornire servizi di accesso ai dati con livelli di
-\textit{trasparenza} definiti (infatti le diversità tra db nei nodi vengono
-``nascosti'' a vari \textit{livelli di trasparenza} per distribuzione,
-eterogeneità e autonomia). Come abbiamo visto esiste l'esigenza di integrare a
-posteriori vari db preesistenti (anche a causa di integrazione di nuovi
-applicativi o nuove cooperazioni di processi) e questa situazione è spinta
-dallo sviluppo della rete.\\
-Possiamo quindi dividere i livello di federazione su tre categorie tra loro
-ortogonali (ovvero indipendenti):
-\begin{itemize}
-  \item autonomia
-  \item distribuzione
-  \item eterogeneità
-\end{itemize}
-L'\textbf{autonomia} fa riferimento al grado di indipendenza tra i nodi e si
-hanno diverse forme:
-\begin{itemize}
-  \item \textbf{autonomia di progetto}, il livello ``massimo'' dove ogni nodo ha
-  un proprio modello dei dati e di gestione delle transazioni
-  \item \textbf{autonomia di condivisione}, dove ogni nodo sceglie la porzione
-  di dati da condividere ma condividendo con gli altri nodi lo schema comune
-  \item \textbf{autonomia di esecuzione}, dove ogni nodo sceglie in che modo
-  eseguire le transazioni
-\end{itemize}
-Si hanno quindi:
-\begin{itemize}
-  \item \textbf{DBMS Strettamente integrati} con nessuna autonomia, con dati
-  logicamente centralizzati, un unico data manager per le transazioni
-  applicative e vari data manager locali che non operano in modo autonomo ma
-  eseguono le direttive centrali
-  \item \textbf{DBMS semi-autonomi}, dove ogni data manager è autonomo ma
-  partecipa a transazioni globali, dove una parte dei dati è condivisa e dove
-  sono richieste modifiche architetturali  per poter fare parte della
-  federazione
-  \item \textbf{DBMS Peer to Peer} completamente autonomi, dove ogni DBMS lavora
-  in completa autonomia ed è inconsapevole dell'esistenza degli altri  
-\end{itemize}
-Per la\textbf{ distribuzione} dei dati si hanno 3 livelli classici:
-\begin{itemize}
-  \item \textbf{distribuzione client/server}, in cui la gestione dei dati è
-  concentrata nei server, mentre i client forniscono l’ambiente applicativo e la
-  presentazione
-  \item \textbf{distribuzione Peer to Peer}, in cui non c'è distinzione tra
-  client e server, e tutti i nodi del sistema hanno identiche funzionalita’ DBMS
-  \item \textbf{nessuna distribuzione}
-\end{itemize}
-Le prime due possono anche non essere distinte.\\
-L'\textbf{eterogeneità} può invece riguardare vari aspetti:
-\begin{itemize}
-  \item \textbf{modello dei dati} (relazionale, XML, object oriented (OO), json)
-  \item \textbf{linguaggio di query} (diversi dialetti SQL, query by example,
-  linguaggi di interrogazione OO o XML)
-  \item \textbf{gestione delle transazione} (protocolli diversi per il gestore
-  della concorrenza o per il recovery)
-  \item \textbf{schema concettuale e logico} (concetti rappresentati in uno
-  schema come attributo e in altri come entità)
-\end{itemize}
-Quindi si hanno:
-\begin{itemize}
-  \item \textbf{DBMS distribuito omogeneo (DDBMS)} quando si ha alta
-  distribuzione ma non si hanno autonomia ed eterogeneità (gestiti solitamente
-  dallo stesso vendor)
-  \item \textbf{DBMS eterogeneo logicamente integrato (data warehouse)} quando
-  si ha alta eterogeneità ma non si hanno distribuzione e autonomia
-  \item \textbf{DBMS distribuiti eterogenei} quando si ha alta eterogeneità e
-  distribuzione ma non autonomia 
-  \item \textbf{DBMS federati distribuiti} quando si ha alta
-  distribuzione, semi autonomia e non eterogeneità
-  \item \textbf{DBMS distribuiti federati eterogenei} quando si ha alta
-  distribuzione ed eterogeneità e semi autonomia
-  \item \textbf{multi db MS}, totalmente autonomi ed eventualmente omogenei o
-  eterogenei 
-\end{itemize}
-\textit{Si hanno molti altri sistemi in base alle 3 categorie}.\\
-\section{DDBMS}
-Parliamo di \textbf{DBMS distribuito omogeneo (\textit{DDBMS})}.\\
-Studiamo uno schema in cui si passa da un sistema centralizzato ad un sistema
-distribuito.\\
-Si hanno due architetture di riferimento:
-\begin{itemize}
-  \item l'\textbf{architettura dati}
-  \item l'\textbf{architettura funzionale}, ovvero l'insieme di tecnologie a
-  supporto dell'architettura dati
-\end{itemize}
-Non avendo eterogeneità mantengo lo stesso schema di un DBMS centralizzato ma
-distribuisco dati bisogna prendere lo schema centralizzato e aggiungere
-componenti tra lo schema logico e lo schema fisico. Infatti non si avrà più un
-solo schema logico e un unisco schema fisico ma tanti schemi logici e fisici
-locali (ad ogni logico corrisponde un fisico). I vari schemi logici inoltre si
-interfacciano con uno \textbf{schema logico globale}, i vari schemi logici
-locali non sono quindi altro che delle \textit{viste} dello schema logico
-globale. Questa organizzazione tra schemi logici locali e schema logico globale
-è la cosiddetta \textbf{organizzazione LAV (\textit{Local As View})}. In ogni
-caso il progettista interroga lo schema logico globale e saranno varie
-tecnologie ad interrogare gli schemi logici locali (si fa una sorta di routing
-delle query).\\
-Per ciascuna funzione (come query processing, transaction manager etc$\ldots$)
-si possono avere vari tipi di gestione:
-\begin{itemize}
-  \item centralizzata/gerarchica o distribuita
-  \item con assegnazione statica o dinamica dei ruoli
-\end{itemize}
-\textit{Lo schema globale viene progettato prima degli schemi locali.}\\
-Ovviamente cambia il \textbf{processo di progettazione} nel caso dei
-DDBMS. Normalmente si ha un approccio \textit{top-down} per la progettazione,
-con:
-\begin{enumerate}
-  \item analisi dei requisiti
-  \item progettazione concettuale
-  \item progettazione logica
-  \item progettazione fisica
-\end{enumerate}
-ma questo tipo di progettazione va cambiato e quindi si introduce una nuova
-fase e si cambiano le ultime due:
-\begin{enumerate}
-  \item analisi dei requisiti
-  \item progettazione concettuale
-  \item \textbf{progettazione della distribuzione}, per capire dove mettere i
-  dati
-  \item progettazione logica \textbf{locale}, che traduce dallo schema
-  concettuale globale allo schema logico locale solo alcuni concetti
-  \item progettazione fisica \textbf{locale}
-\end{enumerate}
-Si introduce il concetto di \textbf{portabilità}, ovvero la capacita’ di
-eseguire le stesse applicazioni DB su ambienti runtime diversi (anche con SQL
-diversi e differenti dallo standard). La portabilità è a \textit{compile-time}\\
-Si ha anche il concetto di \textbf{interoperabilità} (tra vendors diversi),
-ovvero la capacita’ di eseguire applicazioni che coinvolgono contemporaneamente
-sistemi diversi ed eterogenei (con zero autonomia). A tal fine sono stati
-introdotti dei \textit{middleware}, tra cui \textbf{ODBC} che si occupa
-dell'accesso a dati di diversi vendor. ODBC, a livello architetturale, si pone
-sopra il DBMS e da un'immagine indipendente da ciò che c'è sotto (funziona come
-una sorta di \textit{driver}), trasformando tutto in una sorta di SQL
-standard. Si hanno anche dei protocolli, come \textbf{X-Open Distributed
-  Transaction Processing (\textit{DTP})}, che consentono di eseguire delle
-transazioni secondo una logica diversa. Questo protocollo stabilisce una serie
-di API che vengono implementate da ogni singolo DBMS per offrire una
-connettività standard (approccio molto usato per transazioni con vendor
-diversi). Il protocollo funziona sia se si ha che fare con omogeneità che con
-eterogeneità. \\
-Si hanno altri approcci:
-\begin{itemize}
-  \item \textbf{basi dati parallele}, con incremento delle prestazione mediante
-  parallelismo sia di storage devices che di processore (scalabilità
-  orizzontale). Un esempio sono le \textbf{basi dati GRID}
-  \item \textbf{basi dati replicate} dove si ha la
-  replicazione della stessa informazione su diversi server per motivi di
-  performance. Importanti per i temi della consistenza e della sicurezza
-  \item \textbf{Data warehouses}, ovvero DBMS centralizzati, risultato
-  dell'integrazione di fonti eterogenee, dedicati nel dettaglio alla gestione di
-  dati per il supporto alle decisioni. Prevede la \textit{cristallizzazione} dei
-  dati, acquisiti da varie sorgenti, creando un nuovo schema con la
-  memorizzazione dei dati in formato nuovo (solitamente relazionale). Non usa un
-  approccio LAV 
-\end{itemize}
+La dsitribuzione si dice essere 
+
 
 
 
@@ -603,7 +445,6 @@ Si hanno altri approcci:
 % LocalWords:  transaction begin commit rollabck OLTP OnLine Processing ACID PL
 % LocalWords:  rollback UNDO recovery serializzabile conflict equivalence locks
 % LocalWords:  two phase locking shared deadlock timestamps lock serializzabili
-% LocalWords:  unlock nothing vendor cloud DDBMS l'ottimizzatore Peer to client
-% LocalWords:  object oriented OO example json warehouse LAV Local As View ODBC
-% LocalWords:  routing processing vendors middleware DTP Distributed devices
-% LocalWords:  GRID warehouses
+% LocalWords:  unlock nothing vendor cloud
+
+\message{ !name(archid.tex) !offset(-450) }

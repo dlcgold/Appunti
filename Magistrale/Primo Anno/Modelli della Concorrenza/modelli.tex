@@ -102,6 +102,10 @@
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 \newcommand{\floor}[1]{\lfloor #1 \rfloor}
 \newcommand{\MYhref}[3][blue]{\href{#2}{\color{#1}{#3}}}%
+\newcommand{\simplies}{{\implies}}
+\newcommand{\siff}{{\iff}}
+\newcommand{\notimplies}{\;\not\!\!\!\simplies}
+\newcommand{\notiff}{\;\not\!\!\!\iff}
 \chapter{Introduzione}
 \textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta
   una revisione è altamente probabile (praticamente certo) che possano
@@ -163,7 +167,302 @@ Per poter sviluppare modelli concorrenti se necessità innanzitutto di:
   \item \textbf{model-checking}, per validare formule relative a proprietà di
   sistemi concorrenti 
 \end{itemize}
+\chapter{Ripasso}
+\section{Ripasso logica proposizionale}
+\emph{Si ringrazia
+  \MYhref{https://github.com/bigboss98/appunti/tree/master/Fondamenti}{Marco
+    Natali}
+  \footnote{Link al repository:
+    https://github.com/bigboss98/appunti/tree/master/Fondamenti} per questo
+  ripasso}\\   
+La logica è lo studio del ragionamento e dell’argomentazione e, in particolare,
+dei procedimenti inferenziali, rivolti a chiarire quali	procedimenti di pensiero
+siano validi e quali no. Vi sono molteplici tipologie di logiche, come ad
+esempio la logica classica e le logiche costruttive, tutte accomunate di essere
+composte da 3 elementi: 
+% Elementi di una Logica
+\begin{itemize}
+  \item \textbf{Linguaggio}: insieme di simboli utilizzati nella Logica per
+  definire le cose 
+  \item \textbf{Sintassi}: insieme di regole che determina quali elementi
+  appartengono o meno al linguaggio 
+  \item \textbf{Semantica}: permette di dare un significato alle formule del
+  linguaggio e determinare se rappresentano o meno la verità.
+\end{itemize}
+
+Noi ci occupiamo della logica Classica che si compone in \textit{logica
+  proposizionale} e \textit{logica predicativa}.
+
+La logica proposizionale è un tipo di logica classica che presenta come
+caratteristica quella di essere un linguaggio limitato in quanto si possono
+esprimere soltanto proposizioni senza avere la possibilità di estenderla a una
+classe di persone.
+\newpage
+\subsection{Sintassi}
+Il linguaggio di una logica proposizionale è composto dai seguenti elementi:
+
+% Elementi linguaggio logica proposizionale
+\begin{itemize}
+  \item Variabili Proposizionali, proposizioni atomiche o proposizioni
+  elementari: $P,Q,R,p_i, \dots$ 
+  \item Connettivi Proposizionali: $\land, \lor, \neg, \implies, \siff$
+  \item Simboli Ausiliari: ``(`` e ``)'' (detti delimitatori)
+  \item Costanti: $T$ (\textit{True, Vero, $\top$}) e $F$ (\textit{False, Falso,
+  $\bot$})
+\end{itemize}
+
+La sintassi di un linguaggio è composta da una serie di formule ben
+formate ($FBF$) definite induttivamente nel seguente modo:
+% definizione formule ben formate
+\begin{enumerate}
+  \item Le costanti e le variabili proposizionali: $\top,\bot,p_i\in FBF$.
+  \item Se $A$ e $B \in FBF$ allora $(A \land B)$,$(A \lor B)$,$(\neg A)$,$(A
+  \simplies B)$, $(A \siff B)$, $TA$ e $FA$ sono delle formule ben formate.
+  \item nient'altro è una formula
+\end{enumerate}
+
+\begin{esempio}
+  Vediamo degli esempi:
+  \begin{itemize}
+    \item $(P \land Q) \in FBF$  è una formula ben formata\newline
+    \item $(PQ \land R) \not \in FBF$ in quanto non si rispetta la sintassi del
+    linguaggio 
+    definita. 
+  \end{itemize}
+\end{esempio}
+\textbf{In una formula ben formato le parentesi sono bilanciate.}
+% Definizione delle sottoformule
+\begin{definizione}
+
+  Sia $A \in FBF$, l'insieme delle sottoformule di $A$ è definito come segue:
+  \begin{enumerate}
+    \item Se $A$ è una costante o variabile proposizionale allora A stessa è la
+    sua 
+    sottoformula 
+    \item Se $A$ è una formula del tipo $(\neg A')$ allora le sottoformule di A
+    sono 
+    A stessa e le sottoformule di $A'$; 
+    $\neg$ è detto connettivo principale e $A'$ sottoformula immediata di A.
+    \item Se $A$ è una formula del tipo $B \circ C$, allora le sottoformule di A
+    sono A stessa 
+    e le sottoformule di B e C; $\circ$ è il connettivo principale e B e C sono
+    le due sottoformule immediate di A. 
+  \end{enumerate}
+
+\end{definizione}
+È possibile ridurre ed eliminare delle parentesi attraverso l'introduzione della
+precedenza tra gli operatori, che è definita come segue:\newline
+$\neg, \land, \lor, \simplies,\siff$.
+
+In assenza di parentesi una formula va parentizzata privileggiando le
+sottoformule 
+i cui connettivi principali hanno la precedenza più alta.\newline
+In caso di parità di precedenza vi è la convenzione di associare da destra a
+sinistra. 
+
+Esempio:\newline
+$\neg A \land (\neg B \simplies C) \lor D$ diventa
+$((\neg A) \land ((\neg B) \simplies C) \lor D)$.
+
+% Definizione di albero sintattico
+\begin{definizione}
+  Un albero sintattico $T$ è un albero binario coi nodi etichettati da simboli
+  di $L$, che rappresenta la scomposizione di una formula ben formata $X$
+  definita 
+  come segue: 
+\end{definizione}
+\begin{enumerate}
+  \item Se $X$ è una formula atomica,l'albero binario che la rappresenta è
+  composto 
+  soltanto dal nodo etichettato con $X$
+  \item Se $X = A \circ B$, $X$ è rappresentata da un albero binario che ha la
+  radice 
+  etichettata con $\circ$, i cui figli sinistri e destri sono la
+  rappresentazione di $A$ e $B$ 
+  \item Se $X = \neg A$, $X$ è rappresentato dall'albero binario con radice
+  etichettata 
+  con $\neg$, il cui figlio è la rappresentazione di $A$
+\end{enumerate}
+
+Poiché una formula è definita mediante un albero sintattico, le proprietà di una
+formula 
+possono essere dimostrate mediante induzione strutturale sulla formula, ossia
+dimostrare 
+che la proprietà di una formula soddisfi i seguenti 3 casi:
+\begin{itemize}
+  \item è verificata la proprietà per tutte le formule atomo $A$
+  \item supposta verifica la proprietà per $A$, si verifica che la proprietà è
+  verificata per $\neg A$ 
+  \item supposta la proprietà verificata per $A_1$ e $A_2$, si verifica che la
+  proprietà è verifica per $A_1 \circ A_2$, per ogni connettivo $\circ$.
+\end{itemize}
+\newpage
+\subsection{Semantica}
+La semantica di una logica consente di dare un significato e un interpretazione
+alle formule del Linguaggio.\newline
+\begin{definizione}
+  Sia data una formula proposizionale $P$ e sia ${P_1,\dots,P_n}$, l'insieme
+  degli 
+  atomi che compaiono nella formula $A$. Si definisce come
+  \emph{interpretazione} una 
+  funzione $v:\{P_1,\dots,P_n\} \mapsto \{T,F\}$ che attribuisce un valore di
+  verità 
+  a ciascun atomo della formula $A$.
+  \\
+  $v:P\to\{0,1\}$ è un'\textbf{assegnazione booleana} 
+\end{definizione}
+
+I connettivi della Logica Proposizionale hanno i seguenti valori di verità:
+% Tabella di Verità degli operatori
+\[
+  \begin{array}{ccccccc}
+    \toprule
+    \text{A} & \text{B} & A \land B & A \lor B & \neg A & A \simplies B & A
+                                                                           \siff
+                                                                            B \\
+    \midrule
+    F & F & F & F & T & T & T \\
+    F & T & F & T & T & T & F \\
+    T & F & F & T & F & F & F \\
+    T & T & T & T & F & T & T \\
+    \bottomrule
+  \end{array}
+\]
+Essendo ogni formula $A$ definita mediante un unico albero sintattico,
+l'interpretazione $v$ 
+è ben definito e ciò comporta che data una formula $A$ e un interpretazione
+$v$, 
+eseguita la definizione induttiva dei valori di verità, si ottiene un unico
+$v(A)$. 
+
+% Tipologie di formule
+\begin{definizione}
+  Una formula nella logica proposizionale può essere di diversi tipi:
+  \begin{itemize}
+    \item \textbf{valida o tautologica:} la formula è soddisfatta da qualsiasi
+    valutazione della Formula 
+    \item \textbf{Soddisfacibile non Tautologica:} la formula è soddisfatta da
+    qualche valutazione 
+    della formula ma non da tutte.
+    \item \textbf{falsificabile:} la formula non è soddisfatta da qualche
+    valutazione della formula. 
+    \item \textbf{Contraddizione:} la formula non viene mai soddisfatta
+  \end{itemize}
+\end{definizione}
+
+\begin{teorema}
+  Si ha che:
+  \begin{itemize}
+    \item $A$ è una formula valida se e solo se $\neg A$ è insoddisfacibile.
+    \item $A$ è soddisfacibile se e solo se $\neg A$ è falsificabile
+  \end{itemize}
+\end{teorema}
+
+
+\subsubsection{Modelli e decidibilità}
+Si definisce \emph{modello}, indicato con $M \models A$, tutte le valutazioni
+booleane 
+che rendono vera la formula $A$.
+Si definisce \emph{contromodello}, indicato con $\not\models$, tutte le
+valutazioni booleane 
+che rendono falsa la formula $A$.
+
+La logica proposizionale è decidibile (posso sempre verificare il significato di
+una formula). 
+Esiste infatti una procedura effettiva che stabilisce la validità o no di una
+formula, o se questa 
+ad esempio è una tautologia.
+In particolare il verificare se una proposizione è tautologica o meno è
+l’operazione di decidibilità principale che si svolge nel calcolo
+proposizionale. 
+
+\begin{definizione}
+  Se $M \models A$ per tutti gli $M$, allora $A$ è una tautologia e si indica
+  $\models A$ 
+\end{definizione}
+
+\begin{definizione}
+  Se $M \models A$ per qualche $M$, allora $A$ è soddisfacibile
+\end{definizione}
+
+\begin{definizione}
+  Se $M \models A$ non è soddisfatta da nessun $M$, allora $A$ è
+  insoddisfacibile 
+\end{definizione}
+\subsection{Equivalenze Logiche}
+\begin{defi}
+  Date due formule $A$ e $B$, si dice che $A$ è \emph{logicamente equivalente} a
+  $B$, 
+  indicato con $A \equiv B$, se e solo se per ogni interpretazione $v$ risulta
+  $v(A) = v(B)$. 
+\end{defi}
+
+Nella logica proposizionale sono definite le seguenti equivalenze logiche,
+indicate con $\equiv$,: 
+\begin{enumerate}
+  \item \textbf{Idempotenza:}
+  \begin{align*}
+    A \lor A  \equiv  A \\
+    A \land A  \equiv  A \\
+  \end{align*}
+  \item \textbf{Associatività:}
+  \begin{align*}
+    A \lor (B \lor C) \equiv  (A \lor B) \lor C \\
+    A \land (B \land C)  \equiv  (A \land B) \land C
+  \end{align*}
+  \item \textbf{Commutatività:}
+  \begin{align*}
+    A \lor B  \equiv  B \lor A \\
+    A \land B  \equiv  B \land A
+  \end{align*}
+  \item \textbf{Distributività:}
+  \begin{align*}
+    A \lor (B \land C)  \equiv & (A \lor B) \land (A \lor C)\\
+    A \land (B \lor C)  \equiv & (A \land B \lor (A \land C)
+  \end{align*}
+  \item \textbf{Assorbimento:}
+  \begin{align*}
+    A \lor (A \land B)  \equiv  A
+    A \land (A \lor B)  \equiv  A
+  \end{align*}
+  \item \textbf{Doppia negazione:}
+  \begin{equation*}
+    \neg \neg A \equiv A
+  \end{equation*}
+  \item\textbf{Leggi di De Morgan:}
+  \begin{align*}
+    \neg (A \lor B)  \equiv  \neg A \land \neg B \\
+    \neg(A \land B)  \equiv  \neg A \lor \neg B
+  \end{align*}
+  \item \textbf{Terzo escluso:}
+  \begin{equation*}
+    A \lor \neg A \equiv T
+  \end{equation*}
+  \item \textbf{Contrapposizione:}
+  \begin{equation*}
+    A \simplies B \equiv \neg B \simplies \neg A
+  \end{equation*}
+  \item \textbf{Contraddizione}
+  \begin{equation*}
+    A \land \neg A \equiv F
+  \end{equation*}
+\end{enumerate}
+\subsubsection{Completezza di insiemi di Connettivi}
+Un insieme di connettivi logici è completo se mediante i suoi connettivi si può
+esprimere un qualunque altro connettivo.
+Nella logica proposizionale valgono anche le seguenti equivalenze, utili per
+ridurre il linguaggio: 
+
+\[(A \simplies B)  \equiv  (\neg A \lor B) \]
+\[(A \lor B)  \equiv  \neg(\neg A \land \neg B) \]
+\[(A \land B)  \equiv  \neg(\neg A \lor \neg B) \]
+\[(A \siff B) \equiv  (A \simplies B) \land (B \simplies A) \]
+
+L'insieme dei connettivi $\{ \neg,\lor,\land \}$, $\{ \neg,\land \}$ e $\{
+\neg,\lor \}$ sono completi 
+e ciò è facilmente dimostrabile utilizzando le seguenti equivalenze logiche.
 \chapter{Correttezza di programmi sequenziali}
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
-% LocalWords:  race condition graph sottoprocessi Petri
+% LocalWords:  race condition graph sottoprocessi Petri Morgan

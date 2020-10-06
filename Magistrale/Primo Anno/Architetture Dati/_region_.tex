@@ -1,0 +1,450 @@
+\message{ !name(archid.tex)}\documentclass[a4paper,12pt, oneside]{book}
+
+% \usepackage{fullpage}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{engrec}
+\usepackage{rotating}
+\usepackage{verbatim}
+\usepackage[safe,extra]{tipa}
+\usepackage{showkeys}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{fontspec}
+\usepackage{enumerate}
+\usepackage{braket}
+\usepackage{marginnote}
+\usepackage{pgfplots}
+\usepackage{cancel}
+\usepackage{polynom}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{framed}
+\usepackage{pdfpages}
+\usepackage{pgfplots}
+\usepackage{algorithm}
+% \usepackage{algpseudocode}
+\usepackage[cache=false]{minted}
+\usepackage{mathtools}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute
+    ,double  distance =1.5pt}}\tikzset{derived  attribute /.style={attribute
+    ,dashed}}\tikzset{total /.style={double  distance =1.5pt}}\tikzset{every
+  entity /.style={draw=orange , fill=orange!20}}\tikzset{every  attribute
+  /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every
+  relationship /.style={draw=Chartreuse2,
+    fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
+  \usetikzlibrary{arrows.meta}
+  \usetikzlibrary{decorations.markings}
+  \usetikzlibrary{arrows,shapes,backgrounds,petri}
+\tikzset{
+  place/.style={
+        circle,
+        thick,
+        draw=black,
+        minimum size=6mm,
+    },
+  transition/.style={
+    rectangle,
+    thick,
+    fill=black,
+    minimum width=8mm,
+    inner ysep=2pt
+  },
+  transitionv/.style={
+    rectangle,
+    thick,
+    fill=black,
+    minimum height=8mm,
+    inner xsep=2pt
+    }
+  } 
+\usetikzlibrary{automata,positioning}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyhead[LO,RE]{\slshape \leftmark}
+\fancyfoot[C]{\thepage}
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
+
+\title{Architetture Dati}
+\author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold}}
+\date{}
+
+\pgfplotsset{compat=1.13}
+\begin{document}
+
+\message{ !name(archid.tex) !offset(-3) }
+
+\maketitle
+
+\definecolor{shadecolor}{gray}{0.80}
+\setlist{leftmargin = 2cm}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definizione}{Definizione}
+\newtheorem{esempio}{Esempio}
+\newtheorem{corollario}{Corollario}
+\newtheorem{lemma}{Lemma}
+\newtheorem{osservazione}{Osservazione}
+\newtheorem{nota}{Nota}
+\newtheorem{esercizio}{Esercizio}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}
+\tableofcontents
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\chaptername
+    \ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\MYhref}[3][blue]{\href{#2}{\color{#1}{#3}}}%
+\chapter{Introduzione}
+\textbf{Questi appunti sono presi a lezione. Per quanto sia stata fatta
+  una revisione è altamente probabile (praticamente certo) che possano
+  contenere errori, sia di stampa che di vero e proprio contenuto. Per
+  eventuali proposte di correzione effettuare una pull request. Link: }
+\url{https://github.com/dlcgold/Appunti}.\\
+\chapter{Sistemi centralizzati}
+\begin{definizione}
+  Un \textbf{DBMS (\textit{DataBase Management System})} è un sistema, ovvero un
+  software, in grado di gestire collezioni di dati che siano:
+  \begin{itemize}
+    \item \textit{grandi}, ovvero di dimensioni maggiori della memoria centrale
+    dei sistemi di calcolo usati (se ho a che fare con una quantità di dati non
+    così grande e con un uso personale posso affidarmi ad una \textit{hashmap}
+    piuttosto che ad un db)
+    \item \textit{persistenti}, ovvero con un periodo di vita indipendente dalle
+    singole esecuzioni dei programmi che le utilizzano e per molto tempo 
+    \item \textit{condivise}, ovvero usate da diversi applicativi e diversi
+    utenti (fattore che porta anche allo studio del carico di lavoro,
+    \textit{workload}). L'accesso può essere sia \textit{in scrittura} che
+    \textit{in lettura} (ovviamente anche entrambi) a seconda del caso. SI
+    pongono quindi problemi di concorrenza e sicurezza
+    \item \textit{affidabili}, sia resistente dal punto di vista hardware (un
+    guasto non deve farmi perdere i dati) che dal punto di vista della sicurezza
+    informatica. Le transazioni devono essere quindi \textbf{atomiche} (o tutto
+    o niente) e \textbf{definitive} (che non verranno più dimenticate). Il
+    software può cambiare mentre i dati no
+  \end{itemize}
+\end{definizione}
+A livello di architettura per un \textit{sistema centralizzati} si hanno:
+\begin{itemize}
+  \item uno o più \textit{storage} per memorizzare i dati, a loro volta su uno o
+  più file del \textit{file system}
+  \item il \textit{DBMS}, il componente software che funge da componente logico
+  \item diverse applicazioni che elaborano i dati provenienti dal db
+  (\textit{lettura}) ed eventualmente scrivono dati sullo stesso
+  (\textit{scrittura})
+  \item il \textbf{DBA (\textit{DataBase Administrator})} che tramite riga di
+  comando o GUI si occupa di manutenzione, sicurezza, ottimizzazione etc$\ldots$
+  del DBMS 
+\end{itemize}
+L'\textit{architettura dati} di un DBMS è definita dall'ente \textit{ANSI/SPARC}
+e è a tre livelli:
+\begin{enumerate}
+  \item diversi \textbf{schemi esterni}, porzioni di db messi a disposizione per
+  le varie applicazioni
+  \item uno \textbf{schema logico (o concettuale)}, che fa riferimento al
+  \textit{modello relazionale} dei dati ed è indipendente dalla tecnologia
+  usata. Avendo un unico schema logico si ha un'unica semantica (perlomeno a
+  livello astratto). Si ha unica base di dati, quindi un unico insieme di record
+  interrogati e aggiornati da tutti gli utenti. Non si ha nessuna forma di
+  eterogeneità concettuale 
+  \item uno \textbf{schema fisico}, che fa riferimento alla tecnologia usata per
+  implementare le tabelle per salvare i dati. Si ha un'unica rappresentazione
+  fisica dei dati e quindi nessuna distribuzione e nessuna eterogeneità fisica
+\end{enumerate}
+\textit{Un unico schema fisico è collegato ad un unico schema logico.}\\
+Inoltre si hanno:
+\begin{itemize}
+  \item un \textbf{unico linguaggio di interrogazione} e quindi un'unica
+  modalità di accesso ai dati
+  \item un unico sistema di gestione per accesso, aggiornamento e gestione per
+  la transazioni e le interrogazioni
+  \item un'unica modalità di ripristino in caso d'emergenza
+  \item un unico amministratore dei dati
+  \item \textbf{nessuna autonomia gestionale}
+\end{itemize}
+Per il discorso della persistenza dei dati si ha necessità di una memoria
+secondaria dove il DBMS salva le strutture dati, studiando un modo efficiente di
+trasferimento dei dati nel \textit{buffer} in memoria centrale. Il
+\textit{buffer} è un'area di memoria (o meglio un componente software) nella
+memoria centrale che cerca, tramite una logica di ``vicinanza'', di mettere i
+dati della memoria secondaria in quella centrale. Si usa il \textbf{principio di
+  località}.\\
+A causa degli accessi condivisi al db si hanno problemi di \textbf{concorrenza},
+avendo accesso multi-utente alla stessa dei dati condivisa, accesso che
+necessità anche di meccanismi di \textbf{autorizzazione}. In merito alla
+concorrenza si ha che le transazioni sono corrette se \textbf{seriali} (ordinate
+temporalmente) ma questo non è sempre applicabile e quindi si deve stabilire un
+\textit{controllo della concorrenza}.\\
+Per accedere ai dati di un db si hanno le \textbf{query
+  (\textit{interrogazioni})} che fanno parte del modello logico a cui si
+interfaccia l'utente. Essendo i dati nelle memorie secondarie bisogna cercare un
+modo di rendere gli accessi performanti, in primis tramite opportune strutture
+fisiche in quanto e strutture logiche non sarebbero efficienti in memoria
+secondaria. Bisogna fare in modo che gli accessi alla memoria secondaria siano
+il più limitati possibili e quindi bisogna ottimizzare l'esecuzione delle query.
+Ovviamente una scansione lineare delle tabelle sarebbe troppo dispendiosa con
+tabelle grosse, ricordando che i file sono ad accesso sequenziale. Inoltre un
+ipotetico \textit{join} tra tabelle renderebbe ancora più complesso l'accesso,
+soprattutto se \textit{full-join}.\\
+Per poter garantire tutto ciò che è stato detto l'architettura del DBMS deve
+essere organizzata in termini di \textit{funzionalità cooperanti}:
+\begin{itemize}
+  \item un \textbf{query compiler} che prende una query in SQL e la traduce con
+  un compilatore
+  \item un \textbf{gestore di interrogazioni e aggiornamenti} che trasforma le
+  query in SQL in algebra relazionale facendo operazioni di ottimizzazione
+  \item un \textbf{gestore dei metodi di accesso} per permettere il passaggio
+  tra file e tabelle passando dal \textbf{gestore del buffer} e il
+  \textbf{gestore della memoria secondaria} dove i dati non sono in forma
+  tabellare ma di file e pagine
+  \item un \textbf{DDL compiler}, dove DDL sta per Data Description Language,
+  che si occupa dei comandi del DBA
+  \item un \textbf{gestore della concorrenza}, che garantisce il controllo della
+  concorrenza
+  \item un \textbf{gestore dell'affidabilità}, che garantisce che un dato non
+  vada perso
+  \item un \textbf{gestore delle transazioni}
+\end{itemize}
+Gli ultimi quattro entrano in uso specialmente in fase di scrittura.\\
+\textbf{Tutto deve essere veloce!}\\
+In un sistema distribuito la parte di query compiler, gestore delle
+interrogazioni, gestore delle transazioni e gestore della concorrenza resta
+invariato mentre il resto cambia drasticamente (in quanto i dati sono
+distribuiti) dovendo gestire diversamente l'accesso ai dati e la sua
+sicurezza. Bisogna gestire anche come i vari nodi devono interagire coi dati.
+\section{Ottimizzazione delle query}
+Ottimizzare le query è tutt'altro che banale.\\
+Il primo step è il \textbf{parsing}, che stabilisce se la query è sensata dal
+punto di vista sintattico e se i vari nomi di tabelle e attributi sono coerenti
+con lo schema. Per questo ultimo aspetta ci si appoggia al \textbf{Data
+  Catalog}, un particolare db che contiene informazioni sui vari database, in
+primis sui vari nomi delle tabelle e per ciascuna sui nomi di ogni attributo. SI
+ha quindi una soluzione per gestire i \textit{metadati}. Il parser effettua
+un'analisi lessicale, per la sintattica e la semantica, usando il dizionario e
+l a traduzione in algebra relazionale, producendo un \textbf{query tree}. Si
+calcola anche un \textbf{query plan logico}, utilizzando regole sintattiche di
+buon senso, per capire cosa fare prima (per esempio se fare prima una
+\textit{select} o un \textit{join}) per ottenere il risultato corretto nel minor
+tempo possibile (prima di fare una \textit{join} magari seleziono prima una
+sottotabella con i dati potenzialmente utili, togliendo quelli sicuramente
+inutili$\ldots$ magari quel \textit{join} può anche essere evitato). La query
+viene quindi rappresentata come un albero dove e foglie corrispondono alle
+strutture dati logiche, ovvero le tabelle. I nodi interni sono invece le varie
+\textbf{operazioni algebriche (\textit{select, join, proiezione, prodotto
+    cartesiano} e \textit{operazioni insiemistiche})}.
+\newpage
+\begin{esempio}
+  Vediamo una query:
+  \begin{minted}{sql}
+    SELECT Pnumber, Dnum, Lname, Address, Bdate
+    FROM Project P, Dept D, Emp E
+    Where P.dnum=D.dnumber and E.ssn = D.mgrssn
+    and P.location = 'Stafford'
+  \end{minted}
+  che produce:
+  \begin{center}
+    \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-2.36)(10.7,2.36)
+        \rput[bl](4.0,2.1249022){$\pi$ Pnumber, Dnum, Lname, Address, Bdate}
+        \rput[bl](5.6,0.9249023){join mgrssn=ssn}
+        \rput[bl](2.0,0.124902345){join dnum=dnumber}
+        \rput[bl](8.4,0.124902345){emp}
+        \rput[bl](0.0,-1.0750977){$\sigma$ plocation='stafford'}
+        \rput[bl](6.4,-1.0750977){dept}
+        \rput[bl](1.6,-2.2750976){project}
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm
+        2.0,arrowlength=1.4,arrowinset=0.0]{<-}(6.8,1.3249023)(6.8,2.1249022)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm
+        2.0,arrowlength=1.4,arrowinset=0.0]{<-}(8.8,0.52490234)(8.4,0.9249023)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm
+        2.0,arrowlength=1.4,arrowinset=0.0]{<-}(5.2,0.52490234)(6.0,0.9249023)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{<-}(3.6,-0.67509764)(3.6,0.124902345)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{<-}(6.4,-0.67509764)(4.8,0.124902345)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm
+        2.0,arrowlength=1.4,arrowinset=0.0]{<-}(2.4,-1.8750976)(2.4,-1.0750977)
+      \end{pspicture}
+    }
+  \end{center}
+  ma l'ottimizzatore va oltre (magari invertendo i \textit{where} etc$\ldots$)
+  con un query plan più efficiente che permette di cambiare automaticamente le
+  query in altre più efficienti.\\
+\end{esempio}
+Si ha un db chiamato \textbf{Statistics} che contiene statistiche sulla storia
+delle query nonché altre informazioni sui dati. L'uso di tale db permette di
+ottimizzare le query.\\
+Solo dopo questo processo si ha la trasformazione delle tabelle logiche in
+strutture fisiche e metodi di accesso alla memoria e la trasformazione delle
+operazioni algebriche nelle loro implementazioni sulle strutture fisiche. Per la
+trasformazione si usano proprietà algebriche e una stima dei costi delle
+operazioni fondamentali per diversi metodi di accesso (in poche parole le regole
+della ricerca operativa). L'ottimizzazione ha complessità \textbf{esponenziale}
+e quindi si introducono approssimazioni basate su euristiche, usando
+un'\textbf{alberatura di costi} usando la tecnica del \textbf{Branch\&Bound}.
+\section{Transazioni}
+Una \textbf{transazione} è l'insieme di istruzioni di accesso in lettura e
+scrittura ai dati, istruzioni eventualmente inserite in un linguaggio di
+programmazione. Una transazione gode di proprietà che garantiscono la corretta
+esecuzione anche in ambito di concorrenza e sicurezza, tanto che sono
+paradigmatiche del modello relazionale. Le transazioni iniziano con un
+\textbf{begin-transaction} (a volte finiscono con \textit{end-transaction},
+opzionale) e all'interno deve essere eseguito tra:
+\begin{itemize}
+  \item \textbf{commit work}, per terminare correttamente la lettura e/o
+  scrittura 
+  \item \textbf{rollback work}, per abortire la transazione
+\end{itemize}
+Un \textbf{sistema transazionale OLTP (\textit{OnLine Transaction Processing})}
+è in grado di definire ed eseguire transazioni per conto di un certo numero di
+applicazioni concorrenti anche alto. 
+\begin{esempio}
+  Vediamo un esempio di transazione (esempio di addebito su un conto corrente e
+  accredito su un altro):
+  \begin{minted}{sql}
+    start transaction;
+    update ContoCorrente
+      set Saldo = Saldo + 10 where
+      NumConto = 12202;
+    update ContoCorrente
+      set Saldo = Saldo – 10 where
+      NumConto = 42177;
+    commit work;
+  \end{minted}
+  oppure, con anche la verifica che ci siano ancora soldi dopo il prelievo (con
+  eventuale aborto):
+  \begin{minted}{sql}
+    start transaction;
+    update ContoCorrente
+      set Saldo = Saldo + 10 where
+      NumConto = 12202;
+    update ContoCorrente
+      set Saldo = Saldo – 10 where
+      NumConto = 42177;
+    select Saldo into A
+      from ContoCorrente
+      where NumConto = 42177;
+    if (A >= 0) then commit work
+    else rollback work;
+  \end{minted}
+  Il controllo può essere fatto a posteriori grazie al rollback che permette di
+  ``dimenticare'' tutte le operazioni precedenti
+\end{esempio}
+Le istruzioni commit work e rollback work possono comparire più volte
+all’interno del programma ma esattamente una delle due deve essere eseguita. Si
+ha un \textbf{approccio binario}.\\
+Bisogna approfondire quindi le \textbf{unità di elaborazione} che hanno le
+proprietà cosiddette \textit{ACID}:
+\begin{itemize}
+  \item Atomicità, ovvero una transazione è un'unità atomica di
+  elaborazione. Non si può lasciare il db in uno ``stato 
+  intermedio''. Un problema prima del commit cancella tutto le operazioni svolte
+  (\textit{UNDO}) e un problema dopo il commit non deve avere conseguenze, se
+  necessario vanno ripetute le operazioni (\textit{REDO}) 
+  \item Consistenza, ovvero la transazione rispetta i vincoli di integrità (se
+  lo stato iniziale è corretto lo è anche quello finale). Quindi se ci sono
+  violazioni non devono restare alla fine (nel caso \textit{rollback})
+  \item Isolamento, ovvero la transazione non risente delle altre transazioni
+  concorrenti. Una transazione non espone i suoi stati intermedi evitando
+  l'\textit{effetto domino} (si evita che il rollback di una transazione vada in
+  cascata con le altre). L'esecuzione concorrente di una collezione di
+  transazioni deve produrre un risultato che si potrebbe ottenere con una
+  esecuzione sequenziale
+  \item Durata (ovvero persistenza), ovvero gli effetti di una transazione
+  andata in commit non vanno persi anche in presenza di guasti (a tal fine si
+  sfrutta il \textbf{recovery manager}, che garantisce l'affidabilità, del DBMS)
+\end{itemize}
+\section{Gestore della concorrenza}
+Il \textbf{gestore della concorrenza} permette di eseguire in parallelo più
+operazioni.\\
+Definiamo \textbf{schedule} come una sequenza di esecuzione di un insieme di
+transazioni. Uno schedule è \textbf{seriale} se se una transazione  termina
+prima che la successiva iniziale, altrimenti è \textbf{non seriale}. Qualora non
+sia seriale si potrebbero avere problemi.\\
+Si sfrutta quindi la \textbf{proprietà di isolamento} facendo in modo che ogni
+transazione esegua come se non ci fosse concorrenza: \textit{un insieme di
+  transazioni eseguite concorrentemente produce lo stesso risultato che
+  produrrebbe una (qualsiasi) delle possibili esecuzioni sequenziali delle stesse
+  transazioni allora si ha la proprietà di isolamento}.\\
+Si ha quindi che uno schedule è serializzabile se l'esito della sua esecuzione è
+lo stesso che si avrebbe con una qualsiasi sequenza seriale delle transazioni
+contenute.\\
+Si hanno quindi diversi algoritmi per il controllo della concorrenza secondo
+varie tipologie:
+\begin{itemize}
+  \item controllo basato su \textit{conflict equivalence}
+  \item controllo di concorrenza basato su \textit{locks} \textit{(protocollo
+    2PL o two phase locking, shared locks e gestione dei deadlock}). Il
+  protocollo 2PL è usato nei DBMS dove per costruzione si hanno schedule
+  serializzabili usando i lock per  bloccare l'accesso alla risorse da parte di
+  una transazione fino a che una risorsa non sia rilasciata. Si hanno quindi i
+  concetti di \textit{lock} e \textit{unlock} che garantiscono l'uso esclusivo
+  di una risorsa e l'autorizzazione esclusiva dell'uso di una risorsa viene dato
+  dal gestore delle transazioni. Si hanno delle \textbf{tabelle di lock}. Si ha
+  che, in ogni transazione, tutte le richieste di \textit{lock} precedono tutti
+  gli \textit{unlock} (che comunque devono essere fatti dopo l'operazione di
+  \textit{commit}) 
+  \item controllo di concorrenza basato su \textit{timestamps}
+\end{itemize}
+\chapter{Sistemi distribuiti relazionali}
+Abbiamo visto nei sistemi centralizzati come ci fosse una sola base dati. In un
+sistema distribuito abbiamo diversi \textbf{basi dati locali}, diverse
+applicazioni su ogni nodo di elaborazione (dove ogni nodo condivide varie
+informazioni) con gli utenti che accedono alle varie applicazioni. Questo tipo
+di architettura prende il nome di \textbf{architettura shared nothing}, in
+quanto i DBMS di ogni singola macchina sono autonome (anche di vendor diversi)
+ma che lavorano insieme.\\
+Un sistema distribuito permette non solo di avere dati ``distribuiti'' tra vari
+nodi ma anche di ``duplicarne'' alcuni per diversi scopi, coi nodi collegati in
+rete (addirittura si hanno soluzioni interamente distribuite nel cloud).\\
+Confrontando un db distribuito con un multi-database (ovvero vari database
+completi da ``unificare'') notiamo come entrambi
+abbiano un'alta distribuzione, il primo una bassa eterogeneità (a differenza del
+secondo, dove nei vari db potrei avere forte differenza di tipologia dei dati
+contenuti). Si ha anche bassa autonomia nel caso si db distribuiti a differenza
+del multi-database (dove ogni db è singolarmente autonomo).\\
+Bisogna capire cosa distribuire. Si hanno diverse condizioni (che possono essere
+presenti simultaneamente):
+\begin{itemize}
+  \item le applicazioni, fra loro cooperanti, risiedono su più nodi elaborativi
+  \textbf{(elaborazione distribuita})
+  \item l'archivio informativo è distribuito su più nodi (\textbf{base di dati
+  distribuita}) 
+\end{itemize}
+La dsitribuzione si dice essere 
+
+
+
+
+
+\end{document}
+% LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
+% LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
+% LocalWords:  join compiler DLL DDL Language step parsing Catalog metadati sql
+% LocalWords:  tree parser plan select sottotabella FROM Where Stafford mgrssn
+% LocalWords:  Bdate Pnumber l'ottimizzatore where Statistics Branch Bound work
+% LocalWords:  transaction begin commit rollabck OLTP OnLine Processing ACID PL
+% LocalWords:  rollback UNDO recovery serializzabile conflict equivalence locks
+% LocalWords:  two phase locking shared deadlock timestamps lock serializzabili
+% LocalWords:  unlock nothing vendor cloud
+
+\message{ !name(archid.tex) !offset(-450) }

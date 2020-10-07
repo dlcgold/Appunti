@@ -124,6 +124,26 @@ migliore comporta alta \textit{complessità}. Si ha sempre il rischio di
 \textbf{overfitting}, cercando una precisione dei dati che magari non esiste. Si
 ha un \textbf{generatore di dati} ma il sistema non ha conoscenza della totalità
 degli stessi.\\
+Definiamo alcuni concetti base:
+\begin{itemize}
+  \item \textbf{task (\textit{T})}, il compito da apprendere. È più acile
+  apprendere attraverso esempi che codificare conoscenza o definire alcuni
+  compiti. Inoltre il comportamento della macchina in un ambiente può essere
+  diverso da quello desiderato, a causa della mutabilità dell'ambiente ed è più
+  semplice cambiare gli esempi che ridisegnare un sistema 
+  \item \textbf{performance (\textit{P})}, la misura della bontà
+  dell'apprendimento (e bisognerà capire come misurare la cosa)
+  \item \textbf{experience (\textit{E})}, l'esperienza sui cui basare
+  l'apprendimento. Il tipo di esperienza scelto può variare molto il risultato e
+  il successo dell'apprendimento
+\end{itemize}
+In merito alle parti ``software'' distinguiamo:
+\begin{itemize}
+  \item \textbf{learner}, la parte di programma che impara dagli esempi in modo
+  automatico
+  \item \textbf{trainer}, il \textit{dataset} che fornisce esperienza al
+  \textit{learner}
+\end{itemize}
 Durante l'\textbf{apprendimento} si estrapolano dati da \textbf{istanze di
   addestramento o test}. Quindi:
 \begin{itemize}
@@ -133,21 +153,291 @@ Durante l'\textbf{apprendimento} si estrapolano dati da \textbf{istanze di
 \end{itemize}
 L'ipotesi da apprendere viene chiamata \textbf{concetto target} (tra tutte le
 ipotesi possibili identifico quella giusta dai dati di addestramento).\\
+Approfondiamo il discorso relativo all'\textit{esperienza}. Innanzitutto nel
+momento della scelta bisogna valutare la rappresentatività esperienza. SI ha
+inoltre un controllo dell'esperienza da parte del \textit{learner}:
+\begin{itemize}
+  \item l'esperienza può essere fornita al learner senza che esso possa
+  interagire
+  \item il learner può porre domande su quegli esempi che non risultano chiari 
+\end{itemize}
+\textbf{L'esperienza deve essere presentata in modo causale.}\\
+Si hanno due tipi di esperienza:
+\begin{enumerate}
+  \item \textbf{diretta}, dove i learner può acquisire informazione utile
+  direttamente dagli esempi o dover inferire indirettamente da essi
+  l’informazione necessaria (può essere chiaramente più complicato)
+  \item \textbf{indiretta}
+\end{enumerate}
+Il tipo di dato che studieremo comunemente sarà il \textbf{vettore booleano} e
+la risposta sarà anch'essa di tipo booleano. In questo contesto l'ipotesi è una
+\textbf{congiunzione di variabili}.\\
+Per ogni istanza di addestramento cerchiamo una risposta eventualmente
+corrispondente al nostro \textit{target} (ovvero 1), qualora esista.\\
 Si hanno tre tipi di apprendimento:
 \begin{enumerate}
-  \item \textbf{apprendimento supervisionato}, con un \textit{insegnante} che
-  comunica  l'output corretto
+  \item \textbf{apprendimento supervisionato}, dove vengono forniti a priori
+  esempi di comportamento e si suppone che il \textit{trainer} dia la risposta
+  corretta per ogni input (mentre il learner usa gli esempi forniti per
+  apprendere). L'esperienza è fornita da un insieme di coppie:
+  \[S\equiv\{(x_1,y_1),(x_2,y_2),\ldots,(x_n,y_n)\}\]
+  e, per ogni input ipotetico $x_i$ l'ipotetico trainer restituisce il corretto
+  $y_i$
   \item \textbf{apprendimento non supervisionato}, dove si riconosce
-  \textit{schemi} nell'input senza indicazioni sui valori in uscita. Questo tipo
-  si basa sui \textit{cluster}. Non c'è target
-  \item \textbf{apprendimento per rinforzo}, dove bisogna apprendere sulla base
-  della risposta dell’ambiente alle proprie azioni. Si lavora in \textit{modo
-    continuo}, aggiornando le ipotesi con l'arrivo dei dati
+  \textit{schemi} nell'input senza indicazioni sui valori in uscita. Non c'è
+  target e si ha \textit{libertà di classificazione}. Si cerca una
+  \textit{regolarità} e una \textit{struttura} insita nei dati. In questo caso
+  si ha: 
+  \[S\equiv\{x_1,x_2,\ldots,x_n\}\]
+  Il clustering è un tipico problema di apprendimento non supervisionato. Non si
+  ha spesso un metodo oggettivo per stabilire le prestazioni che vengono quindi
+  valutate da umani
+  \item \textbf{apprendimento per rinforzo}, dove bisogna apprendere, tramite il
+  \textit{learner} sulla base
+  della risposta dell’ambiente alle proprie azioni. Si lavora con
+  un\textit{addestramento continuo}, aggiornando le ipotesi con l'arrivo dei
+  dati (ad esempio per una macchina che deve giocare ad un gioco). Durante la
+  fase di test bisogna conoscere le prestazioni e valutare la correttezza di
+  quanto appreso. Il learner viene addestrato tramite \textit{rewards} e quindi
+  apprende una strategia per massimizzare i \textit{rewards}, detta
+  \textbf{strategia di comportamento} e per valutare la prestazione si cerca di
+  massimizzare ``a lungo termine'' la ricompensa complessivamente ottenuta
 \end{enumerate}
-\section{Concept learning}
-In questo settore il dato è un vettore booleano e il dato che viene richiesto in
-output è anch'esso un booleano. Il target dell'addestramento
+Possiamo inoltre distinguere due tipi di apprendimento:
+\begin{enumerate}
+  \item \textbf{attivo}, dove il \textit{learner} può ``domandare'' sui dati
+  disponibili 
+  \item \textbf{passivo}, dove il \textit{learner} apprende solo a partire dai
+  dati disponibili 
+\end{enumerate}
+Si parla di \textbf{inductive learning} quando voglio apprendere una funzione da
+un esempio (banalmente una funzione target $f$ con esempio $(x, f(x))$, ovvero
+una coppia). Si cerca quindi un'ipotesi $h$, a partire da un insieme d'esempi di
+apprendimento, tale per cui $h\approx f$. Questo è un modello semplificato
+dell'apprendimento reale in quanto si ignorano a priori conoscenze e si assume
+di avere un insieme di dati.Viene usato un approccio che sfrutta anche il
+\textit{Rasoio di Occam}.
+\begin{shaded}
+  Terminologia:
+  \begin{itemize}
+    \item $X$, \textbf{spazio delle istanze}
+    \item $D$, \textbf{training set}
+    \item $c$, \textbf{concetto}, $c\subseteq X$
+    \item $h$, \textbf{ipotesi}, $h\subseteq X$
+    \item $(x, f(x))$, \textbf{esempio}, tale per cui:
+    \[f(x)=
+      \begin{cases}
+        1& \mbox{se } x\subseteq X\\
+        0& \mbox{altrimenti}
+      \end{cases}
+    \]
+    \item $\{(x_1',f(x_1')),\ldots,(x_n',f(x_n'))\}$, \textbf{test}
+    \item $\{(x_1,f(x_1)),\ldots,(x_n,f(x_n))\}$, \textbf{training set}
+    \item \textbf{cross validation}, ovvero ripeto $m$ volte la validazione su
+    campioni diversi di input per evitare che un certo risultato derivi dalla
+    fortuna 
+    \item \textbf{ipotesi H}, ovvero una congiunzione $\land$ di vincoli sugli
+    attributi. Tale ipotesi è \textbf{consistente}, ovvero è coerente con tutti
+    gli esempi
+  \end{itemize}
+\end{shaded}
+Si avrà, in realtà, a che fare con dati, di target e ipotesi,
+booleani e questo ambito è propriamente chiamato \textbf{concept learning}. In
+questo contesto si cerca di capire quale funzione booleana è adatta al mio
+addestramento. In altre parole si cerca di apprendere un'ipotesi booleana
+partendo da esempi di training composti da input e output della
+funzione. Qualora nel concept learning si abbia a che fare con più di due 
+possibilità si aumentano i bit usati.\\
+Quindi, dato un training set $D$, cerco di determinare un'ipotesi $h\in H$ tale
+che: 
+\[h(x)=c(x),\,\forall x\in X\]
+Si ha la teoria delle \textbf{ipotesi di apprendimento induttivo} che dice che
+se la mia $h$ approssima bene nel \textit{training set} allora approssima bene
+su tutti gli esempi non ancora osservati.\\
+Il concept learning è quindi una ricerca del \textit{fit} migliore.
+\begin{definizione}
+  Date $h_j,h_k\in H$ booleane e definite su $X$. Si ha che $h_j$ è \textbf{più
+    generale o uguale a} $h_k$ (e si scrive con $h_j\geq h_k$) sse:
+  \[(h_k(x)=1)\longrightarrow (h_j(x)=1),\,\,\forall x\in X\]
+  \textbf{Si impone quindi un ordine parziale}.\\
+  Si ha che $h_j$ è \textbf{più generale di} $h_k$ (e si scrive con $h_j> h_k$)
+  sse:
+  \[(h_j\geq h_k)\land (h_k\not\geq h_j)\]
+  Riscrivendo dal punto di vista insiemistico si ha che $h_j$ è \textbf{più
+    generale o uguale a} $h_k$ sse:
+  \[h_k\supseteq h_j\]
+  e che è \textbf{più generale di} $h_k$ sse:
+  \[h_k\supset h_j\]
+  Dal punto di vista logico si ha che $h_j$ è \textbf{più generale di} $h_k$ sse
+  impone meno vincoli di $h_k$
+\end{definizione}
+\textit{Lo spazio delle ipotesi è descritto da una congiunzione di attributi.}\\
+Parliamo ora algoritmo \textbf{Find-S}. Questo algoritmo permette di partire
+dall'ipotesi più specifica (attributi nulli, ovvero$\emptyset,\ldots,\emptyset$)
+e generalizzarla, 
+trovando ad ogni passo un'ipotesi più specifica e consistente con il training
+set $D$. L'ipotesi in uscita sarà anche consistente con gli esempi negativi
+dando prova che il target è effettivamente in $H$. Con questo algoritmo non si
+può dimostrare di aver trovato l'unica ipotesi consistente con gli esempi e,
+ignorando gli esempi negativi non posso capire se $D$ contiene dati
+inconsistenti. Inoltre non ho l'ipotesi più generale.
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{findS}{}
+    \State $h\gets \mbox{ l'ipotesi più specifica in } H$
+    \For {\textit{ogni istanza di training positiva $x$}}
+    \For {\textit{ogni vincolo di attributo $a_i$ in $h$}}
+    \If { il vincolo di attributo $a_i$ in $h$ è soddisfatto da $x$}
+    \State \textit{non fare nulla}
+    \Else
+    \State \textit{sostituisci $a_i$ in $h$ con il successivo vincolo più}
+    \State \textit{generale che è soddisfatto da $x$}
+    \EndIf
+    \EndFor
+    \EndFor
+    \Return \textit{ipotesi $h$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo Find-S}
+\end{algorithm}
+\begin{definizione}
+  Si dice che $h$ è \textbf{consistente} con il training set $D$ di concetti
+  target sse: 
+  \[Consistent(h,D):=h(x)=c(x),\,\,\forall \langle x,c(x)\rangle\in D\]
+\end{definizione}
+\begin{definizione}
+  Si definisce \textbf{version space}, rispetto ad $H$ e $D$, come il
+  sottoinsieme delle ipotesi da $H$ consistenti con $D$ e si indica con:
+  \[VS_{H,D}=\{h\in H|\,Consistent(h,D)\]
+\end{definizione}
+Vediamo quindi algoritmo \textbf{List-Then Eliminate}:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{LTE}{}
+    \State $vs \gets$ \textit{una lista connettente tutte le ipotesi di } $H$
+    \For {\textit{ogni esempio di training $\langle x,c(x)\rangle$}}
+    \State \textit{rimuovi da $vs$ ogni ipotesi $h$ non consistente con}
+    \State \textit{l'esempio di training, ovvero $h(x)\neq c(x)$}
+    \EndFor
+    \Return \textit{la lista delle ipotesi in $vs$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo List-Then Eliminate}
+\end{algorithm}
+Questo algoritmo è irrealistico in quanto richiese un numero per forza esaustivo
+di ipotesi.\\
+\begin{definizione}
+  Definiamo:
+  \begin{itemize}
+    \item $G$ come il confine generale di $VS_{H,D}$, ovvero l'insieme dei
+    membri generici al massimo. È l'insieme delle ipotesi più generali:
+    \[G=\{g\in H|\, g\mbox{ è consistente con }D \land\]
+    \[ (\nexists g'\in H \mbox{ t.c } g'\geq q \land g'\mbox{ è consistente con
+      }D\})\] 
+    \item $S$ come il confine specifico di $VS_{H,D}$, ovvero l'insieme dei
+    membri specifici al massimo. È l'insieme delle ipotesi più specifiche:
+     \[S=\{s\in H|\, s\mbox{ è consistente con }D \land\]
+    \[ (\nexists s'\in H \mbox{ t.c } s'\geq s \land s'\mbox{ è consistente con
+      }D\})\] 
+  \end{itemize}
+  Ogni elemento di $VS_{H,D}$ si trova tra questi confini:
+  \[VS_{H,D}=\{h\inH|\,(\exists s\in S)\,\,(\exists g\in G)\,\,(g\geq h\geq
+    s)\}\]
+  con $\geq$ che specifica che è \textit{più generale o uguale}
+\end{definizione}
+Vediamo quindi algoritmo \textbf{candidate eliminate}
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{CE}{}
+    \State $G\gets$ \textit{insieme delle ipotesi più generali in $H$}
+    \State $S\gets$ \textit{insieme delle ipotesi più specifiche in $H$}
+    \For {\textit{ogni esempio di training $d=\langle x,c(x)\rangle$}}
+    \If {\textit{d è un esempio positivo}}
+    \State \textit{rimuovi da $G$ ogni ipotesi inconsistente con $d$}
+    \For {\textit{ogni ipotesi $s$ in $S$ inconsistente con $d$}}
+    \State \textit{rimuovi $s$ da $S$}
+    \State
+    \State \textit{aggiungi a $S$ tutte le generalizzazioni minime $h$ di $s$}
+    \State \textit{tali che $h$ sia consistente con $d$ e qualche membro di $G$}
+    \State \textit{sia più generale di $h$}
+    \EndFor
+    \State \textit{rimuovi da $S$ ogni ipotesi più generale di un'altra in $S$}
+    \Else
+    \State \textit{rimuovi da $S$ ogni ipotesi inconsistente con $d$}
+    \For {\textit{ogni ipotesi $g$ in $G$ inconsistente con $d$}}
+    \State \textit{rimuovi $g$ da $G$}
+    \State
+    \State \textit{aggiungi a $G$ tutte le generalizzazioni minime $h$ di $g$}
+    \State \textit{tali che $h$ sia consistente con $d$ e qualche membro di $S$}
+    \State \textit{sia più generale di $h$}
+    \EndFor
+    \State \textit{rimuovi da $G$ ogni ipotesi più generale di un'altra in $G$}
+    \EndIf
+    \EndFor
+    \Return \textit{la lista delle ipotesi in $vs$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo Candidate Eliminate}
+\end{algorithm}
+Questo algoritmo ha alcune proprietà:
+\begin{itemize}
+  \item converge all'ipotesi $h$ corretta provando che non ci sono errori in $D$
+  e che $c\in H$
+  \item se $D$ contiene errori allora l'ipotesi corretta sarà eliminata dal
+  \textit{version space}
+  \item si possono apprendere solo le congiunzioni
+  \item se $H$ non contiene il concetto corretto $c$, verrà trovata l'ipotesi
+  vuota
+\end{itemize}
+Il nostro spazio delle ipotesi non è in grado di rappresentare un semplice
+concetto di target disgiuntivo, si parla infatti di \textbf{Biased Hypothesis
+  Space}. \\
+Studiamo quindi un \textbf{unbiased learner}. Si vuole scegliere un $H$ che
+esprime ogni concetto insegnabile, ciò significa che $H$ è l'insieme di tutti i
+possibili sottoinsiemi di $X$. $H$ sicuramente contiene il concetto target. $S$
+diventa l'unione degli esempi positivi e $G$ la negazione dell'unione di quelli
+negativi. Per apprendere il concetto di target bisognerebbe presentare ogni
+singola istanza in $X$ come esempio di training.\\
+Un learner che non fa assunzioni a priori in merito al concetto target non ha
+basi ``razionali'' per classificare istanze che non vede.\\
+Introduciamo quindi il \textbf{bias induttivo} considerando:
+\begin{itemize}
+  \item un algoritmo di learning del concetto $L$
+  \item degli esempi di training $D_C=\{\langle x,c(x)\rangle\}$
+\end{itemize}
+Si ha che $L(x_i,D_c$) denota la classificazione assegnata all'istanza $x_1$, da
+$L$, dopo il training con $D_c$.
+\begin{definizione}
+  Il \textbf{bias induttivo} di $L$ è un insieme minimale di asserzioni $B$ tale
+  che, per ogni concetto target $c$ e $D_c$ corrispondente si ha che:
+  \[[B\land D_c\land x_i]\.\vdash\,L(x_i,D_c),\,\,\forall x_i\in X\]
+  con $\vdash$ che rappresenta l'implicazione logica
+\end{definizione}
+Possiamo quindi distinguere:
+\begin{itemize}
+  \item \textbf{sistema induttivo}, dove si hanno in input gli esempi di
+  training e la nuova istanza, viene usato l'algoritmo \textit{candidate
+    eliminate} con $H$ e si ottiene o la classificazione della nuova istanza
+  nulla
+  \item \textbf{sistema deduttivo} equivalente al sistema induttivo sopra
+  descritto dove in input si aggiunge l'asserzione ``$H$ contiene il concetto
+  target'' e si produce lo stesso output tramite un \textbf{prover di teoremi}
+\end{itemize}
+Abbiamo quindi visto tre tipi di \textit{learner}:
+\begin{enumerate}
+  \item il \textbf{rote learner}, dove si ha classificazione sse $x$ corrisponde
+  ad un esempio osservato precedentemente. Non si ha \textit{bias induttivo}
+  \item l'algoritmo \textbf{candidare eliminate} con \textbf{version space},
+  dove il \textit{bias} corrisponde al fatto che lo spazio delle ipotesi
+  contiene il concetto target 
+  \item l'algoritmo \textbf{Find-S}, dove il \textit{bias} corrisponde al fatto
+  che lo spazio delle ipotesi contiene il concetto target e tutte le istanze
+  sono negative a meno che il target opposto sia implicato in un altro modo 
+\end{enumerate}
+
 \end{document}
 
-% LocalWords:  Machine Learning machine learning dataset fit overfitting
-% LocalWords:  Concept
+% LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
+% LocalWords:  Concept concept experience learner rewards inductive validation
+% LocalWords:  find Find findS version List biased Hypothesis unbiased bias
+% LocalWords:  bias prover

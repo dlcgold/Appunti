@@ -347,7 +347,7 @@ applicazioni concorrenti anche alto.
   ``dimenticare'' tutte le operazioni precedenti
 \end{esempio}
 Le istruzioni commit work e rollback work possono comparire più volte
-all’interno del programma ma esattamente una delle due deve essere eseguita. Si
+all'interno del programma ma esattamente una delle due deve essere eseguita. Si
 ha un \textbf{approccio binario}.\\
 Bisogna approfondire quindi le \textbf{unità di elaborazione} che hanno le
 proprietà cosiddette \textit{ACID}:
@@ -434,7 +434,7 @@ un'architettura distribuita (magari frutto di situazioni particolari come la
 diverse logiche applicative e diverse strutture dati possono creare situazioni
 molto pericolose).\\
 Possiamo classificare i db distribuiti. Si ha innanzitutto che un \textbf{DBMS
-Distribuito Eterogeneo Autonomo} e’ in generale una federazione di DBMS che
+Distribuito Eterogeneo Autonomo} è in generale una federazione di DBMS che
 collaborano nel fornire servizi di accesso ai dati con livelli di
 \textit{trasparenza} definiti (infatti le diversità tra db nei nodi vengono
 ``nascosti'' a vari \textit{livelli di trasparenza} per distribuzione,
@@ -449,6 +449,7 @@ ortogonali (ovvero indipendenti):
   \item distribuzione
   \item eterogeneità
 \end{itemize}
+\subsubsection{Autonomia}
 L'\textbf{autonomia} fa riferimento al grado di indipendenza tra i nodi e si
 hanno diverse forme:
 \begin{itemize}
@@ -472,16 +473,18 @@ Si hanno quindi:
   \item \textbf{DBMS Peer to Peer} completamente autonomi, dove ogni DBMS lavora
   in completa autonomia ed è inconsapevole dell'esistenza degli altri  
 \end{itemize}
+\subsubsection{Distribuzione}
 Per la\textbf{ distribuzione} dei dati si hanno 3 livelli classici:
 \begin{itemize}
   \item \textbf{distribuzione client/server}, in cui la gestione dei dati è
-  concentrata nei server, mentre i client forniscono l’ambiente applicativo e la
+  concentrata nei server, mentre i client forniscono l'ambiente applicativo e la
   presentazione
   \item \textbf{distribuzione Peer to Peer}, in cui non c'è distinzione tra
-  client e server, e tutti i nodi del sistema hanno identiche funzionalita’ DBMS
+  client e server, e tutti i nodi del sistema hanno identiche funzionalità DBMS
   \item \textbf{nessuna distribuzione}
 \end{itemize}
-Le prime due possono anche non essere distinte.\\
+Le prime due possono anche non essere distinte.
+\subsubsection{Eterogeneità}
 L'\textbf{eterogeneità} può invece riguardare vari aspetti:
 \begin{itemize}
   \item \textbf{modello dei dati} (relazionale, XML, object oriented (OO), json)
@@ -492,7 +495,7 @@ L'\textbf{eterogeneità} può invece riguardare vari aspetti:
   \item \textbf{schema concettuale e logico} (concetti rappresentati in uno
   schema come attributo e in altri come entità)
 \end{itemize}
-Quindi si hanno:
+Quindi si hanno vari tipi di DBMS:
 \begin{itemize}
   \item \textbf{DBMS distribuito omogeneo (DDBMS)} quando si ha alta
   distribuzione ma non si hanno autonomia ed eterogeneità (gestiti solitamente
@@ -558,11 +561,11 @@ fase e si cambiano le ultime due:
   concettuale globale allo schema logico locale solo alcuni concetti
   \item progettazione fisica \textbf{locale}
 \end{enumerate}
-Si introduce il concetto di \textbf{portabilità}, ovvero la capacita’ di
+Si introduce il concetto di \textbf{portabilità}, ovvero la capacità di
 eseguire le stesse applicazioni DB su ambienti runtime diversi (anche con SQL
 diversi e differenti dallo standard). La portabilità è a \textit{compile-time}\\
 Si ha anche il concetto di \textbf{interoperabilità} (tra vendors diversi),
-ovvero la capacita’ di eseguire applicazioni che coinvolgono contemporaneamente
+ovvero la capacità di eseguire applicazioni che coinvolgono contemporaneamente
 sistemi diversi ed eterogenei (con zero autonomia). A tal fine sono stati
 introdotti dei \textit{middleware}, tra cui \textbf{ODBC} che si occupa
 dell'accesso a dati di diversi vendor. ODBC, a livello architetturale, si pone
@@ -590,10 +593,200 @@ Si hanno altri approcci:
   memorizzazione dei dati in formato nuovo (solitamente relazionale). Non usa un
   approccio LAV 
 \end{itemize}
-
-
-
-
+\subsection{Caratteristiche dei DDBMS}
+Si hanno vari tipi di architetture DDBMS:
+\begin{itemize}
+  \item \textbf{shared-everything}, ad esempio \textit{SMP server}, dove il db
+  management system e il disco sono in un unico nodo
+  \item \textbf{shared-disk}, ad esempio \textit{Oracle RAC}, dove diversi db
+  management systems 
+  agiscono su una stessa \textbf{SAN (\textit{Storage Area Network})}, ovvero
+  un'architettura dati di puro storage (con tanti dischi in raid). I vari db
+  accedono ai dati secondo una certa regolazione. Viene distribuito il carico
+  sui db ma si hanno problemi di concorrenza e hanno grandi problemi di
+  scalabilità e costo economico
+  \item \textbf{shared-nothing}, sempre più usati, dove ogni db management
+  system ha il suo disco. È molto scalabile e, a patto di gestire la
+  complessità, posso aggiungere nodi in modo illimitato (\textbf{scalabilità
+    orizzontale}). Si presta molto all'ambiente cloud. Sono \textit{architetture
+  federate}.
+\end{itemize}
+Vediamo quindi le proprietà generali di un DDBMS (facendo esplicito riferimento
+alle architetture \textit{shared-nothing} per la loro scalabilità):
+\begin{itemize}
+  \item \textbf{località}, secondo il \textit{principio di località}, che
+  garantisce un aumento di performances (nonché di sicurezza) tenendo i dati si
+  trovano ``vicino'' 
+  alle applicazioni che li utilizzano più frequentemente 
+  \item \textbf{modularità}, permettendo di scalare orizzontalmente e
+  permettendo modifiche a dati ed applicazioni a basso costo
+  \item \textbf{resistenza ai guasti}
+  \item \textbf{prestazioni ed efficienza}
+\end{itemize}
+Concentrandoci sulla \textbf{località} si ha che la partizione dei dati
+corrisponde spesso ad una partizione naturale delle applicazioni e degli utenti.
+I dati risiedono più vicino a dove vengono più usati ma possono comunque essere
+raggiunti anche da lontano (\textit{globalmente}). Si cerca inoltre sempre di
+più di spostare i dati verso le applicazioni (paradigma ribaltato nel caso di
+\textit{big data}).\\
+In merito alla \textbf{modularità} si nota come la distribuzione dinamica dei
+dati si adatta meglio alle esigenze delle applicazioni (magari spostando solo
+sottotabelle verso alcuni nodi etc$\ldots$, sia in modo trasparente rispetto
+all'utente che altrimenti).\\
+Parlando di \textbf{resistenza ai guasti} si ha una maggior fragilità a causa
+delle unità che aumentano di numero ma si ha \textbf{ridondanza} e quindi
+maggiore resistenza ai guasti di dati e applicazioni ridondate (\textit{fail
+  soft}).\\
+Discorso più interessante è da farsi sulle \textbf{prestazioni}. Ogni nodo in un
+sistema shared-nothing gestisce db di dimensioni ridotte. Inoltre ogni nodo può
+essere ottimizzato ad hoc ed è più semplice gestire e ottimizzare applicazioni
+locali. Si ha inoltre distribuzione del carico totale e parallelismo  tra
+transazioni locali che fanno parte di una stessa transazione distribuita (anche
+se questo aspetta obbliga soluzioni di coordinamento e appesantisce il carico
+sulla rete, che rischia di diventare un ``collo di bottiglia'').\\
+I DDBMS hanno ovviamente \textbf{funzionalità} specifiche.\\
+Ogni server ha buona capacità di gestire transazioni indipendentemente, anche se
+le interazione distribuita tra server rappresentata un carico supplementare. Per
+le interrogazioni si ha che le query arrivano dalle applicazioni e i risultati
+dai server mentre per le transazioni le richieste transazionali arrivano dalle
+applicazioni ma sono richiesti \textbf{dati di controllo} per il
+coordinamento.\\’
+La gestione della rete deve essere ottimizzata e serve uno studio sulla
+distribuzione locale dei dati.\\
+Ricapitolando si hanno le seguenti funzionalità specifiche:
+\begin{itemize}
+  \item \textbf{trasmissione} di query, transizioni, frammenti di db e dati di
+  controllo tra i nodi
+  \item \textbf{frammentazione, replicazione e trasparenza} (secondo vari
+  livelli), fattori legati alla natura distribuita dei dati
+  \item un \textbf{query processor} e un \textbf{query plan} per la previsione
+  di una strategia globale accanto a strategie per le query locali. Si gestisce
+  il passaggio tra schema logico globale e quelli locali. Chi esegue
+  la query lo fa senza pensare alla frammentazione dei dati
+  \item \textbf{controllo di concorrenza} tramite algoritmi distribuiti,
+  fondamentale per gli accessi \textit{in scrittura}
+  \item \textbf{strategie di recovery} e \textbf{gestione dei guasti}, sia in
+  merito alla rete che all'hardware stesso
+\end{itemize}
+\subsection{Frammentazione e replicazione}
+Si definisce \textbf{frammentazione} come la possibilità di allocare porzioni
+(\textit{chunk}) diverse del db su nodi diversi.\\
+Si definisce \textbf{replicazione} come la possibilità di allocare stesse
+porzioni del db su nodi diversi.\\
+Si definisce \textbf{trasparenza} come la possibilità per l'applicazione di
+accedere ai dati senza sapere dove sono allocati (serve qualcosa che instradi le
+query).
+\subsubsection{frammentazione}
+Esistono due tipi di frammentazione:
+\begin{enumerate}
+  \item \textbf{frammentazione orizzontale}, che prevede di prendere una tabella
+  e frammentare in base alle righe (le prime $n$ da una parte, le seconde $m$
+  dall'altra etc$\ldots$). Si mantiene quindi inalterato lo schema in quanto
+  ottengo solamente delle tabelle più piccole in quanto pezzi. Per spezzare uso
+  una \textit{select} (per la \textbf{selezione}) che selezioni ogni volta un
+  certo ``blocco'' di tabella 
+  \item \textbf{frammentazione verticale}, che consente di ridurre la
+  dimensionalità della tabelle spezzandola in base alle colonne. In ogni nuova
+  tabella però la prima colonna deve essere uguale alla prima della tabella
+  originale (ovvero dove si ha la chiave primaria), questo per garantire che si
+  possa ricomporre la tabella (e lo schema) originale (con operazioni di
+  \textit{join}, o meglio un \textit{natural join}) e garantire la
+  trasparenza. Anche in questo caso uso 
+  una \textit{select} (per la \textbf{proiezione}) che selezioni ogni volta un
+  certo numero di colonne da mettere nella nuova tabella
+\end{enumerate}
+Bisogna quindi garantire:
+\begin{itemize}
+  \item \textbf{completezza}, ovvero ogni record della relazione $R$ di partenza
+  deve poter essere ritrovato in almeno uno dei frammenti
+  \item \textbf{ricostruibilità}, ovvero la relazione $R$ di partenza deve poter
+  essere ricostruita senza perdita di informazione a partire dai frammenti
+  \item \textbf{disgiunzione}, ovvero ogni record della relazione $R$ deve
+  essere rappresentato in uno solo dei frammenti
+  \item \textbf{replicazione}, l'opposto della disgiunzione
+\end{itemize}
+Quindi possiamo definire meglio le proprietà dei due tipi di frammentazione per
+la relazione $R$, frammentata in diversi $R_i$:
+\begin{enumerate}
+  \item \textbf{orizzontale}:
+  \begin{itemize}
+    \item $schema(R_i)=schema(R),\,\forall i$
+    \item ogni $R_i$ contiene un sottoinsieme dei record di $R$
+    \item è definita da una proiezione su una condizione $ci$: $\sigma_{ci}(R)$
+    \item garantisce la completezza, infatti $R_1\cup R_2\cup\ldots R_n=R$
+    \item l'unione garantisce la ricostruibilità
+  \end{itemize}
+  \item \textbf{verticale}:
+  \begin{itemize}
+    \item $schema(R)=L=(A_1,\ldots,A_m)$ e $schema(R_i) = L_i =
+    (A_{i1},\ldots,A_{ik})$ 
+    \item garantisce la completezza, infatti $L_1\cup L_2\cup\ldots L_n=L$, dove
+    i vari $L_i$ sono i frammenti verticali ed $L$ è la tabella originale
+    \item si garantisce la ricostruibilità in quanto $L_i\cap L_j \supseteq
+    chiave\,\,\,primaria(R),\,\forall i\neq j$ (ovvero ogni frammento deve
+    contenere la chiave primaria)
+  \end{itemize}
+\end{enumerate}
+\subsubsection{Replicazione}
+Approfondiamo ora la \textbf{replicazione}. Si hanno diversi aspetti positivi
+per l'accesso \textit{in lettura},
+come il miglioramento delle prestazioni in quanto consente la coesistenza di
+applicazioni con requisiti operazionali diversi sugli stessi dati e aumenta la
+\textit{località dei dati} usati da ogni applicazioni. Nel momento in cui si ha
+l'accesso \textit{in scrittura} si hanno però diversi aspetti negativi. Si hanno
+diverse complicazioni architetturali, tra cui la gestione della transazioni e
+l'updates di copie multiple, che devono essere tutte aggiornate. Inoltre bisogna
+studiare dal punto di vista progettuale cosa replicare, quanto replicare (ovvero
+capire quante copie mantenere), dove allocare le copie e le politiche per
+gestirle.\\
+In merito all'allocazione studiamo anche gli \textbf{schemi di
+  allocazione}. Ogni frammento può essere allocato su un nodo diverso. Lo schema
+globale quindi è solo \textit{virtuale} (in quanto non materializzato in un
+solo nodo) e lo \textbf{schema di allocazione} definisce il \textit{mapping} tra
+un frammento e un nodo. Si ha quindi una tabella, un \textbf{catalogo}, che ci
+da informazioni sul partizionamento, associando ogni frammento al nodo in cui è
+allocato.
+\subsubsection{Trasparenza}
+Con la \textbf{trasparenza} si ha la separazione della semantica di alto livello
+dalle modalità di frammentazione e allocazione. Si separa quindi la
+\textit{logica applicativa} dalla \textit{logica dei dati} ma per farlo serve
+uno strato software che gestisca la traduzione dallo schema unico ai
+sottoschemi, comportando un aumento di complessità del sistema e una perdita di
+prestazioni (problemi che si riducono con un \textit{mapping} integrato del
+DDBMS).\\
+Le applicazioni (transazioni, interrogazioni) non devono essere modificate a
+seguito di cambiamenti nella definizione e organizzazione dei dati e si hanno
+due tipi di trasparenza, che si applicano agli schemi ANSI-SPARC nel modello
+distribuito (schema logico globale e schemi logici/fisici locali):
+\begin{enumerate}
+  \item \textbf{trasparenza logica (o indipendenza logica)}, ovvero in
+  dipendenza dell'applicazione da modifiche dello schema logico. Un'applicazione
+  che usa un frammento non viene modificata se vengono modificati altri
+  frammenti
+  \item \textbf{trasparenza fisica (o indipendenza fisica)}, ovvero in
+  dipendenza dell'applicazione da modifiche dello schema fisico
+\end{enumerate}
+Frammentazione e allocazione sono tra lo schema logico globale e ogni schema
+logico locale. \\
+Si hanno quindi tre livelli di trasparenza:
+\begin{itemize}
+  \item \textbf{trasparenza di frammentazione}, che permette di ignorare
+  l'esistenza dei frammenti ed è lo scenario migliore per la programmazione
+  applicativa con un'applicazione scritta in SQL standard. Il sistema si occupa
+  di convertire query globali in locali e relazioni in sotto-relazioni. La
+  scomposizione delle query per ogni sotto-relazione è detta \textbf{query
+    rewriting} 
+  \item \textbf{trasparenza di replicazione/allocazione}, dove l'applicazione è
+  consapevole dei frammenti ma non dei nodi in cui si trovano. In questo caso la
+  query è già spezzata in quanto si sa di avere a che fare con un sistema
+  frammentato
+  \item \textbf{trasparenza di linguaggio}, dove l'applicazione specifica sia
+  i frammenti che i nodi, nodi che possono offrire interfacce che non sono SQL
+  standard. Tuttavia l'applicazione sarà scritta in SQL standard a prescindere
+  dai linguaggi locali dei nodi. Le query vengono quindi tradotte
+  ottimizzatone di query. \textit{Questo è il livello di trasparenza più
+    basso}
+\end{itemize}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -606,4 +799,6 @@ Si hanno altri approcci:
 % LocalWords:  unlock nothing vendor cloud DDBMS l'ottimizzatore Peer to client
 % LocalWords:  object oriented OO example json warehouse LAV Local As View ODBC
 % LocalWords:  routing processing vendors middleware DTP Distributed devices
-% LocalWords:  GRID warehouses
+% LocalWords:  GRID warehouses everything SMP Oracle RAC systems performances
+% LocalWords:  big sottotabelle soft fail chunk ricostruibilità l'updates
+% LocalWords:  l'updates mapping rewriting

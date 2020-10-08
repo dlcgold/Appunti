@@ -14,7 +14,7 @@
 \usepackage{rotating}
 \usepackage{verbatim}
 \usepackage[safe,extra]{tipa}
-\usepackage{showkeys}
+%\usepackage{showkeys}
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -45,7 +45,7 @@
     fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
   \usetikzlibrary{arrows.meta}
   \usetikzlibrary{decorations.markings}
-  \usetikzlibrary{arrows,shapes,backgrounds,petri}
+  \usetikzlibrary{arrows,shapes,backgrounds,petri, graphdrawing.trees}
 \tikzset{
   place/.style={
         circle,
@@ -108,6 +108,7 @@
   contenere errori, sia di stampa che di vero e proprio contenuto. Per
   eventuali proposte di correzione effettuare una pull request. Link: }
 \url{https://github.com/dlcgold/Appunti}.\\
+\textbf{Si segnala che le immagini sono tratte dalle slide del corso.}
 \chapter{Introduzione al ML}
 Il \textbf{Machine Learning (\textit{ML})} è sempre più diffuso nonostante sia
 nato diversi anni fa.\\
@@ -418,9 +419,11 @@ Introduciamo quindi il \textbf{bias induttivo} considerando:
 Si ha che $L(x_i,D_c$) denota la classificazione assegnata all'istanza $x_1$, da
 $L$, dopo il training con $D_c$.
 \begin{definizione}
-  Il \textbf{bias induttivo} di $L$ è un insieme minimale di asserzioni $B$ tale
+  Il \textbf{bias induttivo} (con \textbf{bias} che normalmente denota una
+  \emph{distorsione} o un \emph{scostamento} dei dati) di $L$ è un insieme
+  minimale di asserzioni $B$ tale 
   che, per ogni concetto target $c$ e $D_c$ corrispondente si ha che:
-  \[[B\land D_c\land x_i]\.\vdash\,L(x_i,D_c),\,\,\forall x_i\in X\]
+  \[[B\land D_c\land x_i]\,\vdash\,L(x_i,D_c),\,\,\forall x_i\in X\]
   con $\vdash$ che rappresenta l'implicazione logica
 \end{definizione}
 Possiamo quindi distinguere:
@@ -444,10 +447,262 @@ Abbiamo quindi visto tre tipi di \textit{learner}:
   che lo spazio delle ipotesi contiene il concetto target e tutte le istanze
   sono negative a meno che il target opposto sia implicato in un altro modo 
 \end{enumerate}
+\section{Alberi decisionali}
+Vediamo come sfruttare una struttura dati discreta, l'\textbf{albero di
+  decisione}, per affrontare problemi di \textit{concept learning}. Su questa
+struttura implementeremo l'algoritmo chiamato \textbf{ID3} che tra le ipotesi
+sceglie il risultato dell'apprendimento tramite esempi di addestramento. La
+lista delle ipotesi in questo caso è enorme e la scelta è guidata dal cosiddetto
+\textit{information gain}.\\
+Possiamo quindi scegliere, al posto delle classiche funzioni booleane,
+\textbf{alberi di decisione} per rappresentare un modello che applicato ad
+esempi non visti ci dirà se applicare in output un'etichetta vera o falsa in
+base a quanto appreso. Siamo in ambito di \textbf{apprendimento
+  supervisionato}.\\
+Si hanno attributi che hanno anche più di due valori. Per ogni ipotesi si ha un
+albero di decisione, come quello in figura \ref{dt}. In rosso si hanno gli
+attributi, in blu i valori degli attributi e in arancione le foglie coi
+risultati. Le foglie sono le risposte booleane.\\
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+      distance=30pt]  
+      \node{\color{red} outlook}
+      child { node {\color{blue} sunny}
+        child{ node {\color{red} humidity}
+          child{ node {\color{blue} high}
+            child{ node {\color{orange} yes}}}
+          child{ node {\color{blue} normal}
+            child{ node {\color{orange} no}}}}}
+      child { node {\color{blue} overcast}
+        child { node {\color{orange} yes}}}
+      child { node {\color{blue} rain}
+        child{ node {\color{red} wind}
+          child{ node {\color{blue} strong}
+            child{ node {\color{orange} no}}}
+          child{ node {\color{blue} weak}
+            child{ node {\color{orange} yes}}}}};
+    \end{tikzpicture}
+  \caption{Esempio di albero decisionale}
+  \label{dt}
+\end{figure}
+Avanzando nell'albero cerchiamo una risposta (che ci deve essere).\\
+La flessibilità nella costruzione dell'albero sta nel scegliere gli attributi e
+i valori di ognuno. Con l'algoritmo \textbf{ID3} si costruiscono alberi
+decisionali in base alle istanze che ricevo (per avere un albero coerente con le
+istanze ricevute).\\
+Formule booleane possono essere rappresentate in un albero decisionale (figura
+\ref{dt2} e figura \ref{dt3}), costruendo un albero che sia \textit{yes}
+solo nei casi la formula booleana 
+sia vera.
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+    distance=30pt]  
+    \node{\color{red} outlook}
+    child { node {\color{blue} sunny}
+      child{ node {\color{red} wind}
+        child{ node {\color{blue} strong}
+          child{ node {\color{orange} no}}}
+        child{ node {\color{blue} weak}
+          child{ node {\color{orange} yes}}}}}
+    child { node {\color{blue} overcast}
+      child { node {\color{orange} no}}}
+    child { node {\color{blue} rain}
+      child{ node {\color{orange} no}}};
+  \end{tikzpicture}
+  \caption{Esempio di albero decisionale per la formula $(Outlook=Sunny)\land
+    (Wind=Weak)$} 
+  \label{dt2}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+    distance=30pt]  
+    \node{\color{red} outlook}
+    child { node {\color{blue} overcast}
+      child{ node {\color{red} wind}
+        child{ node {\color{blue} strong}
+          child{ node {\color{orange} no}}}
+        child{ node {\color{blue} weak}
+          child{ node {\color{orange} yes}}}}}
+    child { node {\color{blue} sunny}
+      child{ node {\color{orange} yes}}}
+    child { node {\color{blue} rain}
+      child{ node {\color{red} wind}
+        child{ node {\color{blue} strong}
+          child{ node {\color{orange} no}}}
+        child{ node {\color{blue} weak}
+          child{ node {\color{orange} yes}}}}};
+  \end{tikzpicture}
+  \caption{Esempio di albero decisionale  per la formula $(Outlook=Sunny)\lor
+    (Wind=Weak)$}
+  \label{dt3}
+\end{figure}
+Notiamo a questo punto come l'albero decisionale in figura \ref{dt} è la
+rappresentazione di:
+\[(Outlook=Sunny\,\land\, Humidity=Normal)\]
+\[\lor(Outlook=Overcast)\]
+\[\lor(Outlook=Rain \land Wind=Weak) \] 
+Possiamo dire che gli alberi decisionali descrivono tutte le funzioni
+booleane. Avendo $n$ funzioni booleane avremo un numero distinto di tabelle di
+verità (e quindi di alberi decisionali), ciascuna con $2^n$ righe, pari a
+$2^{2^{n}}$.\\
+Riassumiamo alcune caratteristiche degli alberi decisionali:
+\begin{itemize}
+  \item abbiamo attributi con valori discreti
+  \item abbiamo un target di uscita discreto, le foglie hanno valori precisi
+  \item posso costruire ipotesi anche con disgiunzioni
+  \item può esserci ``rumore'' nel training dei dati
+  \item possono esserci attributi di cui non ho informazioni
+\end{itemize}
+\subsection{Algoritmo ID3}
+Vista la difficoltà di scegliere l'albero si ha l'idea di scegliere un piccolo
+albero di partenza (o più piccoli) e ricorsivamente l'attributo più
+significativo (sia nei nodi rossi intermedi che nelle foglie) come radice per il
+sotto-albero. Si fanno quindi crescere in modo 
+coerente gli alberi piccoli scelti in partenza. Si punta ad arrivare ad un
+albero valido per tutti gli esempi ricevuti e anche per quelli non visti.
+\newpage
+Iniziamo a vedere l'algoritmo anche se saranno necessarie molte specifiche:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{ID3}{}
+    \State $A \gets$ \textit{il ``miglior'' attributo di decisione per il
+    prossimo nodo}
+    \State \textit{assegno A come attributo di decisione per il nodo, che sarà
+    rosso}
+    \For {\textit{ogni valore dell'attributo A}}
+    \State \textit{creo un discendente}
+    \EndFor
+    \State \textit{ordina gli esempi di training alla foglia}
+    \State \textit{in base al valore dell'attributo del branch}
+    \If {\textit{ho classificato tutti gli esempi di training}}
+    \State \textit{mi fermo}
+    \Else
+    \State \textit{itero sulle foglie appena create}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo ID3}
+\end{algorithm}
+Bisogna in primis capire cosa si intende come \textbf{attributo migliore}. Per
+farlo introduciamo la seguente notazione:
+\[[esempi\,\,\,positivi+,\,\,esempi\,\,\,negativi-]\]
+entrambi rappresentati con un valore intero. Gli esempi positivi sono gli esempi
+che già mi hanno restituito \textit{yes} mentre quelli negativi. In generale
+sono tutti esempi su cui devo ancora valutare l'attributo. E proseguo così
+assegnando etichette positive e negative.
+Vediamo quanto detto:
 
-\end{document}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+    distance=30pt]  
+    \node{\color{red} $A_1=\,?$ \color{black} [29+, 35-]}
+    child { node {\color{blue} True}
+      child{ node {\color{orange} [21+, 5-]}}}
+    child { node {\color{blue} False}
+      child{ node {\color{orange} [8+, 30-]}}};
+  \end{tikzpicture}
+\end{figure}
+
+Se siamo nella situazione in cui dobbiamo confrontare l'attributo sopra con un
+altro, per esempio:
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+    distance=30pt]  
+    \node{\color{red} $A_2=\,?$ \color{black} [29+, 35-]}
+    child { node {\color{blue} True}
+      child{ node {\color{orange} [18+, 33-]}}}
+    child { node {\color{blue} False}
+      child{ node {\color{orange} [11+, 2-]}}};
+  \end{tikzpicture}
+\end{figure}
+Entrambe le foglie del primo attributi ci parlano di valori sbilanciati (tra
+esempi positivi e negativi), a differenza delle due del secondo attributo, dove
+sono una sbilanciata e una no. Per ora stabiliamo ad occhio lo sbilanciamento.\\
+Il criterio di scelta ci porta a preferire lo sbilanciamento, verso un ideale
+``tutti positivi'' o ``tutti negativi''. Quindi se un attributo ha divisioni
+sbilanciate è da ritenersi migliore.\\ 
+Per essere ancora più precisi bisogna richiamare la matematica
+dell'\textbf{entropia}.
+\begin{definizione}
+  Dato un training set $S$ con valori $v_i,\,\,i=1\ldots n$. Se l'entropia di un
+  insieme di bit misura più o meno la sua quantità di informazione (quanto è
+  ``speciale'') noi possiamo richiamare una formula per l'entropia su S:
+  \[I(P(v_1),\ldots,P(v_n))=\sum_{i=1}-P(v_i)\log_2P(v_i)\]
+  Dove $I(x)$ indica il valore dell'entropia su $x$ e $P(y)$ sta per la
+  probabilità legata ad un valore $y$.  \\
+  Nel caso booleano le istanze presenti in un certo insieme $S$ sono associate
+  ad un'etichetta, conteggiandole. Nella variabile $p$ conto i valori di $S$ con
+  etichetta positiva e con $n$ negativa (esempi positivi e negativi). Ottengo
+  quindi in modo esplicito la sommatoria:
+  \[I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
+    -\frac{n}{p+n}\log_2\frac{n}{p+n}\]  
+  Se inoltre diciamo che $p_+$ è la proporzione di esempi positivi e $p_-$ di
+  quelli negativi (saranno quindi tra 0 e 1) possiamo misurare
+  l'\textbf{impurità} di $S$ con l'entropia: 
+  \[Entropy(S)=-p_+\log_2 p_+-p_-\log_2 p_-\]
+  Avrò quindi alta entropia se positivi e negativi sono ``metà e metà''
+\end{definizione}
+Parliamo quindi di \textbf{information gain} $IG$ che viene calcolato su ogni
+attributo $A$ e su $S$:
+\[IG(S,A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)\]
+dove:
+\[remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
+  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+e quindi l'information gain è la riduzione aspettata nell'entropia per ordinare
+$S$ sull'attributo $A$. Si sceglie l'attributo con il maggiore IG.\\
+Possiamo riscrivere il conto come:
+\[IG(S,A)=Entropy(S)-\sum_{v\in values(A)}\frac{|S_v|}{|S|}Entropy(S_v)\]
+\begin{esempio}
+  Vediamo l'esempio di calcolo di entropia di $A_1$ con [29+,35-]:
+  \[Entropy([29+,35-])=
+    -\frac{29}{64}\log_2\frac{29}{64}-\frac{35}{64}\log_2\frac{35}{64}=0.99\]
+  Calcolo anche l'information gain di $A_1$, sapendo che
+  $Entropy([21+,5-])=0.71$ e $Entropy([8+,30-])=0.74$,
+  e quindi:
+  \[IG(S,A_1)=0.99-\frac{26}{64}\cdot 0.71-\frac{38}{64}\cdot 0.74=0.27\]
+  ugualmente calcolo $IG(S,A_2)=0.12$. \\
+  Quindi so che devo scegliere $A_1$ in quanto $0.27 > 0.12$
+\end{esempio}
+Facciamo qualche osservazione finale sull'\textbf{algoritmo ID3}:
+\begin{itemize}
+  \item lo spazio delle ipotesi è completo e sicuramente contiene il target
+  \item ho in output una singola ipotesi
+  \item non si ha backtracking sugli attributi selezionati, si procede con una
+  ricerca greedy (ma trovo scelte buone localmente e non ottime)
+  \item fa scelte basate su una ricerca statistica, facendo sparire incertezze
+  sui dati
+  \item il bias non è sulla classe iniziale, essendo lo spazio delle ipotesi
+  completo, ma sulla scelta di solo alcune funzioni, preferendo alberi corti (e
+  più semplici) e posizionando attributi ad alto information gain vicino alla
+  radice. Il bias è quindi sulla preferenza di alcune ipotesi. Si usa il
+  criterio euristico di \textit{rasoio di Occam}
+  \item $H$ è l'insieme potenza delle istanze $X$
+\end{itemize}
+Viene introdotto però l'\textbf{overfitting}. Se misuro l'errore di una ipotesi
+$h$ sul training set ($error_{traini}(h)$) e poi misuro l'errore di quella
+ipotesi sull'intero set delle possibili istanze
+$D$ ($error_D(h)$) ho che l'ipotesi $h$ va in \textbf{overfit} sul quel data set
+se:
+\[error_{traini}(h) < error_{traini}(h') \,\,\land
+  \,\,error_D(h)>error_D(h')\]
+quindi se presa un'altra ipotesi questa è migliore della prima e ha un errore
+sull'intera distribuzione delle ipotesi inferiore vado in \textit{overfit}. Il
+problema è che non posso sapere se esiste tale $h'$. Per evitare il problema uso
+sempre il rasoio di Occam scegliendo ipotesi semplici ed evitando di far
+crescere l'albero quando lo ``split'' non è statisticamente significativo. Un
+altro modo è quello di togliere pezzi, all'albero, che toccano poche istanze o
+pure calcolare una \textit{misura di complessità dell'albero}, minimizzando la
+grandezza dell'albero e gli errori del training set. Quest'ultima tecnica è
+detta \textbf{Minimum Description Length (\textit{MDL})}
+\end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
 % LocalWords:  Concept concept experience learner rewards inductive validation
-% LocalWords:  find Find findS version List biased Hypothesis unbiased bias
-% LocalWords:  bias prover
+% LocalWords:  find Find findS version List biased Hypothesis unbiased bias yes
+% LocalWords:  bias prover information gain slide level sibling distance wind
+% LocalWords:  weak outlook sunny humidity high normal overcast rain branch IG
+% LocalWords:  primis True backtracking greedy overfit split Description Length

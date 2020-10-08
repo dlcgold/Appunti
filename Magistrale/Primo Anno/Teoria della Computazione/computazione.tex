@@ -108,7 +108,7 @@
   contenere errori, sia di stampa che di vero e proprio contenuto. Per
   eventuali proposte di correzione effettuare una pull request. Link: }
 \url{https://github.com/dlcgold/Appunti}.\\
-\chapter{Complessità computazionale}
+\chapter{Prerequisiti di computazione}
 L'informatica è costruita su una logica matematica. Il punto di partenza è stato
 dettato da Turing (con la \textbf{macchina di Turing} (\textit{TM})) e questo
 pensiero si è poi sviluppato nel tempo. Turing, con la sua macchina logica, ha
@@ -207,8 +207,126 @@ Consideriamo ora un modello basato su algoritmi.
   $T(n)=cn^p,\,p\in\mathbb{N}$ (con lo stesso discorso di sopra su $p$) da un
   algoritmo $A$ in tempo polinomiale.
 \end{definizione}
+\chapter{Complessità computazionale}
+Si cerca di catalogare dal punto di vista computazionale i \textbf{problemi
+  intrattabili}, ovvero problemi risolvibili ma non in modo \textbf{efficiente}
+(ovvero in tempo polinomiale). In alcuni casi si pensa che non esista una
+soluzione ma non si hanno dimostrazioni in merito mentre in altri casi è
+addirittura dimostrato. Abbiamo quindi delle categorie informali per i problemi:
+\begin{itemize}
+  \item \textbf{facili}, so risolverli in modo efficiente. È la \textbf{classe P}
+  \item \textbf{difficili} o, più formalmente, \textbf{intrattabile}, so
+  risolverli ma non in modo efficiente e non ho una 
+  dimostrazione che mi assicuri che non siano risolvibili in modo efficiente. È
+  la \textbf{classe NP} e la sua sottoclasse \textbf{NP-complete}
+  \item \textbf{dimostrabilmente difficili}, so risolverli ma so che non esiste
+  un algoritmo efficiente in quanto è stato dimostrato che non può esistere
+  \item \textbf{impossibili}, non so risolverli sempre neanche in modo non
+  efficiente (esiste almeno un input che manda in crisi l'algoritmo ma esiste
+  almeno un caso in cui funzioni)
+\end{itemize}
+Come formalismo useremo la \textbf{Macchina di Turing (\textit{TM})},
+\textit{deterministica} e \textit{non deterministica}. Analizzeremo in primis
+\textbf{problemi sui grafi}. Un grafo è definito come $G=(V,E)$, con $V$ insieme
+dei vertici e $E$ insieme degli archi. Un grafo può essere \textit{orientato} o
+\textit{non orientato}. Un \textbf{cammino} tra due vertici è una sequenza di
+archi che mi porta da un vertice all'altro. Un cammino è detto \textbf{ciclo} se
+il vertice sorgente coincide con quello di destinazione. Due vertici sono
+\textbf{connessi} se esiste un cammino che li collega. Un \textbf{grafo
+  connesso} è un grafo dove per ogni coppia di vertici si ha che essi sono
+connessi. Se questo cammino è di un solo arco si parla di \textbf{grafo
+  completo}, ovvero ogni vertice è \textbf{adiacente} ad ogni altro. Si parla di
+\textbf{grafo pesato} se si ha una funzione $W$ che associa un peso ad ogni
+arco. \\
+Useremo anche la teoria dei linguaggi formali con $V$ alfabeto e stringhe
+costruite su $V$. Con $\varepsilon$ abbiamo la stringa vuota e con $V^*$ è
+l'insieme di tutte le possibili stringhe costruibili con quell'alfabeto, inclusa
+la stringa vuota. $V^*$ è un insieme infinito. Con $V^+$ indico
+$V^*/\varepsilon$, ovvero senza la stringa vuota. Un \textbf{linguaggio} $L$ è
+un sottoinsieme di $V^*$, quindi $L\subseteq V^*$, che comprende tutti gli
+elementi di $V^*$ che seguono una certa \textbf{proprietà} (o più
+proprietà). Anche $L$ è un insieme infinito.\\
+Un'altra nozione è quella di \textbf{problema}. Un problema computazionale è una
+``questione'' a cui si cerca risposta. Più formalmente un problema è specificato
+da \textbf{parametri} (l'input del problema) e le \textbf{proprietà} che deve
+soddisfare la \textbf{soluzione} (l'output). L'\textbf{istanza} di un problema
+specificando certi parametri in input al problema (input che devono essere
+coerenti ai parametri richiesti).\\
+Cominciamo con degli esempi di problemi comunque risolvibili.
+\begin{esempio}
+  Considero il problema \emph{arco minimo}. Come parametro ho un grafo pesato
+  sugli archi $G=(V,E)$. Le proprietà della soluzione è che voglio l'arco con
+  peso minimo.\\
+  Per risolvere guardo tutti gli archi è vedo quello di peso minimo. Dato che
+  basta iterare su tutti gli archi quindi la soluzione è in $O(n)$ (in realtà
+  $\Theta(n)$), quindi in \textbf{tempo lineare} sul numero di archi (è quindi
+  in \textbf{tempo polinomiale})
+\end{esempio}
+\begin{esempio}
+  Considero il problema \emph{raggiungibilità}. Come parametro ho un grafo non
+  pesato $G=(V,E)$ e due vertici, uno sorgente e uno destinazione, tali che
+  $v_s,v_d\in V$. Le proprietà della soluzione è che voglio sapere se posso
+  arrivare a $v_d$ partendo da $v_s$.\\
+  Per risolvere studio tutti i cammini che partono da $v_s$ e posso dare la
+  risposta. Una soluzione del genere è in tempo $O(2^{|E|})$. Il tempo quindi
+  cresce in \textbf{modo esponenziale}. Una soluzione migliore è quella di usare
+  un \textbf{algoritmo di visita} che richiede tempo $O(|V|+|E|)$, ovvero un
+  \textbf{tempo polinomiale}. Quindi per quanto all'inizio si pensi
+  che sia un \textbf{problema intrattabile} si scopre che è un \textbf{problema
+    facile} 
+\end{esempio}
+\begin{esempio}
+  Considero il problema \emph{TSP}. Come parametro ho un grafo pesato sugli
+  archi e completo $G=(V,E)$. Le proprietà della soluzione è che voglio sapere
+  il \emph{cammino minimo} (in realtà un ciclo) che tocca tutti i vertici una e
+  una sola volta (una volta trovata la soluzione non mi interessa la sorgente
+  essendo il grafo completo). \\
+  Sarebbe facile determinare \textbf{un} ciclo ma non quello di peso minimo e
+  per farlo devo trovare tutti i cicli e trovare quello di peso minimo. Ho
+  quindi un algoritmo che è $O(2^n)$ (nella realtà è circa $O(n!)$ che è
+  comunque esponenziale per l'\textbf{approssimazione di Stirling}). In questo
+  caso non si riesce a pensare ad una soluzione che non sia esponenziale nel
+  tempo (anche se per alcuni input sia di facile risoluzione, basti pensare ad
+  avere tutti gli archi di peso 1, ma mi basta avere un input problematico). Non
+  potendo però dimostrare che sia irrisolvibile si dice che è un
+  \textbf{problema intrattabile}. \textit{TSP} è uno dei 10 problemi famosi per
+  i quali ti danno un milione di dollari se dimostri che è o \emph{facile} o
+  \emph{impossibile}
+\end{esempio}
+Per completezza definiamo un \textbf{algoritmo} come una sequenza di
+\textbf{istruzioni elementari} (supportate dal calcolatore) che, eseguite in
+sequenza, mi portano alla soluzione di un problema. Si ha quindi che un
+algoritmo $A$ risolve un problema $\Pi$ se per ogni possibile istanza di $\Pi$
+l'algoritmo $A$ mi da la risposta corretta. Distinguo però:
+\begin{itemize}
+  \item \textbf{algoritmo efficiente}, che mi da la soluzione in \textbf{tempo
+    polinomiale} rispetto alla \textbf{dimensione dell'input}. Ho un
+  \textit{caso peggiore} limitato superiormente da un \textbf{polinomiale}:
+  $O(p(n))$. Ho una crescita di tempo accettabile all'aumentare
+  dell'input. Diciamo comunque che è dura anche solo raggiungere $O(n^{10})$
+  quindi anche se dire polinomiale potrebbe voler dire $O(n^{10000000})$ non si
+  hanno casi reali di questo tipo
+  \item \textbf{algoritmo non efficiente}, che mi da la soluzione ma in tempo
+  superiore a quello \textbf{polinomiale}. Ho un \textit{caso peggiore} limitato
+  superiormente da un \textbf{esponenziale}: $O(2^n)$. Ho una crescita di tempo
+  assolutamente non accettabile (esponenziale appunto) all'aumentare dell'input 
+\end{itemize}
+\textit{Se ho anche solo un caso di input che porta a tempo esponenziale ho
+  comunque un algoritmo non efficiente}.\\
+Spesso \textbf{problemi intrattabili} vengono risolti tramite approssimazioni
+per arrivare ad una soluzione accettabile anche se non la migliore ma non sempre
+è possibile effettuare delle approssimazioni.\\
+Anche se avessi ha che fare con un computer mille volte migliore di quelli
+attuali, un problema esponenziale avrà comunque tempi non accettabili in
+proporzione ad un problema polinomiale. Quindi non sarà il miglioramento
+hardware a permettere di rendere accettabile la soluzione di problemi
+esponenziali.\\
+Un \textbf{algoritmo intrattabile} quindi non risolve in modo efficiente tutti
+gli input. Bisognerà trovare un modo per capire se un algoritmo è
+\textbf{intrattabile} per davvero.
+
 \end{document}
 
 
-% LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add
-% LocalWords:  load esguite
+% LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add TSP
+% LocalWords:  load esguite dimostrabilmente primis Stirling

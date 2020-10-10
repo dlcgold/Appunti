@@ -14,7 +14,7 @@
 \usepackage{rotating}
 \usepackage{verbatim}
 \usepackage[safe,extra]{tipa}
-\usepackage{showkeys}
+%\usepackage{showkeys}
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -787,6 +787,243 @@ Si hanno quindi tre livelli di trasparenza:
   ottimizzatone di query. \textit{Questo è il livello di trasparenza più
     basso}
 \end{itemize}
+\section{Query distribuite}
+Analizzeremo prevalentemente DDBMS distribuiti \textit{shared-nothing} e, in
+seguito, \textit{architetture di replica} (con un \textit{replication server}
+atto a gestire al replica).\\
+Le query sono ovviamente le operazioni più importanti. Possono essere di sola
+\textit{lettura} (tramite operazioni come la \textit{select}) o anche di
+\textit{scrittura}. Le due tipologie di operazioni vengono gestite in modo
+molto differente (la lettura sincrona non è un problema, se non hardware
+risolvibile con una distribuzione del carico, a differenza della scrittura
+sincrona). Le operazioni devono essere eseguite \textbf{velocemente}.
+\subsection{Query in lettura}
+Esistono, in un sistema relazionale, una serie di attività che convertono la
+query in SQL in algebra relazionale e solo dopo si ha la distribuzione. 
+L'utente, ignaro dello schema distribuito, interroga lo schema
+logico globale e il DDBMS decompone la query secondo una localizzazione
+specifica in base ai singoli frammenti (ovvero deve distribuire la query in modo
+sensato). Si ha anche un'ottimizzazione globale della query prima della
+distribuzione in modo che anche la distribuzione stessa sia ottimizzabile
+correttamente, infatti il gestore delle interrogazioni manda ai singoli nodi i
+giusti frammenti di query che verranno ottimizzati localmente. Ho quindi nel
+complesso 4 fasi che compongono il \textbf{query processor}:
+\begin{enumerate}
+  \item \textbf{query decomposition}
+  \item \textbf{data localization}
+  \item \textbf{global query optimization}
+  \item \textbf{local optimization}
+\end{enumerate}
+\subsubsection{Query decomposition}
+La \textit{query decomposition} opera sullo schema logico globale non tenendo
+conto della distribuzione. In questo caso si hanno tecniche di ottimizzazione
+algebrica (usando quindi l'algebra relazionale indipendentemente dalla
+distribuzione) analoghe a quelle usati in sistemi centralizzati e si ha come
+output un \textbf{query tree} non ottimizzato rispetto ai \textbf{costi di
+comunicazione}. Il costo di comunicazione riguarda il costo di uso della
+\textbf{rete} e dipende da vari fattori. Il costo di comunicazione è il vero
+``collo di bottiglia'' in sistemi distribuiti.
+\subsubsection{Data localization}
+La \textit{data localization} considera la frammentazione delle tabelle e la
+distribuzione, capendo ad esempio dove effettuare le \textit{select}
+etc$\ldots$. Si procede quindi all'ottimizzazione delle operazioni rispetto 
+alla frammentazione, tramite \textbf{tecniche di riduzione}. Viene quindi
+prodotta una query efficiente per la frammentazione ma non
+ottimizzata. Supponiamo per esempio di avere una tabella su 3 nodi (distribuita
+tramite frammentazione orizzontalmente) e che di base
+la query faccia la richiesta a tutti e tre (facendo l'unione dei
+risultati). Usando la tecnica di riduzione, qualora, per esempio, effettivamente
+sia necessaria solo in un nodo, si avrà che la query sarà distribuita unicamente
+nel nodo corretto.
+\subsubsection{Global query optimization}
+La \textit{global query optimization} si basa sulle statistiche sui frammenti
+per effettuare l'ottimizzazione. Viene arricchito il \textbf{query tree}, creato
+con gli operatori dell'algebra relazionale, tramite gli \textbf{operatori di
+  comunicazione} (ovvero \textit{send} e \textit{receive}), che vengono
+effettuati tra nodi. Alcune query, dopo aver tenuto conto dei tempi di
+comunicazione, potranno essere eseguite in parallelo (grazie all'indipendenza
+data dallo \textit{shared-nothing}). In questo caso le decisione più rilevanti
+riguardano le operazioni di \textit{join} (che è uno degli operatori più
+complicati) e,in particolare (come vedremo più avanti), l'ordine tra i
+\textit{join} n-ari e la scelta tra \textit{join} e \textit{semijoin} (un
+operatore particolare per i sistemi distribuiti). L'operatore di \textit{join}
+infatti ``ingrandisce'' i dati ``fondendo'' tabelle, che magari sono frammentate
+in più tabelle su vari nodi. L'uso di \textit{send} e \textit{receive} permette
+la comunicazione dei dati tra i nodi, anche se questo rischia di diventare
+troppo esoso in termini di prestazioni. Si hanno quindi degli \textbf{algoritmi
+  di calcolo del costo adattivi} e si deve studiare la rete e i suoi
+ritardi, che dipendono dalla \textit{topologia} della rete stessa e dal carico
+applicativo. Si ha quindi una fase di \textbf{ottimizzazione a runtime}, dove si
+riadatta il \textbf{query plan}. Per riadattarlo si fa in primis monitoring
+sull'esecuzione della query, si procede adattando il modello di costo
+(eventualmente con software automatici) e, eventualmente, riadattando la query
+se si calcola uno scarto di costo troppo elevato. È il DBA che stabilisce delle
+soglie temporali entro le quali ottenere una risposta. Per questo conta la
+trasparenza, in quanto non è l'applicazione che deve interessarsi di questo
+aspetto. Si introduce un nuovo \textit{layer} di complessità.\\
+In alcuni casi è impossibile ad avere un DDBMS che si occupi di questo tipo di
+ottimizzazioni.\\
+\textbf{La distribuzione non è predicibile a priori}.
+Vediamo un semplice esempio:
+\begin{esempio}
+   \label{esempio:costi}
+  Si supponga di avere il seguente schema:
+  \begin{itemize}
+    \item Employee (eno, ename, title), di cardinalità 400
+    \item AssiGN(eno, projectno, resp, dur), di cardinalità 1000 e dove
+    \emph{resp} rappresentata il tipo di responsabilità
+  \end{itemize}
+  Si ha la seguente query: \textit{trovare i nomi dei dipendenti che sono anche
+    manager di progetti:}
+  \begin{minted}{sql}
+    SELECT ename
+    FROM Employee E JOIN AssiGN A on E.eno=A.eno
+    WHERE resp=''manager''
+  \end{minted}
+  Che, in algebra relazionale già abbastanza ottimizzata ipotizzando che ci
+  siano pochi manager, sarebbe:
+  \[\pi_{ename}(EMP><_{eno}(\sigma_{resp=''manager''}(ASG)))\]
+  Supponiamo di avere poi 5 nodi uguali, il quinto per il risultato e i primi 4
+  frammentati orizzontalmente secondo questo schema di divisione per nodo:
+  \begin{enumerate}
+    \item $ASG1=\sigma_{eno}\leq 'E3'(ASG)$
+    \item $ASG2=\sigma_{eno}> 'E3'(ASG)$
+    \item $EMP1=\sigma_{eno}\leq 'E3'(EMP)$
+    \item $EMP2=\sigma_{eno}> 'E3'(EMP)$
+  \end{enumerate}
+  Vediamo quindi una prima esecuzione:
+  \begin{itemize}
+    \item chiedo al nodo 1 i manager e sposto i risultati di\\
+    $\sigma_{resp=''manager''}(ASG1)$ sul nodo 3 (dove sono 
+    descritti in modo più completo) come $(ASG'1)$. Il risultato di
+    $EMP1><_{eno}(ASG1)$, calcolato sul nodo 4, lo porto sul nodo 5 $EMP'1$ 
+    \item chiedo al nodo 2 i manager e sposto i risultati di\\
+    $\sigma_{resp=''manager''}(ASG'2)$ sul nodo 4 (dove sono descritti in modo
+    più completo) come $(ASG'2)$. Il risultato di $EMP2><_{eno}(ASG'2)$,
+    calcolato sul nodo 4, lo porto sul nodo 5 come $EMP'2$ 
+    \item sul nodo 5 il risultato sarà $EMP'1\cup EMP'2$
+  \end{itemize}
+  Vediamo una seconda soluzione:
+  \begin{itemize}
+    \item contemporaneamente chiedo al nodo 1 e la nodo 3 di mandare al nodo 5
+    tutti i manager. Sempre contemporaneamente a queste due operazioni chiedo al
+    nodo 2 e al nodo 4 di mandare al nodo 5 tutte le informazioni. I tempi
+    saranno basati sul più lento dei quattro nodi, che determinerà il tempo
+    massimo dell'operazione (che sono circa calcolabili a priori tramite la
+    tabella delle statistiche)
+    \item nel nodo 5 calcolo il risultato:
+    \[(EMP1\cup EMP2)><_{eno}\sigma_{resp=''manager''}(ASG1\cup ASG2)\]
+  \end{itemize}
+  I tempi di trasporto detteranno quale soluzione tra le due è la più
+  performante ma, viste le cardinalità esigue di dati, probabilmente vince la
+  seconda (dove si ha un solo spostamento globale). Questa seconda strategia
+  costringe a pensare a particolari strutture di accesso secondarie dette
+  \textbf{indici}, che permettono interrogazioni efficaci ma che \textbf{non
+    possono essere ``portati''} in sistemi distribuiti. Quindi nel nodo 5 non ho
+  gli \textbf{indici} e quindi devo fare l'intero \textbf{prodotto cartesiano}
+  per il \textit{join} (che però in questo caso ha un tempo trascurabile,
+  grazie alla bassa cardinalità dei dati, rispetto ai costi di trasferimento,
+  generalmente non trascurabili rispetto ai costi delle operazioni interne ad un
+  nodo).
+\end{esempio}
+Riprendendo l'esempio definiamo:
+\begin{itemize}
+  \item \textbf{costo di messaggio} come il costo fisso di spedizione o
+  ricezione di un messaggio (detto \textit{setup})
+  \item \textbf{costo di trasmissione} come il costo, fisso rispetto alla
+  topologia, di trasmissione dati
+  \item \textbf{costo di comunicazione} come la somma tra il costo di messaggio,
+  moltiplicato per il numero di messaggi, più il costo di trasmissione,
+  moltiplicato per il numero di \textit{bytes} trasmessi
+  \item \textbf{costo totale} come la somma dei costi delle operazioni
+  (\textit{I/O} e \textit{CPU}) più i costi di comunicazione
+  (\textit{comunicazione})
+  \item \textbf{response time} come la somma dei costi qualora si tenga conto
+  del \textit{parallelismo delle trasmissioni}, quindi come la somma tra il
+  costo di messaggio, moltiplicato per il numero di messaggi comunicati in modo
+  sequenziale, più il costo di trasmissione, moltiplicato per il numero di
+  \textit{bytes} trasmessi in modo sequenziale. In questo conto volendo posso
+  usare dei \textbf{pesi} basati sulla cardinalità delle unità da trasferire e
+  tenere conto del massimo tempo di risposta che si ottiene
+\end{itemize}
+Si ha quindi che:
+\begin{itemize}
+  \item nelle \textbf{grandi reti geografiche} i costi di\textit{ comunicazione}
+  sono molto maggiori del costo di \textit{I/O}, circa di 10 volte 
+  \item nelle \textbf{reti locali} i costi di \textit{comunicazione} e
+  \textit{I/O} sono paragonabili, grazie alle reti \textit{gigabit} in locale
+\end{itemize}
+Tendenzialmente il costo di comunicazione è ancora il \textbf{fattore critico}
+ma sempre meno.\\
+Bisogna scegliere cosa \textbf{minimizzare}:
+\begin{itemize}
+  \item il \textit{response time}, aumentando il parallelismo che però può
+  portare ad un aumento del \textit{costo totale}, con un maggior numero di
+  trasmissione e un maggior processing locale. Nell'esempio \ref{esempio:costi}
+  potrebbe sembrare la seconda soluzione, che effettivamente parallelizza di più
+  ma non minimizza i costi di risposta 
+  \item il \textit{costo totale}, senza tener conto del parallelismo utilizzando
+  meglio le risorse e aumentando il \textit{throughput} ma peggiorando così il
+  \textit{response time}. Nell'esempio \ref{esempio:costi} è la prima soluzione
+\end{itemize}
+\subsubsection{Join e Semijoin}
+Il \textbf{join} presenta il problema di portare alla perdita
+dell'\textbf{indice}. Bisogna quindi studiare come effettuare l'operazione tra
+due tabelle su due nodi diversi. Una prima operazione è data dell'operazione di
+\textit{semijoin}.
+\begin{definizione}
+  Definiamo, in algebra relazionale, l'operazione \textit{semijoin}, tra due
+  tabelle $R$ e $S$, sull'attributo $A$, come:
+  \[R\,\,\,semijoin_A\,\,\,S\equiv \pi_{R^*}(R\,\,\,join_A \,\,\,A)\]
+  dove $R^*$ è l'insieme degli attributi di $R$.\\
+  In altre parole scelgo esplicitamente di tenere solo gli attributi di $R$ dopo
+  il \textit{semijoin}.\\
+  Quindi con $R\,\,\,semijoin_A\,\,\,S$ ho la proiezione sugli attributi di $R$
+  operazione di \textit{join} e quindi ho che il \textit{semijoin} non è
+  \textbf{commutativo}.\\
+  Dalla seconda tabella porto solo la serie di attributi che mi servono
+  esplicitamente ($\pi_A(S)$) riducendo il carico di lavoro.\\
+ \textbf{ Alla fine il nostro $R'$ con i risultati del \textit{semijoin} sarà
+  trasportato nel nodo di $S$}
+\end{definizione}
+Prese due tabelle allocate su nodi differenti, il \textit{joi}n tra di esse può
+quindi essere calcolato tramite operazioni di \textit{semijoin}, valgono infatti
+le seguenti equivalenze (che portano a diverse strategie a seconda della stima
+dei costi):
+\begin{itemize}
+  \item
+  $R\,\,\,join_{\theta}\,\,\,S \iff (R\,\,\,semijoin_{\theta}\,\,\,S)
+  \,\,\,join_\theta\,\,\,S$
+  \item $R\,\,\,join_{\theta}\,\,\,S \iff
+  R\,\,\,join_\theta\,\,\,(S\,\,\,semijoin_{\theta}\,\,\,R)$ 
+  \item $R\,\,\,join_{\theta}\,\,\,S \iff (R\,\,\,semijoin_{\theta}\,\,\,S)
+  \,\,\,join_\theta\,\,\,(A\,\,\,semijoin_{\theta}\,\,\,R)$
+\end{itemize}
+In tutti i casi si riduce lo spostamento dei dati.\\
+L'uso del \textit{semijoin} è conveniente sse il costo del suo calcolo e del
+trasferimento del risultato è inferiore al costo del trasferimento dell'intera
+relazione e del costo dell'intero \textit{join} (e questo dipende dal numero di
+attributi coinvolti).\\
+\textit{Avere più di un \textit{join} complica la situazione, anche solo per la
+  scelta dell'ordine in cui eseguirli.}
+\subsubsection{Local optimization}
+La \textit{local optimization} si occupa dell'ottimizzazione degli schemi
+locali. Ogni nodo riceve una \textit{fragment query} e la ottimizza, con
+tecniche analoghe ai sistemi centralizzati, in modo completamente
+indipendente. Si hanno comunque operazioni di ottimizzazione locale a priori
+sul fatto che il \textit{global query optimization} punti a ridurre i costi di
+comunicazione (nel caso di un DDBMS in rete geografica) o ad aumentare il
+parallelismo (in caso di DDBMS in rete locale).\\
+In ogni caso nella progettazione di sistemi di gestione dati distribuiti bisogna
+tener conto di:
+\begin{itemize}
+  \item tipologie di query distribuite
+  \item stime o statistiche sullo storico query distribuite già eseguite (fatto
+  periodicamente dal DDBMS)
+  \item topologia della rete
+  \item carico aspettato e workload previsto
+\end{itemize}
+\subsection{Query in scrittura e controllo di concorrenza}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -800,5 +1037,8 @@ Si hanno quindi tre livelli di trasparenza:
 % LocalWords:  object oriented OO example json warehouse LAV Local As View ODBC
 % LocalWords:  routing processing vendors middleware DTP Distributed devices
 % LocalWords:  GRID warehouses everything SMP Oracle RAC systems performances
-% LocalWords:  big sottotabelle soft fail chunk ricostruibilità l'updates
-% LocalWords:  l'updates mapping rewriting
+% LocalWords:  big sottotabelle soft fail chunk ricostruibilità l'updates local
+% LocalWords:  l'updates mapping rewriting replication decomposition global dur
+% LocalWords:  optimization localization send receive semijoin runtime layer
+% LocalWords:  monitoring response setup bytes gigabit throughput AssiGN eno
+% LocalWords:  ename resp sse l'updates LocalWords l'updates fragment dell

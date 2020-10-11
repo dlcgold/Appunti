@@ -14,7 +14,7 @@
 \usepackage{rotating}
 \usepackage{verbatim}
 \usepackage[safe,extra]{tipa}
-\usepackage{showkeys}
+%\usepackage{showkeys}
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -352,23 +352,25 @@ ha un \textbf{approccio binario}.\\
 Bisogna approfondire quindi le \textbf{unità di elaborazione} che hanno le
 proprietà cosiddette \textit{ACID}:
 \begin{itemize}
-  \item Atomicità, ovvero una transazione è un'unità atomica di
+  \item \textbf{Atomicità}, ovvero una transazione è un'unità atomica di
   elaborazione. Non si può lasciare il db in uno ``stato 
   intermedio''. Un problema prima del commit cancella tutto le operazioni svolte
   (\textit{UNDO}) e un problema dopo il commit non deve avere conseguenze, se
   necessario vanno ripetute le operazioni (\textit{REDO}) 
-  \item Consistenza, ovvero la transazione rispetta i vincoli di integrità (se
-  lo stato iniziale è corretto lo è anche quello finale). Quindi se ci sono
-  violazioni non devono restare alla fine (nel caso \textit{rollback})
-  \item Isolamento, ovvero la transazione non risente delle altre transazioni
-  concorrenti. Una transazione non espone i suoi stati intermedi evitando
-  l'\textit{effetto domino} (si evita che il rollback di una transazione vada in
-  cascata con le altre). L'esecuzione concorrente di una collezione di
-  transazioni deve produrre un risultato che si potrebbe ottenere con una
-  esecuzione sequenziale
-  \item Durata (ovvero persistenza), ovvero gli effetti di una transazione
-  andata in commit non vanno persi anche in presenza di guasti (a tal fine si
-  sfrutta il \textbf{recovery manager}, che garantisce l'affidabilità, del DBMS)
+  \item \textbf{Consistenza}, ovvero la transazione rispetta i vincoli di
+  integrità (se lo stato iniziale è corretto lo è anche quello finale). Quindi
+  se ci sono violazioni non devono restare alla fine (nel caso
+  \textit{rollback})
+  \item \textbf{Isolamento}, ovvero la transazione non risente delle altre
+  transazioni concorrenti. Una transazione non espone i suoi stati intermedi
+  evitando l'\textit{effetto domino} (si evita che il rollback di una
+  transazione vada in cascata con le altre). L'esecuzione concorrente di una
+  collezione di transazioni deve produrre un risultato che si potrebbe ottenere
+  con una esecuzione sequenziale
+  \item \textbf{Durabilità} (ovvero persistenza), ovvero gli effetti di una
+  transazione andata in commit non vanno persi anche in presenza di guasti (a
+  tal fine si sfrutta il \textbf{recovery manager}, che garantisce
+  l'affidabilità, del DBMS)
 \end{itemize}
 \section{Gestore della concorrenza}
 Il \textbf{gestore della concorrenza} permette di eseguire in parallelo più
@@ -787,6 +789,701 @@ Si hanno quindi tre livelli di trasparenza:
   ottimizzatone di query. \textit{Questo è il livello di trasparenza più
     basso}
 \end{itemize}
+\section{Query distribuite}
+Analizzeremo prevalentemente DDBMS distribuiti \textit{shared-nothing} e, in
+seguito, \textit{architetture di replica} (con un \textit{replication server}
+atto a gestire al replica).\\
+Le query sono ovviamente le operazioni più importanti. Possono essere di sola
+\textit{lettura} (tramite operazioni come la \textit{select}) o anche di
+\textit{scrittura}. Le due tipologie di operazioni vengono gestite in modo
+molto differente (la lettura sincrona non è un problema, se non hardware
+risolvibile con una distribuzione del carico, a differenza della scrittura
+sincrona). Le operazioni devono essere eseguite \textbf{velocemente}.
+\subsection{Accesso in lettura}
+Studiamo prima le \textbf{query in scrittura}.\\
+Esistono, in un sistema relazionale, una serie di attività che convertono la
+query in SQL in algebra relazionale e solo dopo si ha la distribuzione. 
+L'utente, ignaro dello schema distribuito, interroga lo schema
+logico globale e il DDBMS decompone la query secondo una localizzazione
+specifica in base ai singoli frammenti (ovvero deve distribuire la query in modo
+sensato). Si ha anche un'ottimizzazione globale della query prima della
+distribuzione in modo che anche la distribuzione stessa sia ottimizzabile
+correttamente, infatti il gestore delle interrogazioni manda ai singoli nodi i
+giusti frammenti di query che verranno ottimizzati localmente. Ho quindi nel
+complesso 4 fasi che compongono il \textbf{query processor}:
+\begin{enumerate}
+  \item \textbf{query decomposition}
+  \item \textbf{data localization}
+  \item \textbf{global query optimization}
+  \item \textbf{local optimization}
+\end{enumerate}
+\subsubsection{Query decomposition}
+La \textit{query decomposition} opera sullo schema logico globale non tenendo
+conto della distribuzione. In questo caso si hanno tecniche di ottimizzazione
+algebrica (usando quindi l'algebra relazionale indipendentemente dalla
+distribuzione) analoghe a quelle usati in sistemi centralizzati e si ha come
+output un \textbf{query tree} non ottimizzato rispetto ai \textbf{costi di
+comunicazione}. Il costo di comunicazione riguarda il costo di uso della
+\textbf{rete} e dipende da vari fattori. Il costo di comunicazione è il vero
+``collo di bottiglia'' in sistemi distribuiti.
+\subsubsection{Data localization}
+La \textit{data localization} considera la frammentazione delle tabelle e la
+distribuzione, capendo ad esempio dove effettuare le \textit{select}
+etc$\ldots$. Si procede quindi all'ottimizzazione delle operazioni rispetto 
+alla frammentazione, tramite \textbf{tecniche di riduzione}. Viene quindi
+prodotta una query efficiente per la frammentazione ma non
+ottimizzata. Supponiamo per esempio di avere una tabella su 3 nodi (distribuita
+tramite frammentazione orizzontalmente) e che di base
+la query faccia la richiesta a tutti e tre (facendo l'unione dei
+risultati). Usando la tecnica di riduzione, qualora, per esempio, effettivamente
+sia necessaria solo in un nodo, si avrà che la query sarà distribuita unicamente
+nel nodo corretto.
+\subsubsection{Global query optimization}
+La \textit{global query optimization} si basa sulle statistiche sui frammenti
+per effettuare l'ottimizzazione. Viene arricchito il \textbf{query tree}, creato
+con gli operatori dell'algebra relazionale, tramite gli \textbf{operatori di
+  comunicazione} (ovvero \textit{send} e \textit{receive}), che vengono
+effettuati tra nodi. Alcune query, dopo aver tenuto conto dei tempi di
+comunicazione, potranno essere eseguite in parallelo (grazie all'indipendenza
+data dallo \textit{shared-nothing}). In questo caso le decisione più rilevanti
+riguardano le operazioni di \textit{join} (che è uno degli operatori più
+complicati) e,in particolare (come vedremo più avanti), l'ordine tra i
+\textit{join} n-ari e la scelta tra \textit{join} e \textit{semijoin} (un
+operatore particolare per i sistemi distribuiti). L'operatore di \textit{join}
+infatti ``ingrandisce'' i dati ``fondendo'' tabelle, che magari sono frammentate
+in più tabelle su vari nodi. L'uso di \textit{send} e \textit{receive} permette
+la comunicazione dei dati tra i nodi, anche se questo rischia di diventare
+troppo esoso in termini di prestazioni. Si hanno quindi degli \textbf{algoritmi
+  di calcolo del costo adattivi} e si deve studiare la rete e i suoi
+ritardi, che dipendono dalla \textit{topologia} della rete stessa e dal carico
+applicativo. Si ha quindi una fase di \textbf{ottimizzazione a runtime}, dove si
+riadatta il \textbf{query plan}. Per riadattarlo si fa in primis monitoring
+sull'esecuzione della query, si procede adattando il modello di costo
+(eventualmente con software automatici) e, eventualmente, riadattando la query
+se si calcola uno scarto di costo troppo elevato. È il DBA che stabilisce delle
+soglie temporali entro le quali ottenere una risposta. Per questo conta la
+trasparenza, in quanto non è l'applicazione che deve interessarsi di questo
+aspetto. Si introduce un nuovo \textit{layer} di complessità.\\
+In alcuni casi è impossibile ad avere un DDBMS che si occupi di questo tipo di
+ottimizzazioni.\\
+\textbf{La distribuzione non è predicibile a priori}.
+Vediamo un semplice esempio:
+\begin{esempio}
+   \label{esempio:costi}
+  Si supponga di avere il seguente schema:
+  \begin{itemize}
+    \item Employee (eno, ename, title), di cardinalità 400
+    \item AssiGN(eno, projectno, resp, dur), di cardinalità 1000 e dove
+    \emph{resp} rappresentata il tipo di responsabilità
+  \end{itemize}
+  Si ha la seguente query: \textit{trovare i nomi dei dipendenti che sono anche
+    manager di progetti:}
+  \begin{minted}{sql}
+    SELECT ename
+    FROM Employee E JOIN AssiGN A on E.eno=A.eno
+    WHERE resp=''manager''
+  \end{minted}
+  Che, in algebra relazionale già abbastanza ottimizzata ipotizzando che ci
+  siano pochi manager, sarebbe:
+  \[\pi_{ename}(EMP><_{eno}(\sigma_{resp=''manager''}(ASG)))\]
+  Supponiamo di avere poi 5 nodi uguali, il quinto per il risultato e i primi 4
+  frammentati orizzontalmente secondo questo schema di divisione per nodo:
+  \begin{enumerate}
+    \item $ASG1=\sigma_{eno}\leq 'E3'(ASG)$
+    \item $ASG2=\sigma_{eno}> 'E3'(ASG)$
+    \item $EMP1=\sigma_{eno}\leq 'E3'(EMP)$
+    \item $EMP2=\sigma_{eno}> 'E3'(EMP)$
+  \end{enumerate}
+  Vediamo quindi una prima esecuzione:
+  \begin{itemize}
+    \item chiedo al nodo 1 i manager e sposto i risultati di\\
+    $\sigma_{resp=''manager''}(ASG1)$ sul nodo 3 (dove sono 
+    descritti in modo più completo) come $(ASG'1)$. Il risultato di
+    $EMP1><_{eno}(ASG1)$, calcolato sul nodo 4, lo porto sul nodo 5 $EMP'1$ 
+    \item chiedo al nodo 2 i manager e sposto i risultati di\\
+    $\sigma_{resp=''manager''}(ASG'2)$ sul nodo 4 (dove sono descritti in modo
+    più completo) come $(ASG'2)$. Il risultato di $EMP2><_{eno}(ASG'2)$,
+    calcolato sul nodo 4, lo porto sul nodo 5 come $EMP'2$ 
+    \item sul nodo 5 il risultato sarà $EMP'1\cup EMP'2$
+  \end{itemize}
+  Vediamo una seconda soluzione:
+  \begin{itemize}
+    \item contemporaneamente chiedo al nodo 1 e la nodo 3 di mandare al nodo 5
+    tutti i manager. Sempre contemporaneamente a queste due operazioni chiedo al
+    nodo 2 e al nodo 4 di mandare al nodo 5 tutte le informazioni. I tempi
+    saranno basati sul più lento dei quattro nodi, che determinerà il tempo
+    massimo dell'operazione (che sono circa calcolabili a priori tramite la
+    tabella delle statistiche)
+    \item nel nodo 5 calcolo il risultato:
+    \[(EMP1\cup EMP2)><_{eno}\sigma_{resp=''manager''}(ASG1\cup ASG2)\]
+  \end{itemize}
+  I tempi di trasporto detteranno quale soluzione tra le due è la più
+  performante ma, viste le cardinalità esigue di dati, probabilmente vince la
+  seconda (dove si ha un solo spostamento globale). Questa seconda strategia
+  costringe a pensare a particolari strutture di accesso secondarie dette
+  \textbf{indici}, che permettono interrogazioni efficaci ma che \textbf{non
+    possono essere ``portati''} in sistemi distribuiti. Quindi nel nodo 5 non ho
+  gli \textbf{indici} e quindi devo fare l'intero \textbf{prodotto cartesiano}
+  per il \textit{join} (che però in questo caso ha un tempo trascurabile,
+  grazie alla bassa cardinalità dei dati, rispetto ai costi di trasferimento,
+  generalmente non trascurabili rispetto ai costi delle operazioni interne ad un
+  nodo).
+\end{esempio}
+Riprendendo l'esempio definiamo:
+\begin{itemize}
+  \item \textbf{costo di messaggio} come il costo fisso di spedizione o
+  ricezione di un messaggio (detto \textit{setup})
+  \item \textbf{costo di trasmissione} come il costo, fisso rispetto alla
+  topologia, di trasmissione dati
+  \item \textbf{costo di comunicazione} come la somma tra il costo di messaggio,
+  moltiplicato per il numero di messaggi, più il costo di trasmissione,
+  moltiplicato per il numero di \textit{bytes} trasmessi
+  \item \textbf{costo totale} come la somma dei costi delle operazioni
+  (\textit{I/O} e \textit{CPU}) più i costi di comunicazione
+  (\textit{comunicazione})
+  \item \textbf{response time} come la somma dei costi qualora si tenga conto
+  del \textit{parallelismo delle trasmissioni}, quindi come la somma tra il
+  costo di messaggio, moltiplicato per il numero di messaggi comunicati in modo
+  sequenziale, più il costo di trasmissione, moltiplicato per il numero di
+  \textit{bytes} trasmessi in modo sequenziale. In questo conto volendo posso
+  usare dei \textbf{pesi} basati sulla cardinalità delle unità da trasferire e
+  tenere conto del massimo tempo di risposta che si ottiene
+\end{itemize}
+Si ha quindi che:
+\begin{itemize}
+  \item nelle \textbf{grandi reti geografiche} i costi di\textit{ comunicazione}
+  sono molto maggiori del costo di \textit{I/O}, circa di 10 volte 
+  \item nelle \textbf{reti locali} i costi di \textit{comunicazione} e
+  \textit{I/O} sono paragonabili, grazie alle reti \textit{gigabit} in locale
+\end{itemize}
+Tendenzialmente il costo di comunicazione è ancora il \textbf{fattore critico}
+ma sempre meno.\\
+Bisogna scegliere cosa \textbf{minimizzare}:
+\begin{itemize}
+  \item il \textit{response time}, aumentando il parallelismo che però può
+  portare ad un aumento del \textit{costo totale}, con un maggior numero di
+  trasmissione e un maggior processing locale. Nell'esempio \ref{esempio:costi}
+  potrebbe sembrare la seconda soluzione, che effettivamente parallelizza di più
+  ma non minimizza i costi di risposta 
+  \item il \textit{costo totale}, senza tener conto del parallelismo utilizzando
+  meglio le risorse e aumentando il \textit{throughput} ma peggiorando così il
+  \textit{response time}. Nell'esempio \ref{esempio:costi} è la prima soluzione
+\end{itemize}
+\subsubsection{Join e Semijoin}
+Il \textbf{join} presenta il problema di portare alla perdita
+dell'\textbf{indice}. Bisogna quindi studiare come effettuare l'operazione tra
+due tabelle su due nodi diversi. Una prima operazione è data dell'operazione di
+\textit{semijoin}.
+\begin{definizione}
+  Definiamo, in algebra relazionale, l'operazione \textit{semijoin}, tra due
+  tabelle $R$ e $S$, sull'attributo $A$, come:
+  \[R\,\,\,semijoin_A\,\,\,S\equiv \pi_{R^*}(R\,\,\,join_A \,\,\,A)\]
+  dove $R^*$ è l'insieme degli attributi di $R$.\\
+  In altre parole scelgo esplicitamente di tenere solo gli attributi di $R$ dopo
+  il \textit{semijoin}.\\
+  Quindi con $R\,\,\,semijoin_A\,\,\,S$ ho la proiezione sugli attributi di $R$
+  operazione di \textit{join} e quindi ho che il \textit{semijoin} non è
+  \textbf{commutativo}.\\
+  Dalla seconda tabella porto solo la serie di attributi che mi servono
+  esplicitamente ($\pi_A(S)$) riducendo il carico di lavoro.\\
+ \textbf{ Alla fine il nostro $R'$ con i risultati del \textit{semijoin} sarà
+  trasportato nel nodo di $S$}
+\end{definizione}
+Prese due tabelle allocate su nodi differenti, il \textit{joi}n tra di esse può
+quindi essere calcolato tramite operazioni di \textit{semijoin}, valgono infatti
+le seguenti equivalenze (che portano a diverse strategie a seconda della stima
+dei costi):
+\begin{itemize}
+  \item
+  $R\,\,\,join_{\theta}\,\,\,S \iff (R\,\,\,semijoin_{\theta}\,\,\,S)
+  \,\,\,join_\theta\,\,\,S$
+  \item $R\,\,\,join_{\theta}\,\,\,S \iff
+  R\,\,\,join_\theta\,\,\,(S\,\,\,semijoin_{\theta}\,\,\,R)$ 
+  \item $R\,\,\,join_{\theta}\,\,\,S \iff (R\,\,\,semijoin_{\theta}\,\,\,S)
+  \,\,\,join_\theta\,\,\,(A\,\,\,semijoin_{\theta}\,\,\,R)$
+\end{itemize}
+In tutti i casi si riduce lo spostamento dei dati.\\
+L'uso del \textit{semijoin} è conveniente sse il costo del suo calcolo e del
+trasferimento del risultato è inferiore al costo del trasferimento dell'intera
+relazione e del costo dell'intero \textit{join} (e questo dipende dal numero di
+attributi coinvolti).\\
+\textit{Avere più di un \textit{join} complica la situazione, anche solo per la
+  scelta dell'ordine in cui eseguirli.}
+\subsubsection{Local optimization}
+La \textit{local optimization} si occupa dell'ottimizzazione degli schemi
+locali. Ogni nodo riceve una \textit{fragment query} e la ottimizza, con
+tecniche analoghe ai sistemi centralizzati, in modo completamente
+indipendente. Si hanno comunque operazioni di ottimizzazione locale a priori
+sul fatto che il \textit{global query optimization} punti a ridurre i costi di
+comunicazione (nel caso di un DDBMS in rete geografica) o ad aumentare il
+parallelismo (in caso di DDBMS in rete locale).\\
+In ogni caso nella progettazione di sistemi di gestione dati distribuiti bisogna
+tener conto di:
+\begin{itemize}
+  \item tipologie di query distribuite
+  \item stime o statistiche sullo storico query distribuite già eseguite (fatto
+  periodicamente dal DDBMS)
+  \item topologia della rete
+  \item carico aspettato e workload previsto
+\end{itemize}
+\subsection{Accesso in scrittura e controllo di concorrenza}
+In questo caso la situazione si complica. Un conto è avere delle \textbf{remote
+  requests (read-only)}, che possono essere un numero arbitrario di query SQL in
+sola lettura, un altro è avere delle \textbf{remote transactions (read-write)},
+ovvero un numero arbitrario di operazioni SQL che prevedono anche
+\textit{insert} e \textit{update}. Ragionando in un'ottica in cui si ha un
+numero arbitrario di server si parla di \textbf{distribuited requests}, dove
+ogni singola operazione SQL si può riferire, grazie ad un \textit{ottimizzatore
+distribuito}, a qualunque insieme di server, e di \textbf{distribuited
+transactions}, dove ogni operazione è diretta ad un unico server e dove le
+transazioni possono modificare più di un db, tutto ciò grazie ad un
+\textit{protocollo transazionale di coordinamento distribuito}, detto
+\textbf{two-phase commit} (in questo caso si ha spesso a che fare con sistemi
+\textit{eterogenei} e \textit{federati}). Deve valore la \textbf{proprietà di
+  atomicità} di \textit{ACID}. Sempre riguardo \textit{ACID} si ha che la
+\textbf{proprietà di consistenza} non dipende dalla distribuzione, in quanto le
+proprietà sono indipendenti dall'allocazione, e si ha che la \textbf{proprietà
+  di durabilità} viene garantita localmente. Vanno invece rivisti
+architetturalmente la \textbf{proprietà di atomicità}, tramite componenti come
+il \textit{reliability control} e il \textit{recovery manager} (in caso di
+guasti), e la \textbf{proprietà di isolamento}, tramite il \textit{concurrency
+  control} (senza il quale si può incorrere in \textit{update fantasma}, dove un
+\textit{update} viene cancellato da uno seguente).\\ 
+Rivedendo i \textbf{principi del controllo di concorrenza}.
+\begin{definizione}
+  Data una transazione $t_i$ si ha che essa viene scomposta in sotto-transazioni
+  $t_{ij}$ a seconda del nodo $j$-simo su cui viene eseguita. A sua volta una
+  transizione $t_{ij}$ viene nominata $r_{ij}$ per le operazioni di lettura e
+  $w_{ij}$ per le operazioni di scrittura. L'uso di una risorsa $x$ viene
+  indicata, per esempio, con $r_{ij}(x)$ o $w_{ij}(x)$.
+\end{definizione}
+Ogni sotto-transazione viene schedulata in modo indipendente di server di
+ciascun nodo e quindi la \textbf{schedule globale} (dove \textit{schedules}
+indica le sequenze delle transazioni da eseguire) dipende dalle
+\textbf{schedules locali} di ogni nodo.\\
+Purtroppo \textbf{la serializzabilità locale di ogni schedule non garantisce la
+  sua serializzabilità globale}. Si viene a creare un \textbf{grafo globale dei
+  conflitti} in quanto i conflitti non sono a livello locale ma a livello
+globale (infatti si hanno risorse occupate tra i vari nodi, si arriva, in certi
+casi, ad una \textbf{situazione di deadlock}). \\
+Si ha quindi che lo \textit{schedule globale} è serializzabile sse \textbf{gli
+  ordini di serializzazione sono gli stessi per tutti i nodi coinvolti} (nel
+caso in cui il db non sia replicato).\\
+Qualora si abbia un db replicato si aggiunge un altro problema qualora le
+scritture riguardino due repliche diverse. In tal caso si può violare la
+\textbf{mutua consistenza} (che dice che al termine della transazione tutte le
+copie devono avere lo stesso valore) dei due db locali, anche con due schedule
+localmente seriali. Si introduce quindi un \textbf{protocollo di controllo delle
+  repliche}.
+Il \textbf{protocollo di controllo delle repliche} viene chiamato \textbf{ROWA
+  (\textit{Read Once Write All})}. In base a questo protocollo, dato un item
+logico $X$ (con $x_1\ldots x_n$ items fisici), si ha che le transazioni vedono
+solamente $X$ ed è il protocollo che si occupa di mappare \textit{read(X)} su
+una copia qualunque e \textit{write(X)} su tutte le copie. Questo meccanismo
+torna utile nell'uso standard delle repliche, permettendo al client di leggere
+dal nodo più vicino ma imponendo, eventualmente, la scrittura su tutte le
+copie e bloccando le operazioni fino a quando l'ultima scrittura non è
+avvenuta. Si hanno purtroppo problemi di perdita di prestazioni a causa di
+questa scrittura ``di massa''. Per lo stesso problema si hanno anche condizioni
+di rilascio tramite \textit{protocolli asincroni}.
+\subsection{2 phase locking}
+Anche l'\textbf{algoritmo 2PL (\textit{2 Phase Locking})} viene esteso al caso
+di schemi distribuiti. Si hanno due possibili strategie:
+\begin{enumerate}
+  \item \textbf{primary site}, \textit{centralized}, in quanto
+  basata sui siti
+  \item \textbf{primary copy}, in quanto basata sulle copie
+\end{enumerate}
+2PL prevede che prima di rilasciare un \textit{lock} debba averli richiesti
+tutti, e nello \textit{stricted 2PL} solo dopo che sia anche stato effettuato il
+\textit{commit}.\\
+Nel caso di \textit{centralized 2PL} si ha un \textbf{lock manager (LM)} per
+ogni nodo, è un'architettura ``master-slave''. Il ``master'' è appunto il
+\textit{lock manager} che gestisce i \textit{lock} per l'intero db
+distribuito. Gli ``slave'' sono invece i \textit{data processor}, che seguono
+quanto fa il \textit{lock manager coordinatore} (che se non è disponibile per
+problemi tecnici del nodo comporta seri problemi in quanto la scelta di un nuovo
+\textit{lock manager} tra quelli di ogni nodo è parecchio complicata).\\
+Si ha inoltre che il \textbf{transaction manager (TM)} del nodo in cui inizia la
+transazione sarà ritenuto il \textit{TM coordinatore} dei transaction
+manager. La transazione anche in questo caso sarà eseguita dai \textit{data
+  processor} nei vari nodi. Il TM coordinatore formula all'LM coordinatore le
+richieste di \textit{lock}, che vengono concesse tramite l'\textit{algoritmo
+  2PL}. Una volta concesse il TM coordinatore le comunica ai vari \textit{data
+  processor}, assegnando ad essi i vari lock e l'accesso ai dati. AL termine
+delle operazioni i \textit{data processor} comunicheranno il termine al TM
+coordinatore che a sua volta lo comunicherà all'LM coordinatore, che rilascerà i
+lock. Si ha però un effetto ``collo di bottiglia'' sul nodo del LM che deve
+gestire moltissime richieste e fino a che non risponde sistema va in
+\textit{wait}. Una soluzione a questo problema è individuata nella tecnica della
+\textbf{copia primaria}. Prima dell'assegnazione del \textit{lock}, viene
+individuata per ogni risorsa una \textit{copia primaria}. Inoltre si ha che i
+diversi nodi hanno diversi \textit{lock manager} attivi, ognuno che gestisce una
+partizione dei lock complessivi, relativi alle risorse primarie residenti nel
+nodo. Inoltre, per ogni risorsa nella transazione, il TM comunica le richieste
+di lock al LM responsabile della copia primaria, che assegna i \textit{lock}. Si
+evita quindi il ``collo di bottiglia'' ma è necessario determinare a priori il
+LM per ogni risorsa. Inoltre si necessità di una \textbf{directory globale} dove
+tutti i nodi ``vedono tutto''.
+\subsection{Gestione dei deadlock}
+Indipendentemente da quanto appena discusso si può creare un'\textbf{attesa
+  circolare} tra transazioni di due o più nodi. Bisogna quindi applicare un
+algoritmo distribuito. Per costruire l'algoritmo dobbiamo ragionare che siamo in
+una ``rete tra pari'' \textit{Peer-to-Peer} (e non ``master-slave'') e quindi
+bisogna definire un protocollo su cui costruire l'algoritmo \textit{asincrono e
+  distribuito}. L'algoritmo potrebbe partire su uno qualsiasi dei nodi.\\
+Si ipotizza innanzitutto che tutte le sotto-transazioni siano attivate in modo
+sincrono, tramite \textit{Remote Procedure Call (RPC)} bloccante, ovvero una
+transazione chiede di fare un'operazione su un certo nodo facendo una RPC ad un
+altro nodo, mettendosi in attesa fino a che non finisce. Si possono generare due
+tipi di attesa:
+\begin{enumerate}
+  \item \textbf{attesa da RPC}, una sotto-transazione su un nodo attende
+  un'altra sotto-transazione, della stessa transazione, su un altro nodo
+  \item \textbf{attesa da rilascio di risorsa}, una sotto-transazione su un nodo
+  attende un'altra sotto-transazione, della stessa transazione, sullo stesso
+  nodo a causa del rilascio di una risorsa (che normalmente è la tipica
+  situazione che porta ad un deadlock in un sistema centralizzato)
+\end{enumerate}
+La composizione dei due tipi di attesa può generare un \textbf{deadlock
+  globale}. \\
+E’ possibile caratterizzare le condizioni di attesa su ciascun nodo tramite
+condizioni di precedenza e serve quindi specificare qualche notazione, per
+rappresentare il fatto che ogni nodo deve capire quali sono le transazioni sono
+in attesa per una chiamata esterna o per l'accesso ad una risorsa interna:
+\begin{itemize}
+  \item $EXT_i$ per una chiamata all'esecuzione di una transazione sul nodo $i$
+  \item $x < y$ per indicare che $x$ sta aspettando il rilascio di una risorsa
+  da parte di $y$ (che può essere anche $EXT$)
+  \item indichiamo quindi la \textbf{sequenza di attesa generale} al nodo $k$
+  come: 
+  \[EXT<T_{ik}<T_{jk}<EXT\]
+\end{itemize}
+\begin{esempio}
+  Sul DBMS1 si ha:
+  \[EXT2<T_{21}<T_{11}<EXT2\]
+  e sul DBMS2:
+  \[EXT1<T_{12}<T_{22}<EXT1\]
+  ovvero sul nodo 2 c'è la transazione 1 che sta aspettando che finisca. La
+  transazione 1 sul nodo 1 sta aspettando che la transazione 2 sul nodo 1
+  finisca, che a sua volta sta aspettando che la transazione sul nodo 2
+  finisca. Però sul DBMS2 scopriamo che la transazione 1 sul nodo 1 è in
+  attesa della transazione 2 sul nodo 2 finisca. Quest'ultima sta aspettando
+  che finisca la transazione 1 sul nodo 2 che a sua volta attende la
+  transazione sul nodo 1. Si ha quindi un \textbf{deadlock distribuito},
+  rappresentato nell'immagine \ref{esempio:1}.
+  \begin{figure}
+    \centering
+    \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-3.50458)(9.6,3.50458)
+        \definecolor{colour0}{rgb}{0.03529412,0.6392157,0.91764706}
+        \definecolor{colour1}{rgb}{0.98039216,0.27450982,0.27450982}
+        \psframe[linecolor=black, linewidth=0.002, shadow=true,
+        shadowsize=0.10583334,shadowcolor=black,fillstyle=solid,
+        fillcolor=colour0, dimen=outer](4.0,2.8954198)(0.0,-3.50458)
+        \psframe[linecolor=black, linewidth=0.002, shadow=true,
+        shadowsize=0.10583334,shadowcolor=black,fillstyle=solid,
+        fillcolor=colour0, dimen=outer](9.6,2.8954198)(5.6,-3.50458)
+        \psellipse[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour1, dimen=outer](2.0,1.49542)(0.8,0.6)
+        \psellipse[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour1,
+        dimen=outer](2.0,-1.3045801)(0.8,0.6)
+        \psellipse[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=colour1, dimen=outer](7.6,-1.3045801)(0.8,0.6)
+        \psellipse[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=colour1, dimen=outer](7.6,1.49542)(0.8,0.6)
+        \rput[bl](1.2,3.29542){$DBMS1$}
+        \rput[bl](6.8,3.29542){$DBMS2$}
+        \rput[bl](1.8,1.2954199){$t_{11}$}
+        \rput[bl](1.8,-1.50458){$t_{21}$}
+        \rput[bl](7.4,1.2954199){$t_{12}$}
+        \rput[bl](7.4,-1.50458){$t_{22}$}
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(2.0,-0.70458007)(2.0,0.8954199)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(2.8,1.6954199)(6.8,1.6954199)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(7.6,0.8954199)(7.6,-0.70458007)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(6.8,-1.50458)(2.8,-1.50458)
+        \rput[bl](4.4,1.2954199){RPC}
+        \rput[bl](4.4,-1.9045801){RPC}
+        \rput[bl](2.4,0.09541992){lock}
+        \rput[bl](8.0,0.09541992){lock}
+      \end{pspicture}
+    }
+    \caption{Grafico dell'esempio di deadlock distribuito}
+    \label{esempio:1}
+  \end{figure}
+\end{esempio}
+Per risolvere il problema del \textbf{deadlock distribuito} ogni nodo, ad un
+certo punto con un suo ordine temporale, prende la sua sequenza di attesa e la
+aggiunge ad alle condizioni di attesa locale degli altri nodi legati da
+$EXT$. Dopodiché analizza la situazione, rilevando potenziali \textbf{deadlock
+  locali}, e comunica le sequenze di attesa alle altre istanze dell'algoritmo,
+ovvero agli altri nodi. Qualora si abbia un \textit{deadlock locale} si crea un
+grafo dedicato allo stesso dove sarà possibile notare un ciclo, che rappresenta
+il deadlock. Ovviamente è possibile evitare che due nodi scoprano
+lo stesso deadlock, rendendo così quindi più efficiente l'algoritmo che invia le
+sequenze di attesa solo in alcuni modi:
+\begin{enumerate}
+  \item \textbf{in avanti}, verso il nodo dove è attiva la sotto-transizione
+  attesa (nodo nel quale vede che non ci siano deadlock (???)). Nei sistemi
+  \textit{Peer-to-Peer} questi sono meccanismi \textit{coreografati}, decisi a
+  priori.\\
+  \textit{Esempio alla slide 68 del quarto PDF della costruzione di un grafo
+    delle transazioni con presenza di ciclo}
+  \item solamente quando l'identificatore del secondo nodo attende il
+  rilascio della risorsa identificatore del primo nodo
+\end{enumerate}
+\subsection{Recovery management}
+Approfondiamo quindi come garantire la \textbf{proprietà di atomicità}.\\
+Abbiamo visto come uno dei guasti possibili in un sistema distribuito sia quello
+legato alla perdita di messaggi sulla rete, nonché al partizionamento delle
+stessa (comportando magari l'isolamento dei nodi). Ricapitolando abbiamo diversi
+tipi di guasti: 
+\begin{itemize}
+  \item \textbf{guasti nei nodi}, sia \textit{soft} che hard
+  \item \textbf{perdita di messaggi}, che lascia l'esecuzione di un protocollo
+  in uno stato di \textit{indecisione}, in quanto ogni messaggio del protocollo
+  è seguito da un \textit{ack} e la perdita o del messaggio o dell'\textit{ack}
+  stesso genera incertezza (non potendo decidere se il messaggio sia arrivato o
+  meno)
+  \item \textbf{partizionamento della rete}, dove una transazione distribuita
+  può essere attiva contemporaneamente su più sotto-reti temporaneamente
+  isolate. In questa situazione i singoli nodi non riescono a capire bene chi
+  sia isolato e la cosa può portare i nodi a fare scelte contraddittorie
+\end{itemize}
+Si è quindi studiato il \textbf{protocollo two phase commit (\textit{2PC})} che
+cerca di funzionare in presenza di guasti di rete. Questo tipo di protocollo
+consente ad una transizione di giungere ad un eventuale \textit{commit} o
+\textit{abort} su ciascuno dei nodi che partecipano alla transazione. In questo
+protocollo la decisione di \textit{commit} o \textit{abort} tra due o più
+\textbf{resource managers (RM)} (i server) viene certificata da un
+\textbf{transaction manager (TM)} (il coordinatore). Lo scambio dei messaggi (e
+il salvataggio di un log per ciascuno) tra TM e RMs è ciò su cui si basa il
+protocollo 2PC. Si ha quindi sempre un'architettura ``master-slave'' (in modo
+metaforico si può rappresentare come il prete che unisce in matrimonio i due
+sposi). Si ha quindi il TM che interroga i RMs riguardo allo stato della loro
+esecuzione.
+\subsubsection{2PC in assenza di guasti}
+Si hanno diverse fasi:
+\begin{enumerate}
+  \item durante la prima fase il TM interroga (con un \textit{prepare} o
+  \textit{ready\_to\_commit}) tutti i nodi per capire come 
+  ciascun nodo intenda terminare la transazione, autonomamente o
+  irrevocabilmente \textit{commit} o \textit{abort} (magari per violazione della
+  concorrenza locale o per violazione di qualche vincolo di consistenza
+  etc$\ldots$). I nodi risponderanno quindi o con \textit{ready\_to\_commit} o
+  con \textit{not\_ready\_to\_commit}
+  \item nella seconda fase il TM prende la decisione globale. Si ha che se anche
+  solo un nodo richiede un \textit{abort} allora si avrà \textit{abort} per
+  tutti i nodi, altrimenti \textit{commit}, chiudendo la transazione. Il TM si
+  occupa anche di comunicare ai RMs la decisione finale per poter procedere con
+  le azioni locali 
+\end{enumerate}
+Le fasi sono schematizzate in figura \ref{fig:2pc}.\\
+Come abbiamo detto precedentemente si ha la raccolta di \textit{log} nei quali
+compaiono due tipi di record:
+\begin{enumerate}
+  \item \textbf{record di transazione}, con le informazioni sulle operazioni
+  effettuate
+  \item \textbf{record di sistema}, con l'evento di \textit{checkpoint} e di
+  \textit{dump} (ovvero la copia esatta del db in un certo stato)
+\end{enumerate}
+Le scritture sui log avvengono prima della decisione delle operazioni, che a
+loro volta si suddividono in \textit{prepare} e \textit{global decision}.
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale = 0.5]{img/2pc.png}
+  \caption{Diagramma del protocollo 2PC, dove negli ovali abbiamo le\emph{
+      decisioni} e nei rettangoli le \emph{azioni sui log}. Entrambi i tipi di
+    frecce indicano un \emph{messaggio}. La prima fase è fino alle decisioni
+    globali incluse.}
+  \label{fig:2pc}
+\end{figure}
+Ai log del TM vengono aggiunti ulteriori dettagli:
+\begin{itemize}
+  \item \textbf{prepare record} (in figura \ref{fig:2pc} \textit{begin\_commit})
+  che contiene l'identità (nodi e transazioni) di tutti i RMs
+  \item \textbf{global commit} o \textbf{global abort} che descrive la decisione
+  globale. La decisione del TM diventa esecutiva quando scrive nel proprio log
+  \textbf{global commit} o \textbf{global abort} 
+  \item \textbf{complete record} (in figura \ref{fig:2pc}
+  \textit{begin\_of\_transaction}), che viene scritto alla fine del protocollo
+\end{itemize}
+Al log dei RMs vengono aggiunti ulteriori dettagli:
+\begin{itemize}
+  \item \textbf{ready record}, per segnalare la disponibilità irrevocabile a
+  partecipare alla fase di commit. Si hanno diverse politiche sul
+  \textbf{protocollo 2PL} (\textit{recoverable, 2PL, ACR, strict 2PL}). Inoltre
+  questo log contiene l'indicazione del TM e i records (come nel caso
+  centralizzato), ovvero \textit{begin, insert, delete, update, commit}
+  \item \textbf{not ready record} (in figura \ref{fig:2pc} \textit{abort}) per
+  segnalare l'indisponibilità del RM al commit
+\end{itemize}
+In entrambe le fasi del 2PC possono avvenire guasti e in entrambe tutte le
+componenti devono poter decidere in base al loro stato. Viene quindi introdotto
+l'uso di \textbf{timers}, stabilendo un \textbf{timeout} entro il quale il TM
+aspetta una risposta (in entrambe le fasi, anche se nella prima è più
+importante). Se il timeout viene superato si lancia un \textit{abort}. Vediamo
+distinte le due fasi
+\begin{enumerate}
+  \item il TM scrive \textit{prepare} nel suo log e invia \textit{prepare} ai
+  RMs, fissando un timeout massimo per le riposte. Gli RMs \textit{recoverable},
+  ovvero pronti al \textit{commit}, scrivono \textit{ready} nel loro log e
+  inviano \textit{ready} al TM. Gli RMs non \textit{recoverable},
+  ovvero non pronti al \textit{commit} a causa di un deadlock, scrivono
+  \textit{not-ready} nel loro log e terminano il protocollo, con un \textit{log
+    unilaterale}. Il TM, come detto scrive nel suo log  \textbf{global commit} o
+  il \textbf{global abort}, il secondo nel caso in cui ci sia anche solo un
+  \textit{not-ready} o che scatti il timeout (assumendo che i nodi che non hanno
+  risposto siano in \textit{failure}).
+  \item il TM trasmette la decisione globale e fissa un secondo
+  \textit{timeout}. Gli RMs \textit{ready} agiscono di conseguenza scrivendo
+  \textit{commit} o \textit{abort} nei loro log e inviando un \textit{ack} al
+  TM. Solo dopo effettuano in locale \textit{commit} o \textit{abort}. Il TM
+  raccoglie gli \textit{ack} e, in assenza di qualche risposta, fissa un nuovo
+  \textit{timeout} ripetendo la trasmissione per gli RMs problematici. Questo
+  fino a che non avrà ricevuto da tutti un \textit{ack} e in quel momento scrive
+  \textit{complete} nel suo log
+\end{enumerate}
+Abbiamo quindi appena visto un \textbf{paradigma centralizzato} ``master-salve''
+dove i vari RMs non comunicano tra loro. Il TM è quindi il collo di bottiglia''.
+Si hanno altri paradigmi:
+\begin{itemize}
+  \item \textbf{lineare}, dove gli RMs hanno un ordine prestabilito e comunicano
+  sempre secondo un ordine prestabilito. Il TM
+  è solo il primo di tale ordine. Questo paradigma è utile per reti senza
+  possibilità di \textit{broadcast}
+  \item \textbf{distribuito}. In questo caso nella prima fase il TM comunica coi
+  vari RMs, che però rispondono a tutti. I vari RMs decidono in base alle
+  informazioni ricevute dagli altri RMs (comunicano tra loro in
+  \textit{broadcast}) e quindi non è più necessaria la seconda fase di
+  \textit{2PC}. Si genera una gran quantità di messaggi tra i vari RMs, avendo
+  una situazione ``tra pari'' \textit{Peer-to-Peer}, creando un problema di
+  prestazioni, dovendo garantire la comunicazione tra tutti i nodi (anche
+  tramite \textit{ack})
+\end{itemize}
+\subsubsection{2PC in caso di guasto}
+In uno stato di guasto, nel caso \textbf{centralizzato}, un RM nello stato
+\textit{ready} perde la sua autonomia e attende la decisione del TM. Nel caso di
+guasto del TM i vari RMs sono lasciati in \textit{stato di incertezza} e le
+risorse allocate alla transazione restano bloccate.
+\begin{definizione}
+  Definiamo \textbf{finestra di incertezza} come la finestra temporale fra la
+  scrittura di ready nel log dei RMs e la scrittura di \emph{commit} o
+  \emph{abort}. Questo intervallo è ridotto al minimo da \textbf{2PC}.
+\end{definizione}
+Durante la finestra di incertezza tutte le risorse acquisite tramite meccanismi
+di \textit{lock} restano bloccate e, in caso di guasto durante la
+\textit{finestra di incertezza}, TM e RMs usano i \textbf{protocolli di
+  recovery}.\\
+Si possono avere diversi guasti:
+\begin{itemize}
+  \item \textbf{guasti di componenti}, ovvero guasti al TM o ai RMs.
+  \item \textbf{perdita di messaggi o partizionamento della rete}
+\end{itemize}
+\paragraph{Guasti di componenti}
+In questo caso devono essere usati protocolli con due compiti:
+\begin{enumerate}
+  \item assicurare la terminazione delle procedure. Sono i \textbf{protocolli di
+  terminazione}
+\item assicurare il ripristino. Sono i \textbf{protocolli di recovery}
+\end{enumerate}
+\textbf{In entrambi i casi questi protocolli funzionano sia che il guasto
+  interessi un solo componente che più di uno}.\\
+Partiamo dal caso in cui cada un RM. Può cadere prima di iniziare il protocollo,
+non rispondendo al \textit{prepare} e portando all'\textit{abort}. Può cadere
+dopo il \textit{ready\_to\_commit} e se quando si riprende vede nei log lo stato
+\textit{ready} si mette in \textit{wait} non sapendo bene come fare (nel caso di
+\textit{abort} semplicemente chiuderà il protocollo). Il TM
+provvederà a inviare a tale RM \textit{commit} o \textit{abort}. Non si hanno
+quindi problemi al protocollo, o si va diretti all'\textit{abort} o si
+aspetta. Il TM capisce che un RM è caduto grazie al \textit{timeout}.\\
+Più complesso è il caso in cui cada il TM. Se cade prima di ricevere le risposte
+al \textit{prepare}, quando si sarà ripreso, guarderà lo stato delle risposte al
+\textit{prepare} ricevute, altrimenti si avrà un \textit{abort unilaterale}. \\
+Vengono introdotti gli \textbf{algoritmi bizantini} nel caso in cui il TM cada e
+il RMs debbano decidere insieme cosa fare. Per decidere serve visibilità.\\
+Quindi, ricapitolando per le cadute del TM:
+\begin{itemize}
+  \item cade quanto l'ultimo record del log è \textit{prepare}, magari bloccando
+  alcuni RMs. In tal caso si hanno 2 opzioni di recovery:
+  \begin{enumerate}
+    \item decidere \textit{global abort}, e procedere con la seconda fase di 2PC
+    \item ripetere la prima fase, sperando di giungere a un \textit{global
+      commit}, richiedendo nuovamente lo stato dei RM
+  \end{enumerate}
+  \item cade quanto l'ultimo record del log è \textit{global-commit} o
+  \textit{global-abort} il TM deve ripete la seconda fase in quanto alcuni RMs
+  potrebbero essere bloccati o comunque ignari della decisione presa prima della
+  caduta
+  \item l’ultimo record nel log è una \textit{complete}, in tal caso non si
+  hanno problemi
+\end{itemize}
+Ricapitoliamo anche le cadute dell'RM:
+\begin{itemize}
+  \item l'ultimo record nei log è di \textit{azione}, \textit{abort} o
+  \textit{commit}, come nel caso centralizzato e in tal caso di procede con un
+  \textbf{warm restart}:
+  \begin{itemize}
+    \item nel caso di \textit{abort} o \textit{azione} si procede con
+    l'\textit{undo} dell'operazione
+    \item nel caso di \textit{commit} di effettua nuovamente la transazione
+  \end{itemize}
+  \item l'ultimo record nei log è \textit{ready} e in tal caso l'RM si blocca
+  non conoscendo la decisione del TM e si inseriscono, durante \textit{warm
+    restart}, nel \textit{ready set} le transazioni dubbie. Si hanno quindi due
+  alternative:
+  \begin{enumerate}
+    \item \textbf{remote recovery}, ovverol'RM chiede al TM cosa è accaduto
+    \item il TM riesegue la seconda fase del protocollo
+  \end{enumerate}
+\end{itemize}
+\paragraph{Perdita di messaggi e partizionamento della rete}
+In questo caso il TM non riesce a distinguere tra perdita di messaggi
+\textit{prepare} o \textit{ready} nella prima fase e procede, scattando i
+\textit{timeout}, con un \textbf{global abort}. \\
+Durante la seconda fase la non distinzione tra perdita di \textit{ack} o di
+decisioni dei gli RM porta alla ripetizione della seconda fase dopo il
+\textit{timeout}.\\
+Un partizionamento della rete non causa problemi ulteriori, dato che una
+transazione può avere successo solo se il TM e tutti i RM appartengono alla
+stessa partizione.
+\subsubsection{Ottimizzazioni di 2PC}
+2PC può essere ottimizzato per:
+\begin{itemize}
+  \item ridurre il numero di messaggi tra TM e RMs
+  \item ridurre le scritture nei log
+\end{itemize}
+Si hanno due tipi di ottimizzazione:
+\begin{enumerate}
+  \item \textbf{ottimizzazione read-only}, quando un RM sa che se la propria
+  transazione è \textit{read-only} allora non influenza l'esito finale della
+  transazione. Al \textit{prepare} risponde \textit{read-only} e termina il
+  protocollo. Il TM ignora i partecipanti \textit{read-only} dalla seconda fase
+  e, qualora si sapesse a priori, possono anche essere direttamente esclusi dal
+  protocollo
+  \item \textbf{ottimizzazione presumed abort} che si basa sulla regola
+  ``scordarsi gli \textit{abort} e ricordasi i \textit{commit}''. In questo caso
+  il TM abbandona la transazione dopo la decisione di abort senza scrivere
+  \textit{global abort} nel log e senza aspettare risposta dai vari RMs. Se il
+  TM riceve richiesta di un \textit{remote recovery} il TM decide per il
+  \textit{global abort}. Non sarà più necessario quindi scriver e\textit{global
+    abort} o \textit{prepare} nei log ma solo \textit{global commit, ready} e
+  \textit{commit}
+\end{enumerate}
+\subsubsection{Protocollo X/Open}
+Il protocollo 2PC è stato adottato nel protocollo \textbf{X/Open DTP
+  (\textit{Distributed Transaction Processing})}, che è un 
+consorzio di vendors che vogliono rendere portabile lo standard dell'ambiente
+UNIX. In questo protocollo si ha il \textit{TX interface} per la comunicazione
+tra il TM e l'applicazione e si ha l'\textit{XA interface} per la comunicazione
+tra TM e RMs. Ogni vendor ha la sua implementazione del modello.
+
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -798,7 +1495,17 @@ Si hanno quindi tre livelli di trasparenza:
 % LocalWords:  two phase locking shared deadlock timestamps lock serializzabili
 % LocalWords:  unlock nothing vendor cloud DDBMS l'ottimizzatore Peer to client
 % LocalWords:  object oriented OO example json warehouse LAV Local As View ODBC
-% LocalWords:  routing processing vendors middleware DTP Distributed devices
+% LocalWords:  routing processing vendors middleware DTP Distributed devices TM
 % LocalWords:  GRID warehouses everything SMP Oracle RAC systems performances
-% LocalWords:  big sottotabelle soft fail chunk ricostruibilità l'updates
-% LocalWords:  l'updates mapping rewriting
+% LocalWords:  big sottotabelle soft fail chunk ricostruibilità l'updates local
+% LocalWords:  l'updates mapping rewriting replication decomposition global dur
+% LocalWords:  optimization localization send receive semijoin runtime layer LM
+% LocalWords:  monitoring response setup bytes gigabit throughput AssiGN eno RM
+% LocalWords:  ename resp sse l'updates LocalWords l'updates fragment dell read
+% LocalWords:  requests only transactions write insert update distribuited All
+% LocalWords:  ottimizzatore reliability control concurrency schedules ROWA RPC
+% LocalWords:  serializzabilità items primary copy stricted centralized wait of
+% LocalWords:  Call external slide PDF ack abort resource managers log RMs not
+% LocalWords:  prepare ready checkpoint dump img png decision recoverable all
+% LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
+% LocalWords:  interface

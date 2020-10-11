@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt, oneside]{book}
+\message{ !name(archid.tex)}\documentclass[a4paper,12pt, oneside]{book}
 
 % \usepackage{fullpage}
 \usepackage[italian]{babel}
@@ -90,6 +90,9 @@
 
 \pgfplotsset{compat=1.13}
 \begin{document}
+
+\message{ !name(archid.tex) !offset(-3) }
+
 \maketitle
 
 \definecolor{shadecolor}{gray}{0.80}
@@ -1283,207 +1286,14 @@ Si hanno diverse fasi:
   tutti i nodi, altrimenti \textit{commit}, chiudendo la transazione. Il TM si
   occupa anche di comunicare ai RMs la decisione finale per poter procedere con
   le azioni locali 
-\end{enumerate}
-Le fasi sono schematizzate in figura \ref{fig:2pc}.\\
+\end{enumerate} 
 Come abbiamo detto precedentemente si ha la raccolta di \textit{log} nei quali
 compaiono due tipi di record:
 \begin{enumerate}
   \item \textbf{record di transazione}, con le informazioni sulle operazioni
   effettuate
-  \item \textbf{record di sistema}, con l'evento di \textit{checkpoint} e di
-  \textit{dump} (ovvero la copia esatta del db in un certo stato)
+  \item 
 \end{enumerate}
-Le scritture sui log avvengono prima della decisione delle operazioni, che a
-loro volta si suddividono in \textit{prepare} e \textit{global decision}.
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale = 0.5]{img/2pc.png}
-  \caption{Diagramma del protocollo 2PC, dove negli ovali abbiamo le\emph{
-      decisioni} e nei rettangoli le \emph{azioni sui log}. Entrambi i tipi di
-    frecce indicano un \emph{messaggio}. La prima fase è fino alle decisioni
-    globali incluse.}
-  \label{fig:2pc}
-\end{figure}
-Ai log del TM vengono aggiunti ulteriori dettagli:
-\begin{itemize}
-  \item \textbf{prepare record} (in figura \ref{fig:2pc} \textit{begin\_commit})
-  che contiene l'identità (nodi e transazioni) di tutti i RMs
-  \item \textbf{global commit} o \textbf{global abort} che descrive la decisione
-  globale. La decisione del TM diventa esecutiva quando scrive nel proprio log
-  \textbf{global commit} o \textbf{global abort} 
-  \item \textbf{complete record} (in figura \ref{fig:2pc}
-  \textit{begin\_of\_transaction}), che viene scritto alla fine del protocollo
-\end{itemize}
-Al log dei RMs vengono aggiunti ulteriori dettagli:
-\begin{itemize}
-  \item \textbf{ready record}, per segnalare la disponibilità irrevocabile a
-  partecipare alla fase di commit. Si hanno diverse politiche sul
-  \textbf{protocollo 2PL} (\textit{recoverable, 2PL, ACR, strict 2PL}). Inoltre
-  questo log contiene l'indicazione del TM e i records (come nel caso
-  centralizzato), ovvero \textit{begin, insert, delete, update, commit}
-  \item \textbf{not ready record} (in figura \ref{fig:2pc} \textit{abort}) per
-  segnalare l'indisponibilità del RM al commit
-\end{itemize}
-In entrambe le fasi del 2PC possono avvenire guasti e in entrambe tutte le
-componenti devono poter decidere in base al loro stato. Viene quindi introdotto
-l'uso di \textbf{timers}, stabilendo un \textbf{timeout} entro il quale il TM
-aspetta una risposta (in entrambe le fasi, anche se nella prima è più
-importante). Se il timeout viene superato si lancia un \textit{abort}. Vediamo
-distinte le due fasi
-\begin{enumerate}
-  \item il TM scrive \textit{prepare} nel suo log e invia \textit{prepare} ai
-  RMs, fissando un timeout massimo per le riposte. Gli RMs \textit{recoverable},
-  ovvero pronti al \textit{commit}, scrivono \textit{ready} nel loro log e
-  inviano \textit{ready} al TM. Gli RMs non \textit{recoverable},
-  ovvero non pronti al \textit{commit} a causa di un deadlock, scrivono
-  \textit{not-ready} nel loro log e terminano il protocollo, con un \textit{log
-    unilaterale}. Il TM, come detto scrive nel suo log  \textbf{global commit} o
-  il \textbf{global abort}, il secondo nel caso in cui ci sia anche solo un
-  \textit{not-ready} o che scatti il timeout (assumendo che i nodi che non hanno
-  risposto siano in \textit{failure}).
-  \item il TM trasmette la decisione globale e fissa un secondo
-  \textit{timeout}. Gli RMs \textit{ready} agiscono di conseguenza scrivendo
-  \textit{commit} o \textit{abort} nei loro log e inviando un \textit{ack} al
-  TM. Solo dopo effettuano in locale \textit{commit} o \textit{abort}. Il TM
-  raccoglie gli \textit{ack} e, in assenza di qualche risposta, fissa un nuovo
-  \textit{timeout} ripetendo la trasmissione per gli RMs problematici. Questo
-  fino a che non avrà ricevuto da tutti un \textit{ack} e in quel momento scrive
-  \textit{complete} nel suo log
-\end{enumerate}
-Abbiamo quindi appena visto un \textbf{paradigma centralizzato} ``master-salve''
-dove i vari RMs non comunicano tra loro. Il TM è quindi il collo di bottiglia''.
-Si hanno altri paradigmi:
-\begin{itemize}
-  \item \textbf{lineare}, dove gli RMs hanno un ordine prestabilito e comunicano
-  sempre secondo un ordine prestabilito. Il TM
-  è solo il primo di tale ordine. Questo paradigma è utile per reti senza
-  possibilità di \textit{broadcast}
-  \item \textbf{distribuito}. In questo caso nella prima fase il TM comunica coi
-  vari RMs, che però rispondono a tutti. I vari RMs decidono in base alle
-  informazioni ricevute dagli altri RMs (comunicano tra loro in
-  \textit{broadcast}) e quindi non è più necessaria la seconda fase di
-  \textit{2PC}. Si genera una gran quantità di messaggi tra i vari RMs, avendo
-  una situazione ``tra pari'' \textit{Peer-to-Peer}, creando un problema di
-  prestazioni, dovendo garantire la comunicazione tra tutti i nodi (anche
-  tramite \textit{ack})
-\end{itemize}
-\subsubsection{2PC in caso di guasto}
-In uno stato di guasto, nel caso \textbf{centralizzato}, un RM nello stato
-\textit{ready} perde la sua autonomia e attende la decisione del TM. Nel caso di
-guasto del TM i vari RMs sono lasciati in \textit{stato di incertezza} e le
-risorse allocate alla transazione restano bloccate.
-\begin{definizione}
-  Definiamo \textbf{finestra di incertezza} come la finestra temporale fra la
-  scrittura di ready nel log dei RMs e la scrittura di \emph{commit} o
-  \emph{abort}. Questo intervallo è ridotto al minimo da \textbf{2PC}.
-\end{definizione}
-Durante la finestra di incertezza tutte le risorse acquisite tramite meccanismi
-di \textit{lock} restano bloccate e, in caso di guasto durante la
-\textit{finestra di incertezza}, TM e RMs usano i \textbf{protocolli di
-  recovery}.\\
-Si possono avere diversi guasti:
-\begin{itemize}
-  \item \textbf{guasti di componenti}, ovvero guasti al TM o ai RMs.
-  \item \textbf{perdita di messaggi o partizionamento della rete}
-\end{itemize}
-\paragraph{Guasti di componenti}
-In questo caso devono essere usati protocolli con due compiti:
-\begin{enumerate}
-  \item assicurare la terminazione delle procedure. Sono i \textbf{protocolli di
-  terminazione}
-\item assicurare il ripristino. Sono i \textbf{protocolli di recovery}
-\end{enumerate}
-\textbf{In entrambi i casi questi protocolli funzionano sia che il guasto
-  interessi un solo componente che più di uno}.\\
-Partiamo dal caso in cui cada un RM. Può cadere prima di iniziare il protocollo,
-non rispondendo al \textit{prepare} e portando all'\textit{abort}. Può cadere
-dopo il \textit{ready\_to\_commit} e se quando si riprende vede nei log lo stato
-\textit{ready} si mette in \textit{wait} non sapendo bene come fare (nel caso di
-\textit{abort} semplicemente chiuderà il protocollo). Il TM
-provvederà a inviare a tale RM \textit{commit} o \textit{abort}. Non si hanno
-quindi problemi al protocollo, o si va diretti all'\textit{abort} o si
-aspetta. Il TM capisce che un RM è caduto grazie al \textit{timeout}.\\
-Più complesso è il caso in cui cada il TM. Se cade prima di ricevere le risposte
-al \textit{prepare}, quando si sarà ripreso, guarderà lo stato delle risposte al
-\textit{prepare} ricevute, altrimenti si avrà un \textit{abort unilaterale}. \\
-Vengono introdotti gli \textbf{algoritmi bizantini} nel caso in cui il TM cada e
-il RMs debbano decidere insieme cosa fare. Per decidere serve visibilità.\\
-Quindi, ricapitolando per le cadute del TM:
-\begin{itemize}
-  \item cade quanto l'ultimo record del log è \textit{prepare}, magari bloccando
-  alcuni RMs. In tal caso si hanno 2 opzioni di recovery:
-  \begin{enumerate}
-    \item decidere \textit{global abort}, e procedere con la seconda fase di 2PC
-    \item ripetere la prima fase, sperando di giungere a un \textit{global
-      commit}, richiedendo nuovamente lo stato dei RM
-  \end{enumerate}
-  \item cade quanto l'ultimo record del log è \textit{global-commit} o
-  \textit{global-abort} il TM deve ripete la seconda fase in quanto alcuni RMs
-  potrebbero essere bloccati o comunque ignari della decisione presa prima della
-  caduta
-  \item l’ultimo record nel log è una \textit{complete}, in tal caso non si
-  hanno problemi
-\end{itemize}
-Ricapitoliamo anche le cadute dell'RM:
-\begin{itemize}
-  \item l'ultimo record nei log è di \textit{azione}, \textit{abort} o
-  \textit{commit}, come nel caso centralizzato e in tal caso di procede con un
-  \textbf{warm restart}:
-  \begin{itemize}
-    \item nel caso di \textit{abort} o \textit{azione} si procede con
-    l'\textit{undo} dell'operazione
-    \item nel caso di \textit{commit} di effettua nuovamente la transazione
-  \end{itemize}
-  \item l'ultimo record nei log è \textit{ready} e in tal caso l'RM si blocca
-  non conoscendo la decisione del TM e si inseriscono, durante \textit{warm
-    restart}, nel \textit{ready set} le transazioni dubbie. Si hanno quindi due
-  alternative:
-  \begin{enumerate}
-    \item \textbf{remote recovery}, ovverol'RM chiede al TM cosa è accaduto
-    \item il TM riesegue la seconda fase del protocollo
-  \end{enumerate}
-\end{itemize}
-\paragraph{Perdita di messaggi e partizionamento della rete}
-In questo caso il TM non riesce a distinguere tra perdita di messaggi
-\textit{prepare} o \textit{ready} nella prima fase e procede, scattando i
-\textit{timeout}, con un \textbf{global abort}. \\
-Durante la seconda fase la non distinzione tra perdita di \textit{ack} o di
-decisioni dei gli RM porta alla ripetizione della seconda fase dopo il
-\textit{timeout}.\\
-Un partizionamento della rete non causa problemi ulteriori, dato che una
-transazione può avere successo solo se il TM e tutti i RM appartengono alla
-stessa partizione.
-\subsubsection{Ottimizzazioni di 2PC}
-2PC può essere ottimizzato per:
-\begin{itemize}
-  \item ridurre il numero di messaggi tra TM e RMs
-  \item ridurre le scritture nei log
-\end{itemize}
-Si hanno due tipi di ottimizzazione:
-\begin{enumerate}
-  \item \textbf{ottimizzazione read-only}, quando un RM sa che se la propria
-  transazione è \textit{read-only} allora non influenza l'esito finale della
-  transazione. Al \textit{prepare} risponde \textit{read-only} e termina il
-  protocollo. Il TM ignora i partecipanti \textit{read-only} dalla seconda fase
-  e, qualora si sapesse a priori, possono anche essere direttamente esclusi dal
-  protocollo
-  \item \textbf{ottimizzazione presumed abort} che si basa sulla regola
-  ``scordarsi gli \textit{abort} e ricordasi i \textit{commit}''. In questo caso
-  il TM abbandona la transazione dopo la decisione di abort senza scrivere
-  \textit{global abort} nel log e senza aspettare risposta dai vari RMs. Se il
-  TM riceve richiesta di un \textit{remote recovery} il TM decide per il
-  \textit{global abort}. Non sarà più necessario quindi scriver e\textit{global
-    abort} o \textit{prepare} nei log ma solo \textit{global commit, ready} e
-  \textit{commit}
-\end{enumerate}
-\subsubsection{Protocollo X/Open}
-Il protocollo 2PC è stato adottato nel protocollo \textbf{X/Open DTP
-  (\textit{Distributed Transaction Processing})}, che è un 
-consorzio di vendors che vogliono rendere portabile lo standard dell'ambiente
-UNIX. In questo protocollo si ha il \textit{TX interface} per la comunicazione
-tra il TM e l'applicazione e si ha l'\textit{XA interface} per la comunicazione
-tra TM e RMs. Ogni vendor ha la sua implementazione del modello.
-
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -1504,8 +1314,8 @@ tra TM e RMs. Ogni vendor ha la sua implementazione del modello.
 % LocalWords:  ename resp sse l'updates LocalWords l'updates fragment dell read
 % LocalWords:  requests only transactions write insert update distribuited All
 % LocalWords:  ottimizzatore reliability control concurrency schedules ROWA RPC
-% LocalWords:  serializzabilità items primary copy stricted centralized wait of
+% LocalWords:  serializzabilità items primary copy stricted centralized wait
 % LocalWords:  Call external slide PDF ack abort resource managers log RMs not
-% LocalWords:  prepare ready checkpoint dump img png decision recoverable all
-% LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
-% LocalWords:  interface
+% LocalWords:  prepare ready
+
+\message{ !name(archid.tex) !offset(-1321) }

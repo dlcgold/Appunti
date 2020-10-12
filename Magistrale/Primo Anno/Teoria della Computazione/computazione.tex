@@ -14,7 +14,7 @@
 \usepackage{rotating}
 \usepackage{verbatim}
 \usepackage[safe,extra]{tipa}
-\usepackage{showkeys}
+%\usepackage{showkeys}
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -323,10 +323,160 @@ hardware a permettere di rendere accettabile la soluzione di problemi
 esponenziali.\\
 Un \textbf{algoritmo intrattabile} quindi non risolve in modo efficiente tutti
 gli input. Bisognerà trovare un modo per capire se un algoritmo è
-\textbf{intrattabile} per davvero.
+\textbf{intrattabile} per davvero.\\
+Studiamo ora il tempo di calcolo di una \textbf{macchina di Turing non
+  deterministica (\textit{NTDM})}:
+\begin{definizione}
+  Sia $T:\mathbb{N}\to\mathbb{N}$ una funziona calcolabile da TM. Dato $L\pi$ un
+  linguaggio di decisione allora una $NDTM$ $M$. $M$ accetta $L\pi$ in tempo
+  $T(n)$ se per ogni $x$ in $L\pi$ ,con $|x|=n$,  $M$ accetta $x$ in $T(n)$
+  mosse (o configurazioni).\\
+  Quindi la \textbf{classe NP} è la classe dei linguaggi di decisione accettati
+  in tempo $T(n)=cn^p,\,\,\,p\in \mathbb{N}$ da una $NDTM$
+\end{definizione}
+Diamo una definizione alternativa di NP:
+\begin{definizione}
+  Sia $L\pi$ un linguaggio di decisione, $N:n\to n$ una funzione calcolabile,
+  $y$ una stringa di lunghezza polinomiale nell'input, allora un algoritmo $A$
+  con ``certificato'' accetta $L\pi$ in tempo $t(n)$ se per ogni $x$ in $L\pi$,
+  con $|x|=n$, A termina su input $(x,y)$ dopo $t(|x|)$ passi di calcolo
+  (istruzioni eseguite) producendo 1 in output.
+  Quindi la \textbf{classe NP} è la classe dei linguaggi (o problemi) di
+  decisione accettati in tempo $T(n)=cn^p,\,\,\,p\in\mathbb{N}$ da un algoritmo
+  $A$ ``certificato''
+\end{definizione}
+Resta da capire il significato del termine ``certificato''.
+\begin{definizione}
+  Preso un algoritmo $A$ definiamo cosa significa che sia ``certificato'' si
+  compone di un input $(x,y)$ con $y$ che è una stringa, nel dettaglio una
+  \textbf{dimostrazione}, che garantisce che $x\in L\pi$.
+\end{definizione}
+Vediamo un esempio:
+\begin{esempio}
+  Uso un problema NP come esempio, quindi $\pi\in NP$, per avere un algoritmo
+  che ammette certificato (non ho alternative). \\
+  Prendo il problema $\pi$ \emph{vertex-cover}. Come input si ha un grafo
+  $G=(V,E)$ e un intero $k$. Come output ho o 1 o 0, essendo un problema di
+  decisione, e si cerca di capire se $\exists\, V'\subseteq V$ tale che $V'$ è
+  una copertura di $G$. Il sottoinsieme è copertura di un grafo quando $forall\,
+  e\in E$ almeno un estremo dell'arco $e=(u,v)$ è in $V'$. La copertura con il
+  minor numero di vertici è detta \textbf{minima copertura}.\\
+  Il problema \emph{vertex-cover} chiede se esiste una copertura del grafo di
+  dimensione $k$. È quindi un \textbf{problema di decisione}. Qualora trovassi
+  una copertura di cardinalità minore di $k$ mi basterà aggiungere vertici
+  arbitrari fino al raggiungimento di $k$. Ovviamente può non esistere una
+  copertura di cardinalità $k$.\\
+  Il problema di \emph{vertex-cover} è il problema di decisione del problema di
+  trovare la minima copertura di un grafo, che è un \textbf{problema di
+    ottimizzazione (o problema di ottimo)} (ogni problema di ottimizzazione può
+  essere trasformato in uno di decisione aggiungendo un parametro $k$ e
+  richiedendo un risultato booleano).\\
+  \emph{vertex-cover} decisionale è nella classe \textbf{NP} con ``certificato''
+  e, in questo caso, il parametro $y$ è la dimostrazione che posso dare risposta
+  affermativa, per esempio la certezza di avere un sottoinsieme di vertici che
+  effettivamente copre tutto il grafo, quindi $y=V''\subseteq V$ tale per cui
+  $V''$ copre $G$ con cardinalità $k$. Bisogna capire come trovare e come usare
+  $y$, sapendo che $A$ lavora in tempo polinomiale e che la lunghezza di $y$ è
+  polinomiale in dimensione di $x$.\\ 
+  Vedendo che la cardinalità di $y$ è minore di $k$ l'algoritmo A verifica che
+  con i vertici passati con $y$ si è in grado di rispondere al problema in modo
+  affermativo, problema che ha in input $G$ e $k$. In poche parole $A$, per ogni
+  arco, esamina se ogni estremo è in $y$ e, se tutti gli archi hanno un estremo
+  in $y$ allora si ha che usando $y$ si è in grado di verificare l'input $G,
+  k$ è \textbf{accettato}. Questa verifica è in tempo polinomiale e si ha che
+  $|y|=O(|G,k|)$, soprattutto se $|y|$ è una costante.\\
+  Ad oggi non si è dimostrato che \emph{vertex-cover} si risolvibile in tempo
+  polinomiale. È quindi un problema \textbf{NP-hard}.
+\end{esempio}
+\begin{esempio}
+  Per l'algoritmo TSP la versione di ottimo è trovare il \emph{tour} di costo
+  minimo. Il problema di decisione è se esiste un \emph{tour} di massimo peso
+  $k$. In questo caso già il problema di decisione è già in \textbf{NP} e lo è
+  anche il problema di ottimo. La verifica con ``certificato'' ha comunque costo
+  polinomiale nel caso di richiesta di verifica di un dato \emph{tour} con costo
+  minore di $k$. 
+\end{esempio}
+\textbf{Il problema di decisione è una restrizione di quello di ottimo.}\\
+Per notazione dato un algoritmo $A$ chiamiamo $A_d$ la sua versione di
+decisione.\\
+
+\textbf{Senza ``certificato'' non potrei accettare un problema NP}.\\
+Un problema di \textbf{classe NP} quindi ammette verifica in tempo polinomiale,
+ammettendo un ``verificatore'' in tempo polinomiale per i problemi
+specificati.\\
+Non è così scontato trovare ``certificato'', di dimensione polinomiale
+nell'input, e trovare il ``verificatore''. Per esempio la classe
+\textbf{exptime} non esiste $A$ con ``certificato'' che sia polinomiale (la
+verifica potrebbe richiedere tempo esponenziale).\\
+Quindi per un problema \textbf{NP} con ``certificato'' non posso trovare
+soluzione in tempo polinomiale ma posso verificare una soluzione data in tempo
+polinomiale.\\
+Posso quindi dimostrare che un problema $\pi$, con in input una struttura
+combinatoria discreta (come un grafo) e un intero, è in \textbf{NP}.\\
+Si ha quindi che \textbf{P} è vista come sottoclasse la \textbf{NP} dove i
+problemi di decisione sono risolvibili in tempo polinomiale anche senza
+``certificato''. Per dimostrare che $P\subseteq NP$ devo far vedere che ogni
+$L\pi\in P$ ammette un algoritmo $A$ con ``certificato'' in tempo
+polinomiale. Ma questo è vero perché $L\pi$ è accettato da un algoritmo $A$, in
+tempo polinomiale con $y=\emptyset$ e quindi $y$ non è necessario.\\
+Si ha quindi che $P\subseteq NP$. Pensando poi, per esempio,
+all'\textit{isomorfismo di grafi} nessuno sa se sia $P$ o $NP$. Questo
+problema ha in input due grafi e come output se sono isomorfi tra loro.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/problem.png}
+  \caption{Diagramma di \emph{Eulero Venn} per le classi di complessità}
+  \label{fig:complexity}
+\end{figure}
+\begin{shaded}
+  \textit{Tratto dagli appunti di Metodi Formali:}\\
+\begin{center}
+  \textit{Si parla di isomorfismo quando due strutture complesse si possono
+    applicare l'una sull'altra, cioè far corrispondere l'una all'altra, in modo
+    tale che per ogni parte di una delle strutture ci sia una parte
+    corrispondente nell'altra struttura; in questo contesto diciamo che due
+    parti sono corrispondenti se hanno un ruolo simile nelle rispettive
+    strutture.}
+\end{center}
+Diamo ora una definizione formale di isomorfismo tra sistemi di transizione
+etichettati, che possono quindi essere grafi dei casi o grafi dei casi
+sequenziali.
+\begin{definizione}
+  Siano dati due sistemi di transizione etichettati:\\
+  $A_1 = (S_1,E_1,T_1,s_{01})$ e $A_2 = (S_2 , E_2 , T_2 , s_{02})$.\\
+  e siano date due \textbf{mappe biunivoche}:
+  \begin{enumerate}
+    \item $\alpha:S_1\to S_2$, ovvero che passa dagli stati del primo sistema a
+    quelli del secondo
+    \item $\beta:E_1\to E_2$, ovvero che passa dagli eventi del primo sistema a
+    quelli del secondo
+  \end{enumerate}
+  allora:
+  \[\langle \alpha,\beta\rangle:A_1= (S_1 , E_1 , T_1 ,s_{01})\to A_2 = (S_2 ,
+    E_2 , T_2 , s_{02})\]
+  è un \textbf{isomorfismo} sse:
+  \begin{itemize}
+    \item $\alpha(s_{01})=s_{02}$, ovvero l'immagine dello stato iniziale del
+    primo sistema coincide con lo stato iniziale del secondo
+    \item $\forall s,s'\in S_1,\forall e\in E_1:\,(s,e,s')\in T_1
+    \Leftrightarrow (\alpha(s),\beta(e),\alpha(s'))\in T_2$ ovvero per ogni
+    coppia di stati del primo sistema, tra cui esiste un arco etichettato $e$,
+    vale che esiste un arco, etichettato con l'immagine di $e$, nel secondo
+    sistema che va dall'immagine del primo stato considerato del primo sistema
+    all'immagine del secondo stato considerato del secondo sistema, e viceversa
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  Si definiscono due \textbf{sistemi equivalenti} sse hanno grafi dei casi
+  sequenziali, e quindi di conseguenza anche grafi dei casi, \emph{isomorfi}.\\
+  Due sistemi equivalenti accettano ed eseguono le stesse sequenze di eventi
+\end{definizione}
+\end{shaded}
+\section{Riduzioni polinomiali}
 
 \end{document}
 
 
 % LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add TSP
-% LocalWords:  load esguite dimostrabilmente primis Stirling
+% LocalWords:  load esguite dimostrabilmente primis Stirling NTDM vertex cover
+% LocalWords:  exptime all img problem png

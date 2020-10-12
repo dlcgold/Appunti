@@ -1483,7 +1483,154 @@ consorzio di vendors che vogliono rendere portabile lo standard dell'ambiente
 UNIX. In questo protocollo si ha il \textit{TX interface} per la comunicazione
 tra il TM e l'applicazione e si ha l'\textit{XA interface} per la comunicazione
 tra TM e RMs. Ogni vendor ha la sua implementazione del modello.
-
+\section{Repliche}
+Parliamo ora delle tecnologie per la \textbf{replicazione di dati}.\\
+Tra le principali soluzioni architetturale troviamo \textbf{IBM replication
+  technologies} e \textbf{Microsoft SQL Server replication technologies}
+(\textit{i dettagli delle implementazioni non saranno oggetto d'esame}).\\
+\begin{definizione}
+  La \textbf{replica} è il processo di cerare e mantenere istanze dello stesso
+  db allineate tra loro, consentendo la condivisione di dati ma anche
+  comportando cambiamenti architetturali. Si ha che le eventuali modifiche
+  devono essere viste da tutti i nodi.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{sincronizzazione} è il processo che m i consente di
+  \textit{allineare} le copie, prima o poi.
+\end{definizione}
+In base all'ultima definizione si capisce che spesso le copie non sono
+aggiornate istantaneamente. Si ha quindi la \textbf{replica sincrona} o la
+\textbf{replica asincrona} (non avendo allineamento \textit{realtime}). IBM
+preferisce un approccio \textit{based and mode based} mentre Microsoft uno
+basato su \textit{snapshot, transactional \textnormal{e} merge}.\\
+Vediamo le differenze tra le due repliche:
+\begin{itemize}
+  \item le \textbf{repliche sincrone} cercano di far si che tutte le repliche
+  vengano aggiornate contemporaneamente (ad esempio si ha il protocollo
+  ROWA). Scrivo in modo sincrono su tutti nodi e solo quando tutte le repliche
+  confermano la scrittura avanzo con le transazioni (che fallisce se ho nodi non
+  disponibili). Nelle repliche sincrone si necessitano molti scambi di messaggi.
+  Di fatto si obbliga due o più \textit{storage} ad aggiornarsi e a fare
+  \textit{rollback} in caso di fallimento. Si hanno quindi alte disponibilità,
+  un auto \textit{fail-over} (bloccando la transazioni in caso di guasti sui
+  nodi) e un \textit{data loss} minimo. Le repliche sincrone vengono soprattutto
+  usate nei \textit{disaster recovery}, ovvero in situazioni \textit{mission
+    critical} (ad esempio sistemi bancari dove i db di backup, almeno 3, devono
+  stare a centinaia di kilometri di distanza, in zone sismiche tra loro
+  diverse). Gli svantaggi delle repliche sincrone sono la necessità di una rete
+  valida, si hanno problemi di scalabilità, di costi e minor flessibilità
+  \item nelle \textbf{repliche asincrone} prima si aggiorna il db
+  \textit{target} e poi le repliche (normalmente dopo pochi secondi ma anche
+  dopo giorni). Si hanno evidenti vantaggi di costo, scalabilità e flessibilità
+  (perché in caso di problema lavoro in primis sul db principale)
+  ma a rischio di \textit{data loss} (nell'intervallo di tempo tra la scrittura
+  del db principale e delle repliche). Normalmente si usano soluzioni asincrone
+  per accessi online e la loro efficienza, per bilanciamento del calcolo
+  etc$\ldots$ 
+\end{itemize}
+\textit{In caso di perdita di dati bisogna analizzare i singoli contratti per
+  capire legalmente come rispondere di dati che non verranno recuperati
+  probabilmente.}\\
+Ci sono vari contesti in cui pensare alla replica dei dati:
+\begin{itemize}
+  \item condivisione di dati da utenti tra loro scollegati. Un esempio è una
+  copia su un portatile con una replica usata da un commerciale. Si possono
+  avere conflitti nel momento in cui più utenti con db replicati lavorano
+  offline. Si ha il \textit{merge conflict}
+  \item \textit{data consolidation}, ovvero quando un'azienda vuole tenere più
+  copie dei dati in vari punti e alla fine bisogna riportare i dati a livello
+  centrale a cadenza periodica. Può servire per fare data warehousing o anche
+  solo semplicemente per monitorare le vendite delle varie filiali o per
+  aggiornare il catalogo
+  \item \textit{data distribution} che è il caso degli \textit{e-commerce}. È un
+  caso tipicamente \textit{mission-critical} e bisogna aumentare l'accesso ai
+  dati e si ha una costante sincronizzazione realtime bidirezionale per evitare
+  problemi. Un altro caso è la distribuzione tra diversi uffici, dove le
+  repliche locali hanno magari dati non presenti nel db globale
+  \item prestazioni, accesso efficiente, \textit{load balancing} e accesso
+  offline. Se non si hanno necessità di update immediati (tipo un sito vetrina)
+  allora la replica garantisce la disponibilità e l'accessibilità a basso
+  costo. Con il load balancing scarico gli utenti su diverse macchine replicate,
+  in primis per le molte realtà di sola lettura o comunque con pochissime
+  scritture (un esempio può anche essere un social network dove anche eventuali
+  ritardi di qualche secondo non sono problematici). Per la disponibilità
+  bisogna fare un forte testing dell'intera architettura, se cade un server
+  bisogna puntare ad una replica e bisogna essere sicuri e spesso i costi sono
+  troppo alti (\textit{RIVEDERE QUESTA PARTE})
+  \item separazione tra \textit{data entry \textnormal{e} reporting}, se si
+  usa lo stesso server per entrambi i compiti (che in pratica sono scrittura
+  costante e lettura costante) può essere utile separare in due server. Si
+  evitano così i rallentamenti dati dai \textit{lock}. Bisogna studiare i tempi
+  di sincronizzazione
+  \item coesistenza di applicazioni, questo è un caso particolare. Qualora
+  sia necessario cambiare applicazione devo, eventualmente, cambiare anche i
+  sistemi. Bisogna quindi travasare i dati vecchi e durante il trasferimento
+  bisogna comunque mantenere funzionanti le applicazioni. Quindi bisogna far
+  coesistere i due database durante il trasferimento (facendo il travaso di
+  notte bloccando le transazioni). I costi sono incredibili e si può avere anche
+  coesistenza delle applicazioni e non solo dei dati, con migrazioni parziali
+  (magari per area geografica) etc$\ldots$ questo comporta che magari due
+  filiali devono collaborare con due applicazioni e due db diversi
+\end{itemize}
+Ci sono anche casi in cui non si dovrebbe replicare:
+\begin{itemize}
+  \item quando ci sono frequenti update su più copie, portando le copie a
+  possibili conflitti che devono essere scoperti e gestiti ``manualmente'' 
+  \item quando la consistenza è \textit{critical} magari in contesti di
+  trasferimento di fondi etc$\ldots$. In questo caso solitamente si impone un
+  protocollo ROWA (con transazioni \textit{ACID compliant}), riducendo le
+  prestazioni per avere l'autorizzazione dei \textit{commit} da parte delle
+  repliche 
+\end{itemize}
+Ma spesso bisogna comunque replicare ``scegliendo il male minore'' (ad esempio
+nelle banche) e bisogna quindi analizzare il singolo caso, anche in base al
+budget. Inoltre non bastano le tecnologie serve un'ottima organizzazione.\\ 
+Concludendo si ha che i benefici della replica sono:
+\begin{itemize}
+  \item disponibilità
+  \item affidabilità
+  \item prestazioni
+  \item riduzione di carico
+  \item lavoro offline
+  \item supporto a molti utenti
+\end{itemize}
+Distinguiamo anche delle classi di tipologie di replica:
+\begin{itemize}
+  \item \textbf{data distribution}, di tipo \textit{1:many}, con un
+  \textit{source} che distribuisce, in modo sincrono o asincrono, le varie copie
+  passive ai \textit{target}
+  \item \textbf{Peer-to-Peer}, dove i vari nodi sono interconnessi e si
+  aggiornano tra di loro. Si usa un approccio ROWA
+  \item \textbf{data consolidation}, di tipo \textit{many:1}, dove ho più
+  \textit{source} che aggiornano un \textit{target} a livello centrale
+  \item \textbf{bi-directional} (per il \textit{conflict detention resolution}),
+  dove una copia primaria e uno secondaria 
+  possono leggere e scrivere a vicenda tra loro (è quindi una versione
+  semplificata del \textit{Peer-to-Peer} con due Peer)
+  \item \textbf{multi-Tier staging}, in cui si hanno meccanismi intermedi tra
+  \textit{source} e \textit{target} con ``aree di deposito'' dette aree di
+  \textit{staging}
+\end{itemize}
+Per realizzare una replica posso fare in diversi modi:
+\begin{itemize}
+  \item faccio letteralmente il backup del disco con una persona che stacca il
+  disco dal server e lo copia, riattaccando infine copia e disco originale
+  \item posso prima fare il backup attaccando un altro disco e poi mettere nella
+  nuova macchina il disco copia
+  \item posso fare una \textit{replica incrementale}, ovvero faccio un
+  \textit{full backup} e sposto solo il file di \textit{log} delle transazioni
+  nel nuovo server, rieseguendo quanto fatto (essendo contenuto nel
+  \textit{log}). Quindi prima faccio un \textit{full
+    backup} e poi un \textit{backup \textnormal{del} log}, questo per ogni
+  replica. Un'alternativa è l'\textbf{event publish}.
+  Un \textbf{event publish} è una replica senza \textit{apply} e
+  leggo i file di log. Analizzando gli eventi tramite particolari meccanismi
+  riscrivo quindi sull'architettura target. Da un \textit{publisher} si passa ad un
+  \textit{distributor} e infine ai \textit{subscriber}
+  % MANCA PARTE DB2
+\end{itemize}
+\textbf{Sulle slide \textit{repliche} si ha un approfondimento delle
+  architetture IBM e Microsoft opzionali per il corso}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -1508,4 +1655,9 @@ tra TM e RMs. Ogni vendor ha la sua implementazione del modello.
 % LocalWords:  Call external slide PDF ack abort resource managers log RMs not
 % LocalWords:  prepare ready checkpoint dump img png decision recoverable all
 % LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
-% LocalWords:  interface
+% LocalWords:  interface IBM Microsoft technologies realtime based snapshot and
+% LocalWords:  transactional merge over loss disaster mission critical load
+% LocalWords:  kilometri consolidation distribution balancing offline entry
+% LocalWords:  reporting warehousing commerce social testing compliant many
+% LocalWords:  source directional resolution detention Tier staging event apply
+% LocalWords:  publish publisher distributor subscriber

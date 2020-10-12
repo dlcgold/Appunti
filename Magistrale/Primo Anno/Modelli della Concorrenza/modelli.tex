@@ -785,17 +785,22 @@ linguaggio sopra definito.
   dove $\vdash$
 segnala che la tripla è stata \textbf{dimostrata/derivabile} con le regole di
 derivazione (si parla quindi di \textit{sintassi}, viene infatti ignorato il
-significato ma si cerca solo di applicare le regole).
+significato ma si cerca solo di applicare le regole, ottenendo al conclusione
+come risultato di una catena di regole).\\
 Come notazione usiamo anche che:
 \[\Vdash \{p\}\,\,\,C\,\,\,\{q\}\]
 dove $\Vdash$
 indica che la tripla è \textbf{vera} (si parla quindi di \textit{semantica},
 riferendosi al significato).\\
-\textit{Ogni tripla \textbf{derivabile} è anche \textbf{vera} in qualsiasi
-  interpretazione}.
-\\
-\textit{Ogni tripla \textbf{vera} vorremmo fosse anche \textbf{derivabile} e il
-  discorso verrà approfondito in seguito}.\\
+Dato che si ha \textbf{completezza} e \textbf{correttezza} dell'apparato
+deduttivo si ha hanno due situazioni.
+\begin{itemize}
+  \item \textit{ogni tripla \textbf{derivabile} è anche \textbf{vera} in
+    qualsiasi interpretazione}
+  \item \textit{ogni tripla \textbf{vera} vorremmo fosse anche
+    \textbf{derivabile} e il discorso verrà approfondito in seguito per la
+    logica di Hoare}
+\end{itemize}
 $\vdash$ può avere a pedice una sigla per la regola rappresentata, ad esempio
 $\vdash_{ass}$ per l'assegnamento.
 \end{shaded}
@@ -820,7 +825,7 @@ $\vdash_{ass}$ per l'assegnamento.
   cercando di non soddisfare la postcondizione. Scelgo in memoria $z=1$ e
   $y=-2$. Abbiamo fatto quindi un ragionamento semantico. Provo a anche
   sintatticamente e giungo a:
-  \[\implies\{(y\cdot z+1)> 0\}\,\,\,x\cceq (y\cdot z)+1\,\,\,\{x>0\}\]
+  \[\vdash\{(y\cdot z+1)> 0\}\,\,\,x\cceq (y\cdot z)+1\,\,\,\{x>0\}\]
   che non è vero, quindi non posso proseguire.
 \end{esempio}
 \begin{esempio}
@@ -842,16 +847,98 @@ $\vdash_{ass}$ per l'assegnamento.
   \[\vdash_{ass}\{sx=x^{i+1}\}\,\,\,i\cceq i+1\,\,\,\{sx=x^i\}\]
   per transitività si può scrivere:
   \[\{sx=x^{i+1}\}\,\,\,i\cceq i+1,\, s\cceq s\cdot x\,\,\,\{s=x^i\}\]
-   ma non coincide con quanto voglio dimostrare. Ragiono quindi in modo
-   algebrico. In $\{sx=x^{i+1}\}\,\,\,i\cceq i+1\,\,\,\{sx=x^i\}$ ho infatti:
-   \[\{s\cancel{x}=x^{i+\cancel{1}}\}\to\{sx=x^i\},\mbox{ se }x\neq 0\]
-   e quindi la formula iniziale è dimostrata.
+  ma non coincide con quanto voglio dimostrare. Ragiono quindi in modo
+  algebrico. In $\{sx=x^{i+1}\}\,\,\,i\cceq i+1\,\,\,\{sx=x^i\}$ ho infatti:
+  \[\{s\cancel{x}=x^{i+\cancel{1}}\}\to\{sx=x^i\},\mbox{ se }x\neq 0\]
+  e quindi la formula iniziale è dimostrata.
+\end{esempio}
+\begin{esempio}
+  Vediamo qualche esempio di dimostrazione. Dimostro che la tripla seguente sia
+  vera:
+  \[\{\top\}\,\,\,\mbox{if } x<0 \mbox{ then }y\cceq -2\cdot x \mbox{ else }
+    y\cceq 2*x\mbox{ endif}\,\,\,\{y\geq 0\}\]
+  Diciamo che $C$ rappresenta $y\cceq -2\cdot x$ e $D$ rappresenta $y\cceq 2*x$
+  per praticità. Indichiamo la condizione booleana $x<0$ con $B$. Tutta la
+  condizione di scelta la chiamiamo $S$
+  Quindi avremo:
+  \[\{\top\}\,\,\,\mbox{if } B \mbox{ then }C\mbox{ else }
+    D \mbox{ endif}\,\,\,\{y\geq 0\}\]
+  che in modo ancora più compatto sarebbe:
+  \[\{\top\}\,\,\,S\,\,\,\{y\geq 0\}\]
+  \textbf{Applico quindi la regola di derivazione al primo caso:}
+  Ho quindi:
+  \[\{\top \land x<0\}\,\,\,C\,\,\,{y\geq 0}\]
+  che è uguale a:
+  \[\{x<0\}\,\,\,C\,\,\,{y\geq 0}\]
+  Procedo ora con l'assegnamento:
+  \[\vdash_{ass}\{-2\cdot x\geq 0\}\,\,\,y\cceq -2\cdot x\,\,\,\{y\geq 0\}\]
+  che però equivale algebricamente a:
+  \[\vdash_{ass}\{x\leq 0\}\,\,\,y\cceq -2\cdot x\,\,\,\{y\geq 0\}\]
+  ma siccome $x<0 \implies x\geq 0$ uso la regola dell'implicazione:
+  \[\vdash_{impl}\{x< 0\}\,\,\,y\cceq -2\cdot x\,\,\,\{y\geq 0\}\]
+  \textbf{Passo al secondo caso:}
+  \[\{\top \land x\geq 0\}\,\,\,D\,\,\,{y\geq 0}\]
+  che è uguale a:
+  \[\{x\geq 0\}\,\,\,D\,\,\,{y\geq 0}\]
+  Procedo ora con l'assegnamento:
+  \[\vdash_{ass}\{2\cdot x\geq 0\}\,\,\,y\cceq 2\cdot x\,\,\,\{y\geq 0\}\]
+  che però equivale algebricamente a:
+  \[\vdash_{ass}\{x\geq 0\}\,\,\,y\cceq -2\cdot x\,\,\,\{y\geq 0\}\]
+  e quindi è dimostrabile che:
+  \[\vdash \{\top\}\,\,\,S\,\,\,\{y\geq 0\}\]
 \end{esempio}
 \subsection{Iterazione}
-Per proseguire bisogna definire meglio il concetto di \textbf{invariante}.
+% Per proseguire bisogna definire meglio il concetto di \textbf{invariante}.
 \begin{definizione}
-  La sesta regola è quella relativa all'iterazione
+  Definiamo:
+  \begin{itemize}
+    \item \textbf{correttezza parziale}, dove la tripla viene letta supponendo a
+    priori che l'esecuzione termini
+    \item \textbf{correttezza totale}, dove la tripla viene letta dovendo anche
+    dimostrare che l'esecuzione termini. Si procede quindi prima dimostrando la
+    correttezza parziale aggiungendo poi la dimostrazione per l'esecuzione
+    finita
+  \end{itemize}
 \end{definizione}
+\begin{definizione}
+  La sesta regola è quella relativa all'iterazione. Abbiamo quindi:
+  \[\{p\}\mbox{ while \textit{B} do \textit{C} endwhile }\{q\}\]
+  ma non posso determinare a priori quante volte si eseguirà $C$, che modifica
+  lo stato della memoria. Per comodità $\mbox{ while \textit{B} do \textit{C}
+    endwhile }$ la chiameremo $W$, quindi in modo compatto abbiamo:
+  \[\{p\}\,\,\,W\,\,\,\{q\}\]
+  Partiamo con la correttezza parziale supponendo a priori che l'esecuzione
+  termini. Si ha quindi che in $q$ sicuramente $B$ è falsa, altrimenti non si
+  avrebbe terminazione. Quindi in realtà abbiamo:
+  \[\{p\}\,\,\,W\,\,\,\{q\land \neg B\}\]
+  Ipotizziamo che all'inizio $B$ sia vera, quindi la precondizione sarà
+  $\{i\land B\}$, con $i$ rappresentante una nuova formula. In questi stati
+  eseguiremo $C$. Suppongo di poter derivare, tramite $C$ eseguito una sola
+  volta, nuovamente $i$:
+  \[\{i\land B\}\,\,\,C\,\,\,\{i\}\]
+  Se vale questa tripla significa che $i$ è un \textbf{invariante} per $C$ e
+  quindi $i$ viene chiamata \textbf{invariante di ciclo}. Nello stato raggiunto
+  dopo $C$ la condizione $B$ può essere valida o meno. Qualora valga dopo la
+  singola esecuzione di $C$ allora avrei ancora $\{i\land B\}$ e dovrei eseguire
+  nuovamente $C$ e dopo varrà ancora $i$ sicuramente e bisogna ristudiare $B$
+  per capire come procedere, in quanto $i$ resterà vera per qualsiasi numero di
+  iterazioni di $C$. Si ha che $i$ resterà vera, teoricamente, anche una volta
+  ``usciti'' dal ciclo. Qualora non valga $B$ si ha che:
+  \[\{i\land \neg B\}\,\,\,W\,\,\,\{i\land \neg B\}\]
+  (dove si nota che $i$ resta vera ma $B$ impedisce di tornare nel ciclo).\\
+  Si ha quindi che:
+  \[\frac{\{i\land B\}\,\,\,C\,\,\,\{i\}}{\{i\}\,\,\,W\,\,\,\{i\land \neg B\}}\]
+  che è la \textbf{regola dell'iterazione}. Scritta in modo completo:
+  \[\frac{\{i\land B\}\,\,\,C\,\,\,\{i\}}{\{i\}\mbox{ while \textit{B} do \textit{C}
+        endwhile }\{i\land \neg B\}}\]
+  Una nozione più forte di \textbf{invariante} può essere espressa dicendo che
+  \[\{i\}\,\,\,C\,\,\,\{i\}\]
+  che si differenzia da quella di \textbf{invariante di ciclo} (dove mi
+  interessa sapere che un invariante sia vero prima del ciclo anche se questa
+  non è un proprietà intrinseca degli invarianti):
+  \[\{i\land B\}\,\,\,C\,\,\,\{i\}\]
+\end{definizione}
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

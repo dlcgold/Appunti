@@ -21,6 +21,7 @@
 \usepackage{fontspec}
 \usepackage{enumerate}
 \usepackage{listings}
+\usepackage{cancel}
 \usepackage{braket}
 \usepackage{marginnote}
 \usepackage{pgfplots}
@@ -758,11 +759,98 @@ linguaggio sopra definito.
     completa sarebbe:
     \[\{x+2>0\land x+2\leq y\}\,\,x \cceq x+1\,\,\{x>0\land x\leq y\}\]
     e anche questa tripla è garantita dalla regola di sostituzione
-  \end{esempio}
+    \ \end{esempio}
 \end{definizione}
-Per proseguire bisogna definire il concetto di \textbf{invariante}.
+\subsection{Istruzione di scelta}
+\begi\n{definizione}
+  La quinta regola è quella relativa all'\textbf{istruzione di scelta} che è
+  della forma:
+  \[\{p\}\mbox{ if \textit{B} then \textit{C} else \textit{D} endif }\{q\}\]
+  Se la condizione $B$ è vera eseguo $C$ altrimenti $D$. In entrambi i casi
+  alla fine deve valere la postcondizione $q$. Separiamo i due casi:
+  \begin{itemize}
+    \item se suppongo vere $p$ e $B$ eseguo $C$ arrivando in $q$:
+    \[\{p\land B\}\,\,\,C\,\,\,\{q\}\]
+    \item se suppongo vera $p$ ma falsa $B$ avrò:
+    \[\{p\land \neg B\}\,\,\,D\,\,\,\{q\}\]
+  \end{itemize}
+  Ricavo quindi la formula generale:
+  \[\frac{\{p\land B\}\,\,\,C\,\,\,\{q\}\,\,\,\,\,\,\,\,\,
+      \{p\land \neg B\}\,\,\,D\,\,\,\{q\}}{\{p\}\mbox{ if \textit{B}
+        then \textit{C} else \textit{D} endif }\{q\}}\]
+\end{definizione}
+\begin{shaded}
+  Come notazione usiamo che:
+  \[\vdash \{p\}\,\,\,C\,\,\,\{q\}\]
+  dove $\vdash$
+segnala che la tripla è stata \textbf{dimostrata/derivabile} con le regole di
+derivazione (si parla quindi di \textit{sintassi}, viene infatti ignorato il
+significato ma si cerca solo di applicare le regole).
+Come notazione usiamo anche che:
+\[\Vdash \{p\}\,\,\,C\,\,\,\{q\}\]
+dove $\Vdash$
+indica che la tripla è \textbf{vera} (si parla quindi di \textit{semantica},
+riferendosi al significato).\\
+\textit{Ogni tripla \textbf{derivabile} è anche \textbf{vera} in qualsiasi
+  interpretazione}.
+\\
+\textit{Ogni tripla \textbf{vera} vorremmo fosse anche \textbf{derivabile} e il
+  discorso verrà approfondito in seguito}.\\
+$\vdash$ può avere a pedice una sigla per la regola rappresentata, ad esempio
+$\vdash_{ass}$ per l'assegnamento.
+\end{shaded}
+\begin{esempio}
+  Vediamo qualche esempio di dimostrazione. Dimostro che la tripla seguente sia
+  vera:
+  \[\{y\geq 0\}\,\,\,x\cceq 2\cdot y+1\,\,\,\{x>0\}\]
+  uso la \emph{regola di assegnamento} (che non ha premesse) partendo dalla
+  postcondizione. Sostituisco e ottengo:
+  \[\vdash_{ass}\{2\cdot y+1> 0\}\,\,\,x\cceq 2\cdot y+1\,\,\,\{x>0\}\]
+  Procedo usando la \emph{regola di implicazione} (sapendo che $y\geq 0\implies
+  2y+1>0$):
+  \[\vdash_{impl}\{y\geq 0\}\,\,\,x\cceq 2\cdot y+1\,\,\,\{x>0\}\]
+  Dimostrando quindi che la tripla è \textbf{vera}.
+\end{esempio}
+\begin{esempio}
+  Vediamo qualche esempio di dimostrazione. Dimostro che la tripla seguente sia
+  vera:
+  \[\{z> 0\}\,\,\,x\cceq (y\cdot z)+1\,\,\,\{x>0\}\]
+  e vediamo che la tripla non è valida in quanto $y$ potrebbe essere negativo e
+  non portare alla positività di $x$. Formalmente cerchiamo un controesempio
+  cercando di non soddisfare la postcondizione. Scelgo in memoria $z=1$ e
+  $y=-2$. Abbiamo fatto quindi un ragionamento semantico. Provo a anche
+  sintatticamente e giungo a:
+  \[\implies\{(y\cdot z+1)> 0\}\,\,\,x\cceq (y\cdot z)+1\,\,\,\{x>0\}\]
+  che non è vero, quindi non posso proseguire.
+\end{esempio}
+\begin{esempio}
+  Vediamo qualche esempio di dimostrazione. Dimostro che la tripla seguente sia
+  vera:
+  \[\{s=x^i\}\,\,\,i\cceq i+1,\, s\cceq s\cdot x\,\,\,\{s=x^i\}\]
+  anche se uguali precondizione e postcondizione fanno riferimento a due momenti
+  della memoria diversi e quindi i valori saranno diversi.\\
+  Abbiamo a che fare con un \textbf{invariante} in quanto la formula non varia
+  tra precondizione e postcondizione anche se i valori saranno diversi (in mezzo
+  al processo posso violare comunque l'invarianza).\\
+  Ragioniamo in modo puramente sintattico. Dobbiamo applicare due volte
+  l'assegnamento (e spesso serve dopo anche la regola di implicazione) e una
+  volta la sequenza. Anche qui partiamo dalla postcondizione risalendo via via
+  alle precondizioni:
+  \[\vdash_{ass}\{sx=x^i\}\,\,\,s\cceq s\cdot x\,\,\,\{s=x^i\}\]
+  Ho creato quindi la condizione intermedia tra i due assegnamenti e proseguendo
+  ho:
+  \[\vdash_{ass}\{sx=x^{i+1}\}\,\,\,i\cceq i+1\,\,\,\{sx=x^i\}\]
+  per transitività si può scrivere:
+  \[\{sx=x^{i+1}\}\,\,\,i\cceq i+1,\, s\cceq s\cdot x\,\,\,\{s=x^i\}\]
+   ma non coincide con quanto voglio dimostrare. Ragiono quindi in modo
+   algebrico. In $\{sx=x^{i+1}\}\,\,\,i\cceq i+1\,\,\,\{sx=x^i\}$ ho infatti:
+   \[\{s\cancel{x}=x^{i+\cancel{1}}\}\to\{sx=x^i\},\mbox{ se }x\neq 0\]
+   e quindi la formula iniziale è dimostrata.
+\end{esempio}
+\subsection{Iterazione}
+Per proseguire bisogna definire meglio il concetto di \textbf{invariante}.
 \begin{definizione}
-  La quinta regola è quella relativa all'iterazione
+  La sesta regola è quella relativa all'iterazione
 \end{definizione}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread

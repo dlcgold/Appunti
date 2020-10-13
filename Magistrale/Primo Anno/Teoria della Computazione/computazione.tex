@@ -74,7 +74,15 @@
 \fancyhead[LE,RO]{\slshape \rightmark}
 \fancyhead[LO,RE]{\slshape \leftmark}
 \fancyfoot[C]{\thepage}
-
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
 
 \title{Teoria della Computazione}
 \author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold}}
@@ -473,10 +481,260 @@ sequenziali.
 \end{definizione}
 \end{shaded}
 \section{Riduzioni polinomiali}
-
+Si hanno alcuni problemi che sono in grado di risolvere qualunque problema di
+decisione in \textbf{NP}. Serviranno prima le definizioni di \textbf{NP-hard} e
+\textbf{NP-complete}.\\
+Vediamo innanzitutto il problema \textit{independent-set} che ci aiuterà
+analisi.
+\begin{definizione}
+  L'\textit{independent-set } di un grafo non orientato è un sottoinsieme
+  $I\subseteq V$ tale che $\forall u,v\in I$ $(u,v)\not\in E$. Il problema
+  \textit{ind\_set}, nella versione di ottimo, è quello di trovare
+  l'\textit{independent-set} di cardinalità massima di un grafo non
+  orientato. Nella versione di decisione $ind\_set_d$ si ha anche il parametro
+  $k$ intero e si cerca se esiste un \textit{independent-set} di cardinalità
+  uguale a $k$. L'\textit{independent-set} di cardinalità massima può essere
+  usato come ``certificato''.
+\end{definizione}
+Questo problema è legato alla \textit{copertura dei vertici}, infatti sappiamo
+che se dall'insieme dei vertici togliamo un sottoinsieme di minima copertura
+troviamo un \textit{independent-set} di cardinalità massima perché sto facendo
+il complemento di un insieme di copertura di cardinalità minima, infatti tra i
+vertici non nell'insieme di copertura di cardinalità minima, ovvero nel
+complemento, non posso avere un arco per definizione e quindi se il primo è di
+cardinalità minima allora il secondo, che è l'\textit{independent-set}, è di
+cardinalità massima. Infatti i vertici nella copertura sono vertici che toccano
+tutti gli archi.\\
+Dal punto di vista delle applicazioni pratiche questi problemi si prestano allo
+studio, per esempio, delle telecomunicazioni.
+\begin{proof}
+  Dimostriamo che $ind\_set_d$ è \textbf{NP}, infatti esiste un algoritmo $A$
+  che in costo polinomiale prende in ingresso il grafo, $k$, e un
+  ``certificato'' $y$ e i vertici in $y$, che sono vertici di un
+  \textit{independent\_set} per il grafo $G$ di cardinalità $k$. L'algoritmo
+  verifica che $y$ è un \textit{independent-set} e il costo della verifica è
+  quadratico su $|y|$, ovvero $|y|^2$ che nel caso peggiore è $|V|^2$. So anche
+  che, per l'input $x$, $O(|x|)=O(|E|+|V|)=O(|V^2|+|V|)$ nel caso peggiore,
+  quindi il tempo di verifica è \textbf{polinomiale}.
+\end{proof}
+\begin{definizione}
+  Vediamo ora il problema di \textbf{soddisfacibilità} $SAT$. Questo problema
+  prende in input una formula booleana $\phi$ in \textbf{forma normale congiunta
+    (CNF)}, ovvero che ha una congiunzione ($\lan$d) come legame tra le
+  \textbf{clausole}. Una clausola è un $\lor$ di \textbf{letterali}, ovvero di
+  variabili booleane $x_i$ o $\neg x_i$. In output ho se la forma sia
+  soddisfacibile o meno. 
+  \begin{esempio}
+    Prendo 3 variabili, $x_1,x_2,x_3$. Creo i letterali  $x_1,x_2,x_3$ e anche
+    $\neg x_1,\neg x_2,\neg x_3$. Creo quindi le clausole $c_1=x_1\lor x_2$,
+    $c_2=x_1\lor \neg x_2$ e $c_3=x_1\lor \neg x_2$. Definisco quindi la CNF
+    $\phi$:
+    
+    \[\phi=(x_1\lor x_2)\land (x_1\lor \neg x_2)\land
+      (x_1\lor \neg x_2)=c_1\land c_2\land c_3\]
+    Quindi in ogni clausola almeno un letterale deve essere vero, cosicché tutte
+    le clausole siano vere rendendo vera la CNF.\\
+    Avendo due letterali a clausola si è definito un $2SAT$.
+  \end{esempio}
+  Il numero di letterali $k$ che compongono la clausola definsice un problema
+  $kSAT$. Si ha che $2SAT\in P$ ma con $k>2$ si ha che $kSAT\in NP$ (in
+  realtà è in \textbf{NP-hard})
+\end{definizione}
+\begin{definizione}
+  Definiamo un problema \textbf{NP-hard} come un problema difficile almeno
+  quanto un problema \textbf{NP}. Ogni che problema $A$ in \textbf{NP} può
+  essere risolto con un chiamata di procedura a $B$, che è un problema
+  \textbf{NP-hard} a cui tutti gli altri ``chiedono aiuto'' per trovare una
+  soluzione. \\
+  Ad esempio \textit{vertex-cover} è un problema \textbf{NP-hard} e quindi posso
+  risolvere ogni problema $A$ in \textbf{NP} con il problema
+  \textit{vertex-cover} $B$.\\
+  Trasformo quindi l'input $w$ di $A$ in un input
+  $f(w)$ per $B$ in tempo polinomiale. La risposta di $B$ con input $f(w)$ è la
+  stessa che $A$ da su input $w$.\\
+  Non tutti i problemi \textbf{NP-hard} sono dentro la classe \textbf{NP}
+\end{definizione}
+\begin{definizione}
+  Definiamo quindi il concetto di \textbf{riduzione}, rappresentato in figura
+  \ref{fig:rid}.\\
+  La riduzione è la trasformazione dell'input di $w$ in $A$ in un input $f(w)$
+  per $B$, in tempo polinomiale. La risposta di $B$ con input $f(w)$ è la stessa
+  che $A$ da su input $w$.\\
+  Si ha che $A$ si riduce polinomialmente a $B$, e si scrive:
+  \[A\leq_p B\]
+  se $\exists\,f$ tale che:
+  \[w \in L_A\mbox{ sse } f(w)\in L_B\]
+  con $f$ calcolabile in tempo polinomiale, infatti il calcolo di $f(w)$ è
+  $=(|w|^p)$, con $p\in\mathbb{N}$ per semplicità. Non devo introdurre una
+  complessità superiore nel contesto di confronto tra problemi (??).\\ 
+  \begin{figure}
+    \centering
+    
+    \psscalebox{0.9 0.9} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-2.8)(15.0,2.8)
+        \definecolor{colour1}{rgb}{0.34901962,0.6627451,0.3019608}
+        \definecolor{colour0}{rgb}{0.8784314,0.20392157,0.20392157}
+        \definecolor{colour2}{rgb}{0.3254902,0.38039216,0.99607843}
+        \psframe[linecolor=colour1, linewidth=0.04, dimen=outer]
+        (13.52,2.8)(1.52,-2.8)
+        \psframe[linecolor=colour0, linewidth=0.04, dimen=outer]
+        (6.32,1.2)(2.72,-1.2)
+        \psframe[linecolor=colour0, linewidth=0.04, dimen=outer]
+        (6.32,1.2)(2.72,-1.2)
+        \psframe[linecolor=colour2, linewidth=0.04, dimen=outer]
+        (11.52,1.2)(7.92,-1.2)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(6.32,0.0)(7.92,0.0)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(0.72,0.0)(2.72,0.0)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(11.52,0.4)(14.32,0.4)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(11.52,-0.4)(14.32,-0.4)
+        \rput[bl](3.7,1.3){Riduzione}
+        \rput[bl](0.0,-0.14){$w$}
+        \rput[bl](4.1,-0.08){$f(w)$}
+        \rput[bl](9.42,-0.08){$B$}
+        \rput[bl](12.26,0.6){yes}
+        \rput[bl](14.42,0.25){yes}
+        \rput[bl](12.34,-0.74){no}
+        \rput[bl](14.42,-0.5){no}
+        \rput[bl](9.24,1.3){$SAT$}
+        \rput[bl](6.72,0.4){$f(w)$}
+      \end{pspicture}
+    }
+    \caption{Rappresentazione grafica della riduzione}
+    \label{fig:rid}
+  \end{figure}
+  Ogni problema $A$ che in \textbf{NP} può essere risolto con una chiamata di
+  procedura a $B$, quindi posso risolvere ogni problema $A\in NP$ con
+  \textit{vertex-cover}, essendo esso un problema \textbf{NP-hard}.
+  
+\end{definizione}
+\begin{definizione}
+  $B$ è \textbf{NP-hard} sse $\for A\in NP$ $A$ si riduce a $B$ in tempo
+  polinomiale:
+  \[A\leq_p B,\,\,\forall A\]
+  Un problema $NP-hard$ può non essere in $NP$, in quanto potrebbe non avere un
+  ``certificato'' per consentire la verifica in tempo polinomiale.
+\end{definizione}
+\begin{definizione}
+  Un problema \textbf{NP-hard} e anche \textbf{NP} si dice che il problema è
+  \textbf{NP-complete} 
+\end{definizione}
+$kSAT$ è il primo problema che si è dimostrato essere anche
+\textbf{NP-complete}.
+\begin{esempio}
+  Vediamo un esempio di riduzione, rappresentata in figura \ref{fig:ride}:
+  \[3SAT\leq_p ind\_set_d\]
+  arrivando e alla conclusione che $ind\_set_d$ è \textbf{NP-completo}.\\
+  \begin{figure}
+    \centering
+    
+    \psscalebox{0.9 0.9} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-2.8)(15.0,2.8)
+        \definecolor{colour1}{rgb}{0.34901962,0.6627451,0.3019608}
+        \definecolor{colour0}{rgb}{0.8784314,0.20392157,0.20392157}
+        \definecolor{colour2}{rgb}{0.3254902,0.38039216,0.99607843}
+        \psframe[linecolor=colour1, linewidth=0.04, dimen=outer]
+        (13.52,2.8)(1.52,-2.8)
+        \psframe[linecolor=colour0, linewidth=0.04, dimen=outer]
+        (6.32,1.2)(2.72,-1.2)
+        \psframe[linecolor=colour0, linewidth=0.04, dimen=outer]
+        (6.32,1.2)(2.72,-1.2)
+        \psframe[linecolor=colour2, linewidth=0.04, dimen=outer]
+        (11.52,1.2)(7.92,-1.2)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(6.32,0.0)(7.92,0.0)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(0.72,0.0)(2.72,0.0)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(11.52,0.4)(14.32,0.4)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(11.52,-0.4)(14.32,-0.4)
+        \rput[bl](3.7,1.3){Riduzione}
+        \rput[bl](0.35,-0.15){$\phi$}
+        \rput[bl](4.1,-0.08){$f(\phi)$}
+        \rput[bl](9.42,-0.08){$B$}
+        \rput[bl](14.42,0.25){1}
+        \rput[bl](14.42,-0.5){0}
+        \rput[bl](9.0,1.3){$ind\_set_d$}
+        \rput[bl](6.72,0.4){$G_\phi$}
+      \end{pspicture}
+    }
+    \caption{Rappresentazione grafica del'esempio \ref{es:1}}
+    \label{fig:ride}
+  \end{figure}
+  e vediamo che $\phi$ è soddisfacibile sse $G_\phi$ ha un
+  \textit{independent-set} di dimensione $k=|\phi|$, con $|\phi|$ pari al numero
+  di clausole della formula.\\
+  Costruisco quindi un grafo che ha un vertice per ogni letterale della
+  clausola. Collego i tre letterale della clausola ottenendo un
+  ``triangolo'', detto \textit{gadget}, che rappresenta una clausola. Infine
+  collego ogni letterale al suo negato.
+  \newpage
+  Quindi per la formula:
+  \[\phi=(\neg x_1\lor x_2\lor x_3)\land(x_1\lor \neg x_2\lor x_3)\land(\neg
+    x_1\lor x_2\lor x_4)\]
+  avrò il grafo $G$ che codifica la formula $\phi$:
+  \begin{figure}[H]
+    \centering
+    \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-1.5798438)(12.92,1.5798438)
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](1.6,0.9050586){0.4}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](0.4,-0.6949414){0.4}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](2.8,-0.6949414){0.4}
+        \psline[linecolor=black, linewidth=0.02](1.6,0.5050586)(2.4,-0.6949414)
+        \psline[linecolor=black, linewidth=0.02](1.6,0.5050586)(0.8,-0.6949414)
+        \psline[linecolor=black, linewidth=0.02](0.8,-0.6949414)(2.4,-0.6949414)
+        \rput[bl](1.2,1.3050586){$\neg x_1$}
+        \rput[bl](2.6,-1.4949414){$x_3$}
+        \rput[bl](0.2,-1.4949414){$x_2$}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](6.4,0.9050586){0.4}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](5.2,-0.6949414){0.4}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](7.6,-0.6949414){0.4}
+        \psline[linecolor=black, linewidth=0.02](6.4,0.5050586)(7.2,-0.6949414)
+        \psline[linecolor=black, linewidth=0.02](6.4,0.5050586)(5.6,-0.6949414)
+        \psline[linecolor=black, linewidth=0.02](5.6,-0.6949414)(7.2,-0.6949414)
+        \rput[bl](6,1.3050586){$\neg x_2$}
+        \rput[bl](7.4,-1.4949414){$x_3$}
+        \rput[bl](5.0,-1.4949414){$x_2$}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](11.2,0.9050586){0.4}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](10.0,-0.6949414){0.4}
+        \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
+        fillcolor=black, dimen=outer](12.4,-0.6949414){0.4}
+        \psline[linecolor=black,linewidth=0.02](11.2,0.5050586)(12.0,-0.6949414)
+        \psline[linecolor=black,linewidth=0.02](11.2,0.5050586)(10.4,-0.6949414)
+        \psline[linecolor=black,linewidth=0.02]
+        (10.4,-0.6949414)(12.0,-0.6949414)
+        \rput[bl](10.8,1.3050586){$\neg x_1$}
+        \rput[bl](12.2,-1.4949414){$x_4$}
+        \rput[bl](9.8,-1.4949414){$x_2$}
+        \psline[linecolor=black, linewidth=0.02](0.8,-0.6949414)(6.0,0.9050586)
+        \psline[linecolor=black, linewidth=0.02](2.0,0.9050586)(4.8,-0.6949414)
+        \psline[linecolor=black, linewidth=0.02](5.6,-0.6949414)(10.8,0.9050586)
+        \psline[linecolor=black, linewidth=0.02](6.8,0.9050586)(9.6,-0.6949414)
+      \end{pspicture}
+    }
+  \end{figure}
+  % disegno grafo per esempio
+  \label{es:1}
+\end{esempio}
 \end{document}
 
 
 % LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add TSP
 % LocalWords:  load esguite dimostrabilmente primis Stirling NTDM vertex cover
-% LocalWords:  exptime all img problem png
+% LocalWords:  exptime all img problem png independent ind nell CNF definsice
+% LocalWords:  soddisfacibilità polinomialmente

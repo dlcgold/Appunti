@@ -97,8 +97,8 @@
   morestring=[b]',
   morestring=[b]",
   classoffset=4, % starting new class
-  otherkeywords={>,<,.,;,-,!,=},
-  morekeywords={>,<,.,;,-,!,=},
+  otherkeywords={>,<,.,;,-,!,=, +, /, *},
+  morekeywords={>,<,.,;,-,!,=, +, /, *},
   keywordstyle=\color{darkgray},
   classoffset=0,
 }
@@ -929,18 +929,137 @@ $\vdash_{ass}$ per l'assegnamento.
   Si ha quindi che:
   \[\frac{\{i\land B\}\,\,\,C\,\,\,\{i\}}{\{i\}\,\,\,W\,\,\,\{i\land \neg B\}}\]
   che è la \textbf{regola dell'iterazione}. Scritta in modo completo:
-  \[\frac{\{i\land B\}\,\,\,C\,\,\,\{i\}}{\{i\}\mbox{ while \textit{B} do \textit{C}
-        endwhile }\{i\land \neg B\}}\]
+  \[\frac{\{i\land B\}\,\,\,C\,\,\,\{i\}}{\{i\}\mbox{ while \textit{B} do
+        \textit{C} endwhile }\{i\land \neg B\}}\]
   Una nozione più forte di \textbf{invariante} può essere espressa dicendo che
   \[\{i\}\,\,\,C\,\,\,\{i\}\]
   che si differenzia da quella di \textbf{invariante di ciclo} (dove mi
   interessa sapere che un invariante sia vero prima del ciclo anche se questa
   non è un proprietà intrinseca degli invarianti):
   \[\{i\land B\}\,\,\,C\,\,\,\{i\}\]
+  Ricordiamo che stiamo dando per scontata la \textbf{terminazione} tramite la
+  \textbf{correttezza parziale}.\\
+  Facciamo qualche osservazione:
+  \begin{itemize}
+    \item nella precondizione della conclusione non si ha $B$, in quanto il
+    corpo dell'iterazione può anche non essere mai eseguito
+    \item data un'istruzione iterativa posso avere più di un invariante. Si ha
+    inoltre che ogni formula iterativa ha l'\textbf{invariante banale}
+    $i=\top$. Possiamo avere anche una formula in cui compaiono variabili che
+    non sono modificate della funzione iterativa e quindi l'intera formula è un
+    \textit{invariante di ciclo}. Studiamo quindi gli invarianti ``più utili''
+    \item nei casi pratici non consideriamo ovviamente iterazioni isolate ma
+    iterazioni inserite in un programma. In questi casi quindi la scelta di un
+    invariante adeguato dipende sia dall'iterazione che dall'intero contesto.
+    \begin{esempio}
+      Ho un programma su cui voglio dimostrare:
+      \[\{p\}\mbox{ \textit{C; W; D} }\{q\}\]
+      con $W$ iterazione e $C,D$ comandi.\\
+      Spezziamo quindi il programma per fare la dimostrazione, tramite la regola
+      della sequenza:
+      \[\{p\}\mbox{ \textit{C} }\{r\}\mbox{ \textit{W} }\{z\}\mbox{ \textit{D}
+        }\{q\}\]
+      $r$ sarà quindi la precondizione dell'iterazione $W$ che porterà a $z$ che
+      sarà precondizione di $D$.\\
+      Sapendo che la regola di derivazione per $W$ è:
+      \[\{i\}\mbox{ \textit{W} }\{i\land\neg B\]
+      Confronto la tripla con la ``catena'' sopra espressa. Si nota che $r$
+      dovrà implicare l'invariante per $W$.
+    \end{esempio}
+  \end{itemize}
 \end{definizione}
-
+\begin{esempio}
+  Vediamo quindi un esempio completo.\\
+  Si prenda il seguente programma:
+  \begin{listing}[H]
+    \begin{lstlisting}
+      i ~ 0; s ~ 1;
+      while i < N do
+        i ~ i + 1;
+        s ~ s * x;
+      endwhile  
+    \end{lstlisting}
+    \caption{Programma $P$}
+    \label{E:W}
+  \end{listing}
+  \textit{Per comodità chiamo $A$ i due assegnamenti iniziali,
+      $W$ l'iterazione e $C$ il corpo dell'iterazione.}\\
+  Ci proponiamo di derivare:
+  \[\{N\geq 0\}\mbox{ \textit{P} }\{s\cceq x^N\}\]
+  $x$ e $N$ sono variabili, nella realtà costanti non venendo mai modificate da
+  $P$, e il loro valore fa parte dello stato della memoria.\\
+  Concentriamoci in primis sull'iterazione cercando un invariante. Una strategia
+  semplice è quella di simulare i primi passi di una esecuzione. Supponendo $N$
+  comunque non nullo abbiamo, seguendo le due variabili $i$ e $s$ nelle varie
+  iterazioni (procedendo verso destra nella tabella), procedendo in modo
+  \textit{simbolico} per $s$ (usando quindi il simbolo $x$ direttamente):
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c|ccccc}
+      i & 0 & 1 & 2 & 3 & $\ldots$\\
+      s & 1 & $x$ & $x^2$ & $x^3$ & $\ldots$
+    \end{tabular}
+  \end{table}
+  Quindi $s= x^i$ è il nostro invariante. Dimostro questa ipotesi è vera,
+  dimostrando:
+  \[\{s=x^i\land i<N\}\mbox{ \textit{C} }\{s=x^i\}\]
+  sapendo che essa è la premessa alla regola di iterazione.\\
+  Procedo quindi con la dimostrazione, avendo l'assegnamento:
+  \[\vdash_{ass}\{sx=x^{i+1}\}\mbox{ \textit{C} }\{s=x^i\}\]
+  infatti i due assegnamenti sono \emph{indipendenti}, permettendo di applicare
+  in una sola volta due regole di assegnamento.\\
+  Sapendo che $s\cancel{x}=x^{i+\cancel{i}}\implies s=x^i$. Ho quindi mostrato
+  che:
+  \[\vdash \{s=x^i\}\mbox{ \textit{C} }\{s=x^i\}\]
+  dimostrando che ho effettivamente l'invariante $s= x^i$ (e nel dettaglio
+  abbiamo trovato un \textbf{invariante forte}, che lo è a priori rispetto alla
+  condizione booleana $B$).\\
+  Vogliamo però ottenere come precondizione $\{s=x^i\land i<N\}$. Sapendo però
+  che $s= x^i\land i<N$ è una regola ``più forte'' di $s= x^i$ (se è vera la
+  prima sicuramente è vera anche la seconda) posso usare
+  l'implicazione e dire che:
+  \[\{s=x^i\land i<N\}\implies \{s= x^i\}\]
+  quindi:
+  \[\vdash_{impl} \{s=x^i\land i<N\}\mbox{ \textit{C} }\{s=x^i\}\]
+  posso quindi applicare la regola dell'iterazione avendo la premessa corretta e
+  ottenendo quindi:
+  \[\vdash_{iter}\{s=x^i\}\mbox{ \textit{W} }\{s=x^i\land i\geq N\}\]
+  ma la postcondizione non ci sta implicando $s=x^N$, per avere:
+  \[\{N\geq 0\}\mbox{ \textit{P} }\{s\cceq x^N\}\]
+  bisogna quindi \textbf{rafforzare} l'invariante, in modo che l'invariante
+  implichi che alla fine dell'esecuzione $i=N$.\\
+  Procediamo quindi con una nuova ipotesi, cercando di dimostrare che $i\leq N$
+  è un invariante:
+  \[\{i\leq N\land i<N\}\mbox{ \textit{C} }\{i\leq N\}\]
+  Questa precondizione contiene una formula che è più restrittiva dell'altra.
+  Procedo con l'assegnamento (CAPIRE QUESTA PARTE):
+  \[\vdash_{ass}\{i+1\leq N\}\mbox{ \textit{C} }\{i\leq N\}\]
+  ma sapendo che $i<N\implies i+1\leq N$ ottengo:
+  \[\vdash_{impl}\{i< N\}\mbox{ \textit{C} }\{i\leq N\}\]
+  Dimostrando quindi che è un invariante.\\
+  Passo quindi all'iterazione:
+  \[\vdash_{iter}\{i\leq N\}\mbox{ \textit{W} }\{i\leq N\land i\geq N\}\]
+  e la postcondizione è uguale a dire che $i=N$.\\
+  Considerando quindi i due invarianti ottengo:
+  \[\vdash_{iter}\{s=x^i\land i\leq N\}\mbox{ \textit{W} }
+    \{s=x^i\land i= N\}\]
+  Dobbiamo però dimostrare anche la parte degli assegnamenti iniziali:
+  \[\{N\geq 0\}\mbox{ \textit{A} }\{s=x^i\land i\leq N\}\]
+  Bisogna infatti vedere se anche le condizioni iniziali permettono
+  all'invariante doppio di restare tale.\\
+  Applico quindi due volte l'assegnamento (partendo dal fondo); il primo con
+  $s\cceq 1$: 
+  \[\vdash_{ass}\{1=x^i\land i\leq N\}\mbox{ $s\cceq 1$ }\{s=x^i\land i\leq N\}\]
+  Passo quindi a $i\cceq 0$ seguendo il nuovo ordine delle condizioni:
+  \[\vdash_{ass}\{1=x^0\land 0\leq N\}\mbox{ $i\cceq 0$ }\{1=x^i\land i\leq N\}\]
+  Applico quindi la sequenza con la prima parte (sapendo $1=x^0$ è sempre vero):
+  \[\vdash_{seq}\{N\geq 0\}\mbox{ \textit{A} }\{s=x^i\land i\leq N\}\]
+  completando la dimostrazioni.\\
+  Da notare solo che $x$ deve essere non nullo.
+\end{esempio}
+\textbf{\textit{Altri esempi sono presenti sulla pagina del corso}}.
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
 % LocalWords:  if return ht primis postcondizione Hoare then endif for endwhile
-% LocalWords:  endfor program counter skip and not
+% LocalWords:  endfor program counter skip and not cccccc ccccc

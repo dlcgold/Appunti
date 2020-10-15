@@ -661,7 +661,7 @@ $kSAT$ è il primo problema che si è dimostrato essere anche
         \rput[bl](14.42,0.25){1}
         \rput[bl](14.42,-0.5){0}
         \rput[bl](9.0,1.3){$ind\_set_d$}
-        \rput[bl](6.72,0.4){$G_\phi$}
+        \rput[bl](6.85,0.2){$G_\phi$}
       \end{pspicture}
     }
     \caption{Rappresentazione grafica del'esempio \ref{es:1}}
@@ -678,7 +678,7 @@ $kSAT$ è il primo problema che si è dimostrato essere anche
   Quindi per la formula:
   \[\phi=(\neg x_1\lor x_2\lor x_3)\land(x_1\lor \neg x_2\lor x_3)\land(\neg
     x_1\lor x_2\lor x_4)\]
-  avrò il grafo $G$ che codifica la formula $\phi$:
+  avrò il grafo $G_\phi$ che codifica la formula $\phi$:
   \begin{figure}[H]
     \centering
     \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
@@ -707,7 +707,7 @@ $kSAT$ è il primo problema che si è dimostrato essere anche
         \psline[linecolor=black, linewidth=0.02](5.6,-0.6949414)(7.2,-0.6949414)
         \rput[bl](6,1.3050586){$\neg x_2$}
         \rput[bl](7.4,-1.4949414){$x_3$}
-        \rput[bl](5.0,-1.4949414){$x_2$}
+        \rput[bl](5.0,-1.4949414){$x_1$}
         \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
         fillcolor=black, dimen=outer](11.2,0.9050586){0.4}
         \pscircle[linecolor=black, linewidth=0.04, fillstyle=solid,
@@ -727,9 +727,76 @@ $kSAT$ è il primo problema che si è dimostrato essere anche
         \psline[linecolor=black, linewidth=0.02](6.8,0.9050586)(9.6,-0.6949414)
       \end{pspicture}
     }
+    \label{es:1}
   \end{figure}
-  % disegno grafo per esempio
-  \label{es:1}
+  Quindi un \textbf{gadget} è una rappresentazione dell'input del problema $A$
+  di partenza e ogni \textbf{gadget} rappresenta una clausola.\\
+  Ricordiamo che $\phi$ è soddisfacibile sse esiste un assegnamento delle
+  variabili della formula tale per cui almeno un letterale di ogni clausola è
+  vero. Nel grafo relativo alla formula lego quindi un letterale ad ogni suo
+  complemento al fine di poter identificare i valori di verità e avendo il
+  calcolo di \textit{independent-set} (per la \textbf{riduzione}) prendo uno
+  solo degli estremi di un arco, e quindi uno solo tra $x_i$ e $\neg x_i$,
+  codificando l'assegnamento di verità. Il concetto di \textbf{riduzione} è
+  quindi ritrovabile nella capacità di rappresentare un problema in un'altra
+  forma, studiabile con un altro algoritmo.
+  \begin{proof}
+    Indichiamo con $A$ $3SAT$ e con $B$ \textit{independent-set}.\\
+    Effettuiamo quindi la prova finale, la dimostrazione vera e propria. A
+    questo livello di comprensione abbiamo dimostrato
+    l'esistenza della funzione $f$, che trasforma $\phi$ (ovvero l'input di $A$)
+    in $\langle G, k\rangle$, ovvero l'input di $B$, e che essa è in tempo
+    polinomiale. Abbiamo quindi che $w\in L_A$ sse $f(w)\in L_B$. Se $\phi$ è
+    vera allora esiste un \textit{independent-set} di dimensione $k$ per
+    $\langle G, k\rangle$.\\ 
+    Nell'\,''altro verso'' abbiamo che se esiste un \textit{independent-set} di
+    dimensione $k$ per $\langle G, k\rangle$ allora $\phi$ è vera. Dimostrare
+    questi due ``versi'' equivale a dimostrare la riduzione.\\
+    Il \textbf{primo verso} si dimostra dicendo che dato un assegnamento di
+    verità si seleziona un letterale vero da ogni triangolo. Questi letterali
+    veri scelti formano l'\textit{independent-set} $S$, che ha dimensione
+    $k$. Questo può accadere sse $\phi$ è vera, infatti per ogni clausola $c_i$
+    $\exists \,\,l_{ij}$, letterale, che rende vera $c_i$, a questo punto tale
+    letterale è un vertice del triangolo, ovvero del gadget $g_{c_i}$, (mi basta
+    infatti un letterale vero per triangolo) e, poiché
+    tutte le clausole sono vere, ho la scelta di $k$ vertici se $k$ è il numero
+    delle clausole. Esiste quindi un \textit{independent-set} di dimensione
+    $k$.\\
+    Per questo si potrebbe fare una \textbf{dimostrazione per costruzione},
+    ovvero se rendo vera $c_y$ con $l_y$ significa che la variabile $x_i$ può
+    essere usata o come 1 o come 0 nell'assegnamento di verità in un altro
+    letterale $l_z$, che rende vera la clausola $c_z$. Ma $x_i$, se già usata,
+    non posso più usarla con valore opposto a quello scelto per $c_y$ e quindi
+    non esiste un arco di collegamento tra $l_y$ e $l_z$.\\
+    Si può dimostrare anche per \textbf{assurdo}. Se esiste un arco tra i due
+    letterali $l_z$ e $l_y$ che rendono vere le clausole $c_z$ e $c_y$,
+    allora ottengo una contraddizione sugli assegnamenti di verità, asserendo
+    che i due letterali sono uno la negazione dell'altro ma entrambi sono
+    veri, per poter rendere vere le clausole. 
+    \\
+    \\
+    Il \textbf{secondo verso} si dimostra dicendo che, dato un
+    \textit{independent-set} 
+    $S$ di dimensione $k$, $S$ deve contenere un vertice per triangolo. Ponendo
+    quindi i letterali contenuti in $S$ come veri si ottiene un assegnamento di
+    verità che è \textbf{consistente} e tutte le clausole sono soddisfatte.
+    Quindi se esiste un \textit{independent-set} di dimensione $k$ allora trovo
+    un assegnamento alle variabili $x_i,\,\,\forall \,\,1\ldots n$ che rende
+    vera $\phi$, ovvero assegno 0 o 1 a ciascuna variabile (ovviamente o 1 o 0,
+    non entrambi). Se esiste l'\textit{independent-set} di dimensione $k$ pari
+    al numero delle clausole, allora per ogni gadget $g_{c_i}$,
+    che rappresenta una clausola, esiste un vertice nel gadget che si trova
+    anche nell'\textit{independent-set}, quindi esiste un letterale, per ogni
+    clausola $c_i$ tale che non è collegato ad un altro letterale
+    dell'\textit{independent-set}, ovvero non è collegato ad un altro letterale
+    di un'altra clausola (ovvero ho un nodo per gadget che non ha un arco verso
+    un nodo di un altro gadget). Quindi per ogni letterale vedo la variabile che
+    rende vero il letterale e con il valore dato alla variabile costruisco
+    l'assegnamento o 0 o 1 a quella variabile (se $l_i=\neg x_j$ allora
+    $x_j=0$ e se $l_i= x_j$ allora $x_j=1$). Trovo quindi l'assegnamento delle
+    variabili che è di verità per $\phi$, dimostrando quindi che $\phi$ è vera.
+  \end{proof}
+
 \end{esempio}
 \end{document}
 
@@ -737,4 +804,4 @@ $kSAT$ è il primo problema che si è dimostrato essere anche
 % LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add TSP
 % LocalWords:  load esguite dimostrabilmente primis Stirling NTDM vertex cover
 % LocalWords:  exptime all img problem png independent ind nell CNF definsice
-% LocalWords:  soddisfacibilità polinomialmente
+% LocalWords:  soddisfacibilità polinomialmente dell

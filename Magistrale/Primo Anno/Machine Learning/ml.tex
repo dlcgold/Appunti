@@ -66,16 +66,24 @@
     fill=black,
     minimum height=8mm,
     inner xsep=2pt
-    }
-  } 
+  }
+} 
 \usetikzlibrary{automata,positioning}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
 \fancyhead[LO,RE]{\slshape \leftmark}
 \fancyfoot[C]{\thepage}
-
-
+\definecolor{darkgreen}{rgb}{0.03,0.43, 0.30}
+\usepackage[usenames,dvipsnames]{pstricks}
+\usepackage{epsfig}
+\usepackage{pst-grad} % For gradients
+\usepackage{pst-plot} % For axes
+\usepackage[space]{grffile} % For spaces in paths
+\usepackage{etoolbox} % For spaces in paths
+\makeatletter % For spaces in paths
+\patchcmd\Gread@eps{\@inputcheck#1 }{\@inputcheck"#1"\relax}{}{}
+\makeatother
 \title{Machine Learning}
 \author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold}}
 \date{}
@@ -84,7 +92,7 @@
 \begin{document}
 \maketitle
 
-\definecolor{shadecolor}{gray}{0.80}
+\definecolor{shadecolor}{gray}{0.90}
 \setlist{leftmargin = 2cm}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definizione}{Definizione}
@@ -216,35 +224,101 @@ un esempio (banalmente una funzione target $f$ con esempio $(x, f(x))$, ovvero
 una coppia). Si cerca quindi un'ipotesi $h$, a partire da un insieme d'esempi di
 apprendimento, tale per cui $h\approx f$. Questo è un modello semplificato
 dell'apprendimento reale in quanto si ignorano a priori conoscenze e si assume
-di avere un insieme di dati.Viene usato un approccio che sfrutta anche il
+di avere un insieme di dati. Viene usato un approccio che sfrutta anche il
 \textit{Rasoio di Occam}.
 \begin{shaded}
-  Terminologia:
+  \textbf\textit{{Terminologia:}}
   \begin{itemize}
-    \item $X$, \textbf{spazio delle istanze}
-    \item $D$, \textbf{training set}
-    \item $c$, \textbf{concetto}, $c\subseteq X$
-    \item $h$, \textbf{ipotesi}, $h\subseteq X$
-    \item $(x, f(x))$, \textbf{esempio}, tale per cui:
-    \[f(x)=
+    \item $X$, \textbf{spazio delle istanze}, ovvero la collezione di tutte le
+    possibili \textbf{istanze} utili per qualche compito di
+    \textit{learning}. In termini statistici lo \textit{spazio delle istanze}
+    non è altro che lo \textbf{spazio campione} (ovvero lo spazio degli esiti
+    fondamentali di un esperimento concettuale)
+    \item $x\in X$, \textbf{istanza}, ovvero un singolo ``oggetto'' preso dallo
+    \textbf{spazio delle istanze}. Ogni \textbf{istanza} è rappresentata tramite
+    un \textbf{vettore di attributi unici} (un attributo per posizione del
+    vettore)
+    \item $c$, \textbf{concetto}, $c\subseteq X$, ovvero un sottoinsieme dello
+    \textit{spazio delle istanze} che descrive una \textit{classe} di oggetti
+    (ovvero di istanze) alla quale siamo interessati per costruire un modello di
+    \textit{machine learning}. In pratica raccolgo quel sottoinsieme di istanze
+    che mi garantiscono, per esempio, uno o più attributi. La nozione statistica
+    equivalente è quella di \textit{evento} (ovvero un sottoinsieme dello
+    \textit{spazio campione}). Si ha quindi che, preso un concetto $A\subseteq
+    X$:
+    \[f_A:X\to\{0,1\}\]
+    \[f_a(x)=
       \begin{cases}
-        1& \mbox{se } x\subseteq X\\
-        0& \mbox{altrimenti}
+        1& \mbox{ se } x\in A\\
+        0& \mbox{ altrimenti}
       \end{cases}
     \]
+    \item $h$, \textbf{ipotesi}, $h\subseteq X$
+    \item $H$, \textbf{spazio delle ipotesi}
+    \item $(x, f(x))$, \textbf{esempio},
+    ovvero prendo un'istanza e la vado ad etichettare con la sua classe di
+    appartenenza. La funzione $f$ è detta \textbf{funzione target}
+    \item $D=\{(x_1,f(x_1)),\ldots,(x_n,f(x_n))\}$, \textbf{training set},
+    ovvero è la raccolta degli esempi. Qualora si avesse a che fare con un 
+    \textit{training non supervisionato} si avrebbe:
+    $D=\{x_1,\ldots,x_n\}$
     \item $\{(x_1',f(x_1')),\ldots,(x_n',f(x_n'))\}$, \textbf{test}
-    \item $\{(x_1,f(x_1)),\ldots,(x_n,f(x_n))\}$, \textbf{training set}
+    \item un \textbf{modello di machine learning} (dove \textit{machine
+      learning} viene anche definito come lo studio di diverse strategie, più
+    precisamente di ottimizzazione, per
+    cercare ipotesi soddisfacenti/efficienti nello spazio delle ipotesi) è
+    quindi l'\textit{ipotesi migliore}. Questo \textbf{modello predittivo} viene
+    addestrato tramite il \textit{training set} e servirà per inferire nuove
+    informazioni mai state osservate nel \textit{training set}. Lo
+    \textit{spazio delle ipotesi} può quindi essere chiamato anche
+    \textbf{spazio dei modelli} (come del resto \textit{ipotesi} e
+    \textbf{modello} intendono la stessa cosa)
+    \item \textbf{linguaggio delle ipotesi}, è il linguaggio che definisce lo
+    \textit{spazio delle ipotesi/modelli}
+    \begin{esempio}
+      Prendiamo un problema semplice di \textit{regressione lineare}.\\
+      In questo contesto un'istanza è un punto $(x,y)$, lo spazio delle ipotesi
+      è quello formato dalle rette $y=a+bx$ (dove $a$ è il nostro
+      \textbf{bias}). Tra tutte queste rette cerco quella che sarà il
+      \textbf{modello predittivo}, tramite la quale poter prevedere l'andamento
+      dei vari punti (di modo che dato un $x$ sia in grado di stabilire un buon
+      $y$)
+    \end{esempio}
+    
     \item \textbf{cross validation}, ovvero ripeto $m$ volte la validazione su
     campioni diversi di input per evitare che un certo risultato derivi dalla
     fortuna 
     \item \textbf{ipotesi H}, ovvero una congiunzione $\land$ di vincoli sugli
     attributi. Tale ipotesi è \textbf{consistente}, ovvero è coerente con tutti
     gli esempi
+    \item \textbf{soddisfazione di un'ipotesi}: un'istanza $x$ soddisfa
+    un'ipotesi $h$ sse tutti i vincoli espressi da $h$ sono soddisfatti dai
+    valori di $x$ e si indica con:
+    \[h(x)=1\]
+    \begin{esempio}
+      Avendo:
+      \[x=\langle S,W,N,S,W,S\rangle \mbox{ \textnormal{e}
+        }h=\langle S,?,?,S,?,S\rangle\]
+      posso dire che $x$ soddisfa $h$.\\
+      se invece ho che:
+      \[h=\langle S,?,?,\emptyset,?,S\rangle\]
+      posso dire che $x$ non soddisfa $h$.
+    \end{esempio}
   \end{itemize}
 \end{shaded}
 Si avrà, in realtà, a che fare con dati, di target e ipotesi,
-booleani e questo ambito è propriamente chiamato \textbf{concept learning}. In
-questo contesto si cerca di capire quale funzione booleana è adatta al mio
+booleani e questo ambito è propriamente chiamato \textbf{concept learning}.
+\begin{definizione}
+  Il \textbf{concept learning} è la ricerca, nello spazio delle ipotesi, di
+  funzioni che assumano valori all'interno di $\{0,1\}$. In altre parole si
+  parla di funzioni che hanno come dominio lo \textbf{spazio delle ipotesi} e
+  come codominio $\{0,1\}$:
+  \[f:X\to\{0,1\}\]
+  Volendo si possono usare insiemi e non funzioni.\\
+  Si cerca quindi con opportune procedure la miglior ipotesi che si adatta
+  meglio al concetto implicato dal \textit{training set}
+\end{definizione}
+In questo contesto si cerca di capire quale funzione booleana è adatta al mio
 addestramento. In altre parole si cerca di apprendere un'ipotesi booleana
 partendo da esempi di training composti da input e output della
 funzione. Qualora nel concept learning si abbia a che fare con più di due 
@@ -253,12 +327,32 @@ Nel concept learning un'ipotesi è un insieme di valori di attributi e ogni
 valore può essere:
 \begin{itemize}
   \item specificato
-  \item non importante e si indica con ?
-  \item nullo e si indica con $\emptyset$
+  \item non importante, che si indica con ``?'', e che può assumere qualsiasi
+  valore. Avere un'ipotesi con tutti i valori del vettore pari a ``?'' implica
+  avere l'ipotesi più generale, avendo classificato tutte le istanze solo come
+  esempi positivi 
+  \item nullo e si indica con $\emptyset$. Avere un'ipotesi con tutti i valori
+  del vettore pari a $\emptyset$ implica avere l'ipotesi più specifica, avendo
+  classificato tutte le istanze solo come esempi negativi 
 \end{itemize}
-Quindi, dato un training set $D$, cerco di determinare un'ipotesi $h\in H$ tale
-che: 
-\[h(x)=c(x),\,\forall x\in X\]
+\begin{esempio}
+  Vediamo quindi la rappresentazione di una ipotesi (ipotizzando di avere a che
+  fare con solo 4 attributi $A_i$, sempre in prospettiva booleana):
+  \[h=\langle 0, 1, ?, 1\rangle = \langle A_1=0, A_2=1, A_3=\,?, A_4=1\rangle\]
+  nella realtà, grazie al ``?'' riferito all'istanza, l'ipotesi $h$ è un insieme
+  di due ipotesi: 
+  \[h\in\{(0, 1, 0, 1),\,(0, 1, 1, 1)\}\]
+  \textbf{passando quindi da una notazione per ipotesi ad una insiemistica}.\\
+  Ricordiamo inoltre che lo spazio delle istanze $X$, dal punto di vista
+  insiemistico è:
+  \[X=\{(x_1,x_2,x_3,x_3): \,\,x_1\in A_1,x_2\in A_2, x_3\in A_3, x_4\in A_4\}\]
+  Se un'istanza $x$ soddisfa i vincoli di $h$ allora $h$ classifica $x$ come
+  esempio positivo:
+  \[h(x)=1\]
+\end{esempio}
+Quindi, dato un \textit{training set} $D$, cerco di determinare un'ipotesi $h\in
+H$ tale che: 
+\[h(x)=c(x),\,\forall x\in D\]
 Si ha la teoria delle \textbf{ipotesi di apprendimento induttivo} che dice che
 se la mia $h$ approssima bene nel \textit{training set} allora approssima bene
 su tutti gli esempi non ancora osservati.\\
@@ -279,10 +373,193 @@ Il concept learning è quindi una ricerca del \textit{fit} migliore.
   Dal punto di vista logico si ha che $h_j$ è \textbf{più generale di} $h_k$ sse
   impone meno vincoli di $h_k$
 \end{definizione}
-\textit{Lo spazio delle ipotesi è descritto da una congiunzione di attributi.}\\
-Parliamo ora algoritmo \textbf{Find-S}. Questo algoritmo permette di partire
-dall'ipotesi più specifica (attributi nulli, ovvero$\emptyset,\ldots,\emptyset$)
-e generalizzarla, 
+\textit{Lo spazio delle ipotesi è descritto da una congiunzione di attributi.}
+\begin{esempio}
+  Facciamo un esempio ``giocattolo'' di situazione di \textbf{concept
+    learning}.\\ 
+  Il \textbf{target concept}, ovvero la domanda che ci si pone, è:\\
+  \begin{center}
+    \textit{In quali tipologie di giorni $A$ apprezza fare sport acquatici?}
+  \end{center}
+  Abbiamo quindi una serie di attributi per il meteo con i vari valori che
+  possono assumere:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{|c|c|}
+      \hline
+      \textbf{Attributo} & \textbf{\textit{Possibili valori}}\\
+      \hline
+      sky & \textit{Sunny, Cloudy, Rainy}\\
+      temp & \textit{Warm, Cold}\\
+      humid & \textit{Normal, High}\\
+      wind & \textit{Strong, Weak}\\
+      water & \textit{Warm, Cold}\\
+      forecast & \textit{Same, Change}\\
+      \hline
+    \end{tabular}
+  \end{table}
+  In ottica \textit{concept learning} si cerca quindi la \textbf{funzione
+    target} $enjoySport$ (che sarebbe la nostra funzione $c$): 
+  \[enjoySport:X\to\{0,1\}\]
+  Vediamo quindi anche un esempio di \textit{training set} $D$ (per praticità i
+  valori degli attributi sono indicati con la sola iniziale):
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{|c|c|c|c|c|c|c|}
+      \hline
+      \textbf{sky} & \textbf{temp} & \textbf{humid} & \textbf{wind} &         
+      \textbf{water} & \textbf{forecast} & \textbf{enjoySport}\\
+      \hline
+      S & W & N & S & W & S & \color{darkgreen} yes\\
+      S & W & H & S & W & S & \color{darkgreen} yes\\
+      R & C & H & S & W & C & \color{red} no\\
+      S & W & H & S & C & C & \color{darkgreen} yes\\
+      \hline
+    \end{tabular}
+  \end{table}
+  Dove nella colonna finale si ha la risposta booleana al problema, è infatti
+  l'\textbf{etichetta target}.\\
+  Bisogna quindi cercare un'ipotesi $h$ tale che $h(x)=c(x)$,
+  per tutte le istanze nel \textit{training set}.\\
+  Un'ipotesi $h$, anch'essa rappresentata come vettore, sarà quindi una
+  congiunzione $\land$ di vincoli di valore sugli attributi.
+  \label{es:tab}
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio anche relativo alle nozioni di \textbf{più generale di}.\\
+  Si hanno due ipotesi:
+  \[h_J=\langle S,?,?,?,?,?\rangle\]
+  \[h_k=\langle S,?,?,S,?,?\rangle\]
+  e quindi si ha che:
+  \[h_J\geq h_k \mbox{ \textnormal{ovvero} }h_k(x)=1\implies h_j(x)=1\]
+  infatti un'istanza positiva per $h_k$ è sicuramente positiva anche per $h_j$,
+  in quanto $h_k$ ha un vincolo più restrittivo sul quarto attributo, che deve
+  assumere il valore $S$, mentre il quarto attributo di $h_j$ può assumere
+  qualsiasi valore. Questo aspetto si potrebbe rappresentare con un
+  \textbf{diagramma di Eulero-Venn} dal punto di vista insiemistico (con il
+  ``cerchio'' di $h_j$ che conterrebbe quello di $h_k$ (essendo un insieme più
+  esterno e quindi più generale), nello spazio delle istanze).
+  \begin{figure}
+    \centering
+    
+    \psscalebox{1 1} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-2.3375487)(4.0,2.3375487)
+        \definecolor{colour0}{rgb}{0.99607843,0.30980393,0.30980393}
+        \definecolor{colour1}{rgb}{0.25490198,0.41960785,0.94509804}
+        \definecolor{colour2}{rgb}{0.4117647,0.6784314,0.31764707}
+        \psframe[linecolor=colour0, linewidth=0.04, dimen=outer]
+        (4.0,1.6624511)(0.0,-2.3375487)
+        \pscircle[linecolor=colour1, linewidth=0.04, dimen=outer]
+        (2.0,-0.33754882){1.6}
+        \rput{-271.73}(1.0203394,-1.7267202){
+          \psellipse[linecolor=colour2, linewidth=0.04, dimen=outer]
+          (1.4,-0.33754882)(0.6,0.4)}
+        \psdots[linecolor=black, dotsize=0.1](2.4,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](2.4,-0.7375488)
+        \psdots[linecolor=black, dotsize=0.1](1.6,-1.1375488)
+        \psdots[linecolor=black, dotsize=0.1](1.2,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](0.4,1.2624512)
+        \psdots[linecolor=black, dotsize=0.1](3.6,1.2624512)
+        \psdots[linecolor=black, dotsize=0.1](3.6,0.8624512)
+        \psdots[linecolor=black, dotsize=0.1](3.2,-1.9375489)
+        \psdots[linecolor=black, dotsize=0.1](0.4,-1.9375489)
+        \psdots[linecolor=black, dotsize=0.1](0.8,-1.9375489)
+        \psdots[linecolor=black, dotsize=0.1](2.8,0.46245116)
+        \psdots[linecolor=black, dotsize=0.1](3.2,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](3.2,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](2.8,-0.7375488)
+        \psdots[linecolor=black, dotsize=0.1](2.0,0.8624512)
+        \rput[bl](0.1,1.8624511){Spazio delle ipotesi $X$}
+        \rput[bl](0.28,0.46245116){$h_j$}
+        \rput[bl](1.7,0.062451173){$h_k$}
+      \end{pspicture}
+    }
+    \label{fig:eulero}
+    \caption{Rappresentazione di \textbf{più generale di} con i diagrammi di
+      Eulero-Venn, dove si nota come, in $X$, $h_j\geq h_k$} 
+  \end{figure}
+\end{esempio}
+\begin{esempio}
+  Consideriamo un'ipotesi $h$, con quattro attributi, dal punto di vista
+  insiemistico: 
+  \[h\in\{( 0, 1, 1, 1)\,(0, 1, 0, 0)\}\]
+  e ci si chiede se $h\in H$.\\
+  In primis possiamo ``comprimere'' questa rappresentazione insiemistica in:
+  \[h=\langle 0, 1, ?, ?\rangle\]
+  $h$ ora è rappresentata come tipicamente fatto nel \textit{concept
+    learning}.\\
+  Quindi $h\in H$, avendo un'ipotesi con quattro attributi. 
+\end{esempio}
+\begin{esempio}
+  Consideriamo un concetto $c$, con cinque attributi, dal punto di vista
+  insiemistico:
+  \[c\in
+    \begin{cases}
+      \begin{rcases}
+        (0,1,0,1,0),\\
+        (0,1,1,1,0),\\
+        (0,1,0,1,1),\\
+        (0,1,1,1,1)
+      \end{rcases}
+    \end{cases}
+  \]
+  e ci si chiede se $c\in H$, quindi se la strategia è di ricerca è buona esso
+  può essere ritrovato (altrimenti nessuna strategia lo potrebbe riconoscere).\\
+  Studiando $c$ otteniamo che:
+  \[c=\langle 0,1,?,1,?\rangle\]
+  \textbf{Usiamo la stessa rappresentazione usata per le ipotesi}
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio di studio dello spazio delle istanze $X$.\\
+  Considero che le istanze sono specificate da due attributi: $A_1=\{0,1,2\}$ e
+  $A_2=\{0,1\}$.
+  Quindi, sapendo che $X=A_1\times A_2$ (con $\times$ \textbf{prodotto
+    cartesiano}), ho che: 
+  \[|X|=|A_1\times A_2|\]
+  e quindi in questo caso $|X|=6$
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio di studio del numero di concetti.\\
+  in $X$ abbiamo 3 attributi, ciascuno con 3 possibili valori:
+  $A_i=\{0,1,2\},\,\,i= 1,2,3$
+  Abbiamo già visto come calcolare $|X|$ e quindi sappiamo che:
+  \[|X|=3^3=27\]
+  
+  Sappiamo che un concetto $c$ è un sottoinsieme di $X$, quindi, chiamato
+  $C=\{c_i\subseteq X\}$ l'insieme di tutti i concetti so che la sua cardinalità
+  è pari alla cardinalità dell'\textbf{insieme delle parti} di $X$:
+  \[|C|=|\mathcal{P}(X)|=|2^{|X|}|=2^{27}\]
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio di studio del numero delle ipotesi, ovvero si studia la
+  cardinalità dello spazio delle ipotesi (che altro non è che il numero di
+  differenti combinazioni di tutti i possibili valori per ogni possibile
+  attributo).\\
+  Bisogna notare che l'uso di $\emptyset$ come valore di un attributo in
+  un'ipotesi rende tale ipotesi \textbf{semanticamente equivalente} a qualsiasi
+  altra che contenga un $\emptyset$ (anche non per lo stesso attributo). Inoltre
+  tutte queste sono ipotesi che rifiutano tutto. Tutte queste ipotesi conteranno
+  come un unico caso nel conteggio delle ipotesi.\\
+  Quindi per conteggiare tutte ipotesi \textbf{semanticamente differenti} dovrò
+  fare (indicando con $|A|$ il numero di valori possibili per l'attributo $A$):
+  \[|H|_{sem}=1+\prod_{A\in A_i} (|A|+1)\]
+  quindi moltiplicare tutti il numero di valori di ogni attributo più 1
+  (indicante ``?'' e che quindi va conteggiato come possibile valore per ogni
+  attributi) e sommare 1 (indicante $emptyset$ che va conteggiato solo una volta
+  per il discorso fatto sopra in merito all'equivalenza semantica di tali
+  ipotesi) a questo risultato finale.\\
+  \textbf{La seguente affermazione è un esercizio dato a casa, che io risolverei
+  come scritto.}\\
+  Qualora volessi conteggiare tutte ipotesi \textbf{sintatticamente differenti}
+  dovrò contare $\emptyset$ come ipotetico valore per ogni attributo e quindi:
+   \[|H|_{sint}=\prod_{A\in A_i} (|A|+2)\]
+\end{esempio}
+\section{Primi algoritmi}
+\subsection{Algoritmo find-S}
+Parliamo ora dell'algoritmo \textbf{Find-S}. Questo algoritmo permette di
+partire dall'ipotesi più specifica (attributi nulli, indicati con
+$\emptyset$) e generalizzarla, 
 trovando ad ogni passo un'ipotesi più specifica e consistente con il training
 set $D$. L'ipotesi in uscita sarà anche consistente con gli esempi negativi
 dando prova che il target è effettivamente in $H$. Con questo algoritmo non si
@@ -308,6 +585,7 @@ inconsistenti. Inoltre non ho l'ipotesi più generale.
   \end{algorithmic}
   \caption{Algoritmo Find-S}
 \end{algorithm}
+\subsection{Algoritmi di eliminazione}
 \begin{definizione}
   Si dice che $h$ è \textbf{consistente} con il training set $D$ di concetti
   target sse: 
@@ -318,6 +596,37 @@ inconsistenti. Inoltre non ho l'ipotesi più generale.
   sottoinsieme delle ipotesi da $H$ consistenti con $D$ e si indica con:
   \[VS_{H,D}=\{h\in H|\,Consistent(h,D)\]
 \end{definizione}
+\begin{esempio}
+  Vediamo un esempio per capire la consistenza. Riprendiamo la situazione
+  dell'esempio \ref{es:tab} con un \textit{training set} $D$ leggermente
+  diverso: 
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{|c|c|c|c|c|c|c|c|}
+      \hline
+      \textbf{example} & \textbf{sky} & \textbf{temp} & \textbf{humid}
+      & \textbf{wind} & \textbf{water} & \textbf{forecast} &
+      \textbf{enjoySport}\\
+      \hline
+      1 & S & W & N & S & W & S & \color{darkgreen} yes\\
+      2 & S & W & H & S & W & S & \color{darkgreen} yes\\
+      3 & R & C & H & S & W & C & \color{red} no\\
+      4 & S & W & H & S & C & C & \color{darkgreen} yes\\
+      \hline
+    \end{tabular}
+  \end{table}
+  e prendiamo l'ipotesi:
+  \[h=\langle S,W, ?, S, ?, ?\rangle\]
+  e studiamo se $h$ sia \textbf{consistente} con $D$.\\
+  Studio l'esempio 1: ($\langle S,W, N, S, W, S\rangle$,\textit{yes}). Vedo che
+  ogni valore va bene e, avendo la classificazione 
+  \textit{yes}, ho la stessa etichetta assegnata dalla \textbf{funzione target}
+  $enjoySport$, quindi l'ipotesi è consistente con l'esempio. \\
+  Questo vale per tutti e quattro gli esempi (il terzo non ``appaia'' ma questo
+  è confermato dalla label \textit{no}) e quindi la mia ipotesi è
+  \textbf{consistente} con il \textit{training set}.
+\end{esempio}
+
 Vediamo quindi algoritmo \textbf{List-Then Eliminate}:
 \begin{algorithm}[H]
   \begin{algorithmic}
@@ -333,7 +642,8 @@ Vediamo quindi algoritmo \textbf{List-Then Eliminate}:
   \caption{Algoritmo List-Then Eliminate}
 \end{algorithm}
 Questo algoritmo è irrealistico in quanto richiese un numero per forza esaustivo
-di ipotesi.\\
+di ipotesi.
+\newpage
 \begin{definizione}
   Definiamo:
   \begin{itemize}
@@ -562,8 +872,7 @@ albero di partenza (o più piccoli) e ricorsivamente l'attributo più
 significativo (sia nei nodi rossi intermedi che nelle foglie) come radice per il
 sotto-albero. Si fanno quindi crescere in modo 
 coerente gli alberi piccoli scelti in partenza. Si punta ad arrivare ad un
-albero valido per tutti gli esempi ricevuti e anche per quelli non visti.
-\newpage
+albero valido per tutti gli esempi ricevuti e anche per quelli non visti.\\
 Iniziamo a vedere l'algoritmo anche se saranno necessarie molte specifiche:
 \begin{algorithm}[H]
   \begin{algorithmic}
@@ -696,8 +1005,25 @@ sempre il rasoio di Occam scegliendo ipotesi semplici ed evitando di far
 crescere l'albero quando lo ``split'' non è statisticamente significativo. Un
 altro modo è quello di togliere pezzi, all'albero, che toccano poche istanze o
 pure calcolare una \textit{misura di complessità dell'albero}, minimizzando la
-grandezza dell'albero e gli errori del training set. Quest'ultima tecnica è
-detta \textbf{Minimum Description Length (\textit{MDL})} (???????)
+grandezza dell'albero e gli errori del \textit{training set}, usando il
+\textbf{Minimum Description Length (\textit{MDL})}
+% \chapter{Reti neurali artificiali}
+% I \textbf{neuroni} sono calcoli su valori reali. Ci si sposta quindi dagli spazi
+% booleani (quindi discreti) del \textit{concept learning}. I neuroni accettano
+% numeri reali sia in input che in output. Si aprono scenari di nuovi spazi
+% applicativi grazie a questa capacità di manipolare dati reali. L'incertezza dei
+% dati in ingresso è implicata dai numeri reali, comportando una maggior
+% resistenza al rumore. Un neurone cerca di emulare il \textit{neurone biologico}.
+% Si avrà una funzione con parametri che ne cambiano il comportamento ma questi
+% parametri non saranno immediatamente intuibili come nel caso del \textit{concept
+%   learning}.\\
+% % aggiungere descrizione biologica
+% I parametri, in una corrispondenza biologica, sono pesi legati alle
+% sinapsi. Questi pesi \textbf{eccitano} il neurone.
+% Si avranno anche dei pesi in uscita, un neurone \textbf{inibito} non invia
+% segnali.\\
+% Bisogna formalizzare il neurone.
+
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -706,3 +1032,5 @@ detta \textbf{Minimum Description Length (\textit{MDL})} (???????)
 % LocalWords:  bias prover information gain slide level sibling distance wind
 % LocalWords:  weak outlook sunny humidity high normal overcast rain branch IG
 % LocalWords:  primis True backtracking greedy overfit split Description Length
+% LocalWords:  cloudy rainy warm cold sky temp humid forecast same change Venn
+% LocalWords:  darkgreen list then example label dell

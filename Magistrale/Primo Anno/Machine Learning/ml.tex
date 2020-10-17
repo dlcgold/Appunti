@@ -94,6 +94,7 @@
 
 \definecolor{shadecolor}{gray}{0.90}
 \setlist{leftmargin = 2cm}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definizione}{Definizione}
 \newtheorem{esempio}{Esempio}
@@ -662,7 +663,7 @@ di ipotesi.
     \rangle$ 
   \end{itemize}
   Ogni elemento di $VS_{H,D}$ si trova tra questi confini:
-  \[VS_{H,D}=\{h\inH|\,(\exists s\in S)\,\,(\exists g\in G)\,\,(g\geq h\geq
+  \[VS_{H,D}=\{h\in H|\,(\exists s\in S)\,\,(\exists g\in G)\,\,(g\geq h\geq
     s)\}\]
   con $\geq$ che specifica che è \textit{più generale o uguale}
 \end{definizione}
@@ -775,7 +776,7 @@ attributi, in blu i valori degli attributi e in arancione le foglie coi
 risultati. Le foglie sono le risposte booleane.\\
 \begin{figure}
   \centering
-  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
       distance=30pt]  
       \node{\color{red} outlook}
       child { node {\color{blue} sunny}
@@ -807,7 +808,7 @@ solo nei casi la formula booleana
 sia vera.
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
     distance=30pt]  
     \node{\color{red} outlook}
     child { node {\color{blue} sunny}
@@ -827,7 +828,7 @@ sia vera.
 \end{figure}
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
     distance=30pt]  
     \node{\color{red} outlook}
     child { node {\color{blue} overcast}
@@ -890,6 +891,7 @@ Iniziamo a vedere l'algoritmo anche se saranno necessarie molte specifiche:
     \State \textit{mi fermo}
     \Else
     \State \textit{itero sulle foglie appena create}
+    \EndIf
     \EndFunction
   \end{algorithmic}
   \caption{Algoritmo ID3}
@@ -905,7 +907,7 @@ Vediamo quanto detto:
 
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
     distance=30pt]  
     \node{\color{red} $A_1=\,?$ \color{black} [29+, 35-]}
     child { node {\color{blue} True}
@@ -919,7 +921,7 @@ Se siamo nella situazione in cui dobbiamo confrontare l'attributo sopra con un
 altro, per esempio:
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[nodes={draw}, --, sibling distance=70pt, level
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
     distance=30pt]  
     \node{\color{red} $A_2=\,?$ \color{black} [29+, 35-]}
     child { node {\color{blue} True}
@@ -1023,7 +1025,344 @@ grandezza dell'albero e gli errori del \textit{training set}, usando il
 % Si avranno anche dei pesi in uscita, un neurone \textbf{inibito} non invia
 % segnali.\\
 % Bisogna formalizzare il neurone.
-
+\chapter{Reti neurali}
+\section{Neurone biologico}
+In natura l'operazione di \textit{learning} viene eseguita tramite il
+\textbf{cervello}, che tramite i \textbf{neuroni}, delle cellule nervose, è in
+grado di effettuare una miriade di operazioni in parallelo. Potenzialmente i
+neuroni hanno un tempo di risposta nell'ordine dei millisecondi mentre in
+circuito logico si aggira nell'ordine dei nanosecondi quindi la differenza deve
+essere ricercata nell'\textit{architettura} del nostro cervello. La ``potenza di
+calcolo'' del cervello è data dal funzionamento parallelo di $\sim 10^{11}$
+neuroni, collegati tra loro da $\sim 10^5$ connessioni. Vediamo quindi
+indicativamente gli elementi principali di un \textbf{neurone biologico}:
+\begin{itemize}
+  \item \textbf{corpo}, che implementa tutte le funzioni logiche del neurone
+  \item \textbf{assone}, il canale di uscita verso gli altri neuroni, è quello
+  che si occupa di trasmettere gli impulsi nervosi
+  \item \textbf{dendrite}, la parte che permette al neurone di ricevere gli
+  impulsi nervosi
+  \item \textbf{sinapsi}, ovvero la regione funzionale in cui avviene lo scambio
+  dei segnali, ovvero dove ogni singolo ramo terminale dell'assone
+  (\textbf{bottone sinaptico}) del neurone (detto \textbf{neurone
+    pre-sinaptico}) trasmette impulsi nervosi provenienti dal neurone ai
+  dendriti di altri neuroni (detti \textbf{neuroni post-sinaptici})
+\end{itemize}
+Questa ``architettura'' è quindi basata sull'emissione di segnali da parte del
+neurone. Questa azione dipende da vari fattori, come ad esempio la forza del
+segnale ricevuto da altri neuroni e la forza delle connessioni di un neurone con
+le sue sinapsi. Si ha che la \textbf{funzione di risposta} di un neurone è una
+funzione non lineare impulso ricevuto dai dendriti. Dopo l'invio di un impulso
+ogni neurone ha un tempo, detto \textbf{refractory time}, prima del quale poter
+inviare un altro impulso. Si hanno infatti due stati possibili per il
+\textit{neurone biologico}:
+\begin{enumerate}
+  \item \textbf{eccitazione}, quando il neurone invia, tramite le sinapsi,
+  segnali (che per comodità computazionale chiamiamo già \textbf{pesati}) ai
+  neuroni connessi
+  \item \textbf{inibizione}, quando il neurone non invia segnali
+\end{enumerate}
+La \textbf{transizione di stato} dipende dall'entità complessiva dei segnali
+eccitatori e inibitori ricevuti dal neurone.\\
+Una legge importante è la \textbf{regola di Hebb} che indica che i cambiamenti
+di forza delle connessioni delle sinapsi di due neuroni connessi è proporzionale
+alla correlazione tra l'emissione di segnali dei neuroni stessi (ovvero se due
+neuroni rispondono allo stesso input allora è bene che siano connessi).
+\section{Neuroni formali}
+Dopo una breve introduzione biologica possiamo alla definizione \textbf{formale
+  e matematica} che verrà usato nello studio delle reti neurali. Questo modello
+matematico è stato proposto da \textbf{McCulloch} e \textbf{Pitts} e definisce
+formalmente un \textbf{neurone binario a soglia} come una quadrupla:
+\[\langle n, C, W, \theta \rangle\]
+dove:
+\begin{itemize}
+  \item $n$ specifica il \textbf{nome}
+  \item $C$ specifica l'\textbf{insieme degli input} $c_i$
+  \item $W$ specifica il \textbf{vettore dei pesi} $w_i$, associati ad ogni
+  input $c_i$. È una rappresentazione formale dei pesi delle sinapsi (e si nota
+  che possono essere sia positivi che negativi)
+  \item $\theta$ specifica la \textbf{soglia}, utile per definire quando un
+  neurone manda effettivamente il segnale
+\end{itemize}
+Per definire i \textbf{due stati del neurone} si usa l'insieme $\{0,1\}$ o
+l'insieme $\{-1,1\}$ (si ha infatti un \textbf{neurone binario}). La
+\textbf{funzione di transizione} viene indicata con:
+\[c(t+1)=1 \mbox{ \textnormal{sse} }\sum w_i\cdot c_i(t)\geq \theta\]
+ovvero in un tempo successivo $t+1$ ho che il neurone emette il segnale (stato
+pari ad 1) sse al tempo precedente $t$ ho avuto una somma pesata, tramite $w_i$,
+degli input $c_i(t)$ maggiore della soglia
+$\theta$.\\
+L'insieme degli stati, rappresentato in modo binario, comporta che la funzione
+di transizione sia una \textbf{funzione a scalino}:
+\[f(x)=
+  \begin{cases}
+    1 &\mbox{ se } x\geq \theta\\
+    0 &\mbox{ altrimenti}
+  \end{cases}\,\,\,\mbox{   con }\,\,\, x=\sum w_i\cdot c_i
+\]
+\begin{figure}[H]
+  \centering
+  \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+  {
+    \begin{pspicture}(0,-0.965)(9.8,0.965)
+      \psframe[linecolor=black, linewidth=0.04, dimen=outer]
+      (4.0,0.71990234)(2.4,-0.8800976)
+      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+      arrowlength=1.4,arrowinset=0.0]{->}(0.8,0.71990234)(2.4,-0.08009765)
+      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+      arrowlength=1.4,arrowinset=0.0]{->}(0.8,-0.08009765)(2.4,-0.08009765)
+      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+      arrowlength=1.4,arrowinset=0.0]{->}(0.8,-0.8800976)(2.4,-0.08009765)
+      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+      arrowlength=1.4,arrowinset=0.0]{->}(4.0,-0.08009765)(5.6,-0.08009765)
+      \psframe[linecolor=black, linewidth=0.04, dimen=outer]
+      (7.2,0.71990234)(5.6,-0.8800976)
+      \psline[linecolor=black, linewidth=0.04]
+      (6.0,-0.48009765)(6.4,-0.48009765)(6.4,0.31990233)(6.8,0.31990233)
+      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+      arrowlength=1.4,arrowinset=0.0]{->}(7.2,-0.08009765)(8.4,-0.08009765)
+      \rput[bl](3,-0.28009765){$\sum$}
+      \rput[bl](6.5,-0.48009765){$\theta$}
+      \rput[bl](8.4,-0.28009765){$\{0,1\}$}
+      \rput[bl](0.4,0.690990234){$c_1$}
+      \rput[bl](0.4,-0.12009765){$c_2$}
+      \rput[bl](0.4,-0.9300976){$c_n$}
+      \rput[bl](0.4,-0.48009765){$\ldots$}
+      \rput[bl](1.2,0.51990233){$w_1$}
+      \rput[bl](1.2,-0.01990233){$w_2$}
+      \rput[bl](1.2,-0.40009765){$w_n$}
+      \rput[bl](4.0,-0.031990233){$\sum c_i\cdot w_i$}
+    \end{pspicture}
+  }
+  \caption{Rappresentazione matematica del modello di McColluch e Pitts}
+  \label{fig:bin}
+\end{figure}
+Questo modello è comunque estremamente semplificato. L'insieme degli stati
+potrebbe non essere booleano ma potrebbe essere $\mathbb{R}$, infatti anche
+nella biologia il segnale in uscita dai neuroni è graduato e continuo. Si
+potrebbe quindi avere una \textbf{funzione logistica o sigmoide}, dove, avendo
+come insieme degli stati $\mathbb{R}$ si avrebbe:
+\[f(x)=\frac{1}{1+e^{-x}}\,\,\,\,\mbox{   con } \,\,\,x=\sum w_i\cdot c_i\]
+\section{Reti neurali artificiali}
+Lo studio di un singolo neurone non è comunque particolarmente interessante. Si
+introduce quindi lo studio di \textbf{reti neurali} dove vengono posti diversi
+\textit{neuroni} in modo che possano fare qualcosa di utile.\\
+Si hanno alcune \textbf{caratteristiche strutturali} delle \textit{reti neurali
+  artificiali}:
+\begin{itemize}
+  \item hanno un gran numero di unità
+  \item permettono operazioni elementari
+  \item hanno un alto livello di interconnessione
+\end{itemize}
+Ci sono anche alcune \textbf{caratteristiche dinamiche}:
+\begin{itemize}
+  \item si hanno cambiamenti di stato in funzione dello stato dei neuroni
+  collegati in input
+  \item si ha una funzione di uscita per ogni unità
+  \item si ha la modifica dello schema di connessione, tramite la modifica dei
+  pesi, per l'apprendimento
+\end{itemize}
+Dal punto di vista formale, dovendo espandere le definizioni fatte nel caso del
+singolo neurone a più neuroni, si lavora con:
+\begin{itemize}
+  \item una \textbf{matrice dei pesi} $W$, con i valori indicati tramite
+  $w_{ij}$
+  \item un \textbf{vettore delle soglie} $\Theta$, con i valori indicati tramite
+  $\theta_i$
+  \item l'\textbf{input netto per il neurone (?) $i$ al tempo $t$}, indicato con
+  $n_i(t)=\sum_{j=1}^n w_{ij}\cdot c_j(t)-\theta_i$
+  \item la \textbf{funzione di transizione} indicata con $c_i(t+1)=g(n_i(t))$
+\end{itemize}
+\textbf{RIVEDERE NOTAZIONE CHE POTREBBE ESSERE ERRATA.}\\
+\subsection{Percettrone}
+Il percettrone è la tipologia di rete neurale più semplice, sono infatti una
+semplificazione estrema del sistema nervoso.
+\begin{definizione}
+  Un percettrone è una collezione di neuroni, di cardinalità $M$, a cui viene
+  aggiunto un insieme di nodi in input, di cardinalità $N$ (generalmente
+  diversa da quella della collezione di neuroni). Generalmente gli input sono
+  pesati e con la notazione $w_{ij}$ indichiamo il peso della connessione tra il
+  nodo $i$-simo in input e il neurone $j$-simo.\\
+  I neuroni sono tra loro completamente indipendenti comportando anche un
+  insieme di elementi in output. Nel caso semplice di funzioni di transizione
+  binarie l'output sarà quindi un vettore binario contenente all'indice $k$-simo
+  1 se il neurone $k$ ha inviato il segnale o 0 altrimenti. \\
+  Solitamente coi percettroni si parla di \textit{learning supervisionato}.
+\end{definizione}
+Dal punto di vista geometrico il vettore dei pesi $W$ rappresenta un
+\textbf{iperpiano} (che è una retta in $\mathbb{R}^2$) che separa i possibili
+vettori di input in due classi, a 
+seconda che formino con $W$ un angolo acuto o ottuso.
+\begin{shaded}
+  \textbf{Ripasso di algebra lineare}\\
+  Per praticità ripasseremo i concetti fondamentali facendo riferimento a
+  $\mathbb{R}^2$, formato quindi da elementi, dette coordinate, che sono coppie
+  ordinate $(x_1,x_2)$ (rappresentabili con un punto nel piano o con un segmento
+  orientato con partenza nell'origine e destinazione nelle coordinate del punto
+  nel piano).\\
+  Ricordiamo le operazioni fondamentali, dati $R$ pari a $(x_1,x_2)$ e $Q$ pari
+  a $(x_3,x_4)$ 
+  \begin{itemize}
+    \item addizione: $P+Q=(x_1+x_3, x_2+x_4)$
+    \item prodotto per uno scalare $\lambda\in\mathbb{R}$: $\lambda\cdot
+    R=(\lambda\cdot x_1,\lambda\cdot x_2)$
+    \item prodotto scalare tra vettori: $\langle P,Q\rangle\equiv P\cdot Q^T =
+    \sum_{i=1}^n r_i\cdot q_i$ 
+    (dove $r_i$ e $q_i$ sono rispettivamente gli elementi di $R$ e $Q$
+    all'indice $i$)
+  \end{itemize}
+  Ricordiamo la \textit{norma} di un vettore $X$:
+  \[\norm{X}=\equiv\sqrt{X\cdot X^T}=\sqrt{\sum_{i=1}^n x_i\cdot
+      x_i}=\sqrt{\langle X,X\rangle}\] 
+  Con $X=0$ indichiamo il \textit{vettore nullo} (che ha anche norma nulla).\\
+  Definiamo il \textit{versore} (\textit{vettore unitario}) come:
+  \[\frac{X}{\norm{X}},\,\,\,X\neq 0\]
+  In $\mathbb{R}^2$ l'angolo $\theta$ sotteso tra due vettori $X$ e $Y$ è:
+  \[\cos\theta=\frac{\langle X,Y\rangle}{\norm{X}\cdot \norm{Y}}\]
+  La proiezione di un vettore $X$ sul vettore $Y$ è:
+  \[X_Y=\norm{X}\cdot \cos\theta\]
+  Si hanno quindi tre casi:
+  \begin{enumerate}
+    \item $\theta < 90 \iff \langle X,Y\rangle >0$
+    \item $\theta > 90 \iff \langle X,Y\rangle <0$
+    \item $\theta = 90 \iff \langle X,Y\rangle =0$
+  \end{enumerate}
+  (quindi disegnando una retta sul piano tutti i punti sopra di essa
+  apparterranno ad una certa classe e quelli sotto ad un'altra).\\
+  Posso definire una retta $r$ che passa per l'origine in  $\mathbb{R}^2$
+  assegnando un vettore $W=(w_1,w_2)$ ad essa ortogonale, infatti tutti i punti,
+  ovvero vettori, $X=(x_1,x_2)$ sulla retta sono ortogonali a $W$:
+  \[\langle W,X\rangle=w_1\cdot x_1+w_2\cdot x_2=0 \]
+  Quindi la retta (ovvero l'iperpiano) mi separa due semispazi, a seconda che
+  $\langle X,W\rangle$ sia strettamente positivo o strettamente negativo.\\
+  Generalizzando ora a $n$ dimensioni ho che, dato l'iperpiano $h$ (di
+  dimensione $n-1$):
+  \begin{itemize}
+    \item se $h$ passa dall'origine allora si ha l'equazione $\langle X,Y\rangle
+    =0$
+    \item se non passa per l'origine $\langle X,Y\rangle +b=0$ 
+    \item 
+  \end{itemize}
+  I vettori in un iperpiano si proiettano tutti nello stesso modo e i punti ad
+  un lato e all'altro dell'iperpiano sono distinti dal fatto che $\langle
+  X,Y\rangle +b$ sia strettamente positiva o strettamente negativa
+\end{shaded}
+Studiamo quindi l'apprendimento del percettrone.\\
+Come abbiamo visto l'output è rappresentato da un vettore booleano
+rappresentante 1 in posizione $k$ in corrispondenza del neurone $k$-simo che ha
+inviato il segnale o 0 altrimenti. A questo risultato si giunge tramite un certo
+input pesato e, essendo un training supervisionato, esso viene
+verificato. Qualora un risultato non vada bene bisogna procedere cambiando i
+pesi. Il problema è appunto la scelta dei pesi, che non sono conoscibili a
+priori. Un peso troppo alto porta un neurone a mandare il segnale anche quando
+non dovrebbe mentre un peso troppo basso impedisce l'invio del segnale anche
+quando il neurone dovrebbe. Preso un neurone $k$ che porta un risultato errato
+posso definire una \textbf{function error} come:
+\[E=y_k-t_k\]
+dove:
+\begin{itemize}
+  \item $y_k$ è l'output del neurone
+  \item $t_k$ è il target atteso per quel neurone
+\end{itemize}
+Per tale neurone bisognerà sistemare tutti i pesi $w_{ik}$.\\
+Se $E$ è negativa allora il neurone avrebbe dovuto emettere il segnale ma non lo
+ha fatto e quindi bisogna aumentare il peso e viceversa (nel caso binario o ho
+-1 o 1). Bisogna però considerare che l'input potrebbe essere negativo e quindi
+anche in pesi devono poter essere negativi. Perfezioniamo quindi il conto della
+differenza di peso necessaria con la moltiplicazione di $E$ (messa in negativo
+in modo da eventualmente ``sistemare'' il segno per input negativi) per l'input:
+\[\Delta w_{ik}=-(y_k-t_k)\times c_i\]
+In questo discorso bisogna inserire anche la soglia, importante per input
+specifici (basti pensare ad un input pari a 0 che annullerebbe ogni cambio di
+peso secondo la formula precedente). Per ora trascureremo tali casi anche se una
+semplice soluzione per un caso limite come quello di avere solo input nulli, è
+quella di aggiungere un \textbf{nodo bias}, di valore $-1$, collegato ai neuroni
+con peso nullo.\\
+Viene anche introdotto il \textbf{learning
+rate} $\eta$, utile per stabilire la velocità di apprendimento della rete. Si
+ottiene quindi:
+\[w_{ij}\gets w_{ij}-\eta\cdot(y_j-t_j)\times c_i\]
+In pratica $\eta$ decide quanto cambiare il peso (e se si vuole trascurare il
+parametro basta porre $\eta =1$). L'uso di tale parametro migliora la stabilità
+della \textit{rete neurale} che non avrà cambi di peso eccessivi, anche se
+questo comporta tempi di apprendimento più estesi. Tipicamente si ha che:
+\[0.1\leq\eta\leq 0.4\]
+Si ha che ad ogni iterazione ci si aspetta un miglioramento della
+\textit{rete neurale} (e questo miglioramento è dimostrabile). Viene imposto
+quindi un limite $T$ di iterazioni entro le 
+quali interrompere l'apprendimento anche se non si è arrivati al risultato
+corretto.\\
+Vediamo due teoremi utili per lo studio dell'apprendimento del percettrone su
+due classi $A$ e $B$, banalmente rappresentanti, nella nostra situazione binaria
+e semplificata, il caso in cui si abbia il
+neurone che emette il segnale (valore 1 in output) o altrimenti (valore 0 in
+output). Nel nostro caso le classi sono discriminabili.
+\begin{teorema}[Teorema di convergenza]
+  Comunque si scelgano i pesi iniziali, se le classi A e B sono discriminabili,
+  la procedura di apprendimento termina dopo un numero finito di passi
+\end{teorema}
+\begin{teorema}[Teorema di Minsky e Papert]
+  La  classe  delle  forme  discriminabili da un percettrone semplice è
+  limitata alle forme linearmente separabili
+\end{teorema}
+\begin{teorema}
+  Se l'insieme degli input estesi è partito in due classi linearmente separabili
+  allora:
+  \[\exists\,\,W\mbox{ t.c }
+    \begin{cases}
+      1 &\mbox{ se } \sum w_i\cdot c_i \geq 0\\
+      0 &\mbox{ se } \sum w_i\cdot c_i < 0
+    \end{cases}
+  \]
+  con $W$ \textbf{vettore dei pesi}.
+\end{teorema}
+Vediamo quindi l'algoritmo di learning per un percettrone, data la
+\textbf{funzione di transizione} per un input di cardinalità $m$ e $n$ neuroni:
+\[
+  y_j=g\left(\sum_{i=0}^m w_{ij}\cdot c_i \right)=
+  \begin{cases}
+    1 &\mbox{ se } \sum_{i=0}^m w_{ij}\cdot c_i \geq 0\\
+    0 &\mbox{ se } \sum_{i=0}^m w_{ij}\cdot c_i < 0
+  \end{cases}
+\]
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{perceptron-learning}{}
+    \State \textit{\color{gray}{\# Inizializzazione}}
+    \State \textit{si imposta tutti i pesi $w_{ij}$ a valori casuali piccoli
+    (anche negativi)}
+    \State \textit{\color{gray}{\# Training}}
+    \For {\textit{$T$ iterazioni \textbf{o} fino a che tutti gli output non sono
+    corretti}}
+    \For {\textit{ogni vettore input}}
+    \State \small{\color{gray}{\textit{\# calcolo lo stato del neurone $j$
+    tramite la funzione di transizione $g$}}}
+    \State $y_j=g\left(\sum_{i=0}^m w_{ij}\cdot c_i \right)=
+    \begin{cases} 1
+      &\mbox{ se } \sum_{i=0}^m w_{ij}\cdot c_i \geq 0\\ 0 &\mbox{ se }
+      \sum_{i=0}^m w_{ij}\cdot c_i < 0
+    \end{cases}$ 
+    \State {\textit{ \color{gray}\# aggiorno ogni peso individualmente}}
+    \State $w_{ij}\gets w_{ij}-\eta\cdot(y_j-t_j)\times c_i$
+    \State {\textit{ \color{gray}\# nella prossima iterazione avrò nuovi pesi}}
+    \EndFor
+    \EndFor
+    \State {\textit{ \color{gray}\# Recall per il risultato finale}}
+    \State $y_j=g\left(\sum_{i=0}^m w_{ij}\cdot c_i \right)=
+    \begin{cases} 1
+      &\mbox{ se } \sum_{i=0}^m w_{ij}\cdot c_i \geq 0\\ 0 &\mbox{ se }
+      \sum_{i=0}^m w_{ij}\cdot c_i < 0
+    \end{cases}$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di learning del percettrone}
+\end{algorithm}
+La complessità dell'algoritmo è $O(Tnm)$.\\
+Si può dimostrare, tramite il \textbf{teorema della convergenza del percettrone}
+che dopo $\beta$ modifiche di peso il percettrone classifica 
+correttamente ogni input anche se tale $\beta$ non è il reale numero di stadi e
+dipende dall'output.
+% capire se mettere dimostrazione
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -1033,4 +1372,6 @@ grandezza dell'albero e gli errori del \textit{training set}, usando il
 % LocalWords:  weak outlook sunny humidity high normal overcast rain branch IG
 % LocalWords:  primis True backtracking greedy overfit split Description Length
 % LocalWords:  cloudy rainy warm cold sky temp humid forecast same change Venn
-% LocalWords:  darkgreen list then example label dell
+% LocalWords:  darkgreen list then example label dell nell refractory Hebb pre
+% LocalWords:  McCulloch Pitts sigmoide Percettrone percettroni iperpiano error
+% LocalWords:  function Papert Minsky perceptron Recall

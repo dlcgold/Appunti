@@ -703,9 +703,10 @@ sia verificata).
   Una dimostrazione si ottiene quindi applicando le regole di derivazione fino
   ad arrivare, se si riesce, ad una soluzione.
 \end{definizione}
+\subsection{Regole di derivazione}
 Vediamo quindi le regole di derivazione, che sono associate alle regole del
 linguaggio sopra definito.
-\subsection{Skip}
+\subsubsection{Skip}
 \begin{definizione}
   Partiamo con la regola per l'istruzione \textbf{\textit{skip}}, che non
   facendo nulla 
@@ -715,7 +716,7 @@ linguaggio sopra definito.
   con $p$ che è una formula proposizionale. Dopo lo \textit{skip} $p$ vale se
   valeva prima dello \textit{skip}
 \end{definizione}
-\subsection{Implicazione}
+\subsubsection{Implicazione}
 \begin{definizione}
   La seconda è una regola che non ha un rapporto diretto con il linguaggio e
   chiameremo \textbf{regola di conseguenza (o dell'implicazione)}. Ha due
@@ -729,13 +730,13 @@ linguaggio sopra definito.
   Ho anche una forma speculare:
   \[\frac{\{p\}\,\,C\,\,\{q'\}\,\, \,\,q'\implies q}{\{p\}\,\,C\,\,\{q\}}\]
 \end{definizione}
-\subsection{Sequenza}
+\subsubsection{Sequenza}
 \begin{definizione}
   La terza regola è legata alla struttura di \textbf{sequenza} dei programmi:
   \[\frac{\{p\}\,\,C_1\,\,\{q\}\,\,
       \,\,\{q\}\,\,C_2\,\,\{r\}}{\{p\}\,\,C_1;C_2\,\,\{r\}}\] 
 \end{definizione}
-\subsection{Assegnamento}
+\subsubsection{Assegnamento}
 \begin{definizione}
   La quarta regola riguarda l'\textbf{assegnamento}. Questa è l'unica regola
   non banale (come lo è lo \textit{skip}) che non ha premesse. È la regola base
@@ -759,9 +760,9 @@ linguaggio sopra definito.
     completa sarebbe:
     \[\{x+2>0\land x+2\leq y\}\,\,x \cceq x+1\,\,\{x>0\land x\leq y\}\]
     e anche questa tripla è garantita dalla regola di sostituzione
-    \ \end{esempio}
+  \end{esempio}
 \end{definizione}
-\subsection{Istruzione di scelta}
+\subsubsection{Istruzione di scelta}
 \begin{definizione}
   La quinta regola è quella relativa all'\textbf{istruzione di scelta} che è
   della forma:
@@ -887,7 +888,7 @@ $\vdash_{ass}$ per l'assegnamento.
   e quindi è dimostrabile che:
   \[\vdash \{\top\}\,\,\,S\,\,\,\{y\geq 0\}\]
 \end{esempio}
-\subsection{Iterazione}
+\subsubsection{Iterazione}
 % Per proseguire bisogna definire meglio il concetto di \textbf{invariante}.
 \begin{definizione}
   Definiamo:
@@ -1199,8 +1200,157 @@ Chiameremo questa espressione aritmetica è \textbf{variante}.\\
   anche questo $E$ è ricavabile da $i$, anche se questo non è sempre attuabile).
   Il resto della dimostrazione è analoga all'esempio precedente.
 \end{esempio}
+\subsubsection{Correttezza e Completezza}
+In generale quando si sviluppa una logica, con un apparato deduttivo e
+un'interpretazione delle formule, siamo interessati a due proprietà generali
+della logica e dell'apparato deduttivo:
+\begin{enumerate}
+  \item \textbf{correttezza}, ovvero il fatto che tutto quello che si può
+  derivare con l'apparato deduttivo è effettivamente vero, ovvero
+  $vdash\implies\vDash$. Quindi se una tripla è derivabile è anche vera
+  \item \textbf{completezza}, ovvero il fatto che l'apparato deduttivo sia in
+  grado di derivare tutte le formule vere (ovvero tutte le triple) vere. Si ha
+  quindi $\vDash\implies\vdash$
+\end{enumerate}
+Per la logica di Hoare vale la correttezza ma vale una proprietà di completezza
+è \textit{relativa} in quanto nel corso di una dimostrazione di completezza
+occorre a volte usare deduzioni della logica proposizionale ma tali formule
+parlano anche di operazioni aritmetiche. Si ha che l'aritmetica può essere
+formalizzata attraverso un linguaggio logico con degli assiomi e delle regole di
+inferenza. Si hanno però i \textbf{teoremi di incompletezza dell'aritmetica} di
+G\"{o}del che dicono che l'aritmetica come teoria matematica è incompleta in
+quanto ci sono formule scritte nel linguaggio dell'aritmetica che sono vere ma
+non sono dimostrabili. Questa incompletezza si riverbera sulla logica di Hoare,
+che comunque, dal punto di vista deduttivo sulle triple, è completa.
+\subsection{Precondizione più debole}
+Dato un comando $C$ e una formula $q$ che interpretiamo come post condizione di
+$C$. Si cerca $p$ tale per cui:
+\[\vdash\{p\}\mbox{ C } \{q\}\]
+Sia valida e quindi vera.\\
+Ovviamente il caso interessante è quello totale.
+\begin{esempio}
+  Suppongo di avere come comando un singolo assegnamento $y\cceq 2\cdot x-1$ e
+  come postcondizione $\{y>x\}$.\\
+  Cerco possibili precondizioni che, dopo l'assegnamento, portino a quella
+  postcondizione. Ovviamente si avrebbero infiniti valori di $x$ che consentono
+  di arrivare alla postcondizione (nonché altrettanti che non lo permettono). 
+\end{esempio}
+Si cerca quindi la ``migliore'' precondizione per arrivare ad una data
+postcondizione ma per farlo ci serve un criterio di confronto. \\
+Introduciamo quindi alcuni simboli e nozioni utili:
+\begin{itemize}
+  \item $V$ è l'insieme della variabili di $C$
+  \item $\Sigma=\{\sigma|\,\sigma:V\to\mathbb{Z}\}$ è l'insieme degli stati
+  della memoria (ricordando che posso avere solo valori interi nel nostro
+  linguaggio)
+  \item $\Pi$ è l'insieme di tutte le formule sull'insieme $V$
+  \item $\sigma \vDash p$ significa che la formula $p$ è vera nello stato
+  $\sigma$ e si ha che $\vDash\subseteq\Sigma\times \Pi$, con $\vDash$ che
+  indica la veridicità di una formula in uno stato
+  \item $t(\sigma)=\{p\in \Pi|\,\sigma\vDash p\}$ come la funzione che assegna
+  ad uno stato l'insieme delle proposizioni, ovvero tutte le formule, che sono
+  vere in $\sigma$
+  \item $m(p)=\{\sigma\in \Sigma|\,\sigma\vDash p\}$ come la funzione che
+  associa ad una formula l'insieme di tutti gli stati che soddisfano la formula
+\end{itemize}
+Tra le due funzioni finali si ha una sorta di ``dualità'' e agiscono in modo
+speculare tra loro. Se, partendo da $\Sigma$, applico $t(\sigma)$ e scopriamo
+che un certo stato $p$ appartiene a $\Pi$ e a tale $p$ associamo l'insieme dato
+da $m(p)$ si avrà che $\sigma\in m(p)$.\\
+Si possono fare altre osservazioni su queste due funzioni. \\
+Prendiamo due formule $p$ e $q$ e cerco di capire se è possibile avere
+$m(p)=m(q)$. La risposta è positiva e si parla, in caso, di \textit{equivalenza
+  tra formule}. Fissati due stati $\sigma_1$ e $\sigma_2$ mi chiedo se possano
+appartenere allo stesso insieme di formule. In questo caso la risposta è
+negativa, in quanto sei i due stati sono distinti allora ci deve essere almeno
+una variabile $x$ che ha valore diverso nei due stati ma allora è facile trovare
+una formula che separa i due stati e tale formula potrà essere vera solo in uno
+dei due stati.\\
+Dato $S\subseteq \Sigma$ e $F\subseteq\Pi$ (ragiono quindi su sottoinsiemi) si
+ha che:
+\begin{itemize}
+  \item $t(S)=\{p\in \Pi|\,\forall\,\sigma\in S,\,\,\,\sigma\vDash
+  p\}=\bigcap_{\sigma\in S}t(\sigma)$ (ragiono quindi su tutti gli stati di $S$
+  e quindi sulle formule che sono vere in tutti questi stati) 
+  \item $m(F)=\{\sigma\in \Sigma|\,\forall\,p\in F\,\,\,\sigma\vDash
+  p\}=\bigcap_{p\in \Pi}m(p)$ (ragiono quindi su tutte le formule di $\Pi$
+  e quindi su tutti gli stati in devono essere soddisfatte tutte queste formule) 
+\end{itemize}
+Abbiamo quindi esteso il dominio delle due funzioni a sottoinsiemi di stati e
+sottoinsiemi di formule.\\
+Si può anche dimostrare che $S\subseteq m(t(s))$ e che $F\subseteq
+t(m(F))$. Inoltre, dati $A\subseteq B$, si può dimostrare che $m(B)\subseteq
+m(A)$ (se ho un insieme più grande di formule ho meno stati che le soddisfano
+tutte).\\
+Si ha un rapporto tra la logica proposizionale (coi suoi connettivi logici) e
+l'insieme di stati ($p$ e $q$ sono formule di $\Pi$): 
+\begin{itemize}
+  \item $m(\neg p)=\Sigma \,\,\backslash \,\,m(p)$, quindi il complemento
+  insiemistico di $p$
+  \item $m(p\lor q)=m(p)\cup m(q)$, quindi all'unione dei due insiemi  
+  \item $m(p\land q)=m(p)\cap m(q)$ (da verificare) quindi all'intersezione dei
+  due insiemi
+\end{itemize}
+L'implicazione merita un discorso a parte in quanto ha due ``nature'':
+\begin{itemize}
+  \item \textbf{operatore logico}, che comporta che $p\implies q= \neg p\lor q$
+  e in tal caso si ha, in linea a quanto detto per gli altri connettivi:
+  \[m(p\implies q)= m(\neg p)\cup m(q)\]
+  \item \textbf{relazione tra formule}, dove se $p$ implica $q$ (in tutti in
+  casi in cui è vera $p$ è vera $q$) allora
+  $m(p)\subseteq m(q)$, intendendo che $q$ è ``più debole'' (ovvero come formula
+  ci da una conoscenza inferiore essendo $q$ corrispondente ad un insieme più
+  grande di stati) di $p$. Si ha a che
+  fare con una relazione algebrica tra le due formule. Più ``debole'' non
+  significa comunque ``peggiore''
+\end{itemize}
+Posso quindi capire come definire la precondizione migliore per ottenere una
+tripla valida, insieme al comando $C$ e alla postcondizione.\\
+Un modo è quello di definire la migliore precondizione come la precondizione più
+debole $p$ che presa come precondizione forma una tripla valida:
+\[\vdash \{p\}\mbox{ C }\{q\}\]
+se $p$ è la precondizione più debole allora corrisponde al più grande insieme di
+stati tale che la tripla sia valida.\\
+Questa è una scelta ragionevole perché è la precondizione che impone meno
+vincoli sullo stato iniziale, infatti determina tutti gli stati iniziali che
+garantiscono il raggiungimento della postcondizione. È sempre possibile
+calcolare la precondizione più debole.\\
+Indichiamo, fissati $C$ comando e $q$ formula di postcondizione, con $wp(C, q)$
+la precondizione più debole (\textit{weakest precondition}).
+\begin{teorema}
+  Si ha che $\vDash\{p\}\mbox{ C }\{q\}$ (quindi la tripla è vera) sse
+  $p\implies wp(C,q)$ 
+\end{teorema}
+Vediamo quindi la \textit{regola di calcolo}.\\
+Si hanno diversi casi a seconda dei tipi di comando:
+\begin{itemize}
+  \item \textbf{assegnamento:} in questo caso la precondizione più debole è
+  quella determinata dalla regola di derivazione introdotta per la correttezza
+  parziale. Quindi dato un assegnamento del tipo $x\cceq E$ e una postcondizione
+  $q$ ho che la precondizione più debole si ottiene sostituendo in $q$ ogni
+  occorrenza di $x$ con l'espressione $E$, ottenendo quindi:
+  \[\{q[E/x]\}\]
+  \item \textbf{sequenza:} in questo caso, se ho la sequenza di due comando
+  $C_1$ e $C_2$ allora la precondizione più debole si calcola nel seguente modo:
+  calcolo la precondizione più debole per $C_2$, ottenendo $wp(C_2,q)$, che sarà
+  quindi la formula usata come postcondizione per calcolare la precondizione più
+  debole di $C_1$, ovvero: $wp(C_1,wp(C_2,q))$. Questo non è altro che la
+  condizione più debole della sequenza:
+  \[wp((C_1;C_2),q)= wp(C_1,wp(C_2,q))\]
+  \item \textbf{scelta:} in questo caso, avendo:
+  \[S=\mbox{ if \textit{B} then \textit{C} else \textit{D} endif }\]
+  fisso la postcondizione $q$ e procedo come per la regola di
+  derivazione. Separo i due casi in cui sia vera $B$ o meno. Se $B$ è vera devo
+  eseguire $C$ quindi calcolo, eseguendo $C$ la precondizione più debole
+  $wp(C,q)$. Qualora $B$ non sia vera calcolo, eseguendo $D$, la precondizione
+  più debole $wp(D,q)$. Nel complesso quindi, facendo la disgiunzione dei due
+  casi, ottengo: 
+  \[wp(S,q)=(B\land wp(C,q))\lor (\neg B\land wp(D,q))\]
+\end{itemize}
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
 % LocalWords:  if return ht primis postcondizione Hoare then endif for endwhile
 % LocalWords:  endfor program counter skip and not cccccc ccccc derivabilità
+% LocalWords:  weakest precondition sse step

@@ -802,6 +802,130 @@ Siccome $3SAT$ è \textbf{NP-complete} allora anche \textit{independent-set} è
 \[\forall\,\, A_{\in NP}\leq_p 3SAT\leq_p \mbox{ \textit{independent-set}}\]
 in quanto la riduzione $\leq_p$ è \textbf{transitiva}, e quindi:
 \[\forall\,\, A_{\in NP}\leq_p \mbox{ \textit{independent-set}}\in NP\]
+\begin{teorema}
+  Se un problema $\Pi$ \textbf{NP-complete} è in \textbf{P} allora si può dire
+  $P=NP$, implicando che ogni problema $A\in NP$ è risolvibile da $\Pi\in P$.
+  Questa cosa non è stata ancora dimostrata (e probabilmente si riuscirà
+  a dimostrare l'opposto).
+\end{teorema}
+\begin{proof}
+  Per ogni problema $A$ in \textbf{NP} so che $A\leq_p \Pi$, ovvero $\Pi$ è una
+  procedura che risolve $A$, con trasformazione dell'input $x$ di $A$ nell'input
+  $f(x)$ di $\Pi$, con $f(x)$ calcolabile in tempo polinomiale.\\
+  Assumendo quindi che $\Pi\in P$ allora anche ogni $A\in P$, e quindi $NP=P$.
+\end{proof}
+\begin{teorema}
+  La riduzione polinomiale è transitiva. Ovvero se $A\leq_p B$ e $B\leq_p C$
+  allora:
+  \[A\leq_p C\]
+\end{teorema}
+\begin{proof}
+  Infatti $A\leq_p B$ implica l'esistenza di $f$ tale che $x\in L_A$ sse
+  $f(x)=L_B$. Ugualmente $B\leq_p C$ implica l'esistenza di $g$ tale che $x\in
+  L_B$ sse $g(x)=L_C$.\\
+  Devo dimostrare che $\exists\,\,f'$ tale che $x\in L_A$ sse $f'(x)\in
+  L_C$. Per ottenere $f'$ compongo $f$ e $g$. Assumendo che $x$ appartiene
+  all'input di ha compongo le funzioni, quindi ho che $f'=g\circ f$,
+  e ho che $x\in L_A$ e che $f(x)\in L_B$ (quindi $f(x)$ è un input per $B$) ma
+  quindi $g(f(x))\in L_C$ (quindi $g(f(x))$ è un input per $C$). Ho quindi
+  dimostrato la transitività.\\
+  Se $f$ e $g$ sono costruibili in tempo polinomiale, la prima sulla dimensione
+  di $x$ e la seconda su quella di $f(x)$, allora anche $f'=g\circ f$
+  è costruibile in tempo polinomiale, proporzionalmente alla cardinalità di $x$.
+\end{proof}
+Quindi per dimostrare che un problema $\Pi'$ è \textbf{NP-hard} devo ridurre
+$\Pi'$ ad un problema qualsiasi \textbf{NP-hard} (in base alla somiglianza del
+problema), sapendo che $\forall A\in NP$ $A$ si riduce ad un problema
+\textbf{NP-hard}, come $SAT$.\\
+In modo equivalente per dire che è un problema è \textbf{NP-complete} faccio
+quanto fatto per \textbf{NP-hard} ma devo aggiungere che esso sia in $NP$,
+dovendo quindi aggiungere il ``certificato''.
+% immagine slide 6(teorema cook)
+\begin{teorema}
+  Si ha che $SAT\leq_p 3SAT$
+\end{teorema}
+\begin{proof}
+  \textbf{Dimostrazione solo parziale, solo l'inizio è stato fatto in aula.\\}
+  Prendo una $\phi$ con $k\geq 4$ letterali. Ogni clausola deve diventare una
+  clausola con al più 3 letterali (introducendo nuovi letterali ogni volta che
+  viene negato uno). 
+\end{proof}
+\subsection{Problema set-cover}
+Questo problema si applica bene allo studio, nel campo delle telecomunicazioni,
+dei ripetitori e dello studio della copertura per reti mobili.
+\begin{definizione}
+  Dato un universo $U$ di $n$ elementi sia $S=\{S_1,\ldots,S_M\}$ una collezione
+  di sottoinsiemi di $U$. Sia anche data una funzione di costo
+  $c:S\to\mathbb{Q}^+$. Il problema \textbf{set-cover} consiste nel trovare una
+  collezione $C$ di sottoinsiemi di $S$ di costo minimo che copra tutti gli
+  elementi di $U$.
+\end{definizione}
+\begin{esempio}
+  Se ho $U=\{1,2,3,4,5\}$, $S_1=\{1,2,3\}$, $S_2=\{2,3\}$, $S_3=\{4,5\}$ e
+  $S_4=\{1,2,4\}$, con $S=\bigcup S_i$ . Per praticità assumo costo
+  uniforme, ovvero che  $c_1=c_2=c_3=c_4=1$.\\
+  Quindi la soluzione $C$ è $\{S_1,S_3\}$, in quanto questi due insiemi coprono
+  tutti gli elementi di $U$, con costo pari a $5$ (che è il minimo che posso
+  avere).
+\end{esempio}
+\begin{definizione}
+  Qualora il costo sia uniforme allora il \textbf{set-cover} diventa la ricerca
+  di una sotto-collezione che copra tutti gli elementi di $U$ con minima
+  dimensione.
+\end{definizione}
+
+\begin{teorema}
+  \textit{set-cover}, nella versione decisionale e nella
+  versione con peso uniforme, è \textbf{NP-complete} (quindi se esiste una
+  collezione $C$ di sottoinsiemi di $S$ 
+  la cui unione sia $U$ con cardinalità minore uguale di $k$).
+\end{teorema}
+\begin{proof}
+  Posso facilmente dimostrare che $|C|\leq k$ in tempo polinomiale e che
+  l'unione degli insieme di $C$ include tutti gli elementi di $U$, in
+  tempo polinomiale su $|U|$. Posso aggiungere anche un ``certificato'', nella
+  forma di una collezione che copre tutto $U$ (e quindi la verifica è in tempo
+  polinomiale sulla dimensione del ``certificato'' più quella di $U$). Quindi
+  \textbf{set-cover} è in \textbf{NP}.\\
+  Per dimostrare che \textbf{set-cover} è \textbf{NP-hard} dimostro che:
+  \[\mbox{vertex-cover} \leq_p \mbox{set-cover}\]
+  ovvero uso un problema che so già essere \textbf{NP-hard}, appunto
+  \textit{vertex-cover} (avendo già dimostrato che $\forall A\in NP, \,\,A\leq_p
+  \mbox{vertex-cover}$, dimostrando che \textit{set-cover} dimostra tutti i
+  problemi in \textbf{NP}).\\
+  Faccio vedere che posso usare \textit{set-cover} per dimostrare
+  \textit{vertex-cover}.\\
+  Devo quindi trasformare un'istanza di \textit{vertex-cover} $C=\langle
+  G=(V,E), j\rangle$ in un'istanza $C'$ di \textit{set-cover}, in tempo
+  polinomiale, tale che $C$ è soddisfacibile sse $C'$ è soddisfacibile.\\
+  Procedo quindi con la trasformazione. Pongo innanzitutto $U=E$. Per quanto
+  riguarda la collezione $S$ procedo nel seguente modo. Etichetto i vertici in
+  $V$ da $1$ a $n$. A questo punto $S_i$ diventa l'insieme degli archi incidenti
+  al vertice $i$-simo. A questo punto basta porre $k=j$ per concludere la
+  costruzione polinomiale dell'istanza di \textit{set-cover}.\\
+  In poche parole ciascun arco è un elemento di $U$ e ciascun vertice è un
+  insieme di $S$.\\
+  Vediamo anche la dimostrazione formale che \textit{vertex-cover} risponde
+  ``yes'', per $j$, sse istanza di \textit{set-cover} risponde ``yes'' per
+  $k=j$.\\
+  Innanzitutto se \textit{vertex-cover} risponde ``yes'' per $j$ allora trovo
+  una collezione di \textit{set-cover} buona di cardinalità $j$. Suppongo
+  infatti $G$ ha una copertura C di al più $j$ vertici e quindi $C$ corrisponde
+  ad una collezione di $C'$ di sottoinsiemi $U$. Poiché assumo $k=j$ allora
+  $|C'|\leq k$. Inoltre $C'$ copre tutti gli elementi di $U$ coprendo tutti gli
+  archi di $G$, in quanto ogni elemento di $U$ è un arco in $G$. Poiché $C$ è
+  una copertura, almeno un estremo dell’arco è in $C$  e quindi l’arco è in un
+  insieme di $C'$.\\
+  Dimostriamo anche l'altro verso della dimostrazione, ovvero devo garantire
+  l'esistenza della copertura. Suppongo di avere un set cover $C'$ di dimensione
+  $k$. Dato che ad ogni insieme di $C'$ ho associato un vertice in $G$ allora
+  $|C|=|C'|\leq k=j$. Inoltre, $C$ è una copertura di $G$ poiché $C'$ è un
+  set-cover, poiché, preso un arco $e$ ho che $e\in U$ e quindi $C'$ deve
+  contenere almeno un insieme che contiene $e$ e tale insieme è quello che
+  corrisponde ai nodi che sono estremi di $e$. Quindi $C$ deve contenere almeno
+  un estremo di $e$. Quindi posso concludere dicendo che $C$ è copertura di $G$.
+\end{proof}
+
 \end{document}
 
 

@@ -762,7 +762,7 @@ linguaggio sopra definito.
     \ \end{esempio}
 \end{definizione}
 \subsection{Istruzione di scelta}
-\begi\n{definizione}
+\begin{definizione}
   La quinta regola è quella relativa all'\textbf{istruzione di scelta} che è
   della forma:
   \[\{p\}\mbox{ if \textit{B} then \textit{C} else \textit{D} endif }\{q\}\]
@@ -788,8 +788,8 @@ derivazione (si parla quindi di \textit{sintassi}, viene infatti ignorato il
 significato ma si cerca solo di applicare le regole, ottenendo al conclusione
 come risultato di una catena di regole).\\
 Come notazione usiamo anche che:
-\[\Vdash \{p\}\,\,\,C\,\,\,\{q\}\]
-dove $\Vdash$
+\[\vDash \{p\}\,\,\,C\,\,\,\{q\}\]
+dove $\vDash$
 indica che la tripla è \textbf{vera} (si parla quindi di \textit{semantica},
 riferendosi al significato).\\
 Dato che si ha \textbf{completezza} e \textbf{correttezza} dell'apparato
@@ -1057,9 +1057,150 @@ $\vdash_{ass}$ per l'assegnamento.
   completando la dimostrazioni.\\
   Da notare solo che $x$ deve essere non nullo.
 \end{esempio}
-\textbf{\textit{Altri esempi sono presenti sulla pagina del corso}}.
+\textbf{\textit{Altri esempi sono presenti sulla pagina del corso}}.\\
+\subsection{Correttezza totale}
+Analizziamo ora il caso in cui non si abbia certezza di terminazione di
+un'iterazione:
+\[\{p\}\mbox{ while \textit{B} do \textit{C} endwhile }\{q\}\]
+Distinguiamo i due tipi di correttezza, dal punto di vista della derivabilità,
+tramite: 
+\[\vdash^{parz}\{p\}\mbox{ C }\{q\}\]
+\[e\]
+\[\vdash^{tot}\{p\}\mbox{ C }\{q\}\]
+Dal punto di vista semantico non ha invece senso distinguere di due casi e
+quindi si ha solo:
+\[\vDash\{p\}\mbox{ C }\{q\}\]
+In quanto dal punto di vista semantico o si ha terminazione o non si ha, non si
+hanno casistiche differenti a seconda di correttezza totale o parziale.\\
+Bisognerà quindi dimostrare la terminazione.\\
+Studiamo il caso semplice dove:
+\[W=\mbox{ while \textit{B} do \textit{C} endwhile }\]
+Cerchiamo un'espressione aritmetica $E$, dove compaiono le variabili del
+programma, costanti numeriche e operazioni aritmetiche. Cerchiamo anche un
+\textbf{invariante di ciclo} $i$ (che quindi è una formula) per $W$. $E$ e $i$
+devono soddisfare due condizioni:
+\begin{enumerate}
+  \item $i\implies E\geq 0$, quindi se vale $i$ allora l'espressione aritmetica
+  ha valore $\geq 0$ (il valore di $E$ lo ottengo eseguendo le operazioni sulle
+  costanti e sui valori, in quello stato della memoria, delle variabili)
+  \item $\vdash^{tot}\{i\land B\land E=k\}\mbox{ C }\{i\land E<k\}$, dove
+  nella precondizione abbiamo la congiunzione logica tra l'invariante $i$, la
+  condizione di ciclo $B$ e tra $E=k$, avendo prima assegnato a $k$ il valore
+  effettivo di $E$ nello stato in cui iniziamo a computare $C$. $k$ quindi non
+  deve essere una variabile del programma e non deve apparire in $C$
+  (rappresentante il corpo della singola iterazione). Se vale la
+  condizione 1 e l'invariante sappiamo che $E\geq 0\implies k\geq 0$. La
+  postcondizione è formata dall'invariante $i$ e dal fatto che il valore di $E$
+  dopo l'esecuzione sia strettamente minore di $k$ (che è il valore di $E$ prima
+  dell'esecuzione). In pratica $E$ decresce ad ogni singola iterazione, ovvero
+  ad ogni esecuzione di $C$.\\
+  La notazione $\vdash^{tot}$ serve a escludere che $C$ abbia altri cicli
+  annidati (portando a dover dimostrare che anche i cicli interni
+  terminano). Per praticità quindi supponiamo di non avere cicli interni (stiamo
+  partendo dal ciclo più interno)
+\end{enumerate}
+In pratica, nella seconda condizione, uso $E$ per concludere che una singola
+esecuzione dell'iterazione mi porta in uno stato in cui vale l'invariante, dove
+può valere o meno $B$ (che potrebbe portare all'uscita dall'iterazione) ma in
+cui $E$ ha un valore diverso, minore a quello di partenza ma mai minore di 0 per
+la prima condizione (in quanto l'invariante è sempre valido). Quindi, ad un
+certo punto, $E$ raggiungerà il valore minimo e in quel momento o $B$ è falsa o
+si ha una contraddizione ($E$ dovrebbe diventare negativo), quindi si ha la
+terminazione. \\
+Quindi se abbiamo dimostrato le due condizioni posso dire:
+\[\vdash^{tot}\{i\}\mbox{ W }\{i\land\neg B\}\]
+che è anche la conclusione della regola di derivazione dell'iterazione in caso
+di correttezza parziale.\\
+Possiamo anche osservare due cose:
+\begin{enumerate}
+  \item $E$ non è una formula logica ma un'espressione aritmetica con valore
+  numerico ($E\geq 0$ è una formula logica)
+  \item qualora si abbia $E=0$ non si hanno problemi, $0$ è solo un esempio,
+  potremmo riscrivere la prima condizione come $E\geq n$, con $n$ qualsiasi
+  numero intero, basta che sia ben definito per poter permettere la ripetizione
+  finita delle iterazioni
+\end{enumerate}
+Chiameremo questa espressione aritmetica è \textbf{variante}.\\
+\textit{L'invariante della correttezza totale non è sempre quello di quella
+  parziale, magari è uguale, magari diverso o anche uguale solo in parte}
+\begin{esempio}
+  Vediamo un esempio chiarificatore.\\
+  Dato il programma (una sorta di conto alla rovescia):
+  \begin{listing}[H]
+    \begin{lstlisting}
+      while x > 5 do
+        x ~ x - 1;
+      endwhile  
+    \end{lstlisting}
+    \caption{Programma $P$}
+    \label{E:t}
+  \end{listing}
+  studio la correttezza totale della tripla:
+  \[\{x>5\}\mbox{ P }\{x=5\}\]
+  Innanzitutto cerco un variante $E$, che decresce ad ogni singola iterazione è
+  un invariante $i$ come descritti sopra, quindi che, qualora ci sia
+  l'invariante $i$ allora  $E\geq 0$.\\
+  Un primo invariante ``banale'' è $i=x\geq 5$.\\
+  In merito ad $E$ notiamo che nel corpo dell'iterazione abbiamo un solo
+  comando, dove il valore della variabile $x$ viene decrementato, quindi un
+  primo candidato per $E$ potrebbe essere proprio $x$.\\
+  Per comodità scegliamo però come variante $x-5$ per avere una
+  corrispondenza diretta con l'invariante $x\geq 5$, essendo derivato dallo
+  stesso invariante (basandoci in primis sulla prima condizione).\\
+  \textbf{Non sempre posso ottenere una corrispondenza tra variante e
+    invariante}.\\
+  Presi questo invariante e questo variante verifichiamo le due condizioni:
+  \begin{enumerate}
+    \item $x\geq 5\implies x-5\geq 0$ è ovviamente corretto perché si ottiene
+    che $x\geq 5\implies x \geq 5$ (infatti questo è il motivo per cui si è
+    scelto $x-5$ come variante)
+    \item $\vdash^{tot}\{x\geq 5\land x>5\land x-5=k\}\,\,\,x\cceq
+    x-1\,\,\,\{x\geq 5\land x-5<k\}$\\
+    Applico quindi la regola dell'assegnamento (che si applica anche per la
+    correttezza totale) e ottengo la precondizione per la postcondizione
+    $\{x\geq 5\land x-5<k\}$:
+    \[\{x-1\geq 5\land x-1-5<k\}=\{x\geq 6\land x-6 < k\}\]
+    che però è diversa da $\{x\geq 5\land x>5\land x-5=k\}$.\\
+    Cerco quindi di applicare la regola dell'implicazione. Riguardando la
+    precondizione originale noto che $x>5$ è ``più forte'' di $x\geq 5$ e quindi
+    quest'ultimo può essere trascurato. Ricordando che stiamo lavorando su
+    valori interi si ha che $x>5\implies x\geq 6$. Inoltre, sempre per il fatto
+    che lavoriamo su numeri interi, \\
+    $x-5=k\implies x-6<k$ e quindi:
+    \[\{x\geq 5\land x>5\land x-5=k\}\implies \{x\geq 6\land x-6 < k\}\]
+  \end{enumerate}
+  Abbiamo quindi dimostrato che il programma termina e vale la tripla
+  iniziale.\\
+  Qualora avessimo dovuto dimostrare la correttezza parziale si sarebbe dovuto
+  procedere riutilizzando lo stesso invariante e procedendo studiando la
+  negazione di $B$, ovvero $x\leq 5$ (che insieme danno la postcondizione).
+\end{esempio}
+\begin{esempio}
+  vediamo un esempio non si ha alcuna variabile che decrementa nel corpo
+  dell'iterazione:
+  \begin{listing}[H]
+    \begin{lstlisting}
+      while x < 5 do
+        x ~ x + 1;
+      endwhile  
+    \end{lstlisting}
+    \caption{Programma $P$}
+    \label{E:ti}
+  \end{listing}
+  studio la correttezza totale della tripla:
+  \[\{x<5\}\mbox{ P }\{x=5\}\]
+  Dal punto di vista della correttezza parziale ragiono come al solito mentre
+  per la correttezza totale la situazione è un po' diversa.\\
+  Ovviamente non posso usare $x$ come variante ma posso sicuramente usare, per
+  esempio, $-x$, che sicuramente decresce visto che $x$ cresce, in entrambi i
+  casi ad ogni iterazione. Riprendendo l'esempio sopra quindi posso usare $x\leq
+  5$ come invariante e, al posto di $-x$ che comunque andrebbe bene, secondo una
+  ragionamento simile allo scorso esempio, $5-x$ come variante (si nota che
+  anche questo $E$ è ricavabile da $i$, anche se questo non è sempre attuabile).
+  Il resto della dimostrazione è analoga all'esempio precedente.
+\end{esempio}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
 % LocalWords:  if return ht primis postcondizione Hoare then endif for endwhile
-% LocalWords:  endfor program counter skip and not cccccc ccccc
+% LocalWords:  endfor program counter skip and not cccccc ccccc derivabilità

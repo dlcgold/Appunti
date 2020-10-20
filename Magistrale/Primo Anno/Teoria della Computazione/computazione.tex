@@ -520,7 +520,7 @@ studio, per esempio, delle telecomunicazioni.
 \begin{definizione}
   Vediamo ora il problema di \textbf{soddisfacibilità} $SAT$. Questo problema
   prende in input una formula booleana $\phi$ in \textbf{forma normale congiunta
-    (CNF)}, ovvero che ha una congiunzione ($\lan$d) come legame tra le
+    (CNF)}, ovvero che ha una congiunzione ($\land$) come legame tra le
   \textbf{clausole}. Una clausola è un $\lor$ di \textbf{letterali}, ovvero di
   variabili booleane $x_i$ o $\neg x_i$. In output ho se la forma sia
   soddisfacibile o meno. 
@@ -613,7 +613,7 @@ studio, per esempio, delle telecomunicazioni.
   
 \end{definizione}
 \begin{definizione}
-  $B$ è \textbf{NP-hard} sse $\for A\in NP$ $A$ si riduce a $B$ in tempo
+  $B$ è \textbf{NP-hard} sse $\forall A\in NP$ $A$ si riduce a $B$ in tempo
   polinomiale:
   \[A\leq_p B,\,\,\forall A\]
   Un problema $NP-hard$ può non essere in $NP$, in quanto potrebbe non avere un
@@ -925,6 +925,170 @@ dei ripetitori e dello studio della copertura per reti mobili.
   corrisponde ai nodi che sono estremi di $e$. Quindi $C$ deve contenere almeno
   un estremo di $e$. Quindi posso concludere dicendo che $C$ è copertura di $G$.
 \end{proof}
+Si continua la ricerca di una dimostrazioni di \textbf{NP-completezza}, ambito
+di studio nato dopo la scoperta di Cook di $SAT\in$ \textbf{NP-complete}.\\
+Partiamo ricordando che:
+\begin{teorema}
+  Se $B$ è un problema tale che $A\leq_p B$, con $A$
+  \textbf{NP-hard} (o ovviamente anche \textbf{NP-complete}), allora $B$ è
+  \textbf{NP-hard} e se inoltre $B\in NP$ allora $B$ è \textbf{NP-complete}.  
+\end{teorema}
+% vedere se aggiungere dimostrazione
+\begin{proof}
+  Con la transitività della riduzione $\leq_p$ si ha che $\forall\pi\in
+  NP,\,\,\, \pi\leq_p A$ e quindi $A$ è \textbf{NP-hard}. Inoltre avendo
+  $A\leq_p B$ ho che  $\pi\leq_p B$ e quindi $B$ è \textbf{NP-hard}, e quindi
+  avendo $B\in NP$ ho che è \textbf{NP-complete}
+\end{proof}
+
+\subsection{Problemi di ottimizzazione}
+\subsubsection{Clique-problem}
+\begin{definizione}
+  Definisco \textbf{clique (\textup{cricca})} di un grafo non orientato
+  $G=(V,E)$ come un sottoinsieme $V'\subseteq V$ di vertici tale che:
+  \[\forall \,v_1,v_2\in V' (v_1,v_2)\in E\]
+  quindi un sottoinsieme di vertici con solo vertici collegati da un arco.
+\end{definizione}
+Definisco quindi il problema.
+\begin{definizione}
+  Il \textbf{clique-problem} è un problema di ottimizzazione (nel
+  dettaglio di massimo) in cui si cerca la \textbf{clique} di dimensione massima
+  di un grafo (ovvero $|V'|$ è massimo). Nella versione decisionale chiedo se
+  esiste una \textbf{clique} di dimensione $k$.\\
+  Il problema è \textbf{NP-complete}
+\end{definizione}
+\begin{proof}
+  Dimostriamo che sia \textbf{NP-complete} (nella versione decisionale). Cerco
+  quindi un algoritmo 
+  polinomiale, con``certificato''. Uso quindi un insieme $V'\subseteq V$ come
+  vertici della \textbf{clique} come ``certificato'' per il grafo in input. Per
+  verificare che $V'$ è una \textbf{clique} controllo che:
+  \[\forall\,v_1,v_2\in    V' (v_1,v_2)\in E\]
+  e questa verifica è polinomiale, infatti è $O(|V'|^2)$ e
+  quindi è quadratico nella dimensione dell'input.\\
+  Bisogna ora trovare un problema $A\in \mbox{NP-complete}$ tale che $A$ si
+  riduce in tempo polinomiale al \textbf{clique-problem} (quindi
+  \textbf{clique-problem} risolve $A$).  \\
+  Notiamo che una \textbf{clique} è l'opposto di \textbf{independent-set}, che
+  avevamo dimostrato tramite $3SAT$ (che può risolvere
+  \textbf{independent-set}).\\
+  Quindi per \textbf{clique-problem} provo ancora ad usare $3SAT$. Devo fare in
+  modo che $\phi\in 3SAT$ sse il grafo $G_\phi$ ha una \textbf{clique} di
+  dimensione uguale al numero di clausole di $\phi$. Quindi avendo $k$ clausole
+  in $\phi$ avrò che ciascuna clausola sarà un gadget e da ogni gadget estrarrà
+  un vertice che comporrà la \textbf{clique} di dimensione $k$.\\
+  Il grafo $G_\phi$ è costruito come nel caso di \textit{independent-set} coi
+  letterali come vertici.\\
+  Bisogna studiare il collegamento tra tali vertici (che sarà diverso al caso di
+  \textit{independent-set}, non avendo quindi i triangoli).\\
+  Ipotizzo:
+  \[\phi=c_1\land c_2\land c_3\]
+  con:
+  \[c_1=x_1\lor \neg x_2\lor \neg x_3\]
+  \[c_2=\neg x_1\lor x_2\lor x_3\]
+  \[c_3=x_1\lor x_2\lor x_3\]
+  Per ogni clausola faccio i vertici per ogni letterale (distinti anche per lo
+  stesso letterale, come nel caso di \textit{independent-set}).\\
+  Per ora abbiamo vertici isolati e i tre vertici isolati di ogni clausola sono
+  il gadget. A questo punto collego ogni letterale di ogni clausola con ogni
+  altro letterale di ogni altra clausola (non della stessa) che non sia
+  l'opposto, collegando quindi solo vertici \textbf{consistenti} (in quanto non
+  potrei avere una \textbf{clique} connettendo due vertici non consistenti). Sto
+  facendo esattamente l'opposto di \textit{independent-set}. 
+  \begin{figure}
+    \centering
+    \psscalebox{0.9 0.9} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-4.3798437)(8.58,4.3798437)
+        \definecolor{colour0}{rgb}{0.003921569,0.003921569,0.003921569}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](2.8,3.3050585){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](6.8,3.3050585){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](4.8,3.3050585){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](1.2,2.1050587){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](1.2,-1.8949414){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](1.2,0.105058596){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](2.8,-3.0949414){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](6.8,-3.0949414){0.4}
+        \pscircle[linecolor=black, linewidth=0.04,
+        fillstyle=solid,fillcolor=colour0, dimen=outer](4.8,-3.0949414){0.4}
+        \rput[bl](2.65,3.9050587){$x_1$}
+        \rput[bl](4.4,3.9050587){$\neg x_2$}
+        \rput[bl](6.4,3.9050587){$\neg x_3$}
+        \rput[bl](0.0,2.0050587){$\neg x_1$}
+        \rput[bl](0.2,0.0405058596){$x_2$}
+        \rput[bl](0.2,-2.0949414){$x_3$}
+        \rput[bl](2.63,-3.8949413){$x_1$}
+        \rput[bl](4.63,-3.8949413){$x_2$}
+        \rput[bl](6.63,-3.8949413){$x_3$}
+        \psline[linecolor=black, linewidth=0.04](4.8,2.9050586)(2.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](4.8,2.9050586)(6.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](4.8,2.9050586)(1.6,2.1050587)
+        \psline[linecolor=black, linewidth=0.04](4.8,2.9050586)(1.6,-1.8949414)
+        \psline[linecolor=black, linewidth=0.04](6.8,2.9050586)(4.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](6.8,2.9050586)(2.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](6.8,2.9050586)(1.6,0.105058596)
+        \psline[linecolor=black, linewidth=0.04](6.8,2.9050586)(1.6,2.1050587)
+        \psline[linecolor=black, linewidth=0.04](1.6,2.1050587)(4.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](1.6,2.1050587)(6.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04]
+        (1.6,0.105058596)(2.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04]
+        (1.6,0.105058596)(4.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04]
+        (1.6,0.105058596)(6.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](1.6,-1.8949414)(2.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](1.6,-1.8949414)(4.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](1.6,-1.8949414)(6.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](2.8,2.9050586)(2.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](2.8,2.9050586)(4.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](2.8,2.9050586)(6.8,-2.6949415)
+        \psline[linecolor=black, linewidth=0.04](2.8,2.9050586)(1.6,0.105058596)
+        \psline[linecolor=black, linewidth=0.04](2.8,2.9050586)(1.6,-1.8949414)
+      \end{pspicture}
+    }
+    \caption{Grafo $G_\phi$ per \textbf{clique-problem}, con le due righe di
+      nodi e la colonna che rappresentano i tre gadget}
+    \label{fig:cli}
+  \end{figure}
+  Costruito il grafo $G_\phi$ cerco almeno una \textbf{clique} di dimensione 3
+  per $3SAT$. Non potrò mai avere più di un letterale per clausola nella
+  \textbf{clique} non essendo tra loro collegati.\\
+  Passare da $\phi$ a $G_\phi$ ha costo polinomiale in tempo, ottenendo quindi
+  istanza, in tempo polinomiale. \\
+  Inoltre bisogna dimostrare che se $\phi$ ha un assegnamento che la rende vera
+  allora esiste una \textbf{clique} per $G_\phi$ di dimensione $k$. Se $\phi$ è
+  vera allora per ogni clausola $c_r$ esiste almeno un letterale che è vero e
+  assumiamo che tale letterale sia $l_{i}^r=1$. Questo letterale è associato al
+  vertice $v_i^r$. Quindi data la clausola $c_i$, vera per il letterale $l_j^i$
+  allora costruisco l'insieme dei vertici $V'\subseteq V$ tale che sia formato
+  da quei singoli vertici corrispondenti ai singoli letterali veri. Questo $V'$
+  è una \textbf{clique} infatti avrò solo letterali ``collegabili'' nel grafo
+  (non essendo vero che un letterale sia vero e contemporaneamente falso, cosa
+  che comporterebbe l'assenza dell'arco). Ho solo archi tra letterali
+  consistenti tra loro e quindi, per costruzione, esiste l'arco tra i vertici
+  corrispondenti ($\forall\, u,v\in V'$).\\
+  Inoltre bisogna dimostrare che, se esiste una \textbf{clique} di dimensione
+  $k$, allora $\phi$ è vera e quindi le $K$ clausole sono tutte vere. \\
+  Per ogni vertice di $v_{it}\in V'$ se appartiene al gadget della clausola
+  $c_t$ rendo vero il letterale associato (o falso se esso è negato). A questo
+  punto rendo vera ogni clausola rendendo vero almeno un suo letterale e quindi
+  so di ottenere un assegnamento di verità per $\phi$ in quanto i letterali, per
+  come sono stati definiti, sono consistenti.
+  % sistemare formalismi
+\end{proof}
+I problemi \textbf{NP-complete} richiedono quindi una soluzione efficiente.\\
+Bisogna quindi pensare ad algoritmi di approssimazione, algoritmi polinomiali
+con ``garanzia'', ovvero \textbf{euristiche} (ovvero un qualcosa che funziona in
+pratica) per il problema. Non si ha quindi una soluzione esatta al problema,
+l'euristica non fornisce una soluzione esatta.
 
 \end{document}
 
@@ -932,4 +1096,4 @@ dei ripetitori e dello studio della copertura per reti mobili.
 % LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add TSP
 % LocalWords:  load esguite dimostrabilmente primis Stirling NTDM vertex cover
 % LocalWords:  exptime all img problem png independent ind nell CNF definsice
-% LocalWords:  soddisfacibilità polinomialmente dell
+% LocalWords:  soddisfacibilità polinomialmente dell clique

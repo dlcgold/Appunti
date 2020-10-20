@@ -69,4 +69,5 @@ yv=iris[,5] ## spazio di output
 ## vedo che setosa si distingue per le dimensioni del petalo
 featurePlot(x=xv, y=yv, plot="pairs", auto.key=list(columns=3))
 ## plot target variable
-## plot(yv,col=c(4,6,3))
+#plot(yv,col=c(4,6,3))
+

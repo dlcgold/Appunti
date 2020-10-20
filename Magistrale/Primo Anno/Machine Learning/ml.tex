@@ -1076,7 +1076,8 @@ formalmente un \textbf{neurone binario a soglia} come una quadrupla:
 \[\langle n, C, W, \theta \rangle\]
 dove:
 \begin{itemize}
-  \item $n$ specifica il \textbf{nome}
+  \item $n$ specifica il \textbf{nome} del neurone stesso, una sorta di
+  identificativo
   \item $C$ specifica l'\textbf{insieme degli input} $c_i$
   \item $W$ specifica il \textbf{vettore dei pesi} $w_i$, associati ad ogni
   input $c_i$. È una rappresentazione formale dei pesi delle sinapsi (e si nota
@@ -1087,8 +1088,10 @@ dove:
 Per definire i \textbf{due stati del neurone} si usa l'insieme $\{0,1\}$ o
 l'insieme $\{-1,1\}$ (si ha infatti un \textbf{neurone binario}). La
 \textbf{funzione di transizione} viene indicata con:
-\[c(t+1)=1 \mbox{ \textnormal{sse} }\sum w_i\cdot c_i(t)\geq \theta\]
-ovvero in un tempo successivo $t+1$ ho che il neurone emette il segnale (stato
+\[s(t+1)=1 \mbox{ \textnormal{sse} }\sum w_i\cdot s_i(t)\geq \theta\]
+ovvero in un tempo successivo $t+1$ (con $s(t)$ che definisce uno stato al tempo
+$t$) ho che il neurone emette il segnale (stato
+
 pari ad 1) sse al tempo precedente $t$ ho avuto una somma pesata, tramite $w_i$,
 degli input $c_i(t)$ maggiore della soglia
 $\theta$.\\
@@ -1123,7 +1126,7 @@ di transizione sia una \textbf{funzione a scalino}:
       arrowlength=1.4,arrowinset=0.0]{->}(7.2,-0.08009765)(8.4,-0.08009765)
       \rput[bl](3,-0.28009765){$\sum$}
       \rput[bl](6.5,-0.48009765){$\theta$}
-      \rput[bl](8.4,-0.28009765){$\{0,1\}$}
+      \rput[bl](8.4,-0.28009765){$\,output\mbox{ (esempio }\{0,1\}\mbox{)}$}
       \rput[bl](0.4,0.690990234){$c_1$}
       \rput[bl](0.4,-0.12009765){$c_2$}
       \rput[bl](0.4,-0.9300976){$c_n$}
@@ -1134,7 +1137,8 @@ di transizione sia una \textbf{funzione a scalino}:
       \rput[bl](4.0,-0.031990233){$\sum c_i\cdot w_i$}
     \end{pspicture}
   }
-  \caption{Rappresentazione matematica del modello di McColluch e Pitts}
+  \caption{Rappresentazione matematica del modello di McColluch e Pitts, ovvero
+    rappresentazione della \textbf{Linear Treshold Unit (\textit{LTU})}}
   \label{fig:bin}
 \end{figure}
 Questo modello è comunque estremamente semplificato. L'insieme degli stati
@@ -1147,6 +1151,8 @@ come insieme degli stati $\mathbb{R}$ si avrebbe:
 Lo studio di un singolo neurone non è comunque particolarmente interessante. Si
 introduce quindi lo studio di \textbf{reti neurali} dove vengono posti diversi
 \textit{neuroni} in modo che possano fare qualcosa di utile.\\
+Se dal singolo neurone voglio passare alla rete collego in modo orientato i
+neuroni, di modo che l'output di uno sia l'input dell'altro. \\
 Si hanno alcune \textbf{caratteristiche strutturali} delle \textit{reti neurali
   artificiali}:
 \begin{itemize}
@@ -1166,33 +1172,31 @@ Dal punto di vista formale, dovendo espandere le definizioni fatte nel caso del
 singolo neurone a più neuroni, si lavora con:
 \begin{itemize}
   \item una \textbf{matrice dei pesi} $W$, con i valori indicati tramite
-  $w_{ij}$
+  $w_{ij}$, per gli archi che collegano i neuroni. I pesi sono i \textit{pesi
+    correnti} (un vettore di pesi per ogni neurone e quindi una matrice, che
+  risulta a singolo colonna se ho un solo neurone)
   \item un \textbf{vettore delle soglie} $\Theta$, con i valori indicati tramite
-  $\theta_i$
-  \item l'\textbf{input netto per il neurone (?) $i$ al tempo $t$}, indicato con
-  $n_i(t)=\sum_{j=1}^n w_{ij}\cdot c_j(t)-\theta_i$
-  \item la \textbf{funzione di transizione} indicata con $c_i(t+1)=g(n_i(t))$
+  $\theta_i$, una per ogni neurone
+  \item l'\textbf{input netto per il neurone $i$ al tempo $t$}, indicato con\\
+  $n_i(t)=\sum_{j=1}^n w_{ij}\cdot s_j(t)-\theta_i$, quindi si ha che la soglia
+  influisce già nell'input del neurone (e quindi non si può ragionare come se
+  $\theta$ fosse un confronto a posteriori)
+  \item la \textbf{funzione di transizione} indicata con $s_i(t+1)=g(n_i(t))$
 \end{itemize}
-\textbf{RIVEDERE NOTAZIONE CHE POTREBBE ESSERE ERRATA.}\\
+L'output di un neurone è, a conti fatti, uno stato per un altro neurone.\\
+Si hanno alcuni elementi caratterizzanti di una rete neurale:
+\begin{itemize}
+  \item il \textbf{tipo di unità}
+  \item la \textbf{topologia}, ovvero la direzione delle connessioni
+  (\textit{feedforward \textnormal{o} feedback}), il numero di neuroni (con più
+  layer o solo uno, \textit{monostrato \textnormal{o} multistrato}) etc$\ldots$
+  \item le \textbf{modalità di attivazione}, che può essere \textit{seriale
+    ciclica, seriale probabilistica, parallela \textnormal{o} mista}
+  \item un \textbf{algoritmo di apprendimento} con lo studio, in primis, dei
+  pesi
+\end{itemize}
+\newpage
 \subsection{Percettrone}
-Il percettrone è la tipologia di rete neurale più semplice, sono infatti una
-semplificazione estrema del sistema nervoso.
-\begin{definizione}
-  Un percettrone è una collezione di neuroni, di cardinalità $M$, a cui viene
-  aggiunto un insieme di nodi in input, di cardinalità $N$ (generalmente
-  diversa da quella della collezione di neuroni). Generalmente gli input sono
-  pesati e con la notazione $w_{ij}$ indichiamo il peso della connessione tra il
-  nodo $i$-simo in input e il neurone $j$-simo.\\
-  I neuroni sono tra loro completamente indipendenti comportando anche un
-  insieme di elementi in output. Nel caso semplice di funzioni di transizione
-  binarie l'output sarà quindi un vettore binario contenente all'indice $k$-simo
-  1 se il neurone $k$ ha inviato il segnale o 0 altrimenti. \\
-  Solitamente coi percettroni si parla di \textit{learning supervisionato}.
-\end{definizione}
-Dal punto di vista geometrico il vettore dei pesi $W$ rappresenta un
-\textbf{iperpiano} (che è una retta in $\mathbb{R}^2$) che separa i possibili
-vettori di input in due classi, a 
-seconda che formino con $W$ un angolo acuto o ottuso.
 \begin{shaded}
   \textbf{Ripasso di algebra lineare}\\
   Per praticità ripasseremo i concetti fondamentali facendo riferimento a
@@ -1247,6 +1251,24 @@ seconda che formino con $W$ un angolo acuto o ottuso.
   un lato e all'altro dell'iperpiano sono distinti dal fatto che $\langle
   X,Y\rangle +b$ sia strettamente positiva o strettamente negativa
 \end{shaded}
+Il percettrone è la tipologia di rete neurale più semplice, sono infatti una
+semplificazione estrema del sistema nervoso.
+\begin{definizione}
+  Un percettrone è una collezione di neuroni, di cardinalità $M$, a cui viene
+  aggiunto un insieme di nodi in input, di cardinalità $N$ (generalmente
+  diversa da quella della collezione di neuroni). Generalmente gli input sono
+  pesati e con la notazione $w_{ij}$ indichiamo il peso della connessione tra il
+  nodo $i$-simo in input e il neurone $j$-simo.\\
+  I neuroni sono tra loro completamente indipendenti comportando anche un
+  insieme di elementi in output. Nel caso semplice di funzioni di transizione
+  binarie l'output sarà quindi un vettore binario contenente all'indice $k$-simo
+  1 se il neurone $k$ ha inviato il segnale o 0 altrimenti. \\
+  Solitamente coi percettroni si parla di \textit{learning supervisionato}.
+\end{definizione}
+Dal punto di vista geometrico il vettore dei pesi $W$ rappresenta un
+\textbf{iperpiano} (che è una retta in $\mathbb{R}^2$) che separa i possibili
+vettori di input in due classi, a seconda che formino con $W$ un angolo acuto o
+ottuso. \\
 Studiamo quindi l'apprendimento del percettrone.\\
 Come abbiamo visto l'output è rappresentato da un vettore booleano
 rappresentante 1 in posizione $k$ in corrispondenza del neurone $k$-simo che ha
@@ -1302,9 +1324,76 @@ output). Nel nostro caso le classi sono discriminabili.
   la procedura di apprendimento termina dopo un numero finito di passi
 \end{teorema}
 \begin{teorema}[Teorema di Minsky e Papert]
-  La  classe  delle  forme  discriminabili da un percettrone semplice è
+  La classe delle forme discriminabili da un percettrone semplice è
   limitata alle forme linearmente separabili
 \end{teorema}
+In base a questo si distinguerà in:
+\begin{itemize}
+  \item \textbf{addestramento separabile}, quando si ha un iperpiano che separa
+  le istanze positive e negative
+  \item \textbf{addestramento non separabile}
+\end{itemize}
+Per capire il discorso della \textbf{separabilità} vediamo un esempio.
+\begin{esempio}
+  Vediamo un esempio che tratta l'addizione binaria, ovvero l'\textit{or
+    esclusivo}.
+  Le possibili istanze sono rappresentate nel piano:
+  \begin{figure}[H]
+    \centering
+    \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-1.9534792)(5.906958,1.9534792)
+        \psline[linecolor=black, linewidth=0.04,
+        arrowsize=0.05291667cm 2.0,arrowlength=1.4
+        ,arrowinset=0.0]{->}(2.4,-1.9534792)(2.4,1.6465209)(2.4,2.046521)
+        \psline[linecolor=black, linewidth=0.04,
+        arrowsize=0.05291667cm 2.0,arrowlength=1.4,
+        arrowinset=0.0]{->}(1.6,-1.1534791)(6.0,-1.1534791)
+        \psdots[linecolor=black, dotsize=0.4](2.4,0.84652084)
+        \psdots[linecolor=black, dotsize=0.4](4.4,0.84652084)
+        \psdots[linecolor=black, dotsize=0.4](4.4,-1.1534791)
+        \psdots[linecolor=black, dotsize=0.4](2.4,-1.1534791)
+        \rput[bl](0.4,0.68652084){$0\oplus 1=1$}
+        \rput[bl](0.4,-0.7534792){$0\oplus  1=0$}
+        \rput[bl](3.4,-0.7534792){$1\oplus 0=1$}
+        \rput[bl](3.4,1.2465209){$1\oplus 1=0$}
+      \end{pspicture}
+    }
+  \end{figure}
+  Ho quindi che nessuna retta potrà separare tutti i punti e
+  quindi i punti a valore 1 \textbf{non sono linearmente separabili} da quelli a
+  valore 0.\\
+  Si vorrebbe cercare un neurone binario a soglia tale che:
+  \[x\oplus y=1\iff \alpha\cdot x+\beta\cdot y\geq \lambda\]
+  Tale neurone si rappresenterebbe con:
+  \begin{figure}[H] 
+    \centering
+    \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-1.9534792)(5.906958,1.9534792)
+        \pscircle[linecolor=black, linewidth=0.04,
+        dimen=outer](3.2,0.24245118){0.8}
+        \psline[linecolor=black, linewidth=0.04,
+        arrowsize=0.05291667cm 2.0,arrowlength=1.4,
+        arrowinset=0.0]{->}(0.4,0.64245117)(2.4,0.64245117)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(0.4,-0.15754883)(2.4,-0.15754883)
+        \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
+        arrowlength=1.4,arrowinset=0.0]{->}(4.0,0.24245118)(6.0,0.24245118)
+        \rput[bl](0.0,0.56245117){$x$}
+        \rput[bl](0.0,-0.32754883){$y$}
+        \rput[bl](1.2,0.8245117){$\alpha$}
+        \rput[bl](1.2,0.024245118){$\beta$}
+        \rput[bl](3.07,0.115754886){$\lambda$}
+        \rput[bl](6.2,0.0824245118){$x\oplus y$}
+      \end{pspicture}
+    }
+  \end{figure}
+  ma appunto tale neurone non può esistere in quanto non potrei mai separare
+  i punti a valori 1 e quelli a valore 0 con una retta. Posso infatti separare o
+  singoli punti o coppie di punti a valore opposto o triple di punti ma non
+  potrò mai avere separati insiemi con tutti gli 0 e tutti gli 1.
+\end{esempio}
 \begin{teorema}
   Se l'insieme degli input estesi è partito in due classi linearmente separabili
   allora:
@@ -1366,7 +1455,6 @@ Si può dimostrare, tramite il \textbf{teorema della convergenza del percettrone
 che dopo $\beta$ modifiche di peso il percettrone classifica 
 correttamente ogni input anche se tale $\beta$ non è il reale numero di stadi e
 dipende dall'output.
-% capire se mettere dimostrazione
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -1378,4 +1466,5 @@ dipende dall'output.
 % LocalWords:  cloudy rainy warm cold sky temp humid forecast same change Venn
 % LocalWords:  darkgreen list then example label dell nell refractory Hebb pre
 % LocalWords:  McCulloch Pitts sigmoide Percettrone percettroni iperpiano error
-% LocalWords:  function Papert Minsky perceptron Recall
+% LocalWords:  function Papert Minsky perceptron Recall feedforward layer Unit
+% LocalWords:  Linear Treshold LTU

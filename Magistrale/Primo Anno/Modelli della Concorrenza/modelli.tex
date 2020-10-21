@@ -1316,10 +1316,15 @@ vincoli sullo stato iniziale, infatti determina tutti gli stati iniziali che
 garantiscono il raggiungimento della postcondizione. È sempre possibile
 calcolare la precondizione più debole.\\
 Indichiamo, fissati $C$ comando e $q$ formula di postcondizione, con $wp(C, q)$
-la precondizione più debole (\textit{weakest precondition}).
+la precondizione più debole (\textbf{weakest precondition (\textit{wp})}).
+\begin{teorema}[proprietà fondamentale della condizione più debole]
+  Si ha che $\vDash\{p\}\mbox{ C }\{q\}$ (quindi la tripla è vera) sse:
+  \[p\implies wp(C,q)\]
+\end{teorema}
 \begin{teorema}
-  Si ha che $\vDash\{p\}\mbox{ C }\{q\}$ (quindi la tripla è vera) sse
-  $p\implies wp(C,q)$ 
+  L'\textbf{esistenza} della precondizione più debole è garantita.\\
+  È garantita inoltre l'\textbf{unicità} della precondizione più debole (a meno
+  di eventuali equivalenze logiche).
 \end{teorema}
 Vediamo quindi la \textit{regola di calcolo}.\\
 Si hanno diversi casi a seconda dei tipi di comando:
@@ -1346,30 +1351,120 @@ Si hanno diversi casi a seconda dei tipi di comando:
   più debole $wp(D,q)$. Nel complesso quindi, facendo la disgiunzione dei due
   casi, ottengo: 
   \[wp(S,q)=(B\land wp(C,q))\lor (\neg B\land wp(D,q))\]
+  \item \textbf{iterazione:} in questo caso, avendo:
+  \[W=\mbox{while \textit{B} do \textit{C} endwhile}\]
+  È il caso più complicato.\\
+  Si ha che se $\neg B$ è nello stato iniziale dll'iterazione allora il corpo
+  non viene eseguito (arrivando direttamente alla postcondizione), invece se
+  vale $B$ si avrà che $W$ equivale a $C;W$, in 
+  quanto sicuramente almeno una volta eseguo $C$. Ma a questo punto potrei
+  rifare lo stesso discorso se $B$ è ancora vera (questo fino a che non ho $\neg
+  B$, uscendo dal ciclo e arrivando a $q$), ragionando su $W$ di $C;W$. Si
+  arriva di fatto ad una regola ricorsiva:
+  \[wp(W,q)=(\neg B\land q)\lor(B\land wp((C;W),q))\]
+  Applico quindi la regola della sequenza per la condizione più debole,
+  arrivando a:
+  \[wp(W,q)=(\neg B\land q)\lor(B\land wp(C, wp(W,q)))\]
+  Si nota che questa definizione ricorsiva ha un problema grave: non si ha un
+  \textbf{caso base} che risolva la catena di chiamate ricorsive.\\
+  Purtroppo non si può usare il ``trucco'' dell'invariante come nella regola di
+  definizione e questo comporta che non si ha un vero e proprio algoritmo unico
+  ed effettivo per questa regola di ricerca della precondizione più debole
 \end{itemize}
-\textbf{inserire prima parte lezione}\\
-Abbiamo sviluppato una tecnica di studio basata su un linguaggio di
-programmazione molto semplificato. Innanzitutto potremmo estendere il linguaggio
-usato aggiungendo:
+Si hanno dei casi estremi, ad esempio:
 \begin{itemize}
-  \item il do-while:
-  \[\mbox{do \textnormal{C} while \textnormal{B} endwhile}\]
+  \item precondizioni più deboli sempre false, ad esempio:
+  \[wp(x\cceq5,x<0)=\bot\]
+  ovvero se assegno a $x$ il valore 5 non avrò mai $x$ negativo,
+  ovvero ho un insieme vuoto $\emptyset$ di stati che garantiscono quanto detto
+  \item precondizioni più deboli sempre vere, ad esempio
+  \[wp(x\cceq 5,x\geq0)=\top\]
+  ovvero se assegno a $x$ il valore 5 si avrà che $x$ è sempre
+  positivo, quindi è vero per qualunque stato iniziale
+\end{itemize}
+\subsubsection{Esempi vari}
+\begin{esempio}
+  Vediamo un primo esempio semplice con solo la sequenza di due assegnamenti:
+  \begin{listing}[H]
+    \begin{lstlisting}
+      x ~ x+1;
+      y ~ y*x;
+    \end{lstlisting}
+    \caption{Programma $P$}
+  \end{listing}
+  Dove i due assegnamenti sono rispettivamente $A$ e $B$ e si vuole la
+  postcondizione $q=x<y$. Cerco quindi $wp(P,q)$.\\
+  Procediamo con la formula della sequenza (che ricordiamo procede ``a
+  ritroso'').
+  \begin{itemize}
+    \item Parto dal secondo assegnamento, $B$, e calcolo $wp(B,q)$.\\
+    Procedo con la regola e applico la sostituzione, ottenendo:
+    \[r=wp(B,q)=x<y\cdot x\]
+    quindi se $x<y\cdot x$ vale prima dell'esecuzione di $B$ allora sicuramente
+    si raggiunge uno stato finale dove vale la postcondizione $q$ 
+    \item lo stato in cui eseguiamo $B$, che abbiamo sopra chiamato $r$, è
+    quello prodotto dall'esecuzione di $A$. Dobbiamo quindi calcolare
+    $wp(A,r)$.\\
+    Procedo quindi ancora con l'assegnamento, ottenendo:
+    \[wp(A,r)=x+1<y(x+1)\]
+    che quindi, per composizione, è anche la precondizione più debole per $P$ e
+    $q$. Bisogna però fare dei controlli.\\
+    Uso quindi le regole delle disequazioni:
+    \begin{itemize}
+      \item caso 1: $x+1>0\implies y>1$
+      \item caso 2: $x+1=0\implies 0<0$ e quindi non vale $q$
+      \item caso 3: $x+1<0\implies y<0$
+    \end{itemize}
+    Costruisco quindi la precondizione più debole prendendo la disgiunzione
+    logica dei due casi validi:
+    \[wp(P,q)=(x\geq 0\land y>1)\lor (x<-1\land y<1)\]
+    (sempre ricordando che lavoriamo con interi)
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+   Vediamo un altro esempio:
+  \begin{listing}[H]
+    \begin{lstlisting}
+      x ~ x+a;
+      y ~ y-1;
+    \end{lstlisting}
+    \caption{Programma $P$}
+  \end{listing}
+Dove i due assegnamenti sono rispettivamente $A$ e $B$ e si vuole la
+postcondizione $q=(x=(b-y)\cdot a)$. Cerco quindi $wp(P,q)$.\\
+Nella postcondizione ho una variabile $b$ esterna alla sequenza di interesse
+fissato a priori.\\
+Come prima ottengo:
+\[r=wp(B,q)=(x=(b-y+1)\cdot a)=(x=(b-y)\cdot a)\]
+e quindi:
+\[wp(A,r)=(x+a=(b-y)\cdot a+a)\]
+quindi $x=(b-y)\cdot a$ è un invariante ed è anche la postcondizione, Quindi $q$
+è un invariante, accezione più forte del termine, per $P$.
+\end{esempio}
+
+\subsubsection{Estensioni del linguaggio}
+Abbiamo, in conclusione, sviluppato una tecnica di studio basata su un
+linguaggio di programmazione molto semplificato. Innanzitutto potremmo estendere
+il linguaggio usato, aggiungendo:
+\begin{itemize}
+  \item il \textbf{do-while}:
+  \[\mbox{do \textit{C} while \textit{B} endwhile}\]
   che nella realtà corrisponde a:
-  \[\mbox{\textnormal{C}; while \textnormal{B} do
+  \[\mbox{\textit{C}; while \textit{B} do
       \textnormal{C} endwhile}\]
-  \item il repeat:
-  \[\mbox{repeat \textnormal{C} until \textnormal{B} endrepeat}\]
+  \item il \textbf{repeat-until}:
+  \[\mbox{repeat \textit{C} until \textit{B} endrepeat}\]
   che nella realtà corrisponde a:
-  \[\mbox{\textnormal{C}; while not \textnormal{B} do
-      \textnormal{C} endwhile}\]
-  \item il ciclo for:
-  \[\mbox{for(\mathnormal{D; B; F}) \mathnormal{C} endfor} \]
+  \[\mbox{\textit{C}; while not \textit{B} do
+      \textit{C} endwhile}\]
+  \item il \textbf{ciclo for}:
+  \[\mbox{for(\textit{D; B; F}) \textit{C} endfor} \]
   sempre convertendolo in un while (\textit{ipotizzo così}):
-   \[\mbox{while \textnormal{B} do
-      \textnormal{C; F}  endwhile}\]
-  \item procedure, metodi e funzioni
-  \item array, anche se solo in lettura se vogliamo applicare la logica di Hoare
-  come l'abbiamo vista
+   \[\mbox{while \textit{B} do
+      \textit{C; F}  endwhile}\]
+  \item \textbf{procedure, metodi e funzioni}
+  \item \textbf{array}, anche se solo in lettura se vogliamo applicare la logica
+  di Hoare come l'abbiamo vista
 \end{itemize}
 Un altro limite è dato dal fatto che abbiamo usato solo il tipo intero, ma
 possiamo potenzialmente aggiungere anche gli altri senza cambiare le basi della
@@ -1400,7 +1495,7 @@ Vediamo un esempio.
   un certo $F$, incremento nel corpo, dipendenti da $x$ e $k$):
   \begin{listing}[H]
     \begin{lstlisting}
-      x ~ E(x)
+      x ~ E(x);
       while B(x,k) do
         x ~ F(x,k);
       endwhile  
@@ -1414,7 +1509,7 @@ Vediamo un esempio.
   ottiene quindi: 
   \begin{listing}[H]
     \begin{lstlisting}
-      x ~ 0
+      x ~ 0;
       while (x+1)^2 <= k do
         x ~ x+1;
       endwhile  

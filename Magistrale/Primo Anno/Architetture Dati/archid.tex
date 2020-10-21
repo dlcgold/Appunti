@@ -574,7 +574,9 @@ dell'accesso a dati di diversi vendor. ODBC, a livello architetturale, si pone
 sopra il DBMS e da un'immagine indipendente da ciò che c'è sotto (funziona come
 una sorta di \textit{driver}), trasformando tutto in una sorta di SQL
 standard. Si hanno anche dei protocolli, come \textbf{X-Open Distributed
-  Transaction Processing (\textit{DTP})}, che consentono di eseguire delle
+  Transaction Processing (\textit{DTP})} (che è una descrizione architetturale
+abilitante il protocollo di esecuzione di transazioni distribuite), che
+consentono di eseguire delle 
 transazioni secondo una logica diversa. Questo protocollo stabilisce una serie
 di API che vengono implementate da ogni singolo DBMS per offrire una
 connettività standard (approccio molto usato per transazioni con vendor
@@ -1451,9 +1453,14 @@ In questo caso il TM non riesce a distinguere tra perdita di messaggi
 Durante la seconda fase la non distinzione tra perdita di \textit{ack} o di
 decisioni dei gli RM porta alla ripetizione della seconda fase dopo il
 \textit{timeout}.\\
-Un partizionamento della rete non causa problemi ulteriori, dato che una
-transazione può avere successo solo se il TM e tutti i RM appartengono alla
-stessa partizione.
+% Un partizionamento della rete non causa problemi ulteriori, dato che una
+% transazione può avere successo solo se il TM e tutti i RM appartengono alla
+% stessa partizione.
+Se durante lo svolgimento del protocollo 2pc si partiziona la rete avendo due
+sottoreti una con TM e RM1 che e la seconda sottorete con RM2, RM3. In questo
+caso il TM continua a mandare il messaggio della global decision a RM2 RM3 dopo
+lo scadere del timeout. Si concluderà comunque, con alte probabilità, con un
+\textit{abort} da parte del TM.
 \subsubsection{Ottimizzazioni di 2PC}
 2PC può essere ottimizzato per:
 \begin{itemize}
@@ -1636,8 +1643,25 @@ Per realizzare una replica posso fare in diversi modi:
   Un \textbf{db parallelo} è studiato per le prestazioni. Si ha accesso
   parallelo ai dati, parallelismo \textit{intra-query} (stessa query su
   frammenti diversi), parallelismo \textit{inter-query} (tante query diverse) e
-  sono fatti da elementi hardware posti vicini tra loro.
+  sono fatti da elementi hardware posti vicini tra loro.\\
+  Parliamo di \textbf{persistenza dei dati}. Bisogna garantire la durabilità dei
+  dati, bisogna quindi usare un db. Si hanno anche problemi per creare oggetti
+  persistenti a partire da un linguaggio OOP, si ha il cosiddetto
+  l'\textbf{object-relational paradigm mismatch}. Si separa quindi l'aspetto OOP
+  e l'aspetto relazionale per risolvere il problema per poi ``mappare'' l'uno
+  nell'altro, tramite i \textbf{data mapper}. Si hanno operazioni \textbf{CRUD}:
+  \begin{itemize}
+    \item Create
+    \item Read
+    \item Update
+    \item Delete
+  \end{itemize}
+  Si ha quindi il cosiddetto \textbf{Object–relational mapping}, ovvero questa
+  tecnica di mapping. Si hanno vari framework che lo implementano.\\
+  Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.
 \end{shaded}
+\section{Prima esercitazione}
+\chapter{Blockchain}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -1663,8 +1687,9 @@ Per realizzare una replica posso fare in diversi modi:
 % LocalWords:  prepare ready checkpoint dump img png decision recoverable all
 % LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
 % LocalWords:  interface IBM Microsoft technologies realtime based snapshot and
-% LocalWords:  transactional merge over loss disaster mission critical load
+% LocalWords:  transactional merge over loss disaster mission critical load OOP
 % LocalWords:  kilometri consolidation distribution balancing offline entry
 % LocalWords:  reporting warehousing commerce social testing compliant many
 % LocalWords:  source directional resolution detention Tier staging event apply
-% LocalWords:  publish publisher distributor subscriber intra inter
+% LocalWords:  publish publisher distributor subscriber intra inter paradigm
+% LocalWords:  relational mismatch Blockchain mapper Delete framework

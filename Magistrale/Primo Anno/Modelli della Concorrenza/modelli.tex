@@ -1347,10 +1347,117 @@ Si hanno diversi casi a seconda dei tipi di comando:
   casi, ottengo: 
   \[wp(S,q)=(B\land wp(C,q))\lor (\neg B\land wp(D,q))\]
 \end{itemize}
-
+\textbf{inserire prima parte lezione}\\
+Abbiamo sviluppato una tecnica di studio basata su un linguaggio di
+programmazione molto semplificato. Innanzitutto potremmo estendere il linguaggio
+usato aggiungendo:
+\begin{itemize}
+  \item il do-while:
+  \[\mbox{do \textnormal{C} while \textnormal{B} endwhile}\]
+  che nella realtà corrisponde a:
+  \[\mbox{\textnormal{C}; while \textnormal{B} do
+      \textnormal{C} endwhile}\]
+  \item il repeat:
+  \[\mbox{repeat \textnormal{C} until \textnormal{B} endrepeat}\]
+  che nella realtà corrisponde a:
+  \[\mbox{\textnormal{C}; while not \textnormal{B} do
+      \textnormal{C} endwhile}\]
+  \item il ciclo for:
+  \[\mbox{for(\mathnormal{D; B; F}) \mathnormal{C} endfor} \]
+  sempre convertendolo in un while (\textit{ipotizzo così}):
+   \[\mbox{while \textnormal{B} do
+      \textnormal{C; F}  endwhile}\]
+  \item procedure, metodi e funzioni
+  \item array, anche se solo in lettura se vogliamo applicare la logica di Hoare
+  come l'abbiamo vista
+\end{itemize}
+Un altro limite è dato dal fatto che abbiamo usato solo il tipo intero, ma
+possiamo potenzialmente aggiungere anche gli altri senza cambiare le basi della
+logica introdotte.
+\subsection{Logica di Hoare per sviluppare programmi}
+Possiamo vedere le logiche di Hoare come \textbf{contratti} tra chi scrive il
+programma e l'utente. In questo contesto l'utente commissiona il programma
+specificando la postcondizione e chiede al programmatore di garantire che tale
+postcondizione venga garantita al termine dell'esecuzione. Per garantire la
+postcondizione $q$ deve essere vera la precondizione $p$.\\
+Vediamo un esempio.
+\begin{esempio}
+  Ci proponiamo di calcolare la radice quadrata intera di un certo $k\geq 0$,
+  approssimando per difetto.\\
+  Alla fine del programma voglio il risultato nella variabile $x$, quindi
+  voglio:
+  \[\{k\geq 0\}\mbox{ P }\{0\leq x^2\leq k<(x+1)^2)\}\]
+  con $(x+1)^2$ per la correttezza dell'approssimazione.\\
+  Ci si propone di fare il calcolo per approssimazioni successive, partendo da
+  un valore più piccolo di quello corretto.\\
+  Possiamo spaccare $q$ in:
+  \[0\leq x^2\leq k \,\,\,\mbox{ e }\,\,\,k<(x+1)^2\]
+  la prima possiamo considerarla come \textit{invariante} (anche solo $x^2\leq
+  k$).\\
+  
+  All'inizio possiamo pensare che $x$ dipenda da $k$ per una certa funzione $E$.
+  Si ha quindi un prototipo del genere (con un certo $B$, condizione booleana, e
+  un certo $F$, incremento nel corpo, dipendenti da $x$ e $k$):
+  \begin{listing}[H]
+    \begin{lstlisting}
+      x ~ E(x)
+      while B(x,k) do
+        x ~ F(x,k);
+      endwhile  
+    \end{lstlisting}
+    \caption{Programma $P$}
+  \end{listing}
+  Alla fine deve valere $x^2\leq k \land \neg B$ per la regola
+  dell'iterazione.\\
+  Come $B$ posso porre $(x+1)^2\leq k$ (ovvero la negazione della seconda parte
+  della postcondizione, in modo da ottenere, con la negazione, $q$).\\ Si
+  ottiene quindi: 
+  \begin{listing}[H]
+    \begin{lstlisting}
+      x ~ 0
+      while (x+1)^2 <= k do
+        x ~ x+1;
+      endwhile  
+    \end{lstlisting}
+    \caption{Programma $P$}
+  \end{listing}
+  Bisognerebbe comunque dimostrare invariante e terminazione per validare il
+  programma. 
+\end{esempio}
+Supponiamo un programma del tipo:
+\[\{p\}\mbox{ A;W;C } \{q\}\]
+che si risolve schematicamente con:
+\[\{p\}\mbox{ A } \{inv\} \mbox{ W } \{inv\land \neg B\}\mbox{ C }\{q\}\]
+Questo schema usa i cosiddetti \textbf{invarianti costruttivi}.\\
+\subsection{Ultime considerazioni}
+Vediamo qualche ultima considerazione sulla logica di Hoare.
+\begin{itemize}
+  \item alcune applicazioni pratiche della logica di Hoare:
+  \begin{itemize}
+    \item \textit{java modelling language}, un linguaggio di specificazione
+    scritto in Java, che permette di fare \textit{design by contract} stabilendo
+    delle precondizioni e delle postcondizioni 
+    \item \textit{Eiffel, programming by contract}
+    \item \textit{assert.h} in C
+  \end{itemize}
+  
+  \item alcune applicazioni teoriche della logica di Hoare:
+  \begin{itemize}
+    \item \textit{semantica del programmi}, ovvero lo studio di cosa significa
+    un programma, tramite:
+    \begin{itemize}
+      \item \textit{semantiche operazionali}
+      \item \textit{semantiche assiomatiche}
+      \item \textit{semantiche denotazionali}
+      \item \textit{semantiche operazionali strutturate}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
 % LocalWords:  if return ht primis postcondizione Hoare then endif for endwhile
 % LocalWords:  endfor program counter skip and not cccccc ccccc derivabilità
-% LocalWords:  weakest precondition sse step
+% LocalWords:  weakest precondition sse step repeat until endrepeat array java
+% LocalWords:  modelling contract programming Eiffel assert language
+% LocalWords:  postcondizioni denotazionali

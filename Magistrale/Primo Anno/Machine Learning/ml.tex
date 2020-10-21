@@ -586,7 +586,118 @@ inconsistenti. Inoltre non ho l'ipotesi più generale.
   \end{algorithmic}
   \caption{Algoritmo Find-S}
 \end{algorithm}
+\subsubsection{Esercitazione sull'algoritmo find-S}
+\textit{Verranno usati concetti spiegati più avanti in questi appunti.}\\
+Si ha anche il \textbf{bias induttivo} che permette di studiare anche esempi non
+visti nel training set, anche se è una situazione rara da analizzare a causa
+dell'inconsistenza stessa degli esempi e dal loro rumore.
+\begin{esempio}
+  Prendiamo il seguente \textit{training set} $D$:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c|cccc|c}
+      esempio & $A_1$  & $A_2$  & $A_3$  & $A_4$ & label\\
+      \hline
+      $x_1$ & 1 & 0 & 1 & 0 & 1\\
+      $x_2$ & 0 & 1 & 0 & 0 & 0\\
+      $x_3$ & 1 & 0 & 1 & 1 & 0\\
+      $x_4$ & 0 & 0 & 0 & 0 & 1\\
+      $x_5$ & 0 & 0 & 1 & 0 & 1\\
+    \end{tabular}
+  \end{table}
+  Applico quindi \textbf{find-S}, che ad ogni iterazione cerca di generalizzare
+  un poco l'ipotesi più specifica.\\
+  Parto dall'ipotesi più specifica in assoluto:
+  \[S=\{\langle\emptyset,\emptyset,\emptyset,\emptyset\rangle\}\]
+  Si presenta il primo esempio $x_1=(1,0,1,0)$ che ha label 1, quindi
+  $t(x_1)=1$. Ovviamente il primo valore già non soddisfa il vincolo imposto da
+  $S$ e quindi in $S$ faccio il \textit{replace} del valore del primo attributo
+  di $x_1$ con quello di $S$. Visto che $S$ è però l'ipotesi più specifica dovrò
+  farlo per tutti i vincoli, ottenendo che $S$ diventa, di fatto, una copia di
+  $x_1$: 
+  \[S=\{\langle 1,0,1,0\rangle\}\]
+  Si presenta il secondo esempio $x_2=(0,1,0,0)$ che ha label 0, quindi
+  $t(x_2)=0$. Essendo un esempio negativo viene ignorato dall'algoritmo,
+  lasciando inalterato $S$.\\
+  Si presenta il terzo esempio $x_3=(1,0,1,1)$ che ha label 0, quindi
+  $t(x_3)=0$.Essendo un esempio negativo viene ignorato dall'algoritmo,
+  lasciando inalterato $S$.\\
+  Si presenta il quarto esempio $x_4=(0,0,0,0)$ che ha label 1, quindi
+  $t(x_4)=1$. Controllo quindi con $S$ i vari valori. Dove si ha lo stesso
+  valore lo tengo in $S$, altrimenti pongo il caso generico ``?'' (sempre
+  nell'ottica di generalizzare sempre più), in quanto ho
+  due esempi che mi dicono che avere, per quell'attributo', 1 o 0 va comunque
+  bene. Alla fine avrò:
+  \[S=\{\langle ?,0,?,0\rangle\}\]
+  Si presenta il quinto esempio $x_5=(0,0,1,0)$ che ha label 1, quindi
+  $t(x_5)=1$. Procedo come sopra e ottengo, infine:
+  \[S=\{\langle ?,0,?,0\rangle\}\]
+  Si arriva quindi a dire che $S=\{\langle ?,0,?,0\rangle\}$ è la nuova ipotesi
+  più specifica che verrà restituita dall'algoritmo \textbf{find-S}.
+\end{esempio}
+\begin{esempio}
+  Si ha la richiesta opposta allo scorso esempio. \\
+  Data l'ipotesi:
+  \[S=\{\langle ?,0,?,?\rangle\}\]
+  Si trovino 5 esempi (3 positivi e due negativi) che portino, secondo
+  \textbf{find-S}, a restituire quell'ipotesi.\\
+  Parto sempre da:
+  \[S=\{\langle\emptyset,\emptyset,\emptyset,\emptyset\rangle\}\]
+  e mi invento gli esempi.\\
+  Un primo è $x_1=(1,0,1,0)$ (dato che il secondo attributo ha sicuro valore 0)
+  tale che $t(x_1)=1$. Raggiungo quindi: 
+  \[S=\{\langle 1,0,1,0\rangle\}\]
+  ora me ne bastano due che rendano ``?'' tutti gli attributi tranne il secondo,
+  che deve restare 0. Prendo quindi un esempio positivo che, tranne per il secondo
+  valore che deve restare 0 e per un'altro dei tre che deve restare come per
+  $x_1$ in modo da avere un ulteriore esempio positivo, sia il complemento del
+  primo. Ho quindi $x_2=(1,0,0,1)$, con 
+  $t(x_2)=1$. Ho già ottenuto:
+  \[S=\{\langle 1,0,?,?\rangle\}\]
+  Ora, per il terzo esempio, prendo $x_3=(0,0,0,1)$, con $t(x_3)=1$. Ottengo
+  esattamente:
+  \[S=\{\langle ?,0,?,?\rangle\}\]
+  Gli altri due esempi possono essere con qualsiasi valori ma devono essere
+  negativi, non influenzando il risultato.\\
+  \begin{shaded}
+    Nell'esercitazione il prof usa altri esempi:
+    \begin{itemize}
+      \item $x_1=(1,0,1,0)$ con $t(x_1)=1$
+      \item $x_2=(0,1,0,0)$ con $t(x_2)=0$
+      \item $x_3=(1,0,1,1)$ con $t(x_3)=1$
+      \item $x_4=(0,0,0,0)$ con $t(x_4)=0$
+      \item $x_5=(0,0,0,0)$ con $t(x_5)=1$
+    \end{itemize}
+    Con gli ultimi due che rappresentano, in un contesto reale,
+    un \textbf{errore} e un \textbf{rumore}, in quanto gli stessi valori portano
+    ad avere le due \textit{label} opposte, si ha quindi inconsistenza. Sono
+    infatti detti \textbf{esempi inconsistenti} e vengono completamente ignorati
+    da \textbf{find-S}.
+  \end{shaded}
+\end{esempio}
+Sono quindi ben chiari i problemi di \textbf{find-S}:
+\begin{itemize}
+  \item potrebbero esserci altre ipotesi consistenti rispetto a quella in output
+  \item training set inconsistenti possono ingannare l'algoritmo
+\end{itemize}
+D'altro canto:
+\begin{itemize}
+  \item garantisce in output l'ipotesi più specifica consistente con gli esempi
+  positivi
+  \item l'ipotesi finale è consistente anche con gli esempi negativi, a patto
+  che il \textit{target concep}t sia contenuto in $H$ e che gli esempi siano
+  corretti
+\end{itemize}
+\item 
 \subsection{Algoritmi di eliminazione}
+\begin{definizione}
+  Definiamo \textbf{soddisfacibilità} quando un esempio $x$ soddisfa un'ipotesi
+  $h$, evento indicato con:
+  \[h(x)=1\]
+  a priori sul fatto che $x$ sia un esempio positivo o negativo del
+  \textit{target concept}. Si ha quindi
+  che i valori $x$ soddisfano i vincoli $h$. 
+\end{definizione}
 \begin{definizione}
   Si dice che $h$ è \textbf{consistente} con il training set $D$ di concetti
   target sse: 
@@ -644,7 +755,6 @@ Vediamo quindi algoritmo \textbf{List-Then Eliminate}:
 \end{algorithm}
 Questo algoritmo è irrealistico in quanto richiese un numero per forza esaustivo
 di ipotesi.
-\newpage
 \begin{definizione}
   Definiamo:
   \begin{itemize}
@@ -1467,4 +1577,4 @@ dipende dall'output.
 % LocalWords:  darkgreen list then example label dell nell refractory Hebb pre
 % LocalWords:  McCulloch Pitts sigmoide Percettrone percettroni iperpiano error
 % LocalWords:  function Papert Minsky perceptron Recall feedforward layer Unit
-% LocalWords:  Linear Treshold LTU
+% LocalWords:  Linear Treshold LTU soddisfacibilità replace

@@ -1341,7 +1341,7 @@ Si hanno diversi casi a seconda dei tipi di comando:
   quindi la formula usata come postcondizione per calcolare la precondizione più
   debole di $C_1$, ovvero: $wp(C_1,wp(C_2,q))$. Questo non è altro che la
   condizione più debole della sequenza:
-  \[wp((C_1;C_2),q)= wp(C_1,wp(C_2,q))\]
+  \[wp((C_1;C_2),q)\equiv wp(C_1,wp(C_2,q))\]
   \item \textbf{scelta:} in questo caso, avendo:
   \[S=\mbox{ if \textit{B} then \textit{C} else \textit{D} endif }\]
   fisso la postcondizione $q$ e procedo come per la regola di
@@ -1350,7 +1350,7 @@ Si hanno diversi casi a seconda dei tipi di comando:
   $wp(C,q)$. Qualora $B$ non sia vera calcolo, eseguendo $D$, la precondizione
   più debole $wp(D,q)$. Nel complesso quindi, facendo la disgiunzione dei due
   casi, ottengo: 
-  \[wp(S,q)=(B\land wp(C,q))\lor (\neg B\land wp(D,q))\]
+  \[wp(S,q)\equiv(B\land wp(C,q))\lor (\neg B\land wp(D,q))\]
   \item \textbf{iterazione:} in questo caso, avendo:
   \[W=\mbox{while \textit{B} do \textit{C} endwhile}\]
   È il caso più complicato.\\
@@ -1361,10 +1361,10 @@ Si hanno diversi casi a seconda dei tipi di comando:
   rifare lo stesso discorso se $B$ è ancora vera (questo fino a che non ho $\neg
   B$, uscendo dal ciclo e arrivando a $q$), ragionando su $W$ di $C;W$. Si
   arriva di fatto ad una regola ricorsiva:
-  \[wp(W,q)=(\neg B\land q)\lor(B\land wp((C;W),q))\]
+  \[wp(W,q)\equiv(\neg B\land q)\lor(B\land wp((C;W),q))\]
   Applico quindi la regola della sequenza per la condizione più debole,
   arrivando a:
-  \[wp(W,q)=(\neg B\land q)\lor(B\land wp(C, wp(W,q)))\]
+  \[wp(W,q)\equiv(\neg B\land q)\lor(B\land wp(C, wp(W,q)))\]
   Si nota che questa definizione ricorsiva ha un problema grave: non si ha un
   \textbf{caso base} che risolva la catena di chiamate ricorsive.\\
   Purtroppo non si può usare il ``trucco'' dell'invariante come nella regola di
@@ -1374,11 +1374,11 @@ Si hanno diversi casi a seconda dei tipi di comando:
 Si hanno dei casi estremi, ad esempio:
 \begin{itemize}
   \item precondizioni più deboli sempre false, ad esempio:
-  \[wp(x\cceq5,x<0)=\bot\]
+  \[wp(x\cceq5,x<0)\equiv\bot\]
   ovvero se assegno a $x$ il valore 5 non avrò mai $x$ negativo,
   ovvero ho un insieme vuoto $\emptyset$ di stati che garantiscono quanto detto
   \item precondizioni più deboli sempre vere, ad esempio
-  \[wp(x\cceq 5,x\geq0)=\top\]
+  \[wp(x\cceq 5,x\geq0)\equiv\top\]
   ovvero se assegno a $x$ il valore 5 si avrà che $x$ è sempre
   positivo, quindi è vero per qualunque stato iniziale
 \end{itemize}
@@ -1406,7 +1406,7 @@ Si hanno dei casi estremi, ad esempio:
     quello prodotto dall'esecuzione di $A$. Dobbiamo quindi calcolare
     $wp(A,r)$.\\
     Procedo quindi ancora con l'assegnamento, ottenendo:
-    \[wp(A,r)=x+1<y(x+1)\]
+    \[wp(A,r)\equivx+1<y(x+1)\]
     che quindi, per composizione, è anche la precondizione più debole per $P$ e
     $q$. Bisogna però fare dei controlli.\\
     Uso quindi le regole delle disequazioni:
@@ -1417,7 +1417,7 @@ Si hanno dei casi estremi, ad esempio:
     \end{itemize}
     Costruisco quindi la precondizione più debole prendendo la disgiunzione
     logica dei due casi validi:
-    \[wp(P,q)=(x\geq 0\land y>1)\lor (x<-1\land y<1)\]
+    \[wp(P,q)\equiv(x\geq 0\land y>1)\lor (x<-1\land y<1)\]
     (sempre ricordando che lavoriamo con interi)
   \end{itemize}
 \end{esempio}
@@ -1435,13 +1435,63 @@ postcondizione $q=(x=(b-y)\cdot a)$. Cerco quindi $wp(P,q)$.\\
 Nella postcondizione ho una variabile $b$ esterna alla sequenza di interesse
 fissato a priori.\\
 Come prima ottengo:
-\[r=wp(B,q)=(x=(b-y+1)\cdot a)=(x=(b-y)\cdot a)\]
+\[r=wp(B,q)\equiv(x=(b-y+1)\cdot a)=(x=(b-y)\cdot a)\]
 e quindi:
-\[wp(A,r)=(x+a=(b-y)\cdot a+a)\]
+\[wp(A,r)\equiv(x+a=(b-y)\cdot a+a)\]
 quindi $x=(b-y)\cdot a$ è un invariante ed è anche la postcondizione, Quindi $q$
 è un invariante, accezione più forte del termine, per $P$.
 \end{esempio}
-
+\begin{esempio}
+  Vediamo un altro esempio:
+  \begin{listing}[H]
+    \begin{lstlisting}
+      if y = 0 then
+        x ~ 0;
+      else
+        x ~ x * y;
+      endif
+    \end{lstlisting}
+    \caption{Programma $P$}
+  \end{listing}
+  Dove i due comandi sono rispettivamente $C$ e $D$ e la condizione booleana è
+  $B$. Come postcondizione voglio $q=(x=y)$.\\
+  Per il caso della scelta bisogna calcolare i due casi e usare poi la
+  disgiunzione tra essi.\\
+  Calcolo quindi:
+  \begin{enumerate}
+    \item il caso in cui vale $B$: $wp(C,q)=(0=y)$, usando l'assegnamento
+    \item il caso in cui vale $\neg B$: $wp(D,q)=(x\cdot y)=y$, usando
+    assegnamento. La formula però comporta che ho due casi possibili: $y=0\lor
+    x=1$ (il secondo appunto se ho $y\neq 0$)
+  \end{enumerate}
+  Applico quindi la regola della scelta, ottenendo:
+  \[wp(P,q)\equiv (y=0\land y=0)\lor(y\neq 0\land (y=0\lor x=1))\]
+  Semplificando si ha che:
+  \[wp(P,q)\equiv(y=0)\lor(x=1\land y\neq 0)\]
+\end{esempio}
+\begin{esempio}
+   Vediamo un altro esempio:
+  \begin{listing}[H]
+    \begin{lstlisting}
+      while x > 0 do
+        x ~ x - 1
+      endwhile
+    \end{lstlisting}
+    \caption{Programma $P$}
+  \end{listing}
+  Con la condizione $B$ e il comando $C$, nel corpo dell'iterazione $W$. Come
+  postcondizione si vuole $q=(x=0)$.\\
+  Seguendo le modalità discusse in merito alle tecniche relative al calcolo
+  della precondizione più debole per l'iterazione, vediamo che:
+  \[(\neg B\land q)\equiv (x\leq 0\land x=0)\equiv (x=0)\]
+  Per comodità chiamo $wp(W,q)$ $r$.\\ 
+  Dobbiamo ora studiare $B\land wp(C,wp(W,q))$ che quindi per noi è, per l'alias
+  appena definito, $B\land wp(C,r)$:
+  \[B\land wp(C,r)\equiv x>0\land r[x-1/x]\]
+  usando quindi l'assegnamento e quindi si ha che:
+  \[B\land wp(C,r)\equiv (x>0)\land (x-1=0\loe (x-1>0\land r[x-2/x]))\]
+  %13.16
+\end{esempio}
 \subsubsection{Estensioni del linguaggio}
 Abbiamo, in conclusione, sviluppato una tecnica di studio basata su un
 linguaggio di programmazione molto semplificato. Innanzitutto potremmo estendere

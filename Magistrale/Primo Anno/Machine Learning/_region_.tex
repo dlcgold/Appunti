@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt, oneside]{book}
+\message{ !name(ml.tex)}\documentclass[a4paper,12pt, oneside]{book}
 
 % \usepackage{fullpage}
 \usepackage[italian]{babel}
@@ -21,7 +21,6 @@
 \usepackage{fontspec}
 \usepackage{enumerate}
 \usepackage{braket}
-\usepackage{physics}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -91,11 +90,14 @@
 
 \pgfplotsset{compat=1.13}
 \begin{document}
+
+\message{ !name(ml.tex) !offset(-3) }
+
 \maketitle
 
 \definecolor{shadecolor}{gray}{0.90}
 \setlist{leftmargin = 2cm}
-\newcommand{\normm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definizione}{Definizione}
 \newtheorem{esempio}{Esempio}
@@ -689,6 +691,7 @@ D'altro canto:
   che il \textit{target concep}t sia contenuto in $H$ e che gli esempi siano
   corretti
 \end{itemize}
+\item 
 \subsection{Algoritmi di eliminazione}
 \begin{definizione}
   Definiamo \textbf{soddisfacibilità} quando un esempio $x$ soddisfa un'ipotesi
@@ -1217,7 +1220,7 @@ di transizione sia una \textbf{funzione a scalino}:
   \centering
   \psscalebox{1.0 1.0} % Change this value to rescale the drawing.
   {
-    \begin{pspicture}(3,-0.965)(9.8,0.965)
+    \begin{pspicture}(0,-0.965)(9.8,0.965)
       \psframe[linecolor=black, linewidth=0.04, dimen=outer]
       (4.0,0.71990234)(2.4,-0.8800976)
       \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
@@ -1573,8 +1576,6 @@ classificazione corretta quindi se:
   \item $\eta$ è abbastanza piccolo
 \end{itemize}
 \subsection{Discesa lungo il gradiente}
-\textbf{Le formule più complesse sono solo di bellezza.}\\
-\noindent
 Fino ad ora il singolo neurone rappresentava un singolo iperpiano che veniva
 ``spostato'' per dividere le istanze positive e quelle negative.\\
 Ora introduciamo che ad ogni passo di aggiornamento si aggiornano i pesi e se,
@@ -1593,270 +1594,27 @@ A livello di conti si ha che:
       E}{\partial w_n}\right]\]
 e quindi aggiornando i pesi come:
 \[w'=w+\delta w= w-\eta\nabla E[w]\]
-Si ha quindi:
-\[\Delta w_i=-\eta\frac{\partial E}{\partial w_i}=-\eta\frac{\partial}{\partial
-    w_i}\cdot \frac{1}{2}\sum_d (t_d-y_d)^2\]
-\[=-\eta\frac{\partial}{\partial
-    w_i}\cdot \frac{1}{2}\sum_d (t_d-\sum_i w_i\cdot x_{di})^2=
-  -\eta\sum_d(t_d-y_d)\cdot(-x_i)\]
+% manca una formula
 Si vuole addestrare quindi cambiando costantemente la sequenza di pesi del
 vettore di input $\langle( x_1, \ldots x_n),t\rangle$, con $t$ output
 corrispondente.\\
-$w_i$ è inizializzato con un valore piccolo e si ha l'algoritmo:
+$w_i$ è inizializzato con un valore piccolo e si ha:
+% insieire algoritmo slide 5
+
 \begin{algorithm}[H]
   \begin{algorithmic}
-    \Function{grad}{}
+    \Fucntion{grad}{}
     \State \textit{inizializzo ogni $\Delta w_i$ a $0$}
     \For {\textit{ogni input $\langle( x_1, \ldots x_n),t\rangle$}}
     \State \textit{invio l'input $( x_1, \ldots x_n)$ all'unità lineare e
-    calcola l'output $y$} 
-    \State \textit{aggiorno la variazione dei pesi:}
-    \[\Delta w_i=\Delta w_i+\eta\cdot (t-y)\cdot x_i\]
+    calcola l'output $y$}
+    
     \EndFor
-    \State \textit{aggiorno i pesi:}
-    \[w_i=w_i+\Delta w_i\]
     \EndFunction
   \end{algorithmic}
   \caption{Algoritmo di discesa lungo il gradiente}
 \end{algorithm}
-Abbiamo una \textbf{modalità Batch}, quindi computazionalmente costosa:
-\[w=w-\eta\cdot\nabla E_D[W]\]
-Si può avere una \textbf{modalità incrementale}:
-\[w=w-\eta\cdot\nabla E_d[W]\]
-calcolata sui singoli esempi $d$:
-\[E_d[w]=\frac{1}{2}(t_d-y_d)^2\]
-La discesa lungo il gradiente incrementale può approssimare la discesa lungo
-il gradiente Batch arbitrariamente se $\eta$ è abbastanza piccolo.\\
-Rispetto a quanto visto per il percettrone la discesa lungo il gradiente
-converge all'ipotesi con il minimo errore quadratico se  $\eta$ è abbastanza
-basso, anche per dati di training molto rumorosi.
-\subsection{Reti multistrato}
-\textbf{Le formule più complesse sono solo di bellezza.}\\
-\noindent
-Passiamo quindi dal percettrone ad una rete a due strati, cambiando quindi la
-gestione dei pesi.\\
-Devo avere sempre un gradiente dei pesi, che ora avranno doppio indice per
-indicare anche l'unità di riferimento, che scende:
-\[\frac{\partial E}{\partial w_{ij}}=\frac{\partial E}{\partial y_{j}}\cdot
-  \frac{\partial y_j}{\partial w_{ij}}=-(t_j-y_j)\cdot \frac{\partial
-    y_j}{\partial w_{ij}}=-\delta_j\cdot\frac{\partial \sum_i w_{ij}\cdot
-    x_j}{\partial w_{ij}}=-\delta_j\cdot x_i\]
-Si ha quindi:
-\[\Delta w_{ij}=\eta\cdot \delta_j\cdot x_i\]
-detta \textbf{regola delta}, che è l'evoluzione di quanto detto per il
-percettrone in merito alla variazione dei pesi.\\
-Si ha che la convergenza a un minimo globale é garantita per funzioni di
-attivazione lineari senza unità nascoste e per dati consistenti.\\
-Si introduce una nuova funzione di attivazione, detta \textbf{sigmoide}, che
-comporta l'\textbf{unità sigmoide}. La funzione sigmoide è:
-\[y=\sigma(net)=\frac{1}{1+e^{-net}}\]
-Tale funzione è derivabile, infatti:
-\[\dd \sigma(x)=\sigma(x)\cdot (1-\sigma(x))\]
-riprendendo la figura \ref{fig:bin} si ha quindi in primis l'aggiunta del nodo
-bias e poi il cambio della funzione a scalino con il \textbf{sigmoide}. L'output
-invece non sarà più binario ma un certo $y$.\\
-Si hanno quindi in primis le \textbf{reti multistrato feedforward} con le
-seguenti caratteristiche:
-\begin{itemize}
-  \item si hanno strati intermedi tra input e output
-  \item si hanno connessioni da strati di livello basso a strati di livello
-  alto, solitamente mono direzionali
-  \item non si hanno all'interno di uno stesso strato
-  \item il neurone ha uno stato booleano $x\in\{0,1\}$
-  \item si ha la seguente funzione di transizione:
-  \[x_k=\sigma\left(\sum_{j}w_{jk}\cdot x_j\right)\]
-  con $x_j$ che può essere in alcuni
-  casi un input istanza e in altri lo stato di altri neuroni, a seconda
-  dell'altezza del livello in cui mi trovo
-  \item per ogni configurazione $x$ del primo strato (ingresso), la rete calcola
-  una configurazione $y$ dell'ultimo strato (uscita). Normalmente avremo uno
-  strato nascosto più grande (poco) di quello d'uscita (anche se non si ha una
-  regola per dimensionare lo strato nascosto). Raramente useremo più strati
-  nascosti
-\end{itemize}
-\begin{figure}
-  \centering
-  \psscalebox{0.8 0.8} % Change this value to rescale the drawing.
-  {
-    \begin{pspicture}(-3,-4.18)(7.52,4.18)
-      \definecolor{colour2}{rgb}{0.96862745,0.3019608,0.3019608}
-      \definecolor{colour1}{rgb}{0.003921569,0.003921569,0.003921569}
-      \definecolor{colour3}{rgb}{0.039215688,0.5647059,0.1882353}
-      \definecolor{colour4}{rgb}{0.078431375,0.28627452,0.8784314}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (2.4,2.7049024){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (2.4,0.70490235){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (4.0,0.70490235){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (0.8,0.70490235){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (2.4,-0.8950977){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (4.0,-0.8950977){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (0.8,-0.8950977){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (1.6,-2.8950977){0.4}
-      \pscircle[linecolor=black, linewidth=0.04, dimen=outer]
-      (3.2,-2.8950977){0.4}
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(2.4,2.3049023)(0.8,1.1049024)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(2.4,2.3049023)(2.4,1.1049024)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(2.4,2.3049023)(4.0,1.1049024)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(0.8,-1.2950977)(1.6,-2.4950976)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(0.8,-1.2950977)(3.2,-2.4950976)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(2.4,-1.2950977)(1.6,-2.4950976)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(2.4,-1.2950977)(3.2,-2.4950976)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(4.0,-1.2950977)(3.2,-2.4950976)
-      \psline[linecolor=black, linewidth=0.04, arrowsize=0.05291667cm 2.0,
-      arrowlength=1.4,arrowinset=0.0]{<-}(4.0,-1.2950977)(1.6,-2.4950976)
-      \psdots[linecolor=black, dotsize=0.04](1.2,-0.09509765)
-      \psdots[linecolor=black, dotsize=0.04](1.6,-0.09509765)
-      \psdots[linecolor=black, dotsize=0.04](2.0,-0.09509765)
-      \psdots[linecolor=black, dotsize=0.04](2.8,-0.09509765)
-      \psdots[linecolor=black, dotsize=0.04](3.2,-0.09509765)
-      \psdots[linecolor=black, dotsize=0.04](3.6,-0.09509765)
-      \psframe[linecolor=colour2, linewidth=0.04, dimen=outer]
-      (4.4,-2.0950975)(0.4,-3.6950977)
-      \rput[bl](1.2,-4.0950975){\textcolor{colour1}{strato di input}}
-      \rput[bl](1,3.6049025){\textcolor{colour1}{strato di output}}
-      \rput[bl](5,-0.19509765){\textcolor{colour1}{strati nascosti}}
-      \psframe[linecolor=colour3, linewidth=0.04, dimen=outer]
-      (4.0,3.5049024)(0.8,1.9049023)
-      \psframe[linecolor=colour4, linewidth=0.04, dimen=outer]
-      (4.8,1.5049024)(0.0,-1.6950977)
-    \end{pspicture}
-  }
-  \caption{Rappresentazione stilizzata di rete multistrato}
-\end{figure}
-Quindi fissata una mappa $f$ tra input e output, sulla base degli stimoli $x_i$,
-la rete cambia i pesi in modo che dopo un numero di passi $s$ si abbia l'output
-$y_k$ tale che $f(x_k)=y_k,\forall\,k>s$ (almeno approssimativamente). Per la
-modifica bisogna minimizzare un c\textbf{riterio di discrepanza} tra risposta
-della rete e risposta desiderata.\\
-In questo modo potremmo anche risolvere il problema dell'\textit{or esclusivo},
-aggiungendo uno strato nascosto.\\
-Viene aumentata la potenza rispetto al percettrone, permettendo una
-classificazione \textbf{altamente non lineare}.\\
-Si hanno quindi $u_1,\ldots, u_n$ neuroni divisi in:
-\begin{itemize}
-  \item unità di input
-  \item unità nascoste
-  \item unità di output
-\end{itemize}
-Si hanno inoltre:
-\begin{itemize}
-  \item pesi $w_jj$ per ogni coppia che voglio connettere
-  \item stati di attivazione $s_j\in \mathbb{R}$
-  \item input netto a $u_j$: $n_i=\sum_{i=0}^n w_{ij}\cdot s_i$
-  \item funzione di transizione sigmoide:
-  \[s_j(t+1)=\frac{1}{1+e^{-n_i(t)}}\]
-\end{itemize}
-Lo stato di uscita è determinato da una serie di strati profondi. Dato un input
-$x$, un output target $t$ e un output effettivo $y$ abbiamo la solita forma
-quadratica:
-\[E=\frac{1}{2}\sum_j(t_j-y_j)^2\]
-che dipende anche dagli strati nascosti. In ogni caso si ha:
-\[\Delta w_{ij}=-\eta\cdot\frac{\partial E}{\partial w_{ij}}\]
-poiché:
-\[\frac{\partial E}{\partial w_{ij}}= \frac{\partial E}{\partial n_{j}}\cdot
-  \frac{\partial n_j}{\partial w_{ij}}= \frac{\partial E}{\partial n_{j}}\cdot
-  s_j=(def)-\delta_j\cdot s_j\]
-e si cerca:
-\[\delta_j=-\frac{\partial E}{\partial n_{j}}\]
-Abbiamo quindi l'\textbf{algoritmo di retropropagazione} che si divide in 5
-passi:
-\begin{enumerate}
-  \item \textbf{input}: al neurone di input $u_j$ viene assegnato lo stato $x_j$
-  
-  \item \textbf{propagazione}: si calcola lo stato dei neuroni nascosti o di
-  output $u_j$:
-  \[s_j=f_j(n_j)\]
-  \item \textbf{confronto}: per ogni neurone di output $u_j$, noto l’output
-  atteso $t_j$, si calcola:
-  \[\delta_j=f_j(n_j)\cdot(t_j-y_j))\]
-  \item \textbf{retropropagazione dell’errore}: per ogni neurone nascosto $u_j$,
-  si calcola:
-  \[\delta_j=f_j(n_j)\cdot\left(\sum_h w_{ih}\cdot \delta_h\right)\]
-  \item \textbf{aggiornamento dei pesi}: si ha:
-  \[w_{ij}=w_{ij}+\eta\cdot \delta_i\cdot s_j\]
-\end{enumerate}
-Vediamo quindi l'algoritmo:
-\begin{algorithm}[H]
-  \begin{algorithmic}
-    \Function{ret-prog}{}
-    \State \textit{inizializzo ogni $\Delta w_i$ ad un valore piccolo casuale}
-    \While {\textit{non raggiungimento della condizione di terminazione}}
-    \For {\textit{ogni esempio $\langle (x_1,\ldots, x_n),t\rangle$}}
-    \State \textit{immetto l'input $( x_1, \ldots x_n)$ nella rete e calcolo
-    $y_k$}  
-    \For {\textit{ogni unità di output $k$}}
-    \[\delta_k=y_k\cdot(1-y_k)\cdot(t_k-y_k)\]
-    \EndFor
-    \For {\textit{ogni unità nascosta $h$}}
-    \[\delta_h=y_h\cdot(1-y_h)\cdot\sum_k w_{hk}\delta_k\]
-    \EndFor
-    \For {\textit{ogni peso $w_{ij}$}}
-    \[w_{ij}=w_{ij}+\Delta w_{ij},\mbox{ con } \Delta w_{ij}=\eta\cdot\delta_j\cdot x_{ij}\] 
-    \EndFor
-    \EndFor
-    \EndWhile
-    \State \textit{aggiorno i pesi:}
-    \[w_i=w_i+\Delta w_i\]
-    \EndFunction
-  \end{algorithmic}
-  \caption{Algoritmo di retropropagazione}
-\end{algorithm}
-Questa tecnica si generalizza facilmente a grafi orientati.\\  
-Si trova però un \textbf{minimo locale} e non \textbf{globale} e spesso
-include \textbf{termini di momento} per cambiare la formula dell'aggiornamento
-dei pesi del tipo: 
-\[\Delta w_{ij}(n)=\eta\cdot \delta_j\cdot x_{ij}+\alpha\Delta w_{ij}(n-1)\]
-in modo da avere una sorta di \textit{inerzia} per la variazione dei pesi.\\
-Ci sono comunque modelli per uscire dai minimi locali (usando alcune tecniche di
-\textit{ricerca operativa}).\\
-Si minimizzano gli errori sugli esempi di training m,a si rischia
-l'\textbf{overfitting}.\\
-Tutti questi fattori comportano un addestramento lento ma dopo l'addestramento
-si ha una rete veloce.\\
-Si hanno quindi i seguenti limiti:
-\begin{itemize}
-  \item mancanza di teoremi generali di convergenza
-  \item può portare in minimi locali di $E$ 
-  \item difficoltà per la scelta dei parametri 
-  \item scarsa capacità di generalizzazione 
-\end{itemize}
-Si possono avere varianti al modello tramite:
-\begin{itemize}
-  \item un tasso di apprendimento adattivo:
-  \[\eta=g(\nabla E)\]
-  \item range degli stati da –1 a 1 
-  \item l'uso di \textit{termini di momento}
-  \item deviazioni dalla discesa più ripida 
-  \item variazioni nell'architettura (numero di strati nascosti)
-  \item inserimento di connessioni all'indietro
-\end{itemize}
-\textit{Le reti \textbf{feedforward} sono state usate in progetti di guida
-  autonoma come \textbf{ALVINN}.}\\
-Rispetto alberi decisionali si ha:
-\begin{itemize}
-  \item le reti neurali sono più lente in fase di apprendimento ma uguali in
-  fase di esecuzione
-  \item le reti neurali hanno una migliore tolleranza del rumore
-  \item le reti neurali sono meno conoscibili dopo l'esecuzione
-  \item miglior accuratezza (?)
-\end{itemize}
-SI nota che ne le reti neurali ne gli alberi decisionali possono usare della
-conoscenza a priori.
+Abbiamo una 
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -1869,5 +1627,6 @@ conoscenza a priori.
 % LocalWords:  darkgreen list then example label dell nell refractory Hebb pre
 % LocalWords:  McCulloch Pitts sigmoide Percettrone percettroni iperpiano error
 % LocalWords:  function Papert Minsky perceptron Recall feedforward layer Unit
-% LocalWords:  Linear Treshold LTU soddisfacibilità replace percettrone ALVINN
-% LocalWords:  retropropagazione
+% LocalWords:  Linear Treshold LTU soddisfacibilità replace percettrone
+
+\message{ !name(ml.tex) !offset(-1632) }

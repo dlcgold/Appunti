@@ -1089,11 +1089,299 @@ Bisogna quindi pensare ad algoritmi di approssimazione, algoritmi polinomiali
 con ``garanzia'', ovvero \textbf{euristiche} (ovvero un qualcosa che funziona in
 pratica) per il problema. Non si ha quindi una soluzione esatta al problema,
 l'euristica non fornisce una soluzione esatta.
+\chapter{Pattern matching}
+Il \textbf{pattern matching} si occupa di ricercare un pattern $P$ in un testo
+$T$. Si hanno:
+\begin{itemize}
+  \item ricerca esatta
+  \item ricerca approssimata
+\end{itemize}
+\begin{definizione}
+  Definiamo stringa come una sequenza di simboli appartenenti ad un dato
+  alfabeto $\Sigma$, scritta come:
+  \[X=x_1,\ldots,x_n,\,\,\,\forall x_i\in \Sigma\]
+  ovviamente non è necessario che la stringa contenga tutti i simboli
+  dell'alfabeto.
+  Diamo alcune definizioni utili:
+  \begin{itemize}
+    \item $|X|$ indica la lunghezza della stringa
+    \item $\varepsilon$ indica la stringa vuota
+    \item $X[i]$ indica il carattere all'indice $i$ (partendo da 1 e non da 0)
+    \item $X[i,j]$n indica la sottostringa che parte dall'indice $i$ e arriva
+    all'indice $j$ (estremi inclusi). Inoltre se si hanno $i\neq j$ e $j\neq
+    |X|$ si ha una \textbf{sottostringa propria}.\\
+    (Esempio: per $X=bbaccbbaac$ ho la sottostringa $X[4,8]=ccbba$)
+    \item $X[1,j]$ indico un \textbf{prefisso} (estremo finale incluso). Si ha
+    inoltre il \textbf{prefisso proprio} se $j\neq |X|$ e si ha \textbf{prefisso
+      nullo} se $j=0$ e si indica con $\varepsilon$.\\
+    (Esempio: per $X=bbaccbbaac$ ho il prefisso $X[1,4]=bbac$)
+    \item $X[i,|X|]$ indica un \textbf{suffisso} della stringa (estremi
+    inclusi), di lunghezza $k=|X|-i+1$, avendo quindi il suffisso
+    $X[|X|-k+1,|X|]$. Si ha inoltre che se ho $X[|X|,|X|+1]$ 
+    allora ho il \textbf{suffisso nullo}, ovvero $\varepsilon$.\\
+    (Esempio: per $X=bbaccbbaac$ ho il suffisso $X[8,10]=aac$ e il suffisso
+    $X[11,10]=\varepsilon$)
+    
+\end{itemize} 
+\end{definizione}
+\begin{definizione}
+  Definiamo il \textbf{pattern matching esatto} come la ricerca di tutte le
+  occorrenze esatte di un pattern $P$ in un testo $T$.\\
+  $P$ occorre esattamente in $T$, a partire dall'indice $i$ in $T$, sse:
+  \[T[i,i+|P|-1]\mbox{ coincide con }P\]
+  Quindi in output ho tutte le posizione $i$ nel testo tali per cui:
+  \[T[i,i+m-1]\mbox{ coincide con }P\]
+\end{definizione}
+\begin{esempio}
+  Dato il testo $T=bbaccbbaac$ e il pattern $P=ccbb$ ho un'occorrenza esatta a
+  partire da $i=4$ nel testo.
+\end{esempio}
+L'algoritmo naive sarebbe quello di prendere una finestra $W$, di lunghezza $P$,
+da far scorrere sul testo (avanzando ogni volta di un carattere). Ogni volta
+tale finestra viene confrontata con $P$ confrontando tutti i caratteri e, in
+caso di match, stampando in output l'indice di inizio della finestra sul
+testo. Questo algoritmo è $O(|T|\cdot |P|)$ nel caso peggiore.\\ 
+Questo algoritmo ignora le caratteristiche di testo e pattern, ignorando aspetti
+che potrebbero accelerare la ricerca, trovabili tramite un'operazione di
+preprocessamento.
+\begin{definizione}
+  Definiamo \textbf{distanza di edit} come il minimo numero di operazioni di
+  sostituzione, cancellazione e inserimento di un unico simbolo per trasformare
+  una stringa in un'altra (o viceversa). \\
+  La distanza di edit tra due stringhe è simmetrica (anche se le operazioni
+  saranno diverse il loro numero minimo sarà uguale).
+\end{definizione}
+\begin{esempio}
+  Calcoliamo la distanza di edit tra $X_1=agtgcgt$ e $X_2=atgtgat$.\\
+  Partiamo cancellando la $g$ in indice 2 di $X_1$:
+  \[X_1=atgcgt\]
+  \[X_2=atgtgat\]
+  Inserisco quindi una ``a'' al penultimo indice di $X_1$:
+  \[X_1=atgcgat\]
+  \[X_2=atgtgat\]
+  Infine sostituisco la ``c'' con una ``t'' all'indice 4 di $X_1$:
+  \[X_1=atgtgat\]
+  \[X_2=atgtgat\]
+  Ho quindi una distanza di edit pari a 3.\\
+  Per trasformare la seconda nella prima avrei dovuto inserire una ``g''
+  all'indice 2 di $X_2$, cancellare la ``a'' al penultimo indice di $X_2$ e
+  infine sostituire la ``t'' con una ``c'' al terzultimo indice di $X_2$. Si
+  vede quindi come anche in questo caso avrei distanza di edit pari a 3.
+\end{esempio}
+\begin{definizione}
+  Definiamo il \textbf{pattern matching approssimato} come la ricerca di
+  occorrenze approssimate di un pattern $P$ in un testo $T$, con al più un certo
+  errore $k$.\\
+  Viene usata la \textnormal{distanza di edit}, che rappresenta l'errore che si
+  commette nell'eguagliare una stringa con un altra.\\
+  $P$ ha un'occorrenza approssimata in $T$, che finisce all'indice $i$, se
+  esiste almeno una sottostringa $T[i-L+1,i]$ che ha distanza di edit con $P$ di
+  al più $k$. $L$ è un certo valore non prevedibile in quanto sto ammettendo che
+  il match sia su una stringa di lunghezza diversa da quella del
+  pattern. Ovviamente in questo caso si possono avere più sottostringhe
+  accettabili secondo i parametri richiesti.\\
+  In output ho quindi tutte le posizioni $i$ di $T$ in cui finisce almeno una
+  sottostringa che ha con $P$ distanza di edit al più uguale a $k$.
+\end{definizione}
+\begin{esempio}
+  Prendiamo il testo $T=bbaccbbac$ e $P=ccbb$.\\
+  Impongo $k=1$ e vedo che un match è ``ccbb'' terminante all'indice 6 del testo
+  (avendo errore 1 massimo). Ovviamente ``ccbb'' terminante all'indice 7 va bene
+  avendo errore nullo.\\
+  
+\end{esempio}
+\begin{definizione}
+  Definiamo \textbf{bordo} della stringa $X$, $B(X)$, che è il più lungo
+  prefisso proprio che occorre come suffisso di $X$.
+  \begin{esempio}
+    Vediamo qualche esempio:
+    \[X=baacagahabaac\implies B(X)=baac\]
+    \[X=abababa\implies B(X)=ababa\]
+    \[X=aaaaaa\implies B(X)=aaaaa\]
+    \[X=aaaccbbaac\implies B(X)=\varepsilon\]
+    \[X=aaaaaaaa\implies B(X)=aaaaaaa\]
+  \end{esempio}
+  Ovviamente può essere $\varepsilon$ (in primis se ho una stringa di lunghezza
+  1).
+\end{definizione}
+\begin{definizione}
+  Definiamo concatenazione tra una stringa $X$ e un simbolo $\sigma$ come:
+  $X\sigma$
+\end{definizione}
+\begin{esempio}
+  Dato $X=bba$ e $\sigma=d$ ho:
+  \[X\sigma = bbad\]
+\end{esempio}
+\section{Pattern matching con automi}
+Siamo nell'ambito del pattern matching esatto.\\
+Ho un pattern di lunghezza $m$ e un testo di lunghezza $n$.\\
+Abbiamo una fase di preprocessamento in tempo $O(m|\Sigma|)$ per calcolare la
+funzione di transizione $\delta$.\\
+Definiamo $\delta$ definita sul pattern $P$ come:
+\[\delta:\{0,1,\ldots, m\}\times \Sigma\to\{0,\,\ldots, m\}\]
+Quindi ad ogni coppia tra un simbolo e un intero tra 0 e $m$ corrisponde un
+intero tra 0 e $m$. Nel dettaglio si hanno due casi:
+\begin{enumerate}
+  \item primo caso:
+  \[\delta(j,\sigma)=j+1\iff j<m\land P[j+1]=\sigma\]
 
+  \item secondo caso:
+  \[\delta(j,\sigma)=k\iff P[j+1]\neq \sigma \lor j=m,\mbox{ con
+    }k=|B(P[1,j]\sigma)|\]
+  Con $k$ che è la lunghezza del bordo tra il prefisso corrente a cui viene
+  concatenato il carattere $\sigma$. Si ha che $k\leq j$ per definizione (dato
+  che sto calcolando il bordo su una stringa di lunghezza $j+1$). Con questa 
+  transizione posso, eventualmente, andare ``indietro'' nel pattern ma comunque
+  ``in avanti'' nell'automa.
+\end{enumerate}
+La transizione dallo stato $j$ allo stato $\delta(j,\sigma)$ avviene attraverso
+il simbolo $\sigma$. Posso quindi passare allo stato $j+1$ o allo stato $k$.\\
+Nell'automa avremo quindi gli archi etichettati coi simboli e i nodi
+etichettati con gli indici da 0 a $m$.\\
+Nella stringa gli indici partono comunque da 1 quindi l'indice 0 nelle formule
+rappresenta una sorta di posizione prima dell'inizio della stringa. Qualora $k$
+sia pari a 0 per la seconda formula mi sposto effettivamente in questo indice
+posto prima della stringa (anche se avrò due stati diversi etichettati come 0
+nell'automa).
+\begin{esempio}
+  Prendiamo il pattern:
+  \[P=acacbabbaabac\]
+  calcoliamo:
+  \begin{itemize}
+    \item $\delta(6,b)=7$ in quanto ho effettivamente $b$ come simbolo
+    all'indice successivo a $6$, uso quindi la prima formula
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$6$};
+        \node[state] (q_1) [right=of q_0] {$7$};
+        \path[->]
+        (q_0) edge  node {b} (q_1);
+      \end{tikzpicture}
+    \end{center}
+    \item $\delta(0,a)=1$, in quanto $a$ è il primo carattere, uso quindi la
+    prima formula
+     \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$0$};
+        \node[state] (q_1) [right=of q_0] {$1$};
+        \path[->]
+        (q_0) edge  node {a} (q_1);
+      \end{tikzpicture}
+    \end{center}
+    \item $\delta(6,c)=2$ in quanto devo usare la seconda formula e avere:
+    \[|B(P[1,6]c)|=|B(acacbac)|=|ac|=2\]
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$6$};
+        \node[state] (q_1) [right=of q_0] {$2$};
+        \path[->]
+        (q_0) edge  node {c} (q_1);
+      \end{tikzpicture}
+    \end{center}
+    
+    \item $\delta(0,c)=0$ in quanto devo usare la seconda formula e avere:
+    \[|B(P[1,0]c)|=|B(c)|=|\varepsilon|=0\]
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$0$};
+        \node[state] (q_1) [right=of q_0] {$0$};
+        \path[->]
+        (q_0) edge  node {c} (q_1);
+      \end{tikzpicture}
+    \end{center}
+    \item $\delta(13,a)=4$ in quanto devo usare la seconda formula e avere:
+    \[|B(P[1,14]a)|=|B(acacbabbaabaca)|=|aca|=3\]
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$13$};
+        \node[state] (q_1) [right=of q_0] {$3$};
+        \path[->]
+        (q_0) edge  node {a} (q_1);
+      \end{tikzpicture}
+    \end{center}
+  \end{itemize}
+\end{esempio}
+Facciamo due osservazioni:
+\begin{enumerate}
+  \item dallo stato 0 si arriva allo stato 0 per qualsiasi simbolo $\sigma\neq
+  P[1]$ e quindi si arriva allo stato 1 attraverso $\sigma =P[1]$
+  \item dallo stato $m$ si arriva sempre ad uno stato $k\leq m$ e da uno stato
+  $m$ si può arrivare di nuovo ad uno stato $m$
+\end{enumerate}
+\begin{esempio}
+  Se ho $P=aaaaaa$:
+  \[\delta(6,a)=6\]
+  in quanto:
+  \[l=|B(aaaaaaa)|=|aaaaaa|=6\]
+\end{esempio}
+\begin{esempio}
+  Sia dato un pattern $P=acacbac$, con $m=7$ e $\sigma=\{a,b,c\}$.\\
+  Si hanno le seguenti transizioni $\delta(j,\sigma)$, calcolate solo sulla base
+  delle formule.\\
+  Parto con $\delta(j,\sigma)=j+1$:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c||c|c|c}
+      $j\backslash\sigma$ & a & b & c\\
+      \hline
+      \hline
+      0 & 1 & & \\
+      1 & & & 2\\
+      2 & 3 & & \\
+      3 & & & 4\\
+      4 & & 5 & \\ 
+      5 & 6 & & \\
+      6 & & & 7\\
+      7 & & &       
+    \end{tabular}
+  \end{table}
+  Proseguo con $\delta(j,\sigma)=k$:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c||c|c|c}
+      $j\backslash\sigma$ & a & b & c\\
+      \hline
+      \hline
+      0 & 1 & 0 & 0\\
+      1 & 1 & 0 & 2\\
+      2 & 3 & 0 & 0\\
+      3 & 1 & 0 & 4\\
+      4 & 3 & 5 & 0\\ 
+      5 & 6 & 0 & 0\\
+      6 & 1 & 0 & 7\\
+      7 & 3 & 0 & 0      
+    \end{tabular}
+  \end{table}
+\end{esempio}
+In realtà algoritmo procede per induzione di riga in riga, riempendo la riga
+basandosi con quella precedente, in $O(m|\Sigma|)$.\\
+\newpage
+\begin{esempio}
+  Sia dato un pattern $P=acacbac$, con $m=7$ e $\sigma=\{a,b,c,d\}$.\\
+  Aggiungo quindi un simbolo non appartenente al pattern, si ottiene:
+   \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c||c|c|c|c}
+      $j\backslash\sigma$ & a & b & c & d\\
+      \hline
+      \hline
+      0 & 1 & 0 & 0 & 0\\
+      1 & 1 & 0 & 2 & 0\\
+      2 & 3 & 0 & 0 & 0\\
+      3 & 1 & 0 & 4 & 0\\
+      4 & 3 & 5 & 0 & 0\\ 
+      5 & 6 & 0 & 0 & 0\\
+      6 & 1 & 0 & 7 & 0\\
+      7 & 3 & 0 & 0 & 0      
+    \end{tabular}
+  \end{table}
+  Si aggiunge quindi una colonna di soli 0
+\end{esempio}
 \end{document}
 
 
 % LocalWords:  Machine Learning NP TM yes sse Access pseudocodice store add TSP
 % LocalWords:  load esguite dimostrabilmente primis Stirling NTDM vertex cover
 % LocalWords:  exptime all img problem png independent ind nell CNF definsice
-% LocalWords:  soddisfacibilità polinomialmente dell clique
+% LocalWords:  soddisfacibilità polinomialmente dell clique matching naive edit
+% LocalWords:  sottostringa preprocessamento sottostringhe baacagahabaac

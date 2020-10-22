@@ -1661,6 +1661,313 @@ Per realizzare una replica posso fare in diversi modi:
   Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.
 \end{shaded}
 \section{Prima esercitazione}
+\begin{esercizio}
+  Si consideri un db con le seguenti relazioni (e quindi tabelle):
+  \begin{itemize}
+    \item PRODUCTION (\underline{SerialNumber}, PartType, Model, Quantity,
+    Machine) 
+    \item PICKUP (\underline{SerialNumber}, \underline{Lot}, \textbf{Client,
+      SalesPerson},  Amount) 
+    \item CLIENT (\underline{Name}, City, Address)
+    \item SALESPERSON (\underline{Name}, City, Address)
+  \end{itemize}
+  \textit{(con sottolineate le chiavi primarie e in grassetto le chiavi di
+    integrità referenziale)}\\
+  
+  e ci poniamo l'obiettivo di partizionare il db secondo determinate
+  specifiche.\\
+  Si assume che si abbiano le seguenti specifiche organizzative:
+  \begin{itemize}
+    \item si hanno 4 centri di produzione (\textit{Dublino, San Jose, Zurigo
+      \textnormal{e} Taiwan}, ciascuno responsabile, rispettivamente, di
+    \textit{cpu, keyboard, screen \textnormal{e} cable}) e 3 centri di vendita
+    (\textit{San Jose, Zurigo  \textnormal{e} Taiwan})
+    \item le vendite sono distribuite secondo le località geografiche, i clienti
+    a Zurigo sono serviti solo dai venditori di Zurigo etc$\ldots$. SI ha però
+    che i venditori di  Zurigo servono anche Dublino
+    \item ogni area geografica ha il proprio db (avremo quindi 4 db)
+  \end{itemize}
+  Vogliamo studiare una \textbf{frammentazione orizzontale} delle 4 tabelle.\\
+  Ricordiamo quindi che abbiamo 4 centri di produzione (ciascuno responsabile di
+  un prodotto e con un db ciascuno) e 3 punti di vendita.\\
+  Partiamo con la frammentazione della relazione \textnormal{PRODUCTION},
+  ottenendo 4 tabelle, una per componente prodotto, ottenendo (con $\sigma$
+  abbiamo l'operazione di selezione nell'algebra relazionale):
+  \begin{itemize}
+    \item $PRODUCTION_1=\sigma_{partType=cpu}(PRODUCTION)$
+    \item $PRODUCTION_2=\sigma_{partType=keyboard}(PRODUCTION)$
+    \item $PRODUCTION_3=\sigma_{partType=screen}(PRODUCTION)$
+    \item $PRODUCTION_4=\sigma_{partType=cable}(PRODUCTION)$    
+  \end{itemize}
+  Passiamo alla relazione \textnormal{PICKUP}. Anche in questo caso si frammenta
+  per il prodotto facendo il join con la tabella
+  \textnormal{PRODUCTION}(ricordando che $\pi$ è l'operazione di proiezione/join 
+  nell'algebra relazionale). Per comodità indichiamo tutti gli attributi di
+  \textnormal{PICKUP} con $pick$, avendo quindi:
+  \[pick=SerialNumber, Lot, Client, SalesPerson, Amount\]
+  indico anche con $SN$ $SerialNumber$
+  \begin{itemize}
+    \item \scriptsize{$PICKUP_1=\pi_{pick}(\sigma_{partType=cpu}(PICKUP\,\, SN
+      =SN(PRODUCTION)))$}   
+    \item \scriptsize{$PICKUP_2=\pi_{pick}(\sigma_{partType=keyboard}(PICKUP\,\, SN
+      =SN(PRODUCTION)))$}   
+    \item \scriptsize{$PICKUP_3=\pi_{pick}(\sigma_{partType=screen}(PICKUP\,\, SN
+      =SN(PRODUCTION)))$}  
+    \item \scriptsize{$PICKUP_4=\pi_{pick}(\sigma_{partType=cable}(PICKUP\,\, SN
+     =SN(PRODUCTION)))$}  
+ \end{itemize}
+ Prendo quindi una proiezione di tutti gli elementi di \textit{PICKUP} separando
+ nei vari \textit{PICKUP} in base al prodotto.\\
+ Passo a alle tabelle \textnormal{SALESPERSON}. Abbiamo 3
+ punti di vendita, quindi, circa come per \textnormal{PRODUCTION}, frammento in
+ base alle città di vendita:
+ \begin{itemize}
+   \item $SALESPERSON_1=\sigma_{City="San Jose"}(SALESPERSON)$
+   \item $SALESPERSON_2=\sigma_{City="Zurigo"}(SALESPERSON)$
+   \item $SALESPERSON_3=\sigma_{City="Taiwan"}(SALESPERSON)$
+ \end{itemize}
+ Manca solamente \textnormal{CLIENT}. Anche in questo caso divido in base alle
+ città, ricordando che Zurigo e Dublino sono clienti entrambi di Zurigo:
+  \begin{itemize}
+   \item $CLIENT_1=\sigma_{City="San Jose"}(CLIENT)$
+   \item $CLIENT_2=\sigma_{City="Zurigo"\mbox{ or }City="Dublino"}(CLIENT)$
+   \item $CLIENT_3=\sigma_{City="Taiwan"}(CLIENT)$
+ \end{itemize}
+ Abbiamo finito la frammentazione e quindi dobbiamo solo distribuire tali
+ tabelle: 
+ \begin{itemize}
+   \item le quattro tabelle con indice 1 andranno a San Jose, in
+   \texttt{company.sanjose.com}
+   \item le quattro tabelle con indice 2 andranno a Zurigo, in
+   \texttt{company.zurigo.com} 
+   \item le quattro tabelle con indice 3 andranno a Taiwan, in
+   \texttt{company.taiwan.com} 
+   \item le due tabelle con indice 4 andranno a Dublino (che quindi avrà solo
+   parte di \textnormal{PRODUCTION} e parte di \textnormal{PICKUP} in quanto a
+   Dublino non si ha un punto vendita), in \texttt{company.dublino.com}
+ \end{itemize}
+\end{esercizio}
+\begin{esercizio}
+  Vediamo un esercizio in merito alla trasparenza, che ricordiamo essere a tre
+  livelli:
+  \begin{enumerate}
+    \item di frammentazione
+    \item di replicazione/allocazione
+    \item di linguaggio
+  \end{enumerate}
+  Si chiede di fare delle interrogazioni, tenendo conto dei livelli di
+  trasparenza, sul db costruito nell'esercizio precedente.\\
+  La prima query ci chiede di determinare la quantità dei prodotti che hanno
+  valore ``77y6878'' (abbiamo quindi a che fare con la trasparenza di
+  frammentazione, infatti interroghiamo come se avessimo a che fare con un solo
+  db): 
+  \begin{minted}{sql}
+    Procedure Query1(:Quan):
+     Select Quantity in :Quan
+     From PRODUCTION
+     Where SerialNumber="77y6878"
+    End Procedure
+  \end{minted}
+  (con \texttt{:Quan} indichiamo il nome della tabella).\\
+  Vediamo ora come fare nel caso di trasparenza di allocazione, quindi si sa di
+  avere a che fare con un db distribuito. La query quindi si ``sposterà'' alla
+  ricerca del giusto frammento:
+  \begin{minted}{sql}
+    Procedure Query2(:Quan):
+     Select Quantity in :Quan
+     From PRODUCTION_1
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_2
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_3
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_4
+     Where SerialNumber="77y6878"
+    End Procedure
+  \end{minted}
+  Vediamo ora come funziona per la trasparenza di linguaggio. In tal caso
+  dobbiamo considerare sia le frammentazioni che i vari indirizzi di
+  allocazione, ovvero i \texttt{company.città.com}:
+  \begin{minted}{sql}
+    Procedure Query3(:Quan):
+     Select Quantity in :Quan
+     From PRODUCTION_1@company.sanjose.com
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_2@company.zurigo.com
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_3@company.taiwan.com
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_4@company.dublino.com
+     Where SerialNumber="77y6878"
+    End Procedure
+  \end{minted}
+  \textit{Nelle slide usa \texttt{union} al posto di \texttt{if :empty then}}.
+\end{esercizio}
+\begin{esercizio}
+  Sempre sul db del primo esercizio effettuiamo la seguente query:
+  \textit{determinare le macchine che utilizzano come componente ``keyboard'' e
+    sono vendute al cliente ``Brown''}.\\
+  Per praticità vediamo solo la trasparenza di frammentazione e quella di
+  allocazione.\\
+  Partiamo con la trasparenza di frammentazione:
+  \begin{minted}{sql}
+    Procedure Query1(:Machine)
+     Select Machine in :Machine
+     From PRODUCTION join PICKUP on
+     PRODUCTION.SerialNumber=PICKUP.SerialNumber
+     Where PartType = "keyboard" AND Client="Brown"
+    End Procedure
+  \end{minted}
+  Vediamo il caso di trasparenza di allocazione (e sappiamo che ``keyboard'' è
+  solo in $PRODUCTION_2$ quindi interroghiamo un solo frammento e senza chiedere
+  la specifica del $partType$):
+  \begin{minted}{sql}
+    Procedure Query2(:Machine)
+     Select Machine in :Machine
+     From PRODUCTION_2 join PICKUP on
+     PRODUCTION_2.SerialNumber=PICKUP_2.SerialNumber
+     Where Client="Brown"
+    End Procedure
+  \end{minted}
+  Se avessimo voluto fare anche la trasparenza di linguaggio non sarebbe
+  cambiato nulla dato che $PRODUCTION_2$ è solo a Zurigo.
+\end{esercizio}
+\begin{esercizio}
+  Sempre sul db del primo esercizio effettuiamo il cambiamento di indirizzo del
+  cliente ``Brown'' che si sposta da ``27 Church St.'', Dublino, a ``43 Park Hoi
+  St.'', Taiwan. Abbiamo quindi un cambio di allocazione nel db.\\
+  Partiamo con la trasparenza di frammentazione:
+  \begin{minted}{sql}
+    Procedure Update1
+     Update Client
+     Set Address  = "43 Park Hoi St.", City="Taiwan"
+     Where Name="Brown"
+    End Procedure
+  \end{minted}
+  La cosa si complica nel caso di trasparenza di allocazione, tenendo conto
+  delle due città e dei loro db:
+  \begin{minted}{sql}
+    Procedure Update2
+     Delete CLIENT_2
+     Where Name="Brown"
+     
+     Insert into CLIENT_3 (Name, Address, City)
+     values ("Brown", "43 Park Hoi St.", "Taiwan")
+    End Procedure
+  \end{minted}
+  Se avessimo voluto fare anche la trasparenza di linguaggio non sarebbe
+  cambiato nulla poiché le frammentazioni sono in locazioni diverse
+\end{esercizio}
+\begin{esercizio}
+  Sempre sul db del primo esercizio effettuiamo la seguente query:\\
+  \textit{calcolare la somma di tutti gli ordini ricevuti a SanJose, Zurigo e
+    Taiwan}.\\
+  Partiamo con la trasparenza di frammentazione:
+  \begin{minted}{sql}
+    Procedure Query1
+     Select City, sum(Amount)
+     From PICKUP join SALESPERSON on
+     SalesPerson = Name
+     Groub by city
+    End Procedure
+  \end{minted}
+  Passiamo alla trasparenza di allocazione. Mi serviranno tutti i frammenti di
+  \texttt{SALESPERSON}. Inoltre devo considerare i vari \texttt{PICKUP}, tutti e
+  quattro per il discorso delle vendite su Dublino:
+  \begin{minted}{sql}
+    Procedure Query2
+     Create view PICKUP as
+     PICKUP_1 union PICKUP_2 union PICKUP_3 union PICKUP_4
+     
+     Select City, sum(Amount)
+     From SALESPERSON_1 join PICKUP on
+     SalesPerson=Name
+     union
+     From SALESPERSON_2 join PICKUP on
+     SalesPerson=Name
+     union
+     From SALESPERSON_3 join PICKUP on
+     SalesPerson=Name
+    End Procedure
+  \end{minted}
+\end{esercizio}
+\begin{esercizio}
+   Sempre sul db del primo esercizio cerchiamo di massimizzare il parallelismo
+   delle inter-query.\\
+   Prendiamo la seguente query:
+   \textit{estrarre la somma delle quantità di produzione che sono raggruppate
+     secondo i tipi e i modelli delle componenti}.\\
+   \begin{minted}{sql}
+    Procedure Query1
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION
+     Group by (Model, PartType)
+    End Procedure
+  \end{minted}
+  Vogliamo però massimizzare il parallelismo, divido quindi tra le varie
+  frammentazioni:
+  \begin{minted}{sql}
+    Procedure Query1
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_1
+     Group by (Model, PartType)
+
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_2
+     Group by (Model, PartType)
+
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_3
+     Group by (Model, PartType)
+
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_4
+     Group by (Model, PartType)
+    End Procedure
+  \end{minted}
+  massimizziamo il parallelismo inter-query se si consideriamo che ogni
+  partizione ha un DBMS diverso. Volendo potrei dividere la query ancora a
+  seconda del modello, evitando il \texttt{group by} (cosa utile nel caso in cui
+  si abbia a che fare con un sistema fortemente multicore)
+\end{esercizio}
+\begin{esercizio}
+  Vediamo un esempio di db replicato che può produrre inconsistenza.\\
+  Prendiamo l'esempio del db prodotto nel primo esercizio. Supponiamo che ogni
+  frammento di \textnormal{PRODUCTION} sia allocato a tutti i DBMS. Però ogni
+  DBMS utilizza un frammento e trasmette i cambiamenti del frammento agli altri
+  DBMS, permettendo di avere copie del db. In caso di fallimento di un DBMS il
+  db sarebbe comunque accessibile dagli altri sistemi e non so avrebbe problemi
+  con le query, avendo che il fallimento è trasparente sia ai client che al db
+  stesso. Purtroppo quando si ha un fallimento si può generare un
+  partizionamento di rete e questo può comportare delle inconsistenze. Se, per
+  esempio, due transazioni tolgono 800 ad una certa quantità la seconda in
+  ordine temporale fallirà ma se avvengono in due DBMS non connessi non
+  falliranno, producendo inconsistenza.
+\end{esercizio}
+\begin{esercizio}
+  Data una replicazione simmetrica dire quando produce inconsistenza.
+  Un esempio è un db senza il \textit{concurrency control} e quindi due
+  transazioni come quelle dell'esercizio precedente possono causare
+  inconsistenza anche senza fallimento della rete.
+\end{esercizio}
 \chapter{Blockchain}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
@@ -1692,4 +1999,5 @@ Per realizzare una replica posso fare in diversi modi:
 % LocalWords:  reporting warehousing commerce social testing compliant many
 % LocalWords:  source directional resolution detention Tier staging event apply
 % LocalWords:  publish publisher distributor subscriber intra inter paradigm
-% LocalWords:  relational mismatch Blockchain mapper Delete framework
+% LocalWords:  relational mismatch Blockchain mapper Delete framework group
+% LocalWords:  multicore

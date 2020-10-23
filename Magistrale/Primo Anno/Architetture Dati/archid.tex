@@ -1969,30 +1969,41 @@ Per realizzare una replica posso fare in diversi modi:
   inconsistenza anche senza fallimento della rete.
 \end{esercizio}
 \chapter{Blockchains}
+\textbf{\textit{Questa lezione è stata tenuta dal prof. Leporati}}.\\
+\textbf{Nonostante qualche ambiguità ed errore di scrittura, nel capitolo si
+  userà il termine ``nodo'' 
+  quando si parla di rete P2P e il termine ``blocco'' quando ci si riferisce ai
+  blocchi interni alla blockchain.}
 \begin{definizione}
   Una \textbf{blockchain}, in poche parole, è un registro pubblico, condiviso e
-  decentralizzato che memorizza la proprietà di beni digitali.\\
-  È quindi un registro in cui vengono memorizzate informazioni relative alla
-  proprietà di qualcosa che può essere rappresentato tramite sequenze di bit
-  (quindi qualcosa di digitale come i \textit{bitcoin} o altre criptovalute).\\
-  Vengono memorizzate anche le \textbf{transazioni}, ovvero i cambi di
-  proprietà.\\
-  Essendo pubblico tutti possono vedere cosa è stato registrato e in particolare
-  ``chi possiede cosa'' e la storia di una certa proprietà.\\
-  Questo registro è condiviso in quanto gestito da più persone ed è
-  decentralizzato in quanto non esiste un nucleo che abbia di poteri da
-  amministratore rispetto agli altri, tutti sono allo stesso livello.
-  \\
-  Questo registro è organizzato in blocchi. Si ha un primo blocco detto
-  \textbf{genesis block} che da il via a tutto. Si hanno poi altri blocchi, in
-  nero, collegati a questo e che formano una catena. Un blocco si lega al
-  successivo tramite particolari funzioni crittografiche, dette \textbf{funzioni
-    di hash crittografico}. Nel dettaglio il collegamento tra un blocco e il
-  successivo è dato dal fatto che il valore di hash del blocco è contenuta
-  all'interno del blocco successivo, facendo in modo che si estremamente
-  difficile alterare il contenuto di un blocco, ovvero diverse transazioni
-  %6.57
+  decentralizzato che memorizza la proprietà di beni digitali. 
 \end{definizione}
+È quindi un registro in cui vengono memorizzate informazioni relative alla
+proprietà di qualcosa che può essere rappresentato tramite sequenze di bit
+(quindi qualcosa di digitale come i \textit{bitcoin} o altre criptovalute).\\
+Vengono memorizzate anche le \textbf{transazioni}, ovvero i cambi di
+proprietà.\\
+Essendo pubblico tutti possono vedere cosa è stato registrato e in particolare
+``chi possiede cosa'' e la storia di una certa proprietà.\\
+Questo registro è condiviso in quanto gestito da più persone ed è
+decentralizzato in quanto non esiste un nucleo che abbia di poteri da
+amministratore rispetto agli altri, tutti sono allo stesso livello.
+\\
+Questo registro è organizzato in blocchi. Si ha un primo blocco detto
+\textbf{genesis block} che da il via a tutto. Si hanno poi altri blocchi, in
+nero, collegati a questo e che formano una catena. Un blocco si lega al
+successivo tramite particolari funzioni crittografiche, dette \textbf{funzioni
+  di hash crittografico}. Nel dettaglio il collegamento tra un blocco e il
+successivo è dato dal fatto che il valore di hash del blocco è contenuta
+all'interno del blocco successivo, facendo in modo che si estremamente
+difficile alterare il contenuto di un blocco, ovvero diverse transazioni, che
+sono organizzate secondo una precisa struttura dati che consente di verificare
+la validità in modo veloce ed efficiente. Per ogni blocco si calcola quindi
+l'hash e lo si salva nel blocco successivo. Per modificare una transazione
+quindi dovrei calcolare l'hash e dovrei fare il check con il blocco
+successivo. Quindi tutti possono verificare la validità della
+blockchain. Modificare i dati in modo tale da ottenere lo stesso hash però è
+davvero difficile.\\
 \begin{figure}
   \centering
   
@@ -2057,9 +2068,184 @@ Per realizzare una replica posso fare in diversi modi:
     \end{pspicture}
   }
   \caption{Esempio di schema di blockchain. In verde a sinistra troviamo il
-    \textbf{genesis block}. In nero i blocchi che formano la catena}
+    \textbf{genesis block}. In nero i blocchi che formano la catena. In rosso
+    abbiamo i nodi \textit{orfani}. Per comodità è stata rappresentata in
+    orizzontale con la parte ``alta'' a destra}
   \label{fig:bc}
 \end{figure}
+Si hanno vari nodi per l'uso della blockchain.
+I vari nodi sono nodi di una \textbf{rete Peer-to-Peer (\textit{P2P})}
+(come quelle per la condivisione di file come \textit{torrent}, dove quindi
+ogni computer fa sia da \textit{client} che da \textit{server}). I vari nodi
+osservavano le proposte di transazione che vengono fatte dagli utenti (anche
+utenti che solo usano la blockchain), verificano che siano valide (ad esempio
+verificando che non avvenga il \textit{double-spending}, ovvero, per esempio,
+una doppia concessione dello stesso bene), eseguono un \textbf{protocollo di
+  consenso} (in quanto potrebbero esserci nodi ``disonesti'', con per esempio
+utenti che vorrebbero appropriarsi di beni altrui come bitcoin, si procede
+quindi a maggioranza secondo il \textit{proof-of-work}) e infine
+procedono validando la transazione aggiungendo il blocco alla fine della
+blockchain (``in cima''). Una copia della blockchain viene memorizzata in ogni
+nodo della rete P2P alla fine della transazione, quindi quando i nodi sono
+d'accordo sull'aggiunta del blocco allora ciascuno lo aggiunge alla propria
+copia della blockchain (altrimenti qualsiasi proposta futura verrebbe
+bocciata).\\
+In molte blockchain se si stabilisce che due blocchi possono essere attaccati
+ad un certo blocco e si inizia a lavorare su entrambi formando quindi due
+nuove catene. Alla fine ``vince'' la catena più lunga, fermando la
+continuazione dell'altro ramo. I blocchi del ramo ``perdente'' vengono resi
+\textit{orfani} lasciando quindi una sola catena attiva. Le transazioni nei
+nodi \textit{orfani} vengono dimenticate e bisognerà reinserirle. Questa cosa
+è molto inefficiente.\\
+Ci sono reti, come quella \textit{bitcoin}, in cui una transazione è valida
+sse vengono aggiunti 6 blocchi al di sopra di quello che contiene la
+transazione.\\
+Le transazioni sono \textbf{pseudo-anonime} (comodo ambito bitcoin dove,
+come per i contanti, non si sa per quali mani sono passati quei soldi e per
+cosa sono stati usati prima). Ci sono vari meccanismi per rendere anonime le
+cose, alcuni migliori (come quelli di \textit{monero} o \textit{zcash}) e
+alcuni peggiori (come quelli di \textit{bitcoin} ed \textit{ethereum}). \\
+Si ha un ramo della \textit{computer foreniscs} che si occupa di capire chi ha
+fatto certe transazioni, esplicitamente di criptovalute, sulla
+blockchain. Quindi si prova a raggiungere l'anonimato ma non sempre si riesce
+(basta un utente che paghi in \textit{bitcoin} su un sito rivelando la propria
+identità).
+
+\section{Bitcoin}
+\textbf{Bitcoin} è una criptovaluta proposta da Satoshi Nakamoto
+(probabilmente un nome falso in quanto in molti stati creare valuta, anche
+digitale, è reato)
+nel 2008. Non è nato all'improvviso ma molte idee all'interno di
+\textit{bitcoin} erano già presenti i diversi paper di crittografia precedenti
+(ad esempio la \textit{proof-of-work} era già presente all'interno della
+gestione dello spam delle mail, dove veniva imposto un certo sforzo
+computazionale per mandare una mail in modo che l'invio non fosse completamente
+``gratuito'', comportando che si possano mandare al massimo circa 2000 mail al
+giorno, al più di attrezzarsi con dei super computer). Ci sono stati tanti
+precedenti di tentativi di creazione di un sostituto digitale del denaro, con
+diverse difficoltà a causa di anonimato e \textit{double-spending}. Inoltre
+rappresentare una moneta con una sequenza di bit consente la copia illimitata di
+tale sequenza, creando copie perfettamente identiche. Una soluzione per evitare
+il \textit{double-spending} è quella di usare una \textit{trust detour part}
+(\textbf{non ho capito se ha detto questo}), ovvero tipicamente una banca che
+segna le transazioni monetarie, diventando però un ``collo di bottiglia'',
+venendo interpellata in tutte le transazioni. Inoltre la banca è conscia delle
+transazioni di denaro, che perdono così l'anonimato. L'idea di Satoshi Nakamoto
+e stata quella di unire vari protocolli crittografici usando al posto della
+banca un registro condiviso, una blockchain appunto, in cui vengono salvate le
+transazioni e dove vengono anche controllate, permettendo di evitare il
+\textit{double-spending}. Si usa la blockchain quindi per creare un
+\textit{trust}, sostituendo la funzione delle banche. Nel \textbf{genesis block}
+di \textit{bitcoin} c'è infatti un messaggio (nel posto del blocco dedicato alla
+``causale'') che fa riferimento al potere eccessivo delle banche.\\
+Le proprietà memorizzate nella blockchain \textit{Bitcoin} sono chiamate
+direttamente, come abbiamo già scritto, \textbf{bitcoins (\textit{BTC})} o
+frazioni di essi. Le transazioni sono parecchio complicate, con una struttura
+dati complessa, con diverse transazioni in ingresso (infatti una transazione può
+contenere transazioni), campi per generare nuovi bitcoin,0diversi \textit{script
+  di transazione} in output (scritti in un linguaggio ``particolare''). \\
+\textit{Non verrà trattata nel dettaglio la conformazione delle transazioni}.\\
+Se un utente $A$ vuole mandare un \textit{bitcoin} ad un utente $B$, usando il
+proprio client, che spesso viene chiamato \textbf{wallet}, specifica la quantità
+che vuole mandare e l'indirizzo di $B$. Ogni utente ha associato quindi un
+indirizzo, in qualità di lunga sequenza di numeri. Per ottenere l'indirizzo
+viene usata una \textbf{chiave pubblica}, usando quindi la \textit{crittografia
+  a chiave pubblica} in cui si usano algoritmi di cifratura e
+de-cifratura. Ciascuno crea con questi algoritmi una copia \textit{chiave
+  pubblica/chiave privata}, rende pubblica la \textit{chiave pubblica} e
+comunica di usare quella chiave pubblica per risalire all'indirizzo a cui farsi
+spedire i \textit{bitcoin}, infatti data la chiave pubblica all'utente che deve
+inviare i bitcoin la userà per cifrare il messaggio in modo che, tramite la
+chiave privata, solo il legittimo destinatario possa decifrare il messaggio.\\
+Dalla chiave pubblica quindi ottiene l'indirizzo al quale $A$ deve mandare i
+soldi per farli ricevere a $B$. Quindi l'indirizzo è una sorta di identità per
+$B$ che però può generarsi tutte le coppie di chiavi che vuole, combinando poi i
+vari bitcoin ricevuti ai vari indirizzi che ha generato tramite la complessa
+struttura della transazione. Questa possibilità di generare infinite chiavi però
+è solo uno \textit{pseudo-anonimato}. \\
+Bisogna però anche dimostrare che $A$ è proprietario dei \textit{bitcoins} che
+vuole inviare a $B$. Per farlo $A$ ``firma'' digitalmente la transazione tramite
+la sua \textit{chiave segreta}. I nodi della rete P2P, che sono detti
+\textbf{miners}, verificano che la firma di $A$ sia valida, verificano che non
+ci sia il \textit{double-spending} e infine validano la transazione mettendola
+in un nuovo blocco della blockchain. Se $B$, che ha ricevuto i
+\textit{bitcoins}, vuole a sua volta mandarli a $C$ avvia una transazione
+esattamente come descritto sopra, firmando con a chiave privata che era
+accoppiata alla chiave pubblica con la quale $A$ gli aveva mandato i
+\textit{bitcoins}, permettendo che la firma sia verificata e validata. Quindi
+sulla blockchain il possedimento di un \textit{bitcoin} è rappresentato dal
+fatto che si può inviare una transazione per cui quel \textit{bitcoin} può
+essere dato a qualcun altro (ovviamente si è usato \textit{bitcoin} ma si poteva
+parlare anche di più \textit{bitcoins} o frazioni, che molto piccole, di
+esso). Non è segnato da nessuna parte quanti \textit{bitcoins} possiede un certo
+utente ma solo le catene di transazioni che sono state fatte da ciascun
+\textit{bitcoin}, vedendo quindi chi è l'ultimo proprietario. È quindi
+essenziale memorizzare le chiavi in quanto possedere equivale a conoscere una
+chiave segreta.\\ 
+La blockchain registra ogni singola transazione (e sono circa un migliaio ogni
+10 minuti, con un blocco che riesce a contenere circa un migliaio di
+transazioni e i blocchi vengono aggiunti uno ogni 10 minuti circa) e
+attualmente, in data 19 Ottobre 2020, si è arrivati a 290GB di blockchain.
+\subsection{Miners}
+Abbiamo parlato prima dei membri della rete P2P della blockchain
+\textit{Bitcoin}, detti appunto \textbf{miners}.\\
+I \textit{miners} lavorano su un \textit{pool} di transazioni proposte dai vari
+\textit{wallet}. I miners scelgono circa un migliaio di queste transazioni alla
+volta e cercano di formare il nuovo blocco, validando le transazioni. Effettuano
+quindi i calcoli computazionali del \textit{proof-of-work} per cui dimostrano di
+aver fatto un certo sforzo per avere il \textbf{diritto} di essere quelli che
+aggiungono il prossimo blocco alla catena. Avendo un'aggiunta ogni 10 minuti si
+ha una fortissima concorrenza tra i \textit{miners}. Inoltre il carico di lavoro
+richiesto diventa sempre più difficile in quanto, grazie alla \textbf{legge
+  di Moore}, diventa sempre più facile risolvere il ``puzzle'' crittografico,
+per il \textit{proof-of-work,} che
+serve a risolvere il nuovo blocco e quindi il ``puzzle'' viene reso sempre più
+difficile (ovvero se un blocco arriva in meno di 10 minuti il blocco successivo
+sarà più difficile da produrre, in modo che nuovamente servano almeno 10 minuti,
+anche se equivalentemente verrà reso più facile se ci vogliono troppi minuti in
+più di 10, avendo così \textbf{autoregolazione}). Bisogna quindi parlare di
+questo ``problema'' crittografico da risolvere e per farlo bisogna un attimo
+specificare meglio le \textit{funzioni di hash}.
+\begin{definizione}
+  Le \textbf{funzioni di hash} sono funzioni crittografiche che prendono in
+  input una sequenza di bit, in teoria arbitrariamente lunga, anche se ogni
+  funzione ha un limite teorico (ma praticamente irraggiungibile), e produce una
+  sequenza che vorrebbe essere univoca (ma che non lo è) di poche centinaia di
+  bit. Per esempio \textit{SHA1} produce in output una sequenza di 160 bit,
+  \textit{MD5} di 128 bit, \textit{SHA256} di 256 bit (una di
+  quelle usate in \textit{Bitcoin}), \textit{RIPEMD} di 160 bit (anch'essa usata
+  in \textbit{Bitcoin}) etc$\ldots$\\
+  Le funzioni di hash devono essere sufficientemente facili da calcolare a
+  partire da un certo input
+\end{definizione}
+L'idea è quindi è che prendo un file e, usando ad esempio SHA256, mi esce una
+sequenza di 256 bit, univoca per quel file. Purtroppo il dominio della funzione
+(ovvero i bit del file)
+è molto più grande del codominio (ovvero tutte le possibili sequenze di 256 bit)
+e quindi non si può avere davvero una \textbf{funzione iniettiva} e quindi si
+avranno sempre due sequenze in input che producono lo stesso output e quando
+questo avviene si ha una \textbf{collisione}. Le collisioni sono inevitabili ma
+le funzioni di hash sono fatte in modo tale che sia estremamente difficile
+trovare due input diversi che producano lo stesso output, motivo per cui si può
+anche pensare che le hash siano univoche. Si ha anche che è estremamente
+difficile cercare esplicitamente un input che abbai lo stesso hash di un altro,
+rendendo quindi molto difficile sostituire un input dato con un altro ottenendo
+comunque lo stesso output, imbrogliando. Quest'ultimo problema è più difficile
+di quello della \textit{collisione} (dove ho, nella pratica, un grado di liberà
+in più avendo due input).\\
+Si hanno altre due proprietà:
+\begin{enumerate}
+  \item dato un hash è estremamente difficile trovare un input, per questo si
+  dice che la funzione di hash è \textit{one-way} (essendo molto facile da
+  calcolare ma difficilissimo da invertire)
+  \item anche se cambio un solo bit dell'input ottengo un output completamente
+  diverso a quello ottenuto prima del cambiamento, rendendo impossibile capire
+  la regola di calcolo o anche solo fare indagini statistiche. Infatti hash
+  significa anche ``polpettone'', cosa che rappresenta bene l'azione di
+  spezzettamento, calcolo e rimescolamento (con anche valori semi casuali)
+  dell'input fatte dalle funzioni per calcolare l'output  
+\end{enumerate}
+
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -2086,10 +2272,12 @@ Per realizzare una replica posso fare in diversi modi:
 % LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
 % LocalWords:  interface IBM Microsoft technologies realtime based snapshot and
 % LocalWords:  transactional merge over loss disaster mission critical load OOP
-% LocalWords:  kilometri consolidation distribution balancing offline entry
-% LocalWords:  reporting warehousing commerce social testing compliant many
+% LocalWords:  kilometri consolidation distribution balancing offline entry BTC
+% LocalWords:  reporting warehousing commerce social testing compliant many GB
 % LocalWords:  source directional resolution detention Tier staging event apply
 % LocalWords:  publish publisher distributor subscriber intra inter paradigm
-% LocalWords:  relational mismatch Blockchain mapper Delete framework group
+% LocalWords:  relational mismatch Blockchain mapper Delete framework group SHA
 % LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis
-% LocalWords:  block hash
+% LocalWords:  block hash torrent double spanning Leporati ethereum monero spam
+% LocalWords:  zcash foreniscs criptovaluta Satoshi Nakamoto paper proof part
+% LocalWords:  spending bitcoins wallet miners Moore RIPEMD iniettiva one way

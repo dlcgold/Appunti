@@ -577,7 +577,9 @@ dell'accesso a dati di diversi vendor. ODBC, a livello architetturale, si pone
 sopra il DBMS e da un'immagine indipendente da ciò che c'è sotto (funziona come
 una sorta di \textit{driver}), trasformando tutto in una sorta di SQL
 standard. Si hanno anche dei protocolli, come \textbf{X-Open Distributed
-  Transaction Processing (\textit{DTP})}, che consentono di eseguire delle
+  Transaction Processing (\textit{DTP})} (che è una descrizione architetturale
+abilitante il protocollo di esecuzione di transazioni distribuite), che
+consentono di eseguire delle 
 transazioni secondo una logica diversa. Questo protocollo stabilisce una serie
 di API che vengono implementate da ogni singolo DBMS per offrire una
 connettività standard (approccio molto usato per transazioni con vendor
@@ -1280,7 +1282,8 @@ Si hanno diverse fasi:
   irrevocabilmente \textit{commit} o \textit{abort} (magari per violazione della
   concorrenza locale o per violazione di qualche vincolo di consistenza
   etc$\ldots$). I nodi risponderanno quindi o con \textit{ready\_to\_commit} o
-  con \textit{not\_ready\_to\_commit}
+  con \\
+  \textit{not\_ready\_to\_commit}
   \item nella seconda fase il TM prende la decisione globale. Si ha che se anche
   solo un nodo richiede un \textit{abort} allora si avrà \textit{abort} per
   tutti i nodi, altrimenti \textit{commit}, chiudendo la transazione. Il TM si
@@ -1442,7 +1445,7 @@ Ricapitoliamo anche le cadute dell'RM:
     restart}, nel \textit{ready set} le transazioni dubbie. Si hanno quindi due
   alternative:
   \begin{enumerate}
-    \item \textbf{remote recovery}, ovverol'RM chiede al TM cosa è accaduto
+    \item \textbf{remote recovery}, ovvero l'RM chiede al TM cosa è accaduto
     \item il TM riesegue la seconda fase del protocollo
   \end{enumerate}
 \end{itemize}
@@ -1453,9 +1456,14 @@ In questo caso il TM non riesce a distinguere tra perdita di messaggi
 Durante la seconda fase la non distinzione tra perdita di \textit{ack} o di
 decisioni dei gli RM porta alla ripetizione della seconda fase dopo il
 \textit{timeout}.\\
-Un partizionamento della rete non causa problemi ulteriori, dato che una
-transazione può avere successo solo se il TM e tutti i RM appartengono alla
-stessa partizione.
+% Un partizionamento della rete non causa problemi ulteriori, dato che una
+% transazione può avere successo solo se il TM e tutti i RM appartengono alla
+% stessa partizione.
+Se durante lo svolgimento del protocollo 2pc si partiziona la rete avendo due
+sottoreti una con TM e RM1 che e la seconda sottorete con RM2, RM3. In questo
+caso il TM continua a mandare il messaggio della global decision a RM2 RM3 dopo
+lo scadere del timeout. Si concluderà comunque, con alte probabilità, con un
+\textit{abort} da parte del TM.
 \subsubsection{Ottimizzazioni di 2PC}
 2PC può essere ottimizzato per:
 \begin{itemize}
@@ -1508,8 +1516,658 @@ preferisce un approccio \textit{based and mode based} mentre Microsoft uno
 basato su \textit{snapshot, transactional \textnormal{e} merge}.\\
 Vediamo le differenze tra le due repliche:
 \begin{itemize}
-  \item le 
+  \item le \textbf{repliche sincrone} cercano di far si che tutte le repliche
+  vengano aggiornate contemporaneamente (ad esempio si ha il protocollo
+  ROWA). Scrivo in modo sincrono su tutti nodi e solo quando tutte le repliche
+  confermano la scrittura avanzo con le transazioni (che fallisce se ho nodi non
+  disponibili). Nelle repliche sincrone si necessitano molti scambi di messaggi.
+  Di fatto si obbliga due o più \textit{storage} ad aggiornarsi e a fare
+  \textit{rollback} in caso di fallimento. Si hanno quindi alte disponibilità,
+  un auto \textit{fail-over} (bloccando la transazioni in caso di guasti sui
+  nodi) e un \textit{data loss} minimo. Le repliche sincrone vengono soprattutto
+  usate nei \textit{disaster recovery}, ovvero in situazioni \textit{mission
+    critical} (ad esempio sistemi bancari dove i db di backup, almeno 3, devono
+  stare a centinaia di kilometri di distanza, in zone sismiche tra loro
+  diverse). Gli svantaggi delle repliche sincrone sono la necessità di una rete
+  valida, si hanno problemi di scalabilità, di costi e minor flessibilità
+  \item nelle \textbf{repliche asincrone} prima si aggiorna il db
+  \textit{target} e poi le repliche (normalmente dopo pochi secondi ma anche
+  dopo giorni). Si hanno evidenti vantaggi di costo, scalabilità e flessibilità
+  (perché in caso di problema lavoro in primis sul db principale)
+  ma a rischio di \textit{data loss} (nell'intervallo di tempo tra la scrittura
+  del db principale e delle repliche). Normalmente si usano soluzioni asincrone
+  per accessi online e la loro efficienza, per bilanciamento del calcolo
+  etc$\ldots$ 
 \end{itemize}
+\textit{In caso di perdita di dati bisogna analizzare i singoli contratti per
+  capire legalmente come rispondere di dati che non verranno recuperati
+  probabilmente.}\\
+Ci sono vari contesti in cui pensare alla replica dei dati:
+\begin{itemize}
+  \item condivisione di dati da utenti tra loro scollegati. Un esempio è una
+  copia su un portatile con una replica usata da un commerciale. Si possono
+  avere conflitti nel momento in cui più utenti con db replicati lavorano
+  offline. Si ha il \textit{merge conflict}
+  \item \textit{data consolidation}, ovvero quando un'azienda vuole tenere più
+  copie dei dati in vari punti e alla fine bisogna riportare i dati a livello
+  centrale a cadenza periodica. Può servire per fare data warehousing o anche
+  solo semplicemente per monitorare le vendite delle varie filiali o per
+  aggiornare il catalogo
+  \item \textit{data distribution} che è il caso degli \textit{e-commerce}. È un
+  caso tipicamente \textit{mission-critical} e bisogna aumentare l'accesso ai
+  dati e si ha una costante sincronizzazione realtime bidirezionale per evitare
+  problemi. Un altro caso è la distribuzione tra diversi uffici, dove le
+  repliche locali hanno magari dati non presenti nel db globale
+  \item prestazioni, accesso efficiente, \textit{load balancing} e accesso
+  offline. Se non si hanno necessità di update immediati (tipo un sito vetrina)
+  allora la replica garantisce la disponibilità e l'accessibilità a basso
+  costo. Con il load balancing scarico gli utenti su diverse macchine replicate,
+  in primis per le molte realtà di sola lettura o comunque con pochissime
+  scritture (un esempio può anche essere un social network dove anche eventuali
+  ritardi di qualche secondo non sono problematici). Per la disponibilità
+  bisogna fare un forte testing dell'intera architettura, se cade un server
+  bisogna puntare ad una replica e bisogna essere sicuri e spesso i costi sono
+  troppo alti (\textit{RIVEDERE QUESTA PARTE})
+  \item separazione tra \textit{data entry \textnormal{e} reporting}, se si
+  usa lo stesso server per entrambi i compiti (che in pratica sono scrittura
+  costante e lettura costante) può essere utile separare in due server. Si
+  evitano così i rallentamenti dati dai \textit{lock}. Bisogna studiare i tempi
+  di sincronizzazione
+  \item coesistenza di applicazioni, questo è un caso particolare. Qualora
+  sia necessario cambiare applicazione devo, eventualmente, cambiare anche i
+  sistemi. Bisogna quindi travasare i dati vecchi e durante il trasferimento
+  bisogna comunque mantenere funzionanti le applicazioni. Quindi bisogna far
+  coesistere i due database durante il trasferimento (facendo il travaso di
+  notte bloccando le transazioni). I costi sono incredibili e si può avere anche
+  coesistenza delle applicazioni e non solo dei dati, con migrazioni parziali
+  (magari per area geografica) etc$\ldots$ questo comporta che magari due
+  filiali devono collaborare con due applicazioni e due db diversi
+\end{itemize}
+Ci sono anche casi in cui non si dovrebbe replicare:
+\begin{itemize}
+  \item quando ci sono frequenti update su più copie, portando le copie a
+  possibili conflitti che devono essere scoperti e gestiti ``manualmente'' 
+  \item quando la consistenza è \textit{critical} magari in contesti di
+  trasferimento di fondi etc$\ldots$. In questo caso solitamente si impone un
+  protocollo ROWA (con transazioni \textit{ACID compliant}), riducendo le
+  prestazioni per avere l'autorizzazione dei \textit{commit} da parte delle
+  repliche 
+\end{itemize}
+Ma spesso bisogna comunque replicare ``scegliendo il male minore'' (ad esempio
+nelle banche) e bisogna quindi analizzare il singolo caso, anche in base al
+budget. Inoltre non bastano le tecnologie serve un'ottima organizzazione.\\ 
+Concludendo si ha che i benefici della replica sono:
+\begin{itemize}
+  \item disponibilità
+  \item affidabilità
+  \item prestazioni
+  \item riduzione di carico
+  \item lavoro offline
+  \item supporto a molti utenti
+\end{itemize}
+Distinguiamo anche delle classi di tipologie di replica:
+\begin{itemize}
+  \item \textbf{data distribution}, di tipo \textit{1:many}, con un
+  \textit{source} che distribuisce, in modo sincrono o asincrono, le varie copie
+  passive ai \textit{target}
+  \item \textbf{Peer-to-Peer}, dove i vari nodi sono interconnessi e si
+  aggiornano tra di loro. Si usa un approccio ROWA
+  \item \textbf{data consolidation}, di tipo \textit{many:1}, dove ho più
+  \textit{source} che aggiornano un \textit{target} a livello centrale
+  \item \textbf{bi-directional} (per il \textit{conflict detention resolution}),
+  dove una copia primaria e uno secondaria 
+  possono leggere e scrivere a vicenda tra loro (è quindi una versione
+  semplificata del \textit{Peer-to-Peer} con due Peer)
+  \item \textbf{multi-Tier staging}, in cui si hanno meccanismi intermedi tra
+  \textit{source} e \textit{target} con ``aree di deposito'' dette aree di
+  \textit{staging}
+\end{itemize}
+Per realizzare una replica posso fare in diversi modi:
+\begin{itemize}
+  \item faccio letteralmente il backup del disco con una persona che stacca il
+  disco dal server e lo copia, riattaccando infine copia e disco originale
+  \item posso prima fare il backup attaccando un altro disco e poi mettere nella
+  nuova macchina il disco copia
+  \item posso fare una \textit{replica incrementale}, ovvero faccio un
+  \textit{full backup} e sposto solo il file di \textit{log} delle transazioni
+  nel nuovo server, rieseguendo quanto fatto (essendo contenuto nel
+  \textit{log}). Quindi prima faccio un \textit{full
+    backup} e poi un \textit{backup \textnormal{del} log}, questo per ogni
+  replica. Un'alternativa è l'\textbf{event publish}.
+  Un \textbf{event publish} è una replica senza \textit{apply} e
+  leggo i file di log. Analizzando gli eventi tramite particolari meccanismi
+  riscrivo quindi sull'architettura target. Da un \textit{publisher} si passa ad
+  un \textit{distributor} e infine ai \textit{subscriber}
+  % MANCA PARTE DB2
+\end{itemize}
+\textbf{Sulle slide \textit{repliche} si ha un approfondimento delle
+  architetture IBM e Microsoft opzionali per il corso}.\\
+\begin{shaded}
+  Un \textbf{db parallelo} è studiato per le prestazioni. Si ha accesso
+  parallelo ai dati, parallelismo \textit{intra-query} (stessa query su
+  frammenti diversi), parallelismo \textit{inter-query} (tante query diverse) e
+  sono fatti da elementi hardware posti vicini tra loro.\\
+  Parliamo di \textbf{persistenza dei dati}. Bisogna garantire la durabilità dei
+  dati, bisogna quindi usare un db. Si hanno anche problemi per creare oggetti
+  persistenti a partire da un linguaggio OOP, si ha il cosiddetto
+  l'\textbf{object-relational paradigm mismatch}. Si separa quindi l'aspetto OOP
+  e l'aspetto relazionale per risolvere il problema per poi ``mappare'' l'uno
+  nell'altro, tramite i \textbf{data mapper}. Si hanno operazioni \textbf{CRUD}:
+  \begin{itemize}
+    \item Create
+    \item Read
+    \item Update
+    \item Delete
+  \end{itemize}
+  Si ha quindi il cosiddetto \textbf{Object–relational mapping}, ovvero questa
+  tecnica di mapping. Si hanno vari framework che lo implementano.\\
+  Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.
+\end{shaded}
+\section{Prima esercitazione}
+\begin{esercizio}
+  Si consideri un db con le seguenti relazioni (e quindi tabelle):
+  \begin{itemize}
+    \item PRODUCTION (\underline{SerialNumber}, PartType, Model, Quantity,
+    Machine) 
+    \item PICKUP (\underline{SerialNumber}, \underline{Lot}, \textbf{Client,
+      SalesPerson},  Amount) 
+    \item CLIENT (\underline{Name}, City, Address)
+    \item SALESPERSON (\underline{Name}, City, Address)
+  \end{itemize}
+  \textit{(con sottolineate le chiavi primarie e in grassetto le chiavi di
+    integrità referenziale)}\\
+  
+  e ci poniamo l'obiettivo di partizionare il db secondo determinate
+  specifiche.\\
+  Si assume che si abbiano le seguenti specifiche organizzative:
+  \begin{itemize}
+    \item si hanno 4 centri di produzione (\textit{Dublino, San Jose, Zurigo
+      \textnormal{e} Taiwan}, ciascuno responsabile, rispettivamente, di
+    \textit{cpu, keyboard, screen \textnormal{e} cable}) e 3 centri di vendita
+    (\textit{San Jose, Zurigo  \textnormal{e} Taiwan})
+    \item le vendite sono distribuite secondo le località geografiche, i clienti
+    a Zurigo sono serviti solo dai venditori di Zurigo etc$\ldots$. SI ha però
+    che i venditori di  Zurigo servono anche Dublino
+    \item ogni area geografica ha il proprio db (avremo quindi 4 db)
+  \end{itemize}
+  Vogliamo studiare una \textbf{frammentazione orizzontale} delle 4 tabelle.\\
+  Ricordiamo quindi che abbiamo 4 centri di produzione (ciascuno responsabile di
+  un prodotto e con un db ciascuno) e 3 punti di vendita.\\
+  Partiamo con la frammentazione della relazione \textnormal{PRODUCTION},
+  ottenendo 4 tabelle, una per componente prodotto, ottenendo (con $\sigma$
+  abbiamo l'operazione di selezione nell'algebra relazionale):
+  \begin{itemize}
+    \item $PRODUCTION_1=\sigma_{partType=cpu}(PRODUCTION)$
+    \item $PRODUCTION_2=\sigma_{partType=keyboard}(PRODUCTION)$
+    \item $PRODUCTION_3=\sigma_{partType=screen}(PRODUCTION)$
+    \item $PRODUCTION_4=\sigma_{partType=cable}(PRODUCTION)$    
+  \end{itemize}
+  Passiamo alla relazione \textnormal{PICKUP}. Anche in questo caso si frammenta
+  per il prodotto facendo il join con la tabella
+  \textnormal{PRODUCTION}(ricordando che $\pi$ è l'operazione di proiezione/join 
+  nell'algebra relazionale). Per comodità indichiamo tutti gli attributi di
+  \textnormal{PICKUP} con $pick$, avendo quindi:
+  \[pick=SerialNumber, Lot, Client, SalesPerson, Amount\]
+  indico anche con $SN$ $SerialNumber$
+  \begin{itemize}
+    \item \scriptsize{$PICKUP_1=\pi_{pick}(\sigma_{partType=cpu}(PICKUP\,\, SN
+      =SN(PRODUCTION)))$}   
+    \item \scriptsize{$PICKUP_2=\pi_{pick}(\sigma_{partType=keyboard}(PICKUP\,\, SN
+      =SN(PRODUCTION)))$}   
+    \item \scriptsize{$PICKUP_3=\pi_{pick}(\sigma_{partType=screen}(PICKUP\,\, SN
+      =SN(PRODUCTION)))$}  
+    \item \scriptsize{$PICKUP_4=\pi_{pick}(\sigma_{partType=cable}(PICKUP\,\, SN
+     =SN(PRODUCTION)))$}  
+ \end{itemize}
+ Prendo quindi una proiezione di tutti gli elementi di \textit{PICKUP} separando
+ nei vari \textit{PICKUP} in base al prodotto.\\
+ Passo a alle tabelle \textnormal{SALESPERSON}. Abbiamo 3
+ punti di vendita, quindi, circa come per \textnormal{PRODUCTION}, frammento in
+ base alle città di vendita:
+ \begin{itemize}
+   \item $SALESPERSON_1=\sigma_{City="San Jose"}(SALESPERSON)$
+   \item $SALESPERSON_2=\sigma_{City="Zurigo"}(SALESPERSON)$
+   \item $SALESPERSON_3=\sigma_{City="Taiwan"}(SALESPERSON)$
+ \end{itemize}
+ Manca solamente \textnormal{CLIENT}. Anche in questo caso divido in base alle
+ città, ricordando che Zurigo e Dublino sono clienti entrambi di Zurigo:
+  \begin{itemize}
+   \item $CLIENT_1=\sigma_{City="San Jose"}(CLIENT)$
+   \item $CLIENT_2=\sigma_{City="Zurigo"\mbox{ or }City="Dublino"}(CLIENT)$
+   \item $CLIENT_3=\sigma_{City="Taiwan"}(CLIENT)$
+ \end{itemize}
+ Abbiamo finito la frammentazione e quindi dobbiamo solo distribuire tali
+ tabelle: 
+ \begin{itemize}
+   \item le quattro tabelle con indice 1 andranno a San Jose, in
+   \texttt{company.sanjose.com}
+   \item le quattro tabelle con indice 2 andranno a Zurigo, in
+   \texttt{company.zurigo.com} 
+   \item le quattro tabelle con indice 3 andranno a Taiwan, in
+   \texttt{company.taiwan.com} 
+   \item le due tabelle con indice 4 andranno a Dublino (che quindi avrà solo
+   parte di \textnormal{PRODUCTION} e parte di \textnormal{PICKUP} in quanto a
+   Dublino non si ha un punto vendita), in \texttt{company.dublino.com}
+ \end{itemize}
+\end{esercizio}
+\begin{esercizio}
+  Vediamo un esercizio in merito alla trasparenza, che ricordiamo essere a tre
+  livelli:
+  \begin{enumerate}
+    \item di frammentazione
+    \item di replicazione/allocazione
+    \item di linguaggio
+  \end{enumerate}
+  Si chiede di fare delle interrogazioni, tenendo conto dei livelli di
+  trasparenza, sul db costruito nell'esercizio precedente.\\
+  La prima query ci chiede di determinare la quantità dei prodotti che hanno
+  valore ``77y6878'' (abbiamo quindi a che fare con la trasparenza di
+  frammentazione, infatti interroghiamo come se avessimo a che fare con un solo
+  db): 
+  \begin{minted}{sql}
+    Procedure Query1(:Quan):
+     Select Quantity in :Quan
+     From PRODUCTION
+     Where SerialNumber="77y6878"
+    End Procedure
+  \end{minted}
+  (con \texttt{:Quan} indichiamo il nome della tabella).\\
+  Vediamo ora come fare nel caso di trasparenza di allocazione, quindi si sa di
+  avere a che fare con un db distribuito. La query quindi si ``sposterà'' alla
+  ricerca del giusto frammento:
+  \begin{minted}{sql}
+    Procedure Query2(:Quan):
+     Select Quantity in :Quan
+     From PRODUCTION_1
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_2
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_3
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_4
+     Where SerialNumber="77y6878"
+    End Procedure
+  \end{minted}
+  Vediamo ora come funziona per la trasparenza di linguaggio. In tal caso
+  dobbiamo considerare sia le frammentazioni che i vari indirizzi di
+  allocazione, ovvero i \texttt{company.città.com}:
+  \begin{minted}{sql}
+    Procedure Query3(:Quan):
+     Select Quantity in :Quan
+     From PRODUCTION_1@company.sanjose.com
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_2@company.zurigo.com
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_3@company.taiwan.com
+     Where SerialNumber="77y6878"
+     
+     if :empty then
+     Select Quantity in :Quan
+     From PRODUCTION_4@company.dublino.com
+     Where SerialNumber="77y6878"
+    End Procedure
+  \end{minted}
+  \textit{Nelle slide usa \texttt{union} al posto di \texttt{if :empty then}}.
+\end{esercizio}
+\begin{esercizio}
+  Sempre sul db del primo esercizio effettuiamo la seguente query:
+  \textit{determinare le macchine che utilizzano come componente ``keyboard'' e
+    sono vendute al cliente ``Brown''}.\\
+  Per praticità vediamo solo la trasparenza di frammentazione e quella di
+  allocazione.\\
+  Partiamo con la trasparenza di frammentazione:
+  \begin{minted}{sql}
+    Procedure Query1(:Machine)
+     Select Machine in :Machine
+     From PRODUCTION join PICKUP on
+     PRODUCTION.SerialNumber=PICKUP.SerialNumber
+     Where PartType = "keyboard" AND Client="Brown"
+    End Procedure
+  \end{minted}
+  Vediamo il caso di trasparenza di allocazione (e sappiamo che ``keyboard'' è
+  solo in $PRODUCTION_2$ quindi interroghiamo un solo frammento e senza chiedere
+  la specifica del $partType$):
+  \begin{minted}{sql}
+    Procedure Query2(:Machine)
+     Select Machine in :Machine
+     From PRODUCTION_2 join PICKUP on
+     PRODUCTION_2.SerialNumber=PICKUP_2.SerialNumber
+     Where Client="Brown"
+    End Procedure
+  \end{minted}
+  Se avessimo voluto fare anche la trasparenza di linguaggio non sarebbe
+  cambiato nulla dato che $PRODUCTION_2$ è solo a Zurigo.
+\end{esercizio}
+\begin{esercizio}
+  Sempre sul db del primo esercizio effettuiamo il cambiamento di indirizzo del
+  cliente ``Brown'' che si sposta da ``27 Church St.'', Dublino, a ``43 Park Hoi
+  St.'', Taiwan. Abbiamo quindi un cambio di allocazione nel db.\\
+  Partiamo con la trasparenza di frammentazione:
+  \begin{minted}{sql}
+    Procedure Update1
+     Update Client
+     Set Address  = "43 Park Hoi St.", City="Taiwan"
+     Where Name="Brown"
+    End Procedure
+  \end{minted}
+  La cosa si complica nel caso di trasparenza di allocazione, tenendo conto
+  delle due città e dei loro db:
+  \begin{minted}{sql}
+    Procedure Update2
+     Delete CLIENT_2
+     Where Name="Brown"
+     
+     Insert into CLIENT_3 (Name, Address, City)
+     values ("Brown", "43 Park Hoi St.", "Taiwan")
+    End Procedure
+  \end{minted}
+  Se avessimo voluto fare anche la trasparenza di linguaggio non sarebbe
+  cambiato nulla poiché le frammentazioni sono in locazioni diverse
+\end{esercizio}
+\begin{esercizio}
+  Sempre sul db del primo esercizio effettuiamo la seguente query:\\
+  \textit{calcolare la somma di tutti gli ordini ricevuti a SanJose, Zurigo e
+    Taiwan}.\\
+  Partiamo con la trasparenza di frammentazione:
+  \begin{minted}{sql}
+    Procedure Query1
+     Select City, sum(Amount)
+     From PICKUP join SALESPERSON on
+     SalesPerson = Name
+     Groub by city
+    End Procedure
+  \end{minted}
+  Passiamo alla trasparenza di allocazione. Mi serviranno tutti i frammenti di
+  \texttt{SALESPERSON}. Inoltre devo considerare i vari \texttt{PICKUP}, tutti e
+  quattro per il discorso delle vendite su Dublino:
+  \begin{minted}{sql}
+    Procedure Query2
+     Create view PICKUP as
+     PICKUP_1 union PICKUP_2 union PICKUP_3 union PICKUP_4
+     
+     Select City, sum(Amount)
+     From SALESPERSON_1 join PICKUP on
+     SalesPerson=Name
+     union
+     From SALESPERSON_2 join PICKUP on
+     SalesPerson=Name
+     union
+     From SALESPERSON_3 join PICKUP on
+     SalesPerson=Name
+    End Procedure
+  \end{minted}
+\end{esercizio}
+\begin{esercizio}
+   Sempre sul db del primo esercizio cerchiamo di massimizzare il parallelismo
+   delle inter-query.\\
+   Prendiamo la seguente query:
+   \textit{estrarre la somma delle quantità di produzione che sono raggruppate
+     secondo i tipi e i modelli delle componenti}.\\
+   \begin{minted}{sql}
+    Procedure Query1
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION
+     Group by (Model, PartType)
+    End Procedure
+  \end{minted}
+  Vogliamo però massimizzare il parallelismo, divido quindi tra le varie
+  frammentazioni:
+  \begin{minted}{sql}
+    Procedure Query1
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_1
+     Group by (Model, PartType)
+
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_2
+     Group by (Model, PartType)
+
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_3
+     Group by (Model, PartType)
+
+     Select sum(Quantity), Model, PartType
+     from PRODUCTION_4
+     Group by (Model, PartType)
+    End Procedure
+  \end{minted}
+  massimizziamo il parallelismo inter-query se si consideriamo che ogni
+  partizione ha un DBMS diverso. Volendo potrei dividere la query ancora a
+  seconda del modello, evitando il \texttt{group by} (cosa utile nel caso in cui
+  si abbia a che fare con un sistema fortemente multicore)
+\end{esercizio}
+\begin{esercizio}
+  Vediamo un esempio di db replicato che può produrre inconsistenza.\\
+  Prendiamo l'esempio del db prodotto nel primo esercizio. Supponiamo che ogni
+  frammento di \textnormal{PRODUCTION} sia allocato a tutti i DBMS. Però ogni
+  DBMS utilizza un frammento e trasmette i cambiamenti del frammento agli altri
+  DBMS, permettendo di avere copie del db. In caso di fallimento di un DBMS il
+  db sarebbe comunque accessibile dagli altri sistemi e non so avrebbe problemi
+  con le query, avendo che il fallimento è trasparente sia ai client che al db
+  stesso. Purtroppo quando si ha un fallimento si può generare un
+  partizionamento di rete e questo può comportare delle inconsistenze. Se, per
+  esempio, due transazioni tolgono 800 ad una certa quantità la seconda in
+  ordine temporale fallirà ma se avvengono in due DBMS non connessi non
+  falliranno, producendo inconsistenza.
+\end{esercizio}
+\begin{esercizio}
+  Data una replicazione simmetrica dire quando produce inconsistenza.
+  Un esempio è un db senza il \textit{concurrency control} e quindi due
+  transazioni come quelle dell'esercizio precedente possono causare
+  inconsistenza anche senza fallimento della rete.
+\end{esercizio}
+\chapter{Blockchains}
+\textit{Questa lezione è stata tenuta dal prof. Leporati}.\\
+\textbf{Verificare bene quanto scritto in quanto mi sono perso ad un certo punto
+  sulla distinzione o meno di nodi e blocchi e ho scritto assumendo che siano
+  identici}.
+\begin{definizione}
+  Una \textbf{blockchain}, in poche parole, è un registro pubblico, condiviso e
+  decentralizzato che memorizza la proprietà di beni digitali. 
+\end{definizione}
+È quindi un registro in cui vengono memorizzate informazioni relative alla
+proprietà di qualcosa che può essere rappresentato tramite sequenze di bit
+(quindi qualcosa di digitale come i \textit{bitcoin} o altre criptovalute).\\
+Vengono memorizzate anche le \textbf{transazioni}, ovvero i cambi di
+proprietà.\\
+Essendo pubblico tutti possono vedere cosa è stato registrato e in particolare
+``chi possiede cosa'' e la storia di una certa proprietà.\\
+Questo registro è condiviso in quanto gestito da più persone ed è
+decentralizzato in quanto non esiste un nucleo che abbia di poteri da
+amministratore rispetto agli altri, tutti sono allo stesso livello.
+\\
+Questo registro è organizzato in blocchi. Si ha un primo blocco detto
+\textbf{genesis block} che da il via a tutto. Si hanno poi altri blocchi, in
+nero, collegati a questo e che formano una catena. Un blocco si lega al
+successivo tramite particolari funzioni crittografiche, dette \textbf{funzioni
+  di hash crittografico}. Nel dettaglio il collegamento tra un blocco e il
+successivo è dato dal fatto che il valore di hash del blocco è contenuta
+all'interno del blocco successivo, facendo in modo che si estremamente
+difficile alterare il contenuto di un blocco, ovvero diverse transazioni, che
+sono organizzate secondo una precisa struttura dati che consente di verificare
+la validità in modo veloce ed efficiente. Per ogni blocco si calcola quindi
+l'hash e lo si salva nel blocco successivo. Per modificare una transazione
+quindi dovrei calcolare l'hash e dovrei fare il check con il blocco
+successivo. Quindi tutti possono verificare la validità della
+blockchain. Modificare i dati in modo tale da ottenere lo stesso hash però è
+davvero difficile.\\
+\begin{figure}
+  \centering
+  
+  \psscalebox{1.3 1.3} % Change this value to rescale the drawing.
+  {
+    \begin{pspicture}(0,-1.0)(6.8,1.0)
+      \definecolor{colour0}{rgb}{0.08235294,0.61960787,0.22352941}
+      \definecolor{colour1}{rgb}{0.9529412,0.25882354,0.25882354}
+      \psframe[linecolor=colour0, linewidth=0.02, dimen=outer,
+      framearc=0.35](0.4,0.6)(0.0,0.2)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](2.0,1.0)(1.6,0.6)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](2.0,0.2)(1.6,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](1.2,0.6)(0.8,0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](2.8,0.2)(2.4,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](3.6,0.2)(3.2,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](4.4,0.2)(4.0,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](5.2,0.6)(4.8,0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](6.0,0.6)(5.6,0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](6.8,0.6)(6.4,0.2)
+      \psline[linecolor=black, linewidth=0.02](0.4,0.4)(0.8,0.4)
+      \psline[linecolor=black, linewidth=0.02](1.1627907,0.3860465)
+      (1.6279069,0.8511628)
+      \psline[linecolor=black, linewidth=0.02](1.1627907,0.3860465)
+      (1.6279069,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](2.0,0.013953488)
+      (2.372093,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](2.7441862,0.013953488)
+      (3.2093024,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](3.5813954,0.013953488)
+      (4.0465117,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](4.418605,0.013953488)
+      (4.7906976,-0.35813954)
+      \psline[linecolor=black, linewidth=0.02](5.162791,-0.35813954)
+      (5.627907,-0.35813954)
+      \psline[linecolor=black, linewidth=0.02](5.162791,0.3860465)
+      (5.627907,0.3860465)
+      \psline[linecolor=black, linewidth=0.02](6.0,0.3860465)
+      (6.372093,0.3860465)
+      \psline[linecolor=black, linewidth=0.02](4.418605,0.013953488)
+      (4.7906976,0.3860465)
+      \psline[linecolor=black, linewidth=0.02](3.3953488,-0.17209302)
+      (3.3953488,-0.6372093)
+      \psline[linecolor=black, linewidth=0.02](3.5813954,-0.82325584)
+      (4.0465117,-0.82325584)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](3.6,-0.6)(3.2,-1.0)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](4.4,-0.6)(4.0,-1.0)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](5.2,-0.2)(4.8,-0.6)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](6.0,-0.2)(5.6,-0.6)
+    \end{pspicture}
+  }
+  \caption{Esempio di schema di blockchain. In verde a sinistra troviamo il
+    \textbf{genesis block}. In nero i blocchi che formano la catena. In rosso
+    abbiamo i nodi \textit{orfani}. Per comodità è stata rappresentata in
+    orizzontale con la parte ``alta'' a destra}
+  \label{fig:bc}
+\end{figure}
+Si hanno vari nodi per l'uso della blockchain.
+I vari nodi sono nodi di una \textbf{rete Peer-to-Peer (\textit{P2P})}
+(come quelle per la condivisione di file come \textit{torrent}, dove quindi
+ogni computer fa sia da \textit{client} che da \textit{server}). I vari nodi
+osservavano le proposte di transazione che vengono fatte dagli utenti (anche
+utenti che solo usano la blockchain), verificano che siano valide (ad esempio
+verificando che non avvenga il \textit{double-spending}, ovvero, per esempio,
+una doppia concessione dello stesso bene), eseguono un \textbf{protocollo di
+  consenso} (in quanto potrebbero esserci nodi ``disonesti'', con per esempio
+utenti che vorrebbero appropriarsi di beni altrui come bitcoin, si procede
+quindi a maggioranza secondo il \textit{proof-of-work}) e infine
+procedono validando la transazione aggiungendo il blocco alla fine della
+blockchain (``in cima''). Una copia della blockchain viene memorizzata in ogni
+nodo della rete P2P alla fine della transazione, quindi quando i nodi sono
+d'accordo sull'aggiunta del blocco allora ciascuno lo aggiunge alla propria
+copia della blockchain (altrimenti qualsiasi proposta futura verrebbe
+bocciata).\\
+In molte blockchain se si stabilisce che due blocchi possono essere attaccati
+ad un certo blocco e si inizia a lavorare su entrambi formando quindi due
+nuove catene. Alla fine ``vince'' la catena più lunga, fermando la
+continuazione dell'altro ramo. I blocchi del ramo ``perdente'' vengono resi
+\textit{orfani} lasciando quindi una sola catena attiva. Le transazioni nei
+nodi \textit{orfani} vengono dimenticate e bisognerà reinserirle. Questa cosa
+è molto inefficiente.\\
+Ci sono reti, come quella \textit{bitcoin}, in cui una transazione è valida
+sse vengono aggiunti 6 blocchi al di sopra di quello che contiene la
+transazione.\\
+Le transazioni sono \textbf{pseudo-anonime} (comodo ambito bitcoin dove,
+come per i contanti, non si sa per quali mani sono passati quei soldi e per
+cosa sono stati usati prima). Ci sono vari meccanismi per rendere anonime le
+cose, alcuni migliori (come quelli di \textit{monero} o \textit{zcash}) e
+alcuni peggiori (come quelli di \textit{bitcoin} ed \textit{ethereum}). \\
+Si ha un ramo della \textit{computer foreniscs} che si occupa di capire chi ha
+fatto certe transazioni, esplicitamente di criptovalute, sulla
+blockchain. Quindi si prova a raggiungere l'anonimato ma non sempre si riesce
+(basta un utente che paghi in \textit{bitcoin} su un sito rivelando la propria
+identità).
+
+\section{Bitcoin}
+\textbf{Bitcoin} è una criptovaluta proposta da Satoshi Nakamoto
+(probabilmente un nome falso)
+nel 2008. Non è nato all'improvviso ma molte idee all'interno di
+\textit{bitcoin} erano già presenti i diversi paper di crittografia precedenti
+(ad esempio la \textit{proof-of-work} era già presente all'interno della
+gestione dello spam delle mail, dove veniva imposto un certo sforzo
+computazionale per mandare una mail in modo che l'invio non fosse completamente
+``gratuito'', comportando che si possano mandare al massimo circa 2000 mail al
+giorno, al più di attrezzarsi con dei super computer). Ci sono stati tanti
+precedenti di tentativi di creazione di un sostituto digitale del denaro, con
+diverse difficoltà a causa di anonimato e \textit{double-spending}. Inoltre
+rappresentare una moneta con una sequenza di bit consente la copia illimitata di
+tale sequenza, creando copie perfettamente identiche. Una soluzione per evitare
+il \textit{double-spending} è quella di usare una \textit{trust detour part}
+(\textbf{non ho capito se ha detto questo}), ovvero tipicamente una banca che
+segna le transazioni monetarie, diventando però un ``collo di bottiglia'',
+venendo interpellata in tutte le transazioni. Inoltre la banca è conscia delle
+transazioni di denaro, che perdono così l'anonimato. L'idea di Satoshi Nakamoto
+e stata quella di unire vari protocolli crittografici usando al posto della
+banca un registro condiviso, una blockchain appunto, in cui vengono salvate le
+transazioni e dove vengono anche controllate, permettendo di evitare il
+\textit{double-spending}. Si usa la blockchain quindi per creare un
+\textit{trust}, sostituendo la funzione delle banche. Nel \textbf{genesis block}
+di \textit{bitcoin} c'è infatti un messaggio (nel posto del blocco dedicato alla
+``causale'') che fa riferimento al potere eccessivo delle banche.\\
+Le proprietà memorizzate nella blockchain \textit{Bitcoin} sono chiamate
+direttamente, come abbiamo già scritto, \textbf{bitcoins (\textit{BTC})} o
+frazioni di essi. Le transazioni sono parecchio complicate, con una struttura
+dati complessa, con diverse transazioni in ingresso (infatti una transazione può
+contenere transazioni), campi per generare nuovi bitcoin,0diversi \textit{script
+  di transazione} in output (scritti in un linguaggio ``particolare''). \\
+\textit{Non verrà trattata nel dettaglio la conformazione delle transazioni}.\\
+Se un utente $A$ vuole mandare un \textit{bitcoin} ad un utente $B$, usando il
+proprio client, che spesso viene chiamato \textbf{wallet}, specifica la quantità
+che vuole mandare e l'indirizzo di $B$. Ogni utente ha associato quindi un
+indirizzo, in qualità di lunga sequenza di numeri. Per ottenere l'indirizzo
+viene usata una \textbf{chiave pubblica}, usando quindi la \textit{crittografia
+  a chiave pubblica} in cui si usano algoritmi di cifratura e
+de-cifratura. Ciascuno crea con questi algoritmi una copia \textit{chiave
+  pubblica/chiave privata}, rende pubblica la \textit{chiave pubblica} e
+comunica di usare quella chiave pubblica per risalire all'indirizzo a cui farsi
+spedire i \textit{bitcoin}, infatti data la chiave pubblica all'utente che deve
+inviare i bitcoin la userà per cifrare il messaggio in modo che, tramite la
+chiave privata, solo il legittimo destinatario possa decifrare il messaggio.\\
+Dalla chiave pubblica quindi ottiene l'indirizzo al quale $A$ deve mandare i
+soldi per farli ricevere a $B$. Quindi l'indirizzo è una sorta di identità per
+$B$ che però può generarsi tutte le coppie di chiavi che vuole, combinando poi i
+vari bitcoin ricevuti ai vari indirizzi che ha generato tramite la complessa
+struttura della transazione. Questa possibilità di generare infinite chiavi però
+è solo uno \textit{pseudo-anonimato}. \\
+Bisogna però anche dimostrare che $A$ è proprietario dei \textit{bitcoins} che
+vuole inviare a $B$. Per farlo $A$ ``firma'' digitalmente la transazione tramite
+la sua \textit{chiave segreta}. I nodi della rete P2P, che sono detti 
+
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -1535,6 +2193,15 @@ Vediamo le differenze tra le due repliche:
 % LocalWords:  prepare ready checkpoint dump img png decision recoverable all
 % LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
 % LocalWords:  interface IBM Microsoft technologies realtime based snapshot and
-% LocalWords:  transactional merge
+% LocalWords:  transactional merge over loss disaster mission critical load OOP
+% LocalWords:  kilometri consolidation distribution balancing offline entry BTC
+% LocalWords:  reporting warehousing commerce social testing compliant many
+% LocalWords:  source directional resolution detention Tier staging event apply
+% LocalWords:  publish publisher distributor subscriber intra inter paradigm
+% LocalWords:  relational mismatch Blockchain mapper Delete framework group
+% LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis
+% LocalWords:  block hash torrent double spanning Leporati ethereum monero spam
+% LocalWords:  zcash foreniscs criptovaluta Satoshi Nakamoto paper proof part
+% LocalWords:  spending bitcoins wallet
 
-\message{ !name(archid.tex) !offset(-1540) }
+\message{ !name(archid.tex) !offset(-2207) }

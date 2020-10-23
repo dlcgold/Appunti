@@ -1968,7 +1968,535 @@ Per realizzare una replica posso fare in diversi modi:
   transazioni come quelle dell'esercizio precedente possono causare
   inconsistenza anche senza fallimento della rete.
 \end{esercizio}
-\chapter{Blockchain}
+\chapter{Blockchains}
+\textbf{\textit{Questa lezione è stata tenuta dal prof. Leporati}}.\\
+\textbf{Nonostante qualche ambiguità ed errore di scrittura, nel capitolo si
+  userà il termine ``nodo'' 
+  quando si parla di rete P2P e il termine ``blocco'' quando ci si riferisce ai
+  blocchi interni alla blockchain.}
+\begin{definizione}
+  Una \textbf{blockchain}, in poche parole, è un registro pubblico, condiviso e
+  decentralizzato che memorizza la proprietà di beni digitali. 
+\end{definizione}
+È quindi un registro in cui vengono memorizzate informazioni relative alla
+proprietà di qualcosa che può essere rappresentato tramite sequenze di bit
+(quindi qualcosa di digitale come i \textit{bitcoin} o altre criptovalute).\\
+Vengono memorizzate anche le \textbf{transazioni}, ovvero i cambi di
+proprietà.\\
+Essendo pubblico tutti possono vedere cosa è stato registrato e in particolare
+``chi possiede cosa'' e la storia di una certa proprietà.\\
+Questo registro è condiviso in quanto gestito da più persone ed è
+decentralizzato in quanto non esiste un nucleo che abbia di poteri da
+amministratore rispetto agli altri, tutti sono allo stesso livello.
+\\
+Questo registro è organizzato in blocchi. Si ha un primo blocco detto
+\textbf{genesis block} che da il via a tutto. Si hanno poi altri blocchi, in
+nero, collegati a questo e che formano una catena. Un blocco si lega al
+successivo tramite particolari funzioni crittografiche, dette \textbf{funzioni
+  di hash crittografico}. Nel dettaglio il collegamento tra un blocco e il
+successivo è dato dal fatto che il valore di hash del blocco è contenuta
+all'interno del blocco successivo, facendo in modo che si estremamente
+difficile alterare il contenuto di un blocco, ovvero diverse transazioni, che
+sono organizzate secondo una precisa struttura dati che consente di verificare
+la validità in modo veloce ed efficiente. Per ogni blocco si calcola quindi
+l'hash e lo si salva nel blocco successivo. Per modificare una transazione
+quindi dovrei calcolare l'hash e dovrei fare il check con il blocco
+successivo. Quindi tutti possono verificare la validità della
+blockchain. Modificare i dati in modo tale da ottenere lo stesso hash però è
+davvero difficile.\\
+\begin{figure}
+  \centering
+  
+  \psscalebox{1.3 1.3} % Change this value to rescale the drawing.
+  {
+    \begin{pspicture}(0,-1.0)(6.8,1.0)
+      \definecolor{colour0}{rgb}{0.08235294,0.61960787,0.22352941}
+      \definecolor{colour1}{rgb}{0.9529412,0.25882354,0.25882354}
+      \psframe[linecolor=colour0, linewidth=0.02, dimen=outer,
+      framearc=0.35](0.4,0.6)(0.0,0.2)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](2.0,1.0)(1.6,0.6)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](2.0,0.2)(1.6,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](1.2,0.6)(0.8,0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](2.8,0.2)(2.4,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](3.6,0.2)(3.2,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](4.4,0.2)(4.0,-0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](5.2,0.6)(4.8,0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](6.0,0.6)(5.6,0.2)
+      \psframe[linecolor=black, linewidth=0.02, dimen=outer,
+      framearc=0.35](6.8,0.6)(6.4,0.2)
+      \psline[linecolor=black, linewidth=0.02](0.4,0.4)(0.8,0.4)
+      \psline[linecolor=black, linewidth=0.02](1.1627907,0.3860465)
+      (1.6279069,0.8511628)
+      \psline[linecolor=black, linewidth=0.02](1.1627907,0.3860465)
+      (1.6279069,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](2.0,0.013953488)
+      (2.372093,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](2.7441862,0.013953488)
+      (3.2093024,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](3.5813954,0.013953488)
+      (4.0465117,0.013953488)
+      \psline[linecolor=black, linewidth=0.02](4.418605,0.013953488)
+      (4.7906976,-0.35813954)
+      \psline[linecolor=black, linewidth=0.02](5.162791,-0.35813954)
+      (5.627907,-0.35813954)
+      \psline[linecolor=black, linewidth=0.02](5.162791,0.3860465)
+      (5.627907,0.3860465)
+      \psline[linecolor=black, linewidth=0.02](6.0,0.3860465)
+      (6.372093,0.3860465)
+      \psline[linecolor=black, linewidth=0.02](4.418605,0.013953488)
+      (4.7906976,0.3860465)
+      \psline[linecolor=black, linewidth=0.02](3.3953488,-0.17209302)
+      (3.3953488,-0.6372093)
+      \psline[linecolor=black, linewidth=0.02](3.5813954,-0.82325584)
+      (4.0465117,-0.82325584)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](3.6,-0.6)(3.2,-1.0)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](4.4,-0.6)(4.0,-1.0)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](5.2,-0.2)(4.8,-0.6)
+      \psframe[linecolor=colour1, linewidth=0.02, dimen=outer,
+      framearc=0.35](6.0,-0.2)(5.6,-0.6)
+    \end{pspicture}
+  }
+  \caption{Esempio di schema di blockchain. In verde a sinistra troviamo il
+    \textbf{genesis block}. In nero i blocchi che formano la catena. In rosso
+    abbiamo i nodi \textit{orfani}. Per comodità è stata rappresentata in
+    orizzontale con la parte ``alta'' a destra}
+  \label{fig:bc}
+\end{figure}
+Si hanno vari nodi per l'uso della blockchain.
+I vari nodi sono nodi di una \textbf{rete Peer-to-Peer (\textit{P2P})}
+(come quelle per la condivisione di file come \textit{torrent}, dove quindi
+ogni computer fa sia da \textit{client} che da \textit{server}). I vari nodi
+osservavano le proposte di transazione che vengono fatte dagli utenti (anche
+utenti che solo usano la blockchain), verificano che siano valide (ad esempio
+verificando che non avvenga il \textit{double-spending}, ovvero, per esempio,
+una doppia concessione dello stesso bene), eseguono un \textbf{protocollo di
+  consenso} (in quanto potrebbero esserci nodi ``disonesti'', con per esempio
+utenti che vorrebbero appropriarsi di beni altrui come bitcoin, si procede
+quindi a maggioranza secondo il \textit{proof-of-work}) e infine
+procedono validando la transazione aggiungendo il blocco alla fine della
+blockchain (``in cima''). Una copia della blockchain viene memorizzata in ogni
+nodo della rete P2P alla fine della transazione, quindi quando i nodi sono
+d'accordo sull'aggiunta del blocco allora ciascuno lo aggiunge alla propria
+copia della blockchain (altrimenti qualsiasi proposta futura verrebbe
+bocciata).\\
+In molte blockchain se si stabilisce che due blocchi possono essere attaccati
+ad un certo blocco e si inizia a lavorare su entrambi formando quindi due
+nuove catene. Alla fine ``vince'' la catena più lunga, fermando la
+continuazione dell'altro ramo. I blocchi del ramo ``perdente'' vengono resi
+\textit{orfani} lasciando quindi una sola catena attiva. Le transazioni nei
+nodi \textit{orfani} vengono dimenticate e bisognerà reinserirle. Questa cosa
+è molto inefficiente.\\
+Ci sono reti, come quella \textit{bitcoin}, in cui una transazione è valida
+sse vengono aggiunti 6 blocchi al di sopra di quello che contiene la
+transazione.\\
+Le transazioni sono \textbf{pseudo-anonime} (comodo ambito bitcoin dove,
+come per i contanti, non si sa per quali mani sono passati quei soldi e per
+cosa sono stati usati prima). Ci sono vari meccanismi per rendere anonime le
+cose, alcuni migliori (come quelli di \textit{monero} o \textit{zcash}) e
+alcuni peggiori (come quelli di \textit{bitcoin} ed \textit{ethereum}). \\
+Si ha un ramo della \textit{computer foreniscs} che si occupa di capire chi ha
+fatto certe transazioni, esplicitamente di criptovalute, sulla
+blockchain. Quindi si prova a raggiungere l'anonimato ma non sempre si riesce
+(basta un utente che paghi in \textit{bitcoin} su un sito rivelando la propria
+identità).
+
+\section{Bitcoin}
+\textbf{Bitcoin} è una criptovaluta proposta da Satoshi Nakamoto
+(probabilmente un nome falso in quanto in molti stati creare valuta, anche
+digitale, è reato)
+nel 2008. Non è nato all'improvviso ma molte idee all'interno di
+\textit{bitcoin} erano già presenti i diversi paper di crittografia precedenti
+(ad esempio la \textit{proof-of-work} era già presente all'interno della
+gestione dello spam delle mail, dove veniva imposto un certo sforzo
+computazionale per mandare una mail in modo che l'invio non fosse completamente
+``gratuito'', comportando che si possano mandare al massimo circa 2000 mail al
+giorno, al più di attrezzarsi con dei super computer). Ci sono stati tanti
+precedenti di tentativi di creazione di un sostituto digitale del denaro, con
+diverse difficoltà a causa di anonimato e \textit{double-spending}. Inoltre
+rappresentare una moneta con una sequenza di bit consente la copia illimitata di
+tale sequenza, creando copie perfettamente identiche. Una soluzione per evitare
+il \textit{double-spending} è quella di usare una \textit{trust third party
+  (TTP)}, ovvero tipicamente una banca che
+segna le transazioni monetarie, diventando però un ``collo di bottiglia'',
+venendo interpellata in tutte le transazioni. Inoltre la banca è conscia delle
+transazioni di denaro, che perdono così l'anonimato. L'idea di Satoshi Nakamoto
+e stata quella di unire vari protocolli crittografici usando al posto della
+banca un registro condiviso, una blockchain appunto, in cui vengono salvate le
+transazioni e dove vengono anche controllate, permettendo di evitare il
+\textit{double-spending}. Si usa la blockchain quindi per creare un
+\textit{trust}, sostituendo la funzione delle banche. Nel \textbf{genesis block}
+di \textit{bitcoin} c'è infatti un messaggio (nel posto del blocco dedicato alla
+``causale'') che fa riferimento al potere eccessivo delle banche.\\
+Le proprietà memorizzate nella blockchain \textit{Bitcoin} sono chiamate
+direttamente, come abbiamo già scritto, \textbf{bitcoins (\textit{BTC})} o
+frazioni di essi. Le transazioni sono parecchio complicate, con una struttura
+dati complessa, con diverse transazioni in ingresso (infatti una transazione può
+contenere transazioni), campi per generare nuovi bitcoin,0diversi \textit{script
+  di transazione} in output (scritti in un linguaggio ``particolare''). \\
+\textit{Non verrà trattata nel dettaglio la conformazione delle transazioni}.\\
+Se un utente $A$ vuole mandare un \textit{bitcoin} ad un utente $B$, usando il
+proprio client, che spesso viene chiamato \textbf{wallet}, specifica la quantità
+che vuole mandare e l'indirizzo di $B$. Ogni utente ha associato quindi un
+indirizzo, in qualità di lunga sequenza di numeri. Per ottenere l'indirizzo
+viene usata una \textbf{chiave pubblica}, usando quindi la \textit{crittografia
+  a chiave pubblica} in cui si usano algoritmi di cifratura e
+de-cifratura. Ciascuno crea con questi algoritmi una copia \textit{chiave
+  pubblica/chiave privata}, rende pubblica la \textit{chiave pubblica} e
+comunica di usare quella chiave pubblica per risalire all'indirizzo a cui farsi
+spedire i \textit{bitcoin}, infatti data la chiave pubblica all'utente che deve
+inviare i bitcoin la userà per cifrare il messaggio in modo che, tramite la
+chiave privata, solo il legittimo destinatario possa decifrare il messaggio.\\
+Dalla chiave pubblica quindi ottiene l'indirizzo al quale $A$ deve mandare i
+soldi per farli ricevere a $B$. Quindi l'indirizzo è una sorta di identità per
+$B$ che però può generarsi tutte le coppie di chiavi che vuole, combinando poi i
+vari bitcoin ricevuti ai vari indirizzi che ha generato tramite la complessa
+struttura della transazione. Questa possibilità di generare infinite chiavi però
+è solo uno \textit{pseudo-anonimato}. \\
+Bisogna però anche dimostrare che $A$ è proprietario dei \textit{bitcoins} che
+vuole inviare a $B$. Per farlo $A$ ``firma'' digitalmente la transazione tramite
+la sua \textit{chiave segreta}. I nodi della rete P2P, che sono detti
+\textbf{miners}, verificano che la firma di $A$ sia valida, verificano che non
+ci sia il \textit{double-spending} e infine validano la transazione mettendola
+in un nuovo blocco della blockchain. Se $B$, che ha ricevuto i
+\textit{bitcoins}, vuole a sua volta mandarli a $C$ avvia una transazione
+esattamente come descritto sopra, firmando con a chiave privata che era
+accoppiata alla chiave pubblica con la quale $A$ gli aveva mandato i
+\textit{bitcoins}, permettendo che la firma sia verificata e validata. Quindi
+sulla blockchain il possedimento di un \textit{bitcoin} è rappresentato dal
+fatto che si può inviare una transazione per cui quel \textit{bitcoin} può
+essere dato a qualcun altro (ovviamente si è usato \textit{bitcoin} ma si poteva
+parlare anche di più \textit{bitcoins} o, vedremo in seguito, frazioni, che
+molto piccole, di 
+esso). Non è segnato da nessuna parte quanti \textit{bitcoins} possiede un certo
+utente ma solo le catene di transazioni che sono state fatte da ciascun
+\textit{bitcoin}, vedendo quindi chi è l'ultimo proprietario. È quindi
+essenziale memorizzare le chiavi in quanto possedere equivale a conoscere una
+chiave segreta.\\ 
+La blockchain registra ogni singola transazione (e sono circa un migliaio ogni
+10 minuti, con un blocco che riesce a contenere circa un migliaio di
+transazioni e i blocchi vengono aggiunti uno ogni 10 minuti circa) e
+attualmente, in data 19 Ottobre 2020, si è arrivati a 290GB di blockchain.
+\subsection{Miners}
+Abbiamo parlato prima dei membri della rete P2P della blockchain
+\textit{Bitcoin}, detti appunto \textbf{miners}.\\
+I \textit{miners} lavorano su un \textit{pool} di transazioni proposte dai vari
+\textit{wallet}. I miners scelgono circa un migliaio di queste transazioni alla
+volta e cercano di formare il nuovo blocco, validando le transazioni. Effettuano
+quindi i calcoli computazionali del \textit{proof-of-work} per cui dimostrano di
+aver fatto un certo sforzo per avere il \textbf{diritto} di essere quelli che
+aggiungono il prossimo blocco alla catena. Avendo un'aggiunta ogni 10 minuti si
+ha una fortissima concorrenza tra i \textit{miners}. Inoltre il carico di lavoro
+richiesto diventa sempre più difficile in quanto, grazie alla \textbf{legge
+  di Moore}, diventa sempre più facile risolvere il ``puzzle'' crittografico,
+per il \textit{proof-of-work,} che
+serve a risolvere il nuovo blocco e quindi il ``puzzle'' viene reso sempre più
+difficile (ovvero se un blocco arriva in meno di 10 minuti il blocco successivo
+sarà più difficile da produrre, in modo che nuovamente servano almeno 10 minuti,
+anche se equivalentemente verrà reso più facile se ci vogliono troppi minuti in
+più di 10, avendo così \textbf{autoregolazione}). Bisogna quindi parlare di
+questo ``problema'' crittografico da risolvere e per farlo bisogna un attimo
+specificare meglio le \textit{funzioni di hash}.
+\begin{definizione}
+  Le \textbf{funzioni di hash} sono funzioni crittografiche che prendono in
+  input una sequenza di bit, in teoria arbitrariamente lunga, anche se ogni
+  funzione ha un limite teorico (ma praticamente irraggiungibile), e produce una
+  sequenza che vorrebbe essere univoca (ma che non lo è) di poche centinaia di
+  bit. Per esempio \textit{SHA1} produce in output una sequenza di 160 bit,
+  \textit{MD5} di 128 bit, \textit{SHA256} di 256 bit (una di
+  quelle usate in \textit{Bitcoin}), \textit{RIPEMD} di 160 bit (anch'essa usata
+  in \textbit{Bitcoin}) etc$\ldots$\\
+  Le funzioni di hash devono essere sufficientemente facili da calcolare a
+  partire da un certo input
+\end{definizione}
+L'idea è quindi è che prendo un file e, usando ad esempio SHA256, mi esce una
+sequenza di 256 bit, univoca per quel file. Purtroppo il dominio della funzione
+(ovvero i bit del file)
+è molto più grande del codominio (ovvero tutte le possibili sequenze di 256 bit)
+e quindi non si può avere davvero una \textbf{funzione iniettiva} e quindi si
+avranno sempre due sequenze in input che producono lo stesso output e quando
+questo avviene si ha una \textbf{collisione}. Le collisioni sono inevitabili ma
+le funzioni di hash sono fatte in modo tale che sia estremamente difficile
+trovare due input diversi che producano lo stesso output, motivo per cui si può
+anche pensare che le hash siano univoche. Si ha anche che è estremamente
+difficile cercare esplicitamente un input che abbai lo stesso hash di un altro,
+rendendo quindi molto difficile sostituire un input dato con un altro ottenendo
+comunque lo stesso output, imbrogliando. Quest'ultimo problema è più difficile
+di quello della \textit{collisione} (dove ho, nella pratica, un grado di liberà
+in più avendo due input).\\
+Si hanno altre due proprietà:
+\begin{enumerate}
+  \item dato un hash è estremamente difficile trovare un input, per questo si
+  dice che la funzione di hash è \textit{one-way} (essendo molto facile da
+  calcolare ma difficilissimo da invertire)
+  \item anche se cambio un solo bit dell'input ottengo un output completamente
+  diverso a quello ottenuto prima del cambiamento, rendendo impossibile capire
+  la regola di calcolo o anche solo fare indagini statistiche. Infatti hash
+  significa anche ``polpettone'', cosa che rappresenta bene l'azione di
+  spezzettamento, calcolo e rimescolamento (con anche valori semi casuali)
+  dell'input fatte dalle funzioni per calcolare l'output  
+\end{enumerate}
+Quindi nel \textit{proof-of-work}, per dimostrare di aver svolto una certa
+quantità di lavoro viene preso il dato di cui devo calcolare l'hash, gli viene
+aggiunta una quantità casuale detta \textbf{nonce (si pronuncia ''nons'')} e
+calcolo l'hash del dato concatenato al \textit{nonce} e vado a vedere se il
+risultato ha un certo numero prefissato di bit più significativi uguali a 0,
+riduco quindi il codominio, ovvero il numero di possibili output validi, dicendo
+che devono cominciare con un certo numero di zeri. Aumentando il numero di zeri
+riduco la probabilità di ottenere un risultato valido scegliendo un
+\textit{nonce} a caso (e diminuendo ottengo l'opposto). Variando gli zeri
+ottengo quanto detto sopra in merito al variare del carico computazionale per
+restare sui 10 minuti.\\
+Quindi, ricapitolando:
+\begin{itemize}
+  \item il miner sceglie un migliaio di transazioni più o meno a caso
+  \item il miner spara a caso un valore del \textit{nonce} 
+  \item calcola l'hash di tutto il blocco:
+  \begin{itemize}
+    \item  se ottiene un valore con un numero di bit più significativi uguali a
+    zero accettabile, prima degli altri, manda il blocco nella rete P2P per far
+    validare il nuovo blocco e, se il controllo viene superato, il blocco viene
+    accettato e messo in cima alla blockchain (quindi ogni nodo della P2P lo
+    attacca in cima alla propria copia)
+    \item se non ottiene tale valore spara a caso un altro \textit{nonce} e ci
+    riprova
+  \end{itemize}
+\end{itemize}
+Se mentre si sta lavorando un nuovo blocco viene validato (anche dal nodo che
+stava lavorando al nuovo blocco) un altro blocco bisogna ``buttare'' quanto
+costruito anche se non tutto, butto infatti le transazioni che già compaiono nel
+nuovo blocco convalidato. Inoltre cambio l'hash del nuovo blocco a cui sto
+lavorando mettendo quello di quello appena convalidato (per il discorso spiegato
+all'inizio del capitolo).\\
+L'importanza di essere colui che crea il blocco è data dal fatto che l'unico
+momento in cui si possono creare \textit{bitcoins} è durante la creazione del
+nuovo blocco, chi aggiunge il blocco ha dei nuovi \textit{bitcoins} che vengono
+creati insieme al blocco.\\
+Il mining può essere fatto da macchine sempre più performanti (all'inizio
+bastava un portatile, poi si è passati ad usare i pc di interi uffici di notte
+(o qualche furbo anche, illegalmente, dell'università), poi si è passati a
+cluster ``home-made'' tramite hardware spesso dedicato solo al mining, mentre
+ora servono cluster estremamente potenti ma che comunque facciano ritornare le
+spese). Si hanno anche soluzioni di sub-affitto di hardware o di gente che
+condivide l'hardware per poi dividere i guadagni. A causa di queste
+\textit{farm} professionali enormi, spesso collocate in paesi freddi per il
+risparmio del raffreddamento e dove la corrente costa meno (ovvero in zone
+disabitate di paesi spesso poveri e poco democratici), rischia di danneggiare
+l'idea di decentralizzazione della blockchain. \textbf{Bitcoin} ad un certo
+punto era in mano di pochissime persone (cinesi) con farm sparse nei monti
+asiatici. Si rischiano anche manipolazioni truffaldine del mercato, ad esempio
+proposte di \textit{trading coi bitcoins} (cose comunque vietate nei mercati
+regolamentati ma non su quello delle criptovalute, non essendo regolamentato, e
+quindi se il broker di imbroglia sei fregato).\\
+Un altro problema dell'\textit{accentramento} è il cosiddetto \textbf{attacco
+  del 51\%}. Dato che ogni miner deve vincere contro tutti gli altri per poter
+essere quello che ha diritto di mettere il nuovo blocco allora se uno riesce a
+possedere il 51\% dell potenza di calcolo dei miners, controllando il 51\% dei
+nodi della rete P2P, praticamente vince sempre, validando sempre le transazioni,
+anche se non valide (ovviamente almeno il 51\%).\\
+``Tutti contro tutti'' è anche molto inefficiente dal punto di vista energetico
+(la rete P2P che gestisce \textit{bitcoin} consuma più di tutta l'Argentina).
+Per questo si cercano sempre nuovi algoritmi/alternative per il
+\textit{proof-of-work}, come ad esempio \textit{proof-of-stake}, dove stake sta
+per ``quantità di soldi'', ovvero l'idea in cui solo pochi nodi della P2P fanno
+il mining. Tali nodi vengono scelti in base alla quantità di soldi che ogni nodo
+ha deciso di rendere disponibili agli altri (su un conto speciale). Quindi chi
+mette più soldi ha più possibilità di essere scelto.\\
+Al massimo si ha che si potranno costruire 21 milioni di \textit{bitcoins} e
+questi sono sempre più difficili da creare (è quindi paragonabile all'oro da un
+certo punto di vista).\\
+Torniamo a parlare delle transazioni.\\
+Nel caso in cui $A$ voglia dare a $B$ una certa porzione di \textit{bitcoins}
+deve creare due transazioni:
+\begin{itemize}
+  \item una in cui dal totale produce la frazione complementare a quella che
+  deve dare a $B$, questa transazione è verso se stessi
+  stessi
+  \item una in cui da a $B$ la frazione voluta
+\end{itemize}
+In poche parole se $A$ ha 10 \textit{bitcoins} deve fare una transazione a se
+stessa di 9 e una di 1 a $B$.\\
+Questo può essere fatto anche avendo più indirizzi di partenza in cui si hanno i
+\textit{bitcoins}, grazie al fatto che una transazione ha più input, e verso più
+destinatari, contemporaneamente, in quanto la transazione ammette anche più
+output nella sua struttura. \textbf{La somma totale degli input non deve essere
+  minore a quella in output} (infatti la transazione non verrà validata). Può
+comunque essere maggiore in quanto la differenza, detta \textit{fee}, può essere
+un compenso per il miner per far scegliere quella transazione da validare (che
+quindi non sceglie proprio a caso il migliaio di transazioni in quanto ordina le
+transazioni in base alle \textit{fee}). Queste \textit{fee} saranno l'unica
+fonte di guadagno per i miner quando non si potrà più produrre \textit{bitcoins}
+per il limite visto precedentemente (in quel momento le \textit{fee}
+aumenteranno di valore probabilmente).\\
+Due blocchi possono essere aggiunti contemporaneamente perché magari due miner
+in luoghi distanti propagano insieme l'avviso di aver trovato un nuovo blocco
+valido. Può succedere quindi che vengano aggiunti entrambi anche se uno è
+destinato a diventare \textit{orfano}.\\
+Proporre una transazione con \textit{fee} pari a 0 può portare al fatto che
+nessun miner la prenda in carico, comportando la creazione di
+\textit{transazioni zombie} (che sono parecchie).\\
+Un altro problema di \textit{bitcoin} è che per essere sicuri che una
+transazione si andata a buon fine devo aspettare 6 blocchi, quindi un'ora di
+tempo, e questo limita i casi d'uso della moneta (di certo non va bene per
+prendere il caffè). Il numero di transazioni supportate è comunque minimo
+rispetto a quelle che si possono effettuare con la moneta fisica.
+\section{Ethereum}
+Il futuro delle blockchains non ha potenzialmente limiti. Ci sono molte
+applicazioni e molte varianti, una di queste è \textbf{Ethereum}.\\
+\textit{Ethereum} è un altro tipo di blockchain in cui si pone l'attenzione non
+tanto sulle transazioni quanto sulle \textbf{computazioni}. Si ha un modello
+diverso di blockchain in quanto vengono memorizzate i cosiddetti
+\textit{ethereum account}. Ogni utente che si registra quindi viene quindi
+associato ad un account con una certa quantità di criptovaluta, che in questo
+caso è chiamata \textbf{ether (\textit{ETH})}. Le transazioni avvengono più o
+meno come in un conto in banca, togliendo \textit{ether} ad uno e dandoli
+all'altro mentre la validazione delle transazioni avviene quasi come in
+\textit{bitcoin} anche se si sta cercando di passare alla
+\textit{proof-of-stake}. La novità di \textit{ethereum} è la possibilità di
+scrivere/programmare i cosiddetti \textbf{smart contract}, ovvero il
+corrispettivo dei contratti tra persone, dove, per esempio, un utente, per un
+tot guadagno al mese, concede l'uso di una sua proprietà ad un altro
+utente. Si usa un linguaggio di programmazione chiamato \textbf{Solidity},
+simile ad un linguaggio OOP dove al posto degli oggetti si hanno i
+\textbf{contratti} (ma si hanno comunque \textup{struct, function} etc$\ldots$).
+\begin{listing}
+  \begin{minted}{solidity}
+    pragma solidity >=0.4.16 <0.8.0;
+
+    contract SimpleStorage {
+      uint storedData;
+
+      function set(uint x) public {
+        storedData = x;
+      }
+
+      function get() public view returns (uint) {
+        return storedData;
+      }
+    }
+  \end{minted}
+  \caption{Esempio di contratto in Solidity tratto dalla documentazione di
+    Solidity \url{https://solidity.readthedocs.io/en/v0.7.4/}}
+\end{listing}
+I contratti scritti con Solidity vengono compilati in un bytecode che viene
+memorizzato sulla blockchain di ethereum (e quindi una copia viene salvata su
+tutti i nodi della rete P2P). Si possono fare transazioni che trasferiscono
+soldi oppure posso fare transazioni in cui si invocano funzioni poste
+all'interno di un certo contratto, in questo caso un miner raccoglierà la
+richiesta ed eseguirà sulla sua macchina il codice del contratto. Ogni
+esecuzione di ogni singola operazione del bytecode (che viene eseguito sulla
+\textit{ethereum virtual machine}) costa una certa quantità di \textbf{gas} e
+quindi bisogna dare una certa quantità di soldi, rappresentati il costo del
+\textbf{gas}, per far eseguire il contratto e, 
+qualora non siano sufficienti, viene sollevata l'eccezione \texttt{outOfGas}, il
+contratto non va a buon fine e i soldi finora spesi vanno persi.\\
+Gli \textit{smart contract} sono codice di cui chiunque può vedere il bytecode e
+sono una sorta di codice lato server e posso quindi fare dei client che
+gestiscono le parti ``delicate'' dei trasferimenti di soldi facendo chiamate ai
+contratti, che sono elaborati dai miner. La scrittura dei contratti è rischiosa
+quindi si hanno quindi delle comunità (come \textit{OpenZeppelin}) che
+controllano i contratti stessi e forniscono delle linee guida e delle librerie
+da cui attingere, ma nel momento in cui vengono modificati non sono più testati,
+ovviamente. Un esempio è stato di una startup che ha lasciato una
+moltiplicazione non protetta da overflow modificando un contratto, preso da
+\textit{Openzeppelin}, per permettere pagamenti simultanei (banalmente se si
+doveva dare 10 ETH a due utenti si faceva 10$\cdot$2 e si controllava che ci
+fossero effettivamente 20 ETH nel conto prima di effettuare il doppio
+pagamento). Essendo il bytecode 
+pubblico se ne sono accorti e qualcuno si è fatto un pagamento a due suoi altri
+account dando una cifra esorbitante, in modo da scatenare l'overflow, il
+prodotto per 2 dava 0 a causa dell'overflow e quindi si autorizzava la
+transazione. Questa cosa non sarebbe stata possibile su \textit{bitcoin} ma la
+diversa implementazione della blockchain di ethereum rendevano possibile la cosa
+(e irriconoscibile al miner). Creare quindi \textit{smart contract} è
+estremamente difficile, dovendo essere estremamente sicuri. Inoltre una volta
+che il contratto è sulla blockchain ci resta, anche se il creatore può chiedere
+al contratto stesso di autodistruggersi (nel senso che vengono rese invalide le
+chiamate alle funzioni di quel contratto).\\
+Ci sono vari strumenti per scrivere contratti, l'ide \textit{Remix} e
+\textit{MetaMask}, che permette di avere un \textbf{wallet} su ethereum e di
+collegarsi sia alla rete principale che a 
+diverse reti, anche locali sul proprio computer, per testing. Tra le reti di
+testing principali abbiamo \textit{Rapsten} che cerca di emulare al meglio
+possibile quella principale (dove gli ETH che trasferisco o pago come
+\textbf{gas} sono finti). In altre reti di test si hanno
+altri algoritmi di consenso, come per esempio, nel caso della rete
+\textit{Rinkeby} si ha il \textbf{proof-of-autority} (dove chi ha diritto a
+scrivere una certa informazione lo può fare senza il consenso della rete P2P).\\
+L'iter normale di sviluppo di contratti non prevede in primis l'uso delle reti
+di test in quanto servirebbe troppo tempo ma si usano strumenti come
+\textit{Ganache} o \textit{Truffle} che sono strumenti di sviluppo in locale che
+simulano una rete in locale dove si può testare senza \textbf{gas} in modo
+veloce. Solo dopo si passa alla rete di test e poi alla \textit{main net}, la
+rete principale.\\
+Esiste anche una libreria chiamata \textit{web3}, scritta in \textit{js}, per
+permettere alle webapp di connettersi a MetaMask.\\
+\section{Altre blockchains}
+Si hanno comunque davvero tante diverse blockchains.\\
+Si ha, ad esempio, \textit{Quorum}, una variante di \textit{Ethereum} in cui si
+possono usare altri algoritmi di consenso e in cui si possono anche creare dei
+canali di comunicazione privati tra i nodi della rete P2P.\\
+Si hanno quindi diversi tipi di blockchain e in particolare ci sono le
+blockchain di tipo \textbf{permissioned} e non solo quelle di tipo
+\textbf{permissionless} o \textbf{pubbliche}.\\
+per blockchain di tipo \textit{permissioned} si intende che i nodi della rete
+P2P, che tipicamente sono anche quelli che scrivono informazioni e quindi
+avviare le transazioni, si conoscono ma eventualmente non si fidano, formando
+così un \textbf{consorzio} in cui i partecipanti sono potenzialmente in
+conflitto (dove magari il fallimento di uno è il successo dell'altro). Se le
+dichiarazione pubbliche siano vere o meno viene deciso con un servizio di
+\textit{audit} esterno che valuta le dichiarazioni pubbliche. Non c'è quindi ne
+mining ne \textit{proof-of-work}, magari nemmeno una criptovaluta. La blockchain
+diventa quindi un punto in cui implementare politiche di trust tra i
+partecipanti, obbligandosi a vicenda a dichiarare in modo pubblico (e se
+imbrogli esci dal consorzio perdendone i vantaggi), fattore che
+viene aiutato dal fatto che è estremamente difficile alterare la blockchain
+(dovendo rompere una catena e rifarla, imbrogliando sugli hash etc$\ldots$)
+rendendo le dichiarazioni praticamente eterne.\\
+Si hanno quindi:
+\begin{itemize}
+  \item \textbf{permissionless blockchain}, come \textit{bitcoin} o
+  \textit{ethereum}, dove chiunque può scaricarsi il software e diventare miner
+  \item \textbf{permissioned blockchain pubblica}, dove possono vedere tutti,
+  come \textit{Quorum}, \textit{EOS} (con una virtual machine basata su
+  \textit{webassembly} e \textit{smart contract} scritti in \textit{C++}),
+  \textit{Hyperledger} (sviluppata da IBM e ospitata dalla \textit{Linux
+    Foundation}, essendo completamente \textit{Open Source}, di tipo modulare,
+  molto complessa ma efficiente, nata 
+  per il business con algoritmi di consenso basato sul \textbf{problema dei
+    generali bizantini} e che scrive sulla blockchain solo se necessario
+  etc$\ldots$) etc$\ldots$ Con queste blockchain si perde il discorso della
+  decentralizzazione, non permettendo che partecipi chiunque ma si ha una
+  \textit{certificate authority} che stabiliscono se uno ha il diritto di
+  scrivere o leggere sula blockchain (e si hanno spesso più amministratori che
+  si controllano a vicenda atti a stabilire chi può fare cosa)  
+  \item \textbf{permissioned blockchain privata}, dove possono vedere solo
+  quelli che scrivono
+\end{itemize}
+Grandi aziende, come IBM, Microsoft, SAP etc$\ldots$ che stanno concentrando
+sullo sviluppo di blockchain ma anche piccole applicazioni, come
+\textit{CryptoKitties}, basata su Ethereum, che permette di collezionare
+e crescere ``gattini digitali'' collezzionabili.\\
+Bisognerebbe inoltre fare un discorso sul rapporto che si ha tra \textit{smart
+  contract} e dispositivi fisici, nonché sull'interpretazione legale degli
+stessi (e gli avvocati dicono che non sono ne legali ne ``smart'' per i problemi
+detti sopra).
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.33]{img/blockchain.png}
+  \caption{Diagramma dei casi di scelta di una blockchain}
+  \label{fig:bcd}
+\end{figure}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -1995,9 +2523,19 @@ Per realizzare una replica posso fare in diversi modi:
 % LocalWords:  records failure broadcast warm restart undo presumed xopen TX XA
 % LocalWords:  interface IBM Microsoft technologies realtime based snapshot and
 % LocalWords:  transactional merge over loss disaster mission critical load OOP
-% LocalWords:  kilometri consolidation distribution balancing offline entry
-% LocalWords:  reporting warehousing commerce social testing compliant many
+% LocalWords:  kilometri consolidation distribution balancing offline entry BTC
+% LocalWords:  reporting warehousing commerce social testing compliant many GB
 % LocalWords:  source directional resolution detention Tier staging event apply
-% LocalWords:  publish publisher distributor subscriber intra inter paradigm
-% LocalWords:  relational mismatch Blockchain mapper Delete framework group
-% LocalWords:  multicore
+% LocalWords:  publish publisher distributor subscriber intra inter paradigm js
+% LocalWords:  relational mismatch Blockchain mapper Delete framework group SHA
+% LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis
+% LocalWords:  block hash torrent double spanning Leporati ethereum monero spam
+% LocalWords:  zcash foreniscs criptovaluta Satoshi Nakamoto paper proof part
+% LocalWords:  spending bitcoins wallet miners Moore RIPEMD iniettiva one way
+% LocalWords:  nonce miner mining farm stake fee blockchains ether ETH smart
+% LocalWords:  contract Solidity struct function bytecode virtual machine remix
+% LocalWords:  outOfGas OpenZeppelin startup overflow metamask l'ide Rapsten
+% LocalWords:  Rinkeby autority Truffle Ganache main MetaMask webapp GoQuorum
+% LocalWords:  permission permissionless third TTP permissioned audit Chaos EOS
+% LocalWords:  webassembly Hyperledger authority Foundation SAP CryptoKitties
+% LocalWords:  collezzionabili

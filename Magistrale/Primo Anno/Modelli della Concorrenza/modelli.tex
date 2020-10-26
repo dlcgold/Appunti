@@ -83,7 +83,7 @@
     inner xsep=2pt
   }
 } 
-\usetikzlibrary{automata,positioning}
+\usetikzlibrary{automata,positioning, calc}
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
 \definecolor{purple}{rgb}{0.65, 0.12, 0.82}
@@ -1771,14 +1771,285 @@ di un processo non va ad inficiare l'esecuzione complessiva, senza incorrere in
 Vedremo quindi:
 \begin{itemize}
   \item il calcolo ``puro'' di sistemi comunicanti CCS, definendone la semantica
-  attraverso \textbf{Labeled Transition System,\textit{LTS}} (\textit{sistemi di
-    transizione etichettati}), (avendo come nodi i processi e archi etichettati
-  dalle azioni). Useremo le operazioni ``+'', ``$\cdot$" e la ricorsione, che 
-  verranno definite tramite LTS
+  attraverso \textbf{Labeled Transition System, (\textit{LTS})} (\textit{sistemi
+    di transizione etichettati}), (avendo come nodi i processi e archi
+  etichettati dalle azioni). Useremo le operazioni ``+'', ``$\cdot$'' e la
+  ricorsione, che verranno definite tramite LTS
   \item l'equivalenza all'osservazione e la \textbf{bisimulazione}. Vedremo
   anche una tecnica di verifica della \textit{bisimulazione}, tramite la
   \textbf{teoria dei giochi}
 \end{itemize}
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+    \node[state] (q_0) {$s$};
+    \node[state] (q_1) [right=of q_0] {$s'$};
+    \path[->]
+    (q_0) edge  node {a} (q_1);
+  \end{tikzpicture}
+  \caption{Esempio semplice di LTS}
+  \label{fig:l}
+\end{figure}
+\section{LTS}
+\begin{shaded}
+  Presa una relazione binaria $R$ su $X$, ovvero $R\subseteq X\times X$.\\
+  Si ha che:
+  \begin{itemize}
+    \item una relazione è \textbf{riflessiva} sse $\forall x\in X$ ho che
+    $(x,x)\in R$ o, scritto diversamente, $xRx$ ovvero ogni elemento è in
+    relazione con se stesso 
+    \item una relazione è \textbf{simmetrica} sse ho $(x,y)\in R$ allora
+    $(y,x)\in R$, $\forall\,x,y\in X$
+    \item una relazione è \textbf{transitiva} se ho $(x,y)\in R\land (y,z)\in R$
+    allora ho $(x,z)\in R$
+  \end{itemize}
+  Se una relazione $R$ è simmetrica, riflessiva e transitiva allora è una
+  \textbf{relazione di equivalenza} e quindi posso ripartire $X$ in classi di
+  equivalenza:
+  \[[x]=\{y\in X|\,\,(x,y)\in R\}\]
+  Date due classi di equivalenza $[x_1]$ e $[x_2]$ si ha che o sono uguali
+  (quindi tutti gli elementi di una sono nell'altra) oppure la loro intersezione
+  è vuota.\\
+  Inoltre si ha che:
+  \[U_{x\in X}[x]=X\]
+  Si è quindi diviso $X$ in sottoinsiemi disgiunti che coprono tutto $X$.\\
+  Siano $R$, $R'$ e $R''$ relazioni binarie su $X$. Si ha che:\\
+  $R'$ è la \textbf{chiusura riflessiva/simmetrica/transitiva} di
+  $R$ sse: 
+  \begin{itemize}
+    \item $R'\subseteq R$
+    \item $R'$ è riflessiva/simmetrica/transitiva
+    \item $R'$ è la più piccola relazione che soddisfa i primi due puntu e
+    quindi:
+    \[\forall R''\mbox{ se }R\subseteq R''\land
+      R''\mbox{riflessiva/simmetrica/transitiva}\]
+    \[\mbox{allora } R'\subseteq R''\]
+  \end{itemize}
+\end{shaded}
+I \textbf{Labeled Transition System (\textit{LTS})} sono molto usati per
+rappresentare sistemi concorrenti. Questo modello ha origine dal modello degli
+automi a stati finiti, che però sono usati come riconoscitori di linguaggi.\\
+Negli LTS non si ha l'obbligo di avere un insieme finito di stati.
+\begin{definizione}
+  Definiamo un LTS come la quadrupla:
+  \[(S, Act, T, s_0)\]
+  dove:
+  \begin{itemize}
+    \item $S$ è un insieme, anche infinito, di stati
+    \item $Act$ è un'insieme di nomi di \textit{azioni}
+    \item $T=\{(s,a,s')\}$, con $s,s'\in S$ e $a\in Act$ oppure $T\subseteq
+    S\times Act\times A$, è un insieme di triple rappresentanti le
+    transizioni. Come scrittura si ha anche $(s,a,s')\in T$ oppure
+    $s\stackrel{a}{\rightarrow} s'$ e quindi ho un arco etichettato con $a$ tra
+    due nodi etichettati con $s$ e $s'$, come in figura \ref{fig:l}
+    \item $s_0$ stato iniziale
+  \end{itemize}
+  La transizione $s\stackrel{a}{\rightarrow} s'$ può essere estesa a $w\in
+  Act^*$ avendo più azioni sse:
+  \begin{itemize}
+    \item se $w=\varepsilon$ allora $s\equiv s'$
+    \item se $w=x\cdot x,\,\,a\in Act,\,\,x\in Act^*$ sse:
+    \[s\stackrel{a}{\rightarrow} s'' \mbox{ e } s''\stackrel{x}{\rightarrow}
+      s'\]
+  \end{itemize}
+  Ho che $s\rightarrow s'$ sse $\exists a \in Act \mbox{ t.c. }
+  s\stackrel{a}{\rightarrow} s'$.\\
+  Quindi ho:
+  \[\rightarrow =\cup_{a\in Act}\stackrel{a}{\rightarrow}\]
+  Ho che $s\stackrel{*}{\rightarrow} s'$ sse $\exists w\in Act^*\mbox{ t.c. }
+  s\stackrel{w}{\rightarrow} s'$. Si ha che:
+  \[\stackrel{*}{\rightarrow}=\cup_{w\in Act^*}\stackrel{w}{\rightarrow}\]
+  \[\stackrel{*}{\rightarrow}\subseteq S\times S\]
+  La relazione $\stackrel{*}{\rightarrow}$ è la chiusura riflessiva e transitiva
+  della relazione $\rightarrow$ (tale relazione non è simmetrica), avendo sempre
+  $s\stackrel{*}{\rightarrow}s$ ed essendo garantita la transitività.
+\end{definizione}
+\section{CCS}
+\begin{definizione}
+  Per definire il \textbf{Calculus of Communicating Systems (\textit{CCS})}
+  ``puro'' (astraendo l'aspetto delle strutture dati etc$\ldots$) dobbiamo
+  definire che abbiamo: 
+  \begin{itemize}
+    \item $K$, ovvero un insieme di nomi di processi (\textit{buffer,
+      sender,$ldots$}) che possono anche essere simboli di un alfabeto
+    \item $A$, ovvero un insieme di nomi di azioni, che sono o azioni di
+    sincronizzazione con l'ambiente o le componenti del sistema (anche interne
+    al singolo componente)
+    \item $\overline{A}$, ovvero l'insieme di nomi delle \textit{coazioni}
+    contenute in $A$, $\forall\, a\in A\,\,\,\exists\,\, \overline{a}\in
+    \overline{A}$, quindi:
+    \[\overline{A}=\{\overline{A}|\,a\in A\}\]
+    ovviamente si ha che:
+    \[\overline{\overline{a}}=a\]
+    \item $Act=A\cup \overline{A}\cup \{\tau\}$ dove $\tau\not\in A$ corrisponde
+    all'azione di sincronizzazione tra $a$ e $\overline{a}$, ovvero la
+    sincronizzazione è avvenuta. Le prime due sono \textit{azioni osservabili} e
+    si indica con:
+    \[\mathcal{L}=A\cup \overline{A}\]
+    mentre $\tau$ non è osservabile.\\
+    Ricordando che osservare un'azione significa poter interagire con essa.
+  \end{itemize}
+\end{definizione}
+\begin{esempio}
+  Vediamo un esempio \textbf{NON} chiarificatore.\\
+  Prendiamo un sistema $S$, scuola, che eroga una lezione $\overline{lez}$ e poi
+  continua ciclicamente ad erogare lezioni:
+  \[S=\overline{lez}\cdot S\]
+  Lo studente $ST$ segue la lezione e torna a studiare:
+  \[ST=lez\cdot ST\] 
+  se $S$ e $ST$ si sincronizzano ($S|ST$) lo studente osserva la lezione e il
+  risultato non è più ossrvabile, essendo $\tau$.
+\end{esempio}
+\begin{definizione}
+  I processi CCS sono di fatto operazioni CCS e un sistema CCS è definito da una
+  collezione di processi $p\in K$ e si avranno:
+  \[p=\mbox{espressione CCS}\]
+  e si avrà solo un'equazione $\forall\,p\in K$
+\end{definizione}
+
+Definiamo meglio i processi CCS e, ad ogni processo, l'LTS assegnato, che sarà
+del tipo:
+\[(processi, Act, R, p_0)\]
+e, tramite le regole di inferenza (con premesse, eventualmente con condizioni
+e con conclusioni).\\
+Dare un significato tramite LTS, regole di inferenza e sintassi è detto
+\textbf{semantica operazionale strutturale}.\\
+Un processo CCS può essere:
+\begin{itemize}
+  \item \textit{Nil} o $0$ che ha un solo stato senza transizioni
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$Nil$};
+    \end{tikzpicture}
+  \end{center}
+  \item \textit{prefisso}, in cui si ha $\alpha\cdot p,\,\alpha\in Act,\,p\in
+  processi$, con la regola di inferenza:
+  \[\frac{}{\alpha\cdot p\stackrel{\alpha}{\rightarrow}p}\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$\alpha\cdot p$};
+      \node[state] (q_1) [right=of q_0] {$p$};
+      \path[->]
+      (q_0) edge  node {$\alpha$} (q_1);
+    \end{tikzpicture}
+  \end{center}
+  \item \textit{Somma}, $p_1+p_2,\,\,p_1,p_2\in processi$, con la regola di
+  inferenza (il $+$ è la ``scelta'', come nella regex), avendo $\alpha,\beta\in
+  Act$ e $p_1',p_2'\in processi$:
+  \[\frac{p_1\stackrel{\alpha}{\rightarrow}p_1'}{p_1+p_2
+      \stackrel{\alpha}{\rightarrow}p_1'}\] 
+  \[oppure\]
+   \[\frac{p_2\stackrel{\beta}{\rightarrow}p_2'}{p_1+p_2
+       \stackrel{\beta}{\rightarrow}p_2'}\]
+   \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$p_1+p_2$};
+      \node[state] (q_1) [below right=of q_0] {$p_1'$};
+      \node[state] (q_2) [below left=of q_0] {$p_2'$};
+      \path[->]
+      (q_0) edge  node {$\alpha$} (q_1)
+      (q_0) edge  node [above left] {$\beta$} (q_2);
+    \end{tikzpicture}
+  \end{center}
+  \item posso avere $\sum_{i\in I}p_i$ avendo multiple somme di processi:
+  \[\frac{p_j\stackrel{\alpha}{\rightarrow}p_j'}{\sum_{i\in
+        I}p_i\stackrel{\alpha}{\rightarrow}p_j0},\,j\in J\]
+  e quindi se $I=\emptyset$ avrò che $\sum_{i\in I}p_i=Nil$.\\
+  Posso avere non determinismo avendo $p_1=a\cdot p_1'$ e $p_2=a\cdot p_2'$,
+  avendo:
+   \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$p_1+p_2$};
+      \node[state] (q_1) [below right=of q_0] {$p_1'$};
+      \node[state] (q_2) [below left=of q_0] {$p_2'$};
+      \path[->]
+      (q_0) edge  node {$\alpha$} (q_1)
+      (q_0) edge  node[above left] {$\alpha$} (q_2);
+    \end{tikzpicture}
+  \end{center}
+  \begin{esempio}
+    Vediamo un altro esempio.
+    Dati:
+    \begin{itemize}
+      \item $p_1=\alpha\cdot p_1'$
+      \item $p_2=\beta\cdot p_2'$
+      \item $p_3=\gamma\cdot p_3'$
+    \end{itemize}
+    \[p_1+p_2+p_3=\alpha\cdot p_1'+\beta\cdot p_2'+\gamma\cdot p_3'\]
+    avendo:
+    \[\frac{p_1\stackrel{\alpha}{\rightarrow}p_1'}{p_1+p_2+p_3
+        \stackrel{\alpha}{\rightarrow}p_1'}\]
+    \[\frac{p_2\stackrel{\alpha}{\rightarrow}p_2'}{p_1+p_2+p_3
+        \stackrel{\beta}{\rightarrow}p_2'}\]
+    \[\frac{p_3\stackrel{\gamma}{\rightarrow}p_3'}{p_1+p_2+p_3
+        \stackrel{\gamma}{\rightarrow}p_3'}\]
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto]
+        \node[state] (q_0) {$p_1+p_2+p_3$};
+        \node[state] (q_1) [below right=of q_0] {$p_1'$};
+        \node[state] (q_3) [below left=of q_0] {$p_3'$};
+        \node[state] (q_2) [below =of q_0] {$p_2'$};
+        \path[->]
+        (q_0) edge  node {$\alpha$} (q_1)
+        (q_0) edge  node[above left]{$\gamma$} (q_3)
+        (q_0) edge  node[above left] {$\beta$} (q_2);
+      \end{tikzpicture}
+    \end{center}
+  \end{esempio}
+  \item \textbf{composizione parallela}: $p_1|p_2$, avendo:
+  \[\frac{p_1\stackrel{\alpha}{\rightarrow}p_1'}{p_1|p_2
+      \stackrel{\alpha}{\rightarrow}p_1'|p_2}\]
+  \[oppure\]
+  \[\frac{p_2\stackrel{\alpha}{\rightarrow}p_2'}{p_1|p_2
+      \stackrel{\alpha}{\rightarrow}p_1|p_2'}\]
+  \[oppure\]
+  \[\frac{p_1\stackrel{\alpha}{\rightarrow}p_1'\land p_2
+      \stackrel{\overline{\alpha}}{\rightarrow}p_2'}{p_1|p_2
+      \stackrel{\tau}{\rightarrow}p_1'|p_2'}\]
+  e quindi, in quest'ultimo caso, non potremo più avere altre
+  sincronizzazioni. \\
+  Quindi avendo avendo $p_1=a\cdot p_1'$ e $p_2=a\cdot p_2'$ ho che $p_1|p_2$
+  corrisponde a $a\cdot p_1'|\overline{a}\cdot p_2'$, e, l'LTS corrisponde a:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto]
+      \node[state] (q_0) {$a\cdot p_1'|\overline{a}\cdot p_2'$};
+      \node[state] (q_1) [below right=of q_0] {$\overline{a}\cdot p_1'|p_2'$};
+      \node[state] (q_3) [below left=of q_0] {$p_1'|\overline{a}\cdot p_2'$};
+      \node[state] (q_2) [below right =of q_3] {$p_1'|p_2'$};
+      \path[->]
+      (q_0) edge  node {$\overline{\alpha}$} (q_1)
+      (q_1) edge  node {$\alpha$} (q_2)
+      (q_3) edge  node [below left]{$\overline{\alpha}$} (q_2)
+      (q_0) edge  node [above left]{$\alpha$} (q_3)
+      (q_0) edge  node [above left] {$\tau$} (q_2);
+    \end{tikzpicture}
+  \end{center}
+  \item \textbf{restrizione}, sia $L\subseteq A$. Si ha che:
+  \[P_{\backslash L}\]
+  significa che il processo $P$ non può interagire con il suo ambiente con
+  azioni in $L\cup \overline{L}$ ma le azioni in $L\cup \overline{L}$ sono
+  locali a $P$. Avendo quindi:
+  \[\frac{p\stackrel{\alpha}{\rightarrow}p'}{P_{\backslash L}
+      \stackrel{\alpha}{\rightarrow}p'_{\backslash L}}
+    ,\,\alpha,\overline{\alpha}\in L,\,\,L\subseteq A\]
+  \item \textbf{rietichettatura}, ovvero il cambiamento di nome ad una
+  componente, ad una certa azione, per poter riusare tale nome. Ho quindi una
+  funzione $f$ tale che:
+  \[F:Act\to Act\]
+  inoltre devo avere sempre garantito che:
+  \begin{itemize}
+    \item $f(\tau)=\tau$, ovvero le $\tau$ non cambiano
+    \item $f(\overline{a})=\overline{f(a)}$ quindi un'azione soprassegnata può
+    cambiare nome solo in un'altra soprassegnata
+  \end{itemize}
+  Ho quindi $p_{[f]}$ tale che:
+  \[\frac{p\stackrel{\alpha}{\rightarrow}p'}{p_{[f]}
+      \stackrel{f(\alpha)}{\rightarrow}p'_{[f]}}\]
+  Ho quindi che:
+  \[\frac{p\stackrel{\alpha}{\rightarrow}p'}{k
+      \stackrel{\alpha}{\rightarrow}p'},\,\,\iff k=p\]
+\end{itemize}
+Quindi dato un CCS posso associare un LTS.
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -1790,4 +2061,5 @@ Vedremo quindi:
 % LocalWords:  Communicating Systems CCS composizionalità Milner communicating
 % LocalWords:  sequential CSP transputer hand shacking process processes System
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
-% LocalWords:  bisimulazione
+% LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura
+% LocalWords:  rinominazione

@@ -3064,8 +3064,64 @@ alcune collezioni. Solitamente si ha quindi una configurazione a 3 nodi:
   \item due nodi secondari con frammenti diversi e le repliche del primary
 \end{enumerate}
 \subsubsection{Letture}
-Ho una politica di \textit{readConcern}
-%33.08
+Ho una politica di \textit{readConcern} (che deve essere consistente come del
+caso del \textit{writeConcern}, facendo scegliere se è più dispendioso scrivere
+o leggere):
+\begin{itemize}
+  \item \textit{local}, che è il valore di default t per leggere i dati dai nodi
+  in un replicaSet. La query è fatta secondo la località spaziale e quindi se
+  legge un nodo non primary rischio di leggere dati non ancora replicati
+  \item \textit{available}, di default per lettura su nodi secondari, che fa
+  vedere che il dato c'è ed è consistente
+  \item \textit{majority}, quando almeno metà più 1 repliche ha ricevuto un ack
+  in scrittura sul dato allora posso leggere
+\end{itemize}
+Vediamo quindi un esempio di interrogazione, tramite il metodo \texttt{find}:
+\begin{center}
+  \textit{db.user.find({age:{\$gt:18}},{name:1,address:1}).limits(5)}
+\end{center}
+che equivale a:
+\begin{minted}{sql}
+  SELECT name, address
+  FROM user
+  WHERE age>18
+  LIMIT 5
+\end{minted}
+\textit{\$gt} significa \textit{greater than} e si hanno vari identificativi per
+i confronti (per non avere i simboli >, < etc$\ldots$ che darebbero fastidio
+nelle stringhe).\\
+Vediamo anche una \textit{insert}:
+\begin{minted}{js}
+  db.user.insertOne({
+    name:" Andrea" ,
+    age: 26,
+    Teach[«datawarehouse», «architecture»]
+  })
+\end{minted}
+con \texttt{insertOne} che specifica che voglio inserire un solo documento
+mentre avrei \texttt{insertAll} per tutti i documenti.\\
+Un \textit{update} avviene con la stessa logica con \texttt{updateAll}:
+\begin{minted}{js}
+  Db.user.updateAll({
+    name:{$eq: «Andrea»},
+    {$set: {Role: «PA»}},
+    {$upsert:true}
+  })
+\end{minted}
+%$
+\\
+\textit{\$upsert} sarebbe un \textit{insert if not exist}, per permettere
+l'inserimento e non la modifica in caso di assenza. Tale cosa è assente in SQL
+ma servirebbe un doppio comando.\\
+Si hanno varie utility per importare i dati, da specificare come opzioni al
+comando \texttt{mongoimport}, ad esempio:
+\begin{center}
+  \textit{Mongoimport –d database –c collection –type csv–-ignore blanks –file
+    PATH} 
+\end{center}
+per importare un csv al path PATH ignorando gli spazi bianchi.\\
+\subsubsection{Transazioni}
+%39.55
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -3117,4 +3173,4 @@ Ho una politica di \textit{readConcern}
 % LocalWords:  distributed wide hashata ranged property root MongoDB identifier
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
-% LocalWords:  sharding aware chunks
+% LocalWords:  sharding aware chunks available utility

@@ -21,6 +21,9 @@
 \usepackage{fontspec}
 \usepackage{enumerate}
 \usepackage{braket}
+\usepackage[demo]{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -2596,7 +2599,8 @@ Si hanno però anche delle limitazioni per il modello relazione, come ad esempio
   \item il \textbf{time in market}, ovvero il tempo in cui un applicativo resta
   in commercio, è sempre più ridotto (spesso, per esempio, un videogioco ha una
   vita anche inferiore ad un anno) portando a rendere obsoleto il processo in
-  cui normalmente si integrano i db relazionali
+  cui normalmente si integrano i db relazionali. Anche il \textit{time to
+    market}, ovvero il tempo di preparazione si è ridotto
 \end{itemize}
 Oggigiorno lo standard dal punto di vista hardware è drasticamente cambiato con
 dischi di capienza enorme (nell'ordine dei terabyte per qualche decina di euro).
@@ -2795,12 +2799,273 @@ Si hanno quindi le seguenti caratteristiche per il modello documentale:
   documento (e non dovendo, come nel caso relazionale, prendere $n$ tabelle in
   $n$ file diversi nel \textit{filesystem} facendo poi il join)
 \end{itemize}
-Il modello documentale permette due operazioni principali:
+Il modello documentale permette due tecniche principali:
 \begin{itemize}
-  \item \textbf{referencing}
-  \item \textbf{embdedding}
+  \item \textbf{referencing}, ovvero, come per il modello relazione, si
+  relazionano due documenti tramite un certo attributo, ad esempio:
+  \begin{figure}[H]
+    \centering
+    \begin{subfigure}{.4\textwidth}
+      \centering
+      \begin{minted}{python}
+        contact
+        {
+          "id": 2,
+          "name": "Carlo",
+          "address_id": 1
+        }
+      \end{minted}
+    \end{subfigure}
+    \begin{subfigure}{.4\textwidth}
+      \centering
+      \begin{minted}{python}
+        address
+        {
+          "_id": 1,
+          "city": "Milano",
+          ...
+        }
+      \end{minted}
+    \end{subfigure}
+  \end{figure}
+  
+  \item \textbf{embedding}, ovvero, aggiungere quello che nel
+  \textit{referencing} è un secondo documento come specifica di un certo valore,
+  aggiungendo quindi un livello di profondità (quindi, per esempio, posso avere
+  un documento relativo ad un contatto telefonico contenente anche indirizzo
+  di casa e tale informazione, con i vari attributi, sarà specificata non in un
+  altro documento ma nello stesso), Aumentando lo spazio che però non è più un
+  problema. Ad esempio si ha:
+  \begin{minted}{python}
+    contact
+    {
+      "id": 2,
+      "name": "Carlo",
+      "address": {
+        "city": "Milano",
+        ...
+      }
+    }
+  \end{minted}
 \end{itemize}
-%6.22
+A causa del\textit{ time to/in market} ormai sempre più ogni applicazione ha il
+suo db e questo obbliga la flessibilità dello schema, che garantisce che una
+modifica allo schema, con aggiunta o modifica degli attributi, non è un problema
+(mentre con il modello relazionale sarebbe stato un problema). Questa
+flessibilità però comporta che in fase di query non ho uno schema prefissato
+tramite il quale interrogare (e non posso nemmeno vedere i primi $n$ documenti
+in quanto l'$n+1$ potrebbe essere comunque diverso). Questa problematica è
+relativa all'uso di database costruiti da terzi.\\
+Si hanno diversi linguaggi di query, tra cui \textit{jsoniq, jmespath, jaql,
+  JLINQ, etc$\ldots$}, non avendo più quindi un unico linguaggio come era SQL per i
+modelli relazionali, ma avendone uno per vendor.\\
+Dal punto di vista delle terminologia si hanno le seguenti ``relazioni'' con il
+modello relazione:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    SQL & NoSQL\\
+    \hline
+    database & database \\
+    tabella & collezione\\
+    riga & documento\\
+    colonna & chiave
+  \end{tabular}
+\end{table}
+\subsection{MongoDB}
+MongoDB è un DBMS non relazionale documentale con i dati memorizzati in un
+modello chiamato \textbf{binary json (\textit{Bson})}, che consente maggior
+efficienza tramite una rappresentazione binaria. Tramite l'embedding dei dati
+consente di non eseguire i \textit{join} e permette anche l'accesso tramite
+indici. Supporta comunque il referencing anche se con cali di performances.\\
+Dal punto di vista architetturale si hanno una serie di \textit{engine} diversi
+fra loro (attualmente si usa \textbf{WiredTiger (\textit{WT})}, dopo acquisto
+di una società che si occupava di db relazionali distribuiti con transazioni,
+mentre prima si usava \textit{MMAP V1}). Grazie a WT si è introdotto, nella v4,
+il supporto alle transazioni. Si ha poi il \textit{data model}, il
+\textit{MongoDB query language (MQL)} (proprietario), i componenti di controllo
+degli accessi, il meccanismo di gestione etc$\ldots$\\
+Nel caso di MongoDB si ha:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    RDBMS & MongoDB\\
+    \hline
+    database & database \\
+    tabella/view & collezione\\
+    riga & documento (Bson)\\
+    colonna & campo\\
+    indice & indice\\
+    join & documento con embedding\\
+    chiave esterna & referencing\\
+    partizione & shard
+  \end{tabular}
+\end{table}
+Vediamo quindi un esempio di schema in Mongodb:
+\begin{listing}[H]
+  \begin{minted}{js}
+    var p = {
+      '_id': '342',
+      'author': DBRef('User',2),
+      'timestamp': Date('26-10-20'),
+      'tags': ['MongoDB','NoSQL'],
+      'comments':['author': DBRef('User',4),
+                  'date': Date('26-10-20'),
+                  'text': 'hello'.
+                  'upvotes': 7,...]
+    }
+    >db.posts.save(p);            
+  \end{minted}
+  \caption{Esempio di aggiunta di un documento $p$ nella collezione $posts$}
+\end{listing}
+Analizzando il codice abbiamo:
+\begin{itemize}
+  \item la definizione di $p$ come un oggetto json
+  \item tra gli elementi abbiamo $tags$ che contiene un array di valori
+  \item tra gli elementi abbiamo $comments$ che è un array di documenti
+  \item l'ultima riga è tra le chiavi di successo di Mongodb in quanto ha un
+  linguaggio simile a quelli di programmazione. Nel dettaglio si ha il
+  caricamento del documento $p$ nella collezione $posts$. Si ha un meccanismo
+  simile alla OOP e l'integrazione coi linguaggi di programmazione è facilitata
+  dall'ormai molto diffuso supporto ai json (come esistono già meccanismi per il
+  passaggio da oggetti a json e viceversa)
+\end{itemize}
+Si possono inoltre fare indici, tramite \texttt{ensureindex} (che prende come
+argomento un json), a ogni campo del
+documento, per esempio: 
+\begin{minted}{js}
+  >db.posts.ensureIndex({'author': 1});
+  >db.posts.ensureIndex({'comments.author': 1});
+  >db.posts.ensureIndex({'tags': 1});
+  >db.posts.ensureIndex({'author.location': '2d'});
+\end{minted}
+Si nota che posso creare indici a livello che voglio, a documenti o array, o
+anche, come nell'ultimo esempio, usare indici geo-spaziali.\\
+MongoDB, rispetto al modello relazionale, si avvicina tanto alla
+programmazione.\\
+\subsubsection{Repliche in MongoDB}
+Innanzitutto si ha che MongoDB rientra nella categoria CP rispetto al
+\textit{CAP theorem}, non garantendo disponibilità in caso di guasto.\\
+La replica viene effettuata in modalità master-slave anche se, nel gergo di
+MongoDB si ha \textbf{primary-secondary}, avendo scrittura sul primary e replica
+sui secondary. Si ha in realtà che uno dei nodi replica viene definito a
+posteriori \textit{primary}. La replica avviene tramite il file di log del
+\textit{primary}. Si ha un sistema che procede per repliche parziali
+incrementali, all'inizio il nodo fa un sync, prendendo i dati dal primary e poi
+prende dal file di log del primary solo gli ultimi $n$ movimenti.\\
+La garanzia della tolleranza si ha tramite il meccanismo di elezione dei nodi,
+nel caso il nodo primary vada down.\\
+Si ha che un nodo può assumere uno dei seguenti stati:
+\begin{itemize}
+  \item STARTUP: un nodo che non è membro effettivo di nessun replica set
+  \item PRIMARY: l’unico nodo nel replica set che accetterà le operazioni di
+  lettura
+  \item SECONDARY: un nodo che di effettuare la sola replicazione dei dati (può
+  essere promosso a PRIMARY in fase di elezione)
+  \item RECOVERING: un nodo che sta effettuando una qualche operazione di
+  recupero dei dati, magari dopo un \textit{rollback} (può essere promosso a
+  PRIMARY in fase di elezione) 
+  \item STARTUP2: un nodo che è appena entrato nel set (può essere eletto a
+  PRIMARY)
+  \item ARBITER: un nodo non atto alla replicazione dei dati con lo scopo di
+  prendere parte alle elezioni per promuovere i nodi a PRIMARY (può essere
+  eletto a PRIMARY in fase di elezione)
+  \item DOWN/OFFLINE: un nodo irraggiungibile
+  \item ROLLBACK: un nodo che sta svolgendo un rollbackper cui sarà
+  inutilizzabile per le letture (può essere promosso a PRIMARY in fase di
+  elezione)  
+\end{itemize}
+L'elezione elegge il nodo con la versione più aggiornata dei dati e in questa
+fase le scritture sono interrotte (motivo per cui non è garantita la A di
+CAP). L'elezione dura comunque pochissimi.\\
+Durante il processo di elezione ogni \textit{replicaSet} manda, con timeout per
+assumere che un nodo sia down, un
+``hearbeat'' (ovvero un bit ogni due secondi) agli altri nodi. Se il nodo
+primario risulta down si procede con l'elezione, che in termini umani è di tipo
+\textit{maggioritario con liste bloccate} nel replicaSet. Ogni nodo ha un
+identificativo con un punteggio rappresentante la priorità nelle elezioni
+(più alto più probabile che venga eletto). Quindi appena il primary va down il
+secondario con valore più alto chiamerà le elezioni. Si ha che un replica set
+può avere al massimo 50 membri di cui solo 7 votanti, che esprimono un solo
+voto. I nodi SECONDARY non votanti hanno priorità 0 e accettano solo letture ma
+sono comunque in grado di votare. Nel caso di partizionamento
+to della rete si rischia un problema di riconciliazione tra vecchio primary
+e nuovo, dovendo quindi bloccare la scrittura.
+\subsubsection{Scrittura}
+La scrittura avviene sul nodo primario e si hanno diverse politiche in base
+tramite l'opzione \textit{writeConcern} che dice cosa fare per le replicaSet.
+Si hanno tre parametri:
+\begin{enumerate}
+  \item $w$, indicante il numero di nodi in cui il dato deve essere replicato
+  prima di essere considerata conclusa l’operazione. Ovvero è il numero di nodi
+  sui quali deve essere confermata la scrittura per essere confermata a livello
+  globale
+  \item $j$, ovvero l'intenzione di scrivere sul log di \textit{Wiredtiger},
+  tramite la logica \textit{write ahead logging} (ovvero prima scrivo sul file
+  di log e poi sul disco), prima che l'operazione sia stata
+  eseguita. Questo per garantire la persistenza del dato, avendolo comunque nel
+  file di log. Senza l'opzione lo scriverà in un secondo momento
+  \item $wtimeout$, ovvero il tempo limite, espresso in ms, da aspettare nel
+  caso in cui $w>0$ (se $0$ non devo aspettare risposta da nessuno)
+\end{enumerate}
+Aumentare $w$ comporta aumentare il tempo di esecuzione. Nel dettaglio:
+\begin{itemize}
+  \item $w=0$ non da alcuna certezza di inserimento, utile per operazioni veloci
+  \item $w=1$ implica la scrittura sul nodo primary
+  \item $w=n$ implica la scrittura su $n$ nodi
+  \item $w=majority$ dove almeno la metà dei nodi più 1 deve aver scritto prima
+  della conferma dell'operazione (nella realtà si tenta di scrivere su più nodi
+  ma appena si ha un ack dalla metà più 1 si conferma la scrittura anche se
+  magari si sta ancora scrivendo su altri nodi)
+\end{itemize}
+Qualora si debba caricare una gran quantità di dati, di cardinalità conosciuta,
+per motivi di efficienza non conviene aspettare che il nodo dia l'ack ma si
+caricano tutti subito sul primary, controllando poi con \texttt{count} se tutto
+è stato caricato.
+\subsubsection{Frammentazione}
+Parliamo ora di frammentazione e scalabilità.\\
+Si hanno 3 tipi di sharding per la scalabilità orizzontale:
+\begin{itemize}
+  \item \textit{hash-based}, quindi sulla chiave
+  \item \textit{range-based}, quindi in base ad un certo range di elementi
+  \item \textit{tag-aware}, quindi in base a certi attributi
+\end{itemize}
+Si ha un meccanismo dinamico basato su \textit{pay as you go}, ovvero nel
+momento in cui ho lo sharding sarà MongoDB ad adattarlo nel momento in cui
+cambia il volume di dati, facendo un \textit{bilanciamento automatico}. Si ha
+uno ``spazio'' della mia chiave di shard che posso dividere in $n$ chunks per
+$n+1$ chiavi di shard. Il numero massimo di chunk che è possibile definire su
+una sharded key può definire il numero massimo di shard in un sistema.\\
+Si hanno 3 ruoli fondamentali nella frammentazione:
+\begin{enumerate}
+  \item \textbf{mongos}, che è il punto di accesso software per le query, è
+  l'entry point del cluster, tutte le query verranno eseguite su questo
+  processo. Appena lanciato mongos va a leggere il config server
+  
+  \item \textbf{config server}, ovvero un file che conosce la struttura degli
+  shard, conoscendo frammentazioni e repliche. Dalla versione 4.0 ogni nodo
+  distribuito è anche replicato
+  \item i vari \textbf{shard}, ovvero istanze di MongoDB
+\end{enumerate}
+Quindi il router quando riceve una query capisce dove sono i frammenti, grazie
+al config server, e quindi procede con la query di tipo:
+\begin{itemize}
+  \item \textbf{target query} se deve interrogare solo un nodo
+  \item \textbf{broadcast query} se deve interrogare più nodi
+\end{itemize}
+Sia gli shard che il config server sono replicati su replicaSet per evitare che
+diventino \textit{single point of failure} (anche per questo dalla 4.0 ogni
+volta che frammento replico).\\
+Si ha un \textbf{primary shard}, che contiene l'intero db (ovvero tutte le
+collezioni) e i \textbf{secondary shard} che contengono frammenti e repliche di
+alcune collezioni. Solitamente si ha quindi una configurazione a 3 nodi:
+\begin{enumerate}
+  \item uno primary
+  \item due nodi secondari con frammenti diversi e le repliche del primary
+\end{enumerate}
+\subsubsection{Letture}
+Ho una politica di \textit{readConcern}
+%33.08
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -2832,13 +3097,13 @@ Il modello documentale permette due operazioni principali:
 % LocalWords:  source directional resolution detention Tier staging event apply
 % LocalWords:  publish publisher distributor subscriber intra inter paradigm js
 % LocalWords:  relational mismatch Blockchain mapper Delete framework group SHA
-% LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis
+% LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis WT
 % LocalWords:  block hash torrent double spanning Leporati ethereum monero spam
 % LocalWords:  zcash foreniscs criptovaluta Satoshi Nakamoto paper proof part
 % LocalWords:  spending bitcoins wallet miners Moore RIPEMD iniettiva one way
-% LocalWords:  nonce miner mining farm stake fee blockchains ether ETH smart
+% LocalWords:  nonce miner mining farm stake fee blockchains ether ETH smart CP
 % LocalWords:  contract Solidity struct function bytecode virtual machine remix
-% LocalWords:  outOfGas OpenZeppelin startup overflow metamask l'ide Rapsten
+% LocalWords:  outOfGas OpenZeppelin startup overflow metamask l'ide Rapsten ms
 % LocalWords:  Rinkeby autority Truffle Ganache main MetaMask webapp GoQuorum
 % LocalWords:  permission permissionless third TTP permissioned audit Chaos EOS
 % LocalWords:  webassembly Hyperledger authority Foundation SAP CryptoKitties
@@ -2850,4 +3115,6 @@ Il modello documentale permette due operazioni principali:
 % LocalWords:  Partition partition availability Eventual stores column family
 % LocalWords:  document databases graph RDF tuple caching blob hashing hashed
 % LocalWords:  distributed wide hashata ranged property root MongoDB identifier
-% LocalWords:  filesystem referencing embdedding
+% LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
+% LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
+% LocalWords:  sharding aware chunks

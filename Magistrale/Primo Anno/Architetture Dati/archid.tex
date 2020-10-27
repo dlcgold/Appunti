@@ -3093,7 +3093,7 @@ nelle stringhe).\\
 Vediamo anche una \textit{insert}:
 \begin{minted}{js}
   db.user.insertOne({
-    name:" Andrea" ,
+    name: "Andrea" ,
     age: 26,
     Teach[«datawarehouse», «architecture»]
   })
@@ -3116,12 +3116,43 @@ ma servirebbe un doppio comando.\\
 Si hanno varie utility per importare i dati, da specificare come opzioni al
 comando \texttt{mongoimport}, ad esempio:
 \begin{center}
-  \textit{Mongoimport –d database –c collection –type csv–-ignore blanks –file
+  \textit{mongoimport –d database –c collection –type csv -ignore blanks –file
     PATH} 
 \end{center}
 per importare un csv al path PATH ignorando gli spazi bianchi.\\
 \subsubsection{Transazioni}
-%39.55
+Dalla versione 4.0 MongoDB ha introdotto nel modello documentale le transazione
+tramite l'engine \textit{Wiredtiger}. Introduce quindi il concetto di
+\textit{log} che indica che tutto è nel nodo primary. Si opera sempre sul nodo
+facendo un \textit{lock} che può essere di tipo:
+\begin{itemize}
+  \item \textbf{sharded (\textit{S})}, per le letture
+  \item \textbf{exclusive (\textit{X})}, per le scritture
+  \item \textbf{intent sharded (\textit{IS})}, per esprimere l'intenzione di
+  bloccare in modo condiviso uno dei nodi che discende dal nodo corrente
+  \item \textbf{intent exclusive (\textit{IX})}, per esprimere l'intenzione di
+  bloccare in modo esclusivo uno dei nodi che discende da quello corrente
+\end{itemize}
+Il lock garantisce transazioni a livello di singola collezione mentre prima
+l'atomicità era garantita a livello della singola operazione. Usando
+l'embedding, anche prima della v4.0, potevo gestire un sacco di modiche della
+singola collezioni. Nel caso del referencing invece serviva una gestione più
+approfondita delle transazioni. Essendo WT creato originariamente per un sistema
+distribuito funziona solo per sistemi distribuiti, infatti avendo un solo nodo
+si presuppone che si abbia una sola applicazione che accede, cosa che renderebbe
+a priori più semplice la gestione.
+\subsubsection{Modello contro efficienza}
+\textbf{esempio a partire dalla slide 37}\\
+Spesso il cambiamento del modello può comportare un miglioramento delle
+prestazioni non indifferente, più del cambiamento dell'hardware (\textbf{verrà
+  approfondito in live}).\\
+Avere più piccoli documenti separati migliora il tempo, rendendolo lineare
+(mentre un grosso documento embedding aveva tempi esponenziali nell'inserimento
+delle righe).\\
+Con questa soluzione poi devo sistemare le query.\\
+\textbf{Quindi l'importanza del modello è decisiva dal punto di vista delle
+  prestazioni}.\\
+\textbf{Nelle slide brevissima parte su CouchDB inutile}.
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -3173,4 +3204,4 @@ per importare un csv al path PATH ignorando gli spazi bianchi.\\
 % LocalWords:  distributed wide hashata ranged property root MongoDB identifier
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
-% LocalWords:  sharding aware chunks available utility
+% LocalWords:  sharding aware chunks available utility live

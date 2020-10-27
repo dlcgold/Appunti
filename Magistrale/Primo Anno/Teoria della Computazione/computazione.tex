@@ -1084,11 +1084,182 @@ Definisco quindi il problema.
   come sono stati definiti, sono consistenti.
   \\ \textbf{sistemare formalismi}
 \end{proof}
+\begin{proof}
+  Dimostriamo che la riduzione del problema \textit{clique}, che sappiamo essere
+  \textbf{NP-complete}, è in tempo polinomiale.\\ 
+  Vediamo che la trasformazione della formula $\phi$ di $3SAT$ nel grafo
+  $G_\phi$ è una riduzione in tempo polinomiale.\\
+  Dato un assegnamento che rende vera $\phi$, che ha $k$ clausole, dobbiamo
+  costruire una \textit{clique} per $G_\phi$ che abbia $k$ vertici. Ciascuna
+  clausola $c_{r}$ ha almeno un letterale $l_{i}^r$ che ha assegnato il valore 1,
+  $\top$. Ciascun letterale $l_{i}^r$ corrisponde ad un vertice
+  $v_{i}^r$. Costruiamo $V'$ insieme di vertici per ogni letterale $l_i^r$ vero
+  per ogni clausola $c_r$. Dimostriamo che $V'$ è una \textit{clique}. Si ha che
+  per ogni coppia $v_i^r,v_j^s\in V',\,\,r\neq s$ (due vertici rappresentanti
+  due letterali di due clausole diverse) abbiamo che $(v_i^r,v_j^s)\in
+  E$ essendo entrambi i letterali veri e,per costruzione, sono consistenti, cioè
+  uno non è l'opposto dell'altro.\\
+  Vediamo l'altro verso.\\
+  Supponiamo che $G_\phi$ abbia una \textit{clique} $V'$ di dimensione $k$ e
+  bisogna vedere se $\phi$ è vera. Sappiamo che $V'$, per costruzione ha
+  esattamente un solo vertice per ogni clausola, $v_i^r$ per la clausola
+  $c_r$. Prendo quindi il letterale corrispondente $l_i^r$ e assegno a tale
+  letterale il valore 1 (se negato 0). Quindi so che il letterale complemento di
+  $l_i^r$ non verrà usato per rendere vera una clausola perché il vertice
+  $v_i^r$ non è collegato con un arco ad un vertice che rappresenta il
+  c0complemento di $l_i^r$. Quindi riesco a costruire un assegnamento di verità
+  \textit{consistente} (ovvero ogni variabile è presa come $x_i=1$ oppure
+  $x_i=0$ ma non entrambi i valori sono usati) per $\phi$.
+\end{proof}
+Si può dimostrare che:
+\[clique\leq_p vertex\_cover\]
+\[independent\_set\leq_p vertex\_cover\]
+\[vertex\_cover\leq_p independent\_set\]
+\[vertex\_cover\leq_p clique\]
+Infatti vale il seguente teorema:
+\begin{teorema}
+  Se ho che:
+  \[A\leq_p B\]
+  e $A,B\in \mbox{NP-complete}$, allora:
+  \[B\leq_p A\]
+\end{teorema}
+\begin{proof}
+    Infatti, siccome $B$ è in \textbf{NP-complete} allora è anche in \textbf{NP},
+  allora: 
+  \[B\leq_p A\]
+  Ma posso fare lo stesso discorso con $A$, essendo in \textbf{NP-complete} e
+  quindi sono interscambiabili e quindi:
+  \[A\leq_p B\]
+\end{proof}
 I problemi \textbf{NP-complete} richiedono quindi una soluzione efficiente.\\
 Bisogna quindi pensare ad algoritmi di approssimazione, algoritmi polinomiali
 con ``garanzia'', ovvero \textbf{euristiche} (ovvero un qualcosa che funziona in
 pratica) per il problema. Non si ha quindi una soluzione esatta al problema,
-l'euristica non fornisce una soluzione esatta.
+l'euristica non fornisce una soluzione esatta.\\
+L'obiettivo è quindi quello di risolvere i problemi \textbf{NP-complete}.
+\begin{definizione}
+  Definiamo un \textbf{problema di ottimizzazione}, dato un problema $\Pi$ e
+  un'istanza $x$, come la ricerca di un ottimo di $x$, detto $opt(x)$. Il costo
+  di una soluzione ammissibile su $x$ calcolato da un algoritmo $A$ per il
+  problema $\Pi$ è indicato con $A(x)$ (che quindi è il costo della soluzione
+  calcolato da $A$).\\
+  
+  Si cerca quindi la soluzione, tra tutte quelle di $\Pi$, che massimizza o
+  minimizza una funzione costo (appunto $opt(x)$). Non sappiamo chi calcoli
+  questo costo.
+\end{definizione}
+\begin{definizione}
+  Definiamo un \textbf{algoritmo $\varepsilon$-approssimato} per un problema
+  $\Pi$ è un 
+  algoritmo $A$ polinomiale che restituisce una soluzione ammissibile che dista
+  da quella ottima di un fattore $\varepsilon$.\\
+  Se $\Pi$ è un \textbf{problema di minimo} allora:
+  \[A(x)\leq \varepsilon\cdot opt(x), \mbox{ \textnormal{con} }\varepsilon>1\]
+  Si raggiunge quindi un valore più grande del minimo, di una quantità fissata
+  $\varepsilon$. Devo quindi garantire che non sia troppo grande, tramite
+  $varepsilon$.\\
+  Si ha quindi che:
+  \[\frac{A(x)}{opt(x)}\leq \varepsilon\]
+  L'algoritmo lavora in tempo polinomiale e risolve in modo approssimato
+  problemi $\Pi$ \textbf{NP-completi}. Se avessi $\varepsilon=1$ avrei la
+  soluzione ottima, ma non sarebbe possibile in quanto avrei un algoritmo
+  polinomiale per un algoritmo \textbf{NP-completo}.\\
+  Se $\Pi$ è un \textbf{problema di massimo} allora:
+  \[A(x)\geq \varepsilon\cdot opt(x), \mbox{ \textnormal{con} }0<\varepsilon<1\]
+  In quanto raggiungo una soluzione più piccola del massimo ma devo garantire
+  che non sia troppo piccola, tramite $varepsilon$. $\varepsilon\cdot opt(x)$ è
+  infatti una ``frazione'' dell'ottimo.\\
+  Si ha quindi che:
+  \[\frac{A(x)}{opt(x)}\geq \varepsilon\Longrightarrow\frac{opt(x)}{A(x)}\leq
+    \frac{1}{\varepsilon}\]
+  A seconda del problema devo trovare un $\varepsilon$, che viene fissata
+  costante per ogni input (e quindi è indipendente dall'input stesso e dalla sua
+  dimensione) che serve da ``garanzia''. So quindi che $A(x)$, ovvero il costo
+  della soluzione approssimata ammissibile calcolata da $A$, in tempo
+  polinomiale, si rapporta a $opt(x)$, calcolata dall'algoritmo esatto in tempo
+  esponenziale (se fosse polinomiale si avrebbe $P=NP$), tramite una distanza
+  $\varepsilon$ (da un alto è un $\limsup$ e dall'altro un $\liminf$).\\
+  Tipicamente si ha come valore tipico per $varepsilon$ 2, avendo quindi
+  una \textbf{2-approssimazione}, in quanto facilmente dimostrabile.
+\end{definizione}
+\begin{esempio}
+  Prendiamo \textit{vertex-cover} nella versione di ottimo. Dato $G=(V,E)$ ha
+  come soluzione ammissibile una copertura di vertici per $G$. Il costo di una
+  soluzione è la cardinalità di $V'$, se $V'$ è una soluzione ammissibile.\\
+  Il costo ottimo di \textit{vertex-cover} invece è la minima cardinalità di
+  $V'$.
+\end{esempio}
+\begin{definizione}
+  Si ha il cosiddetto \textbf{approximation ratio} $r$ dicendo che:
+  \[\max\left\{\frac{A(x)}{opt(x)},\frac{opt(x)}{A(x)}\right\}\leq r,\mbox{
+      \textnormal{con} }r>1\] 
+  Il primo caso copre il caso di minimo mentre il secondo caso copre il massimo.
+\end{definizione}
+\textbf{Non tutti i problemi ammettono una \textit{r}-approssimazione, per
+  \textit{r} costante}.\\
+Ci sono problemi infatti dove il calcolo di:
+\[\max\left\{\frac{A(x)}{opt(x)},\frac{opt(x)}{A(x)}\right\}\leq \rho(n)\]
+per una certa funzione $\rho$,con $|x|=n$,
+ovvero il massimo dipende dalla
+dimensione dell'input, non avendo quindi più un $r$ costante. La dimensione del
+problema influisce sulla capacità di approssimazione e degradano all'aumentare
+della dimensione. Si ha, per esempio, $\rho(n)=\log n$.\\
+Per capire $\varepsilon$ fornisco un'euristica $A$ per il problema e provo a
+dimostrare, senza conoscere l'ottimo (quindi per ogni possibile input), che in
+ogni caso:
+\[\frac{A(x)}{opt(x)}\leq \varepsilon\]
+dimostrando che si ha una $\varepsilon$-approssimazione (non sempre è
+dimostrabile o perlomeno per alcuni problemi si è ancora riusciti).
+\begin{teorema}
+  Esiste $A$ polinomiale per \textit{vertex-cover} che è 2-approssimante,
+  quindi:
+  \[\frac{A(x)}{opt(x)}\leq 2\]
+\end{teorema}
+\begin{proof}
+  Prendo il grafo $G=(V,E)$.\\
+  Cerco un $A$ che calcoli in tempo polinomiale una soluzione ammissibile,
+  ovvero una copertura di vertici del grafo. Si sceglie che $A$ non deve essere
+  un \textit{algoritmo greedy}.\\
+  Prendo quindi un arco del grafo $e=(u,v)\in E$. Inizio a costruire una
+  copertura $C$, all'inizio vuota ($C=\emptyset$), che ora diventa, aggiungendo
+  i due vertici:
+  \[C=C\cup\{u,v\}\]
+  Inoltre rimuovo dall'insieme degli archi $E$ tutti gli archi che hanno un
+  estremo nell'attuale copertura $C$, e quindi nel nostro caso in $u$ o $v$.\\
+  Procedo quindi iterativamente costruendo $C$ fermandomi quando $E$ risulti
+  vuoto, ovvero fino a che $E=\emptyset$.\\
+  È quindi una 2-approssimazione in quanto al massimo posso prendere il doppio
+  dei vertici per fare la copertura, infatti, per costruzione, seleziono ogni
+  volta archi che non hanno estremi in comune. Per ognuno di questi archi scelti
+  devo prendere i due estremi, quindi ho $2\cdot k$ vertici in $C$ per $k$ archi
+  e quindi:
+  \[A(x)=2\cdot k\]
+  Ma di $opt(x)$ so che nel casi migliore prende esattamente un estremo per ogni
+  scelto dall'algoritmo, e quindi per archi che non hanno estremi in
+  comune. Quindi nel caso migliore:
+  \[opt(x)\geq k\]
+  Dato che stiamo cercando di minimizza, quindi $k$ è il \textit{lower bound} e
+  quindi:
+  \[\frac{A(x)}{opt(x)}\leq\frac{2k}{k}\leq 2\]
+  Come volevasi dimostrare.
+\end{proof}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{VCApprox}{$G=(V,E)$}
+    \State $C\gets\emptyset$
+    \State $E'\gets E$
+    \While {$E'\neq \emptyset$}
+    \State $\mbox{let }(u,v)\in E'$
+    \State $C\gets C\cup \{u,v\}$
+    \For {$\mbox{every }(u,z)\in E'\land\mbox{ every } (v,z')\in E'$}
+    \State $\mbox{delete } (u,z),(v,z') \mbox{ from } E'$
+    \EndFor
+    \EndWhile
+    \State \textbf{return} $C$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di vertex-cover approssimato}
+\end{algorithm}
 \chapter{Macchina di Turing}
 \section{Problemi intrattabili}
 Trovare una soluzione polinomiale ad un algoritmo \textbf{NP-hard} come TSP
@@ -1589,4 +1760,4 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  exptime all img problem png independent ind nell CNF definsice
 % LocalWords:  soddisfacibilità polinomialmente dell clique matching naive edit
 % LocalWords:  sottostringa preprocessamento sottostringhe baacagahabaac step
-% LocalWords:  halt
+% LocalWords:  halt approximation greedy lower bound return

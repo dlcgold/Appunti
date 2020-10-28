@@ -41,7 +41,7 @@ var anno3 = [
     {"title": "Programmazione C++", "full": true, "pdf": "", "source": "https://github.com/dlcgold/Appunti/tree/master/Triennale/Terzo%20Anno/Programmazione%20C%2B%2B"}
 ]
 var anno4 = [
-    {"title": "Architetture Dati", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Archietture%20Dati/archid.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Archietture%20Dati"},
+    {"title": "Architetture Dati", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Architetture%20Dati/archid.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Architetture%20Dati"},
     {"title": "Machine Learning", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Machine%20Learning/ml.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Machine%20Learning"},
     {"title": "Modelli della Concorrenza", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Modelli%20della%20Concorrenza/modelli.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Modelli%20della%20Concorrenza"},
     {"title": "Teoria della Computazione", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Teoria%20della%20Computazione/computazione.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Teoria%20della%20Computazione"},

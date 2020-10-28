@@ -1641,8 +1641,10 @@ Per realizzare una replica posso fare in diversi modi:
   % MANCA PARTE DB2
 \end{itemize}
 \textbf{Sulle slide \textit{repliche} si ha un approfondimento delle
-  architetture IBM e Microsoft opzionali per il corso}.\\
+  architetture IBM e Microsoft opzionali per il corso}.
 \begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
   Un \textbf{db parallelo} è studiato per le prestazioni. Si ha accesso
   parallelo ai dati, parallelismo \textit{intra-query} (stessa query su
   frammenti diversi), parallelismo \textit{inter-query} (tante query diverse) e
@@ -1661,7 +1663,27 @@ Per realizzare una replica posso fare in diversi modi:
   \end{itemize}
   Si ha quindi il cosiddetto \textbf{Object–relational mapping}, ovvero questa
   tecnica di mapping. Si hanno vari framework che lo implementano.\\
-  Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.
+  Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.\\
+  Parliamo ora del \textit{caso Gitlab}. Questo è un esempio paradigmatico di
+  cosa succede in caso di mala gestione delle repliche. Il 31 Gennaio 2017 dei
+  malintenzionati erano entrati nel db PosgreSQL (con due repliche) e stavano
+  scrivendo in modo significativo sul nodo primario DB1 e sul secondario DB2. I
+  tantissimi lock si bloccavano a vicenda rendendo non disponile il db. Alle 21
+  prendono il db secondario e cercano di riorganizzare tutto ma il db primario
+  aveva fatto chiamate al secondario che però non aveva risposto. I tecnici
+  iniziano a fare danni extra, svuotando la directory dei dati del secondario ma
+  per errore ha ``droppato'' il database primario, cancellando 300GB di dati dal
+  primario. C'erano ancora i backup, fatti a \textit{snapshot} ogni 24h. C'era
+  un backup manuale di 6 ore prima per altri motivi. Il problema è che non sono
+  stati trovati i backup, una volta trovati c'erano problemi a causa di
+  incompatibilità tra PosgreSQL 9.2 e 9.6. I dati su Azure non erano
+  backuppati per scelta di Azure, che non faceva i backup dei database. Nel
+  complesso 5 sistemi di backup in totale non funzionavo (alcuni, tipo S3, per 
+  errori di codice erano vuoti). Fortunatamente c'era il backup manuale di 6 ore
+  prima e si è risolto il problema ma perdendo 5000 progetti, 700 user e
+  migliaia di righe di codice.\\ 
+  Bisogna premiare la trasparenza di Gitlab che ha documentato tutto quello che
+  è accaduto (senza specificare i nomi dei DBA).
 \end{shaded}
 \section{Prima esercitazione}
 \begin{esercizio}
@@ -2500,6 +2522,37 @@ detti sopra).
   \caption{Diagramma dei casi di scelta di una blockchain}
   \label{fig:bcd}
 \end{figure}
+\begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
+  La blockchain potrebbe essere usata per la tracciabilità di prodotti, per
+  evitare \textit{falsi veri} o \textit{veri falsi}. Infatti non è un problema
+  lontano dal \textbf{double-spending} (un prodotto viene fatto in numero
+  limitato e quindi non posso avere più di quel numero sul mercato). Per il
+  tracciamento del prodotto associo un hash-code univoco. Metodi come il
+  bar-code non funzionano bene in quanto facilmente duplicabili. Un metodo più
+  moderno prevede l'uso proprio delle blockchain, introducendo anche la
+  tracciabilità dei documenti, permettendo anche di verificare tutta la filiera
+  per arrivare al prodotto finale. Ogni step della filiera è come se avesse un
+  file di log, dove viene segnato tutto quello che viene fatto in quello
+  step. Si deve anche garantire che nessuno step della filiera ``bari''. Inoltre
+  non si può avere una TTP online (i vari consorzi, gli unici che potrebbero
+  fare da TTP, potrebbero anche loro ``barare'', non essendo un ente che farebbe
+  solo da TTP) e si ha che gli scrittori ``non si fidano'' tra loro. Abbiamo
+  quindi tutti i requisiti per una blockchain, come spiegato immagine
+  \ref{fig:bcd}. Mantenere una blockchain comunque costa (più di un ipotetico
+  timbro univoco da apporre al prodotto, tramite i concetti di \textit{lotto di
+    produzione}) ma ha più senso in un contesto multi-aziendale.\\
+  Ovviamente si ha anche la difficoltà culturale di far interagire piccole
+  imprese con concetti complessi come la \textit{proof-of-work}. Un ragionamento
+  simile si applica sia al mondo del cibo che della moda, che ad altri ambiti.\\
+  Il tracciamento dei clienti non è fattibile causa GDPR, in quanto non si può
+  facilmente cancellare i dati (cosa garantita dalla GDPR) nella blockchain, che
+  infatti non è \textit{GDPR-compatible} (e potrei non inserire i dati in
+  chiaro ma cifrati, dimenticando la chiave nel caso il cliente voglia essere
+  dimenticato, in quanto potenzialmente prima o poi sarebbe facile ``bucare'' i
+  dati).
+\end{shaded}
 \chapter{NoSQL}
 Dopo aver trattato la gestione dei dati distribuita in \textbf{ambiente
   relazionale}, dopo aver trattato le blockchain anche da punto di vista di
@@ -2884,7 +2937,8 @@ di una società che si occupava di db relazionali distribuiti con transazioni,
 mentre prima si usava \textit{MMAP V1}). Grazie a WT si è introdotto, nella v4,
 il supporto alle transazioni. Si ha poi il \textit{data model}, il
 \textit{MongoDB query language (MQL)} (proprietario), i componenti di controllo
-degli accessi, il meccanismo di gestione etc$\ldots$\\
+degli accessi, il meccanismo di gestione etc$\ldots$. Le repliche sono
+organizzate in \textbf{replicaSet}.\\
 Nel caso di MongoDB si ha:
 \begin{table}[H]
   \centering
@@ -3204,4 +3258,5 @@ Con questa soluzione poi devo sistemare le query.\\
 % LocalWords:  distributed wide hashata ranged property root MongoDB identifier
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
-% LocalWords:  sharding aware chunks available utility live
+% LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
+% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure

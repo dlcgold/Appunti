@@ -20,6 +20,7 @@
 \usepackage{microtype}
 \usepackage{fontspec}
 \usepackage{enumerate}
+\usepackage{svg}
 \usepackage{braket}
 \usepackage{physics}
 \usepackage{marginnote}
@@ -977,6 +978,221 @@ Riassumiamo alcune caratteristiche degli alberi decisionali:
   \item può esserci ``rumore'' nel training dei dati
   \item possono esserci attributi di cui non ho informazioni
 \end{itemize}
+\subsubsection{Esercitazione sugli alberi decisionali}
+Partiamo con un esercizio con find-S per coglierne le problematiche.
+\begin{esercizio}
+  Siano dati due attributi $A=\{1,2,3\}$ e $B=\{1,2\}$. Diciamo che $H$ è un
+  congiunzione di $and$ tra i valori degli attributi e delle istanze.\\
+  Il concetto target è:
+  \[c:=((A=1\lor A=2), B=1)\]
+  Find-S può trovare $c$ in $H$?\\
+  Prendo un training set contenente $\langle x_1=(1,1), 1\rangle$ e
+  $x_2=\langle(2,1),1\rangle$. Seguendo find-S 
+  avremo la seguente traccia dell'algoritmo:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+      A & B\\
+      \hline
+      $\emptyset$ & $\emptyset$\\
+      1 & 1 \\
+      ? & 1
+    \end{tabular}
+  \end{table}
+  Si arriva quindi a:
+  \[S=\langle ?,1\rangle\]
+  Ma questa generalizzazione mi farebbe accettare $A=3$, cosa non prevista da
+  $c$.\\
+  Non posso quindi usare find-S in questo caso.
+\end{esercizio}
+Ricordiamo che un albero decisionale è formato da:
+\begin{itemize}
+  \item \textbf{nodes (\textit{nodi})} etichettati da i vari attributi
+  \item \textbf{branches \textit{rami}} etichettati con i possibili valori
+  dell'attributo che etichetta il nodo sorgente del ramo
+  \item \textbf{leef nodes (\textit{foglie})} etichettati con gli outcome della
+  previsione
+\end{itemize}
+Un percorso dalla radice fino alla foglia mi rappresenta una congiunzione di
+attributi mentre l'albero in se è quindi una disgiunzione di congiunzioni (una
+per ogni percorso radice-foglia). Un albero quindi formalizza la congiunzione di
+vincoli su attributi ma può estendere il linguaggio a disgiunzioni di vincoli su
+attributi.\\
+Usando funzioni booleane (quindi un attributo può avere valore $\top,\,\,\,T$ o
+$\bot,\,\,\,F$) posso convertire tabelle di verità in alberi decisionali, con
+quindi ogni percorso dalla radice ad una foglia che rappresenta una
+\textbf{regola} e l'intero albero che rappresenta la congiunzione di tutte le
+regole. Le foglie quindi sono gli assegnamenti di verità della tabella.\\ 
+Posso avere alberi diversi a seconda della scelta del nodo radice.\\
+\begin{esempio}
+  Vediamo i due alberi per la funzione booleana $\lor$.\\
+  Abbiamo la tabella di verità:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c}
+      $A$ & $B$ & $B\lor B$\\
+      \hline
+      $T$ & $T$ & $T$\\
+      $T$ & $F$ & $T$\\
+      $F$ & $T$ & $T$\\
+      $F$ & $F$ & $F$
+    \end{tabular}
+  \end{table}
+  rappresentata dai due alberi:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/dt1.pdf}
+  \end{figure}
+\end{esempio}
+Essendo sempre nel concept learning, nel caso di funzioni booleane, anche il
+target è booleano.
+\begin{teorema}
+  Con un albero decisionale posso rappresentare tutte le
+  funzioni booleane
+\end{teorema}
+\begin{proof}
+  Prendiamo una qualsiasi funzione booleana e la traduciamo in tabella di
+  verità.\\
+  A partire dalla tabella costruisco l'albero decisionale dove ogni percorso
+  radice-foglia è un esempio (quindi una riga) della tabella di verità.\\
+  Dato che ogni funzione booleana può essere rappresentata con una tabella di
+  verità posso costruire un albero decisionale per qualsiasi funzione booleana.
+\end{proof}
+Il metodo appena descritto comunque dimostra il teorema ma non è sempre
+efficiente, dovendo memorizzare tutto.
+\begin{teorema}
+  Avendo una funzione booleana con $n$ attributi allora posso costruire una
+  tabella di verità con $2^n$ righe. Inoltre posso costruire potenzialmente
+  $2^{2^n}$ diverse ma con lo stesso significo, e quindi altrettanti alberi
+  decisionali.
+\end{teorema}
+Vediamo quindi un algoritmo generale per la costruzione dell'albero:
+\begin{enumerate}
+  \item si inizia con un albero vuoto
+  \item scelgo un attributo opportuno per fare lo \textit{split} dei dati
+  \item per ogni \textit{split} dell'albero:
+  \begin{itemize}
+    \item se non c'è altro da fare si fa la predizione con l'ultimo nodo foglia
+    \item altrimenti si torna allo step 2 e si procede con un altro
+    \textit{split}
+  \end{itemize}
+\end{enumerate}
+Bisognerà capire:
+\begin{itemize}
+  \item come fare in modo ottimizzato lo `\textit{split}
+  \item quando fermare la costruzione (quindi capire quando ``non c'è altro da
+  fare'')
+\end{itemize}
+\begin{esempio}
+  Prendiamo il solito esempio giocattolo di quando andare a fare sport in base
+  al clima.\\
+  In base al valore di \textit{outlook} ottengo tre tabelle, in base al valore
+  di overcast, con target $play$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/dt2.pdf}
+  \end{figure}
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c|c|c}
+      outlook & temp & humidity & windy & play\\
+      \hline
+      overcast & H & H & $\bot$ & \color{darkgreen}{yes}\\
+      overcast & C & N & $\top$ & \color{darkgreen}{yes}\\
+      overcast & M & H & $\top$ & \color{darkgreen}{yes}\\
+      overcast & H & N & $\bot$ & \color{darkgreen}{yes}
+    \end{tabular}
+    \caption{Tabella A}
+  \end{table}
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c|c|c}
+      outlook & temp & humidity & windy & play\\
+      \hline
+      sunny & H & H & $\bot$ & \color{red}{no}\\
+      sunny & H & H & $\top$ & \color{red}{no}\\
+      sunny & M & H & $\bot$ & \color{red}{no}\\
+      sunny & C & N & $\bot$ & \color{darkgreen}{yes}\\
+      sunny & M & N & $\top$ & \color{darkgreen}{yes}
+    \end{tabular}
+    \caption{Tabella B}
+  \end{table}
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c|c|c}
+      outlook & temp & humidity & windy & play\\
+      \hline
+      rainy & M & H & $\bot$ & \color{darkgreen}{yes}\\
+      rainy & C & N & $\bot$ & \color{darkgreen}{yes}\\
+      rainy & C & N & $\top$ & \color{red}{no}\\
+      rainy & M & N & $\bot$ & \color{darkgreen}{yes}\\
+      rainy & M & H & $\top$ & \color{red}{no}
+    \end{tabular}
+    \caption{Tabella C}
+  \end{table}
+  Dividendo tramite i valori di outlook ho fatto uno \textit{split}, dividendo
+  così i dati.\\
+  Vediamo un secondo i valori del target nei vari casi:
+  \begin{itemize}
+    \item nel caso di \textit{overcast} ho 4 \textit{yes} e 0 \textit{no}
+    \item nel caso di \textit{sunny} ho 2 \textit{yes} e 3 \textit{no}
+    \item nel caso di \textit{rainy} ho 3 \textit{yes} e 2 \textit{no}
+  \end{itemize}
+  Posso quindi usare una \textbf{funzione di costo} per fissare quando una
+  distribuzione è omogenea (come nel caso di \textit{overcast}) o quando no (gli
+  altri due casi). Lo \textit{split} infatti andrebbe fatto in base ai valori
+  del target, più sono omogenei e meglio è, in quanto nel momento in cui si
+  presenta un nuovo test per la classificazione con \textit{outlook} pari a
+  \textit{overcast} saprò già cosa fare (in quanto nello storico delle
+  esperienze ho sempre avuto \textit{yes}). Le altre due situazioni sono
+  ambigue e quindi, in quei due casi, devo procedere con la costruzione
+  dell'albero per ottenere informazioni cercando di rimuovere l'incertezza.  
+\end{esempio}
+La \textbf{funzione costo} è alla base della strategia della costruzione
+dell'albero.\\
+Una strategia può essere quella ``a maggioranza'', prendendo l'attributo che con
+i suoi valori ha meno disomogeneità. Per farlo calcolo la differenza tra $yes$ e
+$no$ di ogni valore per un certo attributo (o banalmente prendo il minimo tra il
+numero di $yes$ e quello di $no$), sommandone io risultati. Scelgo
+l'attributo con più omogeneità (e quindi somma più bassa), che ha una
+distribuzione più pulita dei risultati. Se ho valori con solo
+$yes$ o solo $no$ sommo 0.
+\begin{esempio}
+  Prendendo le tre tabelle sopra, per \textit{outlook} avrei:
+  \[0+1+1=2\]
+  Se avessi avuto un attributo con:
+  \begin{itemize}
+    \item primo valore: 1 \textit{yes} e 1 \textit{no}
+    \item secondo valore: 2 \textit{yes} e 0 \textit{no}
+    \item terzo valore: 0 \textit{yes} e 4 \textit{no}
+    \item quarto valore: 2 \textit{yes} e 4 \textit{no}
+    \item quinto valore: 2 \textit{yes} e 2 \textit{no} 
+  \end{itemize}
+  avrei avuto:
+  \[1+0+0+2+2=5\]
+\end{esempio}
+Gli alberi di decisione possono essere utilizzati anche nel continuo, per
+attributi numerici.
+\begin{esempio}
+  Prendiamo le istanze definite da due attributi, $x$ e $y$ e costruisco un
+  albero di decisione che definisce in quali aree del piano ho $-$ e quali ho
+  $+$.\\
+  Si ha il seguente piano:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/dt3.pdf}
+  \end{figure}
+  E si ottiene il seguente albero decisionale:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/dt4.pdf}
+  \end{figure}
+  Dove a ciascun nodo è associata una condizione e agli archi il fatto che sia
+  verificata o meno.\\
+  Si nota come non si hanno tutte le condizioni, infatti, per esempio, con $x>3$
+  mi basta $y>7$ per trovare il $+$ e $y<7$ per il $-$ (non dovendo andare
+  specificatamente a guardare anche $y<5$ o $y>5$).
+\end{esempio}
 \subsection{Algoritmo ID3}
 Vista la difficoltà di scegliere l'albero si ha l'idea di scegliere un piccolo
 albero di partenza (o più piccoli) e ricorsivamente l'attributo più
@@ -1855,7 +2071,7 @@ Rispetto alberi decisionali si ha:
   \item le reti neurali sono meno conoscibili dopo l'esecuzione
   \item miglior accuratezza (?)
 \end{itemize}
-SI nota che ne le reti neurali ne gli alberi decisionali possono usare della
+Si nota che ne le reti neurali ne gli alberi decisionali possono usare della
 conoscenza a priori.
 \end{document} 
 
@@ -1870,4 +2086,4 @@ conoscenza a priori.
 % LocalWords:  McCulloch Pitts sigmoide Percettrone percettroni iperpiano error
 % LocalWords:  function Papert Minsky perceptron Recall feedforward layer Unit
 % LocalWords:  Linear Treshold LTU soddisfacibilità replace percettrone ALVINN
-% LocalWords:  retropropagazione
+% LocalWords:  retropropagazione nodes branches leef outcome pdf

@@ -1260,6 +1260,12 @@ dimostrabile o perlomeno per alcuni problemi si è ancora riusciti).
   \end{algorithmic}
   \caption{Algoritmo di vertex-cover approssimato}
 \end{algorithm}
+\newpage
+\begin{shaded}
+  L'algoritmo per il test di primalità funziona in $\log (n^{12})$, nella
+  versione più efficiente sviluppata da un gruppo di indiani, che arriva ad
+  ottenere un tempo polinomiale.
+\end{shaded}
 \chapter{Macchina di Turing}
 \section{Problemi intrattabili}
 Trovare una soluzione polinomiale ad un algoritmo \textbf{NP-hard} come TSP
@@ -1453,8 +1459,8 @@ Vediamo alcuni esempi di costruzione di TM:
     \[\delta\to(s_0,[\triangleright, 0,1])\to(s_0,[\triangleright, 0,1],
       \rightarrow)\]
     \[\delta\to(s_0,\sqcup)\to(s_1,\sqcup,\leftarrow)\]
-    \[\delta\to(s_0,0)\to(H,1,-)\]
-    \[\delta\to(s_0,1)\to(s_1,0,\leftarrow)\]
+    \[\delta\to(s_1,0)\to(H,1,-)\]
+    \[\delta\to(s_1,1)\to(s_1,0,\leftarrow)\]
     \[\delta\to(s_1,\triangleright)\to(H,\triangleright,-)\]
 
     ovvero scorro fino alla fine e inverto l'ultimo numero 
@@ -1464,6 +1470,193 @@ Vediamo alcuni esempi di costruzione di TM:
     \item $s_0$ è lo stato iniziale
   \end{itemize}
 \end{esempio}
+Volendo ad un certo punto si arriva allo stato finale $H$. In quel momento ho
+una nuova stringa $Y$ (il risultato delle modifiche su $X$):
+\[(H,\triangleright Y, -)\]
+e la testina non deve più spostarsi. Questa può essere interpretata come uno
+\textbf{stato di arresto}.\\
+Un altro caso è avere una computazione infinita nel caso in cui, letto un
+simbolo e lo stato, la testina ricopia il simbolo ma non si sposta ne a destra
+ne a sinistra. Oppure una testina potrebbe ``rimbalzare'' infinitamente tra due
+posizioni. Quest'ultima cosa può anche accadere tra molte posizioni, entrando
+comunque in \textbf{loop infinito}, ritornando sempre, prima o poi, in una
+configurazione (e si noti ``configurazione'', non coppia stato-simbolo) già
+avuta. In questo caso la computazione è \textbf{non terminante} e la
+computazione non produce alcun output. \textit{Quindi un insieme finito di
+  elementi (stati, simboli e possibili transazioni) può comunque descrivere un
+  comportamento infinito (infiniti passi)}.\\ 
+Analizziamo meglio gli stati terminanti $Y$ e $N$ il primo indicante che la
+stringa in input è accettata, avendo certe caratteristiche richieste, il secondo
+che la stringa viene rifiutata. Non ho quindi più bisogno della stringa in
+output, quindi posso lasciar scritto quello che voglio quando finisco, mi basta
+sapere lo stato finale $Y$ e $N$.
+\begin{esempio}
+  Sistemiamo l'esempio precedente aggiungendo il riporto, dovendo aggiungere un
+  bit. \\
+ \textit{Si indica solo la funzione di transizione}.\\
+  Scorro fino alla fine (quindi vado a destra indipendentemente dal simbolo fino
+  ad un blank):
+  \[\delta\to(s_0,[\triangleright, 0,1])\to(s_0,[\triangleright, 0,1],
+    \rightarrow)\]
+  Sono a destra dell'ultimo carattere di $X$ (avendo un blank):
+  \[\delta\to(s_0,\sqcup)\to(s_1,\sqcup,\leftarrow)\]
+  eseguo il conto tornando indietro:
+  \[\delta\to(s_1,0)\to(H,1,-)\]
+  \[\delta\to(s_1,1)\to(s_1,0,\leftarrow)\]
+  sono tornato all'inizio:
+  \[\delta\to(s_1,\triangleright)\to(s_2,1,\leftarrow)\]
+  devo ``shiftare'' tutti i caratteri (per farlo semplicemente metto
+  $\triangleright$ nel primo blank a sinistra del precedente $\triangleright$
+  arrivando nello stato $s_2$, come indicato nello step precedente):
+  \[\delta\to(s_2,\sqcup)\to(H,\triangleright,-)\]
+  (avrei comunque potuto shiftare tutte le unità a destra di una posizione, o
+  semplicemente, sapendo che ora sul nastro ho soli 0 dovrei tornare a destra di
+  un passo, cambiare il primo 0 in 1 e aggiungere uno 0 in fondo alla
+  stringa).
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio in cui una TM riconosce una stringa binaria che è
+  palindroma o meno.\\
+  \textit{Si indica solo la funzione di transizione}.\\
+  Se sono sullo start vado a destra di uno:
+  \[\delta(s_0,\triangleright)\to (s_0,\triangleright, \rightarrow)\]
+  se vedo 0 vado nello stato $zero$, scrivo $\sqcup$ e vado a destra:
+  \[\delta(s_0,0)\to (zero,\sqcup, \rightarrow)\]
+  analogo leggendo 1, andando nello stato $1$ scrivendo blank:
+  \[\delta(s_0,1)\to (one,\sqcup, \rightarrow)\]
+  vado in fondo alla stringa (qualsiasi incrocio tra gli stati $one$ e $zero $ e
+  simboli 1 e 0 legga vado a destro riscrivendo lo stesso simbolo):
+  \[\delta\to([zero, one],[0,1])\to(\delta\to([zero, one],[0,1],\rightarrow)\]
+  sono in fondo alla stringa, se sono in stato $zero$ scrivo blank e torno
+  indietro, in uno stato $zero'$:
+  \[\delta(zero, \sqcup)\to(zero', \sqcup, \leftarrow)\]
+  idem per stato $one$
+  \[\delta(one, \sqcup)\to(one', \sqcup, \leftarrow)\]
+  se sono in $zero'$ e leggo $0$ vado in stato $s_1$ e vado a sinistra: 
+  \[\delta(zero', 0)\to(s_1,\sqcup, \leftarrow)\]
+  se sono in $zero'$ e leggo $1$ la stringa non è palindroma, esco con stato
+  $N$:
+  \[\delta(zero', 1)\to(N,\sqcup, \leftarrow)\]
+  idem per stato $one'$, andando in stato $s_2$:
+  \[\delta(one', 1)\to(s_2,\sqcup, \leftarrow)\]
+  \[\delta(one', 0)\to(N,\sqcup, \leftarrow)\]
+  ora proseguo a sinistra fino ad un blank riscrivendo quanto letto:
+  \[\delta(s_1,[0,1])\to(s_1,[0,1], \leftarrow)\]
+  sono nel blank e torno allo stato iniziale, potendo ricominciare la
+  computazione:
+  \[\delta(s_1\sqcup)\to(s_0,\sqcup, \rightarrow)\]
+  ma se la stringa (di cardinalità pari) è palindroma cancello tutto, devo
+  quindi specificare che se in $s_0$ ho blank la stringa è valida:
+  \[\delta(s_0,\sqcup)\to(Y, \sqcup,-)\]
+  se invece la stringa è di cardinalità dispari, allo stato attuale, entra in
+  loop, dobbiamo quindi aggiungere un uscita d:a $zero'$ o $one'$ in questo
+  caso:
+  \[\delta([zero',one'], \sqcup)\to(Y, \sqcup, -)\]
+\end{esempio}
+\begin{esempio}
+  Scrivo una TM per decidere se la stringa in input è del tipo $a^nb^nc^n$.\\
+  \textit{Si indica solo la funzione di transizione}.\\
+  Se leggo $a$ vado nello stato $A$ e vado a destra
+  \[\delta(s_0,a)\to (A,\sqcup, \rightarrow)\]
+  Se leggo in $s_0$ $b$ o $c$ significa che non ho $a$ quindi esco:
+  \[\delta(s_0,[b,c])\to (N,\sqcup, -)\]
+  Se in $A$ trovo un'altra $a$ la lascio e vado a destra:
+  \[\delta(A,a)\to (A,a', \rightarrow)\]
+  Se in $A$ leggo $b$ vado in $B$, e vado a destra:
+  \[\delta(A,b)\to (B,b', \rightarrow)\]
+  se invece leggo $c$ non ho $b$ e esco:
+  \[\delta(A,c)\to (N,\sqcup, -)\]
+  se in $B$ e trovo $a$ non va bene:
+  \[\delta(B,a)\to (N,\sqcup, -)\]
+  Se in $B$ trovo un'altra $b$ la lascio e vado a destra:
+  \[\delta(B,b)\to (B,b, \rightarrow)\]
+  Se in $B$ leggo $c$ vado in $C$ e vado a sinistra a controllare:
+  \[\delta(B,c)\to (C,c', \leftarrow)\]
+  controllo tramite i sentinella indicati con $'$.\\
+  Siamo in $C$ quindi:
+  \[\delta(C,c')\to (C,c', \leftarrow)\]
+  Se però vedo $b$ o $b'$ resto in $C$ e riscrivo:
+  \[\delta(C,[b,b'])\to (C,[b,b'], \leftarrow)\]
+  Per $A$ cambia, se vedo $a$ scorro:
+  \[\delta(C,a)\to (C,a, \leftarrow)\]
+  ma se vedo $a'$ torno in $s_0$:
+  \[\delta(C,a')\to (s_0,a', \rightarrow)\]
+  ma ora $A$ può incontrare $b'$, che va bene, o $c'$ che non va bene:
+  \[\delta(A,b')\to (A,b', \rightarrow)\]
+  \[\delta(A,c')\to (N,\sqcuo, -)\]
+  Per $C$:
+  \[\delta(C,[b,c])\to (C,[b,c'], \rightarrow))\]
+  Se sono in $s_0$ e trovo $a'$ ho finito le $a$:
+  \[\delta(s_0,a')\to (s_0,a' , \rightarrow))\]
+  idem:
+  \[\delta(s_0,[b',c')\to (s_0,[b',c'] , \rightarrow))\]
+  Vado in stato $check$ se:
+  \[\delta(s_0,\sqcup)\to(check,\sqcup, \leftarrow)\]
+  e proseguo fino a trovare solo $b'$ o $c'$, se trovo invece $b$ o $c$ esco.
+  Diventa quindi molto lungo.
+\end{esempio}
+L'esempio sopra mostra quanto possa diventare lunga una semplice computazione
+sulla TM, ci servirebbe quindi una sorta di \textit{TM alternativa}.
+\begin{teorema}[teorema di B\"{o}hm-Jacopini]
+  Qualunque algoritmo può essere implementato utilizzando tre sole strutture, la
+  sequenza, la selezione e il ciclo, da applicare ricorsivamente alla
+  composizione di istruzioni elementari
+\end{teorema}
+\begin{definizione}
+  Si ha la \textbf{TM a $k$ nastri}, ovvero la \textbf{TM
+    multi-nastro} dove ho $k$ nastri di lettura e scrittura, magari avendo
+  l'input solo su un nastro o su multipli. La macchina quindi legge uno stato e
+  $k$ simboli $\{\sigma_1\ldots,\sigma_k\}$. Prima dello spostamento quindi
+  scrive tutti i simboli. Lo spostamento sarà uno per ogni nastro.
+\end{definizione}
+\begin{esempio}
+  Risolviamo il precedente problema (decidere se la stringa in input è del tipo
+  $a^nb^nc^n$) con $k$ nastri.\\
+  Potrei usare 4 nastri, sul primo c'è l'input. Finché trovo $a$ scrivo sul
+  primo, quando trovo $b$ passo a secondo e faccio lo stesso se leggo $c$. In
+  ogni caso mi interrompo se dopo delle $b$ trovo $a$ o dopo $c$ trovo
+  $a,b$. Infine torno indietro sui tre nastri e vedo se sono allineati.
+\end{esempio}
+Una \textbf{TM a $k$ nastri} non è più potente di una \textbf{TM a singolo
+  nastro} (vale il rapporto linguaggio di programmazione e linguaggio
+macchina). Esiste sempre una traduzione verso la TM a singolo nastro.\\
+Per esempio invece un automa a stati finiti è meno potente di un TM, che può
+spostarsi e scrivere dove vuole, a differenza degli automi.\\
+Vediamo cosa quindi può fare una TM:
+\begin{itemize}
+  \item una TM può \textbf{computare} funzioni su stringhe
+  \item una TM può \textbf{decidere} (rispondendo $Y$ o $N$) un linguaggio
+  (ovvero un insieme finito o infinito di stringhe, come il caso sopra
+  $a^nb^nc^n$), ovvero data una stringa in input è sempre in grado di dire se
+  appartiene o meno al linguaggio. Un linguaggio è \textbf{decidibile}, o, più
+  formalmente, \textbf{ricorsivo}, se esiste
+  almeno una TM che decide il linguaggio, fermandosi sempre in $Y$ o
+  $N$. Solitamente è un linguaggio finito, ma potrebbe anche essere infinito (ma
+  tutte le stringhe sarebbero comunque riconoscibili)
+  \item una TM può \textbf{accettare} un linguaggio, ovvero se fornisco una
+  stringa in input che appartiene al linguaggio la riconosce come tale e prima o
+  poi arriva allo stato $Y$, altrimenti la macchina potrebbe:
+  \begin{itemize}
+    \item fermarsi in uno stato $N$
+    \item entrare in un loop infiniti, non avendo mai la risposta ma magari in
+    realtà non è un loop infinito ma solo servono anni per avere la risposta
+  \end{itemize}
+  Quindi la TM non è in grado di distinguere completamente le stringhe che non
+  fanno parte di un linguaggio. Un linguaggio è \textbf{linguaggio
+    ricorsivamente enumerabile} è un linguaggio per cui data una stringa in
+  input buona la TM si ferma, altrimenti la TM potrebbe o fermarsi o andare
+  avanti all'infinito nella computazione. Posso enumerare tutte le stringhe che
+  fanno parte del linguaggio. Potrei quindi avere un linguaggio infinito ma con
+  stringhe che mandano in loop la TM. Ci sono linguaggi che si può dimostrare
+  essere ricorsivamente enumerabili (e alcuni che non sono nemmeno
+  ricorsivamente enumerabili)
+\end{itemize}
+Ricordiamo comunque che esistono problemi irrisolvibili, dimostrati tali, come la
+soluzione di \textit{equazioni Diofantee}.
+
+
+
+
 \chapter{Pattern matching}
 Il \textbf{pattern matching} si occupa di ricercare un pattern $P$ in un testo
 $T$. Si hanno:
@@ -1760,4 +1953,5 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  exptime all img problem png independent ind nell CNF definsice
 % LocalWords:  soddisfacibilità polinomialmente dell clique matching naive edit
 % LocalWords:  sottostringa preprocessamento sottostringhe baacagahabaac step
-% LocalWords:  halt approximation greedy lower bound return
+% LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
+% LocalWords:  Jacobini Jacopini Diofantee

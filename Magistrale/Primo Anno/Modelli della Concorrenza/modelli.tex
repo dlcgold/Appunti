@@ -1916,13 +1916,13 @@ Dare un significato tramite LTS, regole di inferenza e sintassi è detto
 \textbf{semantica operazionale strutturale}.\\
 Un processo CCS può essere:
 \begin{itemize}
-  \item \textit{Nil} o $0$ che ha un solo stato senza transizioni
+  \item \textbf{Nil} o $0$ che ha un solo stato senza transizioni
   \begin{center}
     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
       \node[state] (q_0) {$Nil$};
     \end{tikzpicture}
   \end{center}
-  \item \textit{prefisso}, in cui si ha $\alpha\cdot p,\,\alpha\in Act,\,p\in
+  \item \textbf{prefisso}, in cui si ha $\alpha\cdot p,\,\alpha\in Act,\,p\in
   processi$, con la regola di inferenza:
   \[\frac{}{\alpha\cdot p\stackrel{\alpha}{\rightarrow}p}\]
   \begin{center}
@@ -1933,7 +1933,7 @@ Un processo CCS può essere:
       (q_0) edge  node {$\alpha$} (q_1);
     \end{tikzpicture}
   \end{center}
-  \item \textit{Somma}, $p_1+p_2,\,\,p_1,p_2\in processi$, con la regola di
+  \item \textbf{Somma}, $p_1+p_2,\,\,p_1,p_2\in processi$, con la regola di
   inferenza (il $+$ è la ``scelta'', come nella regex), avendo $\alpha,\beta\in
   Act$ e $p_1',p_2'\in processi$:
   \[\frac{p_1\stackrel{\alpha}{\rightarrow}p_1'}{p_1+p_2
@@ -1951,7 +1951,8 @@ Un processo CCS può essere:
       (q_0) edge  node [above left] {$\beta$} (q_2);
     \end{tikzpicture}
   \end{center}
-  \item posso avere $\sum_{i\in I}p_i$ avendo multiple somme di processi:
+  \item posso avere $\sum_{i\in I}p_i$ avendo \textbf{multiple somme di
+    processi}: 
   \[\frac{p_j\stackrel{\alpha}{\rightarrow}p_j'}{\sum_{i\in
         I}p_i\stackrel{\alpha}{\rightarrow}p_j0},\,j\in J\]
   e quindi se $I=\emptyset$ avrò che $\sum_{i\in I}p_i=Nil$.\\
@@ -2012,10 +2013,12 @@ Un processo CCS può essere:
   corrisponde a $a\cdot p_1'|\overline{a}\cdot p_2'$, e, l'LTS corrisponde a:
   \begin{center}
     \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto]
-      \node[state] (q_0) {$a\cdot p_1'|\overline{a}\cdot p_2'$};
-      \node[state] (q_1) [below right=of q_0] {$\overline{a}\cdot p_1'|p_2'$};
-      \node[state] (q_3) [below left=of q_0] {$p_1'|\overline{a}\cdot p_2'$};
-      \node[state] (q_2) [below right =of q_3] {$p_1'|p_2'$};
+      \node[state] (q_0) {\small{$a\cdot p_1'|\overline{a}\cdot p_2'$}};
+      \node[state] (q_1) [below right=of q_0] {\small{$a\cdot p_1'|p_2'$}};
+      \node[state] (q_3) [below left=of q_0] {\small{$p_1'|\overline{a}\cdot
+          p_2'$}};
+      
+      \node[state] (q_2) [below right =of q_3] {\small{$p_1'|p_2'$}};
       \path[->]
       (q_0) edge  node {$\overline{\alpha}$} (q_1)
       (q_1) edge  node {$\alpha$} (q_2)
@@ -2031,7 +2034,7 @@ Un processo CCS può essere:
   locali a $P$. Avendo quindi:
   \[\frac{p\stackrel{\alpha}{\rightarrow}p'}{P_{\backslash L}
       \stackrel{\alpha}{\rightarrow}p'_{\backslash L}}
-    ,\,\alpha,\overline{\alpha}\in L,\,\,L\subseteq A\]
+    ,\,\alpha,\overline{\alpha}\not\in L,\,\,L\subseteq A\]
   \item \textbf{rietichettatura}, ovvero il cambiamento di nome ad una
   componente, ad una certa azione, per poter riusare tale nome. Ho quindi una
   funzione $f$ tale che:
@@ -2047,9 +2050,228 @@ Un processo CCS può essere:
       \stackrel{f(\alpha)}{\rightarrow}p'_{[f]}}\]
   Ho quindi che:
   \[\frac{p\stackrel{\alpha}{\rightarrow}p'}{k
-      \stackrel{\alpha}{\rightarrow}p'},\,\,\iff k=p\]
+      \stackrel{\alpha}{\rightarrow}p'}\iff k=p\]
 \end{itemize}
-Quindi dato un CCS posso associare un LTS.
+Quindi dato un CCS posso associare un LTS per quanto riguarda la semantica.\\
+Si ha una \textbf{precedenza degli operatori}, da quello con meno precedenza a
+quello con più precedenza: 
+\begin{enumerate}
+  \item restrizione
+  \item rietichettatura
+  \item prefisso
+  \item composizione parallela
+  \item somma
+\end{enumerate}
+\begin{esempio}
+  Avendo:
+  \[R+a\cdot p\,\,|\,\,b\cdot Q_{\backslash L}\]
+  sarebbe:
+  \[R+((a\cdot p)\,\,|\,\,b\cdot(Q_{\backslash L}))\]
+\end{esempio}
+\begin{esempio}
+  Esercizio bonus:
+  \[((a\cdot p_'+\overline{b}\cdot p_1'')|(\overline{a}\cdot p_2'+b\cdot
+    p_2''))_{\{a\}}\]
+  costruisco l'LTS associato ad $a$.
+\end{esempio}
+Analizziamo meglio la \textbf{composizione parallela}.\\
+\begin{esempio}
+  Si ha:
+  \[a\cdot Nil\,\,|\,\,\overline{a}\cdot Nil\]
+  ovvero:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+      \node[state] (q_0) {\footnotesize{$a\cdot Nil\,\,|\,\,\overline{a}\cdot
+          Nil$}}; 
+      \node[state] (q_1) [below right=of q_0] {\footnotesize{$a\cdot
+          Nil\,\,|\,\,Nil$}};  
+      \node[state] (q_3) [below left=of q_0]
+      {\footnotesize{$Nil\,\,\,\,|\,\,\overline{a}\cdot Nil$}}; 
+      \node[state] (q_2) [below right =of q_3] {\footnotesize{$Nil|Nil$}};
+      \path[->]
+      (q_0) edge  node {$\overline{\alpha}$} (q_1)
+      (q_1) edge  node {$\alpha$} (q_2)
+      (q_3) edge  node [below left]{$\overline{\alpha}$} (q_2)
+      (q_0) edge  node [above left]{$\alpha$} (q_3)
+      (q_0) edge  node [above left] {$\tau$} (q_2);
+    \end{tikzpicture}
+  \end{center}
+  Posso quindi eseguire le due operazioni o in una sequenza o nell'altra.\\
+  Ho quindi una \textbf{simulazione sequenziale non deterministica} del
+  comportamento del sistema dato dalla composizione parallela.
+\end{esempio}
+Quanto visto in questo esempio è possibile perché nell'ipotesi di Milner si ha
+che $a$ e $\overline{a}$ sono \textbf{operazioni atomiche}.\\
+Si hanno anche modelli di CCS modellati con:
+\begin{itemize}
+  \item reti di Petri
+  \item strutture ad eventi
+\end{itemize}
+ovvero due modelli in cui si considera la semantica basata sulla \textbf{true
+  concurrency}, a \textit{ordini parziali}, ovvero non si impongono sequenze
+quindi due processi o si sincronizzano o vengono eseguiti in modo concorrente.
+\begin{esempio}
+  Costruisco il sistema di transizioni della specifica:
+  \[S=\overline{lez}\cdot S\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$S$};
+      \path[->]
+      (q_0) edge [loop right]  node {$\overline{lez}$} (q_0);
+    \end{tikzpicture}
+  \end{center}
+  avendo:
+  \[Uni=(M|LP)_{\{\backslash coin, caffe\}}\]
+  Ho,seguendo nei vari step le regole di inferenza legate alla
+  sincronizzazione:
+  
+  \[(coin\cdot \overline{caffe}\cdot
+    M\,\,|\,\,\overline{lez}\cdot\overline{coin}\cdot caffe\cdot
+    LP)_{\{\backslash coin, caffe\}}\]
+  eseguo $\overline{lez}$ passo a:
+  \[(coin\cdot \overline{caffe}\cdot
+    M\,\,|\,\,\overline{coin}\cdot caffe\cdot
+    LP)_{\{\backslash coin, caffe\}}\]
+  sincronizzo con $coin$ e quindi passo con $\tau$:
+  \[(\overline{caffe}\cdot
+    M\,\,|\,\, caffe\cdot
+    LP)_{\{\backslash coin, caffe\}}\]
+  sincronizzo con $caffe$ e quindi passo con $\tau$:
+   \[(coin\cdot \overline{caffe}\cdot
+    M\,\,|\,\,\overline{lez}\cdot\overline{coin}\cdot caffe\cdot
+    LP)_{\{\backslash coin, caffe\}}\]
+  tornando all'inizio.\\
+  (in realtà avrei i nodi per ogni formula e gli archi etichettati prima con
+  $\overline{lez}$ e poi con $\tau$ per gli ultimi due)\\
+  (\textbf{I due $\tau$ non possono avvenire ottemperantemente}).\\
+  
+\end{esempio}
+Posso infine chiedermi, vedendo l'esempio sopra, se $Uni$ implementa $S$, vista
+come specifica. Quindi mi chiedo se posso quindi sostituire $S$ con $Uni$.\\
+Innanzitutto per poter dire che una certa implementazione soddisfa (indicata con
+$implementazione \vbdash specifica$) una certa
+specifica o se due implementazioni diverse soddisfano la stessa specifica ci
+serve una \textbf{relazione di equivalenza} tra processi CCS, ovvero una $R$:
+\[R\subseteq P_{CCS}\times P_{CCS}\]
+che sia:
+\begin{itemize}
+  \item riflessiva
+  \item simmetrica
+  \item transitiva
+\end{itemize}
+Bisognerà inoltre astrarre:
+\begin{itemize}
+  \item gli stati e considerare le azioni $Act$
+  \item dalle sincronizzazioni interne, ovvero dalle $\tau$
+  \item rispetto al non determinismo
+\end{itemize}
+Milner poi asserisce che $R$ deve essere inoltre una \textbf{congruenza}
+rispetto agli operatori del CCS.\\
+\begin{definizione}
+  Una relazione di equivalenza $R$ è una \textbf{congruenza} sse:
+  \[\forall \,\,p,q\in Proc_{CCS} \land \forall c[\cdot] \mbox{ contesto CCS}\]
+  (avendo quindi un contesto CCS sostituibile con qualcosa)\\
+  allora:
+  \[\mbox{se }pRq\mbox{ allora si ha }c[p]\,R\,\,c[q]\]
+\end{definizione}
+\begin{esempio}
+  Preso $Uni=(M\,\,|\,\,LP)_{\{caffe,coin\}}$ posso dire che prendo il contesto:
+  \[(\cdot\,\,|\,\,LP)_{\{caffe,coin\}}\]
+  se $M_1\,R\,M_2$ allora deve succedere che:
+  \[(M_1\,\,|\,\,LP)_{\{caffe,coin\}}\,R\,\,(M_2\,\,|\,\,LP)_{\{caffe,coin\}}\]
+  quindi posso sostituire l'uno con l'altro senza avere conseguenze, essendo
+  equivalenti.
+\end{esempio}
+\begin{teorema}
+  Dati due processi $p_1$ e $p_2$ a cui assegniamo i due LTS $v_1$ e $v_2$. I
+  due processi sono equivalenti se $v_1$ e $v_2$ sono isomorfi. Possiamo in
+  realtà cercare qualcosa di ``meno forte'' rispetto all'isomorfismo ma che
+  garantisca lo stesso risultato.\\
+  Si va a vedere quindi se i due LTS \textbf{ammettono le stesse sequenze di
+    operazioni}, prendendo l'\textbf{equivalenza forte} tra automi a stati
+  finiti. Questa è detta \textbf{equivalenza rispetto alle tracce} (che vale
+  anche per due programmi, che sono equivalenti se implementano la stessa
+  sequenza di istruzioni, lo stesso algoritmo). \textit{È comunque più forte di
+    dire che hanno la stessa precondizione e postcondizione.}\\
+  \textbf{Bisognerà discutere la cosa rispetto alla congruenza}.\\
+   Preso $p\in Proc_{CCS}$ ho l'insieme delle traccie di $p$:
+  \[tracce(p)=\{w\in Act^*|\,\exists\,p'\in Proc_{CCS}
+    \,\,p\stackrel{w}{\rightarrow} p'\}\]
+  \textit{Suppongo, per ora, di non considerare le sincronizzazioni (quindi
+    senza $\tau$).} 
+\end{teorema}
+\begin{teorema}
+  Preso $p'\in Proc_{CCS}$ ho che è equivalente rispetto alle tracce a $p''$,
+  scritto:
+  \[p'\stackrel{T}{\sim} p''\]
+  sse:
+  \[tracce(p')=tracce(p'')\]
+\end{teorema}
+\begin{esempio}
+  Vediamo quindi un esempio.\\
+  Prendo il sistema:
+  \[(LP|M_i)\_{\{coin,caffe\}}\]
+  \[LP=\overline{lez}\\cdot coin\cdot \overline{coffe}\cdto LP\]
+  suppongo di avere due macchinette $M$ che erogano sia caffè che $tea$, per il
+  primo basta una moneta e per il secondo due.\\
+  La prima macchina è::
+  \[M_1=\overline{coin}\cdot(caffe\cdot M_1+\overline{coin}\cdot tea\cdot M_1)\]
+  la seconda:
+  \[M_2=\overline{coin}\cdot(caffe\cdot M_2+\overline{coin}\cdot coin \cdot
+    tes\cdot M_1)\]
+  Mi chiedo se:
+  \[M_1\stackrel{T}{\sim} M_2\]
+  \newpage
+  Parto da $M_1$:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=5cm,on grid,auto]
+      \node[state] (q_0) {$M_1$}; 
+      \node[state] (q_1) [below=of q_0] {\footnotesize{$caffe\cdot
+        M_1+\overline{coin}\cdot tea\cdot M_1$}};  
+      \node[state] (q_2) [right=of q_1]
+      {$tea\cdot M_1$}; 
+      
+      \path[->]
+      (q_0) edge  node {$\overline{\coin}$} (q_1)
+      (q_1) edge  node [above]{$\overline{coin}$} (q_2)
+      (q_2) edge  node [above right] {$tes$} (q_0)
+      (q_1) edge [bend left= 25] node [above left] {$caffe$} (q_0);
+    \end{tikzpicture}
+  \end{center}
+  Passo ad $M_2$:
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+     \node[state] (q_0) {$M_2$}; 
+      \node[state] (q_1) [below right=of q_0] {$\overline{coin}\cdot tea\cdot
+        M_2$};
+      
+      \node[state] (q_2) [below left=of q_0]
+      {$caffe\cdot M_2$};
+      \node[state] (q_3) [above right=of q_0]
+      {$tea\cdot M_2$}; 
+      
+      \path[->]
+      (q_0) edge  node {$\overline{coin}$} (q_2)
+      (q_0) edge  node {$\overline{coin}$} (q_1)
+      (q_1) edge [right] node {$\overline{coin}$} (q_3)
+      (q_3) edge  node {$tea$} (q_0)
+      (q_2) edge [bend left= 25] node [above left] {$caffe$} (q_0);
+    \end{tikzpicture}
+  \end{center}
+  Si vede quindi che le tracce di $M_1$ sono le stesse di quelle di $M_2$.
+  Presi:
+  \[(LP|M_1)\_{\{coin,caffe\}}\]
+  \[(LP|M_2)\_{\{coin,caffe\}}\]
+  Si nota che $M_2$ può andare in deadlock, avendo due processi che iniziano con
+  $\overline{coin}$ (non posso sapere dove va e se vedo sul nodo $caffe$ ma
+  voglio $the$ è un problema (?)). Quindi anche se le tracce sono le stesse ma
+  non posso sostituire senza problemi le due macchinette
+
+\end{esempio}
+Per ovviare al problema sopra descritto si ha la \textbf{bisimulazione}. $M_1$ e
+$M_2$ non sono equivalenti rispetto alla \textbf{bisimulazione} e quindi non
+posso sostituire l'una con l'altra:
+\[M_1\stackrel{Bis}{\not\sim}M_2\]
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -2061,5 +2283,5 @@ Quindi dato un CCS posso associare un LTS.
 % LocalWords:  Communicating Systems CCS composizionalità Milner communicating
 % LocalWords:  sequential CSP transputer hand shacking process processes System
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
-% LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura
-% LocalWords:  rinominazione
+% LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
+% LocalWords:  rinominazione true LocalWords

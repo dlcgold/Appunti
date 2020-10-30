@@ -2428,6 +2428,189 @@ Rispetto alberi decisionali si ha:
 \end{itemize}
 Si nota che ne le reti neurali ne gli alberi decisionali possono usare della
 conoscenza a priori.
+\section{Support Vector Machines}
+Parliamo ora delle \textbf{Support Vector Machines (\textit{SVM})}.\\
+Se il percettrone semplice impara solo funzioni di separazione lineari, quello
+multistrato anche funzioni di separazione non lineari complesse (ma con
+difficoltà di addestramento avendo molti minimi locali e tanti pesi) le SVM
+presentano un algoritmo di apprendimento efficiente e imparano funzioni di
+separazione non lineari complesse.\\
+Viene quindi ripreso comunque il concetto di \textit{separazione lineare} ma con
+una scelta efficiente dell'iperpiano, trovando il \textbf{miglior iperpiano
+  separatore}, per classificare un insieme di punti linearmente separabili,
+trovando un vettore di pesi $W$ per separare bene le istanze. Si usa la
+cosiddetto \textbf{teoria statistica dell’apprendimento} che dice che tra tutti
+gli iperpiani che possiamo usare per separare due classi si sceglie quello che
+sia in grado di etichettare meglio nel futuro. L'intuizione è quella di prendere
+un iperpiano ottimo rispetto alla misura della distanza minima che si ha tra gli
+esempi, si guardano quindi tutti i punti del training set e cerco di piazzare in
+mezzo l'iperpiano, in modo che intorno ad esso ci sii massima ampiezza. Tale
+ampiezza è detta margine (volendo che sia massima la distanza minima tra tutti i
+punti). SVM usa questa teoria per trovare l'iperpiano ``migliore'' in base a
+questi calcoli probabilistici. \\
+% magari pic
+Non si parla quindi più di neuroni.\\
+e riuscissimo a separare i dati con un largo margine
+avremmo ragione di credere che il classificatore (ovvero l'iperpiano stesso) sia
+``più robusto'' tanto da avere una migliore generalizzazione (assunto che i
+punti siano generati da una certa regola).
+Quando arriva quindi un nuovo punto, generato con la stessa regola degli altri,
+sarà sicuramente classificato correttamente, una volta scelto l'iperpiano.\\
+Ci serve quindi la separabilità delle istanze, serve quindi che la funzione
+generatrice sia linearmente separabile.
+\begin{teorema}[dimensione di Vapnik-Cervonenkis]
+  Con la teoria statistica dell'apprendimento si dimostra che più allarghiamo il
+  margine meglio l’iperpiano generalizza, raggiungendo la dimensione di
+  Vapnik-Cervonenkis (VC).\\
+  Prese tutte le funzioni che generano il training set si produce la VC che
+  esprime quanto è difficile sbagliare sulle ipotesi future in base alla scelta
+  dell'iperpiano.
+\end{teorema}
+Dobbiamo quindi scrivere un algoritmo per trovare l'iperpiano di separazione di
+massimo margine. In input si hanno le istanze etichettate e in output un
+vettore che identifica l'iperpiano.\\
+Viene usata una notazione matematica che prevede che, preso un insieme di punti
+di training:
+\[S = \{(x_1,y_1), (x_2,y_2),\ldots, (x_n,y_n)\}\]
+ad ogni vettore $x_i$ associo la classe di appartenenza $y_i$ (con un etichetta
+non booleana):
+\[y_i\in\{-1,+1\}\]
+Ho i punti linearmente separabili:
+\[
+  \begin{cases}
+    \langle w,x_i\rangle + b >0 &\mbox{ se }y_i=+1\\
+    \langle w,x_i\rangle + b <0 &\mbox{ se }y_i=-1\\
+  \end{cases}
+\](quindi l'iperpiano separa positivi e negativi)\\
+che scritto in un solo vincolo diventa:
+\[y_i(\langle w,x_i\rangle + b )>0,\,\,\,i)1,\ldots, n\]
+Si ha che $w$ mi dirà quanto è inclinato il piano mentre $b$ è la distanza tra
+l'origine e il piano (quindi queste due variabili identificano i vari iperpiani
+possibili tra cui cercare il ``migliore'' ovvero quello che separa meglio punti
+positivi e negativi).\\
+Ci si sposta quindi dalla geometria visualizzabile all'algebra lineare.\\
+L'ipotesi quindi tra $w$ e $b$ è una funzione che prende il segno di $<langle
+w,x\rangle+b$ per associare l'etichetta:
+\[h_{w,b}(x)=sgn(\langle w,x\rangle+b)\]
+Date $d_-$ e $d_+$ le distanze tra l’iperpiano separatore e il punto positivo e
+negativo più vicino definiamo:
+\begin{itemize}
+  \item margine funzionale
+  
+  \item margine geometrico
+\end{itemize}
+Si sta cercando:
+\[\min \tau(w)=\frac{1}{2}\norm{w}^2 \mbox{ t.c. }y_i(\langle w,x_i\rangle + b
+  )\geq 1\]
+ovvero:
+\[w=\sum_{i\in Q}\alpha_i\cdot x_i\]
+Ovvero scritta in termini di un sottoinsieme di esempi del training set (noto
+come vettori di supporto) che giacciono sul margine dell’iperpiano, prendendo
+una somma pesata dei contenuti dei vettori.\\
+% pic pagina 36
+Il passaggio finale è che se ho $\langle w,x\rangle+b$ che indicano cosa ho
+appreso, se ricevo un vettore $x$ da classificare posso determinare l'etichetta:
+\[sgn(\langle w,x\rangle+b)=sgn\left(\Big\langle\sum_{i\in Q}\alpha_i\cdot
+    x_i,x\Big\rangle +b\right)=sgn\left(\sum_{i\in Q}\alpha_i\langle x_i,x\rangle
+    +b\right)\]
+Quindi la funzione di decisione associata alla soluzione può essere scritta in
+termini del prodotto interno tra i vettori di supporto (\textit{support vector})
+$x_i$ e il vettore da classificare $x$.\\
+$\alpha$ viene elaborato dai vettori di supporto ma non verrà ora trattato.\\
+Passiamo quindi oltre alla sola separabilità lineare.\\
+Si usa lo stesso approccio rivedendo la formulazione tramite i \textbf{metodi
+  kernel}. Si cerca di mappare lo spazio di input in un nuovo spazio, (in
+generale di dimensione maggiore), in cui i punti siano linearmente separabili,
+per classificare mediante superfici non lineari.\\
+% immagine pagina 39
+Dobbiamo trovare una funzione:
+\[\Phi:\mathbb{R}^n\to \mathbb{R}^m,\mbox{con }m>n\]
+chemappi i dati iniziali non linearmente separabili in uno spazio di dimensione
+superiore in cui siano linearmente separabili.\\
+In questo nuovo spazio la funzione di decisione che classifica l'input $x$ è:
+\[sgn\left(\sum_{i\in Q}\alpha_i\langle \Phi(x_i),\Phi(x)\rangle+b\right)\]
+Il calcolo delle funzioni $\Phi$ è generalmente computazionalmente pesante ma è
+semplificato nel caso di \textbf{funzioni kernel}.
+\begin{definizione}
+  Definiamo una \textbf{funzione kernel}. Data una trasformazione
+  $\Phi:\mathbb{R}^n\to \mathbb{R}^m$ una \textbf{funzione kernel} è una mappa:
+  \[K:\mathbb{R}^n\times \mathbb{R}^n\to \mathbb{R}\mbox{
+      t.c. }K(x,y)=\Phi(x)\cdot \Phi(y)\]
+\end{definizione}
+\begin{definizione}
+  Si definisce quindi il \textbf{kernel trick} che consiste nel computare il
+  prodotto interno delle trasformare di due vettori $x$ e $y$, tramite $\Phi$,
+  senza computare le trasformate, semplificando il calcolo di:
+  \[sgn\left(\sum_{i\in Q}\alpha_i\langle \Phi(x_i),\Phi(x)\rangle+b\right)\]
+  sostituendo $\Phi(x_i)\cdot\Phi(x)$ con $K(x_i,x)$, ottenendo:
+  \[sgn\left(\sum_{i\in Q}\alpha_i\cdotK(x_i,x)+b\right)\]
+  con:
+  \[K(x,y)=\langle \Phi(x),\Phi(y)\rangle\]
+  Non si cercano tutte le possibili trasformazioni ma solo alcune.
+\end{definizione}
+\begin{esempio}
+  Sia:
+  \[\Phi:\mathbb{R}^2\to \mathbb{R}^3\]
+  con rispettivamente $(x,y)$ e $(r,s,t)$\\
+  tale che;
+  \[r=x^2,\,\,s=y^2,\,\,t=\sqrt{2xy}\]
+  presi $p_1=(x_1,y_1),p_2=(x_2,y_2\in\mathbb{R}^2$ ho il loro prodotto interno
+  delle loro immagini in $\mathbb{R}^3$:
+  \[(x_1^2,y_1^2,\sqrt{2x_1y_1})\cdot
+    [(x_2^2,y_2^2,\sqrt{2x_2y_2})=(x_1x_2)^2+(y_1y_2)^2+2x_1x_2x_2y_2\]
+  ma questo è il quadrato del prodotto interno tra $p_1$ e $p_2$:
+  \[[(x_1,y_1)+(x_2,y_2)]^2=(x_1x_2+y_1y_2)^2\]
+  non dovendo quindi calcolare immagini in $\mathbb{R}^3$
+\end{esempio}
+% immagine pagina 26
+Si hanno alcune proprietà:
+\begin{itemize}
+  \item se i dati sono mappati in uno spazio di dimensioni sufficientemente
+  elevate, saranno quasi sempre linearmente separabili
+  \item quattro dimensioni sono sufficienti per separare linearmente un cerchio
+  in qualsiasi punto del piano
+  \item cinque dimensioni sono sufficienti per separare linearmente qualsiasi
+  ellisse
+  \item se abbiamo $N$ esempi sono sempre separabili in spazi di dimensioni
+  $N-1$ o più
+  \item calcolare $K(x,y)$ può essere molto economico anche se $\Phi(x)$ è molto
+  costoso, ad esempio con vettori di dimensione elevata e, in tali casi (che
+  vanno dimostrati), si
+  addestrano le SVM nello spazio di dimensionalità maggiore senza mai dover
+  trovare o rappresentare esplicitamente i vettori $\Phi(x)$
+\end{itemize}
+\begin{esempio}
+  Si data la trasformazione:
+  \[\Phi:\mathbb{R}^3\to \mathbb{R}^{10}\]
+  tale che:
+  \[\Phi(x)=(1,
+    \sqrt{2x_1},\sqrt{2x_2},\sqrt{2_3},\sqrt{2x_1x_2},\sqrt{2x_1x_3},
+    \sqrt{2_1x_3},x_1^2,x_2^2,x_3^2)\]
+  ovvero i 10 possibili monomi fino al grado due ottenuti da tre variabili. Si
+  ha che:
+  \[\Phi(x)\cdot\Phi(y)=1+2\cdot\sum_1^dx_iy_i+2\cdot\sum_1^dx_i^2y_i^2+2\cdot\sum_{i,j}
+    x_ix_jy_iy_j=(1+xy)^2\]
+  
+\end{esempio}
+Vediamo una lista di kernel standard:
+\begin{itemize}
+  \item \textbf{lineare}:
+  \[K(x,y)=x\cdot y\]
+  \item \textbf{polinomiale}:
+  \[K(x,y)=(1+x\cdot y)^d\]
+  \item \textbf{radial basis function}:
+  \[K(x,y)=e^{-y\norm{x-y}^2}\]
+  \item \textbf{gaussian radial basis function}:
+  \[K(x,y)=e^{-\frac{(x-y)^2}{2\sigma^2}}\]
+  \item \textbf{percettrone multistrato}:
+  \[K(x,y)=\tanh (b(x\cdot y) -c)\]
+\end{itemize}
+\begin{teorema}
+  Un kernel definisce una matrice $K_{ij}$ che è simmetrica e definita positiva
+\end{teorema}
+\begin{teorema}[teorema di Mercer]
+  Ogni matrice simmetrica e definita positiva è un kernel
+\end{teorema}
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -2441,4 +2624,6 @@ conoscenza a priori.
 % LocalWords:  McCulloch Pitts sigmoide Percettrone percettroni iperpiano error
 % LocalWords:  function Papert Minsky perceptron Recall feedforward layer Unit
 % LocalWords:  Linear Treshold LTU soddisfacibilità replace percettrone ALVINN
-% LocalWords:  retropropagazione nodes branches leef outcome pdf red Shannon
+% LocalWords:  retropropagazione nodes branches leef outcome pdf red Shannon VC
+% LocalWords:  Support Vector Machines SVM Machines Vector Support LocalWords
+% LocalWords:  iperpiani Cervonenkis Vapnik support vector kernel trick

@@ -1019,7 +1019,443 @@ rientrano nell'ottica dei metodi agili. Quindi un'organizzazione può usare i
 metodi agili ed essere standardizzata rispetto CMMI raggiungendo un
 \textit{maturity level} 2 o 3.\\
 CMMI è quindi uno standard industriale con certificazioni ufficiali.
-\end{document}
+\chapter{Requirements engineering}
+Quando si parla di \textbf{requirements engineering (\textit{RE},
+  ingegnerizzazione dei requisiti)} di fatto ci si concentra sulla comprensione
+di come una soluzione software si deve comportare per risolvere un certo
+problema. In questo senso bisogna prima comprendere quale sia il\textbf{
+  problema} da risolvere e in quale \textbf{contesto} tale problema si verifica,
+per poter arrivare ad una soluzione corretta ed efficacie a problemi
+``reali''. Bisogna ben comprendere il problema, non si parla quindi della
+progettazione in se, ma del ``cosa'' deve fare il software.
+\begin{esempio}
+  Vediamo un esempio banale.\\
+  Bisogna sviluppare il software per l'\textit{adaptive cruise control}. In
+  questo caso si ha:
+  \begin{itemize}
+    \item il \textit{problema} che consiste nel seguire correttamente la
+    macchina che si ha davanti in autostrada
+    \item il \textit{contesto} che consiste in:
+    \begin{itemize}
+      \item guida della macchina
+      \item intenzioni del guidatore
+      \item norme di sicurezza
+      \item etc$\ldots$
+    \end{itemize}
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+  Vediamo ora l'analogia classica per spiegare il RE, il \textup{problema mondo}
+  e la \textup{soluzione macchina}.\\
+  Si hanno:
+  \begin{itemize}
+    \item il \textbf{mondo}, con un problema derivante dal mondo reale, mondo
+    stesso che produce tale problema che bisognerà risolvere con un
+    calcolatore. Si hanno all'interno:
+    \begin{itemize}
+      \item \textup{componenti umane}, ovvero staff, operatori, organizzazioni
+      etc$\ldots$
+      \item \textup{componenti fisiche}, ovvero device, software legacy, madre
+      natura etc$\ldots$
+    \end{itemize}
+    \item la \textbf{macchina}, che bisogna sviluppare per risolvere il
+    problema. Si ha necessità quindi di:
+    \begin{itemize}
+      \item \textup{software} da sviluppare o acquistare
+      \item \textup{piattaforma hardware/software}, con eventuali device annessi
+    \end{itemize}
+    
+    \item \textup{requirements engineering} che si occupa di:
+    \begin{itemize}
+      \item definire gli effetti della \textup{macchina} sul problema del
+      \textup{mondo} 
+      \item definire assunzioni e proprietà principali del \textup{mondo} stesso
+    \end{itemize}
+  \end{itemize}
+  Macchina e mondo possono condividere alcuni componenti, con la macchina che
+  modifica il mondo (nell'esempio precedente la macchina che disattiva il cruise
+  control agisce sia a livello software che a livello del mondo esterno). Nei RE
+  studiamo quindi il \textup{mondo}, senza definire come funziona internamente
+  la macchina (nelle parti che non interagiscono direttamente col mondo, per
+  esempio scelte di design etc\ldots).
+\end{esempio}
+Quando si parla di RE è bene distinguere due elementi:
+\begin{enumerate}
+  \item ogni volta che prendiamo in consideriamo un problema esiste sempre un
+  \textbf{system-as-is}, ovvero un sistema preesistente che già risolve il
+  problema (anche se magari in modo non efficiente o qualitativamente
+  sufficiente). Si ha quindi sempre un sistema da cui partire (esempio banale
+  per il cruise control è dire che in realtà la soluzione al problema già esiste
+  con la guida senza cruise control)
+  \item esiste sempre un \textbf{system-to-be}, ovvero il sistema che si andrà a
+  realizzare. In altre parole è il sistema quando la \textit{macchina/software}
+  ci opera sopra
+\end{enumerate}
+Studiare il \textit{system-as-is} è essenziale per poter lavorare al
+\textit{system-to-be}.
+\newpage
+\begin{definizione}
+  Il requirements engineering è, formalmente, un insieme di attività:
+  \begin{itemize}
+    \item per esplorare, valutare, documentare, consolidare, rivisitare e
+    adattare gli obiettivi, le capacità, le qualità, i vincoli e le ipotesi su
+    un \textup{system-to-be} 
+    \item basate sul problema sorto dal \textit{system-as-is} e sulle nuove
+    opportunità tecnologiche
+  \end{itemize}
+  L'output di queste attività è un \textbf{documento di specifica dei requisiti}
+  con tutto ciò che soddisfa il sistema. Se l'output non è un singolo documento
+  si ha una collezione di singoli requisiti, che nel metodo agile sono
+  \textit{storie/cards} e in altri metodi un repository centrale con un db
+  condiviso contenete i vari requisiti.\\
+  In ogni caso si ha un insieme di requisiti su come si deve comportare il
+  sistema che si realizza, descrivendo quanto descritto nei punti precedenti.
+\end{definizione}
+In un modello simil-cascata di sviluppo software il RE è una delle primissime
+attività, subito dopo quelle di definizione del sistema e di business plan. Per
+gli aspetti tecnici è probabilmente la prima attività svolta, occupandosi di
+\textit{ottenere il giusto sistema da sviluppare (per fare la cosa giusto)},
+prima di design, 
+implementazione ed evoluzione software etc$\ldots$ che si occupano di
+\textit{ottenere il software giusto, sviluppandolo nel modo corretto}.\\
+Errare nel RE può portare ad un ottimo software che risolve i problemi sbagliati
+(o non tutti i problemi che dovrebbe risolvere). Sbagliare i RE è una causa di
+fallimento del progetto (anche in un contesto non agile).\\
+Lavorare sui RE non è semplice per diversi motivi:
+\begin{itemize}
+  \item si deve ragionare su tante versioni del sistema:
+  \begin{itemize}
+    \item as-is
+    \item to-be
+    \item to-be-next, volendo essere lungimiranti per il comportamento del
+    sistema, sapendo e prevedendo evoluzioni future
+  \end{itemize}
+  \item si lavora in \textit{ambienti ibridi}, tra umani, leggi, device, policy,
+  leggi della fisica, etc$\ldots$, quindi in un contesto eterogeneo che va
+  compreso a fondo (ignorare degli aspetti può portare al fallimento)
+  \item si hanno diversi aspetti funzionali, qualitativi e di sviluppo
+  \item si hanno diversi livelli di astrazione, con obiettivi strategici a lungo
+  termine di inserimento sul mercato e dettagli operazionali
+  \item si hanno tanti stakeholders, quindi con diverse parti interessati di cui
+  risolvere problemi e interessi (con potenziali conflitti tra i vari
+  stakeholders)
+  \item si hanno tante attività tecniche legate l'una con l'altra:
+  \begin{itemize}
+    \item conflict management
+    \item risk management
+    \item evaluation of alternatives
+    \item prioritization
+    \item quality assurance
+    \item change anticipation
+  \end{itemize}
+  per capire cosa fare, in che ordine, con che rischi, che livelli di qualità,
+  etc$\ldots$
+\end{itemize}
+\section{Tipi di requisiti}
+Bisogna anche ragioni sui tipi di requisiti su cui si deve lavorare.\\
+Una prima differenza si ha nel modo in cui sono scritti i requisiti. Si hanno
+quindi:
+\begin{itemize}
+  \item \textbf{descriptive statements (\textit{dichiarazioni descrittive})},
+  che indicano dei requisiti non negoziabili, rappresentano dei comportamenti
+  derivanti dalle leggi del mondo su cui lavora la macchina. Si ha quindi zero
+  margine di modifica
+  \item \textbf{prescriptive statements (\textit{dichiarazioni prescrittive})},
+  che indicano requisiti negoziabili
+\end{itemize}
+\begin{esempio}
+  Vediamo un esempio.\\
+  Per il primo modo si ha:
+  \begin{center}
+    \textit{La stessa copia non può essere presa in prestito da due persone
+      diverse contemporaneamente}
+  \end{center}
+  per il secondo:
+  \begin{center}
+    \textit{Un cliente abituale non può prendere in prestito più di tre libri
+      contemporaneamente}
+  \end{center}
+\end{esempio}
+Entrambi sono importanti e vanno considerati. Si possono avere requisiti non
+ovvi, o lo sono in un contesto specialistico e quindi spesso non ovvi a chi
+lavora sul software (che generalmente non è del settore specialistico), che
+magari nemmeno sa che esistono.\\
+I requisiti possono inoltre differire per gli elementi che prendono in
+considerazione. Posso avere requisti:
+\begin{itemize}
+  \item che riguardano come si comporta l'ambiente, per capirne il funzionamento
+  (che andrà ad influenzare il software)
+  \item che studiano come si comporta il software nell'ambiente, studiando i
+  cosiddetti \textit{shared fenomena}
+\end{itemize}
+\textit{I requisti comunque non riguardano mai il comportamento interno del
+  software (variabili, error code etc$\ldots$)}.\\
+I requisti che riguardano l'ambiente possono essere di due forme:
+\begin{enumerate}
+  \item \textbf{domain properties}, ovvero proprietà riguardanti l'ambiente,
+  immutabili
+  \item \textbf{assumptions}, ovvero le assunzioni fatte su come è fatto
+  l'ambiente. Il software funzionerà solo negli ambienti che soddisfano quella
+  certa assunzione (per esempio un numero massimo di chiamate API a cui il
+  sistema è in grado di rispondere). Le assunzioni descrivono gli ambienti
+  compatibili con il software. Se troppo restrittive possono portare al
+  fallimento del progetto, che riguarderebbe pochissimi casi particolari
+\end{enumerate}
+In ottica di un ragionamento di interazione tra sistema software e ambiente
+citiamo il \textbf{modello Parnas95}, della metà degli anni novanta. 
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.7]{img/re.pdf}
+  \caption{Raffigurazione del modello Parnas95}
+\end{figure}
+\newpage
+In modo elementare il modello schematizza
+questa interazione software-ambiente in modo da esplicitare i device usati dal
+software-to-be per interagire con ambiente. Si ha uno schema composto da 4
+elementi:
+
+\begin{enumerate}
+  \item dei device di input, simil sensori, che percepiscono l'ambiente (ad
+  esempio richieste che arrivano dal web)
+  \item dei device di output che permettono di interagire con l'ambiente (che
+  possono ad esempio essere le risposte renderizzate nel browser)
+\end{enumerate}
+Nel caso, ad esempio, di sistemi embedded, di domotica o simili tali device
+diventano parecchio complessi.\\
+È utile quindi fare una distinzione per quanto concerne i requisiti del
+software. Abbiamo due famiglie principali:
+\begin{enumerate}
+  \item \textbf{requisiti funzionali}, che indicano le funzionalità che un
+  sistema, \textit{system-to-be}, deve implementare, cosa deve essere in grado
+  di fare. Non sono prevedibili prima di studiare il sistema
+  \item \textbf{requisiti non funzionali}, che indicano delle qualità o dei
+  vincoli sulle funzionalità e quindi sui requisiti funzionali. Possono essere
+  in termini di prestazioni, sicurezza, qualità etc$\ldots$ delle
+  funzionalità. Questa famiglia di aspetti non funzionali è più o meno standard
+\end{enumerate}
+\begin{esempio}
+  Posso avere il requisito funzionale:
+  \begin{center}
+    \textit{Il cliente è in grado di prendere in prestito al massimo tre libri}
+  \end{center}
+  e quello non funzionale:
+  \begin{center}
+    \textit{Un cliente può prendere in prestito i libri solo dopo il
+      riconoscimento}  
+  \end{center}
+\end{esempio}
+Si ha quindi una tassonomia dove si trovano organizzati aspetti non funzionali
+tali per cui, dopo aver individuato le funzionalità, possono essere usate per
+chiedersi se, per ciascun aspetto, esso è rilevante, individuando nuovi requisiti
+non funzionali da includere nell'insieme dei requisiti.\\
+Per alcuni tipi di progetti requisiti funzionali e non sono difficilmente
+distinguibili, spesso mischiandosi (si pensi, ad esempio, alla sicurezza nello
+sviluppo dio un firewall).
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/re2.pdf}
+  \caption{Tassonomia dei requisiti non funzionali}
+\end{figure}
+
+\section{Qualità dei requisiti}
+Si hanno diversi aspetti di cui preoccuparsi nell'analisi dei requisiti. Si
+hanno tante qualità indispensabili:
+\begin{itemize}
+  \item \textbf{completezza} di quanto descriviamo, descrivendo tutti i
+  requisiti rilevanti del progetto, identificando tutti i comportamenti del
+  sistema e documentarli in modo adeguato. È una qualità virtualmente
+  irraggiungibile in modo assoluto, non è infatti verificabile. Inoltre i
+  requisiti variano al proseguire del progetto, interagendo anche con gli
+  stakeholders, rendendo questo uno degli aspetti più difficili da studiare
+  \item \textbf{consistenza} dei requisti, senza conflitti. Nella mole di
+  requisiti si possono purtroppo facilmente introdurre inconsistenze
+  \item \textbf{non ambiguità} di ciò che si scrive. Tutto deve essere chiaro e
+  non soggetto ad interpretazione
+  \item \textbf{misurabilità}, quando rilevante, e quindi non basato su
+  interpretazioni vaghe ma si misure concrete e specifiche 
+  \item \textbf{fattibilità}, ovvero non si devono avere requisiti basati su
+  funzionalità irrealizzabili
+  \item \textbf{comprensibilità}
+  \item \textbf{buona struttura}
+  \item \textbf{modificabilità}, con possibilità di avere il risultato
+  mantenibile del tempo 
+  \item \textbf{tracciabilità}, individuando tutti gli artefatti ottenibili come
+  conseguenza e tracciandoli. Si tracciano anche le dipendenze tra requisiti
+\end{itemize}
+Vediamo quindi gli errori che si fanno quando si va ad identificare i requisiti,
+per poter poi studiare tecniche per evitare, nel limite del possibile, tali
+errori:
+\begin{itemize}
+  \item \textbf{omissioni}, non riuscendo ad identificare qualche
+  requisito. Anche un riconoscimento tardivo è un problema in quanto comporta la
+  modifica del documento, non sempre facile
+  \item \textbf{contraddizioni}, avendo conflitti tra i requisiti (anche solo,
+  banalmente, per i requisiti di un treno si potrebbe avere che non si possono
+  aprire le porte tra due stazioni ma anche se si possono aprire le porte in
+  caso d'emergenza) 
+  \item \textbf{inadeguatezza}, avendo requisiti che non sono adeguati per
+  un determinato problema
+  \item \textbf{ambiguità}, avendo requisiti interpretabili
+  \item \textbf{non misurabilità} di certi requisiti (specialmente non
+  funzionali), che comportano difficoltà di gestione, precludendo confronti
+  etc$\ldots$ 
+\end{itemize}
+Si hanno anche altri tipi di errore:
+\begin{itemize}
+  \item essere \textbf{troppo specifici} nella definizione dei requisiti
+  includendo anche comportamenti interni al software che non dovrebbero essere
+  descritti in questa fase. Bisogna dire quali funzionalità bisogna realizzare,
+  non come
+  \item descrivere requisiti \textbf{non implementabili} considerando vincoli
+  temporali o di costo
+  \item descrivere requisti \textbf{complessi da leggere}, ad esempio con un uso
+  eccessivo di acronimi
+  \item avere \textbf{poca struttura} nella stesura dei requisiti, a livello
+  visivo. Un documento tecnico deve essere facile da gestire e da usare
+  \item se si produce un documento (e non nel caso dell'uso del db) bisogna
+  evitare di fare riferimento a requisiti che non sono stati ancora descritti,
+  ovvero evitando il \textbf{forward reference}
+  \item evitare ``\textbf{rimorsi}'' di non aver definito nel momento giusto
+  certi concetti che magari erano stati usati, senza definizione,
+  precedentemente. Questi vanno definiti all'inizio del documento (nelle slide
+  si dice tra parentesi)
+  \item evitare la \textbf{poco modificabilità} del documento. È buona norma
+  avere delle ``costanti simboliche'', definite all'inizio, a cui fare
+  riferimento nel documento, in modo che un'eventuale modifica si rifletta su
+  tutto il documento
+  \item evitare l'\textbf{opacità/logica di fondo/rationale/motivazioni} dei
+  requisti, in modo che sia 
+  chiaro il perché esso è stato incluso, portando a mettere in discussione
+  requisiti in realtà sensati a cui si arriverebbe comunque dopo ulteriore
+  analisi, dopo aver perso ulteriore tempo
+  
+\end{itemize}
+\section{Il processo RE}
+Vediamo le principali fasi del RE.\\
+Si hanno 4 fasi a spirale:
+\begin{enumerate}
+  \item \textbf{domain understanding \& elicitation}
+  \item \textbf{evaluation \& agreement}
+  \item \textbf{specification \& documentation}
+  \item \textbf{validation \& verification}
+\end{enumerate}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/re3.pdf}
+  \caption{rappresentazione a spirale delle quattro fasi del RE}
+\end{figure}
+\paragraph{domain understanding \& elicitation}
+In questa fase si hanno due parti principali:
+\begin{enumerate}
+  \item \textbf{domain understanding}
+  \item \textbf{requirements elicitation}
+\end{enumerate}
+\newpage
+Nella \textit{domain understanding} si ha:
+\begin{itemize}
+  \item lo studio del \textit{system-as-is} in ottica di studio del dominio
+  applicativo, studio del business organizzazione che vuole il prodotto. Si
+  studiano anche forze e debolezze del \textit{system-as-is}. Si studia il
+  dominio applicativo, spesso sconosciuto e complesso, per ottenere il miglior
+  \textit{system-to-be} possibile
+  \item si identificano gli stakeholders (e quindi tutte le parti interessate)
+  del progetto per poter capire a fondo interessi e fini
+\end{itemize}
+Come \textbf{output} della \textit{domain understanding} si hanno:
+\begin{itemize}
+  \item le sezioni iniziali per la bozza di proposta preliminare
+  \item il glossario dei termini
+\end{itemize}
+Passando alla \textit{requirements elicitation} si uno studio più approfondito
+nel mondo:
+\begin{itemize}
+  \item si ha un'ulteriore analisi dei problemi legati al \textit{system-as-is},
+  alla ricerca di sintomi, cause e conseguenze
+  \item vengono identificati, grazie all'aiuto degli stakeholders:
+  \begin{itemize}
+    \item opportunità tecnologiche
+    \item condizioni del mercato
+    \item obiettivi di miglioramento
+    \item vincoli, organizzativi e tecnici, del \textit{system-as-is}
+    \item alternative per raggiungere l'obiettivo e assegnare le responsabilità
+    \item scenari di ipotetica interazione software-ambiente
+    \item requisiti del software
+    \item assunzioni sull'ambiente
+  \end{itemize}
+\end{itemize}
+In \textbf{in output} alla \textit{requirements elicitation} si hanno ulteriori
+sezioni per la bozza di proposta preliminare
+
+\paragraph{evaluation \& agreement}
+Come risultato nella fase precedente si effettuando decisioni basate
+sull'interazione con i vari stakeholders (che spesso richiedono funzionalità
+conflittuali etc$\ldots$), per poter valutare e decidere, avendo cambiamenti
+dei rischi in base a:
+\begin{itemize}
+  \item identificazione e risoluzione di conflitti di interesse
+  \item identificazione e risoluzione di rischi legati al sistema proposto
+  \item comparazione e scelta tra le alternative proposte in merito a obiettivi
+  e rischi
+  \item prioritizzazione dei requisti, al fine di:
+  \begin{itemize}
+    \item risolvere conflitti
+    \item definire vincoli di costi e tempi
+    \item supportare lo sviluppo incrementale
+  \end{itemize}
+\end{itemize}
+In \textbf{in output} a questa fase si hanno le sezioni finali per la bozza di
+proposta preliminare, dove si documentano gli obiettivi selezionati, i
+requisiti, le assunzioni e il \textit{rationale}, la logica di fondo delle
+opzioni selezionate 
+\paragraph{specification \& documentation}
+In questa fase si raccoglie quanto detto nelle prime due fasi per produrre il
+documento, si hanno quindi:
+\begin{itemize}
+  \item definizione precisa di tutte le funzionalità del sistema scelto, tra
+  cui: 
+  \begin{itemize}
+    \item obiettivi, concetti, proprietà rilevanti del dominio d'interesse,
+    requisti del sistema, requisti del software, assunzioni sull'ambiente e
+    responsabilità
+    \item motivazioni e logica di fondo delle opzioni scelte
+    \item probabili evoluzioni del sistema ed eventuali variazioni
+  \end{itemize}
+  \item organizzazione di quanto appena citato in una struttura coerente
+  \item documentazione del tutto in un formato comprensibile a tutte le parti,
+  mettendo in allegato:
+  \begin{itemize}
+    \item costi
+    \item piano di lavoro
+    \item tempi di consegna del risultato
+  \end{itemize}
+\end{itemize}
+In \textbf{output} a questa fase si ha il vero e proprio \textbf{Requirements
+  Document (\textit{RD})}
+\paragraph{validation \& verification}
+In questa fase si studia l'RD, ovvero si studia la garanzia di qualità dell'RD
+(in modo equivalente a quanto può essere fatto durante la produzione di un
+software1, analizzando varie attività: 
+\begin{itemize}
+  \item \textbf{validazione}, ovvero vedendo se quanto contenuto nell'RD è
+  adeguato con quanto si necessita
+  \item \textbf{verifica}, controllando se ci sono omissioni o inconsistenze
+  \item \textbf{correzione} di eventuali errori e difetti
+\end{itemize}
+In \textbf{output} a questa fase si ha un RD consolidato.
+\paragraph{Ciclicità del processo}
+Come è stato detto queste quattro fasi si ripetono in modo iterativo in modo ``a
+spirale''. Questo viene fatto in quanto si possono avere evoluzioni nel processo
+nonché correzioni di quanto già fatto che si propagano su tutto il documento. Le
+evoluzioni e le correzioni possono sopraggiungere durante:
+\begin{itemize}
+  \item il RE stesso
+  \item lo sviluppo del software
+  \item dopo il deploy del software stesso
+\end{itemize}
+Dopo ogni ciclo si è molto più consci del sistema e si può passare al
+miglioramento del RE con più efficacia.\\
+Questo sistema è molto compatibile con i vari \textbf{metodi agili}.
+\end{document} 
 % LocalWords:  Machine Learning waterfall png img slides jpg testing self step
 % LocalWords:  organizing continuous refactoring Scrum scrum product backlog as
 % LocalWords:  items dev members owner definzione stakeholders planning daily
@@ -1056,4 +1492,8 @@ CMMI è quindi uno standard industriale con certificazioni ufficiali.
 % LocalWords:  introductory specific goals generic example subpractices level
 % LocalWords:  elaborations capability levels maturity performed managed policy
 % LocalWords:  defined initial quantitatively optimizing GG profile improvement
-% LocalWords:  planned executed org PM
+% LocalWords:  planned executed org PM Requirements requirements adaptive to is
+% LocalWords:  cruise legacy cards db next descriptive statements prescriptive
+% LocalWords:  shared fenomena error domain properties assumptions pdf Parnas
+% LocalWords:  simil embedded firewall tracciabilità forward reference slide RD
+% LocalWords:  understanding elicitation agreement rationale Document

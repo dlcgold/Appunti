@@ -2146,6 +2146,33 @@ quindi due processi o si sincronizzano o vengono eseguiti in modo concorrente.
   (\textbf{I due $\tau$ non possono avvenire ottemperantemente}).\\
   
 \end{esempio}
+\begin{esercizio}
+  Costruire LTS relativo a:
+  \[X=((a\cdot p_1'+\overline{b}\cdot p_1'')|(\overline{a}\cdot P_2'+b\cdot
+    p_2''))_{\{a\}}\]
+  (nessuno può quindi interagire con l'ambiente tramite $a$ e $\overline{a}$)
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=5cm,on grid,auto]
+     \node[state] (q_0) {$X$}; 
+      \node[state] (q_1) [left=of q_0] {$(p_1'|p_2')_{\{a\}}$};
+      
+      \node[state] (q_2) [below right=of q_0]
+      {$(p_1''|(\overline{a}\cdot p_2'+b\cdot p_2''))_{\{a\}}$};
+      \node[state] (q_3) [below left=of q_0]
+      {$((a\cdot p_1'+\overline{b}\cdot p_1'')|p_2'')_{\{a\}}$};
+      \node[state] (q_4) [below left=of q_2]
+      {$(p_1''|p_2'')_{\{a\}}$};
+      
+      \path[->]
+      (q_0) edge  node {$\overline{b}$} (q_2)
+      (q_0) edge [above] node {$\tau$} (q_1)
+      (q_2) edge [above left] node {$b$} (q_4)
+      (q_3) edge  node {$\overline{b}$} (q_4)
+      (q_0) edge  node {$\tau$} (q_4)
+      (q_0) edge [above left] node {$b$} (q_3);
+    \end{tikzpicture}
+  \end{center}
+\end{esercizio}
 Posso infine chiedermi, vedendo l'esempio sopra, se $Uni$ implementa $S$, vista
 come specifica. Quindi mi chiedo se posso quindi sostituire $S$ con $Uni$.\\
 Innanzitutto per poter dire che una certa implementazione soddisfa (indicata con
@@ -2207,6 +2234,7 @@ rispetto agli operatori del CCS.\\
   sse:
   \[tracce(p')=tracce(p'')\]
 \end{teorema}
+
 \begin{esempio}
   Vediamo quindi un esempio.\\
   Prendo il sistema:
@@ -2263,18 +2291,227 @@ rispetto agli operatori del CCS.\\
   \[(LP|M_1)\_{\{coin,caffe\}}\]
   \[(LP|M_2)\_{\{coin,caffe\}}\]
   Si nota che $M_2$ può andare in deadlock, avendo due processi che iniziano con
-  $\overline{coin}$ (non posso sapere dove va e se vado sul nodo del tea si
-  aspetta un'altra moneta, mentre magari si voleva il caffè). Quindi anche se le
-  tracce sono le stesse ma non posso sostituire senza problemi le due
-  macchinette, in qaunto se sostituisco $M_1$ con $M_2$ rischio di andare in
-  deadlock.
-  
-
+  $\overline{coin}$ (non posso sapere dove va e se vado sul nodo del tea la
+  macchina si aspetta un'altra moneta, mentre magari si voleva il caffè). Quindi
+  anche se le tracce sono le stesse ma non posso sostituire senza problemi le
+  due macchinette, in qaunto se sostituisco $M_1$ con $M_2$ rischio di andare in
+  deadlock. 
 \end{esempio}
+Lo studio delle tracce quindi non è più sufficiente nel caso di sistemi
+concorrenti. Si necessità quindi di una nozione più restrittiva.\\
 Per ovviare al problema sopra descritto si ha la \textbf{bisimulazione}. $M_1$ e
 $M_2$ non sono equivalenti rispetto alla \textbf{bisimulazione} e quindi non
 posso sostituire l'una con l'altra:
 \[M_1\stackrel{Bis}{\not\sim}M_2\]
+% aggiungere esercizio 1 quaderno
+% se serve anche esercizio 2
+\begin{esempio}
+  Siano:
+  \[P_1=a\cdot b\cdot Nil+a\cdot c\cdot Nil\]
+  \[P_2=a\cdot(b\cdot Nil+c\cdot Nil)\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+      \node[state] (q_0) {$P_1$}; 
+      \node[state] (q_1) [below right=of q_0] {$c\cdot Nil$};  
+      \node[state] (q_3) [below left=of q_0]
+      {$b\cdot Nil$}; 
+      \node[state] (q_2) [below right =of q_3] {$Nil$};
+      \path[->]
+      (q_0) edge  node {$a$} (q_1)
+      (q_1) edge  node {$c$} (q_2)
+      (q_3) edge  node [below left]{$b$} (q_2)
+      (q_0) edge  node [above left]{$a$} (q_3);
+    \end{tikzpicture}
+  \end{center}
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+      \node[state] (q_0) {$P_2$}; 
+      \node[state] (q_1) [below=of q_0] {$b\cdot Nil+c\cdot Nil$};  
+      \node[state] (q_2) [below=of q_1] {$Nil$}; 
+      \path[->]
+      (q_0) edge  node {$a$} (q_1)
+      (q_1) edge [bend right = 25] node[below left] {$b$} (q_2)
+      (q_1) edge [bend left = 25] node {$c$} (q_2);
+    \end{tikzpicture}
+  \end{center}
+  Avendo quindi:
+  \[T(P_1)=\{\varepsilon,a,ab,ac\}\]
+  \[T(P_2)=\{\varepsilon,a,ab,ac\}\]
+  quindi:
+  \[P_1\sim^T P_2\]
+  Ma se ad esempio prendo:
+  \[Q_1=(P_1|\overline{a}\cdor \overline{b}\cdot Nil )_{\{a,b,c\}}\]
+  \[Q_2=(P_2|\overline{a}\cdor \overline{b}\cdot Nil )_{\{a,b,c\}}\]
+  \newpage
+  Ho:
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+      \node[state] (q_0) {$Q_1$};  
+      \node[state] (q_1) [below right=of q_0] {$(b\cdot Nil+\overline{c} \cdot
+        Nil)_{\{a,b,c\}}$};
+      
+      \node[state] (q_3) [below left=of q_0]
+      {$(c\cdot Nil+\overline{c} \cdot Nil)_{\{a,b,c\}}$}; 
+      \node[state] (q_2) [below =of q_3] {$Nil|Nil$};
+       \node[state] (q_4) [below =of q_1] {$deadlock$};
+      \path[->]
+      (q_0) edge  node {$\tau$} (q_1)
+      (q_0) edge  node [above left] {$\tau$} (q_3)
+      (q_3) edge  node {$\tau$} (q_2)
+      (q_1) edge  node {$\tau$} (q_4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+      \node[state] (q_0) {$Q_2$}; 
+      \node[state] (q_1) [below=of q_0] {$(b\cdot Nil+c\cdot Nil|c\cdot Nil
+        )_{\{a,b,c\}}$}; 
+      
+      \node[state] (q_2) [below=of q_1] {$Nil|Nil$}; 
+      \path[->]
+      (q_0) edge  node {$\tau$} (q_1)
+      (q_1) edge  node {$\tau$} (q_2);
+    \end{tikzpicture}
+  \end{center}
+  Quindi il primo va in deadlock e il secondo no, quindi vedremo non sono
+  equivalenti per la bisimulazione.
+  \label{bi}
+\end{esempio}
+
+\begin{definizione}
+  data una relazione binaria $R\subseteq Proc_{CCS}\times Proc_{CCS}$ è una
+  relazione di \textbf{bisimulazione (forte)} sse:
+  \[\forall\,p,q\in Proc_{CCS}:\,\,\, pRq \mbox{ vale che }\]
+  \begin{itemize}
+    \item $\forall \alpha\in Act=A\cup \overline{A}\cdot \tau$ se ho
+    $p\stackrel{\alpha}{\rightarrow}p'$ allora deve esistere un \[\exists
+    q'\mbox{ t.c }q\stackrel{\alpha}{\rightarrow}q'\mbox{ e si ha }p'Rq'\]
+  \item  $\forall \alpha\in Act=A\cup \overline{A}\cdot \tau$ se ho
+    $q\stackrel{\alpha}{\rightarrow}q'$ allora deve esistere un \[\exists
+    p'\mbox{ t.c }p\stackrel{\alpha}{\rightarrow}p'\mbox{ e si ha }p'Rq'\]
+\end{itemize}
+Due processi $p$ e $q$ sono fortemente bisimili:
+\[p\sim^{Bis}q\]
+sse $\exists\,\,R\subseteq Proc_{CCS}\times Proc_{CCS}$, relazione di
+bisimulazione forte tale che $pRq$.\\
+SI ha che:
+\[\sim^{Bis}=\cup\{R\subseteq Proc_{CCS}\times Proc_{CCS}|\,\,R \mbox{ è una
+    relazione di bisimulazione forte}\}\]
+\end{definizione}
+\begin{teorema}
+  Se prendo $\sim^{Bis}\subseteq Proc_{CCS}\times Proc_{CCS}$ si dimostra che è:
+  \begin{itemize}
+    \item riflessiva
+    \item simmetrica
+    \item transitiva
+  \end{itemize}
+  e quindi è una \textbf{relazione di equivalenza}.\\
+  Quindi:
+  \[p\sim^{Bis}q\iff \forall\alpha\in Act \mbox{ se }
+    p\stackrel{\alpha}{\rightarrow}p'\]
+  \[\mbox{ allora }\]
+  \[\exists q': q\stackrel{\alpha}{\rightarrow}q'\land p'\sim^{Bis}q'\]
+  \[\mbox{ e se }\]
+  \[q\stackrel{\alpha}{\rightarrow}q' \]
+  \[\mbox{ allora }\]
+  \[\exists p': p\stackrel{\alpha}{\rightarrow}p'\land p'\sim^{Bis}q'\]
+  
+\end{teorema}
+\begin{teorema}
+  Se due processi sono fortemente bisimili allora sono sicuramente equivalenti
+  rispetto alle tracce. \\
+  \textbf{NON VALE IL VICEVERSA} (come visto negli esempi sopra).
+\end{teorema}
+Per vedere che due processi sono bisimili devo quindi, per ogni esecuzione,
+ottenere due processi ancora bisimili (potendo quindi fare le azioni
+corrispondenti da entrambe le parti).
+\begin{esempio}
+  esempio \ref{bi} ad esempio dopo $a$ arrivo in $c\cdot Nil$ da una parte e
+  $b\cdot Nil+ c\cdot Nil$ ma banalmente dal secondo posso eseguire sia $b$ che
+  $c$, cosa che non posso fare nel primo, che può eseguire solo $c$.
+\end{esempio}
+\begin{esempio}
+  Siano:
+  \[P_1=a\cdot b\cdot Nil+a\cdot P_1'\]
+  \[P_1'=b\cdot P_1'\]
+  \[Q_1=a\cdot Q_1'\]
+  \[Q_1'=b\cdot Q_1'\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[state] (q_0) {$P_1$};  
+      \node[state] (q_1) [below left=of q_0] {$b\cdot P_1'$};
+      
+      \node[state] (q_2) [below right=of q_0]
+      {$P_1'$}; 
+      \path[->]
+      (q_0) edge   [above left]node {$a$} (q_1)
+      (q_0) edge node {$a$} (q_2)
+      (q_1) edge  node {$b$} (q_2)
+      (q_2) edge [loop right]  node {$b$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[state] (q_0) {$Q_1$};  
+      \node[state] (q_2) [below =of q_0]
+      {$Q_1'$}; 
+      \path[->]
+
+      (q_0) edge  node {$a$} (q_2)
+      (q_2) edge [loop right]  node {$b$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Quindi ho:
+  \[P_1\sim^{Bis}Q_1\]
+  Vedendo che i passi che posso fare nell'uno li posso fare anche
+  nell'altro.
+\end{esempio}
+\begin{esempio}
+  Siano:
+  \[P_1=a\cdot b\cdot Nil\]
+  \[P_2=a\cdot \cdot \tau b\cdot Nil\]
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[state] (q_0) {$P_1$};  
+      \node[state] (q_1) [below =of q_0] {$b\cdot Nil$};
+      
+      \node[state] (q_2) [below =of q_1]
+      {$Nil$}; 
+      \path[->]
+      (q_0) edge node {$a$} (q_1)
+      (q_1) edge  node {$b$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto] 
+      \node[state] (q_0) {$P_2$};  
+      \node[state] (q_1) [below =of q_0] {$\tau\cdot b\cdot Nil$};
+       \node[state] (q_2) [below =of q_1] {$b\cdot Nil$};
+      \node[state] (q_3) [below =of q_2]
+      {$Nil$}; 
+      \path[->]
+      (q_0) edge node {$a$} (q_1)
+      (q_1) edge  node {$\tau$} (q_2)
+      (q_2) edge  node {$b$} (q_3)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Ho che:
+  \[P_1\not\sim^T P_2\]
+  e che:
+  \[P_1\not\sim^{Bis} P_2\]
+  Ma si vede che i comportamenti sono simili.
+\end{esempio}
+Cerco quindi di astrarre dalle interazioni interne ($\tau$), introducendo
+l'\textbf{equivalenza debole}, volendo astrarre rispetto alle azioni $\tau$,
+introducendo la \textbf{bisimulazione debole} (e nell'esempio precedente i due
+processi sono debolmente equivalenti sia per le tracce che per la
+bisimulazione).
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -2287,4 +2524,4 @@ posso sostituire l'una con l'altra:
 % LocalWords:  sequential CSP transputer hand shacking process processes System
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
-% LocalWords:  rinominazione true LocalWords
+% LocalWords:  rinominazione true LocalWords bisimili

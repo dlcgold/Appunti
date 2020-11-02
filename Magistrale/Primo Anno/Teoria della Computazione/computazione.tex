@@ -1583,7 +1583,7 @@ sapere lo stato finale $Y$ e $N$.
   \[\delta(C,a')\to (s_0,a', \rightarrow)\]
   ma ora $A$ può incontrare $b'$, che va bene, o $c'$ che non va bene:
   \[\delta(A,b')\to (A,b', \rightarrow)\]
-  \[\delta(A,c')\to (N,\sqcuo, -)\]
+  \[\delta(A,c')\to (N,\sqcup, -)\]
   Per $C$:
   \[\delta(C,[b,c])\to (C,[b,c'], \rightarrow))\]
   Se sono in $s_0$ e trovo $a'$ ho finito le $a$:
@@ -1646,17 +1646,163 @@ Vediamo cosa quindi può fare una TM:
     ricorsivamente enumerabile} è un linguaggio per cui data una stringa in
   input buona la TM si ferma, altrimenti la TM potrebbe o fermarsi o andare
   avanti all'infinito nella computazione. Posso enumerare tutte le stringhe che
-  fanno parte del linguaggio. Potrei quindi avere un linguaggio infinito ma con
-  stringhe che mandano in loop la TM. Ci sono linguaggi che si può dimostrare
+  fanno parte del linguaggio, tramite una certa procedura. Potrei quindi avere
+  un linguaggio infinito ma con 
+  stringhe che mandano in loop la TM, anche se comunque non sono in grado di
+  capire se sono in un loop o se prima o poi la stringa data in input verrà
+  riconosciuto. Ci sono linguaggi che si può dimostrare 
   essere ricorsivamente enumerabili (e alcuni che non sono nemmeno
   ricorsivamente enumerabili)
 \end{itemize}
 Ricordiamo comunque che esistono problemi irrisolvibili, dimostrati tali, come la
-soluzione di \textit{equazioni Diofantee}.
+soluzione di \textit{equazioni Diofantee}.\\
+I linguaggi possono essere quindi ricorsivi, ricorsivamente enumerabili o non
+ricorsivamente enumerabili. Un linguaggio finito è ricorsivo.\\
+Se ho l'alfabeto $\Sigma$, presa la *-chiusura
+di $\Sigma$ (che quindi comprende la stringa vuota e tutte le stringhe che
+posso ottenere concatenando uno o più simboli di $\Sigma$), ovvero $\sigma^*$,
+la TM riconosce subito la stringa in input in quanto costruita per funzionare
+su $\Sigma$, quindi il linguaggio è ricorsivo. Se prendo $\Sigma^+$, ovvero
+$\Sigma^*$ senza $\varepsilon$, ho comunque un linguaggio ricorsivo per lo
+stesso motivo, dovendo solo controllare in più se $s_0$ è $\sqcup$.
+\begin{teorema}
+  Preso un linguaggio $L$ costruito alfabeto $\Sigma$ si ha che
+  se $L\subseteq\Sigma^*$ se $L$ è ricorsivo è anche ricorsivamente
+  enumerabile.
+  \begin{proof}
+    Se $L$ è ricorsivo esiste una TM che riconosce se, data una stringa $x$,
+    $x\in L$, rispondendo $Y$ e risponde $N$ se $x\not\in L$.\\
+    Costruisco ora una TM $M'$ che se il linguaggio non è ricorsivo allora vado
+    in loop, indicato con $\infty,\uparrow,\bot$. Quindi quando la macchina sta
+    per andare in $N$ cambio $\delta$ per ottenere il loop, ottenendo una
+    macchina che va in loop se $x\not\in L$, mentre riconosce con $Y$ se $x\in
+    L$ e quindi $L$ è ricorsivamente enumerabile. 
+  \end{proof}
+\end{teorema}
+\begin{teorema}
+  $L$ è ricorsivo sse $L$ è ricorsivamente enumerabile e il complementare di
+  $L$, $\overline{L}$ è ricorsivamente enumerabile.
+\end{teorema}
+\begin{proof}
+  Rispetto alla dimostrazione precedente, che garantisce che se $L$ è ricorsivo
+  allora è ricorsivamente enumerabile, devo definire, per il complementare, una
+  TM che va in loop se $x\in L$, andando altrimenti in loop. Presa quindi una TM
+  $M$ che decide $L$, definisco $M'$ che accetta $L$, che quindi è
+  ricorsivamente enumerabile. Definisco ora $M''$ che restituisce $Y$ se $x\in
+  \overline{L}$ ovvero $x\not\in L$ (e $\infty$ se $x\not\in \overline{L}$,
+  ovvero $x\in L$). Quindi $M''$ fa la stessa cosa di $M$ ma quando $M$ sta
+  per rispondere $Y$ faccio andare $M''$ in loop e se $M$ va in $N$ faccio
+  andare $M''$ in $Y$, tutto tramite un cambio di $\delta$.
+\end{proof}
+\begin{teorema}
+  Preso un linguaggio $L$, se è ricorsivamente enumerabile e lo è anche il
+  complementare $\overline{L}$ allora $L$ è ricorsivo.
+\end{teorema}
+\begin{proof}
+  Presa una TM $M'$, se questa risponde $Y$ allora $M$ risponde $Y$. Presa $M''$
+  se questa risponde $Y$ allora $M$ risponde $N$. $M'$ e $M'$ accettano $L$ e
+  $\overline{L}$ quindi non possono dire $Y$ contemporaneamente e non rispondono
+  $N$, andando in loop. $M$ non va mai in loop perché $x\in L\lor x\not\in L$
+  per cui prima o poi una tra $M'$ e $M''$ si ferma. Devo quindi simulare
+  l'esecuzione delle due macchine, raggruppandole in una sola, appunto
+  $M$. Posso usare 4 nastri (due per le macchine e due per gli input) oppure
+  posso mettere le due $\delta$ delle due macchine nella stessa (facendo prima
+  un'operazione di $m'$ e poi una di $M''$ e così via), fino a che non si arriva
+  ad uno $Y$ e, segnando tramite un nastro le configurazioni di $M'$ e $M''$,
+  posso capire se far uscire $M$ con $Y$ o $N$, in base a chi tra $M'$ e $M''$ è
+  uscito con $Y$. 
+\end{proof}
+A noi interessano comunque i \textbf{problemi} ma i linguaggi sono comodi per
+parlare di \textbf{intrattabilità}, legandosi bene ai \textbf{problemi di
+  decisione}.
+\begin{definizione}
+  Un problema di decisione è un problema con solo due possibili risposte, $Y$ e
+  $N$.\\
+  I problemi di decisione sono restrizioni di problemi di ottimo, ai quali viene
+  aggiunto un \textbf{bound}, cambiando la domanda in una richiesta di esistenza
+  di un caso che soddisfi il bound nel problema di ottimo (ma comunque potrei
+  non avere tempi polinomiali, anche se il problema decisionale è più facile di
+  quello di ottimo).
+\end{definizione}
+\begin{teorema}
+  Un problema di decisione è sempre più facile del corrisponde problema di
+  ottimo.
+\end{teorema}
+Posso associare un problema di decisione allo studio di un linguaggio, avendo
+essi la stessa risposta, $Y$ o $N$. Un problema di decisione ha quindi un
+corrispondente linguaggio, con l'input del problema che ha una corrispondente
+stringa (di cui bisogna studiare appartenenza ad un linguaggio).\\
+\begin{esempio}
+  Il problema \textbf{Hamiltonian cycle problem (\textit{HCP})} (esiste anche la
+  variante non con il ciclo ma con il cammino: \textbf{Hamiltonian path problem
+    (\textit{HPP})}).\\ 
+  Dato un grafo non completo e non pesato ci si chiede se c'è un modo per
+  partire da un nodo e tornarci dopo aver toccato tutti i vertici una e una sola
+  volta.\\
+  Questo problema è di decisione ed è risolvibile, ma è difficile da risolvere
+  in termini temporali (restringersi ai problemi decisionali non sempre implica
+  miglioramenti in termini di tempo). HCP si risolve solo in tempo esponenziale.
+\end{esempio}
+\begin{teorema}
+  Se il problema di decisione non è risolvibile in modo efficiente sicuramente
+  il problema di ottimo associato non è risolvibile in modo efficiente.
+\end{teorema}
+\begin{teorema}
+  Preso $\pi$ problema di decisione. Posso passare da $\pi$ ad un linguaggio
+  $L(\pi)$ attraverso uno \textbf{schema di codifica}, che prende in input
+  un'istanza del problema è mette in output una stringa $x$ del linguaggio. Se
+  istanza ha risposta $Y$ ho $cod(x)\in L$ (e se risponde $N$ ho $cod(x)\not\in
+  L$, con $cod$ che indica una 
+  \textbf{codifica}, ovvero una traduzione dell'istanza nel linguaggio.\\
+\end{teorema}
+Risolvere un problema di decisione vuole dire essere in grado di riconoscere o
+meno le stringhe del corrispondente linguaggio.
+\begin{esempio}
+  Pensando a HCP ho:
+  \[L_{HCP}=\{y\in \Sigma^*|\mbox{ che corrispondono ad un'istanza con risposta
+      Y}\}\]
+  Sapendo che HCP è risolvibile so che esiste una TM che risolve il problema e
+  il grafo può essere tradotto in stringa, ad esempio tramite una matrice di
+  adiacenza.\\
+  HCP è risolvile sse il linguaggio associato è decidibile, e quindi ricorsivo.
+\end{esempio}
+\begin{teorema}
+  Quindi un problema decisionale è risolvile sse il linguaggio associato è
+  decidibile, e quindi ricorsivo.
+\end{teorema}
+\begin{definizione}
+  Il tempo di esecuzione di una TM è il conto dei passi di esecuzione nel caso
+  peggiore.
+\end{definizione}
+\newpage
+\section{Problemi non risolvibili}
+\begin{definizione}
+  Definiamo la \textbf{Universal Turing Machine (\textit{UTM})} come una TM che
+  non fa un compito specifico in base alla $\delta$ ma prende in input un'altra
+  TM $M$, un separatore ``;'' e l'input $x$ di $M$ e da in output la stessa cosa
+  che darebbe $M$ con input $x$:
+  \[UTM(M;x)\to M(x)\]
+  Quindi calcola quello che calcola qualunque altra TM.
+\end{definizione}
+La UTM è simile a quello che fa tramite un linguaggio di programmazione, dove si
+da una sequenza di istruzioni e un input, ottenendo un output. Un calcolatore
+moderno è quindi una sorta di UTM (con l'hdd che corrisponde al nastro
+infinito, non avendo potenzialmente limite potendo aggiungere altri dischi).\\
+Esistono le \textbf{Small UTM (\textit{SUTM})} che riusano gli stati per ridurre
+lo spazio usato.\\
+Stati e simboli sono mediamente numeri naturali, e gli spostamenti pure (con
+magari degli stati particolari). Un moderno calcolatore infatti ragiona solo su
+numeri per definire tutto, dagli stati ai simboli.\\
+Normalmente si ha che $UTM(M;x)$ ha due nastri sul primo $(M;x)$ e sul secondo
+la configurazione attuale di $(M;x)$. Quindi una TM può simularne un'altra
+salvando le configurazioni. La UTM tramite la sua $\delta$ poi copia lo stato di
+uscita di $M$, magari scrivendo su un terzo nastro l'output.\\
+\textbf{Posso quindi costruire una TM (la UTM) che simuli un'altra TM}, quindi
+si è in grado di scrivere un algoritmo che prende in input un altro programma
+scritto nello stesso linguaggio, che fa le stesse cose, e quindi il primo
+algoritmo, per esempio, può dare le risposte opposte.\\
 
-
-
-
+  
 \chapter{Pattern matching}
 Il \textbf{pattern matching} si occupa di ricercare un pattern $P$ in un testo
 $T$. Si hanno:
@@ -1954,4 +2100,5 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  soddisfacibilità polinomialmente dell clique matching naive edit
 % LocalWords:  sottostringa preprocessamento sottostringhe baacagahabaac step
 % LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
-% LocalWords:  Jacobini Jacopini Diofantee
+% LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
+% LocalWords:  Universal l'hdd SUTM

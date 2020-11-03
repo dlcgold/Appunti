@@ -1261,11 +1261,144 @@ dimostrabile o perlomeno per alcuni problemi si è ancora riusciti).
   \caption{Algoritmo di vertex-cover approssimato}
 \end{algorithm}
 \newpage
-\begin{shaded}
-  L'algoritmo per il test di primalità funziona in $\log (n^{12})$, nella
-  versione più efficiente sviluppata da un gruppo di indiani, che arriva ad
-  ottenere un tempo polinomiale.
-\end{shaded}
+L'idea della 2-approssimazione è quella che si cerca un limite inferiore
+all'ottimo per il problema, ad esempio, appunto, \textit{vertex-cover}. Si ha
+che:
+\[opt(x)\geq k\]
+con $k$ che è il $\liminf$ mentre $opt(x)$ è la dimensione dell'ottimo su
+istanza X, nel caso di \textit{vertex-cover} ho $x=G=(V,E)$. Sviluppo quindi un
+algoritmo polinomiale che produce una soluzione ammissibile per il problema e
+tale che abbia costo di tale soluzione sia $\varepsilon$ volte il limite
+inferiore dell'ottimo, con $\varepsilon>1$:
+\[A(x)=\varepsilon\cdot \liminf,\,\,\,\varepsilon>1\]
+Inoltre ho che:
+\[A(x)\leq \varepsilon\cdot k,\,\,\,\varepsilon>1\]
+e quindi:
+\[\frac{A(x)}{opt(x)}\leq\frac{\varepsilon\cdot k}{k}\leq \varepsilon\]
+avendo quindi una $\varepsilon$-approssimazione.\\
+Nel caso di \textit{vertex-cover} costruisco un \textbf{matching perfetto},
+selezionando archi del grafo che non condividono i vertici estremi. Utilizzo
+quindi tutti i vertici, per il \textit{matching perfetto}. Una copertura minima
+del grafo deve per forza ottenere esattamente un vertice per ogni arco di
+matching, perché non hanno estremi in comune. Quindi il limite inferiore
+dell'ottimo è il numero di archi del matching (visto che ho un vertice per
+arco):
+\[opt(x)\geq |E_{matching}|\]
+Posso usare una tecnica greedy per costruire il matching, mettendo nelle
+soluzioni ammissibili entrambi gli estremi di ogni arco, per l'ammissibilità,
+per poi fare la rimozione degli archi incidenti.\\
+L'algoritmo $A$ quindi costruisce in modo greedy (o meglio ``in modo
+incrementale'', incrementantalmente) un matching per $G$ così:
+\\
+prende un arco $e_i$ e rimuove tutti gli archi incidenti agli estremi
+di $e_i$ inserendo nella soluzione ammissibile entrambi gli estremi di
+$e_i$. Sicuramente l'arco successivo scritto da $A$ non condivide estremi con
+$e_i$.\\
+L'unico problema è che $A(x)$ ha dimensione doppia rispetto al numero di archi:
+\[A(x)=2\cdot |E_{matching}|\]
+del matching mentre:
+\[opt(x)\geq |E_{matching}|\]
+avendo quindi la 2-approssimazione.\\
+\subsection{Problemi NP-hard non NP}
+Vediamo un algoritmo \textbf{NP-hard} che non è in \textbf{NP}, o meglio che
+ancora non sia dimostrato esserlo.
+Si congettura che non sia possibile che tutti i problemi \textbf{NP-hard} siano
+nella classe \textbf{NP}.\\ 
+Si parla comunque di problemi di decisione decidibili.\\
+Non posso al momento attuale dimostrare che un problema \textbf{NP-hard} non sia
+in \textbf{NP} ma si hanno problemi per cui non si riesce a mostrare che siano
+in \textbf{NP}, ovvero nessuno è riuscito a costruire un algoritmo con
+``certificato'' per questi problemi. Si ricorda la figura
+\ref{fig:complexity}.
+\subsubsection{Quantified boolean formula problem}
+Un esempio è decidere se una formula $\phi$ con \textit{quantificatori} è
+vera. Per questo problema \textbf{NP-hard} non esiste un algoritmo con
+certificato, non ancora perlomeno.\\
+Una \textbf{Quantified Boolean Formula (\textit{QBF})} $\phi$ è una formula
+proposizionale con dei \textit{quantificatori}, ovvero della forma:
+\[\phi=Q_{1p_1}Q_{2p_2}\ldots Q_{1n_n}\]
+Con un quantificatore $Q_{ip_i}$ relativi alle proposizioni $p_i$.\\
+Si ha:
+\[Q_i\in\{\forall,\exists\}\]
+\begin{esempio}
+  Vediamo un esempio di QBF:
+  \[\forall\, p_1\exists\,p_2\,\exists\, p_3(p_1\to(p_1\land p_3))\]
+\end{esempio}
+Decidere se la formula $\phi$ è vera è un problema \textbf{PSPACE-complete},
+ovvero un problema che si risolve con spazio polinomiale rispetto all'input $x$,
+ma al momento attuale nessuno ha mostrato che il problema QBF appartiene a
+\textbf{NP}.\\
+Diversi problemi possono essere espressi in QBF (come ad esempio le mosse degli
+scacchi) ma questi per ora sono tutti in tempo esponenziale.\\
+Aumentando il numero di quantificatori mi sposto in una nuova gerarchia, in un
+contesto di gerarchie infinite dove ad ogni aumento di un quantificatore
+corrisponde una classe di complessità nuova che contiene tutte quelle
+precedenti.\\
+Noi sappiamo che:
+\[P\subseteq NP\subseteq PSPACE=NPSPACE\subseteq EXPTIME\subseteq NEXPTIME\]
+La classe PSPACE è la classe di tutti i problemi accettati da un Turing Machine
+in spazio polinomiale. La classe\textbf{EXPTIME} ha tempo esponenziale e
+\textbf{NEXPTIME} se il problema è risolvibile da una Turing Machine non
+deterministica.
+\begin{definizione}
+  Un problema $\Pi$ è \textbf{complete} per una classe di complessità $k$ sse 
+  $\Pi\in k$ ed è \textbf{difficile} per quella classe.\\
+  SI hanno:
+  \begin{itemize}
+    \item \textbf{NP-complete}
+    \item \textbf{NPSPACE-complete}
+  \end{itemize}
+\end{definizione}
+\section{Complessità parametrica}
+La \textbf{complessità parametrica} è stata introdotta negli anni novanta e
+viene studiata molto in ambito di \textbf{bioinformatica} e studio di
+\textbf{reti/grafi}.\\
+Un problema \textbf{NP-complete} posso dire che alcune istanze sembrano
+risolvibili in tempo polinomiale, fissando determinati parametri che
+caratterizzano l'istanza. Ad esempio prendo \textit{vertex-cover} con al più una
+certa dimensione $k$ in un grafo comunque molto complesso, magari con $10^8$
+nodi e $k$ fissato a un numero piccolo, tipo $5$. Non cerco quindi una minima
+copertura ma una di una certa dimensione, piccola. In questo caso, con $k$
+piccolo, un tempo esponenziale in $k$ è accettabile (esempio $2^5$ è
+accettabile).\\
+Mi serve quindi un algoritmo polinomiale sull'input ma esponenziale su $k$.
+\begin{definizione}
+  Un problema decidibile $\Pi$ è \textbf{trattabile fissato il parametro, Fixed
+    Parameter Tractable (\textit{FPT})}, con parametro $k$, sse esiste un
+  algoritmo $A$, una costante $c$ è una funzione computabile $f$ tale che per
+  tutti gli input $\langle x,k\rangle$ $A$ risolve $\Pi$ con tempo di calcolo:
+  \[T(n) = f(k)\cdot|x|^c=f(k)\cdot n^c\]
+\end{definizione}
+Quindi ho comunque un tempo polinomiale in $x$ ed esponenziale in $k$, $|x|^c\to
+2^k$. Divido quindi l'input in due dimensioni ed esprimo il tempo evidenziando
+i due parametri.\\
+Se avessi un algoritmo $A$, con input $x$, per un problema \textbf{NP-complete}
+avrei $2^{|x|}=2^n$ ma avendo in input $\langle x,k\rangle$ diventa polinomiale
+in $|x|=n$ ma esponenziale in $k$. Nella risposta quindi considero una parte
+limitata dell'input, per questo serve $k$ piccolo.\\
+Fissato $k$ ho una \textbf{soluzione esatta} e quindi gli algoritmi parametrici
+sono vantaggiosi rispetto agli algoritmi di approssimazione.\\
+Non tutti i problemi possono avere un problema parametrico associato.
+\subsection{Vertex-cover parametrico}
+Prendendo \textit{vertex-cover} \textbf{decisionale} cerco una copertura di
+dimensione massima $k$. Ho quindi in input $\langle G=(V,E),k\rangle$ e trovo un
+algoritmo che decide se esiste tale copertura minima in tempo $T(n)$, in
+funzione di $n$ e $k$.\\
+Si ha il seguente teorema:
+\begin{teorema}
+  Il problema vertex-cover $(G,k)$ è risolvibile in tempo $O(2^k\cdot |V|)$ dove
+  $V$ è l'insieme dei vertici di $G$, con la costante che non dipende da $k$ e
+  da $|V|$. Si ha quindi:
+  \[O^*(f(x))=O(2^k\cdot |V|)\]
+  Avendo $O^*$ che specifica indipendenza da $k$ e da $|V|$.
+\end{teorema}
+Si vuole quindi $s^{|V|}=2^k$.\\
+Si parte quindi cercando di costruire insiemi con al più $k$ vertici esplorando
+un albero binario di ricerca, sviluppandolo fino a profondità $2^k$, che avrà
+come foglie degli insiemi \textit{vertex-cover} di dimensione $k$.\\
+Si quindi ricorre ai \textbf{Bounded search trees (\textit{alberi di ricerca
+    limitati})}. 
+
 \chapter{Macchina di Turing}
 \section{Problemi intrattabili}
 Trovare una soluzione polinomiale ad un algoritmo \textbf{NP-hard} come TSP
@@ -1310,6 +1443,11 @@ si hanno proprio algoritmi che risolvono un certo problema e questo è
 dimostrabile (c'è almeno un input che manda in crisi un algoritmo, che va in
 loop infinito o sbaglia risposta) mentre un problema intrattabile comunque in
 qualche modo lo posso risolvere ma in tempi troppo elevati.
+\begin{shaded}
+  L'algoritmo per il test di primalità funziona in $\log (n^{12})$, nella
+  versione più efficiente sviluppata da un gruppo di indiani, che arriva ad
+  ottenere un tempo polinomiale.
+\end{shaded}
 \section{Definizione della TM}
 Definiamo quindi in modo più rigoroso il concetto di algoritmo per poter
 dimostrare che un certo algoritmo può anche non esistere. Non ci basta più la
@@ -2101,4 +2239,5 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  sottostringa preprocessamento sottostringhe baacagahabaac step
 % LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
 % LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
-% LocalWords:  Universal l'hdd SUTM
+% LocalWords:  Universal l'hdd SUTM incrementantalmente Boolean Quantified QBF
+% LocalWords:  PSPACE

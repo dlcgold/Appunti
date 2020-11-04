@@ -3509,7 +3509,123 @@ Per farlo sfruttiamo un esempio:
   di profondità. Se tale asset è in down viene restituito una sola volta.
 \end{esempio}
 \subsection{Ancora su Neo4j}
-%48.13
+Tutta la teoria e la letteratura sui grafi viene applicata ai db a grafo, dai
+cammini minimi alle clique. Il vero problema resta la modellazione e la scelta
+del DBMS. Approfondiamo quindi ancora di più Neo4j.\\
+Abbiamo già visto che non ha meccanismi nativi di frammentazione, avendo scelto
+di sfruttare la \textit{index free adjacency} e la modellazione a grafo, non
+permettendo scalabilità. In compenso garantisce varie caratteristiche
+funzionali:
+\begin{itemize}
+  \item permette le transazioni con tutte le proprietà ACID, con meccanismi di
+  locking
+  \item garantisce la disponibilità
+  \item garantisce la recoverability
+\end{itemize}
+In merito alla scalabilità, nonostante le limitazioni sopra esposte,
+garantisce l'\textbf{alta disponibilità}. L'idea è che è possibile andare a
+definire un cluster di nodi Neo4j, alcuni chiamati \textbf{core server}, ovvero
+nodi per cui tutte le scritture sono fatte in contemporanea, essendo quindi
+sincronizzati. Si hanno poi gli altri nodi che sono chiamati \textbf{replica
+  server}, che sono di sola lettura, che vengono creati tramite meccanismi di
+replica simili a quelli già trattati. I \textit{replica server} vengono anche
+usati per reporting analysis etc$\ldots$. Fatta una query essa comunque non
+viene distribuita ma eseguita sul nodo più vicino. Tutto questo sistema è detto
+\textbf{casual clustering}.\\
+Si ha una bassa \textbf{latenza} nelle query in quanto si usa un indice per
+risalire al primo nodo e poi si procede coi cammini, avendo quindi che le
+performances non dipendono dalla grandezza del dataset ma solo da quali sono i
+dati richiesti dalla query.
+\section{Altri modelli}
+In situazioni reali, ad esempio un e-commerce, posso avere i dati salvati in
+vari DBMS, sia relazionali che NoSQL, a seconda dei dati che contengono (magari
+avrei le raccomandazioni in un db a grafo con Neo4j, il catalogo prodotti in un
+documentale come MongoDB, le sessioni utente in un db key-value come Redis,
+dati finanziari e reporting in un RDBSM, per i log delle attività un modello
+NoSQL colonnale etc$\ldots$). Dover gestire tutti questi modelli diversi è molto
+completo, ma sensato in base al tipo di dati. Ho quindi una sorta di
+\textbf{mondo poliglotta}.
+\subsection{ArangoDB}
+In questo mondo poliglotta complesso ci arriva in soccorso un particolare DBMS:
+\textbf{ArangoDB}.\\
+Il DBA dovrebbe conoscere tutti i modelli in uso e tutti i linguaggi associati,
+essendo anche in grado di gestire i vari conflitti. ArangoDB introduce il
+concetto di \textbf{db poliglotta}, supportando i seguenti modelli:
+\begin{itemize}
+  \item key-value
+  \item documentali
+  \item a grafo
+  \item a ricerca full-text (come fa anche \textbf{Elastic Search})
+\end{itemize}
+Rispetto ai modelli precedentemente descritti a grafo con storage non nativo,
+tipo \textbf{Titan}, che appunto accettano solo un linguaggio di query a grafo,
+il linguaggio di query di ArangoDB, chiamato \textbf{AQL (\textit{Arango Query
+    language})}, garantisce la possibilità di interrogare dati in formato json
+(quindi documentale), a grafo, in formato key-value o per il full text search.\\
+Ad alto livello Arango organizza i dati in database e collezioni (per fare un
+parallelo schemi e tabelle), dove le collezioni memorizzano documenti o
+similari. I documenti, come già accennato, sono documenti json di profondità
+arbitraria (sub-object, sub-arrays etc$\ldots$), non avendo alcun limite da
+questo punto di vista. Nel caso semplice tali documenti sono omogenei, avendo
+stessi attributi e tipi, e effettuare una query AQL è molto semplice:
+\begin{minted}{sql}
+  FOR c IN categories
+  FILTER c._key IN [ 'books', 'kitchen' ]
+  RETURN c
+
+  FOR c IN categories
+  SORT .title
+  RETURN { _key: c._key, title: c.title}
+\end{minted}
+Avendo un linguaggio simile a uno di programmazione.\\
+Abbiamo quindi, nella prima query, che selezioniamo tutti i $c$ in `$categories$
+(che è una collezione) trovando solo le chiavi che sono o ``book'' o ``kitchen''
+ritornando $c$. Nella seconda selezioniamo selezioniamo tutti i $c$ in
+`$categories$, ordiniamo i risultati in base al titolo e ritorniamo chiave e
+titolo.\\
+Posso comunque avere documenti eterogenei, con attributi diversi. Possiamo
+comunque interrogare usando il modello a grafo e tali query mostrano quali
+documenti sono collegati (direttamente o indirettamente) ad altri documenti,
+specificando il cammino per ottenere il collegamento. Queste connessioni tra
+documenti sono chiamate \textbf{edges} che sono salvati in ``edge
+collections''. Gli \textit{edges} hanno sempre due attributi che si riferisocno
+ai nodi entranti e uscenti:
+\begin{itemize}
+  \item \textit{\_from}
+  \item \textit{\_to}
+\end{itemize}
+Avendo sempre archi direzionati del tipo:
+\[\_from \to \_to\]
+\textbf{anche se si possono effettuare query anche nell'ordine opposto}.\\
+\begin{esempio}
+  Preso il documento \textit{json}:
+  \begin{minted}{json}
+    { "_key" : "sofia", "_id" : "employees/sofia"}
+    { "_key" : "adam", "_id" : "employees/adam"}
+    { "_key" : "sarah", "_id" : "employees/sarah"}
+    { "_key" : "jon", "_id" : "employees/jon"}
+  \end{minted}
+  posso avere un \textbf{edge}, per una certa relazione, del tipo:
+  \begin{minted}{json}
+    { "_from" : "employees/sofia", "_to" : "employees/adam"}
+    { "_from" : "employees/sofia", "_to" : "employees/sarah"}
+    { "_from" : "employees/sarah", "_to" : "employees/jon"}
+  \end{minted}
+  \textit{(Potrei comunque continuare a interrogare il primo json come se fosse
+  un documentale)}
+\end{esempio}
+Rispetto a quanto visto per i modelli a grafo cambia drasticamente la
+scalabilità.\\
+Si hanno vari metodi di scalabilità, avendo le modalità di deploy:
+\begin{itemize}
+  \item a singola istanza
+  \item master/slave, scritture su master e repliche su slave
+  \item active failover
+  \item cluster
+  \item multiple datacenters
+\end{itemize}
+Approfondiamo soprattutto gli ultimi tre.
+%1.00.10
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL

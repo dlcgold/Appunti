@@ -2070,7 +2070,7 @@ quello con più precedenza:
 \end{esempio}
 \begin{esempio}
   Esercizio bonus:
-  \[((a\cdot p_'+\overline{b}\cdot p_1'')|(\overline{a}\cdot p_2'+b\cdot
+  \[((a\cdot p_1'+\overline{b}\cdot p_1'')|(\overline{a}\cdot p_2'+b\cdot
     p_2''))_{\{a\}}\]
   costruisco l'LTS associato ad $a$.
 \end{esempio}
@@ -2176,7 +2176,7 @@ quindi due processi o si sincronizzano o vengono eseguiti in modo concorrente.
 Posso infine chiedermi, vedendo l'esempio sopra, se $Uni$ implementa $S$, vista
 come specifica. Quindi mi chiedo se posso quindi sostituire $S$ con $Uni$.\\
 Innanzitutto per poter dire che una certa implementazione soddisfa (indicata con
-$implementazione \vbdash specifica$) una certa
+$implementazione \vDash specifica$) una certa
 specifica o se due implementazioni diverse soddisfano la stessa specifica ci
 serve una \textbf{relazione di equivalenza} tra processi CCS, ovvero una $R$:
 \[R\subseteq P_{CCS}\times P_{CCS}\]
@@ -2239,7 +2239,7 @@ rispetto agli operatori del CCS.\\
   Vediamo quindi un esempio.\\
   Prendo il sistema:
   \[(LP|M_i)\_{\{coin,caffe\}}\]
-  \[LP=\overline{lez}\\cdot coin\cdot \overline{coffe}\cdto LP\]
+  \[LP=\overline{lez}\\cdot coin\cdot \overline{coffe}\cdot LP\]
   suppongo di avere due macchinette $M$ che erogano sia caffè che $tea$, per il
   primo basta una moneta e per il secondo due.\\
   La prima macchina è::
@@ -2260,7 +2260,7 @@ rispetto agli operatori del CCS.\\
       {$tea\cdot M_1$}; 
       
       \path[->]
-      (q_0) edge  node {$\overline{\coin}$} (q_1)
+      (q_0) edge  node {$\overline{coin}$} (q_1)
       (q_1) edge  node [above]{$\overline{coin}$} (q_2)
       (q_2) edge  node [above right] {$tes$} (q_0)
       (q_1) edge [bend left= 25] node [above left] {$caffe$} (q_0);
@@ -2298,7 +2298,8 @@ rispetto agli operatori del CCS.\\
   deadlock. 
 \end{esempio}
 Lo studio delle tracce quindi non è più sufficiente nel caso di sistemi
-concorrenti. Si necessità quindi di una nozione più restrittiva.\\
+concorrenti. Si necessità quindi di una nozione più restrittiva.
+\subsection{Bisimulazione forte}
 Per ovviare al problema sopra descritto si ha la \textbf{bisimulazione}. $M_1$ e
 $M_2$ non sono equivalenti rispetto alla \textbf{bisimulazione} e quindi non
 posso sostituire l'una con l'altra:
@@ -2340,8 +2341,8 @@ posso sostituire l'una con l'altra:
   quindi:
   \[P_1\sim^T P_2\]
   Ma se ad esempio prendo:
-  \[Q_1=(P_1|\overline{a}\cdor \overline{b}\cdot Nil )_{\{a,b,c\}}\]
-  \[Q_2=(P_2|\overline{a}\cdor \overline{b}\cdot Nil )_{\{a,b,c\}}\]
+  \[Q_1=(P_1|\overline{a}\cdot \overline{b}\cdot Nil )_{\{a,b,c\}}\]
+  \[Q_2=(P_2|\overline{a}\cdot \overline{b}\cdot Nil )_{\{a,b,c\}}\]
   \newpage
   Ho:
    \begin{center}
@@ -2505,13 +2506,202 @@ corrispondenti da entrambe le parti).
   e che:
   \[P_1\not\sim^{Bis} P_2\]
   Ma si vede che i comportamenti sono simili.
+  \label{debole}
 \end{esempio}
 Cerco quindi di astrarre dalle interazioni interne ($\tau$), introducendo
 l'\textbf{equivalenza debole}, volendo astrarre rispetto alle azioni $\tau$,
 introducendo la \textbf{bisimulazione debole} (e nell'esempio precedente i due
 processi sono debolmente equivalenti sia per le tracce che per la
 bisimulazione).
-
+\begin{esempio}
+  Vediamo l'esempio dei buffer, dato un buffer di capacità $r$ che contiene $i$
+  elementi ho $B_i^R$.\\
+  Sia quindi, su
+  $A=\{in,out\},\,\,\,\overline{A}=\{\overline{in},\overline{out}\}$, con
+  $A$ per azioni di ricezione e $\overline{A}$ per azioni di invio, il buffer a
+  capacità 1:
+  \[B_0^1=in\cdot B_1^1\]
+  \[B_1^1=\overline{out}\cdot  B_0^1\]
+  Avendo il corrispondente LTS:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[state] (q_0) {$B_0^1$};  
+      \node[state] (q_1) [below =of q_0] {$B_1^1$};
+      
+      \path[->]
+      (q_0) edge [bend right = 25]node[left] {$in$} (q_1)
+      (q_1) edge [bend right = 25] node [right]{$\overline{out}$} (q_0)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Passo al buffer a capacità 2:
+  \[B_0^2=in \cdot B_1^2\]
+  \[B_1^2=\overline{out} \cdot B_0^2+in \cdot B_2^2\]
+  \[B_2^2=\overline{out}\cdot B_1^2\]
+  Avendo il corrispondente LTS:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[state] (q_0) {$B_0^2$};  
+      \node[state] (q_1) [below =of q_0] {$B_1^2$};
+      \node[state] (q_2) [below =of q_1] {$B_2^2$};
+      \path[->]
+      (q_0) edge [bend right = 25]node[left] {$in$} (q_1)
+      (q_1) edge [bend right = 25] node [right]{$\overline{out}$} (q_0)
+      (q_1) edge [bend right = 25]node[left] {$in$} (q_2)
+      (q_2) edge [bend right = 25] node [right]{$\overline{out}$} (q_1)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  \newpage
+  Provo ora a sincronizzare due buffer a capacità 1:
+  \[B_0^1|B_0^1\]
+  Avendo il corrispondente LTS, non avendo la sincronizzazione:
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3.5cm,on grid,auto] 
+      \node[state] (q_0) {$B_0^1|B_0^1$};  
+      \node[state] (q_1) [below left =of q_0] {$B_1^1|B_0^1$};
+      \node[state] (q_2) [below right =of q_0] {$B_0^1|B_1^1$};
+      \node[state] (q_3) [below right =of q_1] {$B_1^1|B_1^1$};
+      \path[->]
+      (q_0) edge [bend right = 25] node [above left]{$in$} (q_1)
+      (q_0) edge [bend left = 25] node[above right]{$in$} (q_2)
+      (q_1) edge [bend right = 25] node [above left]{$\overline{out}$} (q_0)
+      (q_2) edge [bend left = 25] node [above right]{$\overline{out}$} (q_0)
+      (q_1) edge [bend right = 25] node [below left]{$in$} (q_3)
+      (q_2) edge [bend left = 25] node [below right]{$in$} (q_3)
+      (q_3) edge [bend right = 25] node [below left]{$\overline{out}$} (q_1)
+      (q_3) edge [bend left = 25] node [below right]{$\overline{out}$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Si ha quindi, in quest'ultimo modello, una \textbf{simulazione sequenziale non
+    deterministica della concorrenza}.\\
+  Vediamo se si ha che:
+  \[(B_0^1|B_0^1)\sim^{Bis}B_0^2\]
+  $B_0^2$ può essere messo in relazione con $B_0^1|B_0^1$ in quanto se vado in
+  uno tra $B_1^1|B_0^1$ e $B_0^1|B_1^1$ posso sempre fare $in $e
+  $\overline{out}$. Inoltre Posso fare un discorso analogo per $B_2^2$ e
+  $B_1^1|B_1^1$. Essendo questi ultimi quindi bisimili lo sono anche il nodo
+  centrale coi due possibili nodi nel caso della composizione e di conseguenza
+  lo sono anche $B_0^2$ e $B_0^1|B_0^1$.
+\end{esempio}
+Vediamo quindi le proprietà della bisimulazione forte.\\
+In primis la bisimulazione forte è una \textbf{congruenza} rispetto agli
+operatori del CCS. Quindi se ho $p\sim^{Bis}q,\,\,\,p,q\in Proc_{CCS}$ ho che:
+\[\alpha\cdot p\sim^{Bis} \alpha\cdot q,\,\,\,\forall\,\alpha\in Act\]
+Ho inoltre che:
+\[p+r\sim^{Bis}q+r\,\,\,\land\,\,\,
+  r+p\sim^{Bis} r+q,\,\,\,\forall\,r\in Proc_{CCS}\]
+Ho anche che;
+\[p|r\sim^{Bis}q|r\,\,\,\land \,\,\,r|p\sim^{Bis}r|q,\,\,\,\forall\,\alpha\in
+  Act\]
+Ho poi che:
+\[p_{[f]}\sim^{Bis}q_{[f]},\,\,\,\forall\, f:Act\to Act \mbox{ funzione di
+    rietichettatura}\]
+Con $f$, ricordiamo, tale che:
+\begin{itemize}
+  \item $f(\tau)=\tau$
+  \item $f(\overline{a})=\overline{f(a)}$
+\end{itemize}
+Ho infine che:
+\[p_{\backslash L}\sim^{Bis}q_{\backslash L},\,\,\,\forall\, L\in A\]
+A queste regole possiamo aggiungere delle ``leggi'' legate a degli assiomi,
+legate al fatto che gli operatori hanno delle proprietà.\\
+Ho per esempio, $\forall\,p,q,r\in Proc_{CCS}$:\\
+Commutatività:
+\[p+q\sim^{Bis}q+p\]
+\[p|q\sim^{Bis}q|p\]
+Distributività:
+\[(p+q)+r\sim^{Bis}p+(q+r)\]
+\[(p|q)|r\sim^{Bis} p|(q|r)\]
+Leggi di assorbimento:
+\[p+Nil\sim^{Bis} p\]
+\[p|Nil\sim^{Bis} p\]
+\subsection{Bisimulazione debole}
+Abbiamo visto nell'esempio \ref{debole} come la bisimulazione forte rischi di
+essere troppo restrittiva.\\
+Si passa quindi alla \textbf{equivalenza debole rispetto alle tracce}:
+\[\approx^{T}\]
+e alla \textbf{bisimulazione debole}:
+\[\approx^{Bis}\]
+Bisogna però cambiare funzione di transizione. Si passa da:
+\[p\stackrel{a}{\rightarrow}p'\]
+a:
+\[p\stackrel{a}{\Rightarrow}p'\]
+Dove $p$ può fare tutte le $\tau$ che vuole prima e dopo fare $a$, per poi
+comportarsi come $p'$, avendo quindi la \textbf{relazione di transizione debole}.
+\begin{definizione}
+  Definiamo \textbf{relazione/regola di transizione debole}, come:
+  \[\Rightarrow\subseteq Proc_{CCS}\times Act\times Proc_{CCS}\]
+  avendo:
+  \[p\stackrel{a}{\Rightarrow}p',\,\,\,a\in A\cup \overline{A}\cup \tau\]
+  sse:
+  \begin{itemize}
+    \item se $a=\tau$ posso eseguir una sequenza qualsiasi anche nulla di
+    $\tau$:
+    \[p\stackrel{\tau}{\rightarrow}^*p'\]
+    fino ad arrivare a $p'$ (se 0 ho che $p=p'$)
+    \item se $a\in A\cup\overline{A}$ ho che:
+    \[p\stackrel{\tau}{\rightarrow}^*
+      \stackrel{a}{\rightarrow}\stackrel{\tau}{\rightarrow}^*p'\]
+  \end{itemize}
+  Estendo la relazione a sequenze di azioni, $w\in act^*$:
+  \[p\stackrel{w}{\Rightarrow}p'\]
+  sse:
+  \begin{itemize}
+    \item se $w=\varepsilon$, sequenza vuota, o $w=\tau^*$, sequenza di $\tau$,
+    ho: 
+    \[p\stackrel{\tau}{\Rightarrow}^*p'\]
+    
+    \item se $w=a_1\ldots a_n,\,\,\,a_i\in A\cup \overline{A}$ ho:
+    \[p\stackrel{a_1}{\Rightarrow}\cdots \stackrel{a_n}{\Rightarrow}p'\]
+    dove ogni $a_i$ può essere preceduto/seguito da una qualsiasi sequenza di
+    $\tau$.
+    \begin{esempio}
+      \[p\stackrel{ab}{\Rightarrow}p'\]
+      potrebbe essere:
+      \[p\stackrel{\tau}{\rightarrow}^*p_2\stackrel{a}{\rightarrow}
+        \stackrel{\tau}{\rightarrow}^*p_3\stackrel{b}{\rightarrow}
+        \stackrel{\tau}{\rightarrow}^*p'\]
+      oppure:
+      \[p\stackrel{\varepsilon}{\Rightarrow}p'\]
+      comporta:
+      \[p=p'\lor p \stackrel{\tau}{\rightarrow}^*p'\equiv
+        p\stackrel{\tau}{\rightarrow}^*p'\] 
+    \end{esempio}
+  \end{itemize}
+  
+\end{definizione}
+\begin{definizione}
+  Definiamo l'\textbf{equivalenza debole rispetto alle tracce debole}:
+  \[p\approx^T q\]
+  sse:
+  \[Tracce_{\Rightarrow}(p)=Tracce_{\Rightarrow}(q)\]
+  ovvero, equivalentemente:
+  \[\forall w\in(a\cup \overline{A})^*\mbox{ ho che }p\stackrel{w}{\Rightarrow}
+    \iff q\stackrel{w}{\Rightarrow}\]
+  (quindi se i due processi possono fare la stessa sequenza).\\
+  Ho quindi che:
+  \[Tracce_{\Rightarrow}(p)=\{w\in(a\cup \overline{A})^*|
+    p\stackrel{w}{\Rightarrow}\}\]
+   Quindi o ho le stesse tracce con la regola debole ho ogni sequenza del primo
+   processo la devo ritrovare nel secondo processo.\\
+   \textit{Banalmente prendo le tracce forti e cancello $\tau$}
+ \end{definizione}
+ \begin{esempio}
+   Riprendo esempio \ref{debole}.\\
+   Ho:
+   \[Tracce_{\Rightarrow}(P_1)=\{\varepsilon,a,ab\}\]
+   \[Tracce_{\Rightarrow}(P_2)=\{\varepsilon,a,ab\}\]
+   e quindi ho che:
+   \[P_1\approx^T P_2\]
+ \end{esempio}
+ \begin{esempio}
+   Riprendendo l'esempio \ref{bi} ho che:
+   \[Q_1\approx^T Q_2\]
+   ma vedremo che comunque:
+   \[Q_1\not\approx^{Bis} Q_2\]
+ \end{esempio}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

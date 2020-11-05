@@ -3625,7 +3625,31 @@ Si hanno vari metodi di scalabilità, avendo le modalità di deploy:
   \item multiple datacenters
 \end{itemize}
 Approfondiamo soprattutto gli ultimi tre.
-%1.00.10
+\subsubsection{Active failover}
+Nel modello master/slave quando il master fallisce lo slave non può essere
+sostituito e quindi si è pensato al modello \textbf{active failover}, dove
+esistono delle istanze \textit{single-server}, chiamate \textbf{leader}, che
+sono in lettura e scrittura e delle istanze, sempre \textit{single-server},
+chiamate \textbf{followers}, che non sono altro i vecchi slave, passivi e non
+scrivibili. Il leader invia le operazioni di scrittura ai followers che
+replicano in modo asincrono i dati tramite la cosiddetta \textbf{Write-Ahead Log
+  (\textit{WAL})}, ovvero il leader prima salva su un file di log e poi sul
+disco e tale file di log, tramite replica incrementale viene aggiornato, tramite
+un meccanismo di replica chiamato \textbf{apache mesos}. Esiste poi almeno un
+\textbf{agency} che controlla le configurazioni di leader e followers e
+controlla che siano tutti disponibili. Qualora l'agency si accorgesse che un
+server leader non è più disponibile promuove, con un meccanismo elettivo, un
+follower a leader. Resta quindi una sorta di master/slave ma con gli agency che
+procedono con il controllo e la rielezione.
+\subsubsection{Cluster}
+Il cluster è un'evoluzione, avendo più \textbf{coordinator} che si connettono
+con i client. I coordinator effettuando le query e gli \textbf{agency} non si
+occupano di altro se non l'elezione degli stessi e della sincronizzazione dei
+servizi per l'intero cluster. Si hanno poi i \textbf{DB server}, di tipo slave,
+che, in caso di fallimento, non comporta problemi in quanto l'agency attua le
+solite politiche di aumento repliche, se esse sono previste, bilanciando
+nuovamente i dati in caso di sharding.\\
+%1.03.44
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL

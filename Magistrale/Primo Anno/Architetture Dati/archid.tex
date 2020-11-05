@@ -3536,7 +3536,7 @@ Si ha una bassa \textbf{latenza} nelle query in quanto si usa un indice per
 risalire al primo nodo e poi si procede coi cammini, avendo quindi che le
 performances non dipendono dalla grandezza del dataset ma solo da quali sono i
 dati richiesti dalla query.
-\section{Altri modelli}
+\section{Modelli poliglotta}
 In situazioni reali, ad esempio un e-commerce, posso avere i dati salvati in
 vari DBMS, sia relazionali che NoSQL, a seconda dei dati che contengono (magari
 avrei le raccomandazioni in un db a grafo con Neo4j, il catalogo prodotti in un
@@ -3675,6 +3675,89 @@ altro, usando una coda come \textbf{kafka}. La replica è one way per cui scaric
 dal primary alla replica o viceversa in tempi diversi, non
 contemporaneamente. Non è pensato per fare una replica del single-server (userei
 il master/slave).
+\section{Modello key-value}
+È un modello abbastanza semplice dove si hanno appunto rapporti chiave-valore. I
+valori sono considerati come dei blob, non essendo accessibili/interpretabili
+direttamente dal db(??????). Si hanno poche operazioni:
+\begin{itemize}
+  \item inserire un valore data la chiave
+  \item trovare un valore data la chiave
+  \item modificare un valore data la chiave
+  \item cancellare una chiave e il suo valore
+\end{itemize}
+È inoltre possibile associare, in alcune soluzioni come \textbf{Redis}, un tipo
+ad un valore, per esempio \textit{string, integer, list etc$\ldots$}.\\
+Si ha accesso veloce ai dati tramite strutture di hash e posso avere scalabilità
+orizzontale. I modelli key-value funzionano solitamente \textit{in memory},
+anche nel caso della condivisione dati.\\
+Dal punto di vista della nomenclatura si ha:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    relazionale & key-value\\
+    \hline
+    tabella & bucket\\
+    riga & key-value\\
+    id-riga & key
+  \end{tabular}
+\end{table}
+Tra i vari DBMS abbiamo:
+\begin{itemize}
+  \item Redis
+  \item Memcached
+  \item Riak KV
+  \item Hazelcast
+  \item Ehcache
+\end{itemize}
+\subsection{Redis}
+nato del 2009 da Salvatore Sanfilippo mentre stava lavorando su una soluzione di
+realtime web analytic con mysql. Nasce a causa dei limiti del modello
+relazionale, non riuscendo a fare le interrogazioni in realtime. Assunto da
+VMware continua a lavorare su Redis fino a mettesi in proprio:
+\textit{Redislab} (con la parte di ricerca e sviluppo in Sicilia e la sede
+principale negli USA).\\
+Redis può gestire chiavi espresse in ASCII. I valori primitivi sono le
+\textit{string} ma si hanno vari container di stringhe:
+\begin{itemize}
+  \item hashes
+  \item lists
+  \item sets
+  \item sorted sets
+\end{itemize}
+Non si può sempre fare una ricerca per valore all'interno di questi elementi.\\
+Sono stati poi aggiunti i \textbf{moduli} per fari formati di file, per
+memorizzare file \textit{json} ma anche per \textit{video in streaming}. Offre
+quindi blob più strutturati per memorizzare i dati, alcuni a pagamento.\\
+Si ha una versione distribuita enterprise, a pagamento. Si possono fare repliche
+e avere una soluzione in cluster con un certo numero di shard.\\
+Studiamo quindi come avviene lo sharding.\\
+Bisogna stabilire una \textit{policy} per capire come dividere i dati e si è
+scelto di dividere le chiavi in base al valore di hash. Si può, volendo, anche
+dividere le chiavi in base a delle RegEx.\\
+Inoltre bisogna capire dove distribuire i dati e si hanno due soluzioni:
+\begin{enumerate}
+  \item quella di default, detta \textbf{dense}, dove il meccanismo di sharding
+  è gestito tramite un meccanismo incrementale, ovvero quando si riempie la
+  memoria della macchina si crea un'altro shard su un'altra e così via
+  \item una detta \textbf{sparse}, dove, avendo già definito il numero di nodi,
+  vado a popolarli fin da subito
+\end{enumerate}
+Si ha l'alta disponibilità in base a due soluzioni (???):
+\begin{enumerate}
+  \item una soluzione, detta \textbf{Redis replica of setup} in cui si hanno dei
+  nodi che formano il cluster su un datacenter su cui si effettuando le
+  operazioni e altri nodi che formano altri cluster su altri datacenter verso
+  cui sincronizzo. È quindi un master/slave, replicando per disaster-recovery
+  \item una soluzione, chiamata \textbf{active-active setup}, in cui posso
+  scrivere e leggere sui cluster presenti in due datacenters diversi (ma magari
+  nello stesso rack, parlando di \textbf{Redis cluster with rack zone
+    awareness}) avendo in entrambi i datacenter sia i db principali che le
+  repliche. Magari avendo protocolli ROWA etc$\ldots$
+\end{enumerate}
+Di recente si è aggiunta la possibilità di rendere persistenti dati anche se il
+loro punto di forza resta la gestione \textit{in memory} (piuttosto che andare a
+costruire dei sistemi di \textit{cache} etc$\ldots$).
+\section{Wide column}
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL

@@ -3649,7 +3649,32 @@ servizi per l'intero cluster. Si hanno poi i \textbf{DB server}, di tipo slave,
 che, in caso di fallimento, non comporta problemi in quanto l'agency attua le
 solite politiche di aumento repliche, se esse sono previste, bilanciando
 nuovamente i dati in caso di sharding.\\
-%1.03.44
+Lo sharding avviene in partizioni da almeno 40gb, con un meccanismo simile a
+quello di MongoDB: ogni server avrà associato uno shard, e ogni server, avendo
+ciascuno circa 3 repliche, avrà le repliche di altri server (oltre alla sua
+stessa replica, di cui è \textbf{leading shard}) (??????). Questo sistema
+permette di interrogare quasi 
+direttamente tutto sullo stesso server (avendo molte repliche) e permette, in
+caso di server non funzionante, di poter stabilire che un altro server diventa
+il \textbf{leading shard} per un certo frammento (tramite meccanismi soliti di
+elezione tramite gli agency), replicando per avere comune le tre repliche tra i
+vari server e potendo continuare a fare interrogazioni.\\
+Si hanno due soluzioni per la scrittura:
+\begin{enumerate}
+  \item il protocollo \textbf{read once write all (ROWA)} che obbliga il
+  coordinator a scrivere su tutte le repliche
+  \item il coordinatore scrive solo dove si ha la copia primaria e poi si hanno
+  le repliche, è la soluzione \textbf{oneshard} (che era chiamato \textbf{write
+    concern} in MongoDB)
+\end{enumerate}
+Arango quindi scala molto bene.
+\subsubsection{Cluster to cluster}
+L'ultimo livello è il \textbf{cluster to cluster}, una soluzione asincrona di
+tipo \textbf{one way} in cui prendo un cluster e lo copio interamente in un
+altro, usando una coda come \textbf{kafka}. La replica è one way per cui scarico
+dal primary alla replica o viceversa in tempi diversi, non
+contemporaneamente. Non è pensato per fare una replica del single-server (userei
+il master/slave).
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL

@@ -1324,7 +1324,23 @@ Facciamo qualche osservazione finale sull'\textbf{algoritmo ID3}:
   criterio euristico di \textit{rasoio di Occam}
   \item $H$ è l'insieme potenza delle istanze $X$
 \end{itemize}
-Viene introdotto però l'\textbf{overfitting}. Se misuro l'errore di una ipotesi
+Viene introdotto però l'\textbf{overfitting}.
+\begin{definizione}
+  \textit{Definizione tratta da wikipedia.}\\
+  Definiamo formalmente l'\textbf{overfitting} come l'adattamento eccessivo,
+  ovvero quando 
+  un un modello statistico molto complesso si adatta al campione perché ha un
+  numero eccessivo di parametri rispetto al numero di osservazioni. SI ha
+  quindi che un modello assurdo e sbagliato può adattarsi perfettamente se è
+  abbastanza complesso rispetto alla quantità di dati disponibili.\\
+  Nel machine learning se il learner viene addestrato troppo a lungo il modello
+  potrebbe adattarsi a caratteristiche che sono specifiche solo del training
+  set, ma che non hanno riscontro nel resto dei casi quindi le prestazioni sui
+  dati non visionati saranno drasticamente peggiori.\\
+  L'opposto è l'\textbf{underfitting}.
+\end{definizione}
+
+Se misuro l'errore di una ipotesi
 $h$ sul training set ($error_{traini}(h)$) e poi misuro l'errore di quella
 ipotesi sull'intero set delle possibili istanze
 $D$ ($error_D(h)$) ho che l'ipotesi $h$ va in \textbf{overfit} sul quel data set
@@ -2144,6 +2160,123 @@ classificazione corretta quindi se:
   \item i dati di training sono linearmente separabili
   \item $\eta$ è abbastanza piccolo
 \end{itemize}
+\subsubsection{Teorema di convergenza del percettrone}
+\textbf{Per completezza vengono aggiunte le note finali sul teorema presenti
+  nelle slide}.
+\begin{teorema}
+  Se l'insieme degli input estesi è partito in due classi linearmente separabili
+  $A$ e $B$ allora é possibile trovare un vettore di pesi $w$ tale che:
+  \[
+    \begin{cases}
+      \langle w, x\rangle\geq 0&\mbox{ se }x\in A\\
+      \langle w, x\rangle < 0&\mbox{ se }x\in B
+    \end{cases}
+  \]
+  Quindi:
+  \begin{itemize}
+    \item si parte con $w$ arbitrario
+    \item si classifica un punto $x$:
+    \begin{itemize}
+      \item se la risposta è corretta si ha $w'\gets w$
+      \item se la risposta è errata:
+      \[
+        \begin{cases}
+          w'\gets w+x&\mbox{ se }x\in A\\
+          w'\gets w-x&\mbox{ se }x\in B\\
+        \end{cases}
+      \]
+    \end{itemize}
+  \end{itemize}
+
+\end{teorema}
+\begin{proof}
+  Vediamo la prova della correttezza del teorema.\\
+  Se si ha $x\in A$ allora si ha $\langle w, x\rangle<0$ infatti, poiché:
+  \[\langle x, x\rangle\geq 0\]
+  si ha che:
+  \[\langle w', x\rangle=\langle (w+x), x\rangle=\langle w, x\rangle+\langle x,
+    x\rangle>\langle w, x\rangle\]
+  Quindi $w'$ classifica $x$ in modo più corretto di $w$ anche se altri input
+  possono essere classificati "meno correttamente".
+\end{proof}
+\begin{proof}
+  Passiamo ora alla convergenza.\\
+  Consideriamo quindi $A'=A\cup B'$ con:
+  \[B'=\{-x|\,x\in B\}\]
+  e cerchiamo un $v$ tale che:
+  \[\langle v, x\rangle\geq 0,\,\,\forall\,x\in A'\]
+  Si hanno quindi:
+  \begin{itemize}
+    \item la \textbf{sequenza di addestramento} $\{x_i\}_{i\in N}$ dove $x_i\in
+    A'$ e quindi la sequenza ontiene infiniti elementi sia di $A$ che di $B'$
+    \item la \textbf{sequenza di pesi} $\{w_i\}_{i\in N}$ dove si parte
+    arbitrariamente con $w_0=0$ e si procede con:
+    \[
+      \begin{cases}
+        w_{k+1}\gets w_k &\mbox{ se }\langle w_k, x_k\rangle\geq 0\\
+        w_{k+1}\gets w_k+x_k&\mbox{ altrimenti}
+      \end{cases}
+    \]
+  \end{itemize}
+  Si hanno quindi:
+  \begin{itemize}
+    \item la \textbf{sequenza di pesi modificata} $\{v_i\}_{i\in N}$ 
+    \item la \textbf{sottosequenza di training corrispondente} $\{v_i\}_{i\in N}$ 
+  \end{itemize}
+  Di modo che le coppie $(v_i,t_i)$ corrispondano ai $w_j$ tali per cui $w_j\neq
+  w_{j+1}$.\\
+  Ad esempio per:
+  \[w_0\neq w_1=w_2=w_3\neq w_4=w_5=w_6\neq w_7\neq w_8\cdots\]
+  avremo:
+  \begin{itemize}
+    \item $(v_0,t_0)$ associati a $w_0$
+    \item $(v_1,t_1)$ associati a $w_3$
+    \item $(v_2,t_2)$ associati a $w_6$
+    \item $(v_3,t_3)$ associati a $w_7$
+  \end{itemize}
+  Avendo:
+  \[\langle v_i,t_i\rangle<0\,\,\,\forall i\]
+  e avendo:
+  \[v_{i+1}=v_i+t_i=v_{i-1}+t_{i-1}+y_i=\sum_{k=0}^i t_i\]
+  e quindi la sequenza $\{v_i\}$ è \textbf{finita}.
+\end{proof}
+\begin{proof}
+  Uniamo matematicamente in una sola dimostrazione.\\
+  Sia $w$ una qualsiasi soluzioni che sappiamo esistere per ipotesi. Si ha che:
+  \[\langle v, x\rangle\geq 0,\,\,\forall\,x\in A'\]
+  Pongo quindi:
+  \[\alpha=\min(\langle x,w\rangle,\,\,\forall\,x\in A')\]
+  sapendo che:
+  \[v_{i+1}=v_i+t_i=v_{i-1}+t_{i-1}+y_i=\sum_{k=0}^it_i\]
+  ho che:
+  \[\langle v_{i+1},w\rangle=\langle \left(\sum_{k=0}^i t_k \right),
+    w\rangle\geq (i+1)\cdot\alpha\]
+  ma usando il teorema di \textbf{Cauchy-Schwarz} si ha che:
+  \[(\langle v_{i+1},w\rangle)^2\leq \langle |v_{i+1}|^2,|w|^2\rangle\]
+  ottenendo che:
+  \[|v_{i+1}|^2\geq \frac{(i+1)^2\cdot \alpha^2}{|w|^2}\]
+  Pongo quindi:
+  \[M=\max\{|x|^2|,\,x\in A'\}\]
+  si ha che, avendo $\langle v_{1},t_i\rangle<0$:
+  \[|v_{i+1}|^2=|v_i+t_i|^2=|v_i|^2+2\cdot\langle v_{i},t_i\rangle+|t_i|^2\leq
+    |v_i|^2+|t_i|^2\]
+  Si ha, di conseguenza:
+  \[|v_{i+1}|^2\leq \sum_{k=1}^i |t_i|^2\leq i\cdot M\]
+  Unendo quest'ultima con $|v_{i+1}|^2\geq \frac{(i+1)^2\cdot \alpha^2}{|w|^2}$
+  si ha che:
+  \[f(i)=\frac{j^2\cdot \alpha^2}{|w|^2}\leq |v_{i+1}|^2\leq i\cdot M=g(i)\]
+  avendo che $\frac{j^2\cdot \alpha^2}{|w|^2}$ è quadratico in $i$ e $ i\cdot M$
+  lineare in $i$.\\
+  Si ottiene quindi che:
+  \[i\leq\frac{M\cdot |w|^2}{\alpha^2}=\beta\]
+  Quindi dopo $\beta$ modifiche di peso il percettrone classifica correttamente
+  ogni input.
+\end{proof}
+
+
+
+
+
 \subsection{Discesa lungo il gradiente}
 \textbf{Le formule più complesse sono solo di bellezza.}\\
 \noindent
@@ -2484,7 +2617,7 @@ Ho i punti linearmente separabili:
   \end{cases}
 \](quindi l'iperpiano separa positivi e negativi)\\
 che scritto in un solo vincolo diventa:
-\[y_i(\langle w,x_i\rangle + b )>0,\,\,\,i)1,\ldots, n\]
+\[y_i(\langle w,x_i\rangle + b )>0,\,\,\,i=1,\ldots, n\]
 Si ha che $w$ mi dirà quanto è inclinato il piano mentre $b$ è la distanza tra
 l'origine e il piano (quindi queste due variabili identificano i vari iperpiani
 possibili tra cui cercare il ``migliore'' ovvero quello che separa meglio punti
@@ -2497,13 +2630,131 @@ Date $d_-$ e $d_+$ le distanze tra l’iperpiano separatore e il punto positivo 
 negativo più vicino definiamo:
 \begin{itemize}
   \item margine funzionale
-  
   \item margine geometrico
 \end{itemize}
+\begin{definizione}
+  Definiamo il \textbf{margine funzionale} di un punto $(x_i,y_i)$ rispetto
+  all'iperpiano $(w,b)$ come:
+  \[\hat{\gamma}=y_i\cdot(\langle w,x_i\rangle+b)\]
+  e quindi il \textbf{margine funzionale} dell'iperpiano rispetto al training
+  set $S$ è definito come:
+  \[\hat{\rho}=\min_{i=1,\ldots,n}\hat{\gamma_i}\]
+\end{definizione}
+Si hanno quindi due casistiche:
+\begin{enumerate}
+  \item se si ha un punto $x_i$ tale che $y_i=+1$, perchè il margine funzionale
+  sia grande è necessario che la quantità
+  $\langle w,x_i\rangle+b$ abbia un grande valore positivo
+   \item se si ha un punto $x_i$ tale che $y_i=-1$, perchè il margine funzionale
+  sia grande è necessario che  la quantità
+  $\langle w,x_i\rangle+b$ abbia un grande valore negativo
+\end{enumerate}
+\begin{teorema}
+  Se $\hat{\gamma}_i>0,\forall \mbox{ classificazione} i$ la classificazione è
+  approvata in quanto le classi sono linearmente separabili e l'iperpiano
+  $(w,b)$ separa effettivamente le classi
+\end{teorema}
+Si ha quindi che un ampio margine funzionale fornisce probabilità sulla qualità
+della previsione anche se l'uso del solo $\hat{\gamma}$ può essere problematico
+in quanto il margine funzionale non è invariante rispetto ad un iperpiano
+``riscalato''. Analizziamo meglio quest'aspetto.\\
+Per come è stato scelto il classificatore $f$ se si scala l'iperpiano:
+\[(w,b)\to(c\cdot w,b)\]
+si ottengono:
+\begin{itemize}
+  \item lo stesso iperpiano, ovvero lo stesso luogo di punti
+  \item la stessa funzione di decisione, visto che quest'ultima dipende solo dal
+  segno di $\langle w,x\rangle+b$, con il segno che può essere invertito se
+  $c<0$ 
+\end{itemize}
+ma dato che il margine funzionale viene moltiplicato per $c$ non possiamo usarlo
+come distanza di un punto dall’iperpiano, perché non è invariante rispetto alla
+scala.\\
+Bisogna ora studiare la distanza $d$ del punto $x$ dall'iperpiano. Si ha quindi:
+\[d = \frac{\sum_{i=1}^n w_i\cdot x_i+v}{\norm{w}}=\frac{\langle w,
+    x_i\rangle +b}{\norm{w}} \]
+Quindi:
+\begin{definizione}
+  Definiamo il \textbf{margine geometrico} di un punto $(x_i,y_i)$ rispetto
+  all'iperpiano $(w,b)$ come:
+  \[\gamma_i=\frac{y_i\cdot(\langle w,x_i\rangle+b)}{\norm{w}}\]
+  e quindi il \textbf{margine geometrico} dell'iperpiano rispetto al training
+  set $S$ è definito come:
+  \[\rho=\min_{i=1,\ldots, n}\gamma_i\]
+\end{definizione}
+\begin{teorema}
+  Se $\gamma_i>0,\forall \mbox{ classificazione} i$ la classificazione è
+  approvata analogamente a quanto detto per il margine funzionale.
+\end{teorema}
+ato un punto positivo/negativo il margine geometrico rappresenta la sua
+distanza geometrica dall'iperpiano. Quindi il margine geometrico rende meglio
+l'idea della distanza di un punto sa un iperpiano in $\mathbb{R}^n$.\\
+Inoltre si ha che \textbf{i margine geometrico è invariante rispetto alla scala
+  di $w$} e quindi possiamo ``riscalare'' l'iperpiano senza cambiamenti, non
+variando il margine.\\
+Dalla formula notiamo che, posto $\norm{w}=1$ si ``riscala'' l'iperpiano $(w,b)$:
+\[(w,b)\to\left(\frac{w}{\norm{w}},\frac{b}{\norm{w}}\right)\]
+Si considera quindi un iperpiano
+$\left(\frac{w}{\norm{w}},\frac{b}{\norm{w}}\right)$ con il vettore di pesi
+$\frac{w}{\norm{w}}$ di \textbf{norma unitaria}.
+\begin{definizione}
+  Definiamo un \textbf{iperpiano canonico} se:
+  \[\min_{i=1,\ldots n}|\langle w,x_i\rangle+b|=1\]
+  e quindi, per un iperpiano canonico si hanno:
+  \begin{itemize}
+    \item margine funzionale pari a 1
+    \item margine geometrico pari a $\frac{1}{\norm{w}}$
+  \end{itemize}
+\end{definizione}
+Si nota che se $\norm{w}=1$ allora margine funzionale e geometrico coincidono,
+infatti si possono mettere in correlazione:
+\[\gamma=\frac{\hat{\gamma}}{\norm{w}}\]
+Bisogna quindi cercare di estendere il margine, cerchiamo quindi di
+massimizzare una certa funzione obiettivo:
+\[\max f(x)\]
+\[s.t.\,\,\,\,\,g(x)\leq 0\]
+\[\qquad h(x)=0\]
+Vorremmo assicurarci che tutti i punti (sia quelli positivi sia quelli negativi)
+cadano  al di fuori del margine e quindi, dato un certo $\gamma$ vorremmo,
+$\forall\,i\in\{1,\ldots,n\}$:
+\[\frac{y_i\cdot(\langle w,x_i\rangle+b)}{\norm{w}}\geq \gamma\]
+e quindi vogliamo:
+\[\max \gamma\]
+\[s.t.\qquad y_i\cdot(\langle w,x_i\rangle+b)\leq \gamma\]
+\[\norm{w}=1 \]
+avendo, con il secondo vincolo,  margine geometrico uguale a quello
+funzionale.\\
+Riscriviamo quindi:
+\[\max \frac{\hat{\gamma}}{\norm{w}}\]
+\[s.t.\qquad y_i\cdot(\langle w,x_i\rangle+b)\leq \gamma\]
+Non avendo comunque un vincolo convesso.\\
+Possiamo però scalare l'iperpiano senza variazioni, grazie all'invarianza. Lo
+scalo quindi in modo da avere l'iperpiano canonico, con margine funzionale pari
+a 1:
+\[\max \frac{1}{\norm{w}}\]
+\[s.t.\qquad y_i\cdot(\langle w,x_i\rangle+b)\leq \gamma\]
+Si cerca quindi di rendere massimo $\frac{1}{\norm{w}}$ che equivale a rendere
+minimo $\frac{1}{2}\norm{w}^2$. Quindi si ottiene che vogliamo minimizzare
+$\frac{1}{2}\norm{w}^2$, che per comodità chiamiamo $\tau(w)$:
+\[\min \tau(w)=\frac{1}{2}\norm{w}^2\]
+\[s.t.\quad y_i\cdot(\langle w,x_i\rangle+b)\leq \gamma\]
+\begin{teorema}
+  Si dimostra che esiste una sola soluzione al problema, ovvero esiste un unico
+  iperpiano di massimo margine.
+\end{teorema}
+Ricapitolando si hanno due ragioni a supporto delle SVM:
+\begin{enumerate}
+  \item la \textbf{generalizzazione}, ovvero la capacità dell'iperpiano di
+  separazione di massimo margine
+  \item esiste un’unica soluzione del problema di ottimizzazione appena
+  descritto 
+\end{enumerate}
+
+
 Si sta cercando:
-\[\min \tau(w)=\frac{1}{2}\norm{w}^2 \mbox{ t.c. }y_i(\langle w,x_i\rangle + b
-  )\geq 1\]
-ovvero:
+\[\min \tau(w)=\frac{1}{2}\norm{w}^2\]
+\[s.t.\quad y_i\cdot(\langle w,x_i\rangle+b)\leq \gamma\]
+e si ha che:
 \[w=\sum_{i\in Q}\alpha_i\cdot x_i\]
 Ovvero scritta in termini di un sottoinsieme di esempi del training set (noto
 come vettori di supporto) che giacciono sul margine dell’iperpiano, prendendo
@@ -2544,7 +2795,7 @@ semplificato nel caso di \textbf{funzioni kernel}.
   senza computare le trasformate, semplificando il calcolo di:
   \[sgn\left(\sum_{i\in Q}\alpha_i\langle \Phi(x_i),\Phi(x)\rangle+b\right)\]
   sostituendo $\Phi(x_i)\cdot\Phi(x)$ con $K(x_i,x)$, ottenendo:
-  \[sgn\left(\sum_{i\in Q}\alpha_i\cdotK(x_i,x)+b\right)\]
+  \[sgn\left(\sum_{i\in Q}\alpha_i\cdot K(x_i,x)+b\right)\]
   con:
   \[K(x,y)=\langle \Phi(x),\Phi(y)\rangle\]
   Non si cercano tutte le possibili trasformazioni ma solo alcune.
@@ -2612,6 +2863,66 @@ Vediamo una lista di kernel standard:
 \begin{teorema}[teorema di Mercer]
   Ogni matrice simmetrica e definita positiva è un kernel
 \end{teorema}
+SVM può essere applicato a problemi non binari tramite il \textbf{one vs rest},
+avendo separazioni a più classi. Spesso posso ridurmi comunque a sottoproblemi
+binari, avendo più gruppi di punti linearmente separabili. SVM trova quindi
+tutte le possibili separazioni lineari. Combinando quindi i risultati ottenuti
+sui sottoproblemi binari derivati, risultati ottenuti con SVM, e definendo una
+logica di classificazione per il problema originale posso fare un'analisi
+multiclasse.\\
+Si ha quindi l'addestramento di un singolo classificatore per classe, con i
+campioni di quella classe come campioni positivi e tutti gli altri campioni come
+negativi.\\
+Questa strategia richiede che i classificatori di base producano un punteggio di
+confidenza a valore reale per la sua decisione, piuttosto che solo un'etichetta
+di classe, infatti le sole etichette di classi discrete possono portare a
+ambiguità.\\
+Abbiamo quindi:
+\begin{itemize}
+  \item come input:
+  \begin{itemize}
+    \item un learner $L$
+    \item un set di esempi $X$
+    \item delle label $y_i$ associate ad ogni $x_i\in X$ con $i=1,\ldots K$
+  \end{itemize}
+  \item come output una lista di classificatori $f_k$ con $l=1,\ldots K$
+\end{itemize}
+La procedura è quindi, $\forall k\in \{1\ldots K\}$ costruisco un nuovo vettore
+di label $z$ tale che:
+\[
+  \begin{cases}
+    z_i=y_i&\mbox{ se } y_i=k\\
+    z_i=0&\mbox{ altrimenti}
+  \end{cases}
+\]
+applicando poi $L$ a $(X,z)$ per ottenere $f_k$.\\
+Quindi prendere decisioni significa applicare tutti i classificatori ad un nuovo
+sample e prevedere l'etichetta $k$ er la quale il classificatore corrispondente
+riporta il punteggio di confidenza più alto:
+\[\hat{y}=argmax\,\,f_k(x),\,\,\,k\in\{1,\ldots K\}\]
+Questa euristica soffre di diversi problemi:
+\begin{itemize}
+  \item la scala dei valori di confidenza può differire tra vari classificatori
+  binari 
+  \item anche se la distribuzione in classe è bilanciata nel training set, i
+  learner per la classificazione binaria vedono distribuzioni sbilanciate
+  perché tipicamente l'insieme di negativi che vedono è molto più grande
+  dell'insieme di positivi
+\end{itemize}
+Un'alternativa è il \textbf{one vs one} prendendo le varie classi e produrre
+sistemi di SVM tra coppe di classe. La quantità di problemi derivati esplode in
+modo quadratico. Alla fine si attribuisce maggior probabilità ad una singola
+classe.\\
+Si ha il train di:
+\[\frac{K\cdot (K-1)}{2}\]
+classificatori binari per un problema a $K$ classi e ognuno riceve i campioni di
+un paio di classi dal training set originale e deve imparare a
+distinguere queste due classi.\\
+In fase di predizione tutti i $\frac{K\cdot (K-1)}{2}$ classificatori sono
+applicati al nuovo sample e la classe che con il più alto numero di predizioni
+positive viene usata come previsione per il classificatore combinato. Anche
+questa tecnica soffre di ambiguità in quanto alcune regioni del suo spazio di
+input possono ricevere lo stesso numero di voti.
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -2628,3 +2939,4 @@ Vediamo una lista di kernel standard:
 % LocalWords:  retropropagazione nodes branches leef outcome pdf red Shannon VC
 % LocalWords:  Support Vector Machines SVM Machines Vector Support LocalWords
 % LocalWords:  iperpiani Cervonenkis Vapnik support vector kernel trick
+% LocalWords:  riscalato

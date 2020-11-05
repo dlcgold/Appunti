@@ -21,7 +21,7 @@
 \usepackage{fontspec}
 \usepackage{enumerate}
 \usepackage{braket}
-\usepackage[demo]{graphicx}
+%\usepackage[demo]{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{marginnote}
@@ -3163,7 +3163,6 @@ Un \textit{update} avviene con la stessa logica con \texttt{updateAll}:
   })
 \end{minted}
 %$
-\\
 \textit{\$upsert} sarebbe un \textit{insert if not exist}, per permettere
 l'inserimento e non la modifica in caso di assenza. Tale cosa è assente in SQL
 ma servirebbe un doppio comando.\\
@@ -3207,6 +3206,475 @@ Con questa soluzione poi devo sistemare le query.\\
 \textbf{Quindi l'importanza del modello è decisiva dal punto di vista delle
   prestazioni}.\\
 \textbf{Nelle slide brevissima parte su CouchDB inutile}.
+\begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
+  Nella storia di NoSQL compaiono sempre grandi aziende, come Google, Amazon o
+  Facebook che creano il software, fanno il paper e rendono il software open. Il
+  rilascio dei codice in modo open source viene fatto in quanto in primis la
+  community permette continui miglioramenti ``a costo zero'', inoltre le aziende
+  in questione guadagno in primis su pubblicità (Google e Facebook in primis) e
+  cloud (vedisi Amazon che fa il 90\% degli utili dal cloud). Nessuno di questi
+  vende direttamente tecnologia (anche perché, esempio, Android ha un valore
+  economico basso) ma la usano. Si ha quindi esigenza applicativa, non
+  affidandosi a società esterne ma facendosi le cose internamente, rilasciando
+  poi le cose open source per far abituare gli utenti alle proprie tecnologie,
+  facendo così in modo che la gente voglia usare quelle tecnologie in ambito
+  cloud. In tutto ciò si contribuisce a creare pubblicità mirate etc$\ldots$ in
+  quanto il vero ``bene'' sono i dati non l'hardware o le tecnologie (e quelli
+  non sono open). Si ha la \textbf{data-driven economy}, i dati sono il nuovo
+  petrolio. IBM, Oracle etc$\ldots$ che vendevano invece la tecnologia ora sono
+  più in crisi e hanno dovuto cambiare \textit{business}.\\
+  Per progettare una review di prodotti servono informazioni in merito a chi fa
+  la review (utente verificato, numero di vecchie review etc$\ldots$). In ogni
+  elemento del documento salvo queste informazioni. Non è poi possibile avere
+  tutte le review nello stesso documento, quindi le primissime review (che
+  vengono visualizzate subito) le lascio
+  nel documento principale e per le altre lascio una reference ad un altro
+  documento. Le review possono anche essere usate per valutare l'affidabilità
+  dell'utente ed eventuali scelte alternative dei prodotti. Si punta comunque
+  all'efficienze e all'efficacia.\\
+  I db documentali scalano tramite \textbf{distributed hashed table
+    (\textit{DHT})}. Definendo una funzione di hash definisco implicitamente il
+  dominio della funzione, posso quindi distribuire in modo efficiente sui nodi i
+  vari valori di hash. Posso quindi avere diversi server con un nodo che salva
+  le coppie chiave-valore con tutte le chiavi di sua responsabilità, è il
+  \textbf{chord ring}. Ogni nodo quindi sa che dati deve gestire tramite la
+  funzione di hash, avendo un 
+  algoritmo di scelta del nodo tramite \textit{finger table}, con complessità
+  logaritmica. L'aggiunta di un nodo può portare a buchi di sicurezza ma
+  permette una scalabilità orizzontale incredibile.\\
+  \textbf{sistemare questa parte!}
+\end{shaded}
+\section{GraphDB}
+È il modello più ricco e complesso tra i NoSQL.\\
+Un grafo, da un certo punto di vista, ha proprietà simili a quelle di un modello
+ER. È infatti un insieme di nodi e di relazioni tra loro, dove i concetti più
+importanti (quelle che in ER sarebbero le \textit{entità}) sono modellate come
+nodi. Bisogna quindi studiare come connettere i nodi, infatti il modo con cui
+le entità sono semanticamente associate si modellano come relazioni, tramite
+archi.\\
+Si hanno campi di applicazione dei db a grafo:
+\begin{itemize}
+  \item social network
+  \item sistemi di raccomandazione, che suggeriscono oggetti simili a utenti
+  simili
+  \item ambito geografico
+  \item reti logistiche (per spedizioni etc$\ldots$)
+  \item transazioni finanziarie per la \textit{fraud detenction} (riconoscendo
+  certi pattern sospetti, anche a livello geografico)
+  \item master data management, rappresentazione unica della realtà
+  \item bioinformatica
+  \item controllo di autorizzazioni e accessi
+\end{itemize}
+\begin{esempio}
+  Per esempio su Twitter avrei i nodi con gli utenti e gli archi rappresentanti
+  la relazione \textit{follow}.
+\end{esempio}
+Si usa una \textbf{descrizione estensionale dei dati}. Si può avere infatti:
+\begin{itemize}
+  \item \textbf{descrizione estensionale dei dati} quando si descrivono le
+  istanze via-via, descrivendo anche istanze di tipo diverso (magari utenti e
+  messaggi) usando la stessa sintassi del nodo (ugualmente per gli archi). La
+  semantica viene data dall'etichetta
+  \item \textbf{descrizione intensionale dei dati}, che bisognerebbe inferirla
+  direttamente dai dati e quindi non è applicabile
+\end{itemize}
+Nei RDBMS si aveva il \textit{join} basato su valori, facendo uno
+\textit{scheme understanding} sulle varie tabelle, ottenendo quindi il risultato
+tramite anche più operazioni di \textit{join}. Si può avere però il problema
+applicativo, avendo magari\textbf{ relazioni ad anello} tra le varie tabelle
+ad esempio una tabella ``persona'' che tramite una tabella ``amici'' ritorna su
+se stessa, avendo la tabella ``amici'' che esplode in numerosità (magari
+cercando amici di amici etc$\ldots$ complicando le cose di livello in
+livello ). Avendo potenzialmente livelli infiniti di \textit{join} si va
+incontro al \textbf{join bombing}, che fanno soffrire i DBMS. Si può considerare
+comunque il \textbf{six separation degree}, uno studio sociologico, che dice
+che con sette connessioni si può raggiungere chiunque (ora coi social ne bastano
+meno). Simile è il \textbf{Kevin Bacon number}, che dice il numero medio di film
+fatti tra artisti per ottenerne uno fatto con Kevin Bacon, anche in questo caso
+si arriva allo stesso risultato visto con il \textbf{six separation degree}.\\
+Nei sistemi a grafo abbiamo quindi gli archi mentre nei documentali avevamo
+identificatori che puntavano ad altri documenti (con un modello basato sui
+valori come se fossero \textit{foreign keys} dei RDBMS), comportando, nel caso
+dell'embedding, task di modellazione complessi, scarsa efficienza e complessità
+nel gestire dati fortemente connessi, mentre, con il referencing starei
+simulando una sorta di modello a grafo. \\
+I db a grafo hanno forte potenza espressiva permettendo di caratterizzare i nodi
+con un certo \textit{tipo} e definire le varie relazioni tramite archi.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.7]{img/gdb.pdf}
+  \caption{Esempio di db a grafo}
+  \label{fig:gdb}
+\end{figure}
+Coi grafi si possono facilmente rappresentare relazioni umane, sociali,
+affettive, lavorative etc$\ldots$ usando dei semplici archi. Si possono
+connettere elementi tramite un'infinità di tipi di relazioni.\\
+Nei nodi posso rappresentare anche entità complesse, con vari attributi, ovvero
+varie \textbf{proprietà} (ovviamente ogni nodo può avere un set di attributi
+diversi, avendo fortissima libertà di schema).\\
+È un modello molto più immediato rispetto ad un RDBMS. Inoltre, nel caso si
+abbiano potenzialmente più relazioni tra due nodi basta contare quanti cammini
+orientati (che possono quindi passare per nodi intermedi diversi) esistono tra
+quei nodi per ottenere la cardinalità di tali relazioni. \\
+Un grafo con le proprietà nei nodi è detto \textbf{property graph}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1]{img/gdb2.pdf}
+  \caption{Esempio di db con rappresentato da un \textbf{property graph}, con
+    \textit{user} come chiave e un array di valori}
+  \label{fig:gdb2}
+\end{figure}
+È un modello simile a quello che si fa su una lavagna, è una modellazione simile
+a quella umana, basti pensare alle mappe concettuali. \\
+Si hanno comunque vari tipi di \textit{property graph};
+\begin{itemize}
+  \item quando sia nodi che relazioni possono avere proprietà espresse da
+  chiave-valore, accettando quindi che i nodi abbiano un tipo
+  \item altri ammettono array di valori
+\end{itemize}
+\textit{Si nota che invece in altri modelli NoSQL come RDF i nodi possono avere
+  un tipo ma non proprietà e le relazioni non hanno proprietà, dovendo sempre
+  rappresentare il tutto tramite triple ``soggetto-predicato-oggetto''}.\\
+Il problema di modellazione dei grafi si ritrova quindi nella scelta di cosa
+mettere come nodo e cosa come relazioni (ed eventualmente le proprietà), avendo
+varie scelte modellistiche con vari e pro e contro.\\
+Ovviamente anche qui ogni vendor ha il suo linguaggio, anche se ne esiste uno
+\textit{standard}, chiamato \textbf{gremlin}, che più che essere un linguaggio
+di interrogazione è un \textit{linguaggio di attraversamento dei grafi} (dato
+che cercare sottografi e attraversare il grafo è la principale tecnica di studio
+degli stessi che si ha a disposizione). Questo tipo di linguaggio viene detto
+\textbf{vertex-based} che si usano per studiare la validità di predicati
+tramite l'attraversamento dei nodi.\\
+Si hanno vari vendor quindi e si hanno due tipi di approccio:
+\begin{enumerate}
+  \item \textbf{graph processing}, dove ci si concentra sul processamento dei
+  dati, processamento che viene eseguito tramite i grafi 
+  \item \textbf{graph storage}, dove i dati vengono memorizzati in forma di
+  grafo 
+\end{enumerate}
+In entrambi i casi la cosa può essere fatta in modo:
+\begin{itemize}
+  \item \textbf{nativo}:
+    \begin{itemize}
+    \item \textit{native graph storage} per indicare che sono ottimizzati e
+    progettati per le gestione stessa dei grafi. In questo caso comunque i dati
+    vengono memorizzati in modo intelligente, memorizzando in modo vicino i nodi
+    e il loro archi, facendo \textit{index free adjacency}, in modo che
+    seguire gli archi uscenti da un nodo è molto più immediato. Tra gli esempi
+    di db abbiamo \textbf{Neo4j}, che in memoria salva, per ogni nodo, tutti i
+    suoi riferimenti, tramite pointers. In scrittura comunque si perdono
+    performance, a vantaggio di una lettura molto rapida (al costo comunque di
+    molto uso di RAM). Si evita il \textit{join bombing} seguendo i riferimenti
+    vicini ad ogni nodo, facendo l'attraversamento
+  \end{itemize}
+  \item \textbf{non nativo}:
+  \begin{itemize}
+    \item \textit{non native graph storage} per indicare che i dati vengono
+    trasformati da grafo ad un formato diverso tra cui relazionale, object
+    oriented db etc$\ldots$ Si rischia comunque il \textit{join bombing}
+  \end{itemize}
+\end{itemize}
+Potrei avere un db con una rappresentazione a tabelle (e non a grafo) studiata
+come se fosse un grafo (traducendo poi le query in SQL), questo è l'approccio di
+\textbf{FlockDB}.\\
+Un'alternativa è avere, come nel caso di \textbf{Titan}, dove posso comunque
+usare \textit{Gremlin} ma con dati memorizzati in modo colonnale.\\
+Si hanno quindi due approcci principali per gestire un grafo:
+\begin{itemize}
+  \item \textbf{graph database}, ovvero un DBMS che gestisce in maniera
+  persistente un grafo che viene usato per le transazioni. Si ha in questo caso
+  la dicitura OLTP
+  \item \textbf{graph compute engine}, ovvero tecnologie per l'analisi
+  \textit{off line} dei grafi. Si ha in questo caso la dicitura OLAP
+\end{itemize}
+I graph database supportano le operazioni CRUD (come tutti i modelli NoSQL):
+\begin{itemize}
+  \item Create
+  \item Read
+  \item Update
+  \item Delete
+\end{itemize}
+Come abbiamo visto si studiano gli attraversamenti del grafo, che sono
+equiparati ai \textit{join} del modello relazionale, per fare le query in modo
+performante non facendo join ma attraversando e basta. Sono inoltre costruiti
+per essere usati nei sistemi transazionali (OLTP). \\
+Si ha un problema grave coi grafi, motivo per cui si hanno i \textit{non native
+  graph storage}: \textbf{i grafi non scalano bene e non possono essere
+  facilmente frammentati}.\\
+Partizionare un grafo raramente è possibile, in quanto comporta un taglio di
+relazioni. Se quindi si vuole scalare bisogna passare, alla fine, ad un altro
+modello, aggiungendo però costo di comunicazione tra il modello a grafo e il
+nuovo modello scelto, aggiungendo un layer software.\\
+\subsection{Neo4j}
+Abbiamo già introdotto precedentemente Neo4j. Sappiamo che è nativo sia per il
+\textit{graph processing} che per il \textit{graph storage} (sovvrendo quindi la
+scalabilità).\\
+Approfondiamo quindi il \textbf{linguaggio di interrogazione di Neo4j}, chiamato
+\textbf{Cypher} (\textit{OpenCypher} nella versione open).\\
+Cypher è definito come un \textbf{pattern-matching query language}. È un
+linguaggio simil-umano, espressivo, dichiarativo (si dice il cosa e non il
+come), che consente operazioni di aggregazione, sorting e di limit (trovare ad
+esempio le $n$ top key etc$\ldots$) e permette di aggiornare il grafo.\\
+Un formato in modo testuale viene rappresentato con le parentesi tonde per i
+nodi e le quadre per gli archi. Le relazioni orientate vengono indicate tramite
+``->'' o ``<-''.
+\begin{esempio}
+  Tramite:
+  \begin{center}
+    \textit{(c)-[:KNOWS]->(b)-[:KNOWS]->(a), (c)-[:KNOWS]->(a)}
+  \end{center}
+  con la ``,'' che significa $\land$.\\
+  Equivalentemente potevamo avere:
+    \begin{center}
+    \textit{/c)-[:KNOWS]->(b)-[:KNOWS]->(a)<-(c)-[:KNOWS]}
+  \end{center}
+  per rappresentare:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/neo.pdf}
+  \end{figure}
+  Vediamo quindi un'interrogazione classica in Cypher, dove si cercano tutti
+  gli utenti tali per cui conosce qualcuno $a$ che conosce qualcuno $b$ e che
+  sono etichettati come ``Michael'', ritornando $a$ e $b$: 
+  \begin{minted}{cypher}
+    MATCH(c:user)
+    WHERE (c)-[:KNOWS]->(b)-[:KNOWS]->(a),
+          (c)-[:KNOWS]->(a), c.user="Michael"
+    RETURN a, b
+  \end{minted}
+  Il risultato sarà una \textbf{tabella} che contiene tutte le coppie $a$ e
+  $b$. Avrà dei dati ridondati a causa della dualità intrinseca di avere $a$ che
+  conosce $b$, cosa che probabilmente porta ad avere che $b$ conosce $a$.
+\end{esempio}
+Quindi il risultato \textbf{non sempre} è un grafo (mentre nel documentale era
+sempre un documento e nel relazionale una tabella) ma può anche essere altro, ad
+esempio una tabella. Non è quindi sempre possibile concatenare query in quanto
+potrei non avere un grafo in uscita.\\
+Si hanno comunque clausole (coprendo le operazioni CRUD):
+\begin{itemize}
+  \item \textit{where} per imporre criteri di filtraggio tramite
+  pattern-matching dei risultati
+  \item \textit{create/create unique}, per creare nodi e relazioni
+  \item \textit{delete}, per cancellare nodi, relazioni e proprietà
+  \item \textit{set}, per impostare dei valori alle proprietà
+  \item \textit{foreach}, per fare un update per elementi del grafo posti in una
+  lista (per ogni nodo, per ogni arco etc$\ldots$)
+  \item \textit{union}, per unire i risultati più query
+  \item \textit{with}, per concatenare query propagando i risultati in pipe
+\end{itemize}
+\subsection{Grafi e modello relazionale}
+Compariamo ora il modello a grafi con il modello relazionale.\\
+Per farlo sfruttiamo un esempio: 
+\begin{esempio}
+  Vogliamo costruire un modello relazionale per la gestione di una server
+  farm. Si ha che l'utente accede ad una applicazione che gira su una VM ed
+  accede ad un db (primario o secondario). I server che ospitano le VM sono
+  installati su sistemi rack controllati da un sistema di load balancing.\\
+  Una tipica attività è quella di controllare se ogni elemento del sistema
+  funzioni e, in caso di guasto, capire cosa non stia funzionando. Per farlo si
+  hanno dei sensori, sia software che hardware, che monitorano le varie
+  componenti. \\
+  Modello uno schema del mio sistema collegando in una mappa concettuale le
+  varie componenti che comunicano tra loro o che sono in relazioni (anche solo
+  per dire che un server è in un certo rack). Si modellano così le varie
+  istanze. Tale modellazione relazionale può avere il seguente ER:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/er.pdf}
+  \end{figure}
+  Ogni elemento ha l'attributo $on$ per indicare se i sensori dicono che la
+  componente funzioni o meno, attributo che verrà usato per le query.\\
+  Qualora quindi un'utente mi dica che una certa applicazione non funziona devo
+  risalire step by step al server, eventualmente al rack, al db etc$\ldots$,
+  avendo una quantità di join non indifferente (6 \textit{join} diversi nel caso
+  peggiore).\\
+  Una rappresentazione a grafo sarebbe molto più semplice, avendo dei semplici
+  cammini anziché avere tutti quei \textit{join}. Si avrebbe quindi un nodo per
+  singola componente reale con le relazioni tra le varie singole componenti. \\
+  Pensiamo quindi, per esempio, alla seguente query:
+  \begin{center}
+    Trovare gli asset (server, app, machine virtuali) in stato down per l’utente
+    user 3
+  \end{center}
+  \begin{minted}{cypher}
+    START user = node:users(name = "user 3")
+    MATCH (user)-[*1..5]-(asset)
+    WHERE asset.status! = "down"
+    RETURN DISTINCT asset
+  \end{minted}
+  Parto quindi dal nodo che come nome ``user 3'', trova tutti quegli asset con
+  distanza da 1 a 5 rispetto al nodo utente, arrivando quindi fino a 5 livelli
+  di profondità. Se tale asset è in down viene restituito una sola volta.
+\end{esempio}
+\subsection{Ancora su Neo4j}
+Tutta la teoria e la letteratura sui grafi viene applicata ai db a grafo, dai
+cammini minimi alle clique. Il vero problema resta la modellazione e la scelta
+del DBMS. Approfondiamo quindi ancora di più Neo4j.\\
+Abbiamo già visto che non ha meccanismi nativi di frammentazione, avendo scelto
+di sfruttare la \textit{index free adjacency} e la modellazione a grafo, non
+permettendo scalabilità. In compenso garantisce varie caratteristiche
+funzionali:
+\begin{itemize}
+  \item permette le transazioni con tutte le proprietà ACID, con meccanismi di
+  locking
+  \item garantisce la disponibilità
+  \item garantisce la recoverability
+\end{itemize}
+In merito alla scalabilità, nonostante le limitazioni sopra esposte,
+garantisce l'\textbf{alta disponibilità}. L'idea è che è possibile andare a
+definire un cluster di nodi Neo4j, alcuni chiamati \textbf{core server}, ovvero
+nodi per cui tutte le scritture sono fatte in contemporanea, essendo quindi
+sincronizzati. Si hanno poi gli altri nodi che sono chiamati \textbf{replica
+  server}, che sono di sola lettura, che vengono creati tramite meccanismi di
+replica simili a quelli già trattati. I \textit{replica server} vengono anche
+usati per reporting analysis etc$\ldots$. Fatta una query essa comunque non
+viene distribuita ma eseguita sul nodo più vicino. Tutto questo sistema è detto
+\textbf{casual clustering}.\\
+Si ha una bassa \textbf{latenza} nelle query in quanto si usa un indice per
+risalire al primo nodo e poi si procede coi cammini, avendo quindi che le
+performances non dipendono dalla grandezza del dataset ma solo da quali sono i
+dati richiesti dalla query.
+\section{Altri modelli}
+In situazioni reali, ad esempio un e-commerce, posso avere i dati salvati in
+vari DBMS, sia relazionali che NoSQL, a seconda dei dati che contengono (magari
+avrei le raccomandazioni in un db a grafo con Neo4j, il catalogo prodotti in un
+documentale come MongoDB, le sessioni utente in un db key-value come Redis,
+dati finanziari e reporting in un RDBSM, per i log delle attività un modello
+NoSQL colonnale etc$\ldots$). Dover gestire tutti questi modelli diversi è molto
+completo, ma sensato in base al tipo di dati. Ho quindi una sorta di
+\textbf{mondo poliglotta}.
+\subsection{ArangoDB}
+In questo mondo poliglotta complesso ci arriva in soccorso un particolare DBMS:
+\textbf{ArangoDB}.\\
+Il DBA dovrebbe conoscere tutti i modelli in uso e tutti i linguaggi associati,
+essendo anche in grado di gestire i vari conflitti. ArangoDB introduce il
+concetto di \textbf{db poliglotta}, supportando i seguenti modelli:
+\begin{itemize}
+  \item key-value
+  \item documentali
+  \item a grafo
+  \item a ricerca full-text (come fa anche \textbf{Elastic Search})
+\end{itemize}
+Rispetto ai modelli precedentemente descritti a grafo con storage non nativo,
+tipo \textbf{Titan}, che appunto accettano solo un linguaggio di query a grafo,
+il linguaggio di query di ArangoDB, chiamato \textbf{AQL (\textit{Arango Query
+    language})}, garantisce la possibilità di interrogare dati in formato json
+(quindi documentale), a grafo, in formato key-value o per il full text search.\\
+Ad alto livello Arango organizza i dati in database e collezioni (per fare un
+parallelo schemi e tabelle), dove le collezioni memorizzano documenti o
+similari. I documenti, come già accennato, sono documenti json di profondità
+arbitraria (sub-object, sub-arrays etc$\ldots$), non avendo alcun limite da
+questo punto di vista. Nel caso semplice tali documenti sono omogenei, avendo
+stessi attributi e tipi, e effettuare una query AQL è molto semplice:
+\begin{minted}{sql}
+  FOR c IN categories
+  FILTER c._key IN [ 'books', 'kitchen' ]
+  RETURN c
+
+  FOR c IN categories
+  SORT .title
+  RETURN { _key: c._key, title: c.title}
+\end{minted}
+Avendo un linguaggio simile a uno di programmazione.\\
+Abbiamo quindi, nella prima query, che selezioniamo tutti i $c$ in `$categories$
+(che è una collezione) trovando solo le chiavi che sono o ``book'' o ``kitchen''
+ritornando $c$. Nella seconda selezioniamo selezioniamo tutti i $c$ in
+`$categories$, ordiniamo i risultati in base al titolo e ritorniamo chiave e
+titolo.\\
+Posso comunque avere documenti eterogenei, con attributi diversi. Possiamo
+comunque interrogare usando il modello a grafo e tali query mostrano quali
+documenti sono collegati (direttamente o indirettamente) ad altri documenti,
+specificando il cammino per ottenere il collegamento. Queste connessioni tra
+documenti sono chiamate \textbf{edges} che sono salvati in ``edge
+collections''. Gli \textit{edges} hanno sempre due attributi che si riferisocno
+ai nodi entranti e uscenti:
+\begin{itemize}
+  \item \textit{\_from}
+  \item \textit{\_to}
+\end{itemize}
+Avendo sempre archi direzionati del tipo:
+\[\_from \to \_to\]
+\textbf{anche se si possono effettuare query anche nell'ordine opposto}.\\
+\begin{esempio}
+  Preso il documento \textit{json}:
+  \begin{minted}{json}
+    { "_key" : "sofia", "_id" : "employees/sofia"}
+    { "_key" : "adam", "_id" : "employees/adam"}
+    { "_key" : "sarah", "_id" : "employees/sarah"}
+    { "_key" : "jon", "_id" : "employees/jon"}
+  \end{minted}
+  posso avere un \textbf{edge}, per una certa relazione, del tipo:
+  \begin{minted}{json}
+    { "_from" : "employees/sofia", "_to" : "employees/adam"}
+    { "_from" : "employees/sofia", "_to" : "employees/sarah"}
+    { "_from" : "employees/sarah", "_to" : "employees/jon"}
+  \end{minted}
+  \textit{(Potrei comunque continuare a interrogare il primo json come se fosse
+  un documentale)}
+\end{esempio}
+Rispetto a quanto visto per i modelli a grafo cambia drasticamente la
+scalabilità.\\
+Si hanno vari metodi di scalabilità, avendo le modalità di deploy:
+\begin{itemize}
+  \item a singola istanza
+  \item master/slave, scritture su master e repliche su slave
+  \item active failover
+  \item cluster
+  \item multiple datacenters
+\end{itemize}
+Approfondiamo soprattutto gli ultimi tre.
+\subsubsection{Active failover}
+Nel modello master/slave quando il master fallisce lo slave non può essere
+sostituito e quindi si è pensato al modello \textbf{active failover}, dove
+esistono delle istanze \textit{single-server}, chiamate \textbf{leader}, che
+sono in lettura e scrittura e delle istanze, sempre \textit{single-server},
+chiamate \textbf{followers}, che non sono altro i vecchi slave, passivi e non
+scrivibili. Il leader invia le operazioni di scrittura ai followers che
+replicano in modo asincrono i dati tramite la cosiddetta \textbf{Write-Ahead Log
+  (\textit{WAL})}, ovvero il leader prima salva su un file di log e poi sul
+disco e tale file di log, tramite replica incrementale viene aggiornato, tramite
+un meccanismo di replica chiamato \textbf{apache mesos}. Esiste poi almeno un
+\textbf{agency} che controlla le configurazioni di leader e followers e
+controlla che siano tutti disponibili. Qualora l'agency si accorgesse che un
+server leader non è più disponibile promuove, con un meccanismo elettivo, un
+follower a leader. Resta quindi una sorta di master/slave ma con gli agency che
+procedono con il controllo e la rielezione.
+\subsubsection{Cluster}
+Il cluster è un'evoluzione, avendo più \textbf{coordinator} che si connettono
+con i client. I coordinator effettuando le query e gli \textbf{agency} non si
+occupano di altro se non l'elezione degli stessi e della sincronizzazione dei
+servizi per l'intero cluster. Si hanno poi i \textbf{DB server}, di tipo slave,
+che, in caso di fallimento, non comporta problemi in quanto l'agency attua le
+solite politiche di aumento repliche, se esse sono previste, bilanciando
+nuovamente i dati in caso di sharding.\\
+Lo sharding avviene in partizioni da almeno 40gb, con un meccanismo simile a
+quello di MongoDB: ogni server avrà associato uno shard, e ogni server, avendo
+ciascuno circa 3 repliche, avrà le repliche di altri server (oltre alla sua
+stessa replica, di cui è \textbf{leading shard}) (??????). Questo sistema
+permette di interrogare quasi 
+direttamente tutto sullo stesso server (avendo molte repliche) e permette, in
+caso di server non funzionante, di poter stabilire che un altro server diventa
+il \textbf{leading shard} per un certo frammento (tramite meccanismi soliti di
+elezione tramite gli agency), replicando per avere comune le tre repliche tra i
+vari server e potendo continuare a fare interrogazioni.\\
+Si hanno due soluzioni per la scrittura:
+\begin{enumerate}
+  \item il protocollo \textbf{read once write all (ROWA)} che obbliga il
+  coordinator a scrivere su tutte le repliche
+  \item il coordinatore scrive solo dove si ha la copia primaria e poi si hanno
+  le repliche, è la soluzione \textbf{oneshard} (che era chiamato \textbf{write
+    concern} in MongoDB)
+\end{enumerate}
+Arango quindi scala molto bene.
+\subsubsection{Cluster to cluster}
+L'ultimo livello è il \textbf{cluster to cluster}, una soluzione asincrona di
+tipo \textbf{one way} in cui prendo un cluster e lo copio interamente in un
+altro, usando una coda come \textbf{kafka}. La replica è one way per cui scarico
+dal primary alla replica o viceversa in tempi diversi, non
+contemporaneamente. Non è pensato per fare una replica del single-server (userei
+il master/slave).
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -3259,4 +3727,5 @@ Con questa soluzione poi devo sistemare le query.\\
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
 % LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
-% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure
+% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER
+% LocalWords:  intensionale processamento colonnale

@@ -1914,6 +1914,7 @@ meno le stringhe del corrispondente linguaggio.
 \end{definizione}
 \newpage
 \section{Problemi non risolvibili}
+Ci serve, in primis, una nuova TM:
 \begin{definizione}
   Definiamo la \textbf{Universal Turing Machine (\textit{UTM})} come una TM che
   non fa un compito specifico in base alla $\delta$ ma prende in input un'altra
@@ -1939,14 +1940,225 @@ uscita di $M$, magari scrivendo su un terzo nastro l'output.\\
 si è in grado di scrivere un algoritmo che prende in input un altro programma
 scritto nello stesso linguaggio, che fa le stesse cose, e quindi il primo
 algoritmo, per esempio, può dare le risposte opposte.\\
-
-  
+Si ha quindi che esistono \textbf{linguaggi non ricorsivi}, ovvero esistono
+\textbf{problemi non decidibili} (come i dieci problemi proposti da Hilbert ad
+inizio novecento).\\
+Si ha che le TM sono \textbf{enumerate} in quanto possono essere associate ai
+numeri naturali.\\
+Ci sono problemi che possono essere chiaramente descritti per i quali sappiamo
+che non esiste alcun algoritmo in grado di risolverli (di risolverli
+\textbf{sempre}, basta quindi anche solo un caso per cui non posso avere tale
+algoritmo). \textbf{Un problema non decidibile non è un problema intrattabile},
+che sarebbe risolvibile ma solo in tempo esponenziale.\\
+Non si può comunque dimostrare a priori che non esista un certo algoritmo (?)
+\subsection{Halting problem}
+Turing riconosce da subito come interessante l'\textbf{halting problem}. Si
+cerca un algoritmo che data una certa coppia $(M;x)$, TM/input, mi dica se
+quella macchina arriva a termine computazione o entra in loop infinito.
+\begin{definizione}
+  Definisco formalmente l'\textbf{halting problem} con il linguaggio $H$:
+  \[H=\{M;x|\,M(x)\neq\bot\}\]
+  Quindi se la stringa fa parte del linguaggio $M$ termina, altrimenti no.
+\end{definizione}
+\begin{teorema}
+  Si ottiene però che $H$ non è ricorsivo e quindi l'halting problem non è
+  decidibile.
+\end{teorema}
+\begin{proof}
+  \textbf{DIMOSTRAZIONE DA SISTEMARE!}\\
+  Immaginiamo per assurdo che $H$ sia ricorsivo e quindi esiste una TM $M_H$ che
+  prende in input $(M;x)$ e mi da sempre in output $M(x)$, ma così sto facendo
+  la stessa cosa della UTM. Ma $M_H$ non fa quello che fa la UTM, infatti fa:
+  \[
+    \begin{cases}
+      Y& \mbox{ se }M(x)\neq \bot\\
+      N& \mbox{ se }M(x) = \bot
+    \end{cases}
+  \]
+  Quindi fa qualcosa in più della UTM, perché se finisce in loop deve capire che
+  è in loop infinito, interrompere e restituire $N$.\\
+  Assumo che $H$ quindi è ricorsivo e quindi $M_H$ esiste, anche se magari non
+  la so costruire. Se esiste $M_H$ deve esisterne un'altra, chiamata $D$, che
+  presa in input solo $M$ produce:
+  \[D(M)\to M_H(M;M)\]
+  Dando in input alla TM la descrizione della TM stessa (che è comunque
+  ragionevole). Significa che:
+  \[M_H(M;M)=
+    \begin{cases}
+      Y& \mbox{ se }M(M)\neq \bot\\
+      N& \mbox{ se }M(M)=\bot
+    \end{cases}
+  \]
+  ma voglio una macchina $D$ per la quale i risultati siano invertiti (è questa
+  la chiave della dimostrazione per assurdo):
+  \[D(M)=
+    \begin{cases}
+      Y& \mbox{ se }M(M)\neq \bot\to\infty\\
+      N& \mbox{ se }M(M)=\bot\to Y
+    \end{cases}
+  \]
+  Quindi $D$ cambia $N$ in $Y$ e $Y$ in $\infty$, presa in input una macchina
+  $M$.\\
+  Provo quindi a dare in input a $D$ $D$ stessa, ottenendo o il loop o
+  $Y$. Ipotizziamo di andare in stato $Y$, quindi:
+  \[M_H(D;D)=N\]
+  che ci dice se $D$ su input $D$ termine e quindi $M_H$, per la definizione di
+  $M_H$ deve rispondere $N$, Ma $M_H$ risponde $N$ sse $D(D)$ deve andare in
+  loop infinito. Siamo arrivati ad un assurdo avendo detto che $M_H(D;D)=N$
+  accade sse $D(D)=Y$. \\
+  Inoltre se ipotizziamo che $D(D)$ va in loop allora $M_H(D;D)=Y$ che implica
+  che $D(D)$ termina la computazione, sempre per definizione. Ho ottenuto quindi
+  un'altra contraddizione, confermando la prova per assurdo.
+\end{proof}
+Si è dimostrato quindi che anche problemi ben definiti possono non essere
+decidibili, problemi come il definire il comportamento di un programma dato un
+input. Il problema comunque non è una potenza limitata della TM ma un limite
+intrinseco al problema stesso.
+\begin{teorema}
+  Il linguaggio $H$ è ricorsivamente enumerabile, ovvero il problema è
+  \textbf{parzialmente decidibile}. La macchina quindi riconosce una macchina
+  che termina, altrimenti non si sa.  
+\end{teorema}
+\begin{proof}
+  Devo trovare una macchina che termina in $Y$ che riconosce una stringa
+  appartenente al linguaggio $H$.\\
+  Costruisco quindi una $M_H'$ che prende in input una TM generica col suo
+  input e si ha che:
+  \[M_H'(M;x)=
+   \begin{cases}
+     Y &\mbox{ se } M(x)\mbox{ termina}\\
+     N/\infty &\mbox{ altrimenti}
+    \end{cases}
+  \]
+  Quindi se non termina non si sa che succede, ma potrebbe anche essere sempre
+  in loop.\\
+  Pensando a UTM ho che:
+  \[UTM(M;x)=
+   \begin{cases}
+     Y &\mbox{ se } M(x)=Y\mbox{ avendo }M_H'=Y\\
+     N &\mbox{ se } M(x)=N\mbox{ avendo }M_H'=Y\\
+     H &\mbox{ se } M(x)=H\mbox{ avendo }M_H'=Y\\
+     \infty &\mbox{ se } M(x)=\infty\mbox{ avendo }M_H'=\infty\\
+    \end{cases}
+  \]
+  Quindi $M_H'$ è una UTM con gli stati finali leggermente modificati (quindi
+  non più una UTM), avendo
+  solo $Y$ (se termina) e $\infty$ (altrimenti). Abbiamo quindi dimostrato che è
+  \textbf{parzialmente decidibile}, avendo che la macchina da $Y$ se la
+  computazione è terminante e va in loop altrimenti.
+\end{proof}
+Ho quindi problemi non decidibili che sono parzialmente decidibili. Esistono
+anche problemi legati a linguaggi \textbf{non ricorsivamente enumerabili}, per
+cui quindi non si può \textbf{mai} dare risposta. Si hanno quindi problemi
+nemmeno parzialmente decidibili. Pensiamo alle coppie $(M;x)$ che non terminano.
+\begin{teorema}
+   Esistono linguaggi \textbf{non ricorsivamente enumerabili} avendo quindi
+   problemi non decidibili.
+\end{teorema}
+\begin{proof}
+  Basti pensare che se $L$ è ricorsivo sse $L$ è ricorsivamente
+  enumerabile. Quindi, pensando all'halting problem, $L_H$ non è ricorsivo ma è
+  è ricorsivamente enumerabile. Ma allora $\overline{L_H}$, il linguaggio
+  complementare non è ricorsivamente enumerabile: 
+  \[\overline{L_H}=\{M;x|M(x)=\bot)\]
+\end{proof}
+\subsection{Problemi decidibili}
+Studiamo ora i problemi decidibili catalogandoli in base ai tempi, nei casi
+peggiori. Si hanno: 
+\begin{itemize}
+  \item algoritmi in tempo polinomiale rispetto alla dimensione dell'input
+  \item algoritmi in tempo esponenziale rispetto alla dimensione dell'input,
+  sono dimostrabilmente intrattabili
+\end{itemize}
+Bisogna capire se un problema cade in queste due categorie.\\
+Il tempo di esecuzione viene calcolato tramite il numero di passi della TM.
+\begin{definizione}
+  Definiamo $t_M(x)$ come il tempo di calcolo di un TM $M$ su input $x$. Non è
+  un caso peggiore ma dipendente dal singolo input specifico. Il tempo di
+  calcolo è il numero di passi che esegue $M$ su input $x$ per dare una
+  risposta. Concentrandosi sui problemi di decisione decidibili avrò sempre $Y$
+  o $N$ se $x$ fa parte o meno del linguaggio. Ci concentriamo solo sui
+  linguaggi ricorsivi.
+\end{definizione}
+Non si usa comunque il numero di passi nella realtà ma si usa l'O-grande,
+studiando il caso peggiore, il numero massimo di passi.
+\begin{definizione}
+  Definiamo $T_M(n)$ come la \textbf{funzione di complessità temporale} come:
+  \[T_M(n)=\max\{t_m(x)|\,|x|=n\}\]
+\end{definizione}
+\begin{definizione}
+  Definisco la classe $P$ in base alle TM. La \textbf{classe P} è definita come:
+  \[P=\{L|\mbox{ L è deciso da una DTM in tempo polinomiale } O(p(n))\}\]
+  Con DTM che indica una TM deterministica, in cui per ogni coppia stato/simbolo
+  la macchina può fare una sola cosa (leggere/*scrivere/spostarsi di uno)m e con
+  $p$ una certa funzione polinomiale.\\
+  È quindi la classe di problemi che so risolvere velocemente.
+\end{definizione}
+\begin{definizione}
+  Definiamo la classe \textbf{\textit{time(f(n))}} come la classe dei linguaggi
+  decisi da una TM entro un tempo $f(n)$. Quindi \textbf{\textit{time(n)}} sono
+  tutti quelli decisi in tempo lineare, ad esempio (ma potrei anche per un
+  qualsiasi $n^k$).\\
+  Quindi:
+  \[P=\cup_{i\geq 0} time(n^i)\]
+  Infatti $P$ è l'unione di tutte le classi \textit{time} con funzioni
+  polinomiali. \\
+  La maggior parte dei problemi non supera, per il tempo polinomiale, un
+  esponente pari a 10 ($N^{10}$).
+\end{definizione}
+\begin{teorema}
+  Se un problema è nella \textbf{classe P} allora è risolvibile in un
+  \textbf{tempo efficiente}.
+\end{teorema}
+Devo anche definire lo \textbf{spazio}, oltre al \textbf{tempo}.\\
+\begin{definizione}
+  Definisco lo \textbf{spazio di calcolo} come:
+  \[s_M(x)=\mbox{ numero di celle del nastro usate dalla TM $M$ con input $x$}\]
+  \[\mbox{durante la computazione}\]
+  Il calcolo non è semplice come per il tempo, avendo anche decrementi. Quindi
+  più che ``celle usate'' studiamo le ``celle visitate''.
+\end{definizione}
+\begin{definizione}
+  Definisco $S_M(n)$ come la \textbf{funzione di complessità spaziale}:
+  \[S_M(n)=\max\{s_M(x)|\,|x|=n\}\]
+\end{definizione}
+Spazio e tempo sono legati per una TM.\\
+Innanzitutto se una computazione dura $n$ passi (tempo) posso dire che al più ho
+usato $n$ celle (spazio), perché magari in qualche passo la testina rimane ferma
+ma nel caso peggiore si sposta sempre. Si ha quindi:
+\[S_M(n)\leq T_M(n)+n\]
+con $+n$ perché sul nastro abbiamo comunque l'input di lunghezza $n$ (anche se
+potrebbe non essere letto dalla TM). In alcuni casi non viene nemmeno
+considerato come spazio usato in quanto non cambia la risposta in merito agli
+studi di tempo (a meno di studiare tempi inferiori al tempo lineare, dove in
+caso si specifica a parte di avere un input che occupa spazio $n$).
+\begin{teorema}
+  Se il tempo è limitato allora lo spazio è limitato ma non vale l'opposto
+  (potrei avere banalmente un loop tra poche celle, avendo l'uso limitato di
+  poche celle per un tempo illimitato).
+\end{teorema}
+\begin{teorema}
+  Se ho una TM $M$ che lavora in spazio finito e tempo infinito, esiste una TM
+  $M'$ che fa la stessa cosa di $M$ in tempo limitato.\\
+  Quindi se lo spazio è limitato allora il tempo è limitato.
+\end{teorema}
+\begin{proof}
+  Infatti la macchina $M'$ può trovarsi in un numero finito di stati $K$ e
+  avendo spazio limitato ho un numero limitato $S_M(n)$ di celle in cui si trova
+  la testina. Ho anche un numero finito di simboli in alfabeto $\sigma$ e
+  quindi: 
+  \[S_{M'}(n)\leq|k|\cdot |S_M(n)|\cdot |\Sigma|^{|S_M(n)|}\]
+  avendo che prima o poi ritorno a stati già visti quindi la macchina se supera
+  la quantità appena definita capisce di essere in loop (questo perché si ha a
+  che fare con insiemi limitati e quindi tale ragionamento non va bene per
+  l'halting problem).
+\end{proof}
 \chapter{Pattern matching}
 Il \textbf{pattern matching} si occupa di ricercare un pattern $P$ in un testo
 $T$. Si hanno:
 \begin{itemize}
-  \item ricerca esatta
-  \item ricerca approssimata
+  \item \textbf{ricerca esatta}
+  \item \textbf{ricerca approssimata}
 \end{itemize}
 \begin{definizione}
   Definiamo stringa come una sequenza di simboli appartenenti ad un dato
@@ -2240,4 +2452,4 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
 % LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
 % LocalWords:  Universal l'hdd SUTM incrementantalmente Boolean Quantified QBF
-% LocalWords:  PSPACE
+% LocalWords:  PSPACE spaizo

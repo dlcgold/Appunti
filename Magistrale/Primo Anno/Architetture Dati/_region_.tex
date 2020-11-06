@@ -21,6 +21,9 @@
 \usepackage{fontspec}
 \usepackage{enumerate}
 \usepackage{braket}
+%\usepackage[demo]{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -1641,8 +1644,10 @@ Per realizzare una replica posso fare in diversi modi:
   % MANCA PARTE DB2
 \end{itemize}
 \textbf{Sulle slide \textit{repliche} si ha un approfondimento delle
-  architetture IBM e Microsoft opzionali per il corso}.\\
+  architetture IBM e Microsoft opzionali per il corso}.
 \begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
   Un \textbf{db parallelo} è studiato per le prestazioni. Si ha accesso
   parallelo ai dati, parallelismo \textit{intra-query} (stessa query su
   frammenti diversi), parallelismo \textit{inter-query} (tante query diverse) e
@@ -1661,7 +1666,27 @@ Per realizzare una replica posso fare in diversi modi:
   \end{itemize}
   Si ha quindi il cosiddetto \textbf{Object–relational mapping}, ovvero questa
   tecnica di mapping. Si hanno vari framework che lo implementano.\\
-  Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.
+  Storicamente si è provato a fare db ad oggetti ma con scarsi risultati.\\
+  Parliamo ora del \textit{caso Gitlab}. Questo è un esempio paradigmatico di
+  cosa succede in caso di mala gestione delle repliche. Il 31 Gennaio 2017 dei
+  malintenzionati erano entrati nel db PosgreSQL (con due repliche) e stavano
+  scrivendo in modo significativo sul nodo primario DB1 e sul secondario DB2. I
+  tantissimi lock si bloccavano a vicenda rendendo non disponile il db. Alle 21
+  prendono il db secondario e cercano di riorganizzare tutto ma il db primario
+  aveva fatto chiamate al secondario che però non aveva risposto. I tecnici
+  iniziano a fare danni extra, svuotando la directory dei dati del secondario ma
+  per errore ha ``droppato'' il database primario, cancellando 300GB di dati dal
+  primario. C'erano ancora i backup, fatti a \textit{snapshot} ogni 24h. C'era
+  un backup manuale di 6 ore prima per altri motivi. Il problema è che non sono
+  stati trovati i backup, una volta trovati c'erano problemi a causa di
+  incompatibilità tra PosgreSQL 9.2 e 9.6. I dati su Azure non erano
+  backuppati per scelta di Azure, che non faceva i backup dei database. Nel
+  complesso 5 sistemi di backup in totale non funzionavo (alcuni, tipo S3, per 
+  errori di codice erano vuoti). Fortunatamente c'era il backup manuale di 6 ore
+  prima e si è risolto il problema ma perdendo 5000 progetti, 700 user e
+  migliaia di righe di codice.\\ 
+  Bisogna premiare la trasparenza di Gitlab che ha documentato tutto quello che
+  è accaduto (senza specificare i nomi dei DBA).
 \end{shaded}
 \section{Prima esercitazione}
 \begin{esercizio}
@@ -1972,10 +1997,11 @@ Per realizzare una replica posso fare in diversi modi:
   inconsistenza anche senza fallimento della rete.
 \end{esercizio}
 \chapter{Blockchains}
-\textit{Questa lezione è stata tenuta dal prof. Leporati}.\\
-\textbf{Verificare bene quanto scritto in quanto mi sono perso ad un certo punto
-  sulla distinzione o meno di nodi e blocchi e ho scritto assumendo che siano
-  identici}.
+\textbf{\textit{Questa lezione è stata tenuta dal prof. Leporati}}.\\
+\textbf{Nonostante qualche ambiguità ed errore di scrittura, nel capitolo si
+  userà il termine ``nodo'' 
+  quando si parla di rete P2P e il termine ``blocco'' quando ci si riferisce ai
+  blocchi interni alla blockchain.}
 \begin{definizione}
   Una \textbf{blockchain}, in poche parole, è un registro pubblico, condiviso e
   decentralizzato che memorizza la proprietà di beni digitali. 
@@ -2115,7 +2141,8 @@ identità).
 
 \section{Bitcoin}
 \textbf{Bitcoin} è una criptovaluta proposta da Satoshi Nakamoto
-(probabilmente un nome falso)
+(probabilmente un nome falso in quanto in molti stati creare valuta, anche
+digitale, è reato)
 nel 2008. Non è nato all'improvviso ma molte idee all'interno di
 \textit{bitcoin} erano già presenti i diversi paper di crittografia precedenti
 (ad esempio la \textit{proof-of-work} era già presente all'interno della
@@ -2127,8 +2154,8 @@ precedenti di tentativi di creazione di un sostituto digitale del denaro, con
 diverse difficoltà a causa di anonimato e \textit{double-spending}. Inoltre
 rappresentare una moneta con una sequenza di bit consente la copia illimitata di
 tale sequenza, creando copie perfettamente identiche. Una soluzione per evitare
-il \textit{double-spending} è quella di usare una \textit{trust detour part}
-(\textbf{non ho capito se ha detto questo}), ovvero tipicamente una banca che
+il \textit{double-spending} è quella di usare una \textit{trust third party
+  (TTP)}, ovvero tipicamente una banca che
 segna le transazioni monetarie, diventando però un ``collo di bottiglia'',
 venendo interpellata in tutte le transazioni. Inoltre la banca è conscia delle
 transazioni di denaro, che perdono così l'anonimato. L'idea di Satoshi Nakamoto
@@ -2166,8 +2193,1830 @@ struttura della transazione. Questa possibilità di generare infinite chiavi per
 è solo uno \textit{pseudo-anonimato}. \\
 Bisogna però anche dimostrare che $A$ è proprietario dei \textit{bitcoins} che
 vuole inviare a $B$. Per farlo $A$ ``firma'' digitalmente la transazione tramite
-la sua \textit{chiave segreta}. I nodi della rete P2P, che sono detti 
+la sua \textit{chiave segreta}. I nodi della rete P2P, che sono detti
+\textbf{miners}, verificano che la firma di $A$ sia valida, verificano che non
+ci sia il \textit{double-spending} e infine validano la transazione mettendola
+in un nuovo blocco della blockchain. Se $B$, che ha ricevuto i
+\textit{bitcoins}, vuole a sua volta mandarli a $C$ avvia una transazione
+esattamente come descritto sopra, firmando con a chiave privata che era
+accoppiata alla chiave pubblica con la quale $A$ gli aveva mandato i
+\textit{bitcoins}, permettendo che la firma sia verificata e validata. Quindi
+sulla blockchain il possedimento di un \textit{bitcoin} è rappresentato dal
+fatto che si può inviare una transazione per cui quel \textit{bitcoin} può
+essere dato a qualcun altro (ovviamente si è usato \textit{bitcoin} ma si poteva
+parlare anche di più \textit{bitcoins} o, vedremo in seguito, frazioni, che
+molto piccole, di 
+esso). Non è segnato da nessuna parte quanti \textit{bitcoins} possiede un certo
+utente ma solo le catene di transazioni che sono state fatte da ciascun
+\textit{bitcoin}, vedendo quindi chi è l'ultimo proprietario. È quindi
+essenziale memorizzare le chiavi in quanto possedere equivale a conoscere una
+chiave segreta.\\ 
+La blockchain registra ogni singola transazione (e sono circa un migliaio ogni
+10 minuti, con un blocco che riesce a contenere circa un migliaio di
+transazioni e i blocchi vengono aggiunti uno ogni 10 minuti circa) e
+attualmente, in data 19 Ottobre 2020, si è arrivati a 290GB di blockchain.
+\subsection{Miners}
+Abbiamo parlato prima dei membri della rete P2P della blockchain
+\textit{Bitcoin}, detti appunto \textbf{miners}.\\
+I \textit{miners} lavorano su un \textit{pool} di transazioni proposte dai vari
+\textit{wallet}. I miners scelgono circa un migliaio di queste transazioni alla
+volta e cercano di formare il nuovo blocco, validando le transazioni. Effettuano
+quindi i calcoli computazionali del \textit{proof-of-work} per cui dimostrano di
+aver fatto un certo sforzo per avere il \textbf{diritto} di essere quelli che
+aggiungono il prossimo blocco alla catena. Avendo un'aggiunta ogni 10 minuti si
+ha una fortissima concorrenza tra i \textit{miners}. Inoltre il carico di lavoro
+richiesto diventa sempre più difficile in quanto, grazie alla \textbf{legge
+  di Moore}, diventa sempre più facile risolvere il ``puzzle'' crittografico,
+per il \textit{proof-of-work,} che
+serve a risolvere il nuovo blocco e quindi il ``puzzle'' viene reso sempre più
+difficile (ovvero se un blocco arriva in meno di 10 minuti il blocco successivo
+sarà più difficile da produrre, in modo che nuovamente servano almeno 10 minuti,
+anche se equivalentemente verrà reso più facile se ci vogliono troppi minuti in
+più di 10, avendo così \textbf{autoregolazione}). Bisogna quindi parlare di
+questo ``problema'' crittografico da risolvere e per farlo bisogna un attimo
+specificare meglio le \textit{funzioni di hash}.
+\begin{definizione}
+  Le \textbf{funzioni di hash} sono funzioni crittografiche che prendono in
+  input una sequenza di bit, in teoria arbitrariamente lunga, anche se ogni
+  funzione ha un limite teorico (ma praticamente irraggiungibile), e produce una
+  sequenza che vorrebbe essere univoca (ma che non lo è) di poche centinaia di
+  bit. Per esempio \textit{SHA1} produce in output una sequenza di 160 bit,
+  \textit{MD5} di 128 bit, \textit{SHA256} di 256 bit (una di
+  quelle usate in \textit{Bitcoin}), \textit{RIPEMD} di 160 bit (anch'essa usata
+  in \textit{Bitcoin}) etc$\ldots$\\
+  Le funzioni di hash devono essere sufficientemente facili da calcolare a
+  partire da un certo input
+\end{definizione}
+L'idea è quindi è che prendo un file e, usando ad esempio SHA256, mi esce una
+sequenza di 256 bit, univoca per quel file. Purtroppo il dominio della funzione
+(ovvero i bit del file)
+è molto più grande del codominio (ovvero tutte le possibili sequenze di 256 bit)
+e quindi non si può avere davvero una \textbf{funzione iniettiva} e quindi si
+avranno sempre due sequenze in input che producono lo stesso output e quando
+questo avviene si ha una \textbf{collisione}. Le collisioni sono inevitabili ma
+le funzioni di hash sono fatte in modo tale che sia estremamente difficile
+trovare due input diversi che producano lo stesso output, motivo per cui si può
+anche pensare che le hash siano univoche. Si ha anche che è estremamente
+difficile cercare esplicitamente un input che abbai lo stesso hash di un altro,
+rendendo quindi molto difficile sostituire un input dato con un altro ottenendo
+comunque lo stesso output, imbrogliando. Quest'ultimo problema è più difficile
+di quello della \textit{collisione} (dove ho, nella pratica, un grado di liberà
+in più avendo due input).\\
+Si hanno altre due proprietà:
+\begin{enumerate}
+  \item dato un hash è estremamente difficile trovare un input, per questo si
+  dice che la funzione di hash è \textit{one-way} (essendo molto facile da
+  calcolare ma difficilissimo da invertire)
+  \item anche se cambio un solo bit dell'input ottengo un output completamente
+  diverso a quello ottenuto prima del cambiamento, rendendo impossibile capire
+  la regola di calcolo o anche solo fare indagini statistiche. Infatti hash
+  significa anche ``polpettone'', cosa che rappresenta bene l'azione di
+  spezzettamento, calcolo e rimescolamento (con anche valori semi casuali)
+  dell'input fatte dalle funzioni per calcolare l'output  
+\end{enumerate}
+Quindi nel \textit{proof-of-work}, per dimostrare di aver svolto una certa
+quantità di lavoro viene preso il dato di cui devo calcolare l'hash, gli viene
+aggiunta una quantità casuale detta \textbf{nonce (si pronuncia ''nons'')} e
+calcolo l'hash del dato concatenato al \textit{nonce} e vado a vedere se il
+risultato ha un certo numero prefissato di bit più significativi uguali a 0,
+riduco quindi il codominio, ovvero il numero di possibili output validi, dicendo
+che devono cominciare con un certo numero di zeri. Aumentando il numero di zeri
+riduco la probabilità di ottenere un risultato valido scegliendo un
+\textit{nonce} a caso (e diminuendo ottengo l'opposto). Variando gli zeri
+ottengo quanto detto sopra in merito al variare del carico computazionale per
+restare sui 10 minuti.\\
+Quindi, ricapitolando:
+\begin{itemize}
+  \item il miner sceglie un migliaio di transazioni più o meno a caso
+  \item il miner spara a caso un valore del \textit{nonce} 
+  \item calcola l'hash di tutto il blocco:
+  \begin{itemize}
+    \item  se ottiene un valore con un numero di bit più significativi uguali a
+    zero accettabile, prima degli altri, manda il blocco nella rete P2P per far
+    validare il nuovo blocco e, se il controllo viene superato, il blocco viene
+    accettato e messo in cima alla blockchain (quindi ogni nodo della P2P lo
+    attacca in cima alla propria copia)
+    \item se non ottiene tale valore spara a caso un altro \textit{nonce} e ci
+    riprova
+  \end{itemize}
+\end{itemize}
+Se mentre si sta lavorando un nuovo blocco viene validato (anche dal nodo che
+stava lavorando al nuovo blocco) un altro blocco bisogna ``buttare'' quanto
+costruito anche se non tutto, butto infatti le transazioni che già compaiono nel
+nuovo blocco convalidato. Inoltre cambio l'hash del nuovo blocco a cui sto
+lavorando mettendo quello di quello appena convalidato (per il discorso spiegato
+all'inizio del capitolo).\\
+L'importanza di essere colui che crea il blocco è data dal fatto che l'unico
+momento in cui si possono creare \textit{bitcoins} è durante la creazione del
+nuovo blocco, chi aggiunge il blocco ha dei nuovi \textit{bitcoins} che vengono
+creati insieme al blocco.\\
+Il mining può essere fatto da macchine sempre più performanti (all'inizio
+bastava un portatile, poi si è passati ad usare i pc di interi uffici di notte
+(o qualche furbo anche, illegalmente, dell'università), poi si è passati a
+cluster ``home-made'' tramite hardware spesso dedicato solo al mining, mentre
+ora servono cluster estremamente potenti ma che comunque facciano ritornare le
+spese). Si hanno anche soluzioni di sub-affitto di hardware o di gente che
+condivide l'hardware per poi dividere i guadagni. A causa di queste
+\textit{farm} professionali enormi, spesso collocate in paesi freddi per il
+risparmio del raffreddamento e dove la corrente costa meno (ovvero in zone
+disabitate di paesi spesso poveri e poco democratici), rischia di danneggiare
+l'idea di decentralizzazione della blockchain. \textbf{Bitcoin} ad un certo
+punto era in mano di pochissime persone (cinesi) con farm sparse nei monti
+asiatici. Si rischiano anche manipolazioni truffaldine del mercato, ad esempio
+proposte di \textit{trading coi bitcoins} (cose comunque vietate nei mercati
+regolamentati ma non su quello delle criptovalute, non essendo regolamentato, e
+quindi se il broker di imbroglia sei fregato).\\
+Un altro problema dell'\textit{accentramento} è il cosiddetto \textbf{attacco
+  del 51\%}. Dato che ogni miner deve vincere contro tutti gli altri per poter
+essere quello che ha diritto di mettere il nuovo blocco allora se uno riesce a
+possedere il 51\% dell potenza di calcolo dei miners, controllando il 51\% dei
+nodi della rete P2P, praticamente vince sempre, validando sempre le transazioni,
+anche se non valide (ovviamente almeno il 51\%).\\
+``Tutti contro tutti'' è anche molto inefficiente dal punto di vista energetico
+(la rete P2P che gestisce \textit{bitcoin} consuma più di tutta l'Argentina).
+Per questo si cercano sempre nuovi algoritmi/alternative per il
+\textit{proof-of-work}, come ad esempio \textit{proof-of-stake}, dove stake sta
+per ``quantità di soldi'', ovvero l'idea in cui solo pochi nodi della P2P fanno
+il mining. Tali nodi vengono scelti in base alla quantità di soldi che ogni nodo
+ha deciso di rendere disponibili agli altri (su un conto speciale). Quindi chi
+mette più soldi ha più possibilità di essere scelto.\\
+Al massimo si ha che si potranno costruire 21 milioni di \textit{bitcoins} e
+questi sono sempre più difficili da creare (è quindi paragonabile all'oro da un
+certo punto di vista).\\
+Torniamo a parlare delle transazioni.\\
+Nel caso in cui $A$ voglia dare a $B$ una certa porzione di \textit{bitcoins}
+deve creare due transazioni:
+\begin{itemize}
+  \item una in cui dal totale produce la frazione complementare a quella che
+  deve dare a $B$, questa transazione è verso se stessi
+  stessi
+  \item una in cui da a $B$ la frazione voluta
+\end{itemize}
+In poche parole se $A$ ha 10 \textit{bitcoins} deve fare una transazione a se
+stessa di 9 e una di 1 a $B$.\\
+Questo può essere fatto anche avendo più indirizzi di partenza in cui si hanno i
+\textit{bitcoins}, grazie al fatto che una transazione ha più input, e verso più
+destinatari, contemporaneamente, in quanto la transazione ammette anche più
+output nella sua struttura. \textbf{La somma totale degli input non deve essere
+  minore a quella in output} (infatti la transazione non verrà validata). Può
+comunque essere maggiore in quanto la differenza, detta \textit{fee}, può essere
+un compenso per il miner per far scegliere quella transazione da validare (che
+quindi non sceglie proprio a caso il migliaio di transazioni in quanto ordina le
+transazioni in base alle \textit{fee}). Queste \textit{fee} saranno l'unica
+fonte di guadagno per i miner quando non si potrà più produrre \textit{bitcoins}
+per il limite visto precedentemente (in quel momento le \textit{fee}
+aumenteranno di valore probabilmente).\\
+Due blocchi possono essere aggiunti contemporaneamente perché magari due miner
+in luoghi distanti propagano insieme l'avviso di aver trovato un nuovo blocco
+valido. Può succedere quindi che vengano aggiunti entrambi anche se uno è
+destinato a diventare \textit{orfano}.\\
+Proporre una transazione con \textit{fee} pari a 0 può portare al fatto che
+nessun miner la prenda in carico, comportando la creazione di
+\textit{transazioni zombie} (che sono parecchie).\\
+Un altro problema di \textit{bitcoin} è che per essere sicuri che una
+transazione si andata a buon fine devo aspettare 6 blocchi, quindi un'ora di
+tempo, e questo limita i casi d'uso della moneta (di certo non va bene per
+prendere il caffè). Il numero di transazioni supportate è comunque minimo
+rispetto a quelle che si possono effettuare con la moneta fisica.
+\section{Ethereum}
+Il futuro delle blockchains non ha potenzialmente limiti. Ci sono molte
+applicazioni e molte varianti, una di queste è \textbf{Ethereum}.\\
+\textit{Ethereum} è un altro tipo di blockchain in cui si pone l'attenzione non
+tanto sulle transazioni quanto sulle \textbf{computazioni}. Si ha un modello
+diverso di blockchain in quanto vengono memorizzate i cosiddetti
+\textit{ethereum account}. Ogni utente che si registra quindi viene quindi
+associato ad un account con una certa quantità di criptovaluta, che in questo
+caso è chiamata \textbf{ether (\textit{ETH})}. Le transazioni avvengono più o
+meno come in un conto in banca, togliendo \textit{ether} ad uno e dandoli
+all'altro mentre la validazione delle transazioni avviene quasi come in
+\textit{bitcoin} anche se si sta cercando di passare alla
+\textit{proof-of-stake}. La novità di \textit{ethereum} è la possibilità di
+scrivere/programmare i cosiddetti \textbf{smart contract}, ovvero il
+corrispettivo dei contratti tra persone, dove, per esempio, un utente, per un
+tot guadagno al mese, concede l'uso di una sua proprietà ad un altro
+utente. Si usa un linguaggio di programmazione chiamato \textbf{Solidity},
+simile ad un linguaggio OOP dove al posto degli oggetti si hanno i
+\textbf{contratti} (ma si hanno comunque \textup{struct, function} etc$\ldots$).
+\begin{listing}
+  \begin{minted}{solidity}
+    pragma solidity >=0.4.16 <0.8.0;
 
+    contract SimpleStorage {
+      uint storedData;
+
+      function set(uint x) public {
+        storedData = x;
+      }
+
+      function get() public view returns (uint) {
+        return storedData;
+      }
+    }
+  \end{minted}
+  \caption{Esempio di contratto in Solidity tratto dalla documentazione di
+    Solidity \url{https://solidity.readthedocs.io/en/v0.7.4/}}
+\end{listing}
+I contratti scritti con Solidity vengono compilati in un bytecode che viene
+memorizzato sulla blockchain di ethereum (e quindi una copia viene salvata su
+tutti i nodi della rete P2P). Si possono fare transazioni che trasferiscono
+soldi oppure posso fare transazioni in cui si invocano funzioni poste
+all'interno di un certo contratto, in questo caso un miner raccoglierà la
+richiesta ed eseguirà sulla sua macchina il codice del contratto. Ogni
+esecuzione di ogni singola operazione del bytecode (che viene eseguito sulla
+\textit{ethereum virtual machine}) costa una certa quantità di \textbf{gas} e
+quindi bisogna dare una certa quantità di soldi, rappresentati il costo del
+\textbf{gas}, per far eseguire il contratto e, 
+qualora non siano sufficienti, viene sollevata l'eccezione \texttt{outOfGas}, il
+contratto non va a buon fine e i soldi finora spesi vanno persi.\\
+Gli \textit{smart contract} sono codice di cui chiunque può vedere il bytecode e
+sono una sorta di codice lato server e posso quindi fare dei client che
+gestiscono le parti ``delicate'' dei trasferimenti di soldi facendo chiamate ai
+contratti, che sono elaborati dai miner. La scrittura dei contratti è rischiosa
+quindi si hanno quindi delle comunità (come \textit{OpenZeppelin}) che
+controllano i contratti stessi e forniscono delle linee guida e delle librerie
+da cui attingere, ma nel momento in cui vengono modificati non sono più testati,
+ovviamente. Un esempio è stato di una startup che ha lasciato una
+moltiplicazione non protetta da overflow modificando un contratto, preso da
+\textit{Openzeppelin}, per permettere pagamenti simultanei (banalmente se si
+doveva dare 10 ETH a due utenti si faceva 10$\cdot$2 e si controllava che ci
+fossero effettivamente 20 ETH nel conto prima di effettuare il doppio
+pagamento). Essendo il bytecode 
+pubblico se ne sono accorti e qualcuno si è fatto un pagamento a due suoi altri
+account dando una cifra esorbitante, in modo da scatenare l'overflow, il
+prodotto per 2 dava 0 a causa dell'overflow e quindi si autorizzava la
+transazione. Questa cosa non sarebbe stata possibile su \textit{bitcoin} ma la
+diversa implementazione della blockchain di ethereum rendevano possibile la cosa
+(e irriconoscibile al miner). Creare quindi \textit{smart contract} è
+estremamente difficile, dovendo essere estremamente sicuri. Inoltre una volta
+che il contratto è sulla blockchain ci resta, anche se il creatore può chiedere
+al contratto stesso di autodistruggersi (nel senso che vengono rese invalide le
+chiamate alle funzioni di quel contratto).\\
+Ci sono vari strumenti per scrivere contratti, l'ide \textit{Remix} e
+\textit{MetaMask}, che permette di avere un \textbf{wallet} su ethereum e di
+collegarsi sia alla rete principale che a 
+diverse reti, anche locali sul proprio computer, per testing. Tra le reti di
+testing principali abbiamo \textit{Rapsten} che cerca di emulare al meglio
+possibile quella principale (dove gli ETH che trasferisco o pago come
+\textbf{gas} sono finti). In altre reti di test si hanno
+altri algoritmi di consenso, come per esempio, nel caso della rete
+\textit{Rinkeby} si ha il \textbf{proof-of-autority} (dove chi ha diritto a
+scrivere una certa informazione lo può fare senza il consenso della rete P2P).\\
+L'iter normale di sviluppo di contratti non prevede in primis l'uso delle reti
+di test in quanto servirebbe troppo tempo ma si usano strumenti come
+\textit{Ganache} o \textit{Truffle} che sono strumenti di sviluppo in locale che
+simulano una rete in locale dove si può testare senza \textbf{gas} in modo
+veloce. Solo dopo si passa alla rete di test e poi alla \textit{main net}, la
+rete principale.\\
+Esiste anche una libreria chiamata \textit{web3}, scritta in \textit{js}, per
+permettere alle webapp di connettersi a MetaMask.\\
+\section{Altre blockchains}
+Si hanno comunque davvero tante diverse blockchains.\\
+Si ha, ad esempio, \textit{Quorum}, una variante di \textit{Ethereum} in cui si
+possono usare altri algoritmi di consenso e in cui si possono anche creare dei
+canali di comunicazione privati tra i nodi della rete P2P.\\
+Si hanno quindi diversi tipi di blockchain e in particolare ci sono le
+blockchain di tipo \textbf{permissioned} e non solo quelle di tipo
+\textbf{permissionless} o \textbf{pubbliche}.\\
+per blockchain di tipo \textit{permissioned} si intende che i nodi della rete
+P2P, che tipicamente sono anche quelli che scrivono informazioni e quindi
+avviare le transazioni, si conoscono ma eventualmente non si fidano, formando
+così un \textbf{consorzio} in cui i partecipanti sono potenzialmente in
+conflitto (dove magari il fallimento di uno è il successo dell'altro). Se le
+dichiarazione pubbliche siano vere o meno viene deciso con un servizio di
+\textit{audit} esterno che valuta le dichiarazioni pubbliche. Non c'è quindi ne
+mining ne \textit{proof-of-work}, magari nemmeno una criptovaluta. La blockchain
+diventa quindi un punto in cui implementare politiche di trust tra i
+partecipanti, obbligandosi a vicenda a dichiarare in modo pubblico (e se
+imbrogli esci dal consorzio perdendone i vantaggi), fattore che
+viene aiutato dal fatto che è estremamente difficile alterare la blockchain
+(dovendo rompere una catena e rifarla, imbrogliando sugli hash etc$\ldots$)
+rendendo le dichiarazioni praticamente eterne.\\
+Si hanno quindi:
+\begin{itemize}
+  \item \textbf{permissionless blockchain}, come \textit{bitcoin} o
+  \textit{ethereum}, dove chiunque può scaricarsi il software e diventare miner
+  \item \textbf{permissioned blockchain pubblica}, dove possono vedere tutti,
+  come \textit{Quorum}, \textit{EOS} (con una virtual machine basata su
+  \textit{webassembly} e \textit{smart contract} scritti in \textit{C++}),
+  \textit{Hyperledger} (sviluppata da IBM e ospitata dalla \textit{Linux
+    Foundation}, essendo completamente \textit{Open Source}, di tipo modulare,
+  molto complessa ma efficiente, nata 
+  per il business con algoritmi di consenso basato sul \textbf{problema dei
+    generali bizantini} e che scrive sulla blockchain solo se necessario
+  etc$\ldots$) etc$\ldots$ Con queste blockchain si perde il discorso della
+  decentralizzazione, non permettendo che partecipi chiunque ma si ha una
+  \textit{certificate authority} che stabiliscono se uno ha il diritto di
+  scrivere o leggere sula blockchain (e si hanno spesso più amministratori che
+  si controllano a vicenda atti a stabilire chi può fare cosa)  
+  \item \textbf{permissioned blockchain privata}, dove possono vedere solo
+  quelli che scrivono
+\end{itemize}
+Grandi aziende, come IBM, Microsoft, SAP etc$\ldots$ che stanno concentrando
+sullo sviluppo di blockchain ma anche piccole applicazioni, come
+\textit{CryptoKitties}, basata su Ethereum, che permette di collezionare
+e crescere ``gattini digitali'' collezzionabili.\\
+Bisognerebbe inoltre fare un discorso sul rapporto che si ha tra \textit{smart
+  contract} e dispositivi fisici, nonché sull'interpretazione legale degli
+stessi (e gli avvocati dicono che non sono ne legali ne ``smart'' per i problemi
+detti sopra).
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.33]{img/blockchain.png}
+  \caption{Diagramma dei casi di scelta di una blockchain}
+  \label{fig:bcd}
+\end{figure}
+\begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
+  La blockchain potrebbe essere usata per la tracciabilità di prodotti, per
+  evitare \textit{falsi veri} o \textit{veri falsi}. Infatti non è un problema
+  lontano dal \textbf{double-spending} (un prodotto viene fatto in numero
+  limitato e quindi non posso avere più di quel numero sul mercato). Per il
+  tracciamento del prodotto associo un hash-code univoco. Metodi come il
+  bar-code non funzionano bene in quanto facilmente duplicabili. Un metodo più
+  moderno prevede l'uso proprio delle blockchain, introducendo anche la
+  tracciabilità dei documenti, permettendo anche di verificare tutta la filiera
+  per arrivare al prodotto finale. Ogni step della filiera è come se avesse un
+  file di log, dove viene segnato tutto quello che viene fatto in quello
+  step. Si deve anche garantire che nessuno step della filiera ``bari''. Inoltre
+  non si può avere una TTP online (i vari consorzi, gli unici che potrebbero
+  fare da TTP, potrebbero anche loro ``barare'', non essendo un ente che farebbe
+  solo da TTP) e si ha che gli scrittori ``non si fidano'' tra loro. Abbiamo
+  quindi tutti i requisiti per una blockchain, come spiegato immagine
+  \ref{fig:bcd}. Mantenere una blockchain comunque costa (più di un ipotetico
+  timbro univoco da apporre al prodotto, tramite i concetti di \textit{lotto di
+    produzione}) ma ha più senso in un contesto multi-aziendale.\\
+  Ovviamente si ha anche la difficoltà culturale di far interagire piccole
+  imprese con concetti complessi come la \textit{proof-of-work}. Un ragionamento
+  simile si applica sia al mondo del cibo che della moda, che ad altri ambiti.\\
+  Il tracciamento dei clienti non è fattibile causa GDPR, in quanto non si può
+  facilmente cancellare i dati (cosa garantita dalla GDPR) nella blockchain, che
+  infatti non è \textit{GDPR-compatible} (e potrei non inserire i dati in
+  chiaro ma cifrati, dimenticando la chiave nel caso il cliente voglia essere
+  dimenticato, in quanto potenzialmente prima o poi sarebbe facile ``bucare'' i
+  dati).
+\end{shaded}
+\chapter{NoSQL}
+Dopo aver trattato la gestione dei dati distribuita in \textbf{ambiente
+  relazionale}, dopo aver trattato le blockchain anche da punto di vista di
+gestione dati in \textbf{ambiente sicuro}, affrontiamo i sistemi
+\textbf{NoSQL}.\\
+Nel 1970 un ricercatore di IBM chiamato Codd pubblica un articolo intitolato
+\textit{A relational model of data for large shared data banks} in cui presenta
+un modello di rappresentazione dati indipendente dall'implementazione. Si era
+passati dal \textbf{modello gerarchico} (in cui bisognava usare i puntatori per
+accedere ai dati) al \textbf{modello relazionale}. Questo passaggio è stato
+fondamentale per lo sviluppo del mondo dell'informatica, un mondo dove
+l'hardware dedicato allo storage era estremamente costoso, estremamente poco
+capiente (nel range di pochissimi megabyte) e logisticamente parecchio
+ingombrante. Il modello relazionale quindi era studiato in primis per questo
+contesto, proponendo strategie per la rappresentazione compatta dei dati.\\
+Gli aspetti positivi del modello relazionale si possono comunque riassumere in:
+\begin{itemize}
+  \item è un modello molto ben definito, con il \textbf{principio della
+    minimizzazione}, in merito allo spazio, e il \textbf{principio della closed
+    world assumption}, ovvero tutto quello che l'applicazione deve sapere è nel
+  database e a tal fine si ha anche l'uso del \texttt{NULL} \textit{value} per:
+  \begin{itemize}
+    \item assenza di informazione sul valore
+    \item assenza di senso di un certo dato
+    \item assenza di applicabilità di un certo dato
+  \end{itemize}
+  Quindi il modello relazionale è una sorta di \textit{modello chiuso} che
+  contiene tutto il necessario ed era un modello ragionevole in un contesto come
+  quello ``pre anni 2000'', dove un'azienda tipicamente necessitava solo di
+  informazioni interne all'azienda stessa (non c'erano le informazioni dei
+  \textit{social network} etc$\ldots$ infatti, di fatto, non esiste più la
+  \textit{closed world assumption})
+  \item si hanno circa 35 e più anni di sviluppo su \textit{sicurezza,
+    ottimizzazione \textnormal{e} standardizzazione}. Da questo punto di vista
+  si ricorda l'uso delle proprietà ACID che comunque rendono ancora valido il
+  modello anche nel 2020. Inoltre ormai si hanno talmente tante informazioni
+  memorizzate tramite il \textit{modello relazionale} che le aziende sono
+  restie a cambiare modello (a causa dei rischi di perdita dei dati durante un
+  porting, anche dati dal fatto che i db preesistenti sono enormi, considerando
+  che i dati persi non sono recuperabili potenzialmente, a meno di repliche)
+  \item è ben conosciuto, è studiato anche nelle scuole e nelle università
+  \item è comunque la scelta migliore per diversi casi d'uso
+\end{itemize}
+Si hanno però anche delle limitazioni per il modello relazione, come ad esempio:
+\begin{itemize}
+  \item il fatto stesso di essere un \textbf{sistema chiuso}, quasi per gli
+  stessi motivi descritti nei vantaggi, può anche essere un aspetto negativo,
+  infatti:
+  \begin{itemize}
+    \item il \textbf{principio di minimizzazione}, ai giorni nostri, va a
+    discapito, inutilmente, delle performance 
+    \item il \textbf{principio della closed world assumption}, come già detto,
+    non è praticamente più valido nell'era dei social network etc$\ldots$
+    \item il modello relazionale prevede per un attributo uno e un solo valore e
+    non sono quindi ammissibili array o comunque altre strutture per dati con
+    multipli valori e non si possono fare interrogazioni in
+    modo strutturato all'interno dei valori stessi, dovendo ricorrere a diversi
+    \textit{workaround} e, secondo ``il manuale'', il metodo standard è quello
+    di fare una tabella di join, detta \textit{tabella di part-of}, ovvero una
+    tabella a parte coi possibili multi valori (questa soluzione porta ad
+    operazioni di join molto dispendiose)
+    \item non è compatibile con i linguaggi di programmazione moderni. Molti
+    linguaggi moderni sono infatti OOP, con la \textit{object persistency},
+    paradigma non supportato dal modello relazionale. Si hanno quindi framework
+    (come \textit{Spring}) per far comunicare, tramite l'\textbf{object
+      relational mapping} il modello relazionale e gli
+    oggetti della OOP (aggiungendo complicazioni e perdite di
+    performance). Database ad oggetti sono stati creati e implementati nei
+    principali vendors ma non sono usati nelle aziende per varie ragioni, anche
+    di performance e di impatto rispetto ai db relazionali
+    \item non supportano i \textbf{comportamenti ciclici}, comportando limiti
+    modellistici
+  \end{itemize}
+  \item i database relazionali sono difficili da modificare dal punto di vista
+  schematico tramite \texttt{alter table}. Cambiare gli schemi è complesso e
+  comporta il fermo del database
+  \item per garantire le proprietà ACID nei sistemi transazionali e per poter
+  garantire il 2PC si ha un limite fisico alla \textbf{scalabilità}. Dopo un
+  certo punto di crescita i costi di organizzazione rendono impossibile
+  l'esecuzione dei protocolli che garantiscono ACID, in ambiente
+  distribuito. Oggigiorno ci sono varie applicazioni, legate in primis ai social
+  network, per le quali è impossibile mantenere certi protocolli. Il problema
+  della scalabilità è uno degli aspetti più limitanti, specialmente in ottica
+  \textbf{big data} (anche se vedremo che le alternative non relazionali coprono
+  casi d'uso anche oltre il solo ambito dei \textit{big data}). I database
+  relazionali si prestano bene alle \textbf{scale up (\textit{scalabilità
+      verticale})} (semplicemente aumentando
+  l'hardware a disposizione, arrivando a costi esorbitanti e fino al punto in
+  cui si raggiunge il limite tecnologico) ma pochissimo allo \textbf{scale out
+    (\textit{scalabilità orizzontale})} (che comporterebbe non l'acquisto di un
+  nuovo hardware intero ma solo di una parte di esso, a prezzo più basso con
+  hardware detto in gergo \textbf{comodity},
+  magari per avere più dischi etc$\ldots$, ma hardware dedicato storicamente ai
+  db relazionali non prevede questa cosa). Oggigiorno si hanno sempre più spesso
+  le \textbf{architetture a microservizi} (che ``implementano'' bene lo
+  \textit{scale out})
+  \item il \textbf{time in market}, ovvero il tempo in cui un applicativo resta
+  in commercio, è sempre più ridotto (spesso, per esempio, un videogioco ha una
+  vita anche inferiore ad un anno) portando a rendere obsoleto il processo in
+  cui normalmente si integrano i db relazionali. Anche il \textit{time to
+    market}, ovvero il tempo di preparazione si è ridotto
+\end{itemize}
+Oggigiorno lo standard dal punto di vista hardware è drasticamente cambiato con
+dischi di capienza enorme (nell'ordine dei terabyte per qualche decina di euro).
+Il rapporto costo-gigabyte è crollato rispetto a pochi anni fa. Il contesto
+storico è quindi cambiato e in tal senso anche il modello per la
+rappresentazione dei dati sta cambiando e sta cambiando anche la scelta tra
+\textit{spazio} e \textit{tempo}, non essendo più la prima una grossa
+problematica ed essendo la seconda di grande interesse, dovendo rispondere il
+più in fretta possibile alle interrogazioni.\\
+\textbf{Sulle slide un elenco dei vari step storici.}
+\section{I modelli NoSQL}
+Il termine \textbf{NoSQL} è stato coniato da Carlo Strozzi nel 1998 quando si
+inventa una sorta di API per Linux per accedere ai dati relazionali senza usare
+SQL. Il termine è stato ripreso nel 2009 con la ``logica'' \textbf{Not Only
+  SQL} dopo che per circa 9 anni, a partire dal 2000, erano nati nuovi modelli,
+a grafi, a documenti etc$\ldots$ (da parte di Amazon, Google, Facebook
+etc$\ldots$).\\
+Quindi NoSQL è un'insieme di modelli di rappresentazione dati, con relativi
+software di gestione. Si hanno 3 caratteristiche fondamentali:
+\begin{enumerate}
+  \item tutti i modello sono \textbf{schema free} o \textbf{schemaless}
+  \item tutti i \textbf{DBMS NoSQL} usano il \textbf{CAP theorem}
+  \item si passa da ACID a BASE (da ``acido'' a ``basico'') ovvero:
+  \begin{itemize}
+    \item \textit{Basic Available}
+    \item \textit{Soft state}
+    \item \textit{Eventual consistency}
+  \end{itemize}
+\end{enumerate}
+\subsubsection{Schema free}
+Nel modello relazionale prima veniva definito il modello, ovvero l'insieme degli
+attributi che descrivevano i dati e le varie relazioni, e poi veniva popolato
+con i dati veri e propri. Questo iter comportava che se durante lo sviluppo ci
+si accorgeva che bisognava aggiungere, ad esempio, un attributo bisognava
+modificare l'intero schema (nonché i dati già caricati). \\
+Con NoSQL si è quindi passati quindi ad un'architettura dove il modello è basato
+sui dati che vengono inseriti quindi di fatto per ogni ``riga'' ho
+potenzialmente uno schema diverso. Questo concetto, detto \textbf{schema free}
+concede una grandissima libertà di sviluppo, al costo di un'alta probabilità di
+avere inconsistenza tra i dati. Si ha il cosiddetto \textbf{open word
+  assumption}, dove i valori \texttt{NULL} vengono eventualmente messi solo per
+motivi applicativi in quanto se un dato non c'è semplicemente non c'è e non
+bisogna specificare non \texttt{NULL} il fatto che non ci sia, garantendo una
+grande flessibilità (anche se questo può generare problemi). Tale flessibilità
+ha comunque un costo anche dal punto di vista delle query, in quanto non si può
+partire dallo schema ma si deve partire da frammenti del modello in studio. Si
+ha comunque il guadagno che in caso di aggiunta di attributi etc$\ldots$ non
+bisogna modificare l'intero schema, aggiungo dove serve e basta, anche se
+ovviamente serve una \textit{governance} del dato più forte (in quanto può anche
+succedere che non si abbia il tipo di dato). 
+\subsubsection{CAP theorem}
+Vediamo questo teorema essenziale\footnote{così L.T. è contento}, proposto da
+Gilber e Lynch nel 2002 dopo che, qualche anno prima, nel 2000, Brewer aveva
+proposto una sua \textit{congettura sulla consistenza, disponibilità e
+  partizionamento dei webserver}. Il teorema dimostra la congettura di Brewer:
+\begin{teorema}[CAP theorem]
+  Preso un \textbf{sistema distribuito di nodi} si considerino tre aspetti:
+  \begin{itemize}
+    \item \textbf{Consistency (\textit{consistenza})}, ovvero che tutti i nodi
+    abbaino gli stessi i dati nello stesso istante (che è diverso dalla
+    consistenza di ACID)
+    \item \textbf{Availability (\textit{disponibilità})}, ovvero la garanzia che
+    ogni richiesta ricevuta da un sistema riceva una risposta in
+    ogni caso, sia in caso fallimento che successo (non si deve avere quindi
+    un'attesa infinita)
+    \item \textbf{Partition tolerance (\textit{partizionamento})}, ovvero il
+    sistema deve continuare ad operare comunque anche se si hanno perdite di
+    messaggi o fallimenti di parti del sistema
+  \end{itemize}
+  Il teorema garantisce che tra queste tre caratteristiche, in un sistema
+  distribuito, se ne possano avere contemporaneamente due soddisfatte e mai tre.
+\end{teorema}
+Si nota quindi come, prendendo ad esempio i DDBMS, si rinunci alla
+\textit{partition tolerance}, garantendo le prime due caratteristiche (anche se
+con un numero limitato di nodi si può arrivare ad una buona resa anche dal
+punto di vista della \textit{partition tolerance}).\\
+I sistemi NoSQL tipicamente divisi tra:
+\begin{itemize}
+  \item sistemi che garantiscono \textit{consistency} e \textit{partition
+    tolerance} (CP), non potendo garantire che il DBMS lavori 24/7. Tra questi
+  troviamo:
+  \textit{BigTable, Hypertable, HBase, MongoDB, Terrastore, Scalaris, Berkeley
+    DB, MemcacheDB, Redis $\ldots$}
+  \item sistemi che garantiscono \textit{availability} e \textit{partition
+    tolerance} (AP), non potendo garantire che i dati siano sempre
+  consistenti. Tra questi troviamo: \textit{Dynamo, Voldemort, Tokyo Cabinet,
+    KAI, Cassandra, SimpleDB, CouchDB Riak $\ldots$}
+\end{itemize}
+Non è detto che due db NoSQL che implementano lo stesso modello, ad esempio
+documentale, garantiscano le stesse due caratteristiche CAP.\\
+Quindi in fase progettuale la scelta tra due delle caratteristiche CAP è un
+punto chiave per poi scegliere eventualmente su che DBMS NoSQL appoggiarsi (o
+anche partire da un DBMS NoSQL che già si conosce ma essendo consci della
+caratteristica non garantita).\\
+Ci sono contesti applicativi in cui ognuna delle tre caratteristiche può, a
+seconda, non essere fondamentale. In ogni caso si ha che:
+\begin{itemize}
+  \item \textit{consistency} mi garantisce che tutti i client hanno sempre la
+  stessa vista sui dati
+  \item \textit{availability} mi garantisce che ogni client può sempre leggere
+  e/o scrivere
+  \item \textit{partition tolerance} mi garantisce che il sistema continui a
+  funzionare nonostante partizioni fisiche della rete
+\end{itemize}
+In fase progettuale quindi ho 3 step:
+\begin{itemize}
+  \item scelta del modello
+  \item scelta del DBMS
+  \item scelta delle caratteristiche del CAP theorem
+\end{itemize}
+\subsubsection{BASE}
+Analizziamo meglio l'acronimo.
+\begin{itemize}
+  \item \textit{Basic Available}, ovvero, comunque vada, la risposta viene
+  sempre data anche nel caso di consistenza parziale
+  \item \textit{Soft state}, ovvero si rinuncia al concetto di consistenza di
+  ACID
+  \item \textit{Eventual consistency}, ovvero, ad un certo punto prima o poi
+  nel futuro (magari anche dopo pochissimi secondi),
+  i dati ``convergeranno'' ad uno stato di consistenza (in opposizione alla
+  consistenza immediata di ACID)
+\end{itemize}
+Vediamo quindi i vari modelli NoSQL:
+\begin{itemize}
+  \item \textbf{key-value stores} (come \textit{Dynamo, Voldemort, Redis, Riak
+    $ldots$}) che è il modello più semplice. È infatti il semplice modello
+  \textit{chiave-valore}, semplice da memorizzare, e utile per il caching. Il
+  valore è un \textit{blob} quindi non si ha modo di interrogare internamente il
+  valore me deve essere l'applicazione a manipolarlo. La chiave garantisce
+  tipicamente meccanismi di hash, con la chiave che punta ad un certo
+  valore, massimizzando le performance. Viene garantito l'\textit{hashing
+    distribuito}, ovvero la \textit{distributed hashed table}
+  \item \textbf{column family stores}, (come
+  \textit{BigTable, Cassandra, HBase $\ldots$}) dove la chiave punta a colonne
+  multiple di valori, ottenendo un formato \textit{pseudo-relazione}. Ogni riga,
+  in questo schema \textbf{wide column}, ha una sua struttura interna diversa a
+  quella di altre righe, che sono comunque indipendenti. La chiave ovviamente
+  può essere hashata. Non posso fare \textit{ranged query}
+  \item \textbf{document databases} (come \textit{CouchDB, MongoDB $\ldots$}) è
+  formato da documenti con coppie chiave-valore o chiave-oggetto, dove l'oggetto
+  può anche essere un'altra chiave-valore, un array di valori, un array di
+  oggetti etc$\ldots$. Un esempio pratico di documento è il tipico file json,
+  che è ottimo per dire che nel modello documentale si ha un elemento più
+  importante, detto \textit{root} che ha al di sotto tutti gli altri
+  \item \textbf{graph databases} (come \textit{Neo4J, FlockDB, GraphBase,
+    InfoGrip $\ldots$}) con nodi e relazioni tra gli stessi rappresentate dagli
+  archi. I nodi possono rappresentare entità a cui sono associate varie
+  proprietà (e si chiamano \textit{property graph}). le proprietà sono quindi
+  pertinenti ai nodi. I graph db non scalano bene
+  \item \textbf{RDF databases}
+\end{itemize}
+(\textit{Spesso l'azienda stessa non è attenta al tipo di modello usato quindi
+  si hanno spesso confusioni}).\\
+A livello di complessità (anche dei dati che rappresentano) possiamo dire che,
+seguendo l'ordine elencato, si passa dal più semplice al più complesso. Anche
+dal punto di vista del volume abbiamo lo stesso ordine, dal più voluminoso
+(quindi il meno complesso è anche il più voluminoso ma più scalabile) a quello
+meno voluminoso e scalabile.\\
+Il problema fondamentale in tutti questi modelli è come connettere le
+informazioni e questo diventa un problema fondamentale in termini di prestazioni
+e analisi da effettuare. Si ha che le relazioni sono implicitamente incluse nei
+dati. La scelta del modello dipende dall'applicativo e ci sono applicativi che
+possono obbligare ad avere due o più modelli.\\
+Ovviamente ogni vendor ha il suo linguaggio di query per il suo DBMS NoSQL.
+\section{Document based system}
+È uno dei modelli più ricchi nonché più vicini al modello relazionale. Nella
+sezione approfondiremo anche il più ``famoso'' DBMS documentale, ovvero
+\textbf{MongoDB}.\\
+Si ha un'evoluzione del modello chiave-valore in quanto si ha una chiave, ovvero
+un \textit{object identifier}, che può essere indicizzata tramite un
+\textit{meccanismo di hashing}. I documenti solitamente vengo invece memorizzati
+in file \textbf{json} o \textbf{XML} e possono essere cercati a qualsiasi
+livello.\\
+A differenza del modello relazionale il modello documentale è alla fine un
+albero e quindi l'accesso ai dati deve comunque partire dal nodo radice, a
+scendere verso le foglie (anche se si può avere un accesso \textbf{a indici} per
+accedere alle informazioni necessarie). Si ha quindi il concetto di
+\textbf{elemento più importante degli altri}, concetto assente nel modello
+relazionale, definibile ``piatto'' da questo punto di vista (a meno delle
+\textit{data warehouse} dove si ha effettivamente una tabella principale).\\
+La rappresentazione documentale è più vicina al pensiero umano di divisione
+delle cose in ``cartelle'' con varie tipologie di informazioni. \\
+Si hanno quindi le seguenti caratteristiche per il modello documentale:
+\begin{itemize}
+  \item è multidimensionale, ad albero
+  \item ogni campo può contenere zero valori, un valore, multipli valori o altri
+  documenti
+  \item si possono effettuare query ad ogni campo e in ogni livello
+  \item lo schema è flessibile, infatti due documenti della stessa
+  \textbf{collezione} possono avere uno schema diverso di rappresentazione dei
+  dati
+  \item posso aggiungere ``in linea'' nuove informazioni
+  \item avendo ``annegato'' uno dentro l'altro le relazioni che sussistono tra
+  gli elementi, sono richiesti molti meno indici per effettuare le query
+  migliorando le performance in quanto le informazioni sono legate tra loro nel
+  documento (e non dovendo, come nel caso relazionale, prendere $n$ tabelle in
+  $n$ file diversi nel \textit{filesystem} facendo poi il join)
+\end{itemize}
+Il modello documentale permette due tecniche principali:
+\begin{itemize}
+  \item \textbf{referencing}, ovvero, come per il modello relazione, si
+  relazionano due documenti tramite un certo attributo, ad esempio:
+  \begin{figure}[H]
+    \centering
+    \begin{subfigure}{.4\textwidth}
+      \centering
+      \begin{minted}{python}
+        contact
+        {
+          "id": 2,
+          "name": "Carlo",
+          "address_id": 1
+        }
+      \end{minted}
+    \end{subfigure}
+    \begin{subfigure}{.4\textwidth}
+      \centering
+      \begin{minted}{python}
+        address
+        {
+          "_id": 1,
+          "city": "Milano",
+          ...
+        }
+      \end{minted}
+    \end{subfigure}
+  \end{figure}
+  
+  \item \textbf{embedding}, ovvero, aggiungere quello che nel
+  \textit{referencing} è un secondo documento come specifica di un certo valore,
+  aggiungendo quindi un livello di profondità (quindi, per esempio, posso avere
+  un documento relativo ad un contatto telefonico contenente anche indirizzo
+  di casa e tale informazione, con i vari attributi, sarà specificata non in un
+  altro documento ma nello stesso), Aumentando lo spazio che però non è più un
+  problema. Ad esempio si ha:
+  \begin{minted}{python}
+    contact
+    {
+      "id": 2,
+      "name": "Carlo",
+      "address": {
+        "city": "Milano",
+        ...
+      }
+    }
+  \end{minted}
+\end{itemize}
+A causa del\textit{ time to/in market} ormai sempre più ogni applicazione ha il
+suo db e questo obbliga la flessibilità dello schema, che garantisce che una
+modifica allo schema, con aggiunta o modifica degli attributi, non è un problema
+(mentre con il modello relazionale sarebbe stato un problema). Questa
+flessibilità però comporta che in fase di query non ho uno schema prefissato
+tramite il quale interrogare (e non posso nemmeno vedere i primi $n$ documenti
+in quanto l'$n+1$ potrebbe essere comunque diverso). Questa problematica è
+relativa all'uso di database costruiti da terzi.\\
+Si hanno diversi linguaggi di query, tra cui \textit{jsoniq, jmespath, jaql,
+  JLINQ, etc$\ldots$}, non avendo più quindi un unico linguaggio come era SQL per i
+modelli relazionali, ma avendone uno per vendor.\\
+Dal punto di vista delle terminologia si hanno le seguenti ``relazioni'' con il
+modello relazione:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    SQL & NoSQL\\
+    \hline
+    database & database \\
+    tabella & collezione\\
+    riga & documento\\
+    colonna & chiave
+  \end{tabular}
+\end{table}
+\subsection{MongoDB}
+MongoDB è un DBMS non relazionale documentale con i dati memorizzati in un
+modello chiamato \textbf{binary json (\textit{Bson})}, che consente maggior
+efficienza tramite una rappresentazione binaria. Tramite l'embedding dei dati
+consente di non eseguire i \textit{join} e permette anche l'accesso tramite
+indici. Supporta comunque il referencing anche se con cali di performances.\\
+Dal punto di vista architetturale si hanno una serie di \textit{engine} diversi
+fra loro (attualmente si usa \textbf{WiredTiger (\textit{WT})}, dopo acquisto
+di una società che si occupava di db relazionali distribuiti con transazioni,
+mentre prima si usava \textit{MMAP V1}). Grazie a WT si è introdotto, nella v4,
+il supporto alle transazioni. Si ha poi il \textit{data model}, il
+\textit{MongoDB query language (MQL)} (proprietario), i componenti di controllo
+degli accessi, il meccanismo di gestione etc$\ldots$. Le repliche sono
+organizzate in \textbf{replicaSet}.\\
+Nel caso di MongoDB si ha:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    RDBMS & MongoDB\\
+    \hline
+    database & database \\
+    tabella/view & collezione\\
+    riga & documento (Bson)\\
+    colonna & campo\\
+    indice & indice\\
+    join & documento con embedding\\
+    chiave esterna & referencing\\
+    partizione & shard
+  \end{tabular}
+\end{table}
+Vediamo quindi un esempio di schema in Mongodb:
+\begin{listing}[H]
+  \begin{minted}{js}
+    var p = {
+      '_id': '342',
+      'author': DBRef('User',2),
+      'timestamp': Date('26-10-20'),
+      'tags': ['MongoDB','NoSQL'],
+      'comments':['author': DBRef('User',4),
+                  'date': Date('26-10-20'),
+                  'text': 'hello'.
+                  'upvotes': 7,...]
+    }
+    >db.posts.save(p);            
+  \end{minted}
+  \caption{Esempio di aggiunta di un documento $p$ nella collezione $posts$}
+\end{listing}
+Analizzando il codice abbiamo:
+\begin{itemize}
+  \item la definizione di $p$ come un oggetto json
+  \item tra gli elementi abbiamo $tags$ che contiene un array di valori
+  \item tra gli elementi abbiamo $comments$ che è un array di documenti
+  \item l'ultima riga è tra le chiavi di successo di Mongodb in quanto ha un
+  linguaggio simile a quelli di programmazione. Nel dettaglio si ha il
+  caricamento del documento $p$ nella collezione $posts$. Si ha un meccanismo
+  simile alla OOP e l'integrazione coi linguaggi di programmazione è facilitata
+  dall'ormai molto diffuso supporto ai json (come esistono già meccanismi per il
+  passaggio da oggetti a json e viceversa)
+\end{itemize}
+Si possono inoltre fare indici, tramite \texttt{ensureindex} (che prende come
+argomento un json), a ogni campo del
+documento, per esempio: 
+\begin{minted}{js}
+  >db.posts.ensureIndex({'author': 1});
+  >db.posts.ensureIndex({'comments.author': 1});
+  >db.posts.ensureIndex({'tags': 1});
+  >db.posts.ensureIndex({'author.location': '2d'});
+\end{minted}
+Si nota che posso creare indici a livello che voglio, a documenti o array, o
+anche, come nell'ultimo esempio, usare indici geo-spaziali.\\
+MongoDB, rispetto al modello relazionale, si avvicina tanto alla
+programmazione.\\
+\subsubsection{Repliche in MongoDB}
+Innanzitutto si ha che MongoDB rientra nella categoria CP rispetto al
+\textit{CAP theorem}, non garantendo disponibilità in caso di guasto.\\
+La replica viene effettuata in modalità master-slave anche se, nel gergo di
+MongoDB si ha \textbf{primary-secondary}, avendo scrittura sul primary e replica
+sui secondary. Si ha in realtà che uno dei nodi replica viene definito a
+posteriori \textit{primary}. La replica avviene tramite il file di log del
+\textit{primary}. Si ha un sistema che procede per repliche parziali
+incrementali, all'inizio il nodo fa un sync, prendendo i dati dal primary e poi
+prende dal file di log del primary solo gli ultimi $n$ movimenti.\\
+La garanzia della tolleranza si ha tramite il meccanismo di elezione dei nodi,
+nel caso il nodo primary vada down.\\
+Si ha che un nodo può assumere uno dei seguenti stati:
+\begin{itemize}
+  \item STARTUP: un nodo che non è membro effettivo di nessun replica set
+  \item PRIMARY: l’unico nodo nel replica set che accetterà le operazioni di
+  lettura
+  \item SECONDARY: un nodo che di effettuare la sola replicazione dei dati (può
+  essere promosso a PRIMARY in fase di elezione)
+  \item RECOVERING: un nodo che sta effettuando una qualche operazione di
+  recupero dei dati, magari dopo un \textit{rollback} (può essere promosso a
+  PRIMARY in fase di elezione) 
+  \item STARTUP2: un nodo che è appena entrato nel set (può essere eletto a
+  PRIMARY)
+  \item ARBITER: un nodo non atto alla replicazione dei dati con lo scopo di
+  prendere parte alle elezioni per promuovere i nodi a PRIMARY (può essere
+  eletto a PRIMARY in fase di elezione)
+  \item DOWN/OFFLINE: un nodo irraggiungibile
+  \item ROLLBACK: un nodo che sta svolgendo un rollbackper cui sarà
+  inutilizzabile per le letture (può essere promosso a PRIMARY in fase di
+  elezione)  
+\end{itemize}
+L'elezione elegge il nodo con la versione più aggiornata dei dati e in questa
+fase le scritture sono interrotte (motivo per cui non è garantita la A di
+CAP). L'elezione dura comunque pochissimi.\\
+Durante il processo di elezione ogni \textit{replicaSet} manda, con timeout per
+assumere che un nodo sia down, un
+``hearbeat'' (ovvero un bit ogni due secondi) agli altri nodi. Se il nodo
+primario risulta down si procede con l'elezione, che in termini umani è di tipo
+\textit{maggioritario con liste bloccate} nel replicaSet. Ogni nodo ha un
+identificativo con un punteggio rappresentante la priorità nelle elezioni
+(più alto più probabile che venga eletto). Quindi appena il primary va down il
+secondario con valore più alto chiamerà le elezioni. Si ha che un replica set
+può avere al massimo 50 membri di cui solo 7 votanti, che esprimono un solo
+voto. I nodi SECONDARY non votanti hanno priorità 0 e accettano solo letture ma
+sono comunque in grado di votare. Nel caso di partizionamento
+to della rete si rischia un problema di riconciliazione tra vecchio primary
+e nuovo, dovendo quindi bloccare la scrittura.
+\subsubsection{Scrittura}
+La scrittura avviene sul nodo primario e si hanno diverse politiche in base
+tramite l'opzione \textit{writeConcern} che dice cosa fare per le replicaSet.
+Si hanno tre parametri:
+\begin{enumerate}
+  \item $w$, indicante il numero di nodi in cui il dato deve essere replicato
+  prima di essere considerata conclusa l’operazione. Ovvero è il numero di nodi
+  sui quali deve essere confermata la scrittura per essere confermata a livello
+  globale
+  \item $j$, ovvero l'intenzione di scrivere sul log di \textit{Wiredtiger},
+  tramite la logica \textit{write ahead logging} (ovvero prima scrivo sul file
+  di log e poi sul disco), prima che l'operazione sia stata
+  eseguita. Questo per garantire la persistenza del dato, avendolo comunque nel
+  file di log. Senza l'opzione lo scriverà in un secondo momento
+  \item $wtimeout$, ovvero il tempo limite, espresso in ms, da aspettare nel
+  caso in cui $w>0$ (se $0$ non devo aspettare risposta da nessuno)
+\end{enumerate}
+Aumentare $w$ comporta aumentare il tempo di esecuzione. Nel dettaglio:
+\begin{itemize}
+  \item $w=0$ non da alcuna certezza di inserimento, utile per operazioni veloci
+  \item $w=1$ implica la scrittura sul nodo primary
+  \item $w=n$ implica la scrittura su $n$ nodi
+  \item $w=majority$ dove almeno la metà dei nodi più 1 deve aver scritto prima
+  della conferma dell'operazione (nella realtà si tenta di scrivere su più nodi
+  ma appena si ha un ack dalla metà più 1 si conferma la scrittura anche se
+  magari si sta ancora scrivendo su altri nodi)
+\end{itemize}
+Qualora si debba caricare una gran quantità di dati, di cardinalità conosciuta,
+per motivi di efficienza non conviene aspettare che il nodo dia l'ack ma si
+caricano tutti subito sul primary, controllando poi con \texttt{count} se tutto
+è stato caricato.
+\subsubsection{Frammentazione}
+Parliamo ora di frammentazione e scalabilità.\\
+Si hanno 3 tipi di sharding per la scalabilità orizzontale:
+\begin{itemize}
+  \item \textit{hash-based}, quindi sulla chiave
+  \item \textit{range-based}, quindi in base ad un certo range di elementi
+  \item \textit{tag-aware}, quindi in base a certi attributi
+\end{itemize}
+Si ha un meccanismo dinamico basato su \textit{pay as you go}, ovvero nel
+momento in cui ho lo sharding sarà MongoDB ad adattarlo nel momento in cui
+cambia il volume di dati, facendo un \textit{bilanciamento automatico}. Si ha
+uno ``spazio'' della mia chiave di shard che posso dividere in $n$ chunks per
+$n+1$ chiavi di shard. Il numero massimo di chunk che è possibile definire su
+una sharded key può definire il numero massimo di shard in un sistema.\\
+Si hanno 3 ruoli fondamentali nella frammentazione:
+\begin{enumerate}
+  \item \textbf{mongos}, che è il punto di accesso software per le query, è
+  l'entry point del cluster, tutte le query verranno eseguite su questo
+  processo. Appena lanciato mongos va a leggere il config server
+  
+  \item \textbf{config server}, ovvero un file che conosce la struttura degli
+  shard, conoscendo frammentazioni e repliche. Dalla versione 4.0 ogni nodo
+  distribuito è anche replicato
+  \item i vari \textbf{shard}, ovvero istanze di MongoDB
+\end{enumerate}
+Quindi il router quando riceve una query capisce dove sono i frammenti, grazie
+al config server, e quindi procede con la query di tipo:
+\begin{itemize}
+  \item \textbf{target query} se deve interrogare solo un nodo
+  \item \textbf{broadcast query} se deve interrogare più nodi
+\end{itemize}
+Sia gli shard che il config server sono replicati su replicaSet per evitare che
+diventino \textit{single point of failure} (anche per questo dalla 4.0 ogni
+volta che frammento replico).\\
+Si ha un \textbf{primary shard}, che contiene l'intero db (ovvero tutte le
+collezioni) e i \textbf{secondary shard} che contengono frammenti e repliche di
+alcune collezioni. Solitamente si ha quindi una configurazione a 3 nodi:
+\begin{enumerate}
+  \item uno primary
+  \item due nodi secondari con frammenti diversi e le repliche del primary
+\end{enumerate}
+\subsubsection{Letture}
+Ho una politica di \textit{readConcern} (che deve essere consistente come del
+caso del \textit{writeConcern}, facendo scegliere se è più dispendioso scrivere
+o leggere):
+\begin{itemize}
+  \item \textit{local}, che è il valore di default t per leggere i dati dai nodi
+  in un replicaSet. La query è fatta secondo la località spaziale e quindi se
+  legge un nodo non primary rischio di leggere dati non ancora replicati
+  \item \textit{available}, di default per lettura su nodi secondari, che fa
+  vedere che il dato c'è ed è consistente
+  \item \textit{majority}, quando almeno metà più 1 repliche ha ricevuto un ack
+  in scrittura sul dato allora posso leggere
+\end{itemize}
+Vediamo quindi un esempio di interrogazione, tramite il metodo \texttt{find}:
+\begin{center}
+  \textit{db.user.find({age:{\$gt:18}},{name:1,address:1}).limits(5)}
+\end{center}
+che equivale a:
+\begin{minted}{sql}
+  SELECT name, address
+  FROM user
+  WHERE age>18
+  LIMIT 5
+\end{minted}
+\textit{\$gt} significa \textit{greater than} e si hanno vari identificativi per
+i confronti (per non avere i simboli >, < etc$\ldots$ che darebbero fastidio
+nelle stringhe).\\
+Vediamo anche una \textit{insert}:
+\begin{minted}{js}
+  db.user.insertOne({
+    name: "Andrea" ,
+    age: 26,
+    Teach[«datawarehouse», «architecture»]
+  })
+\end{minted}
+con \texttt{insertOne} che specifica che voglio inserire un solo documento
+mentre avrei \texttt{insertAll} per tutti i documenti.\\
+Un \textit{update} avviene con la stessa logica con \texttt{updateAll}:
+\begin{minted}{js}
+  Db.user.updateAll({
+    name:{$eq: «Andrea»},
+    {$set: {Role: «PA»}},
+    {$upsert:true}
+  })
+\end{minted}
+%$
+\textit{\$upsert} sarebbe un \textit{insert if not exist}, per permettere
+l'inserimento e non la modifica in caso di assenza. Tale cosa è assente in SQL
+ma servirebbe un doppio comando.\\
+Si hanno varie utility per importare i dati, da specificare come opzioni al
+comando \texttt{mongoimport}, ad esempio:
+\begin{center}
+  \textit{mongoimport –d database –c collection –type csv -ignore blanks –file
+    PATH} 
+\end{center}
+per importare un csv al path PATH ignorando gli spazi bianchi.\\
+\subsubsection{Transazioni}
+Dalla versione 4.0 MongoDB ha introdotto nel modello documentale le transazione
+tramite l'engine \textit{Wiredtiger}. Introduce quindi il concetto di
+\textit{log} che indica che tutto è nel nodo primary. Si opera sempre sul nodo
+facendo un \textit{lock} che può essere di tipo:
+\begin{itemize}
+  \item \textbf{sharded (\textit{S})}, per le letture
+  \item \textbf{exclusive (\textit{X})}, per le scritture
+  \item \textbf{intent sharded (\textit{IS})}, per esprimere l'intenzione di
+  bloccare in modo condiviso uno dei nodi che discende dal nodo corrente
+  \item \textbf{intent exclusive (\textit{IX})}, per esprimere l'intenzione di
+  bloccare in modo esclusivo uno dei nodi che discende da quello corrente
+\end{itemize}
+Il lock garantisce transazioni a livello di singola collezione mentre prima
+l'atomicità era garantita a livello della singola operazione. Usando
+l'embedding, anche prima della v4.0, potevo gestire un sacco di modiche della
+singola collezioni. Nel caso del referencing invece serviva una gestione più
+approfondita delle transazioni. Essendo WT creato originariamente per un sistema
+distribuito funziona solo per sistemi distribuiti, infatti avendo un solo nodo
+si presuppone che si abbia una sola applicazione che accede, cosa che renderebbe
+a priori più semplice la gestione.
+\subsubsection{Modello contro efficienza}
+\textbf{esempio a partire dalla slide 37}\\
+Spesso il cambiamento del modello può comportare un miglioramento delle
+prestazioni non indifferente, più del cambiamento dell'hardware (\textbf{verrà
+  approfondito in live}).\\
+Avere più piccoli documenti separati migliora il tempo, rendendolo lineare
+(mentre un grosso documento embedding aveva tempi esponenziali nell'inserimento
+delle righe).\\
+Con questa soluzione poi devo sistemare le query.\\
+\textbf{Quindi l'importanza del modello è decisiva dal punto di vista delle
+  prestazioni}.\\
+\textbf{Nelle slide brevissima parte su CouchDB inutile}.
+\begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
+  Nella storia di NoSQL compaiono sempre grandi aziende, come Google, Amazon o
+  Facebook che creano il software, fanno il paper e rendono il software open. Il
+  rilascio dei codice in modo open source viene fatto in quanto in primis la
+  community permette continui miglioramenti ``a costo zero'', inoltre le aziende
+  in questione guadagno in primis su pubblicità (Google e Facebook in primis) e
+  cloud (vedisi Amazon che fa il 90\% degli utili dal cloud). Nessuno di questi
+  vende direttamente tecnologia (anche perché, esempio, Android ha un valore
+  economico basso) ma la usano. Si ha quindi esigenza applicativa, non
+  affidandosi a società esterne ma facendosi le cose internamente, rilasciando
+  poi le cose open source per far abituare gli utenti alle proprie tecnologie,
+  facendo così in modo che la gente voglia usare quelle tecnologie in ambito
+  cloud. In tutto ciò si contribuisce a creare pubblicità mirate etc$\ldots$ in
+  quanto il vero ``bene'' sono i dati non l'hardware o le tecnologie (e quelli
+  non sono open). Si ha la \textbf{data-driven economy}, i dati sono il nuovo
+  petrolio. IBM, Oracle etc$\ldots$ che vendevano invece la tecnologia ora sono
+  più in crisi e hanno dovuto cambiare \textit{business}.\\
+  Per progettare una review di prodotti servono informazioni in merito a chi fa
+  la review (utente verificato, numero di vecchie review etc$\ldots$). In ogni
+  elemento del documento salvo queste informazioni. Non è poi possibile avere
+  tutte le review nello stesso documento, quindi le primissime review (che
+  vengono visualizzate subito) le lascio
+  nel documento principale e per le altre lascio una reference ad un altro
+  documento. Le review possono anche essere usate per valutare l'affidabilità
+  dell'utente ed eventuali scelte alternative dei prodotti. Si punta comunque
+  all'efficienze e all'efficacia.\\
+  I db documentali scalano tramite \textbf{distributed hashed table
+    (\textit{DHT})}. Definendo una funzione di hash definisco implicitamente il
+  dominio della funzione, posso quindi distribuire in modo efficiente sui nodi i
+  vari valori di hash. Posso quindi avere diversi server con un nodo che salva
+  le coppie chiave-valore con tutte le chiavi di sua responsabilità, è il
+  \textbf{chord ring}. Ogni nodo quindi sa che dati deve gestire tramite la
+  funzione di hash, avendo un 
+  algoritmo di scelta del nodo tramite \textit{finger table}, con complessità
+  logaritmica. L'aggiunta di un nodo può portare a buchi di sicurezza ma
+  permette una scalabilità orizzontale incredibile.\\
+  \textbf{sistemare questa parte!}
+\end{shaded}
+\section{GraphDB}
+È il modello più ricco e complesso tra i NoSQL.\\
+Un grafo, da un certo punto di vista, ha proprietà simili a quelle di un modello
+ER. È infatti un insieme di nodi e di relazioni tra loro, dove i concetti più
+importanti (quelle che in ER sarebbero le \textit{entità}) sono modellate come
+nodi. Bisogna quindi studiare come connettere i nodi, infatti il modo con cui
+le entità sono semanticamente associate si modellano come relazioni, tramite
+archi.\\
+Si hanno campi di applicazione dei db a grafo:
+\begin{itemize}
+  \item social network
+  \item sistemi di raccomandazione, che suggeriscono oggetti simili a utenti
+  simili
+  \item ambito geografico
+  \item reti logistiche (per spedizioni etc$\ldots$)
+  \item transazioni finanziarie per la \textit{fraud detenction} (riconoscendo
+  certi pattern sospetti, anche a livello geografico)
+  \item master data management, rappresentazione unica della realtà
+  \item bioinformatica
+  \item controllo di autorizzazioni e accessi
+\end{itemize}
+\begin{esempio}
+  Per esempio su Twitter avrei i nodi con gli utenti e gli archi rappresentanti
+  la relazione \textit{follow}.
+\end{esempio}
+Si usa una \textbf{descrizione estensionale dei dati}. Si può avere infatti:
+\begin{itemize}
+  \item \textbf{descrizione estensionale dei dati} quando si descrivono le
+  istanze via-via, descrivendo anche istanze di tipo diverso (magari utenti e
+  messaggi) usando la stessa sintassi del nodo (ugualmente per gli archi). La
+  semantica viene data dall'etichetta
+  \item \textbf{descrizione intensionale dei dati}, che bisognerebbe inferirla
+  direttamente dai dati e quindi non è applicabile
+\end{itemize}
+Nei RDBMS si aveva il \textit{join} basato su valori, facendo uno
+\textit{scheme understanding} sulle varie tabelle, ottenendo quindi il risultato
+tramite anche più operazioni di \textit{join}. Si può avere però il problema
+applicativo, avendo magari\textbf{ relazioni ad anello} tra le varie tabelle
+ad esempio una tabella ``persona'' che tramite una tabella ``amici'' ritorna su
+se stessa, avendo la tabella ``amici'' che esplode in numerosità (magari
+cercando amici di amici etc$\ldots$ complicando le cose di livello in
+livello ). Avendo potenzialmente livelli infiniti di \textit{join} si va
+incontro al \textbf{join bombing}, che fanno soffrire i DBMS. Si può considerare
+comunque il \textbf{six separation degree}, uno studio sociologico, che dice
+che con sette connessioni si può raggiungere chiunque (ora coi social ne bastano
+meno). Simile è il \textbf{Kevin Bacon number}, che dice il numero medio di film
+fatti tra artisti per ottenerne uno fatto con Kevin Bacon, anche in questo caso
+si arriva allo stesso risultato visto con il \textbf{six separation degree}.\\
+Nei sistemi a grafo abbiamo quindi gli archi mentre nei documentali avevamo
+identificatori che puntavano ad altri documenti (con un modello basato sui
+valori come se fossero \textit{foreign keys} dei RDBMS), comportando, nel caso
+dell'embedding, task di modellazione complessi, scarsa efficienza e complessità
+nel gestire dati fortemente connessi, mentre, con il referencing starei
+simulando una sorta di modello a grafo. \\
+I db a grafo hanno forte potenza espressiva permettendo di caratterizzare i nodi
+con un certo \textit{tipo} e definire le varie relazioni tramite archi.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.7]{img/gdb.pdf}
+  \caption{Esempio di db a grafo}
+  \label{fig:gdb}
+\end{figure}
+Coi grafi si possono facilmente rappresentare relazioni umane, sociali,
+affettive, lavorative etc$\ldots$ usando dei semplici archi. Si possono
+connettere elementi tramite un'infinità di tipi di relazioni.\\
+Nei nodi posso rappresentare anche entità complesse, con vari attributi, ovvero
+varie \textbf{proprietà} (ovviamente ogni nodo può avere un set di attributi
+diversi, avendo fortissima libertà di schema).\\
+È un modello molto più immediato rispetto ad un RDBMS. Inoltre, nel caso si
+abbiano potenzialmente più relazioni tra due nodi basta contare quanti cammini
+orientati (che possono quindi passare per nodi intermedi diversi) esistono tra
+quei nodi per ottenere la cardinalità di tali relazioni. \\
+Un grafo con le proprietà nei nodi è detto \textbf{property graph}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1]{img/gdb2.pdf}
+  \caption{Esempio di db con rappresentato da un \textbf{property graph}, con
+    \textit{user} come chiave e un array di valori}
+  \label{fig:gdb2}
+\end{figure}
+È un modello simile a quello che si fa su una lavagna, è una modellazione simile
+a quella umana, basti pensare alle mappe concettuali. \\
+Si hanno comunque vari tipi di \textit{property graph};
+\begin{itemize}
+  \item quando sia nodi che relazioni possono avere proprietà espresse da
+  chiave-valore, accettando quindi che i nodi abbiano un tipo
+  \item altri ammettono array di valori
+\end{itemize}
+\textit{Si nota che invece in altri modelli NoSQL come RDF i nodi possono avere
+  un tipo ma non proprietà e le relazioni non hanno proprietà, dovendo sempre
+  rappresentare il tutto tramite triple ``soggetto-predicato-oggetto''}.\\
+Il problema di modellazione dei grafi si ritrova quindi nella scelta di cosa
+mettere come nodo e cosa come relazioni (ed eventualmente le proprietà), avendo
+varie scelte modellistiche con vari e pro e contro.\\
+Ovviamente anche qui ogni vendor ha il suo linguaggio, anche se ne esiste uno
+\textit{standard}, chiamato \textbf{gremlin}, che più che essere un linguaggio
+di interrogazione è un \textit{linguaggio di attraversamento dei grafi} (dato
+che cercare sottografi e attraversare il grafo è la principale tecnica di studio
+degli stessi che si ha a disposizione). Questo tipo di linguaggio viene detto
+\textbf{vertex-based} che si usano per studiare la validità di predicati
+tramite l'attraversamento dei nodi.\\
+Si hanno vari vendor quindi e si hanno due tipi di approccio:
+\begin{enumerate}
+  \item \textbf{graph processing}, dove ci si concentra sul processamento dei
+  dati, processamento che viene eseguito tramite i grafi 
+  \item \textbf{graph storage}, dove i dati vengono memorizzati in forma di
+  grafo 
+\end{enumerate}
+In entrambi i casi la cosa può essere fatta in modo:
+\begin{itemize}
+  \item \textbf{nativo}:
+    \begin{itemize}
+    \item \textit{native graph storage} per indicare che sono ottimizzati e
+    progettati per le gestione stessa dei grafi. In questo caso comunque i dati
+    vengono memorizzati in modo intelligente, memorizzando in modo vicino i nodi
+    e il loro archi, facendo \textit{index free adjacency}, in modo che
+    seguire gli archi uscenti da un nodo è molto più immediato. Tra gli esempi
+    di db abbiamo \textbf{Neo4j}, che in memoria salva, per ogni nodo, tutti i
+    suoi riferimenti, tramite pointers. In scrittura comunque si perdono
+    performance, a vantaggio di una lettura molto rapida (al costo comunque di
+    molto uso di RAM). Si evita il \textit{join bombing} seguendo i riferimenti
+    vicini ad ogni nodo, facendo l'attraversamento
+  \end{itemize}
+  \item \textbf{non nativo}:
+  \begin{itemize}
+    \item \textit{non native graph storage} per indicare che i dati vengono
+    trasformati da grafo ad un formato diverso tra cui relazionale, object
+    oriented db etc$\ldots$ Si rischia comunque il \textit{join bombing}
+  \end{itemize}
+\end{itemize}
+Potrei avere un db con una rappresentazione a tabelle (e non a grafo) studiata
+come se fosse un grafo (traducendo poi le query in SQL), questo è l'approccio di
+\textbf{FlockDB}.\\
+Un'alternativa è avere, come nel caso di \textbf{Titan}, dove posso comunque
+usare \textit{Gremlin} ma con dati memorizzati in modo colonnare.\\
+Si hanno quindi due approcci principali per gestire un grafo:
+\begin{itemize}
+  \item \textbf{graph database}, ovvero un DBMS che gestisce in maniera
+  persistente un grafo che viene usato per le transazioni. Si ha in questo caso
+  la dicitura OLTP
+  \item \textbf{graph compute engine}, ovvero tecnologie per l'analisi
+  \textit{off line} dei grafi. Si ha in questo caso la dicitura OLAP
+\end{itemize}
+I graph database supportano le operazioni CRUD (come tutti i modelli NoSQL):
+\begin{itemize}
+  \item Create
+  \item Read
+  \item Update
+  \item Delete
+\end{itemize}
+Come abbiamo visto si studiano gli attraversamenti del grafo, che sono
+equiparati ai \textit{join} del modello relazionale, per fare le query in modo
+performante non facendo join ma attraversando e basta. Sono inoltre costruiti
+per essere usati nei sistemi transazionali (OLTP). \\
+Si ha un problema grave coi grafi, motivo per cui si hanno i \textit{non native
+  graph storage}: \textbf{i grafi non scalano bene e non possono essere
+  facilmente frammentati}.\\
+Partizionare un grafo raramente è possibile, in quanto comporta un taglio di
+relazioni. Se quindi si vuole scalare bisogna passare, alla fine, ad un altro
+modello, aggiungendo però costo di comunicazione tra il modello a grafo e il
+nuovo modello scelto, aggiungendo un layer software.\\
+\subsection{Neo4j}
+Abbiamo già introdotto precedentemente Neo4j. Sappiamo che è nativo sia per il
+\textit{graph processing} che per il \textit{graph storage} (sovvrendo quindi la
+scalabilità).\\
+Approfondiamo quindi il \textbf{linguaggio di interrogazione di Neo4j}, chiamato
+\textbf{Cypher} (\textit{OpenCypher} nella versione open).\\
+Cypher è definito come un \textbf{pattern-matching query language}. È un
+linguaggio simil-umano, espressivo, dichiarativo (si dice il cosa e non il
+come), che consente operazioni di aggregazione, sorting e di limit (trovare ad
+esempio le $n$ top key etc$\ldots$) e permette di aggiornare il grafo.\\
+Un formato in modo testuale viene rappresentato con le parentesi tonde per i
+nodi e le quadre per gli archi. Le relazioni orientate vengono indicate tramite
+``->'' o ``<-''.
+\begin{esempio}
+  Tramite:
+  \begin{center}
+    \textit{(c)-[:KNOWS]->(b)-[:KNOWS]->(a), (c)-[:KNOWS]->(a)}
+  \end{center}
+  con la ``,'' che significa $\land$.\\
+  Equivalentemente potevamo avere:
+    \begin{center}
+    \textit{/c)-[:KNOWS]->(b)-[:KNOWS]->(a)<-(c)-[:KNOWS]}
+  \end{center}
+  per rappresentare:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/neo.pdf}
+  \end{figure}
+  Vediamo quindi un'interrogazione classica in Cypher, dove si cercano tutti
+  gli utenti tali per cui conosce qualcuno $a$ che conosce qualcuno $b$ e che
+  sono etichettati come ``Michael'', ritornando $a$ e $b$: 
+  \begin{minted}{cypher}
+    MATCH(c:user)
+    WHERE (c)-[:KNOWS]->(b)-[:KNOWS]->(a),
+          (c)-[:KNOWS]->(a), c.user="Michael"
+    RETURN a, b
+  \end{minted}
+  Il risultato sarà una \textbf{tabella} che contiene tutte le coppie $a$ e
+  $b$. Avrà dei dati ridondati a causa della dualità intrinseca di avere $a$ che
+  conosce $b$, cosa che probabilmente porta ad avere che $b$ conosce $a$.
+\end{esempio}
+Quindi il risultato \textbf{non sempre} è un grafo (mentre nel documentale era
+sempre un documento e nel relazionale una tabella) ma può anche essere altro, ad
+esempio una tabella. Non è quindi sempre possibile concatenare query in quanto
+potrei non avere un grafo in uscita.\\
+Si hanno comunque clausole (coprendo le operazioni CRUD):
+\begin{itemize}
+  \item \textit{where} per imporre criteri di filtraggio tramite
+  pattern-matching dei risultati
+  \item \textit{create/create unique}, per creare nodi e relazioni
+  \item \textit{delete}, per cancellare nodi, relazioni e proprietà
+  \item \textit{set}, per impostare dei valori alle proprietà
+  \item \textit{foreach}, per fare un update per elementi del grafo posti in una
+  lista (per ogni nodo, per ogni arco etc$\ldots$)
+  \item \textit{union}, per unire i risultati più query
+  \item \textit{with}, per concatenare query propagando i risultati in pipe
+\end{itemize}
+\subsection{Grafi e modello relazionale}
+Compariamo ora il modello a grafi con il modello relazionale.\\
+Per farlo sfruttiamo un esempio: 
+\begin{esempio}
+  Vogliamo costruire un modello relazionale per la gestione di una server
+  farm. Si ha che l'utente accede ad una applicazione che gira su una VM ed
+  accede ad un db (primario o secondario). I server che ospitano le VM sono
+  installati su sistemi rack controllati da un sistema di load balancing.\\
+  Una tipica attività è quella di controllare se ogni elemento del sistema
+  funzioni e, in caso di guasto, capire cosa non stia funzionando. Per farlo si
+  hanno dei sensori, sia software che hardware, che monitorano le varie
+  componenti. \\
+  Modello uno schema del mio sistema collegando in una mappa concettuale le
+  varie componenti che comunicano tra loro o che sono in relazioni (anche solo
+  per dire che un server è in un certo rack). Si modellano così le varie
+  istanze. Tale modellazione relazionale può avere il seguente ER:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/er.pdf}
+  \end{figure}
+  Ogni elemento ha l'attributo $on$ per indicare se i sensori dicono che la
+  componente funzioni o meno, attributo che verrà usato per le query.\\
+  Qualora quindi un'utente mi dica che una certa applicazione non funziona devo
+  risalire step by step al server, eventualmente al rack, al db etc$\ldots$,
+  avendo una quantità di join non indifferente (6 \textit{join} diversi nel caso
+  peggiore).\\
+  Una rappresentazione a grafo sarebbe molto più semplice, avendo dei semplici
+  cammini anziché avere tutti quei \textit{join}. Si avrebbe quindi un nodo per
+  singola componente reale con le relazioni tra le varie singole componenti. \\
+  Pensiamo quindi, per esempio, alla seguente query:
+  \begin{center}
+    Trovare gli asset (server, app, machine virtuali) in stato down per l’utente
+    user 3
+  \end{center}
+  \begin{minted}{cypher}
+    START user = node:users(name = "user 3")
+    MATCH (user)-[*1..5]-(asset)
+    WHERE asset.status! = "down"
+    RETURN DISTINCT asset
+  \end{minted}
+  Parto quindi dal nodo che come nome ``user 3'', trova tutti quegli asset con
+  distanza da 1 a 5 rispetto al nodo utente, arrivando quindi fino a 5 livelli
+  di profondità. Se tale asset è in down viene restituito una sola volta.
+\end{esempio}
+\subsection{Ancora su Neo4j}
+Tutta la teoria e la letteratura sui grafi viene applicata ai db a grafo, dai
+cammini minimi alle clique. Il vero problema resta la modellazione e la scelta
+del DBMS. Approfondiamo quindi ancora di più Neo4j.\\
+Abbiamo già visto che non ha meccanismi nativi di frammentazione, avendo scelto
+di sfruttare la \textit{index free adjacency} e la modellazione a grafo, non
+permettendo scalabilità. In compenso garantisce varie caratteristiche
+funzionali:
+\begin{itemize}
+  \item permette le transazioni con tutte le proprietà ACID, con meccanismi di
+  locking
+  \item garantisce la disponibilità
+  \item garantisce la recoverability
+\end{itemize}
+In merito alla scalabilità, nonostante le limitazioni sopra esposte,
+garantisce l'\textbf{alta disponibilità}. L'idea è che è possibile andare a
+definire un cluster di nodi Neo4j, alcuni chiamati \textbf{core server}, ovvero
+nodi per cui tutte le scritture sono fatte in contemporanea, essendo quindi
+sincronizzati. Si hanno poi gli altri nodi che sono chiamati \textbf{replica
+  server}, che sono di sola lettura, che vengono creati tramite meccanismi di
+replica simili a quelli già trattati. I \textit{replica server} vengono anche
+usati per reporting analysis etc$\ldots$. Fatta una query essa comunque non
+viene distribuita ma eseguita sul nodo più vicino. Tutto questo sistema è detto
+\textbf{casual clustering}.\\
+Si ha una bassa \textbf{latenza} nelle query in quanto si usa un indice per
+risalire al primo nodo e poi si procede coi cammini, avendo quindi che le
+performances non dipendono dalla grandezza del dataset ma solo da quali sono i
+dati richiesti dalla query.
+\section{Modelli poliglotta}
+In situazioni reali, ad esempio un e-commerce, posso avere i dati salvati in
+vari DBMS, sia relazionali che NoSQL, a seconda dei dati che contengono (magari
+avrei le raccomandazioni in un db a grafo con Neo4j, il catalogo prodotti in un
+documentale come MongoDB, le sessioni utente in un db key-value come Redis,
+dati finanziari e reporting in un RDBSM, per i log delle attività un modello
+NoSQL colonnare etc$\ldots$). Dover gestire tutti questi modelli diversi è molto
+completo, ma sensato in base al tipo di dati. Ho quindi una sorta di
+\textbf{mondo poliglotta}.
+\subsection{ArangoDB}
+In questo mondo poliglotta complesso ci arriva in soccorso un particolare DBMS:
+\textbf{ArangoDB}.\\
+Il DBA dovrebbe conoscere tutti i modelli in uso e tutti i linguaggi associati,
+essendo anche in grado di gestire i vari conflitti. ArangoDB introduce il
+concetto di \textbf{db poliglotta}, supportando i seguenti modelli:
+\begin{itemize}
+  \item key-value
+  \item documentali
+  \item a grafo
+  \item a ricerca full-text (come fa anche \textbf{Elastic Search})
+\end{itemize}
+Rispetto ai modelli precedentemente descritti a grafo con storage non nativo,
+tipo \textbf{Titan}, che appunto accettano solo un linguaggio di query a grafo,
+il linguaggio di query di ArangoDB, chiamato \textbf{AQL (\textit{Arango Query
+    language})}, garantisce la possibilità di interrogare dati in formato json
+(quindi documentale), a grafo, in formato key-value o per il full text search.\\
+Ad alto livello Arango organizza i dati in database e collezioni (per fare un
+parallelo schemi e tabelle), dove le collezioni memorizzano documenti o
+similari. I documenti, come già accennato, sono documenti json di profondità
+arbitraria (sub-object, sub-arrays etc$\ldots$), non avendo alcun limite da
+questo punto di vista. Nel caso semplice tali documenti sono omogenei, avendo
+stessi attributi e tipi, e effettuare una query AQL è molto semplice:
+\begin{minted}{sql}
+  FOR c IN categories
+  FILTER c._key IN [ 'books', 'kitchen' ]
+  RETURN c
+
+  FOR c IN categories
+  SORT .title
+  RETURN { _key: c._key, title: c.title}
+\end{minted}
+Avendo un linguaggio simile a uno di programmazione.\\
+Abbiamo quindi, nella prima query, che selezioniamo tutti i $c$ in `$categories$
+(che è una collezione) trovando solo le chiavi che sono o ``book'' o ``kitchen''
+ritornando $c$. Nella seconda selezioniamo selezioniamo tutti i $c$ in
+`$categories$, ordiniamo i risultati in base al titolo e ritorniamo chiave e
+titolo.\\
+Posso comunque avere documenti eterogenei, con attributi diversi. Possiamo
+comunque interrogare usando il modello a grafo e tali query mostrano quali
+documenti sono collegati (direttamente o indirettamente) ad altri documenti,
+specificando il cammino per ottenere il collegamento. Queste connessioni tra
+documenti sono chiamate \textbf{edges} che sono salvati in ``edge
+collections''. Gli \textit{edges} hanno sempre due attributi che si riferisocno
+ai nodi entranti e uscenti:
+\begin{itemize}
+  \item \textit{\_from}
+  \item \textit{\_to}
+\end{itemize}
+Avendo sempre archi direzionati del tipo:
+\[\_from \to \_to\]
+\textbf{anche se si possono effettuare query anche nell'ordine opposto}.\\
+\begin{esempio}
+  Preso il documento \textit{json}:
+  \begin{minted}{json}
+    { "_key" : "sofia", "_id" : "employees/sofia"}
+    { "_key" : "adam", "_id" : "employees/adam"}
+    { "_key" : "sarah", "_id" : "employees/sarah"}
+    { "_key" : "jon", "_id" : "employees/jon"}
+  \end{minted}
+  posso avere un \textbf{edge}, per una certa relazione, del tipo:
+  \begin{minted}{json}
+    { "_from" : "employees/sofia", "_to" : "employees/adam"}
+    { "_from" : "employees/sofia", "_to" : "employees/sarah"}
+    { "_from" : "employees/sarah", "_to" : "employees/jon"}
+  \end{minted}
+  \textit{(Potrei comunque continuare a interrogare il primo json come se fosse
+  un documentale)}
+\end{esempio}
+Rispetto a quanto visto per i modelli a grafo cambia drasticamente la
+scalabilità.\\
+Si hanno vari metodi di scalabilità, avendo le modalità di deploy:
+\begin{itemize}
+  \item a singola istanza
+  \item master/slave, scritture su master e repliche su slave
+  \item active failover
+  \item cluster
+  \item multiple datacenters
+\end{itemize}
+Approfondiamo soprattutto gli ultimi tre.
+\subsubsection{Active failover}
+Nel modello master/slave quando il master fallisce lo slave non può essere
+sostituito e quindi si è pensato al modello \textbf{active failover}, dove
+esistono delle istanze \textit{single-server}, chiamate \textbf{leader}, che
+sono in lettura e scrittura e delle istanze, sempre \textit{single-server},
+chiamate \textbf{followers}, che non sono altro i vecchi slave, passivi e non
+scrivibili. Il leader invia le operazioni di scrittura ai followers che
+replicano in modo asincrono i dati tramite la cosiddetta \textbf{Write-Ahead Log
+  (\textit{WAL})}, ovvero il leader prima salva su un file di log e poi sul
+disco e tale file di log, tramite replica incrementale viene aggiornato, tramite
+un meccanismo di replica chiamato \textbf{apache mesos}. Esiste poi almeno un
+\textbf{agency} che controlla le configurazioni di leader e followers e
+controlla che siano tutti disponibili. Qualora l'agency si accorgesse che un
+server leader non è più disponibile promuove, con un meccanismo elettivo, un
+follower a leader. Resta quindi una sorta di master/slave ma con gli agency che
+procedono con il controllo e la rielezione.
+\subsubsection{Cluster}
+Il cluster è un'evoluzione, avendo più \textbf{coordinator} che si connettono
+con i client. I coordinator effettuando le query e gli \textbf{agency} non si
+occupano di altro se non l'elezione degli stessi e della sincronizzazione dei
+servizi per l'intero cluster. Si hanno poi i \textbf{DB server}, di tipo slave,
+che, in caso di fallimento, non comporta problemi in quanto l'agency attua le
+solite politiche di aumento repliche, se esse sono previste, bilanciando
+nuovamente i dati in caso di sharding.\\
+Lo sharding avviene in partizioni da almeno 40gb, con un meccanismo simile a
+quello di MongoDB: ogni server avrà associato uno shard, e ogni server, avendo
+ciascuno circa 3 repliche, avrà le repliche di altri server (oltre alla sua
+stessa replica, di cui è \textbf{leading shard}) (??????). Questo sistema
+permette di interrogare quasi 
+direttamente tutto sullo stesso server (avendo molte repliche) e permette, in
+caso di server non funzionante, di poter stabilire che un altro server diventa
+il \textbf{leading shard} per un certo frammento (tramite meccanismi soliti di
+elezione tramite gli agency), replicando per avere comune le tre repliche tra i
+vari server e potendo continuare a fare interrogazioni.\\
+Si hanno due soluzioni per la scrittura:
+\begin{enumerate}
+  \item il protocollo \textbf{read once write all (ROWA)} che obbliga il
+  coordinator a scrivere su tutte le repliche
+  \item il coordinatore scrive solo dove si ha la copia primaria e poi si hanno
+  le repliche, è la soluzione \textbf{oneshard} (che era chiamato \textbf{write
+    concern} in MongoDB)
+\end{enumerate}
+Arango quindi scala molto bene.
+\subsubsection{Cluster to cluster}
+L'ultimo livello è il \textbf{cluster to cluster}, una soluzione asincrona di
+tipo \textbf{one way} in cui prendo un cluster e lo copio interamente in un
+altro, usando una coda come \textbf{kafka}. La replica è one way per cui scarico
+dal primary alla replica o viceversa in tempi diversi, non
+contemporaneamente. Non è pensato per fare una replica del single-server (userei
+il master/slave).
+\section{Modello key-value}
+È un modello abbastanza semplice dove si hanno appunto rapporti chiave-valore. I
+valori sono considerati come dei blob, non essendo accessibili/interpretabili
+direttamente dal db(??????). Si hanno poche operazioni:
+\begin{itemize}
+  \item inserire un valore data la chiave
+  \item trovare un valore data la chiave
+  \item modificare un valore data la chiave
+  \item cancellare una chiave e il suo valore
+\end{itemize}
+È inoltre possibile associare, in alcune soluzioni come \textbf{Redis}, un tipo
+ad un valore, per esempio \textit{string, integer, list etc$\ldots$}.\\
+Si ha accesso veloce ai dati tramite strutture di hash e posso avere scalabilità
+orizzontale. I modelli key-value funzionano solitamente \textit{in memory},
+anche nel caso della condivisione dati.\\
+Dal punto di vista della nomenclatura si ha:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    relazionale & key-value\\
+    \hline
+    tabella & bucket\\
+    riga & key-value\\
+    id-riga & key
+  \end{tabular}
+\end{table}
+Tra i vari DBMS abbiamo:
+\begin{itemize}
+  \item Redis
+  \item Memcached
+  \item Riak KV
+  \item Hazelcast
+  \item Ehcache
+\end{itemize}
+\subsection{Redis}
+nato del 2009 da Salvatore Sanfilippo mentre stava lavorando su una soluzione di
+realtime web analytic con mysql. Nasce a causa dei limiti del modello
+relazionale, non riuscendo a fare le interrogazioni in realtime. Assunto da
+VMware continua a lavorare su Redis fino a mettesi in proprio:
+\textit{Redislab} (con la parte di ricerca e sviluppo in Sicilia e la sede
+principale negli USA).\\
+Redis può gestire chiavi espresse in ASCII. I valori primitivi sono le
+\textit{string} ma si hanno vari container di stringhe:
+\begin{itemize}
+  \item hashes
+  \item lists
+  \item sets
+  \item sorted sets
+\end{itemize}
+Non si può sempre fare una ricerca per valore all'interno di questi elementi.\\
+Sono stati poi aggiunti i \textbf{moduli} per fari formati di file, per
+memorizzare file \textit{json} ma anche per \textit{video in streaming}. Offre
+quindi blob più strutturati per memorizzare i dati, alcuni a pagamento.\\
+Si ha una versione distribuita enterprise, a pagamento. Si possono fare repliche
+e avere una soluzione in cluster con un certo numero di shard.\\
+Studiamo quindi come avviene lo sharding.\\
+Bisogna stabilire una \textit{policy} per capire come dividere i dati e si è
+scelto di dividere le chiavi in base al valore di hash. Si può, volendo, anche
+dividere le chiavi in base a delle RegEx.\\
+Inoltre bisogna capire dove distribuire i dati e si hanno due soluzioni:
+\begin{enumerate}
+  \item quella di default, detta \textbf{dense}, dove il meccanismo di sharding
+  è gestito tramite un meccanismo incrementale, ovvero quando si riempie la
+  memoria della macchina si crea un'altro shard su un'altra e così via
+  \item una detta \textbf{sparse}, dove, avendo già definito il numero di nodi,
+  vado a popolarli fin da subito
+\end{enumerate}
+Si ha l'alta disponibilità in base a due soluzioni (???):
+\begin{enumerate}
+  \item una soluzione, detta \textbf{Redis replica of setup} in cui si hanno dei
+  nodi che formano il cluster su un datacenter su cui si effettuando le
+  operazioni e altri nodi che formano altri cluster su altri datacenter verso
+  cui sincronizzo. È quindi un master/slave, replicando per disaster-recovery
+  \item una soluzione, chiamata \textbf{active-active setup}, in cui posso
+  scrivere e leggere sui cluster presenti in due datacenters diversi (ma magari
+  nello stesso rack, parlando di \textbf{Redis cluster with rack zone
+    awareness}) avendo in entrambi i datacenter sia i db principali che le
+  repliche. Magari avendo protocolli ROWA etc$\ldots$
+\end{enumerate}
+Di recente si è aggiunta la possibilità di rendere persistenti dati anche se il
+loro punto di forza resta la gestione \textit{in memory} (piuttosto che andare a
+costruire dei sistemi di \textit{cache} etc$\ldots$).
+\section{Wide column}
+Studiamo ora il modello \textbf{wide column store}.\\
+Anche se storicamente non è così il modello \textit{wide column} può essere
+visto come un'evoluzione del modello \textit{key-value} (è nato prima il modello
+\textit{wide column}). L'idea è che accanto ha la chiave non ho un valore/blob
+ma una riga con degli attributi mono-valore. Si ha quindi una via di mezzo tra
+il modello \textit{key-value}, essendo possibile fare interrogazioni su queste
+righe e quindi all'interno delle colonne, e il modello documentale, non
+riuscendo a garantire la stessa potenza descrittiva (i documenti sono comunque
+più espressivi essendo più strutturati, permettendo sub-array e sub-document).\\
+Tra le implementazioni troviamo:
+\begin{itemize}
+  \item \textbf{BigTable}, il primo modello \textit{wide column} introdotto da
+  Google
+  \item \textbf{Hbase}
+  \item \textbf{Cassandra}, che però viene ritenuto spesso \textit{key-value} e
+  anche loro stessi si definiscono \textit{key-value}, basando la loro
+  distribuzione sulle \textbf{distributed hashed table (\textit{DHT})}
+\end{itemize}
+\subsection{BigTable}
+L'idea dietro \textbf{BigTable} è quella di una mappa multidimensionale
+ordinata, persistente e sparsa, ovvero si ha una mappa indicizzata tramite tre
+informazioni:
+\begin{enumerate}
+  \item row key, di tipo \textit{string}
+  \item column key, di tipo \textit{string}
+  \item timestamp che caratterizzano ogni singolo valore, compreso la column key
+  (da immagine sembra così perlomeno). Sono di tipi \textit{int64}
+\end{enumerate}
+All'interno si hanno poi varie \textbf{column family} con i vari dati,
+memorizzati come \textit{string}.\\
+BigTable è molto usato in ambito web grazie alla sua capacità di memorizzare
+contenuti HTML etc$\ldots$\\
+Grazie ai timestamp si garantisce un controllo di concorrenza basato sul
+multiversioning. Possiamo dire che i sistemi che implementano \textit{wide
+  column} con timestamp supportano transazioni ACID compliant tramite
+\textbf{MultiVersion Concurrency Control (\textit{MCC o MVCC})}.\\
+Un insieme di righe viene definito \textbf{tablet}. Abbiamo visto che ogni riga
+può avere diversi \textbf{column family} e si ha che ciascun column
+family può avere diversi \textbf{qualifier} e per ogni qualifier più valori
+diversi. La libertà dello schema deriva che ogni column family può avere un
+numero diverso di qualifier. Si ha quindi l'approccio \textit{key-value} per
+l'accesso tramite chiave e si ha un sistema di indicizzazione per migliorare le
+prestazioni. Ogni column family ha un nome, una \textit{string}, è può contenere
+altre colonne, che a loro volta appartengono ad una column family, specificata
+tramite \texttt{familyName:columnName}.  Un esempio nella figura \ref{fig:col}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/col.pdf}
+  \caption{Esempio di modello \textit{wide column} implementato da BigTable}
+  \label{fig:col}
+\end{figure}
+Non è semplice facile le range query a causa del meccanismo di hashing.\\
+Il timestamp (anche se può essere usato altro) garantisce un \textbf{version
+  number} univoco.
+\subsection{Hbase}
+La versione distribuita di BigTable venne rinominata \textbf{Hbase} (dove $H$
+sta per \textbf{Hadoop}).\\
+In questo caso i dati sono divisi in tables e ogni table è composta di colonne
+che sono a loro volta raggruppate in column family (che possono avere un numero
+variabile di colonne, che erano i qualifier in BigTable). Ovviamente supporta il
+multiversioning.\\
+Un'istanza di Hbase è formata da varie righe, identificate tramite una chiave, a
+cui sono associate, per ciascuna riga, varie column family, una per ogni tipo di
+dato. La column family viene rappresentata tramite un insieme di coppie
+attributo-valore e i valori possono avere timestamp diversi, specificati tramite
+\texttt{@timestamp} (\texttt{@ts=value}).\\
+Si possono avere le stesse column family, dal punto di vista del nome, in più
+righe ma queste possono avere un insieme diverso di valori, garantendo che la
+table è \textbf{sparse}, rivelandosi utile per il mapping ``uno a tanti''. I
+dati sono tutti \textit{bytes}. Un esempio nella figura \ref{fig:col2}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/col2.pdf}
+  \caption{Esempio di istanza di Htable, dove si nota quanto detto, avendo le
+    stesse column family (``info'' e ``ruolo'') ma con all'interno anche
+    attributi diversi (esempio ``consulente'')}
+  \label{fig:col2}
+\end{figure}
+Il modello colonnare non presta attenzione ai \textit{join}, che in questo caso
+implicherebbero scorrere l'intera tabella, ma si concentra sul
+\textbf{denormalizzare} ovvero a replicare le informazioni nel momento in cui si
+crea una column family nuova (???).\\
+Quindi lo schema è formato dalle tables e dalle column family, \textbf{le
+  colonne non fanno parte dello schema}.\\
+Hbase implementa quindi le \textbf{dynamic Columns} in quanto ogni riga ha
+differenti colonne, i quali nomi sono codificati nella riga, non facendo parte
+dello schema.\\
+Il versioning è essenziale per garantire lo storico delle informazioni.\\
+SU Hbase ho alcune operazioni fondamentali:
+\begin{enumerate}
+  \item aggiungere valori
+  \item ricercare per valore esatto (e non in modo range-based)
+\end{enumerate}
+Vediamo quindi come si distribuisce un cluster Hbase. Si hanno tre componenti
+principali (ricordando che si basa su Hadoop), avendo un'architettura
+master/slave: 
+\begin{enumerate}
+  \item un master, detto \textbf{HbaseMaster}
+  \item tanti region server, detti \textbf{HRegionServer}, che sono i vari slave
+  \item il client, detto \textbf{Hbase client}, che dialoga con il singolo
+  master 
+\end{enumerate}
+Nel dettaglio una \textit{region} è un sottoinsieme di righe della tabella, che
+vengono partizionate orizzontalmente tramite regole standard di
+frammentazione (partizionamento che viene fatto in automatico). Quindi un
+\textit{HRegionServer} gestisce un insieme di righe di una o più tabelle e la
+sincronizzazione (lettura e scrittura) avviene tramite file di log. Il master
+coordina gli slave, assegna le region, riconosce fallimenti degli slave
+etc$\ldots$.\\
+Il client quindi fa la richiesta al master il quale cerca il dato e sviluppa
+l'operazione all'interno della singola region. Nel momento in cui il region
+server scrive i dati, attraverso il sistema distribuito chiamato \textbf{Hadoop
+  Distributed File System (\textit{HDFS})}, viene fatta la replica e avviene la
+sincronizzazione dei dati. Potrei avere più master coordinati tra loro. Il
+coordinamento tra i master e i region server avviene tramite il meccanismo di
+\textbf{ZooKeeper}, ovvero un orchestratore software. HDFS permette di avere la
+memorizzazione orizzontale dei dati e tramite il \textbf{write ahead log
+  (\textit{WAL})} prima scrivo sul log e poi sul disco, garantendo la
+ricostruibilità dei dati in caso di guasto e garantendo che prima o poi i dati
+saranno allineati. ZooKeeper quindi coordina master e region server per
+lettura/scrittura mentre HDFS consente l'allineamento e la memorizzazione su un
+file system distribuito.\\
+Hbase ha un linguaggio di query poco ricco, potendo fare solo una
+\textit{select} di dati con un certo valore. Si può comunque fare la ricerca sia
+sulle righe che su alcuni attributi (definiti precedente come ``chiave''). Il
+sistema di ricerca è estremamente performante.
+\subsection{Cassandra}
+Come abbiamo detto \textbf{Cassandra} lo studiamo come modello \textit{wide
+  column} anche se loro stessi si definiscono \textit{key-value}, essendo
+sostanzialmente tale ma usando concetti dei modelli \textit{wide column}.\\
+Cassandra è l'evoluzione open source del db NoSQL utilizzato da Facebook e
+risulta interessante perché implementa un sistema di distribuzione
+completamente diverso da quello master/slave di Hbase.\\
+In cassandra esiste il concetto \textbf{column family}, definito all'interno di
+un \textbf{key space}, come insieme di coppie
+key-value e quindi una column family altro non è che una tabella con le coppie
+key-value come righe. Il concetto di column family quindi varia rispetto a
+quello di Hbase. Una riga è una collezione di colonne con un nome (sono quindi
+come le righe di una tabella relazionale). La chiave corrisponde al nome della
+colonna e ogni riga (che è appunto usa serie di coppie key-value definite come
+colonne) contiene almeno una colonna. Un esempio di modellazione è visibile alla
+figura \ref{fig:cas}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/cas.pdf}
+  \caption{Esempio di due righe della stessa column family di Cassandra con
+    due chiavi e tre colonne (con i tre column name ``nome'', ``id'', ``time'')}
+  \label{fig:cas}
+\end{figure}
+Si possono aggiungere attributi a piacere e modificarli (mentre in Hbase si
+creavano/modificavano le column family). Se i valori corrispondenti a tutte le
+column name sono uguali a ``-'' si specifica che essi non sono usati. Posso
+anche specificare di avere un singolo valore non in uso sempre con ``-''.
+\newpage
+Il linguaggio di query di cassandra è chiamato \textbf{Cassandra Query language
+  (CQL)} molto simile ad SQL. Vediamo un esempio di creazione di tabella (dove
+per ogni attributo si specifica il tipo), con la
+specifica di una primary key:
+\begin{minted}{sql}
+  CREATE TABLE users(
+    email varchar,
+    bio varchar,
+    birthday timestamp,
+    active boolean,
+    PRIMARY KEY (email)
+  )
+\end{minted}
+(si specifica che i campi di tipo timestamp sono specificati in millisecondi).\\
+Per intenerimento dati si procede in modo simile, anche qui, ad SQL:
+\begin{minted}{sql}
+  INSERT INTO users(email, bio, birthday, active)
+  VALUES('example@example.com',
+         'esempio',
+         516513600000,
+         true)
+\end{minted}
+Inutile dire che anche per le query si ha un modello simile ad SQL dove le
+\textit{select} leggono uno o più records dalle column family di Cassandra
+ritornando un insieme di righe:
+\begin{minted}{sql}
+  SELECT * FROM users;
+
+  SELECT email FROM users WHERE active = true;
+\end{minted}
+La particolarità di Cassandra è l'architettura.\\
+Se BigTable usava:
+\begin{itemize}
+  \item Column families
+  \item Memtables
+  \item SSTables
+\end{itemize}
+e altri DBMS come \textbf{Amazon Dynamo} dove si ha (???):
+\begin{itemize}
+  \item hashing consistente per mantenere la replica
+  \item partizionamento e replica
+  \item routing \textit{one-hop}
+\end{itemize}
+in Cassandra i ha un'architettura distribuita \textit{Peer-to-Peer} che si basa
+sostanzialmente su una modalità simile a \textbf{distributed hash tables
+  (\textit{DHT})}. Cassandra  implementa un meccanismo in cui si garantisce
+l'\textbf{elasticità} in modo \textbf{trasparente}, aggiungendo i vari nodi in
+modo molto efficace e performante. Per farlo si prende lo spazio di
+indirizzamento delle chiavi e si assegna l'organizzazione prendendo lo spazio di
+indirizzamento, dividendolo nei nodi disponibili. Tramite ZooKeeper si
+garantisce anche in questo caso la ridondanza, supportando anche la \textbf{rack
+awareness} (dati possono essere replicati tra diversi rack per ``proteggersi''
+da guasti di macchine/rack). Inoltre non si ha un \textbf{single point of
+  failure}.\\
+Analizzando nel dettaglio il partizionamento si ha che i nodi sono divisi in
+modo logico in una forma ad anello, detta \textbf{ring topology}. Si usano
+quindi i valori hash delle chiavi, associate alle partizioni dati, per assegnare
+la chiave e i dati collegati ad un nodo dell'anello. L'hashing viene limitato ad
+un certo valore massimo per permettere la struttura ad anello (banalmente quello
+che si potrebbe fare anche con una semplice operazione $mod$) e si ha che i nodi
+con meno carico si ``spostano'' sull'anello per alleggerire quelli con più
+carico (inserendo un nodo in modo da ``spezzare'' i dati in carico ad un certo
+nodo).
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.7]{img/cas3.pdf}
+  \caption{Esempio di inserimento di un nodo (``D'') nell'architettura ad
+    anello che viene posto, tramite lo studio sull'hash della chiave, tra il
+    nodo ``B'' e il nodo ``C''. Con ``valori di X'' si intende che quei dati si
+    trovano nel nodo ``X''}
+  \label{fig:cas3}
+\end{figure}
+L'aggiunta di un nodo influisce solo sul nodo precedente e il nodo
+successivo. Spesso i nodi vengono replicati almeno 3 volte e viene fatto nei
+primi 3 nodi successivi al nodo di cui si sta facendo la replica (nell'esempio
+sopra, ipotizzando voler per semplicità fare solo due repliche di ``A'', essere
+sarebbero su ``B'' e ``d''). Le repliche di un nodo vengono fatte ad ogni
+scrittura dello stesso. Sapendo che ogni nodo monitora il successivo, qualora
+questo sia guasto, si può chiedere a quello successivo ancora, garantendo che i
+dati non vengono persi, il quale a sua volta replicherà su un nodo successivo
+all'ultimo sui cui aveva repliche per avere sempre le 3 repliche. \\
+Per monitorare i guasti si usano i \textbf{protocolli gossip}. L'idea è appunto
+quella che un nodo chiede al successivo e al successivo ancora se sia vada tutto
+bene, ottenendo, di passaggio in passaggio, una conoscenza completa e robusta
+dello stato del cluster (ricordando che essendo una rete \textit{Peer-to-Peer}
+non si ha alcun master). In caso di failure si procede alla riscrittura dei
+dati sul nodo successivo tramite il file di log.\\
+Le operazioni di write sono quindi \textbf{write ahead log}, prima scrivo quindi
+sul \textbf{commit log} e poi sulla tabella persistente.\\
+Parliamo quindi di consistenza dei dati.\\
+Cassandra nel suo linguaggio offre la \textbf{read/write consistency} avendo
+delle politiche per cui si hanno letture/scritture consistenti:
+\begin{itemize}
+  \item read consistency: la lettura è data per certa se un nodo risponde,
+  politica \textbf{ONE to ALL} o, altrimenti, se un certo numero di nodi è
+  d'accordo prima di ritornare il risultato della lettura
+  \item write consistency: la scrittura è data per certa se un certo numero di
+  nodi viene aggiornato prima di considerare la scrittura valida, politica
+  \textbf{ANY to ALL}, oppure se
+  almeno un nodo mi risponde o anche se tutti i nodi rispondono
+\end{itemize}
+Si ha una politica di 
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -2195,13 +4044,32 @@ la sua \textit{chiave segreta}. I nodi della rete P2P, che sono detti
 % LocalWords:  interface IBM Microsoft technologies realtime based snapshot and
 % LocalWords:  transactional merge over loss disaster mission critical load OOP
 % LocalWords:  kilometri consolidation distribution balancing offline entry BTC
-% LocalWords:  reporting warehousing commerce social testing compliant many
+% LocalWords:  reporting warehousing commerce social testing compliant many GB
 % LocalWords:  source directional resolution detention Tier staging event apply
-% LocalWords:  publish publisher distributor subscriber intra inter paradigm
-% LocalWords:  relational mismatch Blockchain mapper Delete framework group
-% LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis
+% LocalWords:  publish publisher distributor subscriber intra inter paradigm js
+% LocalWords:  relational mismatch Blockchain mapper Delete framework group SHA
+% LocalWords:  multicore Blockchains blockchain bitcoin criptovalute genesis WT
 % LocalWords:  block hash torrent double spanning Leporati ethereum monero spam
 % LocalWords:  zcash foreniscs criptovaluta Satoshi Nakamoto paper proof part
-% LocalWords:  spending bitcoins wallet
+% LocalWords:  spending bitcoins wallet miners Moore RIPEMD iniettiva one way
+% LocalWords:  nonce miner mining farm stake fee blockchains ether ETH smart CP
+% LocalWords:  contract Solidity struct function bytecode virtual machine remix
+% LocalWords:  outOfGas OpenZeppelin startup overflow metamask l'ide Rapsten ms
+% LocalWords:  Rinkeby autority Truffle Ganache main MetaMask webapp GoQuorum
+% LocalWords:  permission permissionless third TTP permissioned audit Chaos EOS
+% LocalWords:  webassembly Hyperledger authority Foundation SAP CryptoKitties
+% LocalWords:  collezzionabili NoSQL for large banks Codd logisticamente closed
+% LocalWords:  terabyte gigabyte world assumption NULL value pre porting array
+% LocalWords:  workaround persistency table comodity microservizi Amazon Google
+% LocalWords:  Facebook schemaless CAP theorem Basic Available Eventually Lynch
+% LocalWords:  consistency governance Brewer webserver Gilber Availability key
+% LocalWords:  Partition partition availability Eventual stores column family
+% LocalWords:  document databases graph RDF tuple caching blob hashing hashed
+% LocalWords:  distributed wide hashata ranged property root MongoDB identifier
+% LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
+% LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
+% LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
+% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER
+% LocalWords:  intensionale processamento colonnare denormalizzare
 
-\message{ !name(archid.tex) !offset(-2207) }
+\message{ !name(archid.tex) !offset(-4075) }

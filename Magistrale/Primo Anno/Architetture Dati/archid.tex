@@ -3879,8 +3879,211 @@ memorizzazione orizzontale dei dati e tramite il \textbf{write ahead log
 ricostruibilità dei dati in caso di guasto e garantendo che prima o poi i dati
 saranno allineati. ZooKeeper quindi coordina master e region server per
 lettura/scrittura mentre HDFS consente l'allineamento e la memorizzazione su un
-file system distribuito.
-%13.38
+file system distribuito.\\
+Hbase ha un linguaggio di query poco ricco, potendo fare solo una
+\textit{select} di dati con un certo valore. Si può comunque fare la ricerca sia
+sulle righe che su alcuni attributi (definiti precedente come ``chiave''). Il
+sistema di ricerca è estremamente performante.
+\subsection{Cassandra}
+Come abbiamo detto \textbf{Cassandra} lo studiamo come modello \textit{wide
+  column} anche se loro stessi si definiscono \textit{key-value}, essendo
+sostanzialmente tale ma usando concetti dei modelli \textit{wide column}.\\
+Cassandra è l'evoluzione open source del db NoSQL utilizzato da Facebook e
+risulta interessante perché implementa un sistema di distribuzione
+completamente diverso da quello master/slave di Hbase.\\
+In cassandra esiste il concetto \textbf{column family}, definito all'interno di
+un \textbf{key space}, come insieme di coppie
+key-value e quindi una column family altro non è che una tabella con le coppie
+key-value come righe. Il concetto di column family quindi varia rispetto a
+quello di Hbase. Una riga è una collezione di colonne con un nome (sono quindi
+come le righe di una tabella relazionale). La chiave corrisponde al nome della
+colonna e ogni riga (che è appunto usa serie di coppie key-value definite come
+colonne) contiene almeno una colonna. Un esempio di modellazione è visibile alla
+figura \ref{fig:cas}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/cas.pdf}
+  \caption{Esempio di due righe della stessa column family di Cassandra con
+    due chiavi e tre colonne (con i tre column name ``nome'', ``id'', ``time'')}
+  \label{fig:cas}
+\end{figure}
+Si possono aggiungere attributi a piacere e modificarli (mentre in Hbase si
+creavano/modificavano le column family). Se i valori corrispondenti a tutte le
+column name sono uguali a ``-'' si specifica che essi non sono usati. Posso
+anche specificare di avere un singolo valore non in uso sempre con ``-''.
+\newpage
+Il linguaggio di query di cassandra è chiamato \textbf{Cassandra Query language
+  (CQL)} molto simile ad SQL. Vediamo un esempio di creazione di tabella (dove
+per ogni attributo si specifica il tipo), con la
+specifica di una primary key:
+\begin{minted}{sql}
+  CREATE TABLE users(
+    email varchar,
+    bio varchar,
+    birthday timestamp,
+    active boolean,
+    PRIMARY KEY (email)
+  )
+\end{minted}
+(si specifica che i campi di tipo timestamp sono specificati in millisecondi).\\
+Per intenerimento dati si procede in modo simile, anche qui, ad SQL:
+\begin{minted}{sql}
+  INSERT INTO users(email, bio, birthday, active)
+  VALUES('example@example.com',
+         'esempio',
+         516513600000,
+         true)
+\end{minted}
+Inutile dire che anche per le query si ha un modello simile ad SQL dove le
+\textit{select} leggono uno o più records dalle column family di Cassandra
+ritornando un insieme di righe:
+\begin{minted}{sql}
+  SELECT * FROM users;
+
+  SELECT email FROM users WHERE active = true;
+\end{minted}
+La particolarità di Cassandra è l'architettura.\\
+Se BigTable usava:
+\begin{itemize}
+  \item Column families
+  \item Memtables
+  \item SSTables
+\end{itemize}
+e altri DBMS come \textbf{Amazon Dynamo} dove si ha (???):
+\begin{itemize}
+  \item hashing consistente per mantenere la replica
+  \item partizionamento e replica
+  \item routing \textit{one-hop}
+\end{itemize}
+in Cassandra i ha un'architettura distribuita \textit{Peer-to-Peer} che si basa
+sostanzialmente su una modalità simile a \textbf{distributed hash tables
+  (\textit{DHT})}. Cassandra  implementa un meccanismo in cui si garantisce
+l'\textbf{elasticità} in modo \textbf{trasparente}, aggiungendo i vari nodi in
+modo molto efficace e performante. Per farlo si prende lo spazio di
+indirizzamento delle chiavi e si assegna l'organizzazione prendendo lo spazio di
+indirizzamento, dividendolo nei nodi disponibili. Tramite ZooKeeper si
+garantisce anche in questo caso la ridondanza, supportando anche la \textbf{rack
+awareness} (dati possono essere replicati tra diversi rack per ``proteggersi''
+da guasti di macchine/rack). Inoltre non si ha un \textbf{single point of
+  failure}.\\
+Analizzando nel dettaglio il partizionamento si ha che i nodi sono divisi in
+modo logico in una forma ad anello, detta \textbf{ring topology}. Si usano
+quindi i valori hash delle chiavi, associate alle partizioni dati, per assegnare
+la chiave e i dati collegati ad un nodo dell'anello. L'hashing viene limitato ad
+un certo valore massimo per permettere la struttura ad anello (banalmente quello
+che si potrebbe fare anche con una semplice operazione $mod$) e si ha che i nodi
+con meno carico si ``spostano'' sull'anello per alleggerire quelli con più
+carico (inserendo un nodo in modo da ``spezzare'' i dati in carico ad un certo
+nodo).
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.7]{img/cas3.pdf}
+  \caption{Esempio di inserimento di un nodo (``D'') nell'architettura ad
+    anello che viene posto, tramite lo studio sull'hash della chiave, tra il
+    nodo ``B'' e il nodo ``C''. Con ``valori di X'' si intende che quei dati si
+    trovano nel nodo ``X''}
+  \label{fig:cas3}
+\end{figure}
+L'aggiunta di un nodo influisce solo sul nodo precedente e il nodo
+successivo. Spesso i nodi vengono replicati almeno 3 volte e viene fatto nei
+primi 3 nodi successivi al nodo di cui si sta facendo la replica (nell'esempio
+sopra, ipotizzando voler per semplicità fare solo due repliche di ``A'', essere
+sarebbero su ``B'' e ``d''). Le repliche di un nodo vengono fatte ad ogni
+scrittura dello stesso. Sapendo che ogni nodo monitora il successivo, qualora
+questo sia guasto, si può chiedere a quello successivo ancora, garantendo che i
+dati non vengono persi, il quale a sua volta replicherà su un nodo successivo
+all'ultimo sui cui aveva repliche per avere sempre le 3 repliche. \\
+Per monitorare i guasti si usano i \textbf{protocolli gossip}. L'idea è appunto
+quella che un nodo chiede al successivo e al successivo ancora se sia vada tutto
+bene, ottenendo, di passaggio in passaggio, una conoscenza completa e robusta
+dello stato del cluster (ricordando che essendo una rete \textit{Peer-to-Peer}
+non si ha alcun master). In caso di failure si procede alla riscrittura dei
+dati sul nodo successivo tramite il file di log.\\
+Le operazioni di write sono quindi \textbf{write ahead log}, prima scrivo quindi
+sul \textbf{commit log} e poi sulla tabella persistente.\\
+Parliamo quindi di consistenza dei dati.\\
+Cassandra nel suo linguaggio offre la \textbf{read/write consistency} avendo
+delle politiche per cui si hanno letture/scritture consistenti:
+\begin{itemize}
+  \item read consistency: la lettura è data per certa se un nodo risponde,
+  politica \textbf{ONE to ALL} o, altrimenti, se un certo numero di nodi è
+  d'accordo prima di ritornare il risultato della lettura
+  \item write consistency: la scrittura è data per certa se un certo numero di
+  nodi viene aggiornato prima di considerare la scrittura valida, politica
+  \textbf{ANY to ALL}, oppure se
+  almeno un nodo mi risponde o anche se tutti i nodi rispondono
+\end{itemize}
+Si ha inoltre una politica di \textbf{quorum} per il calcolo della
+``maggioranza'' (per la quale anche possono avvenire read/write consistency) che
+si basa sul \textbf{replication\_factor}. La richiesta di consistenza viene
+fatta nelle query:
+\begin{minted}{sql}
+  INSERT INTO table (column1,...)
+  VALUES (value1,...)
+  USING CONSISTENCY ONE
+\end{minted}
+Dove per esempio si specifica, con \texttt{USING CONSISTENCY ONE} che basta la
+conferma di un nodo per validare l'operazione. Potrei usare poi  \texttt{USING
+  CONSISTENCY QUORUM}, che si basa sul valore $k$ del
+\textit{replication\_factor}, che stabilisce che servono almeno $k$ nodi che
+validino l'operazione. Con \texttt{USING CONSISTENCY ALL} specifico che tutti
+i nodi devono confermare l'operazione.\\
+Il problema è che se chiedo un solo nodo che verifichi l'operazione rischio di
+avere inconsistenza, avendo i nodi precedenti che non sono stati magari in grado
+di comunicare a tale nodo di aver ottenuto i dati.\\
+Posso avere poi \texttt{USING CONSISTENCY ANY}, specificando anche il booleano
+\textit{hinted\_handoff\_enable}, che autorizza la scrittura anche se si ha il
+nodo offline in quanto un'altro nodo prende la richiesta in carico e, non appena
+il nodo originale torna accessibile, ne trasferisce i dati, per procedere dopo
+la validazione del primo nodo che risponde.\\
+In merito alle operazioni di \textit{delete} si ha che esse semplicemente
+rendono il dato non disponibile, essendo più veloce cambiare un flag piuttosto
+che cancellare. A causa di ciò comunque si creano nelle tabelle fisiche dei
+problemi di spazio, quindi periodicamente si fanno dei \textbf{merge}, ovvero
+ogni singolo nodo procede alla ``compattazione'' dei propri dati, sovrascrivendo
+i valori non più disponibili.\\
+Per assicurare la sincronizzazione dei nodi e per evitare perdita di consistenza
+si utilizzano dei \textit{checksum} per comparare i dati di un nodo con quelli
+dei successivi. Per effettuare questo controllo, nel dettaglio, vengono usati
+degli hash-tree detti \textbf{Merkle tree} nel seguente modo:
+\begin{itemize}
+  \item vengono mandati degli snapshot dei dati ai nodi successivi
+  \item creati e trasmetti ad ogni ``compattazione'' principale (non lo dice ma
+  c'è scritto questo nella slide ????)
+  \item se due nodi prendono uno snapshot con un intervallo pari a\\
+  \texttt{TREE\_STORE\_TIMEOUT} allora i due snapshot sono comparati e in caso
+  di successo i dati vengono sincronizzati
+  
+\end{itemize}
+Vediamo nel dettaglio le operazioni di lettura.\\
+Le letture inconsistenti vengono fatte usando \texttt{ANY}, posso poi
+specificare che mi risponda un nodo con \texttt{ONE} etc$\ldots$, come per le
+scritture.\\
+Quindi in lettura, i nodi vengono interrogati fino a quando il numero di nodi
+che rispondono con il valore più recente non raggiunge un livello di coerenza
+specificato da \textbf{ONE to ALL}. Si ha quindi che:
+\begin{itemize}
+  \item se il livello di consistenza richiesto non
+  viene raggiunto i nodi vengono aggiornati con il valore più recente che viene
+  quindi restituito
+  \item se viene raggiunto il livello di coerenza, il valore viene restituito e
+  tutti i nodi che riportavano valori vecchi vengono aggiornati
+\end{itemize}
+Si hanno quindi, per esempio:
+\begin{minted}{sql}
+  SELECT * FROM table USING CONSISTENCY ONE  
+\end{minted}
+\section{Considerazioni finali}
+SI è notato come bene o male la scelta di algoritmi di gestione siano alla fine
+sempre gli stessi, variano invece al più le architetture (master/slave
+\textit{Peer-to-Peer}) ma i vari modelli NoSQL restano comunque da un certo
+punto di vista (in merito ad eventuali repliche, distribuzione etc$\ldots$)
+tutti simili tra loro. La differenza di modello invece consente la scelta di un
+certo sistema NoSQL in base al tipo di dato che bisogna inserire nel
+db. Un'altra differenza è il linguaggio usato e la facilità d'uso dello
+stesso (e delle altre tecnologie legate al DBMS).\\
+La scalabilità è un'altro punto da considerare durante la scelta.
+
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL

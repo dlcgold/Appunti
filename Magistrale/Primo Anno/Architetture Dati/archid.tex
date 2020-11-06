@@ -3380,7 +3380,7 @@ Potrei avere un db con una rappresentazione a tabelle (e non a grafo) studiata
 come se fosse un grafo (traducendo poi le query in SQL), questo è l'approccio di
 \textbf{FlockDB}.\\
 Un'alternativa è avere, come nel caso di \textbf{Titan}, dove posso comunque
-usare \textit{Gremlin} ma con dati memorizzati in modo colonnale.\\
+usare \textit{Gremlin} ma con dati memorizzati in modo colonnare.\\
 Si hanno quindi due approcci principali per gestire un grafo:
 \begin{itemize}
   \item \textbf{graph database}, ovvero un DBMS che gestisce in maniera
@@ -3542,7 +3542,7 @@ vari DBMS, sia relazionali che NoSQL, a seconda dei dati che contengono (magari
 avrei le raccomandazioni in un db a grafo con Neo4j, il catalogo prodotti in un
 documentale come MongoDB, le sessioni utente in un db key-value come Redis,
 dati finanziari e reporting in un RDBSM, per i log delle attività un modello
-NoSQL colonnale etc$\ldots$). Dover gestire tutti questi modelli diversi è molto
+NoSQL colonnare etc$\ldots$). Dover gestire tutti questi modelli diversi è molto
 completo, ma sensato in base al tipo di dati. Ho quindi una sorta di
 \textbf{mondo poliglotta}.
 \subsection{ArangoDB}
@@ -3758,6 +3758,129 @@ Di recente si è aggiunta la possibilità di rendere persistenti dati anche se i
 loro punto di forza resta la gestione \textit{in memory} (piuttosto che andare a
 costruire dei sistemi di \textit{cache} etc$\ldots$).
 \section{Wide column}
+Studiamo ora il modello \textbf{wide column store}.\\
+Anche se storicamente non è così il modello \textit{wide column} può essere
+visto come un'evoluzione del modello \textit{key-value} (è nato prima il modello
+\textit{wide column}). L'idea è che accanto ha la chiave non ho un valore/blob
+ma una riga con degli attributi mono-valore. Si ha quindi una via di mezzo tra
+il modello \textit{key-value}, essendo possibile fare interrogazioni su queste
+righe e quindi all'interno delle colonne, e il modello documentale, non
+riuscendo a garantire la stessa potenza descrittiva (i documenti sono comunque
+più espressivi essendo più strutturati, permettendo sub-array e sub-document).\\
+Tra le implementazioni troviamo:
+\begin{itemize}
+  \item \textbf{BigTable}, il primo modello \textit{wide column} introdotto da
+  Google
+  \item \textbf{Hbase}
+  \item \textbf{Cassandra}, che però viene ritenuto spesso \textit{key-value} e
+  anche loro stessi si definiscono \textit{key-value}, basando la loro
+  distribuzione sulle \textbf{distributed hashed table (\textit{DHT})}
+\end{itemize}
+\subsection{BigTable}
+L'idea dietro \textbf{BigTable} è quella di una mappa multidimensionale
+ordinata, persistente e sparsa, ovvero si ha una mappa indicizzata tramite tre
+informazioni:
+\begin{enumerate}
+  \item row key, di tipo \textit{string}
+  \item column key, di tipo \textit{string}
+  \item timestamp che caratterizzano ogni singolo valore, compreso la column key
+  (da immagine sembra così perlomeno). Sono di tipi \textit{int64}
+\end{enumerate}
+All'interno si hanno poi varie \textbf{column family} con i vari dati,
+memorizzati come \textit{string}.\\
+BigTable è molto usato in ambito web grazie alla sua capacità di memorizzare
+contenuti HTML etc$\ldots$\\
+Grazie ai timestamp si garantisce un controllo di concorrenza basato sul
+multiversioning. Possiamo dire che i sistemi che implementano \textit{wide
+  column} con timestamp supportano transazioni ACID compliant tramite
+\textbf{MultiVersion Concurrency Control (\textit{MCC o MVCC})}.\\
+Un insieme di righe viene definito \textbf{tablet}. Abbiamo visto che ogni riga
+può avere diversi \textbf{column family} e si ha che ciascun column
+family può avere diversi \textbf{qualifier} e per ogni qualifier più valori
+diversi. La libertà dello schema deriva che ogni column family può avere un
+numero diverso di qualifier. Si ha quindi l'approccio \textit{key-value} per
+l'accesso tramite chiave e si ha un sistema di indicizzazione per migliorare le
+prestazioni. Ogni column family ha un nome, una \textit{string}, è può contenere
+altre colonne, che a loro volta appartengono ad una column family, specificata
+tramite \texttt{familyName:columnName}.  Un esempio nella figura \ref{fig:col}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/col.pdf}
+  \caption{Esempio di modello \textit{wide column} implementato da BigTable}
+  \label{fig:col}
+\end{figure}
+Non è semplice facile le range query a causa del meccanismo di hashing.\\
+Il timestamp (anche se può essere usato altro) garantisce un \textbf{version
+  number} univoco.
+\subsection{Hbase}
+La versione distribuita di BigTable venne rinominata \textbf{Hbase} (dove $H$
+sta per \textbf{Hadoop}).\\
+In questo caso i dati sono divisi in tables e ogni table è composta di colonne
+che sono a loro volta raggruppate in column family (che possono avere un numero
+variabile di colonne, che erano i qualifier in BigTable). Ovviamente supporta il
+multiversioning.\\
+Un'istanza di Hbase è formata da varie righe, identificate tramite una chiave, a
+cui sono associate, per ciascuna riga, varie column family, una per ogni tipo di
+dato. La column family viene rappresentata tramite un insieme di coppie
+attributo-valore e i valori possono avere timestamp diversi, specificati tramite
+\texttt{@timestamp} (\texttt{@ts=value}).\\
+Si possono avere le stesse column family, dal punto di vista del nome, in più
+righe ma queste possono avere un insieme diverso di valori, garantendo che la
+table è \textbf{sparse}, rivelandosi utile per il mapping ``uno a tanti''. I
+dati sono tutti \textit{bytes}. Un esempio nella figura \ref{fig:col2}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/col2.pdf}
+  \caption{Esempio di istanza di Htable, dove si nota quanto detto, avendo le
+    stesse column family (``info'' e ``ruolo'') ma con all'interno anche
+    attributi diversi (esempio ``consulente'')}
+  \label{fig:col2}
+\end{figure}
+Il modello colonnare non presta attenzione ai \textit{join}, che in questo caso
+implicherebbero scorrere l'intera tabella, ma si concentra sul
+\textbf{denormalizzare} ovvero a replicare le informazioni nel momento in cui si
+crea una column family nuova (???).\\
+Quindi lo schema è formato dalle tables e dalle column family, \textbf{le
+  colonne non fanno parte dello schema}.\\
+Hbase implementa quindi le \textbf{dynamic Columns} in quanto ogni riga ha
+differenti colonne, i quali nomi sono codificati nella riga, non facendo parte
+dello schema.\\
+Il versioning è essenziale per garantire lo storico delle informazioni.\\
+SU Hbase ho alcune operazioni fondamentali:
+\begin{enumerate}
+  \item aggiungere valori
+  \item ricercare per valore esatto (e non in modo range-based)
+\end{enumerate}
+Vediamo quindi come si distribuisce un cluster Hbase. Si hanno tre componenti
+principali (ricordando che si basa su Hadoop), avendo un'architettura
+master/slave: 
+\begin{enumerate}
+  \item un master, detto \textbf{HbaseMaster}
+  \item tanti region server, detti \textbf{HRegionServer}, che sono i vari slave
+  \item il client, detto \textbf{Hbase client}, che dialoga con il singolo
+  master 
+\end{enumerate}
+Nel dettaglio una \textit{region} è un sottoinsieme di righe della tabella, che
+vengono partizionate orizzontalmente tramite regole standard di
+frammentazione (partizionamento che viene fatto in automatico). Quindi un
+\textit{HRegionServer} gestisce un insieme di righe di una o più tabelle e la
+sincronizzazione (lettura e scrittura) avviene tramite file di log. Il master
+coordina gli slave, assegna le region, riconosce fallimenti degli slave
+etc$\ldots$.\\
+Il client quindi fa la richiesta al master il quale cerca il dato e sviluppa
+l'operazione all'interno della singola region. Nel momento in cui il region
+server scrive i dati, attraverso il sistema distribuito chiamato \textbf{Hadoop
+  Distributed File System (\textit{HDFS})}, viene fatta la replica e avviene la
+sincronizzazione dei dati. Potrei avere più master coordinati tra loro. Il
+coordinamento tra i master e i region server avviene tramite il meccanismo di
+\textbf{ZooKeeper}, ovvero un orchestratore software. HDFS permette di avere la
+memorizzazione orizzontale dei dati e tramite il \textbf{write ahead log
+  (\textit{WAL})} prima scrivo sul log e poi sul disco, garantendo la
+ricostruibilità dei dati in caso di guasto e garantendo che prima o poi i dati
+saranno allineati. ZooKeeper quindi coordina master e region server per
+lettura/scrittura mentre HDFS consente l'allineamento e la memorizzazione su un
+file system distribuito.
+%13.38
 \end{document}
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
@@ -3811,4 +3934,4 @@ costruire dei sistemi di \textit{cache} etc$\ldots$).
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
 % LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
 % LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER
-% LocalWords:  intensionale processamento colonnale
+% LocalWords:  intensionale processamento colonnare denormalizzare

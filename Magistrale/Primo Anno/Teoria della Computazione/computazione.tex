@@ -2151,8 +2151,193 @@ caso si specifica a parte di avere un input che occupa spazio $n$).
   avendo che prima o poi ritorno a stati già visti quindi la macchina se supera
   la quantità appena definita capisce di essere in loop (questo perché si ha a
   che fare con insiemi limitati e quindi tale ragionamento non va bene per
-  l'halting problem).
+  l'halting problem). Quindi $|k|\cdot |S_M(n)|\cdot |\Sigma|^{|S_M(n)|}$ è
+  anche un limite temporale per la seconda macchina (\textbf{rivedere
+    quest'ultima affermazione}).
 \end{proof}
+Quindi data una certa macchina che lavora in un certo spazio $S(n)$ posso
+costruire una macchina equivalente che da la stessa risposta in tempo limitato
+$T(n)$. Si ha che se ho un problema che si risolve in spazio polinomiale, per
+la formula appena scritta avrò tempo esponenziale. Invece, al contrario, tempo
+polinomiale comporta spazio polinomiale.
+\subsection{NonDeterministic Turing Machine}
+I problemi nella \textbf{classe EXP} sono ancora in studio per capire se sono
+\textbf{dimostrabilmente intrattabili}. Per il loro studio
+si usano le \textbf{NonDeterministic Turing Machine (NDTM)} che sono comunque
+puramente teoriche, in quanto non si è in grado fisicamente di costruirle. Nella
+DTM deterministica avevo una $\delta$ mentre nella NDTM ho:
+\[\Delta\subseteq (k\times \Sigma)\times (k\times \Sigma \times\{\leftarrow,
+  \rightarrow, -\})\]
+Con $\Delta$, detta \textbf{relazione di transizione}, che non è una funzione
+(come era $\delta$) ma una relazione.\\ 
+Nella DTM dato uno stato potevo passare ad un solo stato tramite $\delta$,
+passando di stato in stato fino ad uno stato finale. Era una sequenza di
+transizioni. \\
+Nella NDTM ho delle \textbf{scelte}, ovvero la computazione non è una sequenza
+di computazioni ma un \textbf{albero di computazione}. Da ogni stato posso
+passare a uno tra più stati, a seconda della \textit{scelta}, formando così un
+albero. Il singolo passo di computazione non è univocamente definito. Ogni
+singolo ramo comunque è equivalente al passo di computazione della DTM. Tramite
+$\Delta$ definisco il passaggio tra stati.\\
+Per capire se una stringa è accettata o meno dalla NDTM, visto che potrei andare
+sia in $Y$ che in $N$ (che in $H$) a seconda della varie computazioni
+dell'albero, si ha che:
+\begin{definizione}
+  Una stringa $x$ è \textbf{accettata} da una NDTM se esiste una computazione
+  tale per cui:
+  \[(s_0,x,1)\to(Y, z, \rho_G)\]
+  quindi se almeno un ramo dell'albero di computazione che termina nello stato
+  $Y$. Tutti gli altri rami possono fare quello che vogliono, anche restare in
+  loop.\\
+  Se non c'è almeno un ramo $Y$ non è accettata. Gli altri possono andare in
+  loop o in uno stato $N$.
+\end{definizione}
+\begin{definizione}
+  Un linguaggio $L$ è \textbf{accettato} da una NDTM $N$ se per tutte le
+  stringhe che fanno parte del linguaggio esiste almeno una computazione che
+  termina nello stato $Y$, ovvero esiste una computazione per cui:
+  \[\forall x\in L\Rightarrow N(x)=Y\]
+\end{definizione}
+\begin{definizione}
+  Un linguaggio $L$ è \textbf{deciso} da una NDTM $N$ se, qualora la stringa $x$
+  appartenga il linguaggio, esiste \textbf{almeno una} computazione tale per
+  cui: 
+  \[x\in L\rightarrow N(x)=Y\]
+  altrimenti, se $x$ non appartiene al linguaggio, per \textbf{tutte} le
+  computazioni, si ha che: 
+  \[x\not\in L \rightarrow N(x)=N\]
+  Non devo quindi avere loop in questo caso, tutte devono dare $N$.
+\end{definizione}
+\begin{esempio}
+  Si ha:
+  \[L=\{a^nb^{2n}\}\cup\{a^{2n}b^n\}\]
+  Studiamo una DTM che riconosca tale linguaggio. Dalle DTM controlla prima il
+  primo formato senza cambiare i simboli. Se vede che le $a$ sono più delle $b$
+  passo al secondo step, dopo aver riconvertito i simboli in $a$ e $b$. Dopo
+  aver analizzato il secondo insieme restituisce $Y$ o $N$. Tale funzione di
+  transazione non è scontata.\\
+  Una NDTM potrebbe essere:
+  \[(s_0,x,1)\]
+  che va in
+  \begin{itemize}
+    \item $(s_1,x,1)$, da cui parte lo studio del primo insieme
+    \item $(s_2,x,2)$, da cui parte lo studio del secondo insieme
+  \end{itemize}
+  Data una stringa che non fa parte di $L$ tutti i rami terminano con
+  $N$. Altrimenti almeno un ramo porta a $Y$ a seconda dei tipi di stringa
+  accettati, se appartengono al primo o al secondo insieme. \\
+  La scelta del ramo non è definita formalmente, è solo una \textit{scelta}. La
+  macchina sa il ramo da scegliere dopo aver analizzato la stringa iniziale.
+\end{esempio}
+\begin{teorema}
+  Una NDTM non è ``più potente'' di una DTM in termini di capacità di
+  riconoscimento di un linguaggio. Se ho una NDTM che accetta un linguaggio
+  sicuramente ho una DTM che lo fa.
+\end{teorema}
+\begin{proof}
+  La NDTM non viene simulata da una DTM procedendo per rami, concludendoli, ma
+  si procede per singoli passi su ogni ramo (onde evitare di incappare
+  prematuramente in loop). Si scende quindi per livelli simulando poi tutti i
+  rami (dovendo però ``tornare indietro'' ogni volta per passare al ramo
+  successivo). Quindi muovendomi tra i rami posso simulare tramite una DTM
+  quanto fa una NDTM.
+\end{proof}
+Le NDTM sono ``più potenti'' in termini di tempo di computazione.
+\begin{definizione}
+  La NDTM $N$ decide il linguaggio $L$ in tempo $T(N)$ se:
+  \begin{itemize}
+    \item $N$ decide $L$
+    \item $\forall\,x\in \Sigma^*$ se;
+    \[(s_0,x,1)\to(s_G, z, \rho_G)\]
+    in $M^k$ passi, avendo $k\leq F(N)$
+  \end{itemize}
+  Trovo quindi uno $Y$ in ogni caso in meno di $F(n)$ passi.\\
+  Ho quindi un ramo che in almeno $k$ passi porta in $Y$, per ogni stringa
+  accettata, se $L$ è accettato. 
+  \textbf{Rivedere definizione}
+\end{definizione}
+Il problema diventa quindi trovare il ramo giusto. Nei problemi dimostrabilmente
+esponenziali richiedono che il ramo $Y$ sia lunghissimo mentre ci sono altri
+problemi per i quali tale ramo richiederebbe tempo polinomiale per arrivare a
+$Y$ ma non si sa quale sia tale ramo da seguire, la soluzione diventa quindi
+provarli tutti, arrivando a tempi esponenziali.\\
+Ponendo il limite $F(n)$ posso studiare che ogni singolo ramo non superi $F(n)$
+quindi la NTDM impiega il tempo richiesto da un solo ramo per decidere e
+accettare, perché di passo in passo capisce su quale ramo non proseguire
+(???).\\
+un altro modo di vedere la NDTM è pensare che parallelamente si sposti in tutti
+i livelli fino a cercare uno $Y$ e se non lo trova risponda $N$. Il tempo è
+comunque in termini di livello dell'albero. La NDTM è una macchina
+\textbf{massicciamente parallela}.\\
+Quindi la NTDM, per quanto non più potente in termini di riconoscimento, lo è in
+base al tempo, basandosi sui livelli dell'albero. 
+Si parla di \textbf{guess\&check}, per il metodo che individua il ramo da
+seguire e lo controlla, controllando lo stato $Y$.\\
+Ci interessa quindi il tempo di verifica. Ci sono problemi difficili da
+risolvere e facili da verificare e altri che sono pure difficili da
+verificare.\\
+La classe dei problemi facilmente verificabili di cui non si ha una facile
+risoluzione altro non è che la \textbf{classe NP}, che sono problemi polinomiali
+in modo non deterministico.
+\begin{definizione}
+  la \textbf{classe NP} corrisponde all'insieme di linguaggi $L$ che sono decisi
+  da una NDTM in tempo polinomiale:
+  \[F(n)=O(p(n))\]
+\end{definizione}
+Si ha un rapporto tra $P$ e $NP$.
+\begin{teorema}
+  Data una NDTM $N$ che decide $L$ in tempo $F(n)$ esiste una DTM $M$ che decide
+  $L$ in tempo $O(d^{F(n)})$, dove $d$ è una caratteristica particolare della
+  NDTM, ovvero il \textbf{grado massimo di divisione dell'albero di
+    computazione} di $N$. 
+\end{teorema}
+\begin{proof}
+  $M$ ha vari nastri:
+  \begin{itemize}
+    \item il primo contiene $N$
+    \item il secondo simula $N$
+    \item il terzo contiene un numero in base $d$, inizialmente $1$
+  \end{itemize}
+  La macchina fa un passo di simulazione di $N$, andando nel primo ramo ($d=1$)
+  a sinistra. A questo punto:
+  \begin{itemize}
+    \item trova $Y$ e si ferma
+    \item trova $N$ quindi va avanti
+    \item trova un altro stato, incrementa $d$ e passa al ramo indicato da
+    $d$
+  \end{itemize}
+  e così via. Nello step successivo farà due passi e non uno, per ogni
+  ramo. Valutando quindi eventuali nuove ramificazioni per ogni ramo. \\
+  Se $N$ arriva a $Y$ allora troverò certamente uno $Y$ per $M$. Se arriva a $N$
+  dopo un po' tutti i rami terminano in $N$ ma devo verificare la cosa e a quel
+  punto $M$ termina con $N$.\\
+  La simulazione richiede $d$ passi per il primo livello, $d^2$ per il secondo,
+  $d^i$ per l'i-simo livello. Mi fermo a $d^{F(N)}$, al livello $F(n)$ e quindi
+  ho tempo: 
+  \[O(d^{F(N)})\]
+  \textbf{capire meglio}
+\end{proof}
+La NDTM è quindi più potente per i tempi, per quanto ne sappiamo infatti che se
+la NTDM lavora in $F(n)$, quindi in tempo polinomiale, la DTM che la simula
+lavora in $d^{F(n)}$, quindi in tempo esponenziale. Quindi la NDTM è ``più
+veloce'', anche se non lo sappiamo con certezza.\\
+Rispetto al rapporto tra $P$ e $NP$ possiamo dire che $P\subseteq NP$, in quanto
+una NDTM è un caso generale della DTM (dove la relazione non ha mai scelte). Si
+ha inoltre che: 
+\begin{itemize}
+  \item ci sono problemi che non sappiamo dire se sono in $P$ o meno ma sappiamo
+  che sono in $NP$ (vedasi test di primalità). Ma questo non aiuta rispetto agli
+  altri problemi
+  \item ci sono problemi che sappiamo essere in $NP$ ma nessuno ha mai trovato
+  la dimostrazione che sia in $P$
+\end{itemize}
+Capire qualcosa in merito ai problemi del secondo tipo potrebbe portare a $P=NP$
+o $P\not\subseteq NP$. Questo è uno dei 10 problemi aperti della matematica e il
+più importante per l'informatica teorica.
+
+
+
+
 \chapter{Pattern matching}
 Il \textbf{pattern matching} si occupa di ricercare un pattern $P$ in un testo
 $T$. Si hanno:

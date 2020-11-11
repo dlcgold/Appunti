@@ -2249,7 +2249,6 @@ rispetto agli operatori del CCS.\\
     tes\cdot M_1)\]
   Mi chiedo se:
   \[M_1\stackrel{T}{\sim} M_2\]
-  \newpage
   Parto da $M_1$:
   \begin{center}
     \begin{tikzpicture}[shorten >=1pt,node distance=5cm,on grid,auto]
@@ -2295,7 +2294,8 @@ rispetto agli operatori del CCS.\\
   macchina si aspetta un'altra moneta, mentre magari si voleva il caffè). Quindi
   anche se le tracce sono le stesse ma non posso sostituire senza problemi le
   due macchinette, in qaunto se sostituisco $M_1$ con $M_2$ rischio di andare in
-  deadlock. 
+  deadlock.
+  \label{coffe}
 \end{esempio}
 Lo studio delle tracce quindi non è più sufficiente nel caso di sistemi
 concorrenti. Si necessità quindi di una nozione più restrittiva.
@@ -2343,7 +2343,6 @@ posso sostituire l'una con l'altra:
   Ma se ad esempio prendo:
   \[Q_1=(P_1|\overline{a}\cdot \overline{b}\cdot Nil )_{\{a,b,c\}}\]
   \[Q_2=(P_2|\overline{a}\cdot \overline{b}\cdot Nil )_{\{a,b,c\}}\]
-  \newpage
   Ho:
    \begin{center}
     \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
@@ -2705,12 +2704,12 @@ comportarsi come $p'$, avendo quindi la \textbf{relazione di transizione debole}
 Vediamo una definizione comoda di bisimulazione debole:
 \begin{definizione}
   Dato $R\subseteq Proc_{CCS}\times Proc_{CCS}$ è una bisimulazione debole sse:
-  \[\forall p,\q\in Porc_{CCS}\mbox{ t.c. }\,pRq \mbox{ vale che } \forall a\in
+  \[\forall p,q\in Porc_{CCS}\mbox{ t.c. }\,pRq \mbox{ vale che } \forall a\in
     Act\] 
-  \[\mbox{se }p\stackrel{a}{\rightarrow}p_1\mbox{ allora }\exist
+  \[\mbox{se }p\stackrel{a}{\rightarrow}p_1\mbox{ allora }\exists
     q\stackrel{a}{\Rightarrow}q_1 \mbox{ tale che } p_1Rq_1\]
   e deve valere il viceversa:
-  \[\mbox{se }q\stackrel{a}{\rightarrow}q_1\mbox{ allora }\exist
+  \[\mbox{se }q\stackrel{a}{\rightarrow}q_1\mbox{ allora }\exists
     p\stackrel{a}{\Rightarrow}p_1 \mbox{ tale che } p_1Rq_1\]
   Quindi due processi $p$ $q$ sono in bisimulazione debole:
   \[p\approx^{bis} q\] sse esiste una relazione di bisimulazione $R$ tale che:
@@ -2779,7 +2778,7 @@ Si ha che:
   bisimili:\\
   
   Siano:
-  \[r_1=a\cdot(b\cdto Nil+\tau\cdot c\cdot Nil)\]
+  \[r_1=a\cdot(b\cdot Nil+\tau\cdot c\cdot Nil)\]
   
   ovvero:
   \begin{center}
@@ -2932,7 +2931,139 @@ Si ha che:
 \textit{Se non si vuole dimostrare la bisimilitudine ma la si vuole cercare da
   zero bisogna studiare tutte le possibili partite o, meglio, un insieme di
   partite che mi possa dimostrare quale dei due giocatori ha la
-  \textbf{strategia vincente}.}
+  \textbf{strategia vincente}.}\\
+Facciamo un piccolo ``recap'' della situazione.
+\begin{definizione}
+  Definiamo una \textbf{proprietà di equivalenza} tra processi CCS:
+  \[\backsimeq \,\,\subseteq  Proc_{CCS}\times  Proc_{CCS}\]
+  Si ha che, dati $p,q\in Proc_{CCS}$:
+  \[\mbox{se }LTS(p)=LTS(q)\mbox{ allora } p\backsimeq q\]
+  (ovvero se i due LTS sono isomorfi)\\
+  Vale per altri modelli di concorrenza oltre che a il CCS.\\
+  Si stanno considerando solo le azioni e non gli stati (si hanno altri approcci
+  che considerano gli stati).
+\end{definizione}
+\begin{teorema}
+  Si ha che, dati $p,q\in Proc_{CCS}$:
+  \[p\backsimeq q\implies Tracce(p)=tracce(q)\]
+  Qui le stesse sequenze di azioni possono essere eseguite su entrambi i
+  processi.  
+\end{teorema}
+\begin{teorema}
+  Si ha che, dati $\forall p,q\in Proc_{CCS}$, qualora si abbia che $p\backsimeq
+  q$, i due processi devono avere la stessa possibilità di generare deadlock
+  nell'interazione con l'ambiente (ovvero l'insieme dei processi con cui $p$ e
+  $q$ possono interagire). Quindi sostituendo $p$ con $q$, qualora il
+  primo non avesse deadlock, posso dire che anche il secondo non avrà deadlock
+  se questi sono equivalenti.
+\end{teorema}
+\begin{teorema}
+  Si ha che $\backsimeq$ deve essere una \textbf{congruenza} rispetto agli
+  operatori del CCS. Deve essere possibile sostituire un sottoprocesso con un
+  suo equivalente senza modificare il comportamento complessivo del
+  sistema. Sostituendo quindi un sottoprocesso con un suo equivalente il
+  processo di partenza deve essere equivalente al nuovo processo ottenuto dopo
+  la sostituzione, in qualsiasi contesto ci si trovi.
+\end{teorema}
+\begin{definizione}
+  Definiamo l'\textbf{equivalenza rispetto alle tracce forte} $\sim^T$. Dati
+  $\forall p,q\in Proc_{CCS}$:
+  \[LTS(p)=LTS(q)\implies p\sim^T q\]
+  Anche qui si estrae dagli stati, osservando solo le tracce, e si ha che:
+  \[p\sim^T q\iff Tracce(p)=Tracce(q)\]
+\end{definizione}
+\begin{teorema}
+  Si dimostra che l'equivalenza rispetto alle tracce forte è una
+  \textbf{congruenza} rispetto agli operatori CCS.
+\end{teorema}
+\begin{teorema}
+  La nozione di equivalenza rispetto alle tracce forte non garantisce di
+  preservare il deadlock o l'assenza di deadlock nell'interazione con l'ambiente
+  (come visto nell'esempio \ref{coffe}, dove l'equivalenza rispetto alle tracce
+  forte non è sufficiente a garantire nulla rispetto al deadlock).
+\end{teorema}
+Partendo da quanto sopra si introduce quindi concetto di \textbf{bisimulazione
+  forte} (equivalenza forte rispetto alla bisimulazione), introdotto da
+Milner. Si ricorda che, $\forall p,q\in Proc_{CCS}$, 
+astraendo dagli stati:
+\begin{itemize}
+  \item $LTS(p)=LTS(q)\implies p\sim^{Bis}q$
+  
+  \item $p\sim^{Bis}q\implies Tracce(p)=Tracce(q)$. In altri termini si ha che
+  $p\sim^{Bis}q\implies p\sim^T q$ e quindi:
+  \[\sim^{Bis}\subseteq \sim^T\]
+  non posso avere processi bisimili che non abbiano le stesse tracce
+  \item la bisimulazione forte preserva il deadlock o l'assenza di deadlock
+  nell'interazione con l'ambiente
+  \item la bisimulazione forte è una congruenza rispetto agli operatori del CCS
+\end{itemize}
+Si ha però che la bisimulazione forte è troppo restrittiva infatti, come anche
+$\sim^T$, non astrae $\tau$, avendo, per esempio, che $a\cdot b\cdot
+Nil\not\sim^{Bis} a\cdot \tau\cdot b\cdot Nil$. Non posso quindi confrontare
+alcuna specifica con sincronizzazioni interne alle componenti di un processo,
+rispetto alle azioni non osservabili.\\ 
+Si è introdotta quindi la regola di \textbf{transizione debole},
+$\stackrel{a}{\Rightarrow}$.\\ 
+Si ha \textbf{l'equivalenza debole rispetto alle tracce}, $\approx^T$ è meno
+restrittiva rispetto a quella forte infatti:
+\[p\sim^T q\implies p\approx^T q\]
+e quindi:
+\[\sim^T \subseteq \approx^T\]
+Quindi se due processi sono equivalenti fortemente rispetto alle tracce lo
+saranno anche debolmente. L'equivalenza debole rispetto alle tracce ha quindi le
+seguenti proprietà, astraendo dagli stati:
+\begin{itemize}
+  \item $LTS(p)=LTS(q)\implies p\approx^{T}q$
+  \item l'equivalenza debole rispetto alle tracce è una congruenza rispetto
+  agli operatori del CCS 
+  \item l'equivalenza debole rispetto alle tracce non garantisce di
+  preservare il deadlock o l'assenza di deadlock nell'interazione con l'ambiente
+\end{itemize}
+Passando alla \textbf{bisimulazione debole} (equivalenza debole rispetto alla
+bisimulazione), $\approx^{Bis}$ si ha che è meno 
+restrittiva rispetto a quella forte infatti:
+\[p\sim^{Bis} q\implies p\approx^{Bis} q\]
+e quindi:
+\[\sim^{Bis} \subseteq \approx^{Bis}\]
+Si ha quindi che la bisimulazione forte è più restrittiva ell’equivalenza
+rispetto alle tracce forte ed egualmente la bisimulazione debole è più
+restrittiva ell’equivalenza rispetto alle tracce debole:
+\[p\sim^{Bis}q\implies p\sim^T q\mbox{ e }p\approx^{Bis}q\implies p\approx^Tq\]
+quindi si ha che:
+\[\sim^{Bis}\subseteq\sim^T \mbox{ e }\approx^{Bis}\subseteq\approx^T\]
+Non si hanno rapporti ``misti'' tra forte e debole.\\
+
+\begin{definizione}
+  Dato $p\in Proc_{CCS}$ si ha che esso è un \textbf{processo deterministico}
+  sse vale che:
+  \[\forall x\in Act,\mbox{se } p\stackrel{x}{\rightarrow}p'\mbox{ e
+    }p\stackrel{x}{\rightarrow}p''\mbox{ allora }p'=p''\]
+  Quindi se posso passare a $p'$ o $p''$ con la stessa azione allora
+  necessariamente questi due processi coincidono.
+\end{definizione}
+\begin{esempio}
+  vediamo un esempio di $p$ \textbf{non deterministico}:
+  \[p=x\cdot p'+x\cdot p''\]
+\end{esempio}
+\begin{teorema}
+  Siano $p,q\in Proc_{CCS}$ \textbf{deterministici} e sia $p\sim^Tq$ (quindi
+  anche $p\approx^Tq$) allora si ha che:
+  \[p\sim^{Bis}q\]
+  e quindi anche:
+  \[p\approx^{Bis}q\]
+\end{teorema}
+Avere processi deterministici con le stesse tracce non assicura che i due
+processi abbiano lo stesso LTS. Come esempio basta vedere un processo $p=a\cdot
+b\cdot a\cdot b\cdot p$ e uno $q=a\cdot b\cdot q$, dove il primo ha due nodi in
+più anche se sono deterministici con quindi equivalenza rispetto alle tracce e
+forte bisimilitudine, essendo quindi equivalenti, per entrambe le equivalenza,
+debolmente.\\ 
+Se ho invece due processi non entrambi deterministici potrei avere equivalenza
+rispetto alle tracce (debole e forte) ma non bisimilitudine. Come esempio si
+prendano $p=a\cdot \tau\cdot b\cdot Nil$ e $q=a\cdot(\tau\cdot b\cdot Nil+\tau
+\cdot Nil)$, con quest'ultimo che non è un processo deterministico.\\
+Basta quindi che un processo sia non deterministico per impedire il ``collasso''
+dell'equivalenza rispetto alle tracce su quella rispetto alla bisimulazione.
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -2945,4 +3076,4 @@ Si ha che:
 % LocalWords:  sequential CSP transputer hand shacking process processes System
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
-% LocalWords:  rinominazione true LocalWords bisimili
+% LocalWords:  rinominazione true LocalWords bisimili bisimilitudine

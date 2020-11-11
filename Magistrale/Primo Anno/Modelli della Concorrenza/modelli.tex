@@ -3189,7 +3189,182 @@ Si nota che nel teorema precedente abbiamo, in ordine:
   \item rietichettatura
   \item restrizione
 \end{itemize}
-%11.48
+Non si parla quindi dell'operatore di scelta ``+'' che infatti necessita di
+ulteriori approfondimenti. Vediamo un esempio:
+\begin{esempio}
+  Possiamo, per esempio, dire che:
+  \[\tau\cdot a\cdot Nil\approx^{Bis}a\cdot Nil\]
+  ma:
+  \[\tau\cdot a\cdot Nil+b\cdot Nil\not\approx^{Bis}a\cdot Nil+b\cdot Nil\]
+  graficamente si ha, per il primo:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+      \node[state] (q_0) {$p$};  
+      \node[state] (q_1) [right =of q_0] {$a\cdot Nil$};
+      \node[state] (q_2) [right =of q_1] {$Nil$};
+      \path[->]
+      (q_0) edge  node {$\tau$} (q_1)
+      (q_1) edge node {$a$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  e:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+      \node[state] (q_0) {$q$};  
+      \node[state] (q_2) [right =of q_0] {$Nil$};
+      \path[->]
+      (q_0) edge  node {$a$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  ma componendo $r=b\cdot Nil$ ottengo:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+      \node[state] (q_0) {$p+r$};  
+      \node[state] (q_1) [right =of q_0] {$a\cdot Nil$};
+      \node[state] (q_2) [right =of q_1] {$Nil$};
+      \path[->]
+      (q_0) edge  node {$\tau$} (q_1)
+      (q_1) edge node {$a$} (q_2)
+      (q_0) edge [bend left=45]  node {$b$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  e:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+      \node[state] (q_0) {$q+r$};  
+      \node[state] (q_2) [right =of q_0] {$Nil$};
+      \path[->]
+      (q_0) edge [bend left]  node {$a$} (q_2)
+      (q_0) edge [bend right]  node [below] {$b$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  vedendo che non sono bisimili perché $a\cdot Nil$ non può avere corrispondenti
+  nel secondo LTS.
+\end{esempio}
+Si ha quindi che la \textbf{bisimulazione debole non è una congruenza per il
+  CCS}, a differenza di quella forte (secondo la quale, nell'esempio precedente,
+avremmo avuto direttamente $p\not\sim^{Bis}q$), in quanto non è una congruenza
+rispetto alla scelta.\\
+Si ha inoltre che la bisimulazione debole non è una congruenza rispetto alla
+\textbf{ricorsione} (anche se non dimostriamo la cosa).\\
+Possiamo quindi dire che la \textbf{bisimulazione debole è una congruenza
+  rispetto agli operatori del CCS diversi da scelta e ricorsione.}\\
+Vogliamo quindi identificare una relazione di congruenza, che è sempre una
+relazione binaria tra processi CCS, che sia la più grande relazione contenuta
+nella bisimulazione che sia però una congruenza rispetto a tutti gli
+operatori:
+\[\approx^C\subseteq\approx^{Bis}\subseteq Proc_{CCS}\times Proc_{CCS}\]
+Per il CCS puro senza ricorsione Milner ha introdotto un insieme
+finito di assiomi che possono essere visti come regole di riscrittura che
+preservano la \textbf{congruenza all'osservazione}, che è la più grande
+congruenza contenuta nella bisimulazione. Questo insieme di assiomi è quindi un
+insieme finito per il quale, presi due processi $p,q\in Proc_{CCS}$, se riesco,
+tramite questi assiomi, a trasformare l'uno nell'altro allora si ha che questi
+processi non sono solo bisimili ma anche congruenti (potendo quindi sostituire
+l'uno con l'altro in qualsiasi contesto che non includa la ricorsione). Questo
+insieme di assiomi, detto $Ax$, è:
+\begin{itemize}
+  \item \textbf{corretto}, ovvero che se usando l'insieme di assiomi deduco che
+  $p=q$ allora $p$ è congruente a $q$ rispetto a questa nuova nozione si
+  congruenza:
+  \[Ax\vdash p=q\implies p\approx^C q\]
+  \item \textbf{completo}, ovvero presi due processi che sono congruenti secondo
+  questa nuova nozione di congruenza allora sicuramente questo insieme di
+  assiomi è completo in quanto mi permette, tale insieme, di trascrivere $p$ in
+  $q$, ovvero:
+  \[p\approx^C q\implies AX\vdash p=q\]
+\end{itemize}
+Vediamo quindi questi assiomi:
+\begin{itemize}
+  \item $p+(q+r)\approx^C (p+q)+r$ e $p|(q|r)\approx^C (p|q)|r$, ovvero
+  l'assioma riguardo l'associatività di scelta e composizione parallela
+  \item $p+q\approx^C q+p$ e $p|q\approx^Cq|p$, ovvero
+  l'assioma riguardo la commutatività di scelta e composizione parallela
+  \item $p+p\approx^C p$ ma $p|p\not\approx^C p$, ovvero si ha l'assioma per
+  l'assorbimento riguardo la scelta ma non si ha riguardo la composizione
+  parallela (si pensi per esempio a $p=\cdot Nil$ avrei $a$ due volte mentre $p$
+  può fare $a$ una volta sola)  
+  \item $p+Nil\approx^C p$ e $p|Nil \approx^Cp$, ovvero ovvero si ha l'assioma
+  per l'assorbimento del $Nil$ riguardo la scelta e la composizione parallela
+  \item $p+\tau\cdot p\approx^C\tau\cdot p$, che è l'assioma che risolve il
+  problema di avere una scelta con un una $\tau$ iniziale nella sequenza, che
+  non può essere eliminata
+  \item $\mu\cdot \tau\cdot p\approx \mu\cdot p,\,\,\,\forall\,\mu\in Act$, che
+  tratta le $\tau$ interne alla sequenza, che può essere eliminata
+  \item $\mu\cdot(p+\tau\cdot 1)\approx^C\mu\cdot(p+\tau\cdot q)+\mu\cdot q$,
+  ovvero per questo assioma si ha che il primo che è una ``semplificazione''
+  del secondo (intuizione da esempio)
+\end{itemize}
+\begin{esempio}
+  Vediamo l'ultimo assioma con un esempio.\\
+  Siano:
+  \[r_1=a\cdot(b\cdot Nil+\tau\cdot c\cdot Nil)\]
+  \[k_1=a\cdot(b\cdot Nil+\tau\cdot c\cdot Nil)+a\cdot c\cdot Nil\]
+  ovvero:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[state] (q_0) {$r_1$};  
+      \node[state] (q_1) [right =of q_0] {$r_2$};
+      \node[state] (q_2) [right =of q_1] {$Nil$};
+      \node[state] (q_3) [above =of q_1] {$r_3$};
+      \path[->]
+      (q_0) edge  node {$a$} (q_1)
+      (q_1) edge node {$b$} (q_2)
+      (q_1) edge node {$\tau$} (q_3)
+      (q_3) edge node {$c$} (q_2)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  \newpage
+  e:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto] 
+      \node[state] (q_0) {$k_1$};  
+      \node[state] (q_1) [above right =of q_0] {$k_4$};
+      \node[state] (q_2) [below right =of q_0] {$k_2$};
+      \node[state] (q_3) [right=of q_2] {$k_3$};
+      \node[state] (q_4) [above right=of q_2] {$Nil$};
+      \path[->]
+      (q_0) edge  node {$a$} (q_1)
+      (q_0) edge  node {$a$} (q_2)
+      (q_2) edge node {$b$} (q_3)
+      (q_2) edge node {$\tau$} (q_4)
+      (q_1) edge node {$c$} (q_4)
+      (q_3) edge node {$c$} (q_4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  e si ha vede che:
+  \[r_1\approx^C k_1\]
+  con il primo che è una ``semplificazione'' del secondo.
+\end{esempio}
+Si hanno anche altri assiomi legati al fatto che $p$ e $q$ siano delle somme,
+ovvero:
+\[p=\sum_i a_i\cdot p_i,\,\,\,a\in Act\]
+\[q=\sum_j b_j\cdot q_j,\,\,\,b\in Act\]
+avendo quindi i seguenti assiomi:
+\begin{itemize}
+  \item $p|q\approx^C\sum_i a_i\cdot (p_i|q)+\sum_j b_j\cdot
+  (p|q_j)+\sum_{a_i=\overline{b_j}}\tau\cdot(p_i|q_j)$ che è l'assioma detto
+  \textbf{teorema di espansione di Milner} (nell'ultima parte ho che se $a_i$ e
+  $b_j$ sono l'uno il complemento dell'altro allora posso sincronizzare su di
+  essi i processi, che diventano una $\tau$ e proseguendo con $p_i|q_j$)
+  \item $p[f]\approx^C \sum_if(a_i)\cdot(p_i[f]),\,\,\,\forall\,f\mbox{ funzione
+    di etichettatura}$, ovvero etichettare tutto il processo $p$ corrisponde al
+  fatto di ottenere congruo il processo che ottengo etichettando ogni i-sima
+  azione delle componenti che sono in alternativa con il processo relativo
+  rietichettato con $f$
+  \item $p_{\backslash L}\approx^C \sum_{a_i,\overline{a_i}\not\in
+    L}a_i\cdot(p_{i\backslash L}),\,\,\,\forall\,L\subseteq A$ quindi considero
+  solo le azioni per le quali non si ha al restrizione
+\end{itemize}
+Per cui la bisimulazione risulta tale per cui se usiamo $\approx^C$ si può
+modellare un sistema a passi successivi sapendo che posso sostituire un
+sottoprocesso con un altro ottenendo ancora un sistema bisimile al precedente.
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -3203,3 +3378,4 @@ Si nota che nel teorema precedente abbiamo, in ordine:
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
 % LocalWords:  rinominazione true LocalWords bisimili bisimilitudine bisimile
+% LocalWords:  rietichettato

@@ -3063,7 +3063,133 @@ rispetto alle tracce (debole e forte) ma non bisimilitudine. Come esempio si
 prendano $p=a\cdot \tau\cdot b\cdot Nil$ e $q=a\cdot(\tau\cdot b\cdot Nil+\tau
 \cdot Nil)$, con quest'ultimo che non è un processo deterministico.\\
 Basta quindi che un processo sia non deterministico per impedire il ``collasso''
-dell'equivalenza rispetto alle tracce su quella rispetto alla bisimulazione.
+dell'equivalenza rispetto alle tracce su quella rispetto alla bisimulazione.\\
+Approfondiamo ora le proprietà della bisimulazione debole, tra cui:
+\begin{itemize}
+  \item la bisimulazione debole, per come è definita (unione di tutte le
+  relazioni di bisimulazione), è la più grande relazione di bisimulazione debole
+  ed è di equivalenza, essendo:
+  \begin{itemize}
+    \item riflessiva
+    \item simmetrica
+    \item transitiva
+  \end{itemize}
+  \item la bisimulazione debole, come quella forte, preserva la possibilità di
+  generare o meno deadlock nell'interazione con l'ambiente, quindi sostituendo
+  un processo che non genera deadlock con un suo bisimile ho che anche il nuovo
+  sistema non andrà in deadlock (se invece generava un deadlock ora andrà
+  in deadlock). Questa cosa, si ricorda, non è vera per le l'equivalenza sulle
+  tracce
+  
+  \item la bisimulazione debole, a differenza di quella forte, astrae da azioni
+  non osservabili, le $\tau$, e da cicli inosservabili, i $\tau$ loop. Se ho un
+  ciclo infinito di $\tau$ si parla di \textbf{divergenza}.
+  \begin{esempio}
+    Presi un processo $Nil$ e uno $p=\tau\cdot p$ (quindi un processo infinito
+    di sole $\tau$, una divergenza) ho che:
+    \[Nil\approx^{Bis}p\]
+    avendo:
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+        \node[state] (q_0) {$p$};  
+        \node[state] (q_3) [left =of q_0] {$Nil$};
+        \path[->]
+        (q_0) edge [loop right] node {$\tau$} (q_0)
+        ;
+      \end{tikzpicture}
+    \end{center}
+  \end{esempio}
+  \begin{esempio}
+    Siano $q=a\cdot b\cdot Nil$ e $s\cdot a\cdot v$ con $v=\tau\cdot v+b\cdot
+    Nil$. Ho che:
+    \[q\approx^{Bis} s\]
+    ma:
+    \[q\not\sim^{Bis} s\]
+
+    avendo:
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+        \node[state] (q_0) {$q$};  
+        \node[state] (q_1) [right =of q_0] {$b\cdot Nil$};
+        \node[state] (q_2) [right =of q_1] {$Nil$};
+        \path[->]
+        (q_0) edge  node {$a$} (q_1)
+        (q_1) edge node {$b$} (q_2)
+        ;
+      \end{tikzpicture}
+    \end{center}
+    e
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+        \node[state] (q_0) {$s$};  
+        \node[state] (q_1) [right =of q_0] {$v$};
+        \node[state] (q_2) [right =of q_1] {$Nil$};
+        \path[->]
+        (q_0) edge  node {$a$} (q_1)
+        (q_1) edge node {$b$} (q_2)
+        (q_1) edge [loop above] node {$\tau$} (q_1)
+        ;
+      \end{tikzpicture}
+    \end{center}
+  \end{esempio}
+  \begin{esempio}
+    Presi $q=a\cdot b\cdot Nil$, $r=a\cdot(\tau\cdot p+b\cdot Nil)$ e $s\cdot
+    a\cdot v$ con $v=\tau\cdot v+b\cdot 
+    Nil$. Ho che:
+    \[q\not\approx^{Bis}r\]
+    \[s\not\approx^{Bis}r\]
+    \newpage
+    avendo, oltre ai due LTS dell'esercizio precedente:
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+        \node[state] (q_0) {$r$};  
+        \node[state] (q_1) [right =of q_0] {$\tau\cdot p+b\cdot Nil$};
+        \node[state] (q_2) [right =of q_1] {$Nil$};
+        \node[state] (q_3) [above =of q_1] {$p$};
+        \path[->]
+        (q_0) edge  node {$a$} (q_1)
+        (q_1) edge node {$b$} (q_2)
+        (q_1) edge node {$\tau$} (q_3)
+        (q_3) edge [loop above] node {$\tau$} (q_3)
+        ;
+      \end{tikzpicture}
+    \end{center}
+  \end{esempio}
+\end{itemize}
+Ci si chiede quindi se la bisimulazione debole sia o meno una congruenza
+rispetto agli operatori del CCS.\\
+Si ricorda che:
+\begin{definizione}
+  Data una relazione di equivalenza $R\subseteq Proc_{CCS}\times Proc_{CCS}$
+  essa è una congruenza se $\forall C[\cdot]$, contesto CCS con una certa
+  variabile non specificata ``$\cdot$'', presi $p,q\in Proc_{CCS}$, ho che:
+  \[pRq\implies C[p]\,\,R\,\,C[q]\]
+  Quindi comunque prendo una specifica CCS posso sostituire a piacere i due
+  processi. 
+\end{definizione}
+\begin{teorema}
+  Si ha che $\forall\,p,q\in Proc_{CCS}$ se $p\approx^{Bis}q$, allora:
+  \begin{itemize}
+    \item $a\cdot p\approx^{Bis} a\cdot q,\forall\, a\in
+    Act=A\cup\overline{A}\cup\{\tau\}$ 
+    \item $p|r\approx^{Bis}q|r\,\,\,\land \,\,\,
+    r|p\approx^{Bis}r|q,\forall\,r\in Proc_{CCS}$  
+    \item $p[f]\approx^{Bis}q[f],\forall\,f\mbox{ funzione di rietichettatura}$,
+    ricordando che la funzione preserva nomi, co-nomi (quindi l'immagine di un
+    co-nome è uguale al co-nome dell'immagine) e $\tau$
+    \item $p_{\backslash L}\approx^{Bis}q_{\backslash L},\forall\,L\subseteq A$,
+    ricordando che la restrizione rispetto a $L$ comporta che il processo può
+    eseguire le azioni in $L$ solo se sono sincronizzazioni interne
+  \end{itemize}
+\end{teorema}
+Si nota che nel teorema precedente abbiamo, in ordine:
+\begin{itemize}
+  \item prefisso
+  \item composizione parallela
+  \item rietichettatura
+  \item restrizione
+\end{itemize}
+%11.48
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -3076,4 +3202,4 @@ dell'equivalenza rispetto alle tracce su quella rispetto alla bisimulazione.
 % LocalWords:  sequential CSP transputer hand shacking process processes System
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
-% LocalWords:  rinominazione true LocalWords bisimili bisimilitudine
+% LocalWords:  rinominazione true LocalWords bisimili bisimilitudine bisimile

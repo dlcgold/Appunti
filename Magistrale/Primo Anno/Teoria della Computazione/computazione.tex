@@ -2332,8 +2332,160 @@ ha inoltre che:
   la dimostrazione che sia in $P$
 \end{itemize}
 Capire qualcosa in merito ai problemi del secondo tipo potrebbe portare a $P=NP$
-o $P\not\subseteq NP$. Questo è uno dei 10 problemi aperti della matematica e il
-più importante per l'informatica teorica.
+o $P\not\subseteq NP$. Questo è uno dei 10 problemi aperti della matematica ed è
+il più importante per l'informatica teorica.\\
+A questo conosciamo quindi $P$, $NP$, $EXP$ (poste in ordine di ``è contenuto
+in''):
+\[P\subseteq NP \subseteq EXP\]
+Anche se $p\subseteq NP$ è al centro di studi.\\
+Ordiniamo i problemi in base alla difficoltà in queste due classi, tramite le
+\textbf{riduzioni polinomiali} tra problemi, che ipotizziamo solo di decisione
+per praticità, $A\to B$. Cerco una procedura che per ogni istanza del problema
+$A$ la trasforma in un'istanza per un problema diverso $B$. Quindi un'istanza di
+$A$, $I_A$, ha due risposte, $Y$ o $N$, ma posso passare tramite una certa
+$f:I_A\to I_B$ avendo poi $I_B$ tale che $B$ avrà risposte, uguali a quelle di
+$A$, $Y$ o $N$. Dato l'input, una stringa, $x$ di $A$, ho che lo trasformo in
+input per $B$ potendo dire se la stringa appartiene o meno al linguaggio
+associato ad $A$, mascherando il passaggio a $B$. La cosa ha tempo pari alla
+somma tra il tempo della trasformazione più quello dell'algoritmo $B$.\\
+Vediamo, ad esempio, se possiamo risolvere il problema del ciclo hamiltoniano
+usando TSP, entrambi decisionali. Partendo da un'istanza del grafo per il ciclo
+hamiltoniano creo un'istanza con gli stessi vertici, aggiungo gli archi per
+ottenere un grafo completo (visto che TSP ha un grafo completo mentre ciclo
+hamiltoniano no). Aggiungo anche i pesi (TSP ha un grafo pesato mentre ciclo
+hamiltoniano no), mettendo il peso a 1 per i vecchi archi
+e $K$, con $k\neq 1$, a quelli appena aggiunti. Manca quindi
+solo il bound, che è $B=|V|$ per il ciclo hamiltoniano che ipotizziamo con archi
+solo pesati a $1$ ma quindi in TSP non posso usare quelli aggiunti in quanto
+uscirei per forza dal bound se usassi uno degli archi aggiunti, basta $K=2$. Ho
+un ciclo hamiltoniano sse $B=|V|$ anche con TSP, che avrà un giro con gli stessi
+archi del ciclo hamiltoniano presente nel primo problema, posto che esista,
+avendo che se TSP rende $Y$ sse $B=|V|$ allora avrò un ciclo hamiltoniano nel
+problema iniziale, avendo $Y$ in risposta anche per questo. Ho quindi ridotto il
+ciclo hamiltoniano a TSP, e possiamo dire che quest'ultimo è più difficile di
+ciclo hamiltoniano. Per esempio vedere figura \ref{fig:htsp}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.9]{img/rid.pdf}
+  \caption{Esempio di riduzione da ciclo hamiltoniano a TSP, con archi
+    tratteggiati di peso 2 e archi normali di peso 1. Il colore dei vertici
+    specifica che dalle due parti della trasformazione si ha lo stesso vertice}
+  \label{fig:htsp}
+\end{figure}
+Controlliamo quindi i tempi. Voglio un costo della riduzione polinomiale e si ha
+che l'aggiunta di archi, pesi e bound sono operazioni polinomiali.
+\begin{definizione}
+  Un problema $B$ è più difficile di un problema $A$, che ha in input la stringa
+  $x$, sse:
+  \[A\to B\]
+  infatti ho:
+  \[T(A(x))\leq F(x)+T(B(x))\]
+\end{definizione}
+\begin{definizione}
+  Definiamo formalmente riduzione polinomiale tra un linguaggio $L_1$ e un
+  linguaggio $L_2$ come:
+  \[f:\Sigma_1^*\to \Sigma_2^*\]
+  tale che:
+  \[x\in L_1\iff f(x)\in L_2\]
+  con $f$ calcolabile in tempo polinomiale ($O(|x|)$) dalla DTM. SI ha quindi
+  che:
+  \[L_1<_T L_2\]
+\end{definizione}
+\begin{teorema}
+  Se si ha che $L_1<_T L_2$ e si ha che $L_2\in P$ allora sicuramente $L_1\in
+  P$.\\
+  Se avessi avuto $L_2\in NP$ o $L_2\not\in P$ non avrei informazioni su $L_1$. 
+
+\end{teorema}
+\begin{proof}
+  Infatti e esiste un algoritmo polinomiale per $L_2$ allora, avendo una
+  trasformazione polinomiale  ho che $f(x)+L_2$ è ancora polinomiale.
+\end{proof}
+\begin{teorema}
+  Se si ha che $L_1<_T L_2$ e si ha che $L_1\not\in P$ allora ho che
+  $L_2\not\in P$.
+\end{teorema}
+\begin{proof}
+  Basta vedere ``al contrario'' il teorema precedente.
+\end{proof}
+Le riduzioni godono di proprietà:
+\begin{itemize}
+  \item riflessiva, $A\to A$
+  \item transitiva, $A\to B\,\,\,\land \,\,\,B\to C\implies A\to C$, che essendo
+  due trasformazioni in tempo polinomiale avrò comunque una trasformazione
+  polinomiale 
+\end{itemize}
+Le riduzioni polinomiali \textbf{non sono sempre simmetriche} e quindi non sono
+una relazione di equivalenza.\\
+Abbiamo però una classe di equivalenza interna ai problemi NP, dove i problemi
+contenuti sono i più difficili di NP e si riducono l'uno all'altro. Tali
+problemi sono i problemi \textbf{NP-complete}.
+\begin{definizione}
+  Un linguaggio è \textbf{NP-complete} sse:
+  \begin{itemize}
+    \item $L\in NP$
+    \item $L'<_TL,\forall\,L'\in NP$, tutti i linguaggi in NP si riducono a
+    $L\in NP-complete$ e quindi i problemi in $NP-complete$ sono i più difficili
+    di $NP$
+  \end{itemize}
+  Se ne risolvessi uno in tempo polinomiale risolverei tutti i problemi in NP in
+  tempo polinomiale (ma ormai è assunto che non possa succedere anche se non si
+  può dimostrare).
+\end{definizione}
+\begin{teorema}
+  Ho che $P=NP$ sse esiste un linguaggio $L$ tale che:
+  \[L\in NP-complete\cap P\]
+\end{teorema}
+\begin{proof}
+  Se $P=NP$ allora sappiamo già che sarebbero polinomiali.\\
+  Per l'altro verso ho che:
+  \[\forall L'\in N, \,\,L<_T L\]
+  e quindi esisterebbe un algoritmo polinomiale che risolve L per una DTM e
+  quindi avrei un algoritmo polinomiale per ogni $L'\in NP$ per una DTM.
+\end{proof}
+Quindi se trovassi un algoritmo polinomiale per un NP-complete lo avrei per
+tutti gli NP.
+\begin{teorema}
+  Se esiste un $L\in NP$ ma $L\not\in P$ allora:
+  \[\forall L''\in NP-complete\]
+  ho che $L''\not\in P$.
+\end{teorema}
+Dimostrando quindi che $P\neq NP$.\\
+Andrebbe benissimo avere le prove di una di queste due situazioni, ma non esiste
+ancora.\\
+Per gli NP-complete vale anche la simmetria in quanto ogni problema NP-complete
+è riducibile ad ogni altro problema NP-complete. Riprendendo l'esempio sopra so
+che ciclo hamiltoniano è TSP, anche nelle forme decisionali, e quindi so che TSP
+decisionale è NP-complete. La difficoltà è trovare almeno un problema
+NP-complete, poi saprò che ogni altro a cui posso ridurlo è NP-complete.\\
+Conosciamo moltissimi problemi NP-complete, molti riconosciuti tramite riduzioni
+ma il primo è ottenuto tramite il \textbf{teorema di Cook}:
+\begin{teorema}[teorema di Cook]
+  SAT (che è stato già definito), che richiede un assegnamento di verità sulla
+  formula $\phi$ in base all'assegnamento delle variabili $x_1,\ldots,x_n$, è
+  NP-complete. 
+\end{teorema}
+\begin{proof}
+  La dimostrazione completa è complessa ma vediamo qualche spunto.\\
+  Si ha che SAT può essere risolto in tempo esponenziale, $O(2^n)$, provando
+  tutti i possibili assegnamenti di verità possibili.\\
+  Posso usare inoltre una NDTM che fa tutti i rami in parallelo, con ogni
+  possibilità di assegnamento fatta in un ramo oppure posso dire che ``spara''
+  un assegnamento a caso, che si suppone giusto, su un ramo e verifica che è
+  giusto. In ogni caso con una NDTM avrei tempo polinomiale, $O(n\cdot m)$ per
+  $n$ variabili e $m$ clausole.\\
+  Per vedere che ogni problema NP, per semplicità decisionali, si riduce a SAT
+  vedo che tutti i problemi in NP hanno in comune di avere un NDTM che li
+  risolve in tempo polinomiale, che decide il linguaggio associato. Basta quindi
+  dire che $\forall\Pi'\in NP$ ha associato una NDTM $N_\Pi'$ che lavora in
+  tempo polinomiale e mi basta vedere che ogni NDTM che lavora in tempo
+  polinomiale si può trasformare in una formula CNF, presa in ingresso da SAT,
+  sfruttando poi gli stati finali della computazione di SAT. Se SAT dice che è
+  soddisfacibile allora lo è il problema iniziale e quindi il problema è
+  riducibile a SAT.
+\end{proof}
+SAT è stato il primo problema identificato come NP-complete ed è stato usato per
+riconoscere gli altri problemi NP-complete.
 
 
 
@@ -2350,7 +2502,7 @@ $T$. Si hanno:
   alfabeto $\Sigma$, scritta come:
   \[X=x_1,\ldots,x_n,\,\,\,\forall x_i\in \Sigma\]
   ovviamente non è necessario che la stringa contenga tutti i simboli
-  dell'alfabeto.
+  dell'alfabeto.\\
   Diamo alcune definizioni utili:
   \begin{itemize}
     \item $|X|$ indica la lunghezza della stringa
@@ -2637,4 +2789,4 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
 % LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
 % LocalWords:  Universal l'hdd SUTM incrementantalmente Boolean Quantified QBF
-% LocalWords:  PSPACE spaizo
+% LocalWords:  PSPACE spaizo hamiltoniano SAT

@@ -60,7 +60,7 @@
     fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{decorations.markings}
-\usetikzlibrary{arrows,shapes,backgrounds,petri}
+\usetikzlibrary{arrows,shapes, shapes.geometric,backgrounds,petri}
 \tikzset{
   place/.style={
     circle,
@@ -82,7 +82,9 @@
     minimum height=8mm,
     inner xsep=2pt
   }
-} 
+}
+\tikzset{elliptic state/.style={draw,ellipse}}
+
 \usetikzlibrary{automata,positioning, calc}
 \definecolor{lightgray}{rgb}{.9,.9,.9}
 \definecolor{darkgray}{rgb}{.4,.4,.4}
@@ -3352,7 +3354,9 @@ avendo quindi i seguenti assiomi:
   (p|q_j)+\sum_{a_i=\overline{b_j}}\tau\cdot(p_i|q_j)$ che è l'assioma detto
   \textbf{teorema di espansione di Milner} (nell'ultima parte ho che se $a_i$ e
   $b_j$ sono l'uno il complemento dell'altro allora posso sincronizzare su di
-  essi i processi, che diventano una $\tau$ e proseguendo con $p_i|q_j$)
+  essi i processi, che diventano una $\tau$ e proseguendo con $p_i|q_j$). È la
+  generalizzazione dell'operatore parallelo con la regola d'inferenza vista ad
+  inizio capitolo.
   \item $p[f]\approx^C \sum_if(a_i)\cdot(p_i[f]),\,\,\,\forall\,f\mbox{ funzione
     di etichettatura}$, ovvero etichettare tutto il processo $p$ corrisponde al
   fatto di ottenere congruo il processo che ottengo etichettando ogni i-sima
@@ -3365,6 +3369,128 @@ avendo quindi i seguenti assiomi:
 Per cui la bisimulazione risulta tale per cui se usiamo $\approx^C$ si può
 modellare un sistema a passi successivi sapendo che posso sostituire un
 sottoprocesso con un altro ottenendo ancora un sistema bisimile al precedente.
+\begin{esempio}
+  Vediamo un esempio sull'assioma detto \textbf{teorema di espansione}.\\
+  Si ha, sviluppando a partire dal primo:
+  \[a\cdot c\cdot Nil|b\cdot Nil\approx^C\]
+  \[a\cdot(c\cdot NIl|b\cdot Nil)+b\cdot(a\cdot c \cdot Nil|Nil)\approx^C\]
+
+  \[a\cdot(c\cdot(Nil|b\cdot Nil)+b\cdot(c\cdot Nil|Nil))+b\cdot(a\cdot(c\cdot
+    Nil|Nil))\approx^C\]
+  \[a\cdot (c\cdot b\cdot(NIl|Nil)+b\cdot c\cdot(Nil|NIl))+b\cdot(a\cdot
+    c\cdot(Nil|Nil))\approx^C\]
+  \[a\cdot(c\cdot b\cdot Nil+b\cdot c\cdot Nil)+b\cdot a\cdot c\cdot Nil\]
+  e quindi:
+  \[a\cdot c\cdot Nil|b\cdot Nil\approx^Ca\cdot(c\cdot b\cdot Nil+b\cdot c\cdot
+    Nil)+b\cdot a\cdot c\cdot Nil\]
+  infatti si ha:
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto] 
+      \node[elliptic state] (q_0) {$a\cdot c\cdot Nil |b\cdot Nil$};  
+      \node[elliptic state] (q_1) [below left =of q_0] {$c\cdot Nil|b\cdot Nil$};
+      \node[elliptic state] (q_2) [below right =of q_0] {$a\cdot c\cdot Nil|Nil$};
+      \node[elliptic state] (q_3) [below left=of q_2] {$c\cdot Nil|Nil$};
+      \node[elliptic state] (q_4) [below=of q_1] {$Nil|b\cdot Nil$};
+      \node[elliptic state] (q_5) [below right=of q_4] {$Nil$};
+      \path[->]
+      (q_0) edge [above left] node {$a$} (q_1)
+      (q_0) edge  node {$b$} (q_2)
+      (q_1) edge [below left]node {$b$} (q_3)
+      (q_1) edge node {$c$} (q_4)
+      (q_2) edge node {$a$} (q_3)
+      (q_3) edge node {$c$} (q_5)
+      (q_4) edge node {$b$} (q_5)
+      ;
+    \end{tikzpicture}
+  \end{center}
+\end{esempio}
+\begin{esempio}
+  Vediamo l'esempio della \textbf{mutua esclusione} con la primitiva di un
+  \textbf{semaforo}. \\
+  Si ha la specifica:
+  \[spec=b_1\cdot e_1\cdot spec+b_2\cdot e_2\cdot spec\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+      \node[elliptic state] (q_0) {$spec$};  
+      \node[elliptic state] (q_1) [below left =of q_0] {$e_1\cdot spec$};
+      \node[elliptic state] (q_2) [below right =of q_0] {$e_2\cdot spec$};
+      \path[->]
+      (q_0) edge [bend right = 25] node [above left]{$b_1$} (q_1)
+      (q_0) edge [bend left= 25] node {$b_2$} (q_2)
+      (q_1) edge [bend right = 25] node [below right] {$e_1$} (q_0)
+      (q_2) edge [bend left= 25] node {$e_2$} (q_0)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  e l'implementazione:
+  \[sys=(A_1|S|A_2)_{\backslash\{p,v\}}\]
+
+  con:
+  \[S=p\cdot v\cdot S\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node (q_0) {$S$};  
+      \node (q_1) [below =of q_0] {$v\cdot S$};
+      \path[->]
+      (q_0) edge [bend right = 25] node [above left]{$p$} (q_1)
+
+      (q_1) edge [bend right = 25] node [below right] {$v$} (q_0)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  e con:
+  \[A_1=\overline{p}\cdot b_2\cdot e_1\cdot \overline{v}\cdot A_1\]
+  \[A_2=\overline{p}\cdot b_2\cdot e_2\cdot \overline{v}\cdot A_2\]
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+      \node[elliptic state] (q_0) {$A_1$};  
+      \node[elliptic state] (q_1) [below =of q_0] {$b_i\cdot
+        e_i\cdot\overline{v}\cdot A_i$}; 
+      \node[elliptic state] (q_2) [below =of q_1] {$e_i\cdot \overline{v}\cdot
+        A_i$}; 
+      \node[elliptic state](q_3) [below =of q_2] {$\overline{v}\cdot A_i$};
+      \path[->]
+      (q_0) edge node {$\overline{p}$} (q_1)
+      (q_1) edge node {$b_i$} (q_2)
+      (q_2) edge node {$e_i$} (q_3)
+      (q_3) edge [bend right = 65]node [right]{$\overline{v}$} (q_0)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Si ha quindi:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=5cm,on grid,auto] 
+      \node (q_0) {$(A_1|S|A_2)_{\backslash\{p,v\}}$};  
+      \node (q_1) [below left =of q_0] {$(b_1\cdot e_1\cdot \overline{v}\cdot
+        A_1|v\cdot S|A_2)_{\backslash\{p,v\}}$};
+      \node (q_2) [below right =of q_0] {$(A_1|v\cdot S|b_2\cdot e_2\cdot
+        \overline{v}\cdot A_2)_{\backslash\{p,v\}}$};
+      \node (q_3) [below =of q_1] {$(e_1\cdot \overline{v}\cdot
+        A_1|v\cdot S|A_2)_{\backslash\{p,v\}}$};
+      \node (q_4) [below =of q_3] {$\overline{v}\cdot
+        A_1|v\cdot S|A_2)_{\backslash\{p,v\}}$};
+      \node (q_5) [below =of q_2] {$(A_1|v\cdot S| e_2\cdot
+        \overline{v}\cdot A_2)_{\backslash\{p,v\}}$};
+      \node (q_6) [below =of q_5] {$(\overline{v}\cdot A_2)_{\backslash\{p,v\}}$};
+      \path[->]
+      (q_0) edge node [above left] {$\tau$} (q_1)
+      (q_0) edge node {$\tau$} (q_2)
+      (q_1) edge node {$b_1$} (q_3)
+      (q_3) edge node {$e_1$} (q_4)
+      (q_2) edge node {$b_2$} (q_5)
+      (q_5) edge node {$e_2$} (q_6)
+      (q_6) edge [bend left = 20] node [above right]{$\tau$} (q_0)
+      (q_4) edge [bend right = 20] node {$\tau$} (q_0)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Vedo se $spec\approx^{Bis}sys$ ma ho che l'attaccante ha una strategia
+  vincente, fa una $\tau$ sul primo processo in $sys$. Nella seconda mossa poi
+  l'attaccante opera su $spec$ facendo $b_2$ e il difensore perde:
+  \[spec\not\approx^{Bis}sys\]
+\end{esempio}
+\textbf{altri esempi su slide.}\\
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

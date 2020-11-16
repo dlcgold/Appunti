@@ -3429,8 +3429,8 @@ sottoprocesso con un altro ottenendo ancora un sistema bisimile al precedente.
   \[S=p\cdot v\cdot S\]
   \begin{center}
     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
-      \node (q_0) {$S$};  
-      \node (q_1) [below =of q_0] {$v\cdot S$};
+      \node[state] (q_0) {$S$};  
+      \node[state] (q_1) [below =of q_0] {$v\cdot S$};
       \path[->]
       (q_0) edge [bend right = 25] node [above left]{$p$} (q_1)
 
@@ -3490,7 +3490,89 @@ sottoprocesso con un altro ottenendo ancora un sistema bisimile al precedente.
   \[spec\not\approx^{Bis}sys\]
 \end{esempio}
 \textbf{altri esempi su slide.}\\
+Dati due processi $p_1$ e $p_2$ abbiamo che la composizione parallela è detta a
+\textbf{semantica interleaving}, in quanto si vede dalle regole di inferenza che
+posso eseguire o uno o l'altro o sincronizzare, grazie all'assunzione
+dell'atomicità delle azioni
+La cosa è visibile per esempio con:
+\[p=a\cdot Nil|b\cdot Nil\]
+\[q=a\cdot b\cdot Nil+b\cdot a\cdot Nil\]
+Avendo:
+\[p\sim^{Bis}q\]
+Togliendo l'atomicità, mettendo $a$ come $a_1,a_2$ si ha:
+\[p^{\prime}=p_{\left[a \leftarrowa_{1} \cdot a_{2}\right]}=a_{1} \cdot a_{2}
+  \cdot N i l \mid b . N i l \]
+\[      q^{\prime}=q_{\left[a \leftarrow-a_{1}, a_{2}\right]}=a_{1} \cdot a_{2}
+  \cdot b \cdot N i l+b \cdot a_{1} \cdot a_{2} \cdot N i l\]
+Avendo:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+    \node[elliptic state] (q_0) {$p'$};  
+    \node[elliptic state] (q_1) [below left =of q_0] {$a_2\cdot Nil|b\cdot
+      Nil$};
+    
+    \node[elliptic state] (q_2) [below right =of q_0] {$a_1\cdot a_2\cdot
+      Nil|Nil$};
+    
+    \node[elliptic state] (q_3) [below left=of q_2] {$a_2\cdot Nil|Nil$};
+    \node[elliptic state] (q_4) [below=of q_1] {$Nil|b\cdot Nil$};
+    \node[elliptic state] (q_5) [below right=of q_4] {$Nil| Nil$};
+    \path[->]
+    (q_0) edge [above left] node {$a_1$} (q_1)
+    (q_0) edge  node {$b$} (q_2)
+    (q_1) edge [below left]node {$b$} (q_3)
+    (q_1) edge node {$a_2$} (q_4)
+    (q_2) edge node {$a_1$} (q_3)
+    (q_3) edge node {$a_2$} (q_5)
+    (q_4) edge node {$b$} (q_5)
+    ;
+  \end{tikzpicture}
+\end{center}
+\newpage
+e:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+    \node[elliptic state] (q_0) {$p'$};  
+    \node[elliptic state] (q_1) [below left =of q_0] {$a_2\cdot b\cdot
+      Nil$};
+    
+    \node[elliptic state] (q_2) [below right =of q_0] {$a_1\cdot a_2\cdot
+      Nil$};
+    
+    \node[elliptic state] (q_3) [below =of q_2] {$a_2\cdot Nil$};
+    \node[elliptic state] (q_4) [below=of q_1] {$b\cdot Nil$};
+    \node[elliptic state] (q_5) [below right=of q_4] {$Nil$};
+    \path[->]
+    (q_0) edge [above left] node {$a_1$} (q_1)
+    (q_0) edge  node {$b$} (q_2)
+    (q_1) edge node {$a_2$} (q_4)
+    (q_2) edge node {$a_1$} (q_3)
+    (q_3) edge node [above left] {$a_2$} (q_5)
+    (q_4) edge node {$b$} (q_5)
+    ;
+  \end{tikzpicture}
+\end{center}
+e si ha che $p'\neq\sim^Tq'$. Se le azioni non sono più atomiche quindi
+``rompo'' la composizione parallela, avrei bisogno infatti di una semantica
+basata sulla \textbf{true concurrency}.\\
+Nella letteratura è stata definita la bisimulazione definita differenziando
+azioni concorrenti e in sequenza (per esempio tramite le reti di Petri, che si
+basano sulla \textit{true concurrency}).\\
+\textbf{Sulle slide esempio di un protocollo di comunicazione fatto con CCS e
+  poi con reti di Petri e ulteriori esempi di partite per la bisimulazione}.
+\chapter{Reti di Petri}
+% \begin{center}
+%   \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
 
+%     \node [transition] (t) [below right of = py, label=right:$t$] {};
+%     \node [place] (p1) [above of = t, label=right:$$] {$p_1$};
+%     \node [place] (p2) [below of = t, label=right:$$] {$p_2$};
+%     \path[-{Latex[width=2mm]}]
+%     (p1) edge (t)
+%     (t) edge (p2)
+
+%   \end{tikzpicture}
+% \end{center}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -3504,4 +3586,4 @@ sottoprocesso con un altro ottenendo ancora un sistema bisimile al precedente.
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
 % LocalWords:  rinominazione true LocalWords bisimili bisimilitudine bisimile
-% LocalWords:  rietichettato
+% LocalWords:  rietichettato interleaving

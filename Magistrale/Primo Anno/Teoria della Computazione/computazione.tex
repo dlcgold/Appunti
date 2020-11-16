@@ -2447,7 +2447,7 @@ Quindi se trovassi un algoritmo polinomiale per un NP-complete lo avrei per
 tutti gli NP.
 \begin{teorema}
   Se esiste un $L\in NP$ ma $L\not\in P$ allora:
-  \[\forall L''\in NP-complete\]
+  \[\forall L''\in \mbox{NP-complete}\]
   ho che $L''\not\in P$.
 \end{teorema}
 Dimostrando quindi che $P\neq NP$.\\
@@ -2485,7 +2485,137 @@ ma il primo è ottenuto tramite il \textbf{teorema di Cook}:
   riducibile a SAT.
 \end{proof}
 SAT è stato il primo problema identificato come NP-complete ed è stato usato per
-riconoscere gli altri problemi NP-complete.
+riconoscere gli altri problemi NP-complete.\\
+La descrizione di una NDTM deve quindi corrispondere ad una $\phi$ di SAT per
+far vedere che tutti i problemi NP si riducono a SAT. Si avrà una variabile per
+ogni stato, una variabile per ogni carattere e una variabile per la posizione
+della testina. Queste variabili saranno quelle che comporranno la $\phi$ e il
+loro assegnamento comporterà la veridicità della formula.\\
+Bisogna far vedere che $SAT<_T \Pi$ per far vedere che $\Pi$ è
+NP-complete. Facendo poi vedere che un altro problema si riduce a $\Pi$ o SAT
+dimostro che anche questo secondo problema è NP-complete. \\
+Si ha che il problema del ciclo hamiltoniano e TSP, decisionali, siano
+NP-complete.\\
+Vediamo che $SAT<_T 3SAT$, che ha tre letterali in ogni clausola. Ho in input
+una formula $\phi$ che deve diventare una $\phi_3$ tale che $\phi$ è
+soddisfacibile sse $\phi_3$ lo è. La formula $\phi$ ha tante clausole in
+congiunzione tra loro con un numero arbitrario di letterali ma $\phi_3$ deve
+averne altrettante ma con soli tre letterali per clausola. Qualora si abbiano
+clausole in $\phi$ con un solo letterale si aggiungono due letterali (che
+indichiamo con $z$) in modo
+però che la veridicità sia basata solo sulla variabile iniziale (questo vale per
+tutte le trasformazioni che stiamo per mostrare, ovvero la veridicità deve
+valere in base solo alle variabili iniziali della formula $\phi$). Tale clausola
+che conteneva solo $x_1$ diventa una quadrupla clausola:
+\[(x_1\lor z_1\lor z_2)\land (x_1\lor\neg z_1\lor z_2)\land (x_1\lor z_1\lor\neg
+  z_2)\land(x_1\lor\neg z_1\lor\neg z_2)\] 
+Se invece avessi una formula con due letterali diventa, aggiungendo una sola
+variabile: 
+\[(x_1\lor x_2\lor z_1)\land (x_1\lor x_2\lor \neg z_1)\]
+Una formula a tre letterali resta ovviamente invariata mentre quelle a più
+letterali vanno spezzate (aggiungendo poi variabili). Per esempio, avendo
+quattro letterali, otterrei:
+\[(x_1\lor x_2\lor z_1)\land (\neg z_1\lor x_3\lor z_2)\land (\neg z_2\lor
+  x_4\lor z_3)\land\cdots\land(z_{n-3}\lor x_{n-1}\lor x_n)\]
+Si vede che ogni formula di SAT può essere trasformata in una di 3SAT e quindi
+anche quest'ultimo è NP-complete. Si dimostra che invece 2SAT non è NP-complete
+ma ogni $K$SAT, con $K>2$, è NP-complete.\\
+Anche, per esempio, il \textit{problema della colorabilità} è NP-complete, in
+quanto può essere ridotto a SAT (non vedremo come).\\
+Torniamo a parlare di TSP, non di decisione. Ho capito che serve tempo
+esponenziale per risolverlo quindi si può pensare che sia NP-complete. Passo
+quindi alla versione di decisione. Vedo però che ciclo
+hamiltoniano, che è NP-complete, si riduce a TSP decisionale che quindi è
+anch'esso NP-complete. Abbiamo comunque che TSP è più difficile del suo problema
+decisionale, infatti D-TSP si riduce a TSP. Si ha quindi che TSP è
+\textbf{NP-hard}, ovvero tutti i problemi NP si riducono ad esso ma il problema
+stesso non è in NP (essendo un problema di ottimo e quindi non gli posso
+associare un linguaggio) e quindi non è NP-complete (non essendo in NP). Per
+TSP servirebbe una \textbf{macchina di Turing ad oracolo}.
+\subsection{Rapporto spazio e tempo}
+Aggiungiamo qualcosa a quanto già detto nelle sezioni precedenti.\\
+\begin{definizione}
+  Definisco la \textbf{funzione di complessità spaziale} come:
+  \[f:\mathbb{N}\to\mathbb{N}\]
+  con $f(n)$ che è il massimo numero di caselle utilizzate da una TM per
+  decidere un certo linguaggio $L$ tutte le istanze di una certa dimensione,
+  $n=|x|$. 
+\end{definizione}
+Sappiamo che, dal punto di vista del tempo (in notazione si ha $dtime=time$):
+\[P=\bigcup_{k\geq 1}dtime(n^k)\]
+\[NP=\bigcup_{k\geq 1}ntime(n^k)\]
+\begin{definizione}
+  Definiamo la \textbf{classe DSPACE} come l'insieme di tutti i linguaggi tali
+  che sono decisi da una TM in spazio $O(f(n))$. Si ha che;
+  \[PSPACE=\bigcup_{k\geq 1}dspace(n^k)\]
+  avendo quindi limite polinomiale.
+\end{definizione}
+\begin{definizione}
+  Definiamo la \textbf{classe NSPACE} come l'insieme di tutti i linguaggi tali
+  che sono decisi da una NDTM in spazio $O(f(n))$. Si ha che:
+  \[NPSPACE=\bigcup_{k\geq 1}nspace(n^k)\]
+  avendo quindi limite polinomiale.
+\end{definizione}
+Come vale:
+\[P\subseteq NP\]
+Vale che:
+\[PSPACE\subseteq NPSPACE\]
+e per dimostrarlo mi concerto su una macchina che si preoccupa solo dello spazio
+e non del tempo.\\
+Prendiamo nuovamente il problema SAT e quindi ragioniamo sulla NDTM. Vediamo che
+SAT è in NPSPACE per ovvi motivi (capisco che ramo scegliere e tale ramo ha una
+casella per letterale, avendo spazio $n$) ma vediamo se appartiene anche a
+PSPACE. Una DTM potrebbe provare tutte le possibilità in tempo esponenziale ma
+in spazio polinomiale in quanto si sovrascrivono ad ogni tentativo le varie
+caselle indicanti gli assegnamenti di verità ma la cardinalità di tali caselle è
+sempre la stessa, una per ogni letterale, ovvero $n$. Quindi ho che $SAT\in
+PSPACE$ anche se non è un'informazione così eclatante a causa del tempo
+esponenziale.
+\begin{teorema}[Teorema di Savitch]
+  Si dimostra che:
+  \[PSPACE=NSPACE\]
+  Quindi la DTM e la NDTM hanno la stessa potenza dal punto di vista dello
+  spazio di calcolo.
+\end{teorema}
+\begin{proof}
+  Un problema abbiamo visto essere definito come \textbf{configurazione
+    raggiungibile}, ovvero se una macchina può andare da una configurazione
+  iniziale $c_i$ ad una finale $c_f$ in un certo numero di passi $t$, indicato
+  con:
+  \[(c_i,C_f,t)\]
+  Prendo una
+  configurazione intermedi $c_m$ e vedo se vale:
+  \[\left(c_i,C_m,\frac{t}{2}\right)\land \left(c_m,C_f,\frac{t}{2}\right)\]
+  Spezzo poi in modo D\&I di volta in volta, vedendo ricorsivamente se entrambi
+  i rami sono validi.\\
+  Vedo che lo stack delle chiamate ricorsive ha una certa profondità. Una NDTM
+  andrebbe in spazio $f(n)$ ha associata una DTM che lavora in spazio
+  $O(f^2(n))$ in quanto salvo le varie configurazioni dello stack ricorsivo,
+  avendo $2^{\log f(n)}=f(n)$.\\
+  (\textbf{rivedere tutta la dimostrazione, quanto scritto è errato in buona
+    parte!})
+  
+\end{proof}
+Abbiamo quindi $PSPACE=NPSPACE$ e che $P\subseteq NP$ quindi certamente:
+\[P\subseteq PSPACE\]
+\[NP\subseteq NPSPACE\]
+Si ha quindi la figura \ref{fig:cla}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.9]{img/cla.pdf}
+  \caption{Diagramma di Venn delle classi fin'ora descritte}
+  \label{fig:cla}
+\end{figure}
+Abbiamo anche le classi $CO\_P$ e $CO\_NP$ ovvero le classi dei problemi
+complementari $P$ e $NP$. Si ha che, a causa del determinismo:
+\[CO\_P=P\]
+ma quando si introduce il non determinismo le cose cambiano. La domanda iniziale
+era del tipo \textit{esiste almeno uno} quindi il completamento è \textit{non
+  esiste nessuno}, quindi devo verificare tutti i casi, andando in un caso che
+nemmeno la NDTM riesce a risolvere, si finisce infatti nella classe
+$EXP$. Quindi si ha che:
+\[P\subseteq CP\_NP\land P\subseteq NP\]
+non avendo un rapporto diretto e definito tra $NP$ e $CO\_NP$.
 
 
 
@@ -2789,4 +2919,4 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
 % LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
 % LocalWords:  Universal l'hdd SUTM incrementantalmente Boolean Quantified QBF
-% LocalWords:  PSPACE spaizo hamiltoniano SAT
+% LocalWords:  PSPACE spaizo hamiltoniano SAT colorabilità

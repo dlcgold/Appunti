@@ -2821,7 +2821,7 @@ nell'automa).
       \end{tikzpicture}
     \end{center}
     \item $\delta(13,a)=4$ in quanto devo usare la seconda formula e avere:
-    \[|B(P[1,14]a)|=|B(acacbabbaabaca)|=|aca|=3\]
+    \[|B(P[1,13]a)|=|B(acacbabbaabaca)|=|aca|=3\]
     \begin{center}
       \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
         \node[state] (q_0) {$13$};
@@ -2908,6 +2908,735 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
   \end{table}
   Si aggiunge quindi una colonna di soli 0
 \end{esempio}
+
+\begin{esempio}
+  Individuare un pattern sconosciuto di 6 caratteri e la tabella incompleta con
+  solo $\delta(j,\sigma)=j+1$:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c||c|c|c|c}
+      $j\backslash\sigma$ & a & b & c & d\\
+      \hline
+      \hline
+      0 & 1 &  &  & \\
+      1 &  &  & 2 & \\
+      2 &  & 3 &  & \\
+      3 & 4 &  &  & \\
+      4 & 5 &  &  & \\ 
+      5 &  &  &  & 6\\
+      6 &  &  &  &   
+    \end{tabular}
+  \end{table}
+  Quindi banalmente il pattern è:
+  \[P=acbaad\]
+  Completo quindi la tabella con $\delta(j,\sigma)=k$:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c||c|c|c|c}
+      $j\backslash\sigma$ & a & b & c & d\\
+      \hline
+      \hline
+      0 & 1 & 0 & 0 & 0\\
+      1 &  1& 0 & 2 &0 \\
+      2 &  1& 3 & 0 & 0\\
+      3 & 4 & 0 & 0 & 0\\
+      4 & 5 & 0 &2  &0 \\ 
+      5 & 1 & 0 & 2 & 6\\
+      6 & 1 & 0 & 0&  0 
+    \end{tabular}
+  \end{table}
+\end{esempio}
+
+\begin{esempio}
+  Individuare un pattern sconosciuto di 6 caratteri e 3 simboli e la tabella
+  incompleta:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c||c|c|c|c}
+      $j\backslash\sigma$ & a & b & c & d\\
+      \hline
+      \hline
+      0 & 1 &  &  & \\
+      1 & 2 &  &  & \\
+      2 &  &  &  & \\
+      3 &  &  &  & \\
+      4 &  &  &  & \\ 
+      5 &  &  &  & \\
+      6 &  &  &  & 3  
+    \end{tabular}
+  \end{table}
+  specifico i primi tre caratteri e gli ultimi due (il quarto non è
+  ritrovabile).\\
+  Quindi il pattern è:
+  \[P=cac.ca\]
+  per gli ultimi due sappiamo che avendo bordo 3 quindi gli ultimi due sono
+  sicuro $ca$. Per le prime due uso la classica formula
+  $\delta(j,\sigma)=j+1$. Per il terzo sfrutto l'ultima cella che ha segnato 3,
+  che non è uno stato successivo ma ho il passaggio dallo stato 6 al 3 con c,
+  implicando la lunghezza del bordo che calcolo sul pattern intero con $c$
+  aggiunto è lungo 3 e quindi i primi tre simboli del pattern si ripetono negli
+  ultimi 3 di questo pattern a cui è concatenato c. Quindi in 3 avrò c e in 5 e
+  6 ca. Sul quarto carattere non posso dire nulla.
+\end{esempio}
+
+Vediamo quindi l'uso della funzione di transizione per trovare tutte le
+occorrenze esatte nel testo. Si scandisce il testo per scandire il
+testo. Ricordiamo che il preprocessamento (che non vedremo) ha tempo
+$O(m|\Sigma|)$ mentre la scansione del testo ha tempo $O(n)$ in $T$.
+Il procedimento è:
+\begin{itemize}
+  \item si parte dallo stato iniziale $s_0=0$
+  \item il testo $T$ viene letto dalla posizione 1 alla $n$
+  \item per ogni posizione $q$ da 1 a $n$ è associato uno stato $s_q$ ottenuto
+  con la transizione dallo stato precedente $s_{q-1}$ tramite il simbolo $T[q]$:
+  
+\end{itemize}
+\begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$s_0=0$};
+      \node[state] (q_1) [right=of q_0]{$s_1$};
+      \node[] (q_2) [right=of q_1]{$\cdots$};
+      \node[state] (q_3) [right=of q_2]{$j$};
+      \node[state, accepting] (q_4) [right=of q_3] {$s_q$};
+      \node[] (q_5) [right=of q_4]{$\cdots$};
+      \node[state] (q_6) [right=of q_5]{$s_n$};
+      \path[->]
+      (q_0) edge  node {T[1]} (q_1)
+      (q_1) edge  node {T[2]} (q_2)
+      (q_2) edge  node {T[q-1]} (q_3)
+      (q_3) edge  node {T[q]} (q_4)
+      (q_5) edge  node {T[n]} (q_6);
+    \end{tikzpicture}
+  \end{center}
+Si hanno due supposizioni:
+\begin{enumerate}
+  \item si suppongache $j$ sia la lunghezza del più lungo prefisso di $P$ che ha
+  un’occorrenza in $T$ che finisce in posizione $q-1$ (e che inizia quindi in
+  posizione $q-j$)
+  \item si supponga che $j$ sia lo stato $s_{q-1}$ a cui l'algoritmo arriva dopo
+  aver letto il simbolo $T[q-1]$
+\end{enumerate}
+A questo si passa a $s_q=\delta(j,T[q])$. Il nuovo stato $s_q$ deve essere
+calcolato. \\
+Il calcolo di $s_q=\delta(j, T[q])$ si divide in due casi (anche se in realtà
+poi sono tre):
+\begin{enumerate}
+  \item $j<m\,\,\,\land\,\,\,P[j+1]=T[Q]$, significa avere in $j+1$ lo stesso
+  simbolo che ho appena letto:
+  \begin{esempio}
+    Si ha:
+    \begin{table}[H]
+      \centering
+      \begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+        \hline
+        & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 &14&15&16&17\\
+        \hline
+        T=&a& a & a& b& a& c &c &a &b &a&c&c&c&a &c &b &a\\
+        \hline
+      \end{tabular}
+    \end{table}
+    matchando dal carattere 2 di T:
+    \begin{table}[H]
+      \centering
+      \begin{tabular}{c||c|c|c|c|c|c|c|c}
+        \hline
+        & 1 & 2 & 3 & 4 & 5 & 6 & 7 &8\\
+        \hline
+        P=&a& b & a& c& c& a &b &. \\
+        \hline
+      \end{tabular}
+    \end{table}
+
+  \end{esempio}
+  Il prefisso $P[1,j+1]$ (quindi quando ho $j+1=m$) si ha un'occorrenza di $T$
+  che inizia in $q-(j+a)+1$, dopo aver letto il simbolo $T[q]$:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto]
+      \node[state] (q_0) {$j$};
+      \node[state] (q_1) [right=of q_0] {$j+1$};
+      \path[->]
+      (q_0) edge  node {T[q]} (q_1);
+    \end{tikzpicture}
+  \end{center}
+  Ho quindi che \textbf{il prefisso $P[1,m]=P$ ha un'occorrenza su $T$ che
+    inizia in posizione $q-m+1$}:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto]
+      \node[state] (q_0) {$m-1$};
+      \node[state] (q_1) [right=of q_0] {$m$};
+      \path[->]
+      (q_0) edge  node {T[q]} (q_1);
+    \end{tikzpicture}
+  \end{center}
+  
+  \item $j<m\,\,\,\lor\,\,\,P[j+1]\neq T[Q]$, che a sua volta si divide in:
+  \begin{enumerate}
+    \item $j<m\,\,\,\land\,\,\,P[j+1]\neq T[Q]$ ad esempio:
+    \begin{esempio}
+      Si ha:
+      \begin{table}[H]
+        \centering
+        \begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+          \hline
+          & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 &14&15&16&17\\
+          \hline
+          T=&a& a & a& b& a& c &c &a &b &a&c&c&c&a &c &b &a\\
+          \hline
+        \end{tabular}
+      \end{table}
+      matchando dal carattere 2 di T:
+
+      \begin{table}[H]
+        \centering
+        \begin{tabular}{c||c|c|c|c|c|c|c|c}
+          \hline
+          & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8\\
+          \hline
+          P=&a& b & a& c& c&a&c &. \\
+          \hline
+        \end{tabular}
+      \end{table}
+    \end{esempio}
+    Si ha, con il bordo $k=B(P[1,j]T[q])$:
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto]
+        \node[state] (q_0) {$j$};
+        \node[state] (q_1) [right=of q_0] {$k$};
+        \path[->]
+        (q_0) edge  node {T[q]} (q_1);
+      \end{tikzpicture}
+    \end{center}
+    Quindi \textbf{il prefisso $P[1,k]$ ha occorrenza su $T$ che inizia con il
+      carattere $(q-k+1)$ del testo}. Faccio quindi un salto
+
+    
+    \item $j=m$, ad esempio:
+    \begin{esempio}
+      Si ha:
+      \begin{table}[H]
+        \centering
+        \begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+          \hline
+          & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 &14&15&16&17\\
+          \hline
+          T=&a& a & a& b& a& c &c &a &b &a&c&c&c&a &c &b &a\\
+          \hline
+        \end{tabular}
+      \end{table}
+      matchando dal carattere 2 di T:
+      \begin{table}[H]
+        \centering
+        \begin{tabular}{c||c|c|c|c|c|c|c|c}
+          \hline
+          & 1 & 2 & 3 & 4 & 5 & 6 & 7 &8\\
+          \hline
+          P=&a& b & a& c& c& a&b &a \\
+          \hline
+        \end{tabular}
+      \end{table}
+    \end{esempio}
+    Ho quindi un'occorrenza di $P$ in $T$ che finisce in $q-1$. Il prefisso
+    $P[1,k]$ ha occorrenza in $T$ che un'occorrenza che inizia in $q-m$ e una
+    che inizia in $q-k+1$. Lo stato iniziale $m$ indica un’occorrenza di $P$ in
+    $T$. Lo stato di arrivo $k$ è sicuramente minore o uguale a $m$. Se $k = m$,
+    allora esiste una nuova occorrenza di $P$ in $T$ che risulta essere
+    sovrapposta con la precedente di $m-1$ simboli. \textbf{Il prefisso
+    $P[1,k]$ ha occorrenza in $T$ che un'occorrenza che inizia in $q-k+1$}
+    
+
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto]
+        \node[state] (q_0) {$j=m$};
+        \node[state] (q_1) [right=of q_0] {$k$};
+        \path[->]
+        (q_0) edge  node {T[q]} (q_1);
+      \end{tikzpicture}
+    \end{center}
+  \end{enumerate}
+  Per rendere più semplice lo studio sono in grassetto i punti chiave dei tre
+  casi. 
+\end{enumerate}
+Gli ultimi due casi possono essere riassunti con $j\geq m$ e $f\geq j$:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2.5cm,on grid,auto]
+    \node[state] (q_0) {$j$};
+    \node[state] (q_1) [right=of q_0] {$f$};
+    \path[->]
+    (q_0) edge  node {T[q]} (q_1);
+  \end{tikzpicture}
+\end{center}
+\textbf{Il prefisso di $P$ di lunghezza $f$ occorre in $T$ in posizione
+  $q-f+1$ e se $f = m$, allora $P$ occorre in $T$ alla posizione $q-m+1$}.\\
+In sostanza quindi l'algoritmo procede con tre step:
+\begin{itemize}
+  \item Si  parte dallo stato iniziale $s_0=0$  e si effettua una scansione di
+  $T$ dal primo all’ultimo simbolo
+  \item per ogni posizione $q$ di $T$ si effettua la transizione dallo stato
+  corrente $s$ al nuovo stato $f = \delta(s,T[q])$ 
+  \item ogni volta che il nuovo stato $f$ coincide con $m=|P|$, viene prodotta
+  in output l’occorrenza $q-m+1$  
+\end{itemize}
+Avendo quindi lo pseudocodice:
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{Scan-Text}{$\delta$, T, m}
+    \State $n\gets|T|$
+    \State $s\gets 0$
+    \For {$q\gets 1$ to $n$}
+    \State $f\gets \delta(s, T[q])$
+    \If {$f==m$}
+    \State \textbf{print} $q-m+1$
+    \EndIf
+    \State $s\gets f$
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+Si ha quindi complessità lineare nella lunghezza del testo sia nel caso migliore
+che peggiore.
+\begin{esempio}
+  Vediamo un esempio di scansione del testo dati:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c}
+      \hline
+      & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\
+      \hline
+      T=&c& a & b& a& c& a &c &b &a &c&a&b&a\\
+      \hline
+    \end{tabular}
+  \end{table}
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c|c|c|c|c}
+      \hline
+      & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+      \hline
+      P=&a& c & a& c& b& a &c \\
+      \hline
+    \end{tabular}
+  \end{table}
+  Sono dati, secondo la solita divisione:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c}
+      $\delta(i,\sigma)$ & a & b & c\\
+      \hline
+      0 & 1 &  & \\
+      1 &  &  & 2\\
+      2 & 3 &  & \\
+      3 &  &  & 4\\
+      4 &  & 5 & \\
+      5 & 6 &  & \\
+      6 &  &  & 7\\
+      7 &  &  & 
+    \end{tabular}
+  \end{table}
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c}
+      $\delta(i,\sigma)$ & a & b & c\\
+      \hline
+      0 & 1 & 0 & 0\\
+      1 & 1 & 0 & 2\\
+      2 & 3 & 0 & 0\\
+      3 & 1 & 0 & 4\\
+      4 & 3 & 5 & 0\\
+      5 & 6 & 0 & 0\\
+      6 & 1 & 0 & 7\\
+      7 & 3 & 0 & 0
+    \end{tabular}
+  \end{table}
+  inizio con solo lo stato iniziale:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \path[->]
+      
+      ;
+    \end{tikzpicture}
+  \end{center}
+
+  leggo $c$ seguo la tabella e vado in $0$ da $0$:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+
+      ;
+    \end{tikzpicture}
+  \end{center}
+  leggo $a$ seguo la tabella e vado in $1$ da $0$:
+
+\begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+
+      ;
+    \end{tikzpicture}
+  \end{center}
+
+  leggo $b$ seguo la tabella e vado in $0$ da $1$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+
+      ;
+    \end{tikzpicture}
+  \end{center}
+  leggo $a$ seguo la tabella e vado in $1$ da $0$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+     
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+     
+      ;
+    \end{tikzpicture}
+  \end{center}
+  leggo $c$ seguo la tabella e vado in $2$ da $1$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+         \node[state] (q_0) {$0$};
+        \node[state] (q_1) [right=of q_0]{$0$};
+        \node[state] (q_2) [right=of q_1]{$1$};
+        \node[state] (q_3) [right=of q_2]{$0$};
+        \node[state] (q_4) [right=of q_3] {$1$};
+        \node[state] (q_5) [below=of q_4] {$2$};
+     
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      
+      ;
+    \end{tikzpicture}
+  \end{center}
+  leggo $a$ seguo la tabella e vado in $3$ da $2$:
+
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+        \node[state] (q_1) [right=of q_0]{$0$};
+        \node[state] (q_2) [right=of q_1]{$1$};
+        \node[state] (q_3) [right=of q_2]{$0$};
+        \node[state] (q_4) [right=of q_3] {$1$};
+        \node[state] (q_5) [below=of q_4] {$2$};
+        \node[state] (q_6) [left=of q_5] {$3$};
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+     
+      ;
+    \end{tikzpicture}
+  \end{center}
+    leggo $c$ seguo la tabella e vado in $4$ da $3$:
+
+    \begin{center}
+      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$0$};
+        \node[state] (q_1) [right=of q_0]{$0$};
+        \node[state] (q_2) [right=of q_1]{$1$};
+        \node[state] (q_3) [right=of q_2]{$0$};
+        \node[state] (q_4) [right=of q_3] {$1$};
+        \node[state] (q_5) [below=of q_4] {$2$};
+        \node[state] (q_6) [left=of q_5] {$3$};
+        \node[state] (q_7) [left=of q_6] {$4$};
+
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+
+      ;
+    \end{tikzpicture}
+  \end{center}
+    leggo $b$ seguo la tabella e vado in $5$ da $4$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+      \node[state] (q_5) [below=of q_4] {$2$};
+      \node[state] (q_6) [left=of q_5] {$3$};
+      \node[state] (q_7) [left=of q_6] {$4$};
+      \node[state] (q_8) [left=of q_7] {$5$};
+     
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+      (q_7) edge  node {b} (q_8)
+     
+      ;
+    \end{tikzpicture}
+  \end{center}
+  leggo $a$ seguo la tabella e vado in $6$ da $5$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+      \node[state] (q_5) [below=of q_4] {$2$};
+      \node[state] (q_6) [left=of q_5] {$3$};
+      \node[state] (q_7) [left=of q_6] {$4$};
+      \node[state] (q_8) [left=of q_7] {$5$};
+      \node[state] (q_9) [left=of q_8] {$6$};
+      
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+      (q_7) edge  node {b} (q_8)
+      (q_8) edge  node {a} (q_9)
+     
+      ;
+    \end{tikzpicture}
+  \end{center}
+    leggo $c$ seguo la tabella e vado in $7$ da $6$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+      \node[state] (q_5) [below=of q_4] {$2$};
+      \node[state] (q_6) [left=of q_5] {$3$};
+      \node[state] (q_7) [left=of q_6] {$4$};
+      \node[state] (q_8) [left=of q_7] {$5$};
+      \node[state] (q_9) [left=of q_8] {$6$};
+      \node[state] (q_10) [below=of q_9] {$7$};
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+      (q_7) edge  node {b} (q_8)
+      (q_8) edge  node {a} (q_9)
+      (q_9) edge  node {c} (q_10)
+     
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Essendo arrivati allo stato $m=7$, esiste un’occorrenzza di P in posizione
+  $10-7+1 = 4 $.\\
+  leggo $a$ seguo la tabella e vado in $3$ da $7$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+      \node[state] (q_5) [below=of q_4] {$2$};
+      \node[state] (q_6) [left=of q_5] {$3$};
+      \node[state] (q_7) [left=of q_6] {$4$};
+      \node[state] (q_8) [left=of q_7] {$5$};
+      \node[state] (q_9) [left=of q_8] {$6$};
+      \node[state] (q_10) [below=of q_9] {$7$};
+      \node[state] (q_11) [right=of q_10] {$3$};
+
+     
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+      (q_7) edge  node {b} (q_8)
+      (q_8) edge  node {a} (q_9)
+      (q_9) edge  node {c} (q_10)
+      (q_10) edge  node {a} (q_11)
+      
+      ;
+    \end{tikzpicture}
+  \end{center}
+  
+  \newpage
+  leggo $b$ seguo la tabella e vado in $0$ da $3$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+      \node[state] (q_5) [below=of q_4] {$2$};
+      \node[state] (q_6) [left=of q_5] {$3$};
+      \node[state] (q_7) [left=of q_6] {$4$};
+      \node[state] (q_8) [left=of q_7] {$5$};
+      \node[state] (q_9) [left=of q_8] {$6$};
+      \node[state] (q_10) [below=of q_9] {$7$};
+      \node[state] (q_11) [right=of q_10] {$3$};
+      \node[state] (q_12) [right=of q_11] {$0$};
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+      (q_7) edge  node {b} (q_8)
+      (q_8) edge  node {a} (q_9)
+      (q_9) edge  node {c} (q_10)
+      (q_10) edge  node {a} (q_11)
+      (q_11) edge  node {b} (q_12)
+
+      ;
+    \end{tikzpicture}
+  \end{center}
+    leggo $a$ seguo la tabella e vado in $1$ da $0$:
+
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \node[state] (q_0) {$0$};
+      \node[state] (q_1) [right=of q_0]{$0$};
+      \node[state] (q_2) [right=of q_1]{$1$};
+      \node[state] (q_3) [right=of q_2]{$0$};
+      \node[state] (q_4) [right=of q_3] {$1$};
+      \node[state] (q_5) [below=of q_4] {$2$};
+      \node[state] (q_6) [left=of q_5] {$3$};
+      \node[state] (q_7) [left=of q_6] {$4$};
+      \node[state] (q_8) [left=of q_7] {$5$};
+      \node[state] (q_9) [left=of q_8] {$6$};
+      \node[state] (q_10) [below=of q_9] {$7$};
+      \node[state] (q_11) [right=of q_10] {$3$};
+      \node[state] (q_12) [right=of q_11] {$0$};
+      \node[state, accepting] (q_13) [right=of q_12] {$1$};
+
+      \path[->]
+      (q_0) edge  node {c} (q_1)
+      (q_1) edge  node {a} (q_2)
+      (q_2) edge  node {b} (q_3)
+      (q_3) edge  node {a} (q_4)
+      (q_4) edge  node {c} (q_5)
+      (q_5) edge  node {a} (q_6)
+      (q_6) edge  node {c} (q_7)
+      (q_7) edge  node {b} (q_8)
+      (q_8) edge  node {a} (q_9)
+      (q_9) edge  node {c} (q_10)
+      (q_10) edge  node {a} (q_11)
+      (q_11) edge  node {b} (q_12)
+      (q_12) edge  node {a} (q_13)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  e mi fermo avendo concluso la scansione del testo. Ho trovato quindi solo una
+  occorrenza che inizia all'indice 4.
+\end{esempio}
+\section{Algoritmo Knuth-Morris-Pratt}
+Vediamo ora l'\textbf{algoritmo Knuth-Morris-Pratt (\textit{KMP})}.\\
+Anche in questo caso si ha un preprocessing del pattern in tempo lineare alla
+lunghezza del pattern $O(m)$. Si calcola una funzione di fallimento $\varphi$
+per avere il preprocessamento. Si ha poi la scansione del testo in tempo $O(n)$.
+\begin{definizione}
+  Definiamo la funzione di fallimento, detta \textit{prefix function}
+  $\varphi$: 
+  \[\varphi:\{0,1, \ldots, \mathrm{m}\} \rightarrow\{-1,0,1, \ldots,
+    \mathrm{m}-1\}\]
+  tale che:
+  \begin{itemize}
+    \item $\varphi=|B(P[1,j])|$ se $1\leq j\leq m$
+    \item $\varphi=-1$ se $j=0$
+  \end{itemize}
+\end{definizione}
+\begin{esempio}
+  Dato il pattern lungo 13:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c}
+      \hline
+      & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\
+      \hline
+      P=&a& b & c& a& b& a &a &b &c &a&b&a&b\\
+      \hline
+    \end{tabular}
+  \end{table}
+  ottengo:
+   \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c|c|c|c|c|c|c|c|c|c|c}
+      \hline
+      & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\
+      \hline
+      $\varphi$=&-1& 0 & 0& 0& 1 &2 &1 &1 &2&3&4&5&2\\
+      \hline
+    \end{tabular}
+  \end{table}
+\end{esempio}
 \end{document}
 
 
@@ -2919,4 +3648,4 @@ basandosi con quella precedente, in $O(m|\Sigma|)$.\\
 % LocalWords:  halt approximation greedy lower bound return shiftare blank Bohm
 % LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
 % LocalWords:  Universal l'hdd SUTM incrementantalmente Boolean Quantified QBF
-% LocalWords:  PSPACE spaizo hamiltoniano SAT colorabilità
+% LocalWords:  PSPACE spaizo hamiltoniano SAT colorabilità preprocessing

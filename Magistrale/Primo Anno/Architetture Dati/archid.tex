@@ -4308,8 +4308,204 @@ In uno schema non relazionale identificare i mapping è quindi molto arduo ma
 bisogna anche generare i nuovi mapping e le nuove regole di associazione.\\
 Classificando i matching si trovano anche nuove tipologie di conflitto che
 devono essere risolti con trasformazioni opportune. Dobbiamo quindi meglio
-definire in primis i conflitti.
-% 56.30
+definire in primis i conflitti. Si hanno diversi tipi di conflitti:
+\begin{itemize}
+  \item \textbf{conflitti di classificazione} quando elementi omologhi
+  descrivono insiemi diversi di oggetti del mondo reale (ad esempio docenti e
+  relatori di tesi, che sono comunque docenti ma non tutti i docenti sono
+  relatori). Si risolve tramite generalizzazione o specifica della gerarchia (i
+  relatori sono una parte dei docenti)
+  \item \textbf{conflitti descrittivi} quando tipi omologhi hanno proprietà
+  diverse o le stesse proprietà sono descritte diversamente. Si hanno:
+  \begin{itemize}
+    \item conflitti di nome, ovvero nomi diverse per le stesse cose
+    \item conflitti di composizione, ovvero diversi attributi e/o metodi (magari
+    avendone di più o di meno o anche diversi)
+  \end{itemize}
+  La soluzione dipende dai casi e può, per esempio, prevedere l'inclusione di
+  tutti gli attributi (usando l'uguaglianza) o la scelta di alcuni (usando
+  l'ereditarietà) (???)
+  \item \textbf{conflitti strutturali} dove si hanno gli stessi elementi
+  rappresentati tramite strutture diverse (magari da una parte un elemento è
+  un'intera entità e dall'altra solo un attributo). Per risolvere si sceglie,
+  per massimizzare l'informazione ottenuta, è prendere la struttura meno
+  vincolata (quindi tra entità e attributo scelgo entità). Scelgo quindi la
+  struttura ``più importante'' secondo la logica del ``più cose ho meglio è''
+  (mentre nel caso di datawarehouse si sceglie di non salvare determinate
+  informazioni) 
+  \item \textbf{conflitti di frammentazione} dove magari lo stesso elemento è in
+  un singolo oggetto in uno schema mentre è frammentato nell'altro. Si risolve
+  tramite l'aggregazione dell'elemento frammentato in quello unico (???). Si
+  integrano i dati quindi anche nell'ottica di ``rimetterli insieme'' (questo
+  tipo di tracciamento è comodo anche nella lotta evasione fiscale)
+\end{itemize}
+Parliamo quindi delle \textbf{regole di mapping} definite tra gli schemi
+``sorgente'' e quelli ottenuti dopo l'integrazione e possono essere trovate per
+lo schema sorgente guardando alle trasformazioni effettuate per la risoluzione
+di omologie e conflitti avute durante il processo di integrazione effettuato
+sullo schema sorgente. Le regole mi dicono che un elemento chiamato in un modo
+nello schema integrato ha una precisa corrispondenza con un certo elemento di
+uno schema sorgente.\\
+Se si hanno conflitti a livello direttamente di istanze, avendo che li stessi
+dati (lo stesso oggetto del mondo ideale) in sorgenti diversi hanno valori
+diversi, i problemi aumentano. Questo è un problema fondamentale nel data
+integration, anche nel caso dell'arricchimento. Posso avere:
+\begin{itemize}
+  \item un ``semplice'' \textbf{conflitto di attributi} avendo due entità che
+  rappresentano lo stesso oggetto reale con attributi diversi (anche solo uno)
+  per la stessa proprietà. Le chiavi in questo caso sono coerenti
+  \item un \textbf{conflitto di chiave} (detto anche \textbf{conflitto di entità
+    \textnormal{o} conflitto di tupla}) se ho chiavi primarie diverse in due
+  entità diverse che però rappresentano lo stesso oggetto (banalmente entità
+  che rappresenta lo studente nei db della Bicocca usa la matricola mentre in un
+  altro il codice fiscale) mentre gli altri attributi coincidono
+\end{itemize}
+Una scelta di soluzione, detta \textbf{currency}, prevede, in caso di
+conflittualità di valore di attributo, di scegliere il valore inserito
+temporalmente per ultimo, nella speranza che sia il più aggiornato (ma spesso
+non è esattamente così). Le tecniche che trattano i conflitti a livello di
+istanza possono essere applicate in due diverse fasi del ciclo di vita di un
+sistema di integrazione dati, vale a dire:
+\begin{itemize}
+  \item a \textbf{design time}
+  \item a \textbf{query time}
+\end{itemize}
+I problemi principali si hanno con i conflitti di chiave non sapendo bene se
+gli stessi oggetti sono presenti nei vari dataset e questi problemi saltano
+fuori a query time. Tuttavia, durante il design time decide la
+strategia da seguire per risolvere i conflitti prima che le query vengano
+elaborate, ovvero nella fase di progettazione del sistema di integrazione dei
+dati e le tecniche a query time incorporano le specifiche della strategia da
+seguire all'interno della formulazione della query. Si hanno quindi le
+\textbf{funzioni di risoluzione dei conflitti} che cercano, dati due valori
+conflittuali, di restituire quello più probabile. Un criterio di misura si basa
+sull'affidabilità delle sorgenti stesse da cui proviene il conflitto. In altri
+casi si ragiona in termini di funzioni matematiche di minimo, massimo, media,
+varianza etc$\ldots$ in presenza di valori numerici (introducendo probabilmente
+errori, di sottostima, sovrastima etc$\ldots$ ma l'importante è esserne
+consapevoli per stimare l'impatto dell'integrazione sui dati). Per valori non
+numerici si hanno altre funzioni, ad esempio la concatenazione nel caso di
+stringhe o la scelta delle più lunghe/corte. Ovviamente non si può sapere la
+risposta giusta ma si può imporre una logica di stima. È comunque buona pratica
+tenere traccia tali conflitti e in caso siano troppi preoccuparsi dell'effettiva
+validità dei dati. Il data integration assume quindi due forme:
+\begin{enumerate}
+  \item \textbf{deduplicazione}, dove si scopre se ci sono concetti del mondo
+  reale replicati nella tabella, avendo che l'integrazione viene fatta solo su
+  quella tabella (non avendo schema matching), internamente. Posso avere quindi
+  valori discordanti nella stessa tabella, magari per errori inserimento
+  avendo stringhe con distanza sintattica bassa (qualche carattere, secondo la
+  \textbf{distanza di edit}). Si usano tecniche empiriche. Questo check va fatto
+  di valore in valore ma non 
+  si può avere certezza avendo che distanze brevi si hanno anche tra parole
+  potenzialmente corrette (basti pensare a Carlo e Carla, entrambi
+  potenzialmente corretti per un ipotetico Carl, che potenzialmente è errato in
+  lingua italiana). Si procede quindi, in assenza di chiave, ad una pulizia di
+  eventuali duplicati cercando di ``fonderli'' del risultato corretto più
+  probabile. La distanza di edit va bene solo per stringhe piccole, per quelle
+  grosse si hanno altre funzioni (come la jakarta function (???))
+  \item integrazione in due tabelle diverse, avendo schema matching
+  etc$\ldots$. Si supponga quindi di voler fondere due tabelle senza chiave
+  primaria. Si cerca quindi una pseudo-chiave primaria (usando l'insieme più
+  grande di attributi comuni alle tabelle che siano significativi, ad esempio
+  nome, cognome e luogo di nascita) matchando le tabelle su di essa. Ma potrei
+  anche qui non matchare per errori di scrittura. Faccio quindi un matching
+  approssimato e concatenando le due tabelle e procedendo poi con la deduplica
+  della tabella risultante. Potrei comunque sempre ragionare con la distanza di
+  edit etc$\ldots$ restando con le tabelle separate, procedendo con una
+  combinazione lineare degli score delle distanze (riscalate su $\{0,1\}$, con 1
+  match perfetto, facendo una somma pesata e dividendo per il numero di score),
+  decidendo una soglia oltre la quale si ha il match. Si usano tecniche
+  probabilistiche. Si procede quindi la 
+  fusione delle tabelle e al raffinamento del risultato con l'eliminazione dei
+  duplicati 
+\end{enumerate}
+Oltre a tecniche empiriche e probabilistiche si hanno anche tecniche miste e/o
+basate su conoscenza a priori.\\
+Si sono finora trascurati quei casi in cui si sta palesemente rappresentando la
+stessa cosa ma con termini diversi (magari con nomi contratti, esempio Leonardo
+che diventa Leo.). \\
+Si ha infatti il \textbf{record linkage}, ovvero la tecnica di risoluzione dei
+conflitti a livello di istanza, dove, date le tabelle in input, posso avere in
+output: 
+\begin{itemize}
+  \item \textbf{matching tuples}, ovvero i valori che sicuramente matchano
+  (anche se non perfetti ma con score oltre una certa soglia)
+  \item \textbf{non matching tuples}, ovvero i valori che sicuramente non
+  matchano
+  \item \textbf{possible matches}, ovvero una sorta di ``area grigia'' dove non
+  si sa come dare risposta (come appunto l'esempio dl nome abbreviato). La
+  scelta della soglia per il match e di quella per il non match modifica la
+  cardinalità di questi casi, ad  esempio una coppia di soglie troppo cattiva
+  produrrà come conseguenza molti casi dubbi, essendo quest'area quella compresa
+  tra le due soglie
+\end{itemize}
+In mezzo subentra l'umano che ``a mano'' sistema i valori, non avendo altro
+modo. Da qualche hanno si è anche introdotto il machine learning, tramite
+\textbf{Deepr} (basato su reti neurali, trainato tramite specifici dati di
+training), per sostituire l'uomo nell'analisi di questa zona di mezzo. Le
+soluzioni di machine learning sono fortemente legate al dominio. Un esempio
+classico di problema è quello relativo all'indirizzo di casa nelle
+anagrafiche. In tal caso prima si cerca di normalizzare l'indirizzo (espandendo
+abbreviazioni di vie, piazze etc$\ldots$, esempio v. D. Alighieri diventa Via
+dante Alighieri) facendo poi il confronto sulle stringhe. altra tecnica è
+usare la geocodifica (tramite maps etc) usando poi latitudine e longitudine (con
+comunque un margine di differenza, dato dall'errore anche del GPS in uso
+civile e dagli standard statali di definizione degli indirizzi). Si nota quindi
+come il dominio degli indirizzi ha una risoluzione 
+particolare (oltre al fatto che lo standard degli stessi varia di stato in
+stato) e molti domini specifici hanno tecniche specifiche (difficilmente 
+apprese tutte da una rete neurale (???)). \\
+Si è dato per scontato un altro problema: le dimensione delle tabelle. La
+il check dei valori tra le tabelle esplode nel numero di confronti. Bisogna
+quindi ridurre lo \textbf{spazio di ricerca}, non potendo fare il prodotto
+cartesiano tra le tabelle ($ A\times B$), anche perché nichilizzerebbe la
+scalabilità. Si hanno tantissimi \textbf{blocking method} per ridurre lo spazio
+di ricerca. Una volta ottenuto un sottoinsieme dello spazio di ricerca posso
+partire con vaie tecniche empiriche (ad esempio ordinare sui cognomi, e sperare
+che siano corretti o con al più pochi errori, per effettuare poi il check). Si
+applica poi un \textbf{modello di decisione} per il check, tramite deep
+learning, semantica, funzione di risoluzione delle stringhe etc$\ldots$, ovvero
+un qualsiasi meccanismo per ottenere match, unmatch e possible match. Per farlo
+si necessita anche di un benchmark che sono anch'essi fortemente dipendenti dal
+dominio e quindi non sempre disponibili. Si hanno benchmark sugli indirizzi
+etc$\ldots$. \\
+Vediamo, riassumendo, nel \textbf{record linkage probabilistico} si ha:
+\begin{enumerate}
+  \item \textbf{preprocessing}, normalizzazione dei formati (espansione
+  abbreviazioni, lowecase, eliminazione spazi e caratteri speciali etc$\ldots$ o
+  passando ad altre 
+  codifiche, come la geocodifica) secondo uno standard
+  \item \textbf{blocking}, riduzione dello spazio di ricerca. Uno dei metodi è
+  il \textbf{sorted neighbour} che implementa il blocking scegliendo una
+  chiave, ordinando i record in base alla chiave univoca e spostando una
+  finestra sui file ordinati, confrontando a destra e a sinistra nelle due
+  tabelle gli elementi in questa finestra. Le finestre sono dinamiche in quanto
+  potrei avere match sul bordo che andrebbero persi
+  
+  \item \textbf{compare}, scegliendo una funzione di distanza e cercando un
+  sample con coppie conosciute di match e unmatch. Bisogna anche valutare per
+  ogni valore di distanza la frequenza di 
+  matching e unmatching
+  \item \textbf{decide}, valutando la distanza e le soglie
+\end{enumerate}
+\textit{Per confrontare se due date sono uguali prima le normalizzo al modello o
+europeo o americano, le normalizzo in base al carattere separatore e poi
+confronto}.\\
+Per la fusione posso:
+\begin{itemize}
+  \item ignorare un conflitto, mettendo tutti i valori disponibili
+  \item cercare di evitare i conflitti basandomi sui metadati, sul sorgente o
+  sulle istanze  
+  \item gestire i conflitti tramite le funzioni di risoluzione dei conflitti e
+  alle altre cose discusse sopra
+\end{itemize}
+Si hanno elenchi delle varie strategie possibili (ignorare, scegliere il più
+recente, scegliere il valore medio e molte altre), ognuna delle quali, come
+anche il record linkage, può introdurre errori. La scelta delle soglie inoltre
+può portare ad essere meno conservativi, introducendo falsi positivi, o troppo
+conservativi, riducendo drasticamente i match. Le varie scelte dipendono
+comunque dai singoli casi.
 \end{document}
 
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
@@ -4363,5 +4559,5 @@ definire in primis i conflitti.
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
 % LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
-% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER
+% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER tupla
 % LocalWords:  intensionale processamento colonnare denormalizzare enrichment

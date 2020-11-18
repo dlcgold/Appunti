@@ -133,7 +133,7 @@
     \item \textit{condivise}, ovvero usate da diversi applicativi e diversi
     utenti (fattore che porta anche allo studio del carico di lavoro,
     \textit{workload}). L'accesso può essere sia \textit{in scrittura} che
-    \textit{in lettura} (ovviamente anche entrambi) a seconda del caso. SI
+    \textit{in lettura} (ovviamente anche entrambi) a seconda del caso. Si
     pongono quindi problemi di concorrenza e sicurezza
     \item \textit{affidabili}, sia resistente dal punto di vista hardware (un
     guasto non deve farmi perdere i dati) che dal punto di vista della sicurezza
@@ -236,7 +236,7 @@ Il primo step è il \textbf{parsing}, che stabilisce se la query è sensata dal
 punto di vista sintattico e se i vari nomi di tabelle e attributi sono coerenti
 con lo schema. Per questo ultimo aspetta ci si appoggia al \textbf{Data
   Catalog}, un particolare db che contiene informazioni sui vari database, in
-primis sui vari nomi delle tabelle e per ciascuna sui nomi di ogni attributo. SI
+primis sui vari nomi delle tabelle e per ciascuna sui nomi di ogni attributo. Si
 ha quindi una soluzione per gestire i \textit{metadati}. Il parser effettua
 un'analisi lessicale, per la sintattica e la semantica, usando il dizionario e
 l a traduzione in algebra relazionale, producendo un \textbf{query tree}. Si
@@ -1708,7 +1708,7 @@ Per realizzare una replica posso fare in diversi modi:
     \textit{cpu, keyboard, screen \textnormal{e} cable}) e 3 centri di vendita
     (\textit{San Jose, Zurigo  \textnormal{e} Taiwan})
     \item le vendite sono distribuite secondo le località geografiche, i clienti
-    a Zurigo sono serviti solo dai venditori di Zurigo etc$\ldots$. SI ha però
+    a Zurigo sono serviti solo dai venditori di Zurigo etc$\ldots$. Si ha però
     che i venditori di  Zurigo servono anche Dublino
     \item ogni area geografica ha il proprio db (avremo quindi 4 db)
   \end{itemize}
@@ -4074,7 +4074,7 @@ Si hanno quindi, per esempio:
   SELECT * FROM table USING CONSISTENCY ONE  
 \end{minted}
 \section{Considerazioni finali}
-SI è notato come bene o male la scelta di algoritmi di gestione siano alla fine
+Si è notato come bene o male la scelta di algoritmi di gestione siano alla fine
 sempre gli stessi, variano invece al più le architetture (master/slave
 \textit{Peer-to-Peer}) ma i vari modelli NoSQL restano comunque da un certo
 punto di vista (in merito ad eventuali repliche, distribuzione etc$\ldots$)
@@ -4091,7 +4091,7 @@ La scalabilità è un'altro punto da considerare durante la scelta.
   manipolano il carrello stesso ma la sola associazione è gestita, in modo
   estremamente performante, tramite DynamoDB, \textit{in memory}.\\
   Parliamo di \textbf{knowledge graph}. Studiati dai creatori di Google nel
-  1996. Nel 2000 poi Tim Berners-Lee introduce il \textit{semantic web}. SI ha,
+  1996. Nel 2000 poi Tim Berners-Lee introduce il \textit{semantic web}. Si ha,
   in un motore di ricerca:
   \begin{itemize}
     \item crawling  
@@ -4109,9 +4109,405 @@ La scalabilità è un'altro punto da considerare durante la scelta.
   l'estrazione di conoscenza anche dal linguaggio naturale, con concetti
   espressi in formato testuale. Per le query si usano SparQL, Gremlin
   etc$\ldots$
-  
 \end{shaded}
+\chapter{Architetture di integrazione}
+\textbf{aggiungere intro da live per la doppia divisione}.\\
+\textbf{aggiungere ultima parte live}\\
+Con l'introduzione a NoSQL si è visto come sia possibile memorizzare i dati in
+tanti modi diversi. Ci si chiede quindi come ``unire'' diversi (per sorgente,
+formato natura etc$\ldots$) dataset anche di tipologia diversa, procedendo
+all'\textbf{integrazione} dei dati. Questo processo può avvenire anche su
+dataset di volume ridotto avendo complessità anche su dati piccoli.\\
+Si parla solitamente di:
+\begin{itemize}
+  \item \textbf{data integration}, dove si hanno diversi set di dati (anche non
+  disgiunti) con attributi diversi. Si costruisce un unico insieme con tutti gli
+  elementi dei due insiemi, con gli elementi presenti nell'eventuale
+  intersezione con tutti gli attributi dei due insiemi di partenza (mentre gli
+  altri tengono solo gli attributi iniziali). In pratica si fa un \textit{full
+    outer join} (ovvero prendo tutti i valori della tabella di sinistra e li
+  matcho, se posso, con quelli della tabella di destra, prendendo però poi anche
+  tutti gli elementi che non joinano). Il risultato finale potrebbe non avere a
+  priori dell'informazione in più sui dati
+  \item \textbf{data enrichment}, dove voglio arricchire i dati di un insieme
+  con quelli di altri insiemi, qualora possibile. In altre parole è una specie
+  di \textit{left outer join}, prendendo tutti gli elementi della tabella di
+  sinistra e aggiungo le informazioni della tabella di destra qualora ci sia un
+  match con la tabella di destra, altrimenti non aggiungo nulla. Si ha un
+  match diverso dalla semplice uguaglianza tra il set che voglio arricchire e
+  quello che contiene i potenziali arricchimenti. Potrei avere quindi
+  uguaglianza, similitudine, appartenenza etc$\ldots$ perché posso rilassare i
+  vincoli di match quando voglio arricchire l'informazione (sfruttando altre
+  relazioni più leggere, magari basate su informazioni terze, per esempio
+  relazioni geografiche etc$\ldots$). Il dataset arricchito contiene quindi solo
+  gli elementi del dataset iniziale che volevo arricchire ma questi potrebbero
+  (potrei non essere riuscito ad arricchire tutti i dati) contenere informazioni
+  in più
+\end{itemize}
+In entrambi i casi per rappresentare l'assenza di un attributo uso un NULL nella
+tabella se si parla di un modello relazionale. In caso dei vari modelli NoSQL
+seguo gli standard dei vari modelli e dei vari DBMS per rappresentare l'assenza
+di valore per un certo attributo.\\
+Solitamente si cerca di aggiungere, per integrazione o arricchimento:
+\begin{itemize}
+  \item informazioni spaziali, con informazioni geografiche dei dati che mancano
+  e quindi vanno aggiunte
+  \item informazioni temporali, con informazioni ``storiche'' dei dati da
+  integrare/arricchire. Si ha però un problema di capire cosa venga orima e cosa
+  dopo, comportando ambiguità nel rapporto causa-effetto
+\end{itemize}
+ma potrebbero esserci infinite altre casistiche.\\
+\textit{Si parlerà solo di data integration ma ogni tanto verranno aggiunti
+  incisi in merito all'enrichment.}
+\section{Data integration}
+Immaginiamo di avere due dataset con due schemi, espliciti o meno a seconda che
+siano basati sul modello relazionale o siano modelli NoSQL (e in quanto caso
+bisogno inferirli in modo abbastanza preciso vedendo magari i primi documenti
+etc$\ldots$), da voler integrare.\\
+Ipotizziamo che i due schemi rappresentino la stessa informazione ma da due
+punti di vista. Si hanno, per esempio, uno schema \textit{Libro}, con titolo,
+ISBN e autori (specificati da nome e data di nascita), e uno schema
+\textit{Autore}, con nome, data di nascita e libri scritti (specificati da
+titolo e ISBN). Ho quindi due schemi ugualmente informativi ma con diversa
+rappresentazione (ma stesso modello), rendendo quindi difficile l'integrazione
+che prevede diverse operazioni. Ovviamente la situazione si complica ancora di
+più se ho modelli eterogenei, dal punto di vista dei modelli, avendo modelli sia
+relazionali che non. Bisogna anche scegliere 
+il modello per lo schema integrato finale e non esiste una soluzione ottima a
+priori ma deve essere scelta in base allo scopo dello schema finale. Tale scelta
+influenzerà ovviamente le tecniche di costruzione dello schema finale. Per
+procedere quindi scelgo in primis il modello dello schema finale e come prima
+cosa, dopo averlo scelto, converto il modello di partenza di modello diverso in
+quel modello, ottenendo quindi omogeneità, dal punto di vista dei modelli, dei
+modelli di partenza.\\ 
+Formalizziamo un poco quanto detto. Si hanno vari livelli di
+eterogeneità/conflitti:
+\begin{itemize}
+  \item \textbf{eterogeneità di nome}, legato a come sono state etichettate le
+  eterogeneità. Ho quindi concetti di primo livello (che a seconda del modello
+  sono entità, documenti, attributi, nodi etc$\ldots$) che rappresentano le 
+  stesse informazioni ma con label diverse
+  \item \textbf{eterogeneità di tipo}, ovvero a come modellizzo effettivamente
+  un particolare ``pezzo'' della realtà
+\end{itemize}
+Oltre a questi si ha appunto l'\textbf{eterogeneità di modello}, che abbiamo
+visto sopra come risolvere fin dal principio, che ``copre'' ogni altro tipo di
+eterogeneo.
+\subsection{Eterogeneità di nome}
+Partiamo con questa prima categoria. \\
+Si hanno situazioni di:
+\begin{itemize}
+  \item \textbf{sinonimia}, ovvero rappresento lo stesso concetto con nomi
+  diversi, che sono sinonimi. Sintassi diversa e semantica uguale
+  \item \textbf{omonimia}, ovvero rappresento concetti diversi con gli stessi
+  nomi. Questo caso è più complicato da riconoscere (ad esempio potrei avere
+  \textit{Città} in due schemi ma in uno rappresenta quella di nascita e in un
+  altro quella di residenza) e rischia di comportare diversi errori, magari
+  portando a dover decidere quale valore associare senza sapere come decidere,
+  integrando in modo errato e perdendo informazione. Raramente si ha accesso
+  alla documentazione dei dataset e quindi bisogna sperare che i vari attributi
+  siano il meno ambigui possibile. Sintassi uguale e semantica diversa
+  \item \textbf{iperonimia}, ovvero tra i due concetti uno è più di alto livello
+  rispetto all'altra, secondo magari una relazione \textit{IS-A} (esempio il
+  concetto \textit{Persona} rispetto a quelli \textit{Uomo} e \textit{Donna},
+  con il primo che include i secondi)
+\end{itemize}
+In fase di progettazione dello schema integrato devo quindi riconoscere e
+gestire i casi appena elencati prima di procedere con l'integrazione.
+\subsection{Eterogeneità di tipo}
+In questo caso si ha che lo stesso concetto viene rappresentato in modo
+strutturalmente diverso in due schemi, potendo quindi avere, ad esempio:
+\begin{itemize}
+  \item domini di definizione differenti per lo stesso attributo in due schemi
+  (ad esempio da una parte il dominio delle città italiane e dall'altro quelle
+  islandesi)
+  \item un attributo in uno schema e avere un valore derivato in un altro
+  schema, avendo quindi, nel primo caso, un attributo indipendente mentre nel
+  secondo si ha una dipendenza funzionale con un altro attributo
+  \item un attributo in uno schema e un entità in un altro schema 
+  \item un attributo in uno schema e una gerarchia di generalizzazione in un
+  altro schema 
+  \item un'entità in uno schema e una relazione in un altro schema o magari, nel
+  modello a grafo, avendo in uno schema un nodo e un arco nel secondo
+  \item diversi livelli di astrazione per lo stesso concetto in due schemi
+  (ad esempio due entità con nomi omonimi legati da una gerarchia IS-A in due
+  schemi)  
+  \item diverse granularità nei domini di definizione 
+  \item diverse cardinalità nelle stesse relazioni 
+  \item key conflicts (la chiave in uno schema è diverso da quella dell'altro)
+\end{itemize}
+Si hanno quindi tantissimi casi in cui di presentano eterogeneità.
+\subsection{Data integration system}
+Succede quindi che si ha una \textbf{trasformazione di schema}. Si procede con
+uno \textbf{schema matching} per capire come unificare i vari schemi, capendo,
+per esempio, quali attributi coincidono (anche se magari con sintassi
+diverse). Si procede poi con l'\textbf{integrazione} vera e propria, ottenendo
+quindi lo schema integrato. Il software che procede con queste fasi è detto
+\textbf{data integration system} che procede prendendo e mettendo insieme delle
+sorgenti dati e cerca di ottenere uno schema integrato. Vengono presi e uniti
+tutti gli attributi degli schemi.\\
+\textit{In modo analogo funzionano i datawarehouse dove ho schemi diversi,
+  solitamente relazionali ma non sempre, che vengono messi insieme e quindi
+  manipolati}.\\
+Si hanno tantissimi modi per fare \textbf{schema matching} e si fa ancora molta
+ricerca in merito. Si hanno match singoli, match combinati, match basati sullo
+schema (vedendo label etc$\ldots$), match basati sui contenuti (vedendo i valori
+etc$\ldots$) etc$\ldots$ (per un albero più dettagliato \footnote{Rahm, Erhard &
+  Bernstein, Philip. (2001). A Survey of Approaches to  Automatic Schema
+  Matching.. VLDB J.. 10. 334-350. 10.1007/s007780100057.} vedere figura
+\ref{fig:tree})
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/tree.jpg}
+  \caption{Esempio di albero per lo schema matching } 
+  \label{fig:tree}
+\end{figure}
+Spesso bisogna fare schema matching \textit{on the fly} dovendo integrare nuovi
+schemi in modo assai rapido. Si hanno anche sistemi su grande scala con sistemi
+\textit{pay as you go}, dove serve altrettanta velocità.\\
+Vediamo quindi meglio le fasi:
+\begin{enumerate}
+  \item \textbf{schema transformation o pre-integration}, è una fase quindi
+  propedeutica che presi in input $n$ schemi me li restituisce omogenei tramite
+  tecniche di model trasformation o reverse engineering
+  \item \textbf{Correspondences investigation}, dove si studiano le
+  corrispondenze tra gli schemi tramite tecniche specifiche
+  \item \textbf{schemas integration e mapping generation}, dove si definiscono
+  lo schema integrato e le regole di mapping necessarie
+\end{enumerate}
+Avendo da integrare/arricchire decine di schemi si hanno diverse strategie. Si
+hanno due scelte fondamentali:
+\begin{enumerate}
+  \item integro a coppie. Grazie a questa scelta binaria ho due possibilità:
+  \begin{enumerate}
+    \item prendere uno schema, integrarlo con un altro e integrare il risultato
+    con un altro ancora etc$\ldots$. Ottengo una soluzione a scala con un albero
+    binario non bilanciato
+    \item uso un approccio bilanciato aggregando schemi ``vicini'' e aggregando
+    poi i vari risultati delle integrazioni. Ottengo quindi un albero binario
+    bilanciato 
+  \end{enumerate}
+  \item integro con più schemi contemporaneamente. Ho due approcci:
+  \begin{enumerate}
+    \item integrare tutti gli schemi insieme (\textbf{questo bisogna evitarlo}
+    anche solo per $n>3$)
+    \item integrare in modo iterativo, in modo analogo a quanto fatto con il
+    bilanciamento binario ma ovviamente non con un numero fisso di schemi da
+    integrare ogni volta (magari ne integro due o magari tre, raramente di più
+    per ovvi motivi)
+  \end{enumerate}
+\end{enumerate}
+Si ha appunto anche il problema che posso dire le stesse cose con strutture
+completamente diverse. Si cercano quindi \textbf{corrispondenze semantiche}
+sfruttando la conoscenza pregressa sul dominio applicativo. Si possono sfruttare
+sia le \textbf{equivalenze} che le \textbf{generalità} (\textit{IS-A}) per
+cercare le eventuali corrispondenze. Si rischia di avere anche
+\textbf{disgiunzioni} tra attributi completamente diversi magari di schemi
+uguali rischiando di avere problemi.\\
+In uno schema non relazionale identificare i mapping è quindi molto arduo ma
+bisogna anche generare i nuovi mapping e le nuove regole di associazione.\\
+Classificando i matching si trovano anche nuove tipologie di conflitto che
+devono essere risolti con trasformazioni opportune. Dobbiamo quindi meglio
+definire in primis i conflitti. Si hanno diversi tipi di conflitti:
+\begin{itemize}
+  \item \textbf{conflitti di classificazione} quando elementi omologhi
+  descrivono insiemi diversi di oggetti del mondo reale (ad esempio docenti e
+  relatori di tesi, che sono comunque docenti ma non tutti i docenti sono
+  relatori). Si risolve tramite generalizzazione o specifica della gerarchia (i
+  relatori sono una parte dei docenti)
+  \item \textbf{conflitti descrittivi} quando tipi omologhi hanno proprietà
+  diverse o le stesse proprietà sono descritte diversamente. Si hanno:
+  \begin{itemize}
+    \item conflitti di nome, ovvero nomi diverse per le stesse cose
+    \item conflitti di composizione, ovvero diversi attributi e/o metodi (magari
+    avendone di più o di meno o anche diversi)
+  \end{itemize}
+  La soluzione dipende dai casi e può, per esempio, prevedere l'inclusione di
+  tutti gli attributi (usando l'uguaglianza) o la scelta di alcuni (usando
+  l'ereditarietà) (???)
+  \item \textbf{conflitti strutturali} dove si hanno gli stessi elementi
+  rappresentati tramite strutture diverse (magari da una parte un elemento è
+  un'intera entità e dall'altra solo un attributo). Per risolvere si sceglie,
+  per massimizzare l'informazione ottenuta, è prendere la struttura meno
+  vincolata (quindi tra entità e attributo scelgo entità). Scelgo quindi la
+  struttura ``più importante'' secondo la logica del ``più cose ho meglio è''
+  (mentre nel caso di datawarehouse si sceglie di non salvare determinate
+  informazioni) 
+  \item \textbf{conflitti di frammentazione} dove magari lo stesso elemento è in
+  un singolo oggetto in uno schema mentre è frammentato nell'altro. Si risolve
+  tramite l'aggregazione dell'elemento frammentato in quello unico (???). Si
+  integrano i dati quindi anche nell'ottica di ``rimetterli insieme'' (questo
+  tipo di tracciamento è comodo anche nella lotta evasione fiscale)
+\end{itemize}
+Parliamo quindi delle \textbf{regole di mapping} definite tra gli schemi
+``sorgente'' e quelli ottenuti dopo l'integrazione e possono essere trovate per
+lo schema sorgente guardando alle trasformazioni effettuate per la risoluzione
+di omologie e conflitti avute durante il processo di integrazione effettuato
+sullo schema sorgente. Le regole mi dicono che un elemento chiamato in un modo
+nello schema integrato ha una precisa corrispondenza con un certo elemento di
+uno schema sorgente.\\
+Se si hanno conflitti a livello direttamente di istanze, avendo che li stessi
+dati (lo stesso oggetto del mondo ideale) in sorgenti diversi hanno valori
+diversi, i problemi aumentano. Questo è un problema fondamentale nel data
+integration, anche nel caso dell'arricchimento. Posso avere:
+\begin{itemize}
+  \item un ``semplice'' \textbf{conflitto di attributi} avendo due entità che
+  rappresentano lo stesso oggetto reale con attributi diversi (anche solo uno)
+  per la stessa proprietà. Le chiavi in questo caso sono coerenti
+  \item un \textbf{conflitto di chiave} (detto anche \textbf{conflitto di entità
+    \textnormal{o} conflitto di tupla}) se ho chiavi primarie diverse in due
+  entità diverse che però rappresentano lo stesso oggetto (banalmente entità
+  che rappresenta lo studente nei db della Bicocca usa la matricola mentre in un
+  altro il codice fiscale) mentre gli altri attributi coincidono
+\end{itemize}
+Una scelta di soluzione, detta \textbf{currency}, prevede, in caso di
+conflittualità di valore di attributo, di scegliere il valore inserito
+temporalmente per ultimo, nella speranza che sia il più aggiornato (ma spesso
+non è esattamente così). Le tecniche che trattano i conflitti a livello di
+istanza possono essere applicate in due diverse fasi del ciclo di vita di un
+sistema di integrazione dati, vale a dire:
+\begin{itemize}
+  \item a \textbf{design time}
+  \item a \textbf{query time}
+\end{itemize}
+I problemi principali si hanno con i conflitti di chiave non sapendo bene se
+gli stessi oggetti sono presenti nei vari dataset e questi problemi saltano
+fuori a query time. Tuttavia, durante il design time decide la
+strategia da seguire per risolvere i conflitti prima che le query vengano
+elaborate, ovvero nella fase di progettazione del sistema di integrazione dei
+dati e le tecniche a query time incorporano le specifiche della strategia da
+seguire all'interno della formulazione della query. Si hanno quindi le
+\textbf{funzioni di risoluzione dei conflitti} che cercano, dati due valori
+conflittuali, di restituire quello più probabile. Un criterio di misura si basa
+sull'affidabilità delle sorgenti stesse da cui proviene il conflitto. In altri
+casi si ragiona in termini di funzioni matematiche di minimo, massimo, media,
+varianza etc$\ldots$ in presenza di valori numerici (introducendo probabilmente
+errori, di sottostima, sovrastima etc$\ldots$ ma l'importante è esserne
+consapevoli per stimare l'impatto dell'integrazione sui dati). Per valori non
+numerici si hanno altre funzioni, ad esempio la concatenazione nel caso di
+stringhe o la scelta delle più lunghe/corte. Ovviamente non si può sapere la
+risposta giusta ma si può imporre una logica di stima. È comunque buona pratica
+tenere traccia tali conflitti e in caso siano troppi preoccuparsi dell'effettiva
+validità dei dati. Il data integration assume quindi due forme:
+\begin{enumerate}
+  \item \textbf{deduplicazione}, dove si scopre se ci sono concetti del mondo
+  reale replicati nella tabella, avendo che l'integrazione viene fatta solo su
+  quella tabella (non avendo schema matching), internamente. Posso avere quindi
+  valori discordanti nella stessa tabella, magari per errori inserimento
+  avendo stringhe con distanza sintattica bassa (qualche carattere, secondo la
+  \textbf{distanza di edit}). Si usano tecniche empiriche. Questo check va fatto
+  di valore in valore ma non 
+  si può avere certezza avendo che distanze brevi si hanno anche tra parole
+  potenzialmente corrette (basti pensare a Carlo e Carla, entrambi
+  potenzialmente corretti per un ipotetico Carl, che potenzialmente è errato in
+  lingua italiana). Si procede quindi, in assenza di chiave, ad una pulizia di
+  eventuali duplicati cercando di ``fonderli'' del risultato corretto più
+  probabile. La distanza di edit va bene solo per stringhe piccole, per quelle
+  grosse si hanno altre funzioni (come la jakarta function (???))
+  \item integrazione in due tabelle diverse, avendo schema matching
+  etc$\ldots$. Si supponga quindi di voler fondere due tabelle senza chiave
+  primaria. Si cerca quindi una pseudo-chiave primaria (usando l'insieme più
+  grande di attributi comuni alle tabelle che siano significativi, ad esempio
+  nome, cognome e luogo di nascita) matchando le tabelle su di essa. Ma potrei
+  anche qui non matchare per errori di scrittura. Faccio quindi un matching
+  approssimato e concatenando le due tabelle e procedendo poi con la deduplica
+  della tabella risultante. Potrei comunque sempre ragionare con la distanza di
+  edit etc$\ldots$ restando con le tabelle separate, procedendo con una
+  combinazione lineare degli score delle distanze (riscalate su $\{0,1\}$, con 1
+  match perfetto, facendo una somma pesata e dividendo per il numero di score),
+  decidendo una soglia oltre la quale si ha il match. Si usano tecniche
+  probabilistiche. Si procede quindi la 
+  fusione delle tabelle e al raffinamento del risultato con l'eliminazione dei
+  duplicati 
+\end{enumerate}
+Oltre a tecniche empiriche e probabilistiche si hanno anche tecniche miste e/o
+basate su conoscenza a priori.\\
+Si sono finora trascurati quei casi in cui si sta palesemente rappresentando la
+stessa cosa ma con termini diversi (magari con nomi contratti, esempio Leonardo
+che diventa Leo.). \\
+Si ha infatti il \textbf{record linkage}, ovvero la tecnica di risoluzione dei
+conflitti a livello di istanza, dove, date le tabelle in input, posso avere in
+output: 
+\begin{itemize}
+  \item \textbf{matching tuples}, ovvero i valori che sicuramente matchano
+  (anche se non perfetti ma con score oltre una certa soglia)
+  \item \textbf{non matching tuples}, ovvero i valori che sicuramente non
+  matchano
+  \item \textbf{possible matches}, ovvero una sorta di ``area grigia'' dove non
+  si sa come dare risposta (come appunto l'esempio dl nome abbreviato). La
+  scelta della soglia per il match e di quella per il non match modifica la
+  cardinalità di questi casi, ad  esempio una coppia di soglie troppo cattiva
+  produrrà come conseguenza molti casi dubbi, essendo quest'area quella compresa
+  tra le due soglie
+\end{itemize}
+In mezzo subentra l'umano che ``a mano'' sistema i valori, non avendo altro
+modo. Da qualche hanno si è anche introdotto il machine learning, tramite
+\textbf{Deepr} (basato su reti neurali, trainato tramite specifici dati di
+training), per sostituire l'uomo nell'analisi di questa zona di mezzo. Le
+soluzioni di machine learning sono fortemente legate al dominio. Un esempio
+classico di problema è quello relativo all'indirizzo di casa nelle
+anagrafiche. In tal caso prima si cerca di normalizzare l'indirizzo (espandendo
+abbreviazioni di vie, piazze etc$\ldots$, esempio v. D. Alighieri diventa Via
+dante Alighieri) facendo poi il confronto sulle stringhe. altra tecnica è
+usare la geocodifica (tramite maps etc) usando poi latitudine e longitudine (con
+comunque un margine di differenza, dato dall'errore anche del GPS in uso
+civile e dagli standard statali di definizione degli indirizzi). Si nota quindi
+come il dominio degli indirizzi ha una risoluzione 
+particolare (oltre al fatto che lo standard degli stessi varia di stato in
+stato) e molti domini specifici hanno tecniche specifiche (difficilmente 
+apprese tutte da una rete neurale (???)). \\
+Si è dato per scontato un altro problema: le dimensione delle tabelle. La
+il check dei valori tra le tabelle esplode nel numero di confronti. Bisogna
+quindi ridurre lo \textbf{spazio di ricerca}, non potendo fare il prodotto
+cartesiano tra le tabelle ($ A\times B$), anche perché nichilizzerebbe la
+scalabilità. Si hanno tantissimi \textbf{blocking method} per ridurre lo spazio
+di ricerca. Una volta ottenuto un sottoinsieme dello spazio di ricerca posso
+partire con vaie tecniche empiriche (ad esempio ordinare sui cognomi, e sperare
+che siano corretti o con al più pochi errori, per effettuare poi il check). Si
+applica poi un \textbf{modello di decisione} per il check, tramite deep
+learning, semantica, funzione di risoluzione delle stringhe etc$\ldots$, ovvero
+un qualsiasi meccanismo per ottenere match, unmatch e possible match. Per farlo
+si necessita anche di un benchmark che sono anch'essi fortemente dipendenti dal
+dominio e quindi non sempre disponibili. Si hanno benchmark sugli indirizzi
+etc$\ldots$. \\
+Vediamo, riassumendo, nel \textbf{record linkage probabilistico} si ha:
+\begin{enumerate}
+  \item \textbf{preprocessing}, normalizzazione dei formati (espansione
+  abbreviazioni, lowecase, eliminazione spazi e caratteri speciali etc$\ldots$ o
+  passando ad altre 
+  codifiche, come la geocodifica) secondo uno standard
+  \item \textbf{blocking}, riduzione dello spazio di ricerca. Uno dei metodi è
+  il \textbf{sorted neighbour} che implementa il blocking scegliendo una
+  chiave, ordinando i record in base alla chiave univoca e spostando una
+  finestra sui file ordinati, confrontando a destra e a sinistra nelle due
+  tabelle gli elementi in questa finestra. Le finestre sono dinamiche in quanto
+  potrei avere match sul bordo che andrebbero persi
+  
+  \item \textbf{compare}, scegliendo una funzione di distanza e cercando un
+  sample con coppie conosciute di match e unmatch. Bisogna anche valutare per
+  ogni valore di distanza la frequenza di 
+  matching e unmatching
+  \item \textbf{decide}, valutando la distanza e le soglie
+\end{enumerate}
+\textit{Per confrontare se due date sono uguali prima le normalizzo al modello o
+europeo o americano, le normalizzo in base al carattere separatore e poi
+confronto}.\\
+Per la fusione posso:
+\begin{itemize}
+  \item ignorare un conflitto, mettendo tutti i valori disponibili
+  \item cercare di evitare i conflitti basandomi sui metadati, sul sorgente o
+  sulle istanze  
+  \item gestire i conflitti tramite le funzioni di risoluzione dei conflitti e
+  alle altre cose discusse sopra
+\end{itemize}
+Si hanno elenchi delle varie strategie possibili (ignorare, scegliere il più
+recente, scegliere il valore medio e molte altre), ognuna delle quali, come
+anche il record linkage, può introdurre errori. La scelta delle soglie inoltre
+può portare ad essere meno conservativi, introducendo falsi positivi, o troppo
+conservativi, riducendo drasticamente i match. Le varie scelte dipendono
+comunque dai singoli casi.
 \end{document}
+
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
 % LocalWords:  join compiler DLL DDL Language step parsing Catalog metadati sql
@@ -4163,5 +4559,5 @@ La scalabilità è un'altro punto da considerare durante la scelta.
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
 % LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
-% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER
-% LocalWords:  intensionale processamento colonnare denormalizzare
+% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER tupla
+% LocalWords:  intensionale processamento colonnare denormalizzare enrichment

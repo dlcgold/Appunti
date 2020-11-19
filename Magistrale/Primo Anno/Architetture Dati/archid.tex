@@ -4111,8 +4111,45 @@ La scalabilità è un'altro punto da considerare durante la scelta.
   etc$\ldots$
 \end{shaded}
 \chapter{Architetture di integrazione}
-\textbf{aggiungere intro da live per la doppia divisione}.\\
-\textbf{aggiungere ultima parte live}\\
+L'80\% del lavoro nel caso di gestione dati si ritrova nella preparazione degli
+stessi e nella progettazione.
+Nella preparazione dei dati si parla anche di \textbf{data integration}.\\
+Si hanno diverse possibilità a seconda di carico di lavoro, tecnologie, qualità
+dei dati etc$\ldots$\\
+Posso avere (approfonditi più avanti):
+\begin{itemize}
+  \item consolidamento dei dati
+  \item gestione distribuita dei dati, senza consolidare ma facendo
+  un'integrazione virtuale, tramite il modello wrapper-moderator
+\end{itemize}
+Dal punto di vista organizzativo si hanno vari problemi:
+\begin{itemize}
+  \item autonomia, ovvero il grado di indipendenza tra i diversi DBA nelle
+  scelte progettuali
+  \item frequenza delle query
+  \item valore economico dell'integrazione, ovvero la rilevanza per il processo
+  operativo aziendale e decisionale di avere informazioni integrate in input in
+  modo da produrre output efficaci
+  \item volatilità delle fonti nel tempo, ovvero la frequenza di aggiunta o
+  eliminazione di fonti e frequenza di modifica degli schemi delle fonti
+  \item complessità gestionale, ovvero lo sforzo da dedicare alle attività di
+  gestione relative a database e infrastrutture sia hardware che software, a
+  causa della corrispondente complessità delle organizzazioni che utilizzano i
+  db
+  \item costi di eterogeneità, ovvero i costi nascosti ed espliciti relativi ai
+  processi aziendali dovuti all'utilizzo di dati eterogenei
+\end{itemize}
+Si hanno anche problemi tecnologici:
+\begin{itemize}
+  \item rilevanza dei dati storici e conseguente necessità di memorizzare
+  periodicamente nuovi dati senza cancellare quelli vecchi
+  \item complessità della query, in termini di numero di dati e tabelle visitate
+  e numero di operatori su di esse, e conseguente complessità temporale
+  nell'esecuzione della query
+  \item rilevanza delle query rispetto alle transazioni, ovvero l'importanza
+  relativa e frequenza delle query rispetto alle modifiche dei dati 
+\end{itemize}
+In base a tutti questi criteri si hanno varie soluzioni (nelle slide tabella).\\
 Con l'introduzione a NoSQL si è visto come sia possibile memorizzare i dati in
 tanti modi diversi. Ci si chiede quindi come ``unire'' diversi (per sorgente,
 formato natura etc$\ldots$) dataset anche di tipologia diversa, procedendo
@@ -4252,8 +4289,8 @@ tutti gli attributi degli schemi.\\
 Si hanno tantissimi modi per fare \textbf{schema matching} e si fa ancora molta
 ricerca in merito. Si hanno match singoli, match combinati, match basati sullo
 schema (vedendo label etc$\ldots$), match basati sui contenuti (vedendo i valori
-etc$\ldots$) etc$\ldots$ (per un albero più dettagliato \footnote{Rahm, Erhard &
-  Bernstein, Philip. (2001). A Survey of Approaches to  Automatic Schema
+etc$\ldots$) etc$\ldots$ (per un albero più dettagliato \footnote{Rahm, Erhard
+  \& Bernstein, Philip. (2001). A Survey of Approaches to  Automatic Schema
   Matching.. VLDB J.. 10. 334-350. 10.1007/s007780100057.} vedere figura
 \ref{fig:tree})
 \begin{figure}
@@ -4506,6 +4543,233 @@ anche il record linkage, può introdurre errori. La scelta delle soglie inoltre
 può portare ad essere meno conservativi, introducendo falsi positivi, o troppo
 conservativi, riducendo drasticamente i match. Le varie scelte dipendono
 comunque dai singoli casi.
+\section{Architetture per data integration}
+\textbf{L'ordine di questa sezione è dubbio, forse andava ad inizio capitolo o
+  forse no.}\\
+Si parte come abbiamo detto da una serie di schemi separati in vari db, con
+modelli diversi. Posso avere anche file csv etc$\ldots$ Bisogna quindi
+raccogliere le varie informazioni e integrarle in un'unico dataset. Si hanno più
+tecnciche:
+\begin{itemize}
+  \item la tecnica del \textbf{consolidamento} dove si raccolgono vari dataset
+  dalle varie sorgenti informative, li integro come visto precedentemente e
+  infine salvo il risultato in un nuovo db, che sarà la mia nuova architettura
+  dati 
+  \item la tecnica che prevede di rappresentare i vari schemi separati in modo
+  che essi siano mantenuti inalterati, non memorizzando il risultato
+  dell'integrazione, ma dando possibilità all'utente di scrivere query sui dati
+  integrati. Si produce quindi un nuovo schema globale che comunica tramite un
+  mediatore software per prendere le query. Questo è la vera e propria tecnica
+  di \textbf{virtual data integration}
+\end{itemize}
+\textbf{Nel capitolo si parla soprattutto di virtual data integration anche se
+  spesso non specificato}.\\
+Il data integration è un è un'importante area di ricerca e business che ha lo
+scopo principale di consentire ad un utente un accesso uniforme a più
+fonti di dati autonome ed eterogenee, attraverso la presentazione di una visione
+unificata di questi dati. Trovare questa uniformità tra elementi eterogenei è
+complesso perché bisogna trovare differenze e somiglianze in ogni schema per
+potersi conformare. Bisogna quindi riconciliare tutte le eterogeneità di schema
+e di istanza.\\
+Il vantaggio di architetture d'integrazione rispetto alle architetture federate
+è la capacità di gestire meglio le eterogeneità, soprattutto se complesse, a
+livello di schema. Inoltre i sistemi federati non possono gestire eterogeneità a
+livello di istanze a causa della qualità (accuratezza, incompletezza
+inconsistenza etc$\ldots$) dei dati. D'altro canto nelle architetture federate si
+ha un livello di autonomia in poco più basso nel senso che nei modelli integrati
+si assume che si hanno sorgenti provenienti da chissà dove mentre nei sistemi
+federati i nodi sono scelti in modo più consapevole.\\
+Si hanno due approcci principali alla data integration:
+\begin{enumerate}
+  \item \textbf{integrated read-only views (\textit{Mediation})}, dove si ha
+  integrazione solo per lettura. I dati letti nei vari db restano quindi
+  invariati. Questa soluzione a livello aziendale viene scartata in favore delle
+  datawarehouse, avendo persistenza dei dati e profondità storica maggiore
+  (anche se perdo flessibilità nel momento in cui si rimuove una sorgente dati)
+  \item \textbf{integrated read-write views (\textit{Mediation with update})},
+  dove si hanno anche gli update. È estensione dell'architettura di Mediation
+  per supportare gli aggiornamenti in una vista integrata (dovendo poter
+  accedere ai vari db anche in scrittura). Questa cosa è
+  difficile e anche poco studiata in letteratura e quindi non la tratteremo. In
+  questo caso si preferiscono i modelli federati
+\end{enumerate}
+L'integrazione dei dati è il problema di combinare i dati che risiedono in
+diverse fonti e fornire all'utente una visione unificata di questi dati può
+quindi essere letteralmente definita come \textbf{global virtual schema
+  (\textit{GS})}.\\
+Parto dai vari db coi vari modelli e schemi e creo un GS che ha un certo
+modello. Si hanno mapping tra i vari schemi e il GS e quindi l'utente può
+effettuare delle query passando per il GS e a runtime il GS capisce dove sono le
+informazioni richieste, converte il linguaggio di query in quello necessario per
+il db dove si trova l'informazione ed effettua la query (che viene eseguita
+localmente sul db). Sempre on the fly si risolvono i conflitti e viene
+restituito il risultato della query. Potrei avere anche integrazione pay as you
+go.\\
+Si hanno quindi tre elementi fondamentali in un'architettura di integration:
+\begin{enumerate}
+  \item il GS
+  \item le varie sorgenti
+  \item il mapping tra le sorgenti e il GS
+\end{enumerate}
+Si hanno quindi due componenti fondamentali:
+\begin{enumerate}
+  \item un \textbf{mediator}, che data una query la frammenta e la riscrive per
+  poter lavorare con i vari schemi locali. Inoltre il mediator mette insieme i
+  vari risultati, risolve i conflitti e risponde alla query
+  \item vari \textbf{wrapper}, che agganciano ogni schema locale delle sorgenti
+  al GS, rappresentando la sorgente in uno schema compatibile con quello del
+  GS. Essi ricevono query nel linguaggio del GS e rispondono di conseguenza
+\end{enumerate}
+Le architetture \textbf{wrapper-mediator} sono lo standard nel mondo del virtual
+data integration, nel dettaglio della \textbf{lazy integration} (\textit{capire
+  che 
+  dice al minuto 12.05}) consentendo maggior flessibilità (\textbf{dal minuto 12
+  al minuto 12.30 si capisce davvero poco, controllare}).\\
+Bisogna studiare GS e mapping.\\
+Si hanno due tipiche architetture del sistema, a seconda della direzione dei
+mapping: 
+\begin{enumerate}
+  \item una in cui si parte dagli schemi locali per arrivare al GS
+  \item una in cui si parte dal GS e si arriva gli schemi locali
+\end{enumerate}
+In ogni caso lo scopo è interrogare l'informazioni come se fosse unica.\\
+\textbf{Nelle slide qualche esempio.}\\
+Il mediator costruisce uno schema unificato di diverse fonti di informazioni
+(eterogenee) e consente a un utente di formulare una query su di esso. La query
+dell'utente viene quindi trasformata in una serie di sottoquery, una per
+ciascuna fonte di dati coinvolta nella query e il risultato viene sempre
+raccolto e mergiato dal mediator che lo restituisce all'utente.\\
+Il mediator quindi deve riconciliare le varie istanze mettendo insieme le varie
+risposte dei vari db. Si hanno varie azioni, da svolgere in breve tempo (essendo
+tutto on the fly), fatte dal mediator:
+\begin{itemize}
+  \item raggruppare informazioni sulla stessa entità del mondo reale 
+  \item rimuovere la replicazione dei tra le varie fonti di dati 
+  \item risolvere le inconsistenze tra le varie fonti di dati 
+  \item ottenere accuratezza, completezza, etc$\ldots$ tra i dati provenienti da
+  diverse fonti di dati   
+\end{itemize}
+L'interazione con il mediator è quindi divisa in due fasi:
+\begin{enumerate}
+  \item la creazione della rappresentazione unificata (\textbf{Publishing phase
+    at design time}), creando GS e mapping
+  \item la formulazione e l'esecuzione di una query nella rappresentazione
+  unificata (\textbf{Querying Phase}). Questa fase è a runtime
+\end{enumerate}
+Nella fase di \textbf{publishing} i problemi sono quelli di modellare e definire
+linguaggi 
+per lo schema unificato, costruendo anche i mapping. Eventualmente devo gestire
+gli update. Devo anche estrarre lo schema dei vari db per capire come
+procedere.\\
+Nella fase di \textbf{querying} bisogna stabilire il linguaggio, fare query
+unfloding/rewriting grazie ai mapping. Devo inoltre cleaning e fusion dei
+risultati. Bisogna inoltre convertire i vari linguaggi da GS a schemi locali.\\
+Il mapping è centrale in entrambi. Possiamo vedere il sistema di virtual data
+integration come una tripla:
+\[(G,S,M)\]
+dove:
+\begin{itemize}
+  \item $G$ indica lo schema globale
+  \item $S$ l'insieme degli schemi sorgente
+  \item $M$ il mapping
+\end{itemize}
+Dobbiamo appunto costruire uno schema globale virtuale. Il problema è capire
+quali dati reali nelle sorgenti di dati corrispondono a quei dati virtuali
+rappresentati per scelta dallo schema globale. Per il mapping si hanno vari
+approcci, a seconda della relazione tra lo schema globale e quelli locali,
+rispetto al concetto di vista (che in SQL ricordiamo costruire una sorta di
+tabella virtuale):
+\begin{itemize}
+  \item \textbf{GAV (Global As View)}, in cui lo schema globale viene creato
+  sulla base dell'osservazione degli schemi sorgente, attraverso un
+  processo di integrazione intenzionale degli schemi sorgenti (si pensi
+  anche al processo di consolidamento, o ad una situazione in che vogliamo
+  rappresentare in modo integrato tutto il contenuto informativo
+  dell'architettura dati di un'organizzazione). L'approccio si può
+  riassumere dicendo che lo schema globale è una vista di quelli locali (tutte,
+  contemporaneamente). Ogni tabella dello schema globale è una vista degli
+  schemi locali. In questo caso il mapping va dagli schemi locali a quello
+  globale. Il vantaggio è che si prendono tutte le informazioni disponibili,
+  procedo tramite arricchimento dei dati ma potrebbe capitare che non si ottiene
+  lo schema voluto. GAV si presta poco agli update in caso di rimozione (in caso
+  di aggiunta semplicemente rifaccio l'integrazione e aggiungo elementi allo
+  schema globale, anche se questo ha un costo) in quanto tutti i concetti che
+  prima avevano a che fare con la 
+  sorgente tolta vanno cambiati, avendo poi problemi anche a livello di istanze.
+  Questo approccio ci dice come recuperare i dati da istanze di origine locale
+  (reale) per ciascuna tabella dello schema globale (virtuale). Con il GAV il
+  mediatore procede tramite unfloding delle query, cioè la sostituzione nella
+  query dei riferimenti allo schema globale con l'espressione della
+  view globale in termini delle view locali. Bisogna però riportare i
+  \textit{join} operazione che abbiamo già visto rischia di essere complessa
+  e poco efficiente. Nonostante tutto gli approcci GAV sono solitamente quelli
+  più usati
+ 
+  \item \textbf{LAV (Local As View)}, dove lo schema globale viene progettato a
+  priori indipendentemente dagli schemi sorgente, da cui prenderò solo i pezzi
+  di informazione di interesse. Il mapping tra i sorgenti e lo schema globale si
+  ottiene definendo ciascun sorgente sullo schema globale. Può capitare che
+  concetti locali non siano nello schema globale ma ogni concetto globale avrà
+  una qualche rappresentazione locale. Questo approccio rende più semplice
+  l'evoluzione temporale dello schema globale in quanto in caso di update
+  aggiungendo uno schema locale non cambia lo schema globale (che è fisso) ma si
+  ha solo un eventuale arricchimento del mapping con un nuovo query mapping. Il
+  mapping va quindi dallo schema globale a quelli sorgente/locali avendo che il
+  contenuto di ogni schema locale è descritto in termini di vista sullo schema
+  globale. Se una colonna non è presente nel globale ma solo nel locale rispondo
+  NULL. Questo approccio ci dice come le istanze sorgenti (reali). Il query
+  management è più complesso del GAV ma è più semplicemente estendibile del GAV
+  contribuiscono/sono associati alle tabelle dello schema globale (virtuale) 
+  \item \textbf{GLAV (Global and Local As View)} dove il mapping tra sorgenti e
+  schema globale si ottiene definendo un insieme di viste, alcune sullo schema
+  globale e altre sulle origini dati. È un approccio ibrido
+\end{itemize}
+\begin{esempio}
+  Un mapping GAV è del tipo:
+  \begin{minted}{sql}
+    Create View GProf as
+    Select S1.Name as Name, S1.Age as Age from S1
+    Union
+    Select S2.Name as Name, S2.Age as Age from S2
+  \end{minted}
+  (prendo tutto insieme. facendo una union)\\
+  Con la seguente query per sapere i nomi dei professori che hanno più di 50
+  anni:
+  \begin{minted}{sql}
+    Select GProf.Name
+    From GProf
+    Where Age > 50
+  \end{minted}
+  Avendo poi un'operazione di unfolding infatti nella query il mediator
+  sostituire i riferimenti a GProf con la specifica della vista in termini degli
+  schemi locali 
+\end{esempio}
+\begin{esempio}
+  Vediamo la stessa query in approccio LAV.\\
+  Si hanno nello schema globale delle create view di quello locale:
+  \begin{minted}{sql}
+    Create View S1 (Name,Age) a
+    sSelect GProf.Name as S1.Name, GProf.Age as S1.Age
+    From GProf
+  \end{minted}
+   \begin{minted}{sql}
+    Create View S2 (Name,Age) a
+    sSelect GProf.Name as S2.Name, GProf.Age as S2.Age
+    From GProf
+  \end{minted}
+    Con la seguente query per sapere i nomi dei professori che hanno più di 50
+  anni:
+  \begin{minted}{sql}
+    Select GProf.Name
+    From GProf
+    Where Age > 50
+  \end{minted}
+  Il mediator quindi parte dalle viste per cercare i nomi dei richiesti in
+  entrambe le viste mettendo poi insieme i risultati.\\
+  \textbf{Questo esempio è semplificato in quanto ho schemi locali dello stesso
+    tipo.}
+\end{esempio}
+\textit{In generale i sistemi di integrazione hanno ancora scarse prestazioni.}
 \end{document}
 
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system

@@ -20,6 +20,7 @@
 \usepackage{microtype}
 \usepackage{fontspec}
 \usepackage{enumerate}
+\usepackage{physics}
 \usepackage{braket}
 \usepackage{marginnote}
 \usepackage{pgfplots}
@@ -1368,6 +1369,9 @@ Mi serve quindi un algoritmo polinomiale sull'input ma esponenziale su $k$.
   algoritmo $A$, una costante $c$ è una funzione computabile $f$ tale che per
   tutti gli input $\langle x,k\rangle$ $A$ risolve $\Pi$ con tempo di calcolo:
   \[T(n) = f(k)\cdot|x|^c=f(k)\cdot n^c\]
+  Si arriva quindi ad un $O(f(k)\cdot n^c)$ con $f$ esponenziale in $k$
+  fissato. \\
+  L'input diventa quindi $(x,k)$.
 \end{definizione}
 Quindi ho comunque un tempo polinomiale in $x$ ed esponenziale in $k$, $|x|^c\to
 2^k$. Divido quindi l'input in due dimensioni ed esprimo il tempo evidenziando
@@ -1378,7 +1382,9 @@ in $|x|=n$ ma esponenziale in $k$. Nella risposta quindi considero una parte
 limitata dell'input, per questo serve $k$ piccolo.\\
 Fissato $k$ ho una \textbf{soluzione esatta} e quindi gli algoritmi parametrici
 sono vantaggiosi rispetto agli algoritmi di approssimazione.\\
-Non tutti i problemi possono avere un problema parametrico associato.
+Non tutti i problemi possono avere un problema parametrico associato.\\
+Queste tecniche vengono usate per trattare problemi \textbf{NP-hard},
+considerando problemi di ottimizzazione e non di decisione.
 \subsection{Vertex-cover parametrico}
 Prendendo \textit{vertex-cover} \textbf{decisionale} cerco una copertura di
 dimensione massima $k$. Ho quindi in input $\langle G=(V,E),k\rangle$ e trovo un
@@ -1397,7 +1403,127 @@ Si parte quindi cercando di costruire insiemi con al più $k$ vertici esplorando
 un albero binario di ricerca, sviluppandolo fino a profondità $2^k$, che avrà
 come foglie degli insiemi \textit{vertex-cover} di dimensione $k$.\\
 Si quindi ricorre ai \textbf{Bounded search trees (\textit{alberi di ricerca
-    limitati})}. 
+    limitati})}. Si costruisce quindi un albero binario di profondità $k$, con
+il numero di nodi che quindi cresce circa per $O(2^k)$ e che sono una copertura
+candidata. \\
+Si prende la radice $r$ dell'albero e dato l'arco $(u,v)\in E$ ho due figli di
+$r$, uno con $u$ e l’altro con $v$, costruisco quindi due figli a partire dalla
+radice. Questo si fa in quanto basta avere o $u$ o $v$ nella copertura e quindi
+separo le due situazioni possibili date dalla scelta di uno dei due
+estremi. Scelto un arco arco $(x,v)$ non coperto da $u$ e estendo il nodo di $u$
+collegandolo ad altri due nodi, uno con $\{u, v\}$ e uno con $\{u, x\}$ (fisso
+$k=3$): 
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=1.7cm,on grid,auto]
+    \node[state] (q_0) {$r$};
+    \node[state] (q_1) [below right=of q_0] {$\{v\}$};
+    \node[state] (q_2) [below left=of q_0] {$\{u\}$};
+    \path[->]
+    (q_0) edge  node {$v$} (q_1)
+    (q_0) edge  node [above left] {$u$} (q_2);
+  \end{tikzpicture}
+\end{center}
+Proseguo poi via via con ulteriori archi che non sono coperti dai vertici
+foglia, etichettando gli archi dell'albero con l'identificativo del vertice che
+ho aggiunto. \\
+Aggiungo ad esempio $(x,v)$:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=1.9cm,on grid,auto]
+    \node[state] (q_0) {$r$};
+    \node[state] (q_1) [below right=of q_0] {$\{v\}$};
+    \node[state] (q_2) [below left=of q_0] {$\{u\}$};
+    \node[state] (q_3) [below right=of q_2] {$\{u,v\}$};
+    \node[state] (q_4) [below left=of q_2] {$\{u,x\}$};
+    \path[->]
+    (q_0) edge  node {$v$} (q_1)
+    (q_0) edge  node [above left] {$u$} (q_2)
+    (q_2) edge  node {$v$} (q_3)
+    (q_2) edge  node [above left] {$x$} (q_4);
+  \end{tikzpicture}
+\end{center}
+aggiungo poi $(z,t)$:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2.3cm,on grid,auto]
+    \node[state] (q_0) {$r$};
+    \node[state] (q_1) [below right=of q_0] {$\{v\}$};
+    \node[state] (q_2) [below left=of q_0] {$\{u\}$};
+    \node[state] (q_3) [below right=of q_2] {$\{u,v\}$};
+    \node[state] (q_4) [below left=of q_2] {$\{u,x\}$};
+    \node[state] (q_5) [below right=of q_4] {$\{u,x, z\}$};
+      \node[state] (q_6) [below left=of q_4] {$\{u,x,t\}$};
+    \path[->]
+    (q_0) edge  node {$v$} (q_1)
+    (q_0) edge  node [above left] {$u$} (q_2)
+    (q_2) edge  node {$v$} (q_3)
+    (q_2) edge  node [above left] {$x$} (q_4)
+    (q_4) edge  node {$z$} (q_5)
+    (q_4) edge  node [above left] {$x$} (q_6)
+   ; 
+  \end{tikzpicture}
+\end{center}
+(mi fermo che sono a $k=3$)\\
+Scriviamo il processo formalmente.\\
+Ricorsivamente si ha che sia $S$ l'insieme che etichetta un vertice, scelgo
+$(u',v')$ in E che non è coperto da S, quindi creo due figli con etichetta $S +
+{u'}$ e $S + {v'}$. Si ha che se c'è un percorso di lunghezza $k$ da $r$ ad un
+nodo $S$ che è una copertura per $G$ allora non c’è bisogno di esplorare oltre
+l’albero, facendo quindi il \textbf{bound}, ovvero il taglio dell'albero. \\
+Ovviamente ogni split non esclude che i due risultati coprano lo stesso
+insieme. La scelta di ordine di archi da esplorare è casuale.\\
+Ovviamente se ad altezza $k$ non trovo una copertura minima significa che non
+esiste una copertura di $k$ nodi.\\
+\textbf{su slide appunti extra con algoritmo e calcolo dei tempi}.
+\subsection{TSP metrico}
+\begin{shaded}
+  \noindent \textit{Contenuto extra}\\
+  Definiamo \textbf{ciclo di Eulero} come un ciclo che tocca tutti gli archi
+  del grafo una e una sola volta. Posso tornare allo stesso vertice e quindi i
+  vertici hanno grado entrante pari a quello uscente (numero di archi entranti
+  pari a quello di quelli uscenti):
+  \[indegree=outdegree\]
+\end{shaded}
+Vediamo quindi un algoritmo parametrico per TSP. Il problema TSP consiste nella
+pratica nel trovare un \textbf{ciclo hamiltoniano} di costo minimo. Ricordiamo
+che un ciclo hamiltoniano è un ciclo semplice, non orientato, che passa per ogni
+nodo di $G$. Il costo del ciclo è pari alla somma dei costi dei suoi archi.\\ 
+Parliamo di \textbf{TSP simmetrico} se il grafo non è orientato, altrimenti è
+detto \textbf{TSP asimmetrico}. TSP è un problema \textbf{NP-hard}.\\
+Studiamo quindi un'euristica per TSP. Si definisce $w_{xy}$ come il peso
+dell'arco tra i nodi $x$ e $y$.\\
+Definiano \textbf{TSP metrico} come un TSP dove vale la \textbf{distanza}
+``vera'', ovvero i costi sono attribuiti tramite la \textbf{disuguaglianza
+  triangolare}. Si ha che $\forall(u,v)\in E$ $w_{uv}=0$ sse $u=v$. Inoltre,
+dati tre nodi distinti, vale appunto la disuguaglianza triangolare:
+\[w_{uv}\leq w_{uz}+w_{zv}\]
+e quindi $w$ introduce una semimetrica, che accettiamo come metrica.\\
+Una classe molto importante di metriche èquella delle metriche indotte dalle
+varie norme $\norm{\cdot}_p$:
+\[d_{\norm{\cdot}_p}(i,j)=\norm{i-j}_p=\left(\sum_{k=1}^m
+    |i_k-j_k|^p\right)^{\frac{1}{p}}\]
+e al variare di $p$ si hanno varie metriche:
+\begin{itemize}
+  \item \textbf{distanza di Manahattan} se $p=1$:
+  \[d_{\norm{\cdot}_1}(i,j)=\sum_{k=1}^m|i_k-j_k|\]
+  \item \textbf{distanza Euclidea} se $p=2$:
+  \[d_{\norm{\cdot}_2}(i,j)=\left(\sum_{k=1}^m
+    |i_k-j_k|^2\right)^{\frac{1}{2}}\]
+  \item \textbf{distanza di Lagrange} se $p=\infty$:
+  \[d_{\norm{\cdot}_\infty}(i,j)=\max_k\{|i_k-j_k\}\]
+\end{itemize}
+Per descrivere la 2-approssimazione, detta di \textbf{Christofides}, per TSP
+usiamo il ciclo di Eulero.
+\begin{definizione}
+  Definiamo multigrafo come un grafo che prevede la possibilità di avere archi
+  diversi tra due nodi (possono anche essere cappi).
+\end{definizione}
+\begin{teorema}[teorema di Eulero]
+  Un (multi)grafo ammette un ciclo eurlerianose e solo se è connesso e ogni nodo
+  ha grado pari.\\
+  Un (multi) grafo connesso e con ogni nodo di grado pari è detto grafo
+  euleriano. 
+\end{teorema}
+
+
 
 \chapter{Macchina di Turing}
 \section{Problemi intrattabili}
@@ -3649,3 +3775,4 @@ per avere il preprocessamento. Si ha poi la scansione del testo in tempo $O(n)$.
 % LocalWords:  Jacobini Jacopini Diofantee Hamiltonian cycle path HCP HPP UTM
 % LocalWords:  Universal l'hdd SUTM incrementantalmente Boolean Quantified QBF
 % LocalWords:  PSPACE spaizo hamiltoniano SAT colorabilità preprocessing
+% LocalWords:  semimetrica euleriano

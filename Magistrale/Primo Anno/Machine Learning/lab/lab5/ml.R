@@ -83,3 +83,40 @@ pts <- Random.Unit(1000, 2, THRESHOLD)
 Plot2D(pts, THRESHOLD, -1)
 w <- Perceptron.calc(pts, THRESHOLD)
 Plot2D(pts, -w[1]/w[3], -w[2]/ w[3])
+
+## aggiungo sigmpoide con check su 1/2 avendo comunque solo {0,1}
+## per ora loop
+## PerceptronSigm.calc = function(data, threshold, eta){
+##     max = 10000
+##     w = c(-threshold, runif(ncol(data) - 2))
+##     n = nrow(data)
+##     ## isolo label
+##     label = data[, 1]
+##     ## isolo il resto per poi aggiornare pesi
+##     obs = data[, 2:ncol(data)]
+##     convergence = FALSE
+##     count = 0
+##     while(!convergence){
+##         convergence = TRUE
+##         for (i in 1:n){
+##             ## confronto la la lebel {-1,1} con la classificazione {-1,0,1}
+##             ## classificazione ottenuta coi pesi attuali
+##             ## se prodotto negativo errore
+##             if (eta * label[i] * Classify(obs[i, ], w) <= 0.5){
+##                 ## aggiorno pesi
+##                 w = w + eta * (label[i]-obs[i,]) * obs[i, ]
+##                 ## dico che non sto convergendo per continuare a ciclare
+##                 convergence = FALSE
+##             }  
+##         }
+##         count = count + 1
+##         if (count == max)
+##             break
+##     }
+##     return(w)
+## }
+## THRESHOLD <- 0.75
+## pts <- Random.Unit(1000, 2, THRESHOLD)
+## Plot2D(pts, THRESHOLD, -1)
+## w <- PerceptronSigm.calc(pts, THRESHOLD, 0.4)
+## Plot2D(pts, -w[1]/w[3], -w[2]/ w[3])

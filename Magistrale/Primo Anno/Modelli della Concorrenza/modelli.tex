@@ -3500,9 +3500,9 @@ La cosa è visibile per esempio con:
 Avendo:
 \[p\sim^{Bis}q\]
 Togliendo l'atomicità, mettendo $a$ come $a_1,a_2$ si ha:
-\[p^{\prime}=p_{\left[a \leftarrowa_{1} \cdot a_{2}\right]}=a_{1} \cdot a_{2}
+\[p'=p_{\left[a \leftarrow a_{1} \cdot a_{2}\right]}=a_{1} \cdot a_{2}
   \cdot N i l \mid b . N i l \]
-\[      q^{\prime}=q_{\left[a \leftarrow-a_{1}, a_{2}\right]}=a_{1} \cdot a_{2}
+\[      q'=q_{\left[a \leftarrow a_{1}, a_{2}\right]}=a_{1} \cdot a_{2}
   \cdot b \cdot N i l+b \cdot a_{1} \cdot a_{2} \cdot N i l\]
 Avendo:
 \begin{center}
@@ -3573,6 +3573,550 @@ basano sulla \textit{true concurrency}).\\
 
 %   \end{tikzpicture}
 % \end{center}
+Abbiamo introdotto un'algebra di processi come CCS dove processi sequenziali
+interagiscono tra loro tramite handshaking. Un altro modello usato, con varie
+implementazioni, sono gli automi a stati finiti (usati per reti neurali,
+riconoscitori di linguaggi, modelli di protocolli di comunicazioni
+etc$\ldots$).\\
+Si passa ora alle \textbf{reti di Petri}, introdotte da Petri nel 1962 nella sua
+tesi di dottorato, partendo da una critica ai modelli fatti tramite automi a
+stati per protocolli di comunicazioni.\\
+
+La nuova teoria dei sistemi è basata sui principi della fisica quantistica, il
+modello, nell’ottica di Petri, non è quindi un modello chiuso ma è 
+in grado di \textbf{comunicare con l’ambiente} (in sintonia con le teorie della
+fisica). Vuole una teoria dei sistemi in grado di descrivere il flusso di
+informazioni e che permetta di analizzare sistemi con un'organizzazione
+complessa.\\
+La sua teoria generale dei sistemi che processano informazione si basa su, tra
+le altre cose:
+\begin{itemize}
+  \item comunicazione
+  \item sincronizzazione
+  \item flusso di informazione
+  \item relazione di concorrenza e indipendenza causale
+\end{itemize}
+A partire dagli anni '70 questa teoria si è sviluppata dal punto di vista
+dell'espressività, portando allo studio di diverse classi di reti. Si sviluppano
+anche tecniche formali di analisi e di verifica delle reti (tramite algebra
+lineare, teoria dei grafi etc$\ldots$). Le reti di Petri hanno tantissimi ambiti
+d'uso, tra i quali:
+\begin{itemize}
+  \item specificare protocolli di comunicazione
+  \item disegnare circuiti asincroni
+  \item algoritmi concorrenti/paralleli
+  \item modellare sistemi organizzativi
+  \item modellare db distribuiti
+  \item specificare sistemi di controllo industriali
+  \item modellare sistemi biologici e per modellare reazioni chimiche
+  \item valutare le prestazioni (tramite reti stocastiche e temporizzate)
+\end{itemize}
+\begin{definizione}
+  I \textbf{sistemi di transizione etichettati} sono definiti come gli automi a
+  stati finiti ma senza essere visti come riconoscitori di linguaggi infatti un
+  sistema è formato da un insieme, solitamente finito, di stati globali $S$. Si
+  ha poi un \textit{alfabeto} delle possibili azioni che può eseguire il
+  sistema. Si hanno anche delle relazioni di transizioni, ovvero delle
+  transizioni che permettono di specificare come, attraverso un'azione, si passa
+  da uno stato ad un altro. Le transizioni si rappresentano con archi
+  etichettati tra i nodi, che rappresentano 
+  gli stati. Le etichette degli archi rappresentano le azioni necessarie alla
+  trasformazione. L'insieme delle azioni viene chiamato $E$ mentre $T\subseteq
+  S\times E\times S$ è l'insieme degli archi etichettati. Può essere,
+  opzionalmente, individuato uno stato iniziale $s_0$. Un sistema non è
+  obbligato a ``terminare'', quindi non si ha obbligatoriamente uno stato
+  finale.\\ 
+  Riassumendo quindi un sistema di transizione etichettato è un quadrupla:
+  \[A=(S,E,T,s_0)\]
+  % aggiungere pic
+  % \begin{figure}[H]
+  %   \centering
+  %   \includegraphics[scale = 0.5]{img/ste.jpg}
+  %   \caption{Esempio di sistema di transizione etichettato}
+  % \end{figure}
+\end{definizione}
+La critica di Petri è che in un sistema distribuito non sia individuabile uno
+\textbf{stato globale}, che in un sistema distribuito le trasformazioni di stato
+siano \textbf{localizzate} e non globali, che non esista un sistema di
+riferimento temporale unico (si possono avere più assi temporali in un sistema
+distribuito). Quindi la simulazione sequenziale non deterministica (semantica a
+``interleaving'') dei sistemi distribuiti è una forzatura e non rappresenta le
+reali caratteristiche del comportamento del sistema, ovvero la località, la
+distribuzione degli eventi e la relazione di dipendenza causale e non causale
+tra gli eventi.\\
+Introduciamo quindi i \textbf{sistemi elementari}.\\
+Per introdurre i sistemi elementari delle reti di Petri, ovvero una classe molto
+semplice e astratta, partiamo da un esempio:
+\begin{esempio}
+  Vediamo l'esempio del \textit{Produttore e del Consumatore}.\\
+  Si ha un sistema con una componente Produttore che produce elementi e li
+  deposita in un buffer che ha un'unica posizione (quindi o è pieno o è vuoto) e
+  con un consumatore che preleva dal buffer un elemento per poi consumarlo ed
+  essere pronto a prelevare un altro elemento. Si ha un comportamento
+  ciclico. Usiamo quindi le reti di Petri, col modello dei sistemi elementari,
+  per rappresentare questo modello. Bisogna quindi individuare le proprietà
+  fondamentali locali del sistema.\\
+  Partiamo dal produttore, che può avere 2 stati locali:
+  \begin{enumerate}
+    \item pronto per produrre
+    \item pronto per depositare
+  \end{enumerate}
+  Usiamo i \textbf{cerchi} per rappresentare condizioni locali che sono
+  associabili a delle proposizioni della logica che possono essere vere o
+  false. Queste preposizioni sono quindi stati locali. Gli eventi locali vengono
+  invece rappresentati con un \textbf{rettangolo}. Un evento ha un arco entrante
+  da uno stato che rappresenta le \textit{precondizioni} di quell'evento (che
+  devono essere vere per permettere l'occorrenza dell'evento). L'occorrenza
+  dell'evento rende false le precondizioni e rende vere le
+  \textit{postcondizioni} (che sono stati raggiungibili con un arco uscente da
+  un evento). Si ha quindi che il produttore può depositare solo se il buffer
+  non è pieno, quindi le postcondizioni di un evento devono essere false
+  affinché l'evento possa occorrere (oltre alle precondizioni vere).\\
+  Passiamo al consumatore che estrae solo se il buffer è pieno ed è pronto a
+  prelevare. Si procede poi con la stessa logica del produttore di cambiamento
+  tra vero e falso delle varie condizioni locali.\\
+  In questo esempio si hanno quindi condizioni che sono preposizioni booleane e
+  rappresentano stati locali. Si ha quindi a sinistra il produttore, a destra il
+  consumatore e in mezzo il buffer:
+  \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:pronto a depositare] {};
+      \node [transition] (t1) [below right of = p0, label=left:deposita] {};
+      \node [transition] (t2) [below left of = p0, label=left:produce] {};
+      \node [place] (p1) [below right of = t2, label=below:pronto a produrre]
+      {}; 
+      \node [place] (p3) [right of = t1, label=above:buffer pieno] {};
+      \node [transition] (t4) [right of = p3, label=right:estrae] {};
+
+      \node [place] (p2) [above right of = t4,label=above:pronto a prelevare]
+      {}; 
+      \node [transition] (t3) [below right of = p2, label=right:consuma] {};
+      \node [place] (p4) [below right of = t4, label=below:pronto a consumare]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+
+  Lo stato globale del sistema è dato da una
+  collezione di stati locali. Per segnare tali condizioni mettiamo un punto
+  pieno dentro il cerchio e queste condizioni ``abilitano'' i vari eventi:
+  \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:pronto a depositare] {};
+      \node [transition] (t1) [below right of = p0, label=left:deposita] {};
+      \node [transition] (t2) [below left of = p0, label=left:produce] {};
+      \node [place, tokens=1] (p1) [below right of = t2, label=below:pronto a
+      produrre] {}; 
+      \node [place] (p3) [right of = t1, label=above:buffer pieno] {};
+      \node [transition] (t4) [right of = p3, label=right:estrae] {};
+
+      \node [place, tokens=1] (p2) [above right of = t4,label=above:pronto a
+      prelevare] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:consuma] {};
+      \node [place] (p4) [below right of = t4, label=below:pronto a consumare]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Si può arrivare ad una \textit{configurazione} dove, per esempio, sia l'evento
+  \textit{produce}, del produttore, che l'evento \textit{preleva}, del
+  consumatore, sono abilitati. Si ha quindi che i due eventi possono occorrere
+  in modo \textbf{concorrente} infatti i due eventi sono \textbf{indipendenti}
+  in quanto condizionati da \textbf{precondizioni e postcondizioni completamente
+    disgiunte}. Due eventi che occorrono in maniera concorrente lo possono fare in
+  qualsiasi ordine, non si ha infatti una sequenza temporale specifica tra i
+  due. \\
+  In questo sistema quindi siano solo stati locali ed eventi localizzati e non
+  stati ed eventi globali. Un evento dipende solo dalle sue precondizioni e
+  dalle sue postcondizioni.\\
+  \textit{Se rappresentiamo con delle marche le condizioni vere possiamo
+    simulare il comportamento del sistema con il \textit{gioco delle marche} che
+    mostra come l'evoluzione delle condizioni avviene all'occorrenza degli
+    eventi.} \\
+  La simula di un tale sistema può comunque avvenire con un sistema di
+  transizioni etichettato, ovvero con un automa a stati finiti, che rappresenta
+  gli stati globali corrispondenti alle diverse combinazioni di stati locali che
+  di volta in volta sono veri.
+  \newpage
+  Gli archi vengono etichettati con gli eventi che
+  comportano un cambiamento di stato globale:
+ \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:P2] {};
+      \node [transition] (t1) [below right of = p0, label=left:d] {};
+      \node [transition] (t2) [below left of = p0, label=left:p] {};
+      \node [place, tokens=1] (p1) [below right of = t2, label=below:P1] {}; 
+      \node [place] (p3) [right of = t1, label=above:B] {};
+      \node [transition] (t4) [right of = p3, label=right:e] {};
+
+      \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:c] {};
+      \node [place] (p4) [below right of = t4, label=below:C2]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/prod3.jpg}
+    \caption{Rappresentazione del sistema con un automa a stati finiti che
+      rappresenta stati globali}
+  \end{figure}
+  Lo stesso evento in algebra di processi sarebbe (espandendo il buffer $B$ in
+  un modo che poi specificheremo per specificare pieno e vuoto):
+  \[S=(P1|B1|C1)_{\{\backslash deposita, estae\}}\]
+  \[P1=produce\cdot P2\]
+  \[P2=\overline{deposita}\cdot P1\]
+  \[C1=estrae\cdot C2\]
+  \[C2=consuma\cdot C1\]
+  \[B1=deposita\cdot B2\]
+  \[B2=\overline{estae}\cdot B1\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/prod3.jpg}
+    \caption{Rappresentazione del sistema con un automa a stati finiti che
+      rappresenta stati globali}
+  \end{figure}
+\end{esempio}
+Passiamo ora alla formalizzazione di questi aspetti.\\
+\begin{definizione}
+  Una \textbf{rete elementare} è definita come una tripla:
+  \[N=(B,E,F)\]
+  dove:
+  \begin{itemize}
+    \item $B$ è un insieme finito di \textbf{condizioni}, ovvero \textit{stati
+      locali}, proprietà/proposizioni booleane etc$\ldots$. Vengono
+    rappresentate con un cerchio 
+    \item $E$ è un insieme finito di \textbf{eventi}, ovvero trasformazioni
+    locali di stato e \textit{transizioni locali}. Vengono rappresentate con un
+    quadrato o con un rettangolo pieno
+    \item $F$ è una \textbf{relazione di flusso} che connette condizioni ad
+    eventi ed eventi a condizioni. Si ha quindi che:
+    \[F\subseteq (B\times E)\cup(E\times B)\]
+    Le relazioni di flusso sono rappresentate da archi orientati. Inoltre la
+    relazione di flusso è tale per cui non esistano \textbf{elementi isolati},
+    in quanto non avrebbero senso, in un tale sistema, eventi isolati (che non
+    modificherebbero mai una condizione) o condizioni isolate (che non
+    verrebbero mai modificate da un evento). Si ha, formalmente, che: 
+    \[dom(F)\cup ran(F)=B\cup E\]
+    ovvero non ho condizioni/eventi isolati, in quanto non avrebbero senso
+    (potrei anche non modellarle), avrei una condizione costante e un
+    evento che non accade mai, quindi dominio e codominio di $F$ coprono
+    l'insieme di condizioni ed eventi
+  \end{itemize}
+  Si ha che:
+  \[B\cap E = \emptyset\]
+  \[B\cup E \neq \emptyset\]
+  Ovvero gli insiemi delle condizioni e degli eventi sono tra loro disgiunti e
+  non vuoti.\\
+  Sia ora $x$ un elemento qualsiasi della rete, ovvero $x$ può essere o una
+  condizione o un evento, formalmente:
+  \[x\in B\cup E\]
+  Si ha che, dato $X=B\cup E$:
+  \begin{itemize}
+    \item $^\bullet x=\{y\in X:\,(y,x)\in F\}$ rappresenta l'insieme di tutti gli
+    elementi $y$ che sono connessi dalla relazione di flusso ad $x$, ovvero si
+    ha un arco da $y$ a $x$. Sono quindi i \textbf{pre-elementi} di $x$, ovvero
+    le \textit{precondizioni}, se $x$ è un evento, o i \textit{pre-eventi}, se
+    $x$ è una condizione
+    \item $x^\bullet=\{y\in X:\,(x,y)\in F\}$ rappresenta l'insieme di tutti gli
+    elementi $y$ che sono connessi dalla relazione di flusso a partire da $x$,
+    ovvero si ha un arco da $x$ a $y$. Sono quindi i \textbf{post-elementi} di
+    $x$, ovvero le \textit{postcondizioni}, se $x$ è un evento, o i
+    \textit{post-eventi}, se $x$ è una condizione
+  \end{itemize}
+  Posso estendere questa notazione ad insiemi di elementi. Sia $A$ un insieme
+  qualsiasi di elementi, che possono quindi essere sia condizioni che eventi:
+  \[A\subseteq B\cup E\]
+  Si ha quindi che i pre-elementi dell'insieme $A$ sono rappresentati con:
+  \[^\bullet A=\cup_{x\in A}\, ^\bullet x\]
+  ovvero l'unione dei pre-elementi di ogni singolo elemento dell'insieme $A$.\\
+  Analogamente si ha che i post-elementi dell'insieme $A$ sono rappresentati
+  con: 
+  \[A^\bullet=\cup_{x\in A} x^\bullet\]
+  ovvero l'unione dei post-elementi di ogni singolo elemento dell'insieme $A$.
+  \textit{Nelle reti c'è sempre una relazione di \textbf{dualità} tra due
+    elementi, per esempio tra condizioni ed eventi, tra pre-eventi e
+    post-eventi, tra pre-condizioni e post-condizioni. Inoltre si ha la
+    caratteristica della \textbf{località}, quindi si hanno stati locali e
+    trasformazioni di stato locali} 
+\end{definizione}
+La rete $N=(B,E,F)$ descrive la \textit{struttura statica del sistema}, il
+comportamento é definito attraverso le nozioni di \textbf{caso (o
+  configurazione)} e di \textbf{regola di scatto (o di transizione)}.\\
+Una rete può anche essere suddivisa in sotto-reti, seguendo l'esempio sopra si
+potrebbe avere una sotto-rete per il produttore, una per il consumatore e anche
+una per il buffer.\\
+\begin{definizione}
+  Un \textbf{caso} (o \textbf{configurazione}) é un insieme di condizioni
+  $c\subseteq B$ che rappresentano l’insieme di condizioni vere in una certa
+  configurazione del sistema, un insieme di \textbf{stati locali} che
+  collettivamente individuano lo \textbf{stato globale} del sistema.\\
+  Graficamente le condizioni vere presentano un puntino in mezzo al cerchio
+  mentre le condizioni false solo un cerchio vuoto:
+  \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:False] {};
+      \node [place, tokens=1] (p1) [right of = p0,label=above:True] {};
+      {}; 
+      
+    \end{tikzpicture}
+  \end{center}
+\end{definizione}
+\begin{definizione}
+  Sia $N=(B,E,F)$ una rete elementare e sia $c\subseteq B$ una certa
+  configurazione (non serve quindi necessariamente conoscere tutto lo stato del
+  sistema). La \textbf{regola di scatto} mi permette di stabilire quando
+  un evento $e\in E$ è abilitato, ovvero può occorrere, in $c$ sse:
+  \[^\bullet e\subseteq c \mbox{ e } e^\bullet \cap c = \emptyset\]
+  ovvero sse tutte le precondizioni dell'evento sono vere (e quindi sono
+  contenute nella configurazione $c$) e sse tutte le postcondizioni sono false
+  (quindi non si hanno intersezioni tra le postcondizioni e la
+  configurazione). \\
+  L'occorrenza (l'abilitazione) di $e$ in $c$ si denota con la scrittura:
+  \[c[e >\]
+  Se un evento $e$ è abilitato in $c$, ovvero $c[e >$, si ha che quando $e$
+  occorre in $c$ genera un nuovo caso $c'$ e si usa la notazione:
+  \[c[e > c'\]
+  Si ha quindi che $c'$ è così calcolabile:
+  \[c'=(c-^\bullet e)\cup e^\bullet\]
+  Ovvero togliendo da $c$ tutte le precondizioni dell'evento $e$ e aggiungendo
+  quindi tutte le postcondizioni di $e$
+\end{definizione}
+Le reti si basano sul \textbf{principio di estensionalità}, ovvero sul fatto che
+il cambiamento di stato è locale:
+\begin{center}
+  \textit{un evento è completamente caratterizzato dai cambiamenti che produce
+    negli stati locali, tali cambiamenti sono indipendenti dalla particolare
+    configurazione in cui l’evento occorre.}
+\end{center}
+L'importante è che le precondizioni di un evento siano vere e le postcondizioni
+false (siamo comunque interessati solo alla validità delle condizioni che
+riguardano l'evento).
+\begin{esempio}
+  Partendo da:
+  \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:P2] {};
+      \node [transition] (t1) [below right of = p0, label=left:d] {};
+      \node [transition] (t2) [below left of = p0, label=left:p] {};
+      \node [place, tokens=1] (p1) [below right of = t2, label=below:P1] {}; 
+      \node [place, tokens=1] (p3) [right of = t1, label=above:B] {};
+      \node [transition] (t4) [right of = p3, label=right:e] {};
+
+      \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:c] {};
+      \node [place] (p4) [below right of = t4, label=below:C2]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  \newpage
+  Può scattare $e$ e portare a:
+   \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:P2] {};
+      \node [transition] (t1) [below right of = p0, label=left:d] {};
+      \node [transition] (t2) [below left of = p0, label=left:p] {};
+      \node [place, tokens=1] (p1) [below right of = t2, label=below:P1] {}; 
+      \node [place] (p3) [right of = t1, label=above:B] {};
+      \node [transition] (t4) [right of = p3, label=right:e] {};
+
+      \node [place] (p2) [above right of = t4,label=above:C1] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:c] {};
+      \node [place, tokens=1] (p4) [below right of = t4, label=below:C2]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Quindi dato $C=\{P1, B, C1\}$ ho che, dopo lo scatto dell'evento $e$
+  (possibile visto che tutte le postcondizioni di $e$ sono disabilitate):
+  \[C[e>C'\]
+  con $C'=\{P1, C2\}$.
+  ($P1$ resta inalterato, per il \textbf{principio di estensionalità}).
+\end{esempio}
+\begin{definizione}
+  Sia $N=(B,E,F)$ una rete elementare. Possiamo definire due tipologie di rete:
+  \begin{enumerate}
+    \item $N$ è definita \textbf{semplice} sse:
+    \[\forall x,y \in B\cup E,\,\, (^\bullet x = ^\bullet y)\wedge (x^\bullet =
+      y^\bullet)\Rightarrow x = y\]
+    Ovvero per ogni coppia di elementi (che siano quindi eventi o condizioni) se
+    i loro pre-elementi e i loro post-elementi coincidono allora non ha senso
+    distinguere $x$ e $y$. Vediamo un esempio di rete non semplice, in quanto
+    $P0$ e $P1$ rappresentano la stessa condizione e quindi non ha senso
+    distinguerli: 
+    \begin{center}
+      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        \node [place] (p0) [label=above:P0] {};
+        \node [place] (p1) [right of = p0, label=above:P1] {}; 
+        \node [place] (p2) [right of = p1, label=above:P2] {};
+        \node [transition] (t1) [below right of = p0] {};
+        \node [transition] (t2) [below left of = p2] {};
+        \node [place] (p3) [left of = t1, label=below:P3] {}; 
+        \node [place] (p4) [right of = t2, label=below:P4] {};
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (p0) edge (t2)
+        (p1) edge (t1)
+        (p1) edge (t2)
+        (p2) edge (t2)
+        (t1) edge (p3)
+        (t2) edge (p4)
+        ;
+      \end{tikzpicture}
+    \end{center}
+    \newpage
+    Vale anche per eventi. Vediamo un esempio dove non ha senso distinguere $T1$
+    e $T2$:
+    \begin{center}
+      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        \node [place] (p0) [] {};
+        \node [place] (p1) [right of = p0] {};
+        \node [transition] (t0) [left of = p0, label=above:T0] {};
+        \node [transition] (t1) [below of = p0, label=left:T1] {};
+        \node [transition] (t2) [below of = p1, label=right:T2] {};
+        \node [place] (p3) [below of = t1] {}; 
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (t0) edge (p0)
+        (p0) edge (t1)
+        (p0) edge (t2)
+        (p1) edge (t1)
+        (p1) edge (t2)
+        (t1) edge (p3)
+        (t2) edge (p3)
+        ;
+      \end{tikzpicture}
+    \end{center}
+    \item $N$ è definita \textbf{pura} sse:
+    \[\forall e \in E:\,\,^\bullet e \cap e^\bullet = \emptyset\]
+    Ovvero se per ogni evento non esiste una precondizione che sia anche
+    postcondizioni. Si ha quindi un \textbf{cappio} (detto anche \textbf{side
+      condition}) tra un evento e una condizione. Avere questa situazione
+    comporta che l'evento non può scattare in quanto la condizione che per lui è
+    sia una precondizione che una postcondizioni non può essere
+    contemporaneamente vera e falsa, l'evento non potrà mai scattare e quindi
+    non potrà mai essere osservato. Non avrebbe quindi senso modellarlo. Vediamo
+    un esempio:
+    \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [] {};
+      \node [transition] (t1) [below right of = p0] {};
+      \node [place] (p1) [right of = p0] {}; 
+      \node [place] (p3) [right of = t1] {};
+
+
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge [bend left = 25](t1)
+      (t1) edge [bend left = 25](p0)
+      (p1) edge (t1)
+      (t1) edge (p3)
+      ;
+    \end{tikzpicture}
+  \end{center}
+    
+  \end{enumerate}
+\end{definizione}
+\textbf{Considereremo sempre reti pure.}\\
+
+\begin{definizione}
+  Data una rete elementare $N=(B,E,F)$ e sia $U \subseteq E$ un sottoinsieme di
+  eventi e siano $c,c_1,c_2\in B$ tre configurazioni. Si ha che:
+  \begin{itemize}
+    \item $U$ è un \textbf{insieme di eventi indipendenti} sse:
+    \[\forall e_1,e_2\in U:\,\,e_1\neq e_2\Rightarrow (^\bullet e_1\cup
+      e_1^\bullet)\cap  (^\bullet e_2\cup e_2^\bullet) = \emptyset\]
+    ovvero per ogni coppia distinta di eventi nell'insieme $U$ si ha che le
+    precondizioni e le postcondizioni dei due eventi sono completamente
+    disgiunte.
+    \item $U$ è un \textbf{passo abilitato}, ovvero un insieme di \textit{eventi
+      concorrenti} in una certa configurazione $c$, che si indica con:
+    \[c[U>\]
+    sse:
+    \[U \mbox{ è un insieme di eventi indipendenti } \wedge\,\, \forall e\in
+      U:\,\, c[e>\]
+    $U$ quindi deve essere un insieme di eventi indipendenti e ogni evento in
+    $U$ è abilitato in $c$, quindi le sue precondizioni sono vere e le sue
+    postcondizioni sono false. Si ha quindi che $U$ è un insieme di eventi
+    abitati in maniera concorrente in $c$
+    \item $U$ è un \textbf{passo} dalla configurazione $c_1$ alla configurazione
+    $c_2$, che si indica con:
+    \[c_1[U > c_2\]
+    sse:
+    \[(c_1[U) \wedge \Big(c_2=(c_1-^\bullet U)\cup U^\bullet\Big)\]
+    ovvero sse $U$ è un passo abilitato in $c_1$ e lo scatto degli eventi in $U$
+    porta alla configurazione $c_2$ che si ottiene togliendo da $c_1$ l'insieme
+    delle precondizioni degli eventi in $U$ e aggiungendo quindi l'insieme delle
+    postcondizioni degli eventi in $U$
+  \end{itemize}
+\end{definizione}
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -3586,4 +4130,4 @@ basano sulla \textit{true concurrency}).\\
 % LocalWords:  Pnueli Harvel sottoprocesso all deadlock Labeled Transition LTS
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
 % LocalWords:  rinominazione true LocalWords bisimili bisimilitudine bisimile
-% LocalWords:  rietichettato interleaving
+% LocalWords:  rietichettato interleaving handshaking estensionalità

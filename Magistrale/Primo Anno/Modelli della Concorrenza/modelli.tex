@@ -3643,7 +3643,9 @@ distribuito). Quindi la simulazione sequenziale non deterministica (semantica a
 ``interleaving'') dei sistemi distribuiti è una forzatura e non rappresenta le
 reali caratteristiche del comportamento del sistema, ovvero la località, la
 distribuzione degli eventi e la relazione di dipendenza causale e non causale
-tra gli eventi.\\
+tra gli eventi.
+\section{Sistemi elementari}
+
 Introduciamo quindi i \textbf{sistemi elementari}.\\
 Per introdurre i sistemi elementari delle reti di Petri, ovvero una classe molto
 semplice e astratta, partiamo da un esempio:
@@ -4113,10 +4115,531 @@ riguardano l'evento).
     ovvero sse $U$ è un passo abilitato in $c_1$ e lo scatto degli eventi in $U$
     porta alla configurazione $c_2$ che si ottiene togliendo da $c_1$ l'insieme
     delle precondizioni degli eventi in $U$ e aggiungendo quindi l'insieme delle
-    postcondizioni degli eventi in $U$
+    postcondizioni degli eventi in $U$.
   \end{itemize}
 \end{definizione}
+\begin{esempio}
+  Preso:
+   \begin{center}
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0) [label=above:P2] {};
+      \node [transition] (t1) [below right of = p0, label=left:d] {};
+      \node [transition] (t2) [below left of = p0, label=left:p] {};
+      \node [place, tokens=1] (p1) [below right of = t2, label=below:P1] {}; 
+      \node [place, tokens=1] (p3) [right of = t1, label=above:B] {};
+      \node [transition] (t4) [right of = p3, label=right:e] {};
 
+      \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:c] {};
+      \node [place] (p4) [below right of = t4, label=below:C2]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  si ha che:
+  \begin{itemize}
+    \item $\{p,e\},\{p,c\},\{d,c\}$ sono esempi di insiemi di eventi
+    indipendenti
+    \item $\{p,e\}$ è un passo abilitato in $\{P_1,B,C_1\}$
+    \item $\{P_1,B,C_1\}[\{p,w\}>\{P_2,C_2\}$ è lo scatto del passo
+    $\{p,e\}$ ci porta in $\{P_2,C_2\}$
+  \end{itemize}
+\end{esempio}
+Diamo ora una definizione formale di \textbf{sistema elementare}.
+\begin{definizione}
+  Un \textbf{sistema elementare} $\Sigma=(B,E,F;c_{in})$ è definito come una
+  rete $N=(B,E,F)$ e a cui è associato un caso iniziale, una configurazione
+  iniziale, ovvero un sottoinsieme di condizioni che rappresentano lo stato
+  iniziale da cui inizia la computazione e l'evoluzione del sistema. Formalmente
+  il caso iniziale si indica con $C_{in}\in B$ 
+\end{definizione}
+\begin{definizione}
+  Dato un sistema elementare $\Sigma=(B,E,F;c_{in})$ si indica con $C_\Sigma$
+  l'insieme dei \textbf{casi raggiungibili} da tale sistema a partire dal caso
+  iniziale $c_{in}$.\\
+  Formalmente l'insieme dei casi raggiungibili è il di piccolo sottoinsieme
+  dell'insieme delle parti di $B$, ovvero $2^B$, tale che:
+  \begin{itemize}
+    \item $c_{in}\in C_\Sigma$, ovvero sicuramente il caso iniziale appartiene
+    all'insieme dei casi raggiungibili
+    \item se $c\in C_\Sigma,\,U\subseteq E$ e $c'\subseteq B$ sono tali che
+    $c[U>c'$ allora $c'\in C_\Sigma$, ovvero se ho un generico caso $c$ che
+    appartiene ai casi raggiungibili, se ho un insieme di eventi $U$ tale che
+    questo insieme di eventi (che abbiamo visto essere indipendenti, per la
+    definizione di passo abilitato) è abilitato
+    in $c$ in un unico passo e la sua occorrenza mi porta in $c'$, allora anche
+    $c'$ appartiene a $C_\Sigma$. 
+  \end{itemize}
+  Questa è una definizione data per \textbf{induzione strutturale}, nel primo
+  punto si ha la base, nel secondo l'ipotesi e la conseguenza
+\end{definizione}
+\begin{definizione}
+  Dato un sistema elementare $\Sigma=(B,E,F;c_{in})$ si indica con $U_\Sigma$
+  l'\textbf{insieme dei passi} di $\Sigma$, ovvero di tutti i possibili insiemi
+  di eventi indipendenti che possono occorrere in qualche caso. Formalmente:
+  \[U_\Sigma =\{U\subseteq E\,|\,\exists\, c,c'\in C_\Sigma :\, c[U>c'\}\]
+  Ovvero l'insieme dei sottoinsiemi di eventi tali per cui esistano due casi
+  raggiungibili in $C_\Sigma$ e $U$ è abilitato in $c$ e il suo scatto mi porta
+  in $c'$.
+\end{definizione}
+Definiamo ora il comportamento dei sistemi elementari.
+\begin{definizione}
+  Sia $\Sigma=(B,E,F;c_{in})$ un sistema elementare e siano $c_i\in C_\Sigma$ ed
+  $e_i\in E$.\\
+  Definiamo;
+  \begin{itemize}
+    \item un \textbf{comportamento sequenziale} come una sequenza di eventi che
+    possono occorrere dal caso iniziale. Facendo scattare in maniera sequenziale
+    gli eventi uno alla volta in $c_n$:
+    \[c_{in} [e_1 > c_1 [e_2 > \ldots[e_n > c_n\]
+    Scrittura che può essere alleggerita in:
+    \[c_{in} [e_1 e_2 \ldots e_n > c_n\]
+    Possiamo dire di avere a che fare con una \textbf{simulazione sequenziale
+      non deterministica, detta anche \textit{semantica a interleaving}},
+    infatti ho più eventi abilitati da prendere uno alla volta
+    \item un \textbf{comportamento non sequenziale}, in quanto possiamo anche
+    considerare insiemi di eventi, ovvero passi. Considero quindi sequenze di
+    passi, avendo a che fare con la \textbf{step semantics}. Non ho quindi una
+    simulazione sequenziale non deterministica in quanto dal caso iniziale
+    faccio scattare un insieme di eventi, in maniera concorrente (e quindi senza
+    ordine specificato), per poi far scattare un altro insieme di eventi fino ad
+    arrivare a $c_n$: 
+    \[c_{in} [U_1 > c_1 [U_2 > \ldots [U_n > c_n\]
+    Scrittura che può essere alleggerita in:
+    \[c_{in} [U_1 U_2 \ldots U_n > c_n\]
+    Gli insiemi $U_i$ non sono insiemi massimali abilitati ma sottoinsiemi
+    indipendenti e abilitati in $c_{in}$.\\
+    Posso avere anche un altro tipo di \textbf{comportamento non sequenziale},
+    definito da Petri stesso, in una \textbf{semantica ad ordini parziali} (si
+    parla anche di \textbf{true concurrency}) in
+    cui si definiscono processi non sequenziali. Il comportamento di tale
+    sistema viene registrato in una rete di Petri
+  \end{itemize}
+  In ogni caso si considerano sia sequenze finite che infinite (con cicli) di
+  eventi o passi. 
+\end{definizione}
+\newpage
+\begin{esempio}
+  Dato il sistema elementare $\Sigma$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/seq.jpg}
+  \end{figure}
+  si ha, per esempio, la seguente sequenza di occorrenza di eventi:
+  \[\{1, 2\}[a > \{3, 2\}[b > \{3, 4\}[c > \{1, 2\}[b > \{1, 4\}[d > \{5\}\]
+  arrivati in ``5'' abbiamo un caso finale, ovvero una situazione di
+  \textbf{deadlock}, in quanto il sistema non può evolvere ulteriormente.\\
+  Vediamo anche la seguente possibile sequenza di passi. In ``1'' e ``2'' sia
+  ``a'' che ``b'' sono indipendenti e sono entrambi abilitati (scattano in
+  maniera concorrente in un unico passo, ovviamente posso avere passi con lo
+  scatto di un solo evento):
+  \[\{1, 2\}[\{a, b\} > \{3, 4\}[\{c\} > \{1, 2\}[\{b\} > \{1, 4\}\]
+  Come ricordato posso finire in una sequenza infinita.\\
+  Potrei modellare un processo non sequenziale di $\Sigma$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/seq5.jpg}
+  \end{figure}
+\end{esempio}
+Vediamo ora come modellare e registrare il comportamento del sistema. Un modo è
+usando il \textbf{grafo dei casi raggiungibili} (equivalentemente a quanto si
+faceva con il CCS).
+\newpage
+\begin{definizione}
+  Il \textbf{grafo dei casi raggiungibili} di un sistema elementare
+  $\Sigma=(B,E,F;c_{in})$ è il sistema di transizioni etichettato:
+  \[CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})\]
+  dove:
+  \begin{itemize}
+    \item $C_\Sigma$ è l'insieme dei nodi del grafo, ovvero gli stati globali,
+    i casi raggiungibili dal sistema $\Sigma$    
+    \item $U_\Sigma$, è l'alfabeto, ovvero i passi del sistema rappresentano
+    l'alfabeto 
+    \item $A$ è l'insieme di archi etichettati, formalmente definito come:
+    \[A=\{(c,U,c')|\,c,c'\in C_\Sigma, U\in U_\Sigma, c[U>c'\}\]
+    ovvero sono archi che connettono uno caso $c$ con un caso $c'$ e sono
+    etichettati con un passo $U$ sse $U$ è abilitato in $c$ e porta in
+    $c'$. Ovviamente $c$ e $c'$ sono devono essere raggiungibili e $U$ deve
+    appartenere all'insieme dei passi di $\Sigma$
+  \end{itemize}
+  Esempio in figura \ref{fig:gra}.
+\end{definizione}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.5]{img/seq1.jpg}
+  %\caption{Esempio di sistema $\Sigma$}
+  \includegraphics[scale = 0.5]{img/seq2.jpg}
+  \caption{Esempio di sistema $\Sigma$ e il suo grafo dei casi del sistema
+    $\Sigma$}
+  \label{fig:gra}
+\end{figure}
+\subsection{Diamond Property}
+Dato un sistema elementare $\Sigma = (B,E,F;c_{in})$ e il suo grafo dei casi
+$CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})$ si ha 
+che il grafo soddisfa una particolare proprietà, detta \textbf{diamond
+  property}, tipica solo dei sistemi elementari.
+\begin{definizione}
+  La \textbf{diamond property} stabilisce una proprietà della struttura del
+  grafo della rete elementare, ovvero, dati $U_1,U_2\in U_\Sigma$ tali che:
+  \begin{itemize}
+    \item $U_1\cap U_2=\emptyset$
+    \item $U_1\neq\emptyset$
+    \item $U_2\neq\emptyset$
+  \end{itemize}
+  e dati $c_i\in C_\Sigma$ allora vale, per esempio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/diam.jpg}
+    \label{fig:dia}
+  \end{figure}
+  ovvero se posso rilevare come sottografo una struttura come quella a sinistra
+  nell'immagine allora sicuramente tale sottografo contiene anche gli
+  archi per ottenere l'immagine di destra. 
+\end{definizione}
+Si possono fare delle prove:
+\begin{enumerate}
+  \item \textbf{prima prova:}\\
+  Dimostriamo che possiamo passare all'immagine di destra da quella di sinistra
+  aggiungendo i due archi mancanti, nella figura \ref{fig:dia}.\\
+  Per semplicità diciamo che $U_i$ è un singolo evento $e_i$, con $i=1,2$. Siano
+  inoltre $c_1,c_2\in C_\Sigma$, ovvero sono casi raggiungibili, ed $e_1,e_2\in
+  E$ tali che $c_1 [e_1 > c_2 [e_2 > \mbox{ e } c_1 [e_2 >$, i due eventi quindi
+  sono abilitati in sequenza e da $c_1$ è anche abilitato $c_2$ . Si vuole
+  dimostrare che: 
+  \[(^\bullet e_1\cup e_1^\bullet)\cap(^\bullet e_2\cup e_2^\bullet)=\emptyset\]
+  ovvero che i due eventi sono indipendenti, che sono entrambi abilitati e che
+  sono eseguibili in qualsiasi ordine.
+  \newpage
+  Da $c_1 [e_1 > \mbox{ e }c_1 [e_2 >$ segue che:
+  \begin{itemize}
+    \item $^\bullet e_1\cap e_2^\bullet=\emptyset$
+    \item $^\bullet e_2\cap e_1^\bullet=\emptyset$
+  \end{itemize}
+  infatti se $e_1$ e $e_2$ sono entrambi abilitati in $c_1$, le loro
+  pre-condizioni sono vere e le post-condizioni false, e quindi non è possibile
+  che una condizione sia contemporaneamente precondizione di $e_1$ (vera) e
+  anche postcondizione di $e_2$ (falsa), e viceversa. Quindi le precondizioni
+  di un evento sono disgiunte dalle postcondizioni dell'altro.\\
+  Inoltre dal fatto che ho $c_1 [e_1 > c_2 [e_2$, ovvero che da $c_1$ è
+  abilitato $e_1$ e che dopo lo scatto di $e_1$ è ancora abilitato $e_2$
+  possiamo dire che:
+  \begin{itemize}
+    \item $e_1^\bullet\cap e_2^\bullet=\emptyset$
+    \item $^\bullet e_1\cap\, ^\bullet e_2=\emptyset$
+  \end{itemize}
+  in $c_2$, infatti, le pre-condizioni di $e_1$ sono false mentre le
+  precondizioni di $e_2$ sono vere e quindi $e_1$ e $e_2$ non possono avere
+  precondizioni in comune; inoltre sempre in $c_2$ le postcondizioni di $e_1$
+  sono vere, mentre quelle di $e_2$ sono false, e quindi $e_1$ e $e_2$ non
+  possono avere post-condizioni in comune. Quindi le precondizioni dei due
+  eventi sono disgiunte, come del resto anche le postcondizioni, in quanto i due
+  eventi sono sequenziali.\\
+  Si è quindi dimostrato che i due eventi hanno precondizioni e postcondizioni
+  completamente disgiunte e quindi la tesi è verificata
+  \item \textbf{seconda prova:}\\
+  Analizzando la situazione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.45]{img/diam2.jpg}
+  \end{figure}
+  \newpage
+  Si supponga che $U_1\cup U_2\in U_\Sigma$ e che si abbiano:
+  \begin{itemize}
+    \item $U_1\cap U_2=\emptyset$, ovvero sono disgiunti
+    \item $U_1\neq\emptyset$
+    \item $U_2\neq\emptyset$
+  \end{itemize}
+  allora se $c_1[(U_1\cup U_2)>c_3$, quindi è abilitato il passo $U_1\cup U_2$
+  in $c_1$, sicuramente si ha che sono abilitati anche i singoli passi:
+  \begin{itemize}
+    \item $c_1[U_1>$
+    \item $c_1[U_2>$
+  \end{itemize}
+  resta da dimostrare che dopo lo scatto di $U_1$ è ancora abilitato $U_2$ in
+  $c_2$. Ma se $U_1\cup U_2$ è un passo abilitato significa che posso eseguirli
+  in qualsiasi ordine, quindi anche prima $U_1$ e poi $U_2$, e questo comporta
+  sicuramente che $U_2$ è abilitato e che porta a $c_3$. Analogamente invertendo
+  $U_1$ e $U_2$, formalmente: 
+  \begin{itemize}
+    \item $c_1[U_1>c_2[U_2>c_3$
+    \item $c_1[U_2>c_4[U_1>c_3$
+  \end{itemize}
+  Si dimostra così che l'immagine di sinistra comporta quella di destra.
+\end{enumerate}
+Grazie alla diamond property possiamo non considerare il grafo dei casi
+raggiungibili ma solo il \textbf{grafo dei casi sequenziale}:
+\begin{definizione}
+  Un \textbf{grafo dei casi sequenziale} del sistema elementare
+  $\Sigma=(B,E,F;c_{in})$ è una quadrupla:
+  \[SCG_\Sigma=(C_\Sigma,E,A,c_{in})\]
+  dove le etichette sono i singoli eventi (mentre il resto rimane definito come
+  nel grafo dei casi raggiungibili). Formalmente si ha quindi che:
+  \[A=\{(c,e,c')|\,c,c'\in C_\Sigma,\,e\in E:\, c[e>c'\}\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/seq3.jpg}
+    \caption{Esempio di grafo dei casi sequenziale}
+  \end{figure}
+  Si registra quindi l'occorrenza di un evento alla volta. Il grafo dei casi
+  sequenziale è quindi il sistema di transizione con gli archi etichettati dai
+  singoli eventi.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/seqq.jpg}
+    \caption{Esempio di grafo dei casi sequenziale dell'esempio con produttore
+      e consumatore (con marche in $P1$ e $C1$)}
+  \end{figure}
+\end{definizione}
+Riprendendo l'immagine precedente si ha che per la diamond property possono
+aggiungere l'arco ``centrale'' che trasformerebbe nuovamente il grafo dei casi
+sequenziale in quello dei casi raggiungibili quindi:
+\textit{per la diamond property, nei sistemi elementari il grafo dei casi e il
+  grafo dei casi sequenziale sono \textbf{sintatticamente equivalenti}, ovvero
+  possono essere ricavati a vicenda.\\
+  Questo implica il fatto che due sistemi elementari hanno grafi dei casi
+  \textbf{isomorfi} sse hanno grafi dei casi sequenziali isomorfi.}
+\subsection{Isomorfismo tra Sistemi di Transizione Etichettati}
+Si ricorda che:
+\begin{center}
+  \textit{Si parla di isomorfismo quando due strutture complesse si possono
+    applicare l'una sull'altra, cioè far corrispondere l'una all'altra, in modo
+    tale che per ogni parte di una delle strutture ci sia una parte
+    corrispondente nell'altra struttura; in questo contesto diciamo che due
+    parti sono corrispondenti se hanno un ruolo simile nelle rispettive
+    strutture.}
+\end{center}
+Diamo ora una definizione formale di isomorfismo tra sistemi di transizione
+etichettati, che possono quindi essere grafi dei casi o grafi dei casi
+sequenziali.
+\begin{definizione}
+  Siano dati due sistemi di transizione etichettati:\\
+  $A_1 = (S_1,E_1,T_1,s_{01})$ e $A_2 = (S_2 , E_2 , T_2 , s_{02})$.\\
+  e siano date due \textbf{mappe biunivoche}:
+  \begin{enumerate}
+    \item $\alpha:S_1\to S_2$, ovvero che passa dagli stati del primo sistema a
+    quelli del secondo
+    \item $\beta:E_1\to E_2$, ovvero che passa dagli eventi del primo sistema a
+    quelli del secondo
+  \end{enumerate}
+  allora:
+  \[\langle \alpha,\beta\rangle:A_1= (S_1 , E_1 , T_1 ,s_{01})\to A_2 = (S_2 ,
+    E_2 , T_2 , s_{02})\]
+  è un \textbf{isomorfismo} sse:
+  \begin{itemize}
+    \item $\alpha(s_{01})=s_{02}$, ovvero l'immagine dello stato iniziale del
+    primo sistema coincide con lo stato iniziale del secondo
+    \item $\forall s,s'\in S_1,\forall e\in E_1:\,(s,e,s')\in T_1
+    \Leftrightarrow (\alpha(s),\beta(e),\alpha(s'))\in T_2$ ovvero per ogni
+    coppia di stati del primo sistema, tra cui esiste un arco etichettato $e$,
+    vale che esiste un arco, etichettato con l'immagine di $e$, nel secondo
+    sistema che va dall'immagine del primo stato considerato del primo sistema
+    all'immagine del secondo stato considerato del secondo sistema, e viceversa
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  Si definiscono due \textbf{sistemi equivalenti} sse hanno grafi dei casi
+  sequenziali, e quindi di conseguenza anche grafi dei casi, \emph{isomorfi}.\\
+  Due sistemi equivalenti accettano ed eseguono le stesse sequenze di eventi
+\end{definizione}
+\subsection{Il Problema della Sintesi}
+Si presenta ora un problema tipico dell'informatica, il \textbf{problema della
+  sintesi}, ovvero dato un comportamento, o meglio una sua specifica, decidere
+se esiste un'implementazione di tale specifica, ovvero un modello, che abbia
+esattamente quel comportamento.\\
+In questo caso dato un sistema di transizioni etichettato $A=(S,E,T,s_0)$, con:
+\begin{itemize}
+  \item $S$ insieme degli stati
+  \item $E$ insieme delle etichette, ovvero degli eventi
+  \item $T$ insieme delle transizioni
+  \item $s_0$ stato iniziale
+\end{itemize}
+ci si propone di stabilire se esiste un sistema elementare
+$\Sigma=(B,E,F;c_{in})$, tale che l'insieme degli eventi del sistema esattamente
+l'insieme delle etichette di $A$ e tale che il suo grafo dei casi $SCG_\Sigma$
+sia isomorfo ad $A$. Ci si propone anche di costruirlo.\\
+Il problema è stato risolto mediante la cosiddetta \textbf{teoria delle regioni}
+(che però non verrà trattato nel corso). Una \textbf{regione} comunque è un
+  particolare sottoinsiemi di stati, legati tramite una certa condizione. Si può
+  però dire che $A$ dovrà 
+soddisfare la diamond property, in quanto altrimenti non sarebbe un sistema di
+transizioni che potrebbe corrispondere al comportamento di un sistema
+elementare.
+\subsection{Contatti}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare e siano $e\in E$ un evento
+  e $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale. Allora si ha che
+  $(e,c)$ è un \textbf{contatto} sse:
+  \[^\bullet e\subseteq c \wedge e^\bullet \cap c \neq\emptyset\]
+  Ovvero, in termini pratici, siamo nel caso in cui un evento $e$ ha le
+  precondizioni vere, si ha quindi che $^\bullet e\subseteq c$, e l'evento non
+  ha tutte le postcondizioni false, quindi $e^\bullet \cap c \neq\emptyset$,
+  allora si dice che l'evento $e$ è in una situazione di contatto e quindi non
+  può scattare
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place, tokens=1] (p0) [label=above:P2] {};
+      \node [transition] (t1) [below right of = p0, label=left:d] {};
+      \node [transition] (t2) [below left of = p0, label=left:p] {};
+      \node [place] (p1) [below right of = t2, label=below:P1] {}; 
+      \node [place, tokens=1] (p3) [right of = t1, label=above:B] {};
+      \node [transition] (t4) [right of = p3, label=right:e] {};
+
+      \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:c] {};
+      \node [place] (p4) [below right of = t4, label=below:C2]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p3)
+      (p3) edge (t4)
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+    \caption{Esempio dove l'evento $d$ è in una situazione di
+      contatto}
+  \end{figure}
+\end{definizione}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare. Si dice che il sistema è
+  \textbf{senza contatti} sse:
+  \[\forall e\in E,\,\forall c\in C_\Sigma\mbox{ si ha che } ^\bullet
+    e\subseteq c\Rightarrow e^\bullet\cap c=\emptyset\]
+  ovvero per ogni evento e per ogni caso raggiungibile dal caso iniziale succede
+  sempre che se le precondizioni sono vere, ovvero $^\bullet e\subseteq c$,
+  allora le postcondizioni sono false, ovvero disgiunte dal caso considerato
+  ($e^\bullet\cap c=\emptyset$)
+\end{definizione}
+Ci si chiede se sia possibile trasformare un sistema elementare $\Sigma$, con
+contatti, in uno $\Sigma'$, senza contatti, senza però modificarne il
+comportamento.\\
+La risposta a questo quesito è affermativa e la procedura consiste
+nell'aggiungere a $\Sigma$ il complemento di ogni condizione che crea situazione
+di contatto, ottenendo così un sistema $\Sigma'$ con grafo dei casi isomorfo a
+quello di $\Sigma$.\\ 
+Per aggiungere il complemento, data la condizione $x$, si aggiunge la condizione
+$not\,\, x$ che sarà vera tutte le volte che $x$ è falsa e viceversa. Per
+ottenere questo risultato la nuova condizione avrà come pre-eventi i
+post-eventi di $x$ e come post-eventi i pre-eventi di $x$. Ovvero
+connetto la nuova condizione agli stessi eventi di quella vecchia ma con archi
+orientati in senso opposto. Ovviamente le inizializzazioni delle due condizioni
+dovranno essere opposte (una vera e l'altra falsa).
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/con2.jpg}
+  \caption{Esempio con l'ottenimento del complemento di un sistema}
+\end{figure}
+Se un sistema è senza contatti si ha una regola di contatto semplificata:
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare \textbf{senza
+    contatti}. Sapendo che se le precondizioni di un evento sono vere allora
+  sicuramente le postcondizioni di quell'evento sono false in quel caso. Dato
+  che questo avviene per ogni evento e per ogni caso raggiungibile dal caso
+  iniziale per verificare che un evento $e$ sia abilitato in un caso
+  raggiungibile $c$ è sufficiente verificare che le precondizioni di $e$ siano
+  vere (in quanto automaticamente le postcondizioni saranno false). In
+  maniera formale quindi si ha che: 
+  \[c[e\mbox{ sse } ^\bullet e\subseteq c,\,\,\mbox{ con } e\in E,c\in
+    C_\Sigma\]
+  semplificando di molto la \textbf{regola di scatto}:
+\end{definizione}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place, tokens=1] (p0) [label=above:P2] {};
+      \node [transition] (t1) [below right of = p0, label=left:d] {};
+      \node [transition] (t2) [below left of = p0, label=left:p] {};
+      \node [place] (p1) [below right of = t2, label=below:P1] {}; 
+      \node [place, tokens=1] (p31) [above right  of = t1, label=above:B1] {};
+      \node [place, tokens=1] (p32) [ below right of = t1, label=below:B2] {};
+      \node [transition] (t4) [below right of = p31, label=right:e] {};
+
+      \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+      \node [transition] (t3) [below right of = p2, label=right:c] {};
+      \node [place] (p4) [below right of = t4, label=below:C2]
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p0)
+      (t1) edge (p32)
+      (p32) edge (t4)
+      (t4) edge (p31)
+      (p31) edge (t1)
+      
+      (t4) edge (p4)
+      (p4) edge (t3)
+      (t3) edge (p2)
+      (p2) edge (t4)
+      ;
+    \end{tikzpicture}
+  \includegraphics[scale = 0.4]{img/con33.jpg}
+  \caption{Esempio con il complemento del sistema produttore-consumatore (dove è
+    stato aggiunto solo il complemento di ``buffer-pieno'', ottenendo così sia
+    $B1$ che $B2$, in quanto le altre condizioni avevano già il loro
+    complemento). In aggiunta si ha anche il grafo dei casi sequenziale
+    corrispondente al nuovo sistema senza contatti (grafo che è isomorfo a
+    quello ottenibile al sistema con contatti)}
+  \label{fig:con}
+\end{figure}
+\subsection{Situazioni Fondamentali}
+\subsubsection{Sequenza}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare, con contatti o meno
+  e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1,e_2\in
+  E$ due eventi.\\
+  Si ha che $e_1$ ed $e_2$ sono \textbf{in sequenza} nel caso
+  raggiungibile $c$ sse:
+  \[c[e_1>\wedge\, \neg c[e_2\wedge c[e_1e_2>\]
+  ovvero in $c$ è abilitato $e_1$ ma non $e_2$ ma, dopo lo scatto di $e_1$,
+  $e_2$ diventa abilitato. Quindi in $c$ è possibile attivare prima $e_1$ e poi
+  $e_2$ in sequenza.\\
+  Si ha quindi una relazione di \textbf{dipendenza causale tra $e_1$ ed $e_2$},
+  ovvero qualche postcondizione di $e_1$ è precondizione di $e_2$ (che quindi
+  può occorrere solo se precedentemente è occorso $e_1$).
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place, tokens=1] (p0)  {};
+      \node [transition] (t1) [right of = p0, label=above:$e_1$] {};
+      \node [place] (p1) [above right  of = t1] {};
+      \node [place] (p2) [right of = t1] {};
+      \node [transition] (t2) [right  of = p1, label=above:$e_2$] {};
+      \node [place] (p3) [right  of = t2] {};
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (t1) edge (p2)
+      (p1) edge (t2)
+      (t2) edge (p3)
+      ;
+    \end{tikzpicture}
+    \caption{Esempio di sequenza tra $e_1$ ed $e_2$}
+  \end{figure}
+\end{definizione}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

@@ -4694,8 +4694,8 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
       \centering
       \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
         \node [place, tokens = 1] (p0)  {};
-        \node [transition] (t1) [above right of = p0, label=above:$e_1$] {};
-        \node [transition] (t2) [below right of = p0, label=below:$e_2$] {};
+        \node [transitionv] (t1) [above right of = p0, label=above:$e_1$] {};
+        \node [transitionv] (t2) [below right of = p0, label=below:$e_2$] {};
         \node [place] (p1) [right  of = t1] {};
         \node [place] (p2) [right of = t2] {};
         {}; 
@@ -4717,8 +4717,8 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
       \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
         \node [place, tokens = 1] (p0)  {};
         \node [place, tokens = 1] (p00) [below of = p0] {};
-        \node [transition] (t1) [right of = p0, label=above:$e_1$] {};
-        \node [transition] (t2) [right of = p00, label=below:$e_2$] {};
+        \node [transitionv] (t1) [right of = p0, label=above:$e_1$] {};
+        \node [transitionv] (t2) [right of = p00, label=below:$e_2$] {};
         \node [place] (p1) [right  of = t1] {};
         {}; 
         
@@ -4745,8 +4745,8 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
     \centering
     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
       \node [place] (p0)  {};
-      \node [transition] (t1) [above right of = p0, label=above:$e_1$] {};
-      \node [transition] (t2) [below right of = p0, label=below:$e_2$] {};
+      \node [transitionv] (t1) [above right of = p0, label=above:$e_1$] {};
+      \node [transitionv] (t2) [below right of = p0, label=below:$e_2$] {};
       \node [place, tokens=1] (p1) [right  of = t1] {};
       \node [place] (p2) [right of = t2] {};
       {}; 
@@ -4772,8 +4772,8 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
         \node [place] (p0)  {};
         \node [place] (p00) [below of = p0] {};
-        \node [transition] (t1) [right of = p0, label=above:$e_1$] {};
-        \node [transition] (t2) [right of = p00, label=below:$e_2$] {};
+        \node [transitionv] (t1) [right of = p0, label=above:$e_1$] {};
+        \node [transitionv] (t2) [right of = p00, label=below:$e_2$] {};
         \node [place, tokens = 1] (p1) [right  of = t1] {};
         {}; 
         
@@ -5060,62 +5060,212 @@ Sarà interessante studiare come la composizione di due componenti, per esempio,
 senza deadlock non comporta, in generale, l'ottenimento di una rete priva di
 deadlock.
 \section{Processi non sequenziali}
+Parliamo ora di sistemi non sequenziali, ad ordini parziali.\\
+Vediamo un esempio sempre usato da Petri.
 Petri pensò ad un sistema in cui diversi omini, spostandosi avanti nel tempo,
-portassero dei secchi per andare a spegnere un fuoco. Se due omini si incontrano
-lungo la strada si scambiano 
-il secchio. Ma a Petri non va bene questo modello avendo a che fare col il
-tempo, non discreto. Cerca quindi un modello combinatorio in cui si hanno varie
-configurazioni che possono essere osservate. Gli omini potrebbero essere quindi
+portassero dei secchi per andare a spegnere un fuoco (dato che il sentiero  è
+stretto si studia protocollo per cui se hanno il secchio vuoto si muovono a
+sinistra fino alla fonte d'acqua e a quel punto ci si sposta a destra). Se due
+omini si incontrano lungo la strada si scambiano 
+il secchio e invertono la direzione di marcia:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/fire.jpg} 
+\end{figure}
+Un modello classico è quello di far scorrere il tempo come nell'immagine vedendo
+gli spostamenti di ogni omino. Nell'immagine si identifica in rosso la storia di
+un omino e in blu la storia del secchio pieno.
+Ma a Petri non va bene questo modello avendo a che fare col il 
+tempo, avendo un modello non discreto.\\
+Cerca quindi un modello combinatorio in cui si hanno varie
+configurazioni che possono essere osservate (con quindi non necessariamente una
+sola scala del tempo).
+Si può osservare una configurazione del tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/fire2.jpg} 
+\end{figure}
+con relazioni di dipendenza degli eventi (le righe blu) e situazioni di
+indipendenza (la riga verde).\ 
+Gli omini potrebbero essere quindi
 modellati da una rete con gli incontri tra omini che diventano
 sincronizzazioni. L'evoluzione del sistema può essere registrato salvando
-informazioni vere:
+informazioni vere. Nel sistema la prima transizione a sinistra è quindi il
+prelevamento dell'acqua e l'ultimo a destra il versamento sul fuoco:
 \begin{figure}[H]
   \centering
-  \includegraphics[scale = 0.5]{img/inc1.jpg} 
+  \includegraphics[scale = 0.5]{img/inc.jpg} 
 \end{figure}
-Possiamo quindi produrre la rete in base alle condizioni:
+Gli eventi in mezzo sono i cambiamenti di secchio.\\
+l'ordine degli archi segue il secchio, verso sinistra con il secchio vuoto e
+verso destra con il secchio pieno. Le condizioni in alto praticamente sono il
+secchio vuoto mentre in basso pieno.\\
+L'evoluzione del sistema posso memorizzarlo tramite condizioni vere. 
+Possiamo quindi produrre la rete in base alle condizioni che possono scattare
+(in corrispondenza degli elementi della rete),
+ottenendo:
 \begin{figure}[H]
   \centering
-  \includegraphics[scale = 0.5]{img/inc2.jpg} 
+  \includegraphics[scale = 0.7]{img/inc2.jpg} 
 \end{figure}
-Posso modellare i vari percorsi tramite linee colorate con quelle tratteggiate
-in alto che rappresentano lo stato iniziale e quelle in basso quello finale.
+Tale modello è infinito.\\
+\newpage
+Posso modellare i vari percorsi tramite linee colorate (percorso del secchio
+pieno in blu, percorso dell'omino in rosso, secchio vuoto in giallo,
+etc$\ldots$) con quelle tratteggiate 
+in alto (verde) che rappresentano lo stato iniziale e quelle in basso (viola)
+quello finale, dove blocco il sistema
+(dopo il quale si ricomincia da capo):
 \begin{figure}[H]
   \centering
   \includegraphics[scale = 0.5]{img/inc3.jpg} 
 \end{figure}
-\textbf{rivedere questa parte.}\\
+Tra le varie linee colorate (non quelle tratteggiate) si hanno relazioni di
+dipendenza. \\
+Definiamo il tutto in modo formale.
 \begin{definizione}
   Definiamo:
   \[N=(B,E,F)\]
-  come una \textbf{rete causale}, ovvero una rete di occorrenze senza conflitti,
+  come una \textbf{rete causale}, detta anche rete di occorrenze senza conflitti,
   sse:
   \begin{itemize}
     \item $\forall b\in B:|\,^{\bullet}b|\leq 1\land |b^{\bullet}|\leq 1$, ovvero
-    non si hanno conflitti
+    non si hanno conflitti, quindi per ogni condizione si ha al più un pre
+    evento e un post evento (avendo quindi al più un arco entrante e al più uno
+    uscente)
+    
     \item $\forall a,y\in B\cup E:(x,y)\in F^+\implies (y,x)\not\in F^+$, ovvero
-    non si hanno cicli
-    \item $\forall e\in E:\{x\in B\cupE|\,xF^*e\}$ è finito
+    non si hanno cicli, quindi presi due elementi collegati da una sequenza di
+    archi orientati, avendo un cammino tra i due elementi ($F^+$ è la chiusura
+    transitiva della relazione $F$) non ho anche un cammino opposto tra i due
+    \item $\forall e\in E:\{x\in B\cup E|\,xF^*e\}$ è finito, ovvero si ha un
+    numero finito di pre-elementi di un certo elemento
   \end{itemize}
-  la rete può essere infinita.
+  Sono quindi reti che registrano un comportamento e quindi non si hanno
+  conflitti (che in caso sono sciolti registrando solo quello che è
+  effettivamente successo e non quello che potrebbe succedere). Si registra una
+  run del sistema. Non si hanno nemmeno cicli perché ogni ripetizione
+  dell'evento viene concatenata a quella prima (come detto nell'esempio dopo le
+  righe tratteggiate in viola si cominciava da capo).\\
+  La rete può essere quindi si infinita ma è composta da un insieme di elementi
+  finito che si ripete. In ogni caso il passato di un evento è finito e
+  registrato, anche se nel complesso il comportamento è infinito ``in
+  avanti''. \\
+  Con una rete causale si possono non distinguere più condizioni ed eventi.
+
 \end{definizione}
 Ad una rete causale è possibile associare un ordine parziale:
-\[(X,\leq)=(B\cuo E, F^*)\]
-In tal caso possono non distinguere più condizioni ed eventi.\\
+\[(X,\leq)=(B\cup E, F^*)\]
+Dicendo che un elemento ``è minore'' di un altro se esiste un cammino orientato
+dall'uno all'altro (si specifica che $F^*$ non mi farà mai identificare $x$ con
+$x$).
+\begin{esempio}
+  Vediamo un esempio di rete causale:
+   \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0)  {};
+      \node [transitionv] (t1) [right of = p0] {};
+      \node [place] (p1) [above right of = t1] {};;
+      \node [place] (p2) [below right of = t1] {};
+      \node [transitionv] (t2) [right of = p1] {};
+      \node [place] (p3) [right of = t2] {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (t1) edge (p2)
+      (p1) edge (t2)
+      (t2) edge (p3)
+      ;
+    \end{tikzpicture}
+  \end{figure}
+  che quindi avendo un ordine parziale ed essendo causale posso scrivere come:
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0)  {};
+      \node [place] (t1) [right of = p0] {};
+      \node [place] (p1) [above right of = t1] {};;
+      \node [place] (p2) [below right of = t1, label=below:$a$] {};
+      \node [place] (t2) [right of = p1, label=above:$b$] {};
+      \node [place] (p3) [right of = t2] {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (t1) edge (p2)
+      (p1) edge (t2)
+      (t2) edge (p3)
+      ;
+    \end{tikzpicture}
+  \end{figure}
+  L'ordine \textbf{parziale} si rileva dal fatto che, per esempio, non si ha
+  alcuna relazione d'ordine tra $a$ e $b$.
+\end{esempio}
+\begin{esempio}
+  Vediamo anche due esempi di reti non causali:
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0)  {};
+      \node [transition] (t1) [right of = p0] {};
+      \node [place] (p1) [below of = t1] {};
+      \node [transition] (t2) [below of = p1] {};
+      \node [place] (p2) [left of = t2] {};
+      \node [transition] (t3) [above of = p2] {};
+      %\node [place] (p3) [right of = t3] {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t2)
+      (t2) edge (p2)
+      (p2) edge (t3)
+      (t3) edge (p0)
+      ;
+    \end{tikzpicture}
+  \end{figure}
+  avendo un ciclo.\\
+  Oppure:
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0)  {};
+      \node [transitionv] (t1) [above right of = p0] {};
+      \node [transitionv] (t2) [below right of = p0] {};
+      \node [place] (p2) [right of = t1] {};
+      \node [place] (p3) [right of = t2] {};
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (p0) edge (t2)
+      (t1) edge (p2)
+      (t2) edge (p3)
+      ;
+    \end{tikzpicture}
+  \end{figure}
+  Avendo un conflitto.
+\end{esempio}
 \begin{definizione}
   Data una rete causale $N=(B,E,F)$ e dato un ordine parziale $(X, \leq)$ con
-  $X=B\cup E$ si ha che, presi $x,y\in X$ come elementi che occorrono nella
-  storia di $x$ si hanno le seguenti diciture:
+  $X=B\cup E$ si ha che si può interpretare la relazione d'ordine come
+  indipendenza o dipendenza causale, ovvero presi $x,y\in X$ come elementi che
+  occorrono nella storia di $X=B\cup E$ si hanno le seguenti diciture:
   \begin{itemize}
-    \item $x\leq y$ corrisponde a \textbf{$x$ causa $y$}
+    \item $x\leq y$ (avendo un cammino da $x$ a $y$) corrisponde a \textbf{$x$
+      causa $y$}, ovvero si ha una relazione di dipendenza causale tra i due
     \item $x \mbox{ \textbf{li} }y$ indica che $x\leq y\lor y\leq x$ e quindi
-    corrisponde a \textbf{$x$ e $y$ sono casualmente dipendenti}
+    corrisponde a \textbf{$x$ e $y$ sono casualmente dipendenti}. Si ha che
+    \textbf{li} può venire letto come \textit{linea} ($x$ in linea con $y$) 
+    avendo che uno dei due precede l'altro
     \item $x \mbox{ \textbf{co} }y$ indica che $\neg(x< y)\land \neg(y < x)$ e
-    quindi corrisponde a \textbf{$x$ e $y$ sono casualmente indipendenti} 
+    quindi corrisponde a \textbf{$x$ e $y$ sono casualmente indipendenti},
+    avendo che i due elementi non si precedono a vicenda, non avendo ordine tra
+    loro. Si ha che \textbf{co} sta per \textit{concurrency}
   \end{itemize}
 \end{definizione}
 \begin{esempio}
-  Presa la rete causale:
+  Presa la rete causale (già compattata):
   \begin{figure}[H]
     \centering
     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
@@ -5135,10 +5285,10 @@ In tal caso possono non distinguere più condizioni ed eventi.\\
   \begin{itemize}
     \item $b \mbox{ \textbf{co} }c$
     \item $c \mbox{ \textbf{co} }d$
-    \item $\neg (b \mbox{ \textbf{co} }d$
+    \item $\neg (b \mbox{ \textbf{co} }d)$
     \item $c \mbox{ \textbf{li} }a$
     \item $a \mbox{ \textbf{li} }d$
-    \item $\neg (c \mbox{ \textbf{li} }d$
+    \item $\neg (c \mbox{ \textbf{li} }d)$
   \end{itemize}
 \end{esempio}
 Si ha quindi che \textbf{\textit{li} \textnormal{e} co} sono:
@@ -5147,9 +5297,61 @@ Si ha quindi che \textbf{\textit{li} \textnormal{e} co} sono:
   \item \textbf{non} transitive
   \item riflessive
 \end{itemize}
-  % \subsection{Reti posti e transizioni}
-  % Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
-  % Posti e Transizioni}, permette di rappresentare un sistema in modo più
+che sono comunque proprietà derivate dalla teoria degli ordini parziali.\\
+Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
+\textbf{li} e la relazione \textbf{co} sono transitive.
+\begin{definizione}
+  Data una rete causale $N=(B,E,F)$ e dato un ordine parziale $(X, \leq)$ con
+  $X=B\cup E$ definiamo:
+  \[C\subseteq X\]
+  come:
+  \begin{itemize}
+    \item \textbf{co-set} sse $\forall x,y\in C:\, x\mbox{ \textbf{co }}y$,
+    quindi $C$ è una clique della relazione \textbf{co}
+    \item \textbf{taglio} sse $C$ è un co-set massimale (tutti gli elementi nel
+    taglio sono in relazione \textbf{co})
+  \end{itemize}
+  Definiamo $C$ come co-set massimale sse $\forall\,y\in X\backslash C$ si ha
+  che:
+  \[\exists c\in C:\,y\,\,\,\cancel{\mathbf{co}}\,\,\,c\]
+  (nel dettaglio esiste almeno un $c$). \\
+  Quindi in $C$ definito o come \textbf{co-set} o come \textbf{taglio} si ha che
+  vale la transitività.\\
+  
+  Definiamo:
+  \[L\subseteq X\]
+  come:
+  \begin{itemize}
+    \item \textbf{li-set} sse $\forall x,y\in L:\, x\mbox{ \textbf{li }}y$
+    \item \textbf{linea} sse $L$ è un li-set massimale
+  \end{itemize}
+  \textit{rivedere la seguente affermazione}:\\
+  Definiamo $L$ come li-set massimale sse $\forall\,y\in X\backslash L$ si ha
+  che:
+  \[\exists l\in L:\,y\,\,\,\cancel{\mathbf{li}}\,\,\,l\]
+  Si ha quindi che:
+  \begin{itemize}
+    \item in un \textbf{co-set} la relazione \textbf{co} è transitiva
+    \item in un \textbf{li-set} la relazione \textbf{li} è transitiva.
+  \end{itemize}
+  Tagli e linee possono essere fatti sia di condizioni che di eventi.
+\end{definizione}
+\begin{esempio}
+  Tornando all'esempio del secchio si ha che:
+  \begin{itemize}
+    \item la storia del secchio è un insieme di elementi in relazione
+    \textbf{li} e, nello specifico, ad esempio la parte azzurra o quella gialla,
+    è una \textit{linea} che descrive un sottoprocesso
+    \item le parti tratteggiate, sua quella verde che quella viola, sono invece
+    un co-set e, nel dettaglio, sono un 
+    taglio (infatti se cerco di aggiungere un qualsiasi altro elemento otterrei
+    una relazione di dipendenza con uno degli elementi già presenti)
+  \end{itemize}
+\end{esempio}
+\textbf{I tagli fatti di sole condizioni rappresentano casi raggiungibili}.
+% \subsection{Reti posti e transizioni}
+% Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
+% Posti e Transizioni}, permette di rappresentare un sistema in modo più
 % compatto, sono una sorta di \textit{ripiegamento} dei sistemi
 % elementari. Partiamo quindi da un esempio:
 % \begin{esempio}

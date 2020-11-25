@@ -4570,7 +4570,7 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
       \node [transition] (t2) [below left of = p0, label=left:p] {};
       \node [place] (p1) [below right of = t2, label=below:P1] {}; 
       \node [place, tokens=1] (p31) [above right  of = t1, label=above:B1] {};
-      \node [place, tokens=1] (p32) [ below right of = t1, label=below:B2] {};
+      \node [place] (p32) [ below right of = t1, label=below:B2] {};
       \node [transition] (t4) [below right of = p31, label=right:e] {};
 
       \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
@@ -4640,6 +4640,662 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
     \caption{Esempio di sequenza tra $e_1$ ed $e_2$}
   \end{figure}
 \end{definizione}
+\subsubsection{Concorrenza}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare, con contatti o meno
+  e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1,e_2\in
+  E$ due eventi. \\
+  Si ha che i due eventi sono \textbf{concorrenti} nel caso
+  raggiungibile $c$ sse:
+  \[c[\{e_1,e_2\}>\]
+  ovvero se possono essere abilitati in unico passo o, detto in maniera
+  diversa, se sono indipendenti ed entrambi abilitati in $c$
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place, tokens=1] (p0)  {};
+      \node [place, tokens=1] (p00) [below of = p0] {};
+      \node [transition] (t1) [right of = p0, label=above:$e_1$] {};
+      \node [transition] (t2) [right of = p00, label=above:$e_2$] {};
+      \node [place] (p1) [right  of = t1] {};
+      \node [place] (p2) [right of = t2] {};
+      \node [transition] (t3) [right of = p1] {};
+      \node [place] (p3) [right of = t3] {};
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p1) edge (t3)
+      (p00) edge (t2)
+      (t2) edge (p2)
+      (p2) edge (t3)
+      (t3) edge (p3)
+      ;
+    \end{tikzpicture}
+    \caption{Esempio di concorrenza tra $e_1$ ed $e_2$}
+  \end{figure}
+\end{definizione}
+\subsubsection{Conflitto}
+\begin{definizione}
+  Sia $\Sigma = (B,E,F;c_{in})$ un sistema elementare, con contatti o meno
+  e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1,e_2\in
+  E$ due eventi.\\
+  Si ha che $e_1$ ed $e_2$ sono in conflitto sse:
+  \[c[e_1>\,\wedge\, c[e_2 \wedge\,\neg c[\{e_1,e_2\}>\]
+  ovvero i due eventi sono entrambi abilitati (quindi le precondizioni sono vere
+  mentre le postcondizioni son false) ma l'occorrenza di uno disabilità
+  l'altro, quindi non possono essere abilitati in un unico passo, in quanto non
+  sono indipendenti. Ci sono due casi:
+  \begin{enumerate}
+    \item i due eventi hanno una precondizione in comune, e in tal caso si parla
+    di \textbf{conflitto forward} (ovvero \textit{in avanti})
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        \node [place, tokens = 1] (p0)  {};
+        \node [transition] (t1) [above right of = p0, label=above:$e_1$] {};
+        \node [transition] (t2) [below right of = p0, label=below:$e_2$] {};
+        \node [place] (p1) [right  of = t1] {};
+        \node [place] (p2) [right of = t2] {};
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (t1) edge (p1)
+        (p0) edge (t2)
+        (t2) edge (p2)
+
+        ;
+      \end{tikzpicture}
+      \caption{Esempio di conflitto forward tra $e_1$ ed $e_2$}
+    \end{figure}
+    \item i due eventi hanno una postcondizione in comune, e in tal caso si parla
+    di \textbf{conflitto backward} (ovvero \textit{all'indietro})
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        \node [place, tokens = 1] (p0)  {};
+        \node [place, tokens = 1] (p00) [below of = p0] {};
+        \node [transition] (t1) [right of = p0, label=above:$e_1$] {};
+        \node [transition] (t2) [right of = p00, label=below:$e_2$] {};
+        \node [place] (p1) [right  of = t1] {};
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (t1) edge (p1)
+        (p00) edge (t2)
+        (t2) edge (p1)
+        ;
+      \end{tikzpicture}
+      \caption{Esempio di conflitto backward tra $e_1$ ed $e_2$}
+    \end{figure}
+  \end{enumerate}
+  Si ha quindi una situazione di \textbf{non determinismo}, non essendo
+  specificato quale dei due eventi scatterà prima (e lo scatto di uno impedisce
+  lo scatto dell'altro).
+  Posso ritrovarmi nel caso in cui effettivamente un evento scatta, cambiando lo
+  stato del sistema. In tal caso, in un'ottica completamente deterministica, si
+  deve assumere che \textbf{l'ambiente} abbia fornito un'informazione
+  riguardo il conflitto, ovvero c'è stato qualcosa di esterno che ha permesso ad
+  uno dei due eventi di scattare ugualmente. Ho quindi guadagnato
+  dell'informazione. 
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+      \node [place] (p0)  {};
+      \node [transition] (t1) [above right of = p0, label=above:$e_1$] {};
+      \node [transition] (t2) [below right of = p0, label=below:$e_2$] {};
+      \node [place, tokens=1] (p1) [right  of = t1] {};
+      \node [place] (p2) [right of = t2] {};
+      {}; 
+      
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (t1)
+      (t1) edge (p1)
+      (p0) edge (t2)
+      (t2) edge (p2)
+
+      ;
+    \end{tikzpicture}
+    \caption{Esempio di conflitto con l'intervento dell'ambiente tra $e_1$ ed
+      $e_2$ (con conseguente guadagno di informazione)} 
+  \end{figure}
+  Ci sono però casi in cui in ogni caso non si può avere informazione su quale
+  esempio sia scattato. Si può ipotizzare che tale informazione fosse presente
+  nello stato precedente del sistema (una sola condizione attiva, per
+  esempio). Quindi l'informazione, finita nell'ambiente (ricevuta
+  dall'ambiente), si è persa.
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        \node [place] (p0)  {};
+        \node [place] (p00) [below of = p0] {};
+        \node [transition] (t1) [right of = p0, label=above:$e_1$] {};
+        \node [transition] (t2) [right of = p00, label=below:$e_2$] {};
+        \node [place, tokens = 1] (p1) [right  of = t1] {};
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (t1) edge (p1)
+        (p00) edge (t2)
+        (t2) edge (p1)
+        ;
+      \end{tikzpicture}
+    \caption{Esempio di conflitto tra $e_1$ ed
+      $e_2$ con conseguente perdita di informazione (si può ipotizzare, per
+      esempio, che nello stato precedente la precondizione di $e_1$ fosse attiva
+      mentre quella dio $e_2$ fosse inattiva)} 
+  \end{figure}
+  Il modello, nell'ottica di Petri, non è quindi un \textbf{modello chiuso} ma è
+  in grado di comunicare con l'ambiente (in sintonia con le teorie della
+  fisica). 
+\end{definizione}
+\subsubsection{Confusione}
+\begin{definizione}
+  La situazione di \textbf{confusione} è una \textit{mistura} di situazioni di
+  concorrenza e di conflitto. Si hanno 2 tipi di confusione, entrambe
+  ammissibili: 
+  \begin{enumerate}
+    \item detta \textbf{confusione asimmetrica} considera il fatto di avere un
+    caso raggiungibile e due eventi abilitati, nella figura $e_1$ ed $e_2$, in
+    maniera concorrente in $c$, che nella figura consiste nel caso
+    $\{b_1,b_2,b_3\}$. I due eventi sono quindi indipendenti. Nella figura lo
+    scatto dei due eventi porterebbe allo stato $c'=\{b_4,b_5\}$. Bisogna
+    analizzare però nel dettaglio il sistema. Se prima occorre $e_1$ non si ha
+    alcun conflitto mentre se occorre prima $e_2$ (che porterebbe in
+    $\{b_1,b_3,b_4\}$) si crea un conflitto tra $e_1$ ed $e_3$, che viene
+    risolto a favore di $e_1$ e a sfavore di $e_3$. \textbf{Non è possibile
+      stabilire oggettivamente se è stato sciolto un conflitto}. Sono quindi in
+    una situazione di confusione in quanto non so se è stata effettuata o meno
+    una scelta.
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        %\node [place, tokens = 1] (p0)  {};
+        \node [transition] (t1) [ label=right:$e_2$] {};
+        \node [place, tokens = 1] (p0) [left of = t1,  label=left:$b_2$] {};
+        \node [place] (p1) [below  of = t1,  label=left:$b_4$] {};
+        \node [place, tokens = 1] (p2) [left  of = p1, label=left:$b_3$] {};
+        \node [place, tokens = 1] (p3) [left  of = p2,  label=left:$b_1$] {};
+        \node [transition] (t2) [below of = p1, label=left:$e_1$] {};
+        \node [transition] (t3) [below of = p3, label=right:$e_3$] {};
+        \node [place] (p4) [below of = t2, label=left:$b_5$] {};;
+        \node [place] (p5) [below of = t3,  label=left:$b_6$] {};
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (t1) edge (p1)
+        (p1) edge (t2)
+        (p2) edge (t2)
+        (p2) edge (t3)
+        (p3) edge (t3)
+        (t2) edge (p4)
+        (t3) edge (p5)
+        ;
+      \end{tikzpicture}
+      \caption{Esempio di confusione asimmetrica tra $e_1$ ed $e_2$} 
+    \end{figure}
+    Una soluzione che vedremo sarà la scomposizione in più componenti del
+    sistema 
+    \item detta \textbf{confusione simmetrica}, nome dovuto al fatto che la rete
+    risulta disegnata in modo simmetrico, comportando delle
+    problematiche. Prendiamo nell'immagine il caso raggiungibile $c=\{b_1,b_2\}$
+    e i due eventi $e_1$ ed $e_3$, abilitati in maniera concorrente. Si ha che
+    $c[\{e_1,e_3\}>c'$, con $c'=\{b_3,b_5\}$. Anche in questo caso si hanno dei
+    conflitti, infatti sia $e_1$ che $e_3$ sono in conflitto con $e_2$ (in
+    quanto se uno dei due viene eseguito $e_2$ non può più occorrere). Anche in
+    questo caso non posso stabilire se il conflitto è stato risolto nel momento
+    in cui arrivo in $c'$ (ovvero se si è deciso di fare $e_1$ piuttosto che
+    $e_2$ o $e_3$ piuttosto che $e_2$).\\
+    Anche in questo caso potremo dividere in componenti (una che esegue $e_1$ ed
+    $e_2$ e un'altra che esegue $e_1$ ed $e_3$, con $e_2$ che è una
+    sincronizzazione tra le due componenti).\\
+    Non si può dire chi ha deciso e chi ha la responsabilità di decidere quale
+    evento deve occorrere, se alla componente di $b_1$ o a quella di $b_2$.\\
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+        \node [place, tokens = 1] (p0) [label=left:$b_1$] {};
+        %\node [place, tokens = 1] (p1) [right of = p0, label=left:$b_2$] {};
+        \node [transition] (t1) [below left of = p0, label=right:$e_1$] {};
+        \node [transition] (t2) [below right of = p0, label=right:$e_2$] {};
+        \node [place, tokens = 1] (p1) [above right of=t2,label=left:$b_2$] {};
+        \node [transition] (t3) [below right of = p1, label=right:$e_3$] {};
+        \node [place] (p3) [below of = t1, label=left:$b_3$] {};;
+        \node [place] (p4) [below of = t2,  label=left:$b_4$] {};
+        \node [place] (p5) [below of = t3,  label=left:$b_5$] {};
+        {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (p0) edge (t2)
+        (p1) edge (t2)
+        (p1) edge (t3)
+        (t1) edge (p3)
+        (t2) edge (p4)
+        (t3) edge (p5)
+        ;
+      \end{tikzpicture}
+      \caption{Esempio di confusione simmetrica tra $e_1$ ed $e_2$} 
+    \end{figure}
+  \end{enumerate}
+  Petri era convinto, nella sua visione deterministica e senza conflitti, che
+  l'avere una situazione di confusione nel modello fosse dovuto al non aver
+  esplicitato alcuni aspetti o di aver costruito male il modello, con
+  informazioni parziali e non complete sul modello e sull'ambiente.\\
+  Un altro studioso, Einar Smith, molto vicino a Petri ha invece dimostrato come
+  la confusione sia inevitabile
+\end{definizione}
+Vediamo un esempio famoso, detto della \textbf{mutua esclusione}, portato da
+Smith per spiegare come la confusione sia inevitabile nella realtà.
+\newpage
+\begin{esempio}
+  Si analizza il seguente sistema:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/mes.jpg} 
+  \end{figure}
+  In rosso e in Blu abbiamo specificate le due componenti del sistema, che
+  condividono una risorsa, ovvero la condizione $b_4$, che rappresenta che la
+  risorsa è libera e a disposizione. L'evento $e_1$ e evento $e_4$ rappresentano
+  eventi di acquisizione della risorsa (rispettivamente per la prima e per la
+  seconda componente) e quindi le loro precondizioni rappresentano la necessità
+  di acquisirla. Tra questi due eventi c'è una \textbf{situazione di
+    conflitto}. Le condizioni $b_2$ e $b_7$, ovvero le rispettive postcondizioni
+  dei due eventi, rappresentano che la risorsa è in uso per la rispettiva
+  componente mentre gli eventi $e_2$ ed $e_5$ rappresentano il rilascio della
+  risorsa condivisa, sempre per la rispettiva componente, arrivando
+  rispettivamente nella componente $b_3$ e $b_8$. Ovviamente la risorsa
+  non può essere contemporaneamente in uso da entrambe le risorse, quindi $b_2$
+  e $b_7$ non possono essere contemporaneamente marcate, ovvero vere, e per
+  questo si parla di \textit{mutua esclusione} (se una delle due è vera l'altra
+  deve essere necessariamente falsa). D'altro canto gli
+  eventi $e_3$ ed $e_6$ possono invece occorrere in modo concorrente senza
+  conflitti.\\
+  Scrivendo formalmente si ha che, nel caso che la risorsa sia stata acquisita
+  dalla componente rossa e successivamente rilasciata:
+  \[\{b_3,b_4,b_6\}[\{e_3,e_4\}>\{b_1,b_7\}\]
+  ma se scatta prima $e_3$ ho il conflitto tra $e_1$ ed $e_4$, se scatta prima
+  $e_4$ non ho conflitti con $e_1$. Quindi non ho informazioni sulla risoluzione
+  del conflitto.\\
+  \textbf{Capire se è confusione simmetrica}
+\end{esempio}
+\subsection{Sottoreti}
+Partiamo subito con una definizione formale:
+\begin{definizione}
+  Siano $N=(B,E,F)$ e $N_1=(B_1,E_1,F_1)$ due reti elementari.\\
+  Si dice che $N_1$ è \textbf{sottorete} di $N$ sse:
+  \begin{itemize}
+    \item $B_1\subseteq B$, quindi l'insieme delle condizioni della rete $N_1$
+    è sottoinsieme di quello della rete $N$
+    \item $E_1\subseteq E$, quindi l'insieme degli eventi della rete $N_1$
+    è sottoinsieme di quello della rete $N$
+    \item $F_1=F\cap[(B_1\times E_1)\cup (E_1\times B_1)]$, ovvero la relazione
+    di flusso di $N_1$ è definita come la restrizione della relazione di flusso
+    di $N$ rispetto alle condizioni e $B_1$ e agli eventi $E_1$ (tengo quindi
+    solo gli archi di $N$ che connettono eventi e condizioni di $N_1$)
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  Siano $N=(B,E,F)$ e $N_1=(B_1,E_1,F_1)$ due reti elementari.\\
+  Si dice che $N_1$ è \textbf{sottorete generata da} $B_1$ di $N$ (ovvero di
+  sottorete generata da un insieme di condizioni) sse:
+  \begin{itemize}
+    \item $B_1\subseteq B$, quindi l'insieme delle condizioni della rete $N_1$
+    è sottoinsieme di quello della rete $N$
+    \item $E_1=\, ^\bullet B_1\cup B_1^\bullet$, ovvero come eventi si
+    hanno tutti quegli eventi che sono collegati in $N$ alle condizioni incluse
+    nell'insieme di condizioni $B_1$, prendendo quindi tutti i pre-eventi e i
+    post-eventi delle condizioni dell'insieme $B_1$
+    \item $F_1=F\cap[(B_1\times E_1)\cup (E_1\times B_1)]$, ovvero la relazione
+    di flusso di $N_1$ è definita come la restrizione della relazione di flusso
+    di $N$ rispetto alle condizioni $B_1$ e agli eventi $E_1$
+  \end{itemize}
+  Non ho quindi una sottorete generata da un insieme arbitrario di condizioni ed
+  eventi ma questi ultimi sono direttamente presi in relazione all'insieme delle
+  condizioni scelto
+\end{definizione}
+\begin{definizione}
+  Siano $N=(B,E,F)$ e $N_1=(B_1,E_1,F_1)$ due reti elementari.\\
+  Si dice che $N_1$ è \textbf{sottorete generata da} $E_1$ di $N$ (ovvero di
+  sottorete generata da un insieme di eventi) sse:
+  \begin{itemize}
+    \item $B_1=\,^\bullet E_1\cup E_1^\bullet$, ovvero come condizioni si
+    hanno tutte quelle condizioni che sono collegati in $N$ agli eventi inclusi
+    nell'insieme di eventi $E_1$, prendendo quindi tutte e precondizioni e le
+    postcondizioni degli eventi dell'insieme $E_1$
+    \item $E_1\subseteq E$, quindi l'insieme degli eventi della rete $N_1$
+    è sottoinsieme di quello della rete $N$
+    \item $F_1=F\cap[(B_1\times E_1)\cup (E_1\times B_1)]$, ovvero la relazione
+    di flusso di $N_1$ è definita come la restrizione della relazione di flusso
+    di $N$ rispetto alle condizioni $B_1$ e agli eventi $E_1$
+  \end{itemize}
+  Non ho quindi una sottorete generata da un insieme arbitrario di condizioni ed
+  eventi ma le prime sono direttamente prese in relazione all'insieme degli
+  eventi scelto
+\end{definizione}
+\begin{esempio}
+  Tornando all'esempio della mutua esclusione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/mes.jpg} 
+  \end{figure}
+  si ha, per esempio:
+  \begin{itemize}
+    \item in rosso si ha la sottorete $N'=(\{b_1,b_2,b_3\},
+    \{e_1,e_2,e_3\},F')$, che è la sottorete generata  dall'insieme di
+    condizioni $B'=\{b_1,b_2,b_3\}$ 
+    \item in blu si ha la sottorete $N'=(\{b_6,b_7,b_8\},
+    \{e_4,e_5,e_6\},F')$, che è la sottorete generata dall'insieme di condizioni
+    $B'=\{b_6,b_7,b_8\}$
+    \item si ha la sottorete $N'=(\{b_2,b_4,b_7\},\{e_1,e_2,e_4,e_5\},F')$, che
+    è la sottorete generata  dall'insieme di condizioni $B'=\{b_2,b_4,b_7\}$
+    \item si ha la sottorete $N'=(\{b_1,b_2,b_3,b_4\},\{e_1,e_2,e_3\},F')$, che
+    è la sottorete generata da  dall'insieme di eventi $E'=\{e_1,e_2,e_3\}$
+  \end{itemize}
+\end{esempio}
+\subsection{Operazioni di Composizione per Reti di Petri}
+Data una rete $N=(B,E,F,c_0)$ questa può essere ottenuta componendo altre reti
+di Petri. Si hanno in letteratura 3 modi principali:
+\begin{enumerate}
+  \item la \textbf{composizione sincrona}
+  \item la \textbf{composizione asincrona}
+  \item la \textbf{composizione mista, tra sincrona e asincrona}
+\end{enumerate}
+\newpage
+Iniziamo informalmente a vedere degli esempi pratici.
+\begin{esempio}
+  Supponiamo di avere i modelli di due componenti, $N_1$, con un evento che
+  corrisponde ad un'azione di invio, ed $N_2$, con un evento che corrisponde ad
+  un'azione di ricezione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/sinc.jpg} 
+  \end{figure}
+  Supponiamo che invio e ricezione siano eventi corrispondenti all'handshacking,
+  ovvero l'invio avviene solo se può avvenire la ricezione.\\
+  Vado quindi a sincronizzare questi due eventi, che diventano quindi un'unico
+  evento nella rete composta, che è abilitato se le due precondizioni, nelle due
+  componenti sono entrambe vere: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/sinc2.jpg} 
+  \end{figure}
+  La composizione viene indicata con:
+  \[N_1||N_2\]
+  Lo scatto dell'evento, in maniera sincrona, rende vere le postcondizioni nelle
+  due componenti e false le due precondizioni.\\
+  Abbiamo appena visto un esempio di \textbf{composizione sincrona}
+\end{esempio}
+\begin{esempio}
+  Supponiamo di avere i modelli di due componenti, $N_1$, che invia in un canale
+  un messaggio (per esempio in un buffer), e $N_2$, che riceverà il messaggio
+  solo quando esso sarà disponibile:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/asinc.jpg} 
+  \end{figure}
+  In questo caso, a differenza dell'esempio precedente, non identifichiamo
+  eventi ma condizioni. Identifico quindi il canale (le due condizioni) come uno
+  solo, che avrà il pre-evento in una componente e il post-evento nell'altra.\\
+  Quindi il pre-evento, nella componente $N_1$, può scattare solo se questa
+  nuova condizione condivisa, il canale, è libera, indipendentemente dalla
+  componente $N_2$. D'altro canto l'evento in $N_2$ può scattare solo se la
+  condizione condivisa è marcata, indipendentemente dallo stato della prima
+  componente, liberando il canale di comunicazione.\
+  Avvio e ricezione (dopo che il messaggio è stato inviato può essere letto in
+  un qualsiasi futuro) non sono sincronizzati e si ha quindi a che fare con
+  un esempio di \textbf{composizione asincrona}.\\
+  Si avrebbe:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/asinc2.jpg} 
+  \end{figure}
+\end{esempio}
+Sarà interessante studiare come la composizione di due componenti, per esempio,
+senza deadlock non comporta, in generale, l'ottenimento di una rete priva di
+deadlock.
+\section{Processi non sequenziali}
+Petri pensò ad un sistema in cui diversi omini, spostandosi avanti nel tempo,
+portassero dei secchi per andare a spegnere un fuoco. Se due omini si incontrano
+lungo la strada si scambiano 
+il secchio. Ma a Petri non va bene questo modello avendo a che fare col il
+tempo, non discreto. Cerca quindi un modello combinatorio in cui si hanno varie
+configurazioni che possono essere osservate. Gli omini potrebbero essere quindi
+modellati da una rete con gli incontri tra omini che diventano
+sincronizzazioni. L'evoluzione del sistema può essere registrato salvando
+informazioni vere:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/inc1.jpg} 
+\end{figure}
+Possiamo quindi produrre la rete in base alle condizioni:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/inc2.jpg} 
+\end{figure}
+Posso modellare i vari percorsi tramite linee colorate con quelle tratteggiate
+in alto che rappresentano lo stato iniziale e quelle in basso quello finale.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/inc3.jpg} 
+\end{figure}
+\textbf{rivedere questa parte.}\\
+\begin{definizione}
+  Definiamo:
+  \[N=(B,E,F)\]
+  come una \textbf{rete causale}, ovvero una rete di occorrenze senza conflitti,
+  sse:
+  \begin{itemize}
+    \item $\forall b\in B:|\,^{\bullet}b|\leq 1\land |b^{\bullet}|\leq 1$, ovvero
+    non si hanno conflitti
+    \item $\forall a,y\in B\cup E:(x,y)\in F^+\implies (y,x)\not\in F^+$, ovvero
+    non si hanno cicli
+    \item $\forall e\in E:\{x\in B\cupE|\,xF^*e\}$ è finito
+  \end{itemize}
+  la rete può essere infinita.
+\end{definizione}
+Ad una rete causale è possibile associare un ordine parziale:
+\[(X,\leq)=(B\cuo E, F^*)\]
+In tal caso possono non distinguere più condizioni ed eventi
+%\subsection{Reti posti e transizioni}
+% Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
+%   Posti e Transizioni}, permette di rappresentare un sistema in modo più
+% compatto, sono una sorta di \textit{ripiegamento} dei sistemi
+% elementari. Partiamo quindi da un esempio:
+% \begin{esempio}
+%   prendiamo in studio sempre il sistema produttore-consumatore:
+%   Sia nella versione con contatto:
+%   \begin{figure}[H]
+%     \centering
+%      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%       \node [place, tokens=1] (p0) [label=above:P2] {};
+%       \node [transition] (t1) [below right of = p0, label=left:d] {};
+%       \node [transition] (t2) [below left of = p0, label=left:p] {};
+%       \node [place] (p1) [below right of = t2, label=below:P1] {}; 
+%       \node [place, tokens=1] (p3) [right of = t1, label=above:B] {};
+%       \node [transition] (t4) [right of = p3, label=right:e] {};
+
+%       \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+%       \node [transition] (t3) [below right of = p2, label=right:c] {};
+%       \node [place] (p4) [below right of = t4, label=below:C2]
+%       {}; 
+      
+%       \path[-{Latex[width=2mm]}]
+%       (p0) edge (t1)
+%       (t1) edge (p1)
+%       (p1) edge (t2)
+%       (t2) edge (p0)
+%       (t1) edge (p3)
+%       (p3) edge (t4)
+%       (t4) edge (p4)
+%       (p4) edge (t3)
+%       (t3) edge (p2)
+%       (p2) edge (t4)
+%       ;
+%     \end{tikzpicture}
+%   \end{figure}
+%   che senza:
+%   \begin{figure}[H]
+%     \centering
+%     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%       \node [place, tokens=1] (p0) [label=above:P2] {};
+%       \node [transition] (t1) [below right of = p0, label=left:d] {};
+%       \node [transition] (t2) [below left of = p0, label=left:p] {};
+%       \node [place] (p1) [below right of = t2, label=below:P1] {}; 
+%       \node [place, tokens=1] (p31) [above right  of = t1, label=above:B1] {};
+%       \node [place] (p32) [ below right of = t1, label=below:B2] {};
+%       \node [transition] (t4) [below right of = p31, label=right:e] {};
+
+%       \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+%       \node [transition] (t3) [below right of = p2, label=right:c] {};
+%       \node [place] (p4) [below right of = t4, label=below:C2]
+%       {}; 
+      
+%       \path[-{Latex[width=2mm]}]
+%       (p0) edge (t1)
+%       (t1) edge (p1)
+%       (p1) edge (t2)
+%       (t2) edge (p0)
+%       (t1) edge (p32)
+%       (p32) edge (t4)
+%       (t4) edge (p31)
+%       (p31) edge (t1)
+      
+%       (t4) edge (p4)
+%       (p4) edge (t3)
+%       (t3) edge (p2)
+%       (p2) edge (t4)
+%       ;
+%     \end{tikzpicture}
+%   \end{figure}
+%   Suppongo di voler modellare il sistema in modo che il buffer possa avere un
+%   numero determinato di posizioni, per esempio 2 (il buffer può quindi
+%   depositare fino a due elementi). Si ottiene quindi:
+%   \begin{figure}[H]
+%     \centering
+%     \includegraphics[scale = 0.6]{img/pt3.jpg} 
+%   \end{figure}
+%   Dove si hanno due posizioni del buffer (e quindi basta che una sia vuota per
+%   permettere al produttore di depositare) a disposizione del sistema. Si nota
+%   come l'aumento dei buffer complica drasticamente la modellazione del sistema.
+%   Si cerca quindi una soluzione più compatta, compattando gli eventi
+%   \textit{deposita} e \textit{preleva} e dando nuova notazione al buffer. Si
+%   ottiene:
+%   \begin{figure}[H]
+%     \centering
+%     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%       \node [place] (p0) [label=above:P2] {};
+%       \node [transition] (t1) [below right of = p0, label=left:d] {};
+%       \node [transition] (t2) [below left of = p0, label=left:p] {};
+%       \node [place, tokens = 1] (p1) [below right of = t2, label=below:P1] {}; 
+%       \node [place, tokens=2] (p3) [right of = t1, label=above:B] {};
+%       \node [transition] (t4) [right of = p3, label=right:e] {};
+
+%       \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+%       \node [transition] (t3) [below right of = p2, label=right:c] {};
+%       \node [place] (p4) [below right of = t4, label=below:C2]
+%       {}; 
+      
+%       \path[-{Latex[width=2mm]}]
+%       (p0) edge (t1)
+%       (t1) edge (p1)
+%       (p1) edge (t2)
+%       (t2) edge (p0)
+%       (t1) edge (p3)
+%       (p3) edge (t4)
+%       (t4) edge (p4)
+%       (p4) edge (t3)
+%       (t3) edge (p2)
+%       (p2) edge (t4)
+%       ;
+%     \end{tikzpicture}
+%   \end{figure}
+%   con il buffer che diventa anche un \textbf{contatore} del numero di elementi
+%   presenti al suo interno. Un buffer a due posizioni diventa quindi una
+%   condizione non più booleana, detta \textbf{Posto}, con una \textbf{capacità}
+%   pari a 2. Il produttore non può produrre oltre la capacità.\\
+%   Con questa rappresentazione non ho più alcuna difficoltà nel rappresentare più
+%   posizioni del buffer in quanto basta aumentare la capacità. Ho però perso
+%   delle informazioni infatti non ho più una relazione di dipendenza tra dove si
+%   deposita (se nella prima posizione o nella seconda) e dove si preleva.\\
+%   Aggiungiamo un'altra complicanza: aggiungiamo un secondo consumatore:
+%   \begin{figure}[H]
+%     \centering
+%     \includegraphics[scale = 0.6]{img/pt5.jpg} 
+%   \end{figure}
+%   Possiamo \textit{comprimere} nella stessa maniera, ottenendo, in quanto i due
+%   consumatori hanno lo stesso modello di comportamento:
+%   \begin{figure}[H]
+%     \centering
+%     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%       \node [place] (p0) [label=above:P2] {};
+%       \node [transition] (t1) [below right of = p0, label=left:d] {};
+%       \node [transition] (t2) [below left of = p0, label=left:p] {};
+%       \node [place, tokens = 1] (p1) [below right of = t2, label=below:P1] {}; 
+%       \node [place, tokens=1] (p3) [right of = t1, label=above:B] {};
+%       \node [transition] (t4) [right of = p3, label=right:e] {};
+
+%       \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+%       \node [transition] (t3) [below right of = p2, label=right:c] {};
+%       \node [place, tokens =1] (p4) [below right of = t4, label=below:C2]
+%       {}; 
+      
+%       \path[-{Latex[width=2mm]}]
+%       (p0) edge (t1)
+%       (t1) edge (p1)
+%       (p1) edge (t2)
+%       (t2) edge (p0)
+%       (t1) edge (p3)
+%       (p3) edge (t4)
+%       (t4) edge (p4)
+%       (p4) edge (t3)
+%       (t3) edge (p2)
+%       (p2) edge (t4)
+%       ;
+%     \end{tikzpicture}
+%   \end{figure}
+%   Anche qui perdo l'informazione riguardo quale dei due consumatori ha
+%   effettivamente prelevato, riguardo quale dei due è pronto a \textit{prelevare}
+%   e quale a \textit{consumare}, continuando ad ignorare anche la posizione
+%   del buffer nei confronti della quale stanno agendo.\\
+%   Si può arrivare ad avere due componenti identiche che sono concorrenti tra
+%   loro. 
+% \end{esempio}
+% Le condizioni non sono più, in generale, booleane ma sono \textbf{posti}
+% dotati di \textbf{contatori}, gli elementi all'interno sono detti
+% \textbf{marche}. Ai posti si assegna anche una \textbf{capacità}. 
+% \\
+% Si ha inoltre che lo scatto di una transizione dipende dalla disponibilità
+% delle risorse, per esempio un produttore può produrre $n$ elementi alla volta
+% e il consumatore consumarne $m$. Si usano quindi archi pesati (se non indicato
+% ovviamente ha peso 1, quello del normale check booleano di condizione attiva)
+% tali che una transizione possa scattare sse i pesi vengono rispettati:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.7]{img/pt7.jpg}
+%   \caption{Esempi con la transizione $t_i$ non abilitata}
+% \end{figure}
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.7]{img/pt8.jpg}
+%   \caption{Esempio con la transizione $t_i$ abilitata, a sinistra il ``prima''
+%     e a destra il ``dopo'' lo scatto di $t_i$}
+% \end{figure}
+% \newpage
+% \begin{esempio}
+%   Petri aveva introdotto l'uso delle reti anche per le reazioni chimiche, per
+%   esempio:
+%   \begin{figure}[H]
+%     \centering
+%     \includegraphics[scale = 0.35]{img/pt9.jpg}
+%     \caption{Esempio con la modellazione della produzione di $H_2O$}
+%   \end{figure}
+% \end{esempio}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

@@ -4016,6 +4016,189 @@ per avere il preprocessamento. Si ha poi la scansione del testo in tempo $O(n)$.
     \end{tabular}
   \end{table}
 \end{esempio}
+Ci serve una definizione ricorsiva di bordo:
+\begin{definizione}
+  Si hanno 4 punti:
+  \begin{enumerate}
+    \item il bordo della stringa vuota è la stringa vuota stessa:
+    \[B(\varepsilon)=\varepsilon\]
+    \item il bordo di una stringa di un solo carattere è la stringa vuota:
+    \[B(\sigma)=\varepsilon\]
+    
+    \item il bordo $B(X\sigma)$ della concatenazione tra una stringa $X$ e il
+    simbolo $\sigma$ è:
+    \[B(X\sigma)=B(X)\sigma\]
+    \item il bordo $B(X\sigma)$ della concatenazione tra una stringa $X$ e il
+    simbolo $\sigma$ è anche:
+    \[B(X\sigma)= B(B(X)\sigma)\]
+  \end{enumerate}
+\end{definizione}
+% aggiumngere esempio
+\begin{definizione}
+  Vediamo il calcolo di $\phi$ per induzione.\\
+  I primi passi sono immediati:
+  \[\phi(0)=-1\]
+  \[\phi(1)=0\]
+  Possiamo quindi calcolare $\phi(j)$ per $j>1$ supponendo che $\phi$ sia nota
+  per tutti gli indici in $[0,j-1]$.\\
+  Si ha:
+  \[B(P[1,j])=B(P[1, j-1]P[j])\]
+  e diciamo che:
+  \[k_1=|B(P[1, j-1])|=\phi(j-1)\]
+  Scriviamo anche:
+  \[B(P[1,j-1]) = P[1,k_1]\]
+  e chiamiamo:
+  \[k_2=|B(P[1,k_1])|=\phi(k_1)=\phi(\phi(j-1))\]
+  Si hanno due casi:
+  \begin{enumerate}
+    \item si ha $P[k_1+1]=P[j]$ quindi si ha:
+    \[B(P[1,j])=B(P[1,j-1])P[j]\]
+    Ne segue che:
+    \[|B(P[1,j])| = |B(P[1,j-1])| + 1 \]
+    Ma sappiamo che:
+    \[|B(P[1,j])| = |B(P[1,j-1])| + 1 = k1 + 1 = \phi(j-1) + 1\]
+    e quindi:
+    \[|B(P[1,j])| = \phi(j-1) + 1\]
+    e quindi possiamo dire che:
+    \[\phi(j) = \phi(j-1) + 1 \]
+    \item si ha $P[k_1+1]\neq P[j]$ quindi:
+    \[B(P[1,j]) = B(B(P[1,j-1]) P[j])\]
+    e sostituendo con $B(P[1,j-1]) = P[1,k_1]$:
+    \[B(P[1,j]) = B(P[1,k_1] P[j])\]
+    
+  \end{enumerate}
+  A questo punto dovrei separare due sottocasi per il secondo caso:
+  \begin{enumerate}
+    \item $P[k_2+1] = P[j]$
+    \item $P[k_2+1] \neq P[j]$
+  \end{enumerate}
+  e andrei avanti ricorsivamente (su slide approfondimento anche su secondo
+  livello di ricorsione).\\
+  In generale possiamo dire che aggiungere un valore $k_p$ tale per cui:
+  \[P[k_p+1]=P[j]\]
+  implica che:
+  \[\phi(j)=k_p+1\]
+  mentre trovare tutti i valori $k_p$ tali per cui:
+  \[P[k_p+1]\neq P[j]\]
+  implica che a un certo punto si raggiunge un $k_p = -1$, che implica che il
+  bordo 
+  di $P[1,j]=0$ e quindi:
+  \[\phi(j)=0=k_p+1\]
+  Riassumo quindi la procedura:
+  \begin{itemize}
+    \item inizializzo $\phi(0)=-1$ e $\phi(1)=0$ e $j=2$ (per gli argomenti di
+    $\phi$ che sono quindi maggiori di 1)
+    \item setto $k=\phi(j-1)$
+    \item divido nel due casi:
+    \begin{enumerate}
+      \item se $P[k+1] = P[j] $:
+      \begin{itemize}
+        \item setto $\phi(j)=k+1$
+        \item $j=j+1$
+      \end{itemize}
+      e ricomincio
+      \item se $P[k+1] \neq P[j] $:
+      \begin{itemize}
+        \item setto $k=\phi(k)$
+        \begin{itemize}
+          \item se $k=-1$ setto $\phi(j)=k+1$ e $j=j+1$ e ricomincio 
+          \item altrimenti torno a testare i due casi
+        \end{itemize}
+      \end{itemize}
+    \end{enumerate}
+  \end{itemize}
+  \newpage
+  Possiamo quindi scrivere lo pseudocodice:
+  \begin{algorithm}[H]
+    \begin{algorithmic}
+      \Function{Prefix}{$P$}
+      \State $m\gets |P|$
+      \State $\phi(0)\gets -1$
+      \State $\phi(0)\gets 0$
+      \For {$j\gets 2$ \textbf{to} $m$}
+      \State $k\gets \phi(j-1)$
+      \While {$k\geq 0\land P[k+1]\neq P[j]$}
+      \State $k \gets \phi(k)$
+      \EndWhile
+      \State $\phi(j)\gets k+1$
+      \EndFor
+      \State \textbf{return} $\phi$
+      \EndFunction
+    \end{algorithmic}
+  \end{algorithm}
+  \textbf{su slide esempio di esecuzione}
+\end{definizione}
+Passiamo quindi alla scansione del testo.\\
+La scansione del testo $T$ alla ricerca  di  $P$ avviene tramite una finestra
+$W$ di confronto lunga m simboli che scorre lungo $T$ da sinistra a destra,
+inizialmente posizionata in corrispondenza della posizione $i=1$ di $T$. Per
+ogni posizione $i$ di $W$, ogni simbolo di $P$ viene confrontato con
+il corrispondente simbolo in $W$, procedendo da sinistra a destra. Se
+tutti i simboli sono confrontati con successo, allora nella posizione $i$ di $T$
+esiste un’occorrenza di $P$. La finestra viene poi spostata verso destra in
+una nuova posizione $j$ e si ripete il confronto.\\
+La finestra viene spostata a destra utilizzando la funzione $\phi$. Il confronto
+riparte dal simbolo del testo che aveva dato un mismatch con il pattern nella
+precedente posizione di $W$, avendo quindi una scansione in $O(n)$.\\
+Studiamo meglio lo spostamento di $W$.\\
+Se ho $W$ in $i$ su $T$ e ho il primo carattere di $P$ che determina un mismatch
+con $T$ in posizione $j>1$ ho che il simbolo di mismatch su $T$ è in
+$i+j-1$. Per definizione sappiamo che $k=phi(j-1)$ è la lunghezza del bordo del
+prefisso $P[1,j-1]$. Si ha quindi che:
+\begin{itemize}
+  \item $P[1,k]$ ha un’occorrenza su $T$ che inizia in posizione $i$
+  \item $P[1,k]$ ha un’occorrenza su $T$ che inizia in posizione
+  \[p=i+j-k-1=i+j-\phi(j-1)-1\]
+\end{itemize}
+Quindi il salto di $W$ da $i$ a $p$ garantisce di non perdere occorrenze di $P$
+e garantisce che i primi $k$ simboli di $P$ hanno un matching con $T$ a partire
+dalla nuova posizione $p$. Posso quindi far ripartire il contorno per la nuova
+posizione $p$ di $W$ dalle posizioni:
+\begin{itemize}
+  \item $i+j-1$ su $T$
+  \item $k+1$ su $P$
+\end{itemize}
+Sposto quindi $W$ a $p=i+j-\phi(j-1)-1$ e i primi $k=\phi(j-1)$ simboli di $P$
+non vengono più confrontati con i corrispondenti simboli su $T$ nella nuova
+posizione di $W$.\\
+Si hanno dei casi particolari:
+\begin{itemize}
+  \item se $\phi(j-1)=0$ sposto $W$ a $p=i+j-1$ e i primi $k=0$ simboli di $P$
+  non vengono più confrontati con i corrispondenti simboli su $T$ nella nuova
+  posizione di $W$ quindi il confronto riparte da $i+j-1$ su $T$ e dal primo
+  simbolo su $P$
+  \item se $j=1$ sposto $W$ a $p=i+1$ e i primi $k=-1$ simboli di $P$
+  non vengono più confrontati con i corrispondenti simboli su $T$ nella nuova
+  posizione di $W$ quindi il confronto riparte da $i+1$ su $T$ e dal primo
+  simbolo su $P$
+  \item se $j=m+1$ sposto $W$ a $p=i+m-\phi(m)$ e i primi $k=\phi(m)$ simboli di
+  $P$ 
+  non vengono più confrontati con i corrispondenti simboli su $T$ nella nuova
+  posizione di $W$ quindi il confronto riparte da $i+m$ su $T$ e dal 
+  simbolo in posizione $\phi(m)+1$ su $P$
+\end{itemize}
+Vediamo quindi lo pseudocodice:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{KMP}{$P, T,\phi$}
+    \State $m\gets |P|$
+    \State $n\gets |T|$
+    \State $j\gets 0$
+    \For {$q\gets 1$ \textbf{to} $n$}
+    \While {$j\geq 0\land P[j+1]\neq T[1]$}
+    \State $j \gets \phi(j)$
+    \EndWhile
+    \State $\phi(j)\gets j+1$
+    \If {$j=m$}
+    \State \textbf{return} $q-m+1$
+    \EndIf
+    \EndFor   
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+Questo algoritmo, tramite uno studia di complessità ammortizzata, nonostante il
+doppio ciclo, ha complessità $O(n)$.\\
+\textbf{Su slide esempio di esecuzione.}
 \end{document}
 
 

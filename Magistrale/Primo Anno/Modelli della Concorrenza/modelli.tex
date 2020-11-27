@@ -5337,18 +5337,250 @@ Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
   Tagli e linee possono essere fatti sia di condizioni che di eventi.
 \end{definizione}
 \begin{esempio}
-  Tornando all'esempio del secchio si ha che:
+  Tornando all'esempio del secchio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/ta.jpg} 
+  \end{figure}
+  si ha che:
   \begin{itemize}
     \item la storia del secchio è un insieme di elementi in relazione
     \textbf{li} e, nello specifico, ad esempio la parte azzurra o quella gialla,
     è una \textit{linea} che descrive un sottoprocesso
-    \item le parti tratteggiate, sua quella verde che quella viola, sono invece
+    \item le parti tratteggiate, sono invece
     un co-set e, nel dettaglio, sono un 
     taglio (infatti se cerco di aggiungere un qualsiasi altro elemento otterrei
     una relazione di dipendenza con uno degli elementi già presenti)
   \end{itemize}
 \end{esempio}
-\textbf{I tagli fatti di sole condizioni rappresentano casi raggiungibili}.
+\textbf{I tagli fatti di sole condizioni rappresentano casi raggiungibili
+  (nell'immagine quello verde che quello viola che quello viola-chiaro)}.\\
+Una rete causale quindi registra il comportamento di un sistema elementare.\\
+Si hanno quindi, con i tagli, possibili osservazioni di configurazioni possibili
+nella storia del sistema.
+\begin{definizione}
+  Grazie alle reti causali, preso un elemento $x\in X$, possiamo definire:
+  \begin{itemize}
+    \item $past(x)$, ovvero il passato dell'elemento, tutti gli elementi in
+    relazione $\leq$ di $x$
+    \item $future(x)$, ovvero il futuro dell'elemento, tutti gli elementi in
+    relazione $\geq$ di $x$
+  \end{itemize}
+  Visualizzabili, per esempio, nell'immagine, rispettivamente in rosso e blu:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/pf.jpg} 
+  \end{figure}
+  Gli elementi nell'anti-cono (la parte bianca) sono in relazione \textbf{co}
+  con $x$ e quindi possono essere concorrenti.
+\end{definizione}
+\begin{definizione}
+  Data una rete causale $N=(B,E,F)$ e dato un ordine parziale $(X, \leq)$ con
+  $X=B\cup E$ definiamo che la rete è \textbf{K-densa} se ogni linea ed ogni
+  taglio si intersecano in un punto, tutti hanno un punto comune. Formalmente:
+  \[\forall\,h\in Linee(N),\forall\,c\in Tagli(N):|h\cap c|=1\]
+  Con $Linee(N)$ e $Tagli(N)$ che sono rispettivamente li insiemi di tutte le
+  linee e dei tagli.\\
+  Se $N$ è finita è anche \textbf{K-densa}, se sono infinite non è detto.\\
+  Una rete non K-densa potrebbe essere (in rosso una linea e in blu un taglio):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.36]{img/de1.jpg} 
+  \end{figure}
+  (si nota che è una rete infinita).\\
+  e una K-densa:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.36]{img/de2.jpg} 
+  \end{figure}
+  (si nota che è una rete finita).\\
+  ($K$ significa combinatoria).
+\end{definizione}
+\begin{esempio}
+  Vediamo anche il solito esempio della mutua esclusione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/de3.jpg} 
+  \end{figure}
+  Con sia il sistema elementare che la rete causale associata (dove si vede ad
+  esempio che $e_4$ ed $e_3$ sono in relazione \textbf{co}, le prime tre
+  condizioni a sinistra ($b_1,b_4,b_6$) sono un taglio anche le
+  ultime a destra ($b_1,b_5,b_7$)). 
+\end{esempio}
+\begin{definizione}
+  Sia $\Sigma=(S,T,F,c_{in})$ un sistema elementare senza contatti e finito,
+  tale che $S\cup T$ sia finito. Si ha che, con $\phi$ che mappa dalla rete
+  causale al sistema elementare: 
+  \[\langle N=(B,E,F), \phi\rangle\]
+  è un processo non sequenziale di $\Sigma$ sse:
+  \begin{itemize}
+    \item $(B,E,F)$ è una rete causale (si ammettono condizioni isolate)
+    \item $\phi:B\cup E\to S\cup T$ è una mappa tale che:
+    \begin{itemize}
+      \item $\phi(B)\subseteq S, \phi(E)\subseteq T$
+      \item $\forall x,y\in B\cup E:\phi(x)=\phi(y)\implies (x\leq y)\lor (y\leq
+      x)$ non avendo quindi concorrenza
+      \item $\forall e\in E:\phi(\,^\bullet e)=\,^\bullet
+      \phi(e)\land\phi(e^\bullet)=\phi(e)^\bullet$ quindi le precondizioni di un
+      evento nella rete causale devono corrispondere alle pre dell'evento nel
+      sistema elementare (e così anche per le post)
+      \item $\phi(Min(N))=c_{in}$,\\ con $Min(N)=\{x\in B\cup E|\nexists
+      y_(y,x)\in F\}$ che sono gli stati locali iniziali, ovvero se prendo gli
+      elementi minimali della rete 
+      causali, che non hanno un arco entrante, essi sono mappati nel caso
+      iniziale del sistema elementare
+    \end{itemize}
+  \end{itemize}
+  Se ho queste proprietà la rete causale è una registrazione del sistema
+  elementare.\\
+  In tal caso si ha che $N=(B,E,F)$ è K-densa (sia che sia finita che infinita),
+  avendo il sistema di partenza finito. Le linee sono quindi sottoprocessi
+  sequenziali e i tagli possibili configurazioni sempre raggiungibili.\\
+  Inoltre si ha che:
+  \[\forall K\in B\mbox{ K è B-taglio di } N \mbox{ t.c. } K \mbox{ è finito}
+    \land \exists c\in C_\Sigma:\phi(K)=c\]
+\end{definizione}
+Dato un sistema ho tanti processi non sequenziali che rappresentano esecuzioni
+del sistema. Ci si chiede quindi se ho un unico oggetto che rappresenta tutti i
+possibili run del sistema.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.6]{img/be4.jpg}
+  \includegraphics[scale = 0.6]{img/be5.jpg} 
+  \caption{Esempio con più processi del modello della mutua esclusione
+    modellati da un’unica rete con conflitti in avanti.}
+\end{figure}
+\textbf{Su slide, quelle dedicate agli esercizi, ulteriori esempi.}
+\begin{definizione}
+  Data una rete causale $N=(B,E,F)$, con $X=B\cup E$, diciamo che è una
+  \textbf{rete di occorrenze} sse:
+  \begin{itemize}
+    \item $\forall\,b\in B:|\,^\bullet b|=1$, ovvero ho conflitti solo in
+    avanti
+    \item $\forall\,x,y\in B\cup E:(x,y)\in F^+\implies (y,x)\not\in F^+$,
+    ovvero non ho cicli
+    \item $\forall\,e\in E:\{x\in B\cup E|xF^*e\}$ è finito
+    \item la relazione di conflitto $\#$ non è riflessiva, avendo:
+    \[\#\subset X\times X\]
+    definita come:
+    \[x\# y\iff \exists e_1,e_2\in E:\,^\bullet e_1\cap \,^\bullet e_2\neq
+      \emptyset \land e_1\leq x\land e_2\leq y\]
+  \end{itemize}
+  È comunque possibile associare ad una rete di occorrenze $N$ un ordine
+  parziale. 
+\end{definizione}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+    \node [place] (p0)  {};
+    \node [transitionv] (t1) [above right of = p0] {};
+    \node [transitionv] (t2) [below right of = p0] {};
+    \node [place] (p2) [right of = t1] {};
+    \node [place] (p3) [above right of = t2] {};
+    \node [place] (p4) [right of = t2, label=below:$x$] {};
+    \node [transitionv] (t3) [right of = p2, label=above:$y$] {};
+    \node [place] (p5) [right of = t3] {};
+    % \node [place] (p3) [right of = t3] {}; 
+    
+    \path[-{Latex[width=2mm]}]
+    (p0) edge (t1)
+    (p0) edge (t2)
+    (t1) edge (p2)
+    (p2) edge (t3)
+    (t3) edge (p5)
+    (t2) edge (p3)
+    (t2) edge (p4)
+    ;
+  \end{tikzpicture}
+  \caption{Esempio di rete di occorrenze}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+    \node [place] (p0)  {};
+    \node [transitionv] (t1) [above right of = p0] {};
+    \node [transitionv] (t2) [below right of = p0] {};
+    \node [place] (p2) [right of = t1] {};
+    \node [place] (p3) [above right of = t2] {};
+    \node [place] (p4) [right of = t2] {};
+    \node [transitionv] (t3) [right of = p2, label=above:$z$] {};
+    \node [place] (p5) [right of = t3] {};
+    % \node [place] (p3) [right of = t3] {}; 
+    
+    \path[-{Latex[width=2mm]}]
+    (p0) edge (t1)
+    (p0) edge (t2)
+    (t1) edge (p2)
+    (p2) edge (t3)
+    (t3) edge (p5)
+    (p3) edge (t3)
+    (t2) edge (p3)
+    (t2) edge (p4)
+    ;
+  \end{tikzpicture}
+  \caption{Esempio di rete  che non è una rete di occorrenze, avendo $z\#z$,
+    che quindi è una relazione riflessiva}
+\end{figure}
+\begin{definizione}
+  Sia $\Sigma=(S,T,F,c_{in})$ un sistema elementare senza contatti e
+  finito. Si ha che:
+  \[\langle N=(B,E,F), \phi\rangle\]
+  è un \textbf{processo ramificato} di $\Sigma$ sse:
+  \begin{itemize}
+    \item $(B,E,F)$ è una rete di occorrenze (si ammettono condizioni isolate)
+    \item $\phi:B\cup E\to S\cup T$ è una mappa tale che:
+    \begin{itemize}
+      \item $\phi(B)\subseteq S, \phi(E)\subseteq T$
+      \item $\forall e_1,e_2\in E:(\,^\bullet e_1=\,^\bullet e_2\land
+      \phi(e_1)=\phi(e_2))\implies e_1=e_2$
+      \item $\forall e\in E:\phi(\,^\bullet e)=\,^\bullet
+      \phi(e)\land\phi(e^\bullet)=\phi(e)^\bullet$ quindi le precondizioni di un
+      evento nella rete causale devono corrispondere alle pre dell'evento nel
+      sistema elementare (e così anche per le post)
+      \item $\phi(Min(N))=c_{in}$
+    \end{itemize}
+  \end{itemize}
+\end{definizione}
+\begin{esempio}
+  Riprendendo il solito esempio di mutua esclusione si ha il seguente processo
+  ramificato:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/ram.jpg} 
+  \end{figure}
+\end{esempio}
+\begin{definizione}
+  Sia $\Sigma=(S,T,F,c_{in})$ un sistema elementare senza contatti e finito, e
+  siano:
+  \[\Pi_1=\langle N_1;\phi_1\rangle\]
+  \[\Pi_2=\langle N_2;\phi_2\rangle\]
+  due processi ramificati di $\Sigma$.\\
+  Si ha che $\Pi_1$ è un \textbf{prefisso} di $\Pi_2$ sse:
+  \begin{itemize}
+    \item $N_1$ è una sottorete di $N_2$
+    \item $\phi_{2|N_1}=\phi_1$ ovvero $\phi_2$ ristretto a $N_1$  è uguale a
+    $\phi_1$ 
+  \end{itemize}
+  Si ha che $\Sigma$ ammette un unico processo ramificato che è massimale
+  rispetto alla relazione di prefisso tra processi e tale processo è detto
+  \textbf{unfolding} di $\Sigma$:
+  \[Unf(\Sigma)\]
+  Tale processo non sequenziale è un processo ramificato:
+  \[\Pi=\langle N;\phi\rangle\]
+  tale che $N$ è una rete causale, senza conflitti. Il processo $\Pi$ è anche
+  detto \textbf{run} di $N$.\\
+  L'unfolding tiene traccia di tutti i processi sequenziali di un sistema
+  elementare. 
+\end{definizione}
+
+\begin{esempio}
+  Riprendendo il solito esempio di mutua esclusione si ha il seguente unfolding
+  infinito:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/unf.jpg} 
+  \end{figure}
+\end{esempio}
 % \subsection{Reti posti e transizioni}
 % Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
 % Posti e Transizioni}, permette di rappresentare un sistema in modo più
@@ -5359,7 +5591,7 @@ Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
 %   Sia nella versione con contatto:
 %   \begin{figure}[H]
 %     \centering
-%      \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
 %       \node [place, tokens=1] (p0) [label=above:P2] {};
 %       \node [transition] (t1) [below right of = p0, label=left:d] {};
 %       \node [transition] (t2) [below left of = p0, label=left:p] {};
@@ -5371,7 +5603,7 @@ Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
 %       \node [transition] (t3) [below right of = p2, label=right:c] {};
 %       \node [place] (p4) [below right of = t4, label=below:C2]
 %       {}; 
-      
+
 %       \path[-{Latex[width=2mm]}]
 %       (p0) edge (t1)
 %       (t1) edge (p1)
@@ -5402,7 +5634,7 @@ Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
 %       \node [transition] (t3) [below right of = p2, label=right:c] {};
 %       \node [place] (p4) [below right of = t4, label=below:C2]
 %       {}; 
-      
+
 %       \path[-{Latex[width=2mm]}]
 %       (p0) edge (t1)
 %       (t1) edge (p1)
@@ -5412,7 +5644,7 @@ Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
 %       (p32) edge (t4)
 %       (t4) edge (p31)
 %       (p31) edge (t1)
-      
+
 %       (t4) edge (p4)
 %       (p4) edge (t3)
 %       (t3) edge (p2)
@@ -5533,16 +5765,6 @@ Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
 %   \caption{Esempio con la transizione $t_i$ abilitata, a sinistra il ``prima''
 %     e a destra il ``dopo'' lo scatto di $t_i$}
 % \end{figure}
-% \newpage
-% \begin{esempio}
-%   Petri aveva introdotto l'uso delle reti anche per le reazioni chimiche, per
-%   esempio:
-%   \begin{figure}[H]
-%     \centering
-%     \includegraphics[scale = 0.35]{img/pt9.jpg}
-%     \caption{Esempio con la modellazione della produzione di $H_2O$}
-%   \end{figure}
-% \end{esempio}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

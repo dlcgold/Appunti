@@ -4440,7 +4440,7 @@ validità dei dati. Il data integration assume quindi due forme:
   lingua italiana). Si procede quindi, in assenza di chiave, ad una pulizia di
   eventuali duplicati cercando di ``fonderli'' del risultato corretto più
   probabile. La distanza di edit va bene solo per stringhe piccole, per quelle
-  grosse si hanno altre funzioni (come la jakarta function (???))
+  grosse si hanno altre funzioni (come la Jaccard index function)
   \item integrazione in due tabelle diverse, avendo schema matching
   etc$\ldots$. Si supponga quindi di voler fondere due tabelle senza chiave
   primaria. Si cerca quindi una pseudo-chiave primaria (usando l'insieme più
@@ -4799,13 +4799,178 @@ Si è capito che la qualità è un concetto complicato.
     \item \textbf{qualità}: caratteristiche di un artefatto che influiscono
     sulla sua capacità di soddisfare le esigenze e le aspettative dell'utente,
     dichiarate o implicite. Un dato è di qualità se è adatto all'uso che se ne
-    deve fare. Si ha il concetto di \textbf{fitness for use}
+    deve fare. Si ha il concetto di \textbf{fitness for use}. ``La qualità dei
+    dati è negli occhi di chi li usa e non nelle mani di chi li produce''
     \item \textbf{dimensione}: una caratteristica specifica che descrive la
-    qualità delle informazioni, solitamente non misurabile 
+    qualità delle informazioni, solitamente non misurabile ma potrebbero esserlo
+    \item \textbf{sottodimensioni}: sotto-caratteristiche che spesso
+    classificano una certa dimensione
+  \end{itemize}
+  Le dimensioni misurabili lo sono tramite \textbf{metriche}, che, secondo le
+  definizioni dello standard ISO 9126-1 e secondo il framework ISM3 sono
+  un'insieme di procedure che comprende:
+  \begin{itemize}
+    \item una procedura (o metodo) di misurazione, cioè un algoritmo che prende
+    l'elemento da misurare e lo associa a una misura (sia esso un valore
+    ordinale o un intervallo)
+    \item una corretta unità di misura (o scala), cioè
+    il dominio dei valori restituiti dalla procedura di misurazione
+  \end{itemize}
+  Si possono avere metriche diverse per la stessa dimensione 
+\end{definizione}
+La qualità dei dati è un concetto che può essere espresso attraverso molteplici
+dimensioni, ad esempio la accuratezza (magari anche solo per errori di typo nei
+dati), la comprensibilità, la completezza (avendo magari valori a NULL),
+l'inconsistenza (avendo contraddizioni nei dati) etc$\ldots$\\  
+\textbf{Su slide tabella con le metodologie}.\\
+Un altro aspetto da tenere in considerazione è che si hanno metriche:
+\begin{itemize}
+  \item \textbf{oggettive}, modi formali e precisi per misurare le metriche per
+  una dimensione di qualità in termini di valori di un dominio,
+  indipendentemente dalla percezione/valutazione umana 
+  \item \textbf{soggettive}, modi per misurare le metriche per una dimensione di
+  qualità che dipendono dalla percezione (di solito valutazione esplicita e
+  ordinale) delle persone coinvolte nel processo di misurazione, dipendente
+  dalla percezione/valutazione umana 
+\end{itemize}
+Vediamo qualche aspetto nel dettaglio.\\
+Partiamo dall'\textbf{accuratezza}.
+\begin{definizione}
+  La precisione di un valore $v$ è definita come la vicinanza tra $v$ e un
+  valore $v'$ considerato come la corretta rappresentazione del fenomeno del
+  mondo reale che $v$ intende rappresentare.\\
+  Impatta valori alfanumerici e si può applicare alle tuple e alle relazioni.
+\end{definizione}
+Un esempio di inaccuratezza è un typo.\\
+Si hanno due sottodimensioni di questa qualità:
+\begin{enumerate}
+  \item \textbf{accuratezza sintattica}, magari controllando se la stringa è
+  presente in un insieme di valori di riferimento per il dominio trattato
+  (magari un vocabolario, una lista di città etc$\ldots$). Ci sono dati su cui
+  non è applicabile. Generalmente si fa:
+  \begin{itemize}
+    \item in base alle stringhe
+    \item in base ai singoli token di una stringa
+  \end{itemize}
+  \item \textbf{accuratezza semantica}, molto difficile da verificare (magari
+  tramite un'altra sorgente dati per cross validare). Per piccolissimi db si fa
+  a mano ma è generalmente impensabile
+\end{enumerate}
+Conoscere lo schema aiuta a valutare la accuratezza dei valori e si hanno
+diverse metriche. In primis posso dire se un dato è vicino a quello che mi
+aspetto in un certo dominio tramite una funzione di distanza che confronta il
+valore che ho e il dominio di riferimento. Dopo questo posso pensare a
+correggere eventualmente il dato. Si cerca il valore più vicino al dominio di
+riferimento. Potrei anche fare una stima statistica per capire quale sia il
+valore corretto. Per il calcolo delle distanze su stringhe uso la solita
+\textbf{distanza di edit (non normalizzata)} ma non è la sola. In fase di
+assesment considero solo 
+valori con una massima distanza di edit stabilita e nella fase di improvment
+posso stimare la giusta correzione per ottenere la stringa magari corretta
+(magari in corrispondenza di typo). La distanza sintattica potrebbe però essere
+poco informativa in merito alla semantica (si pensi a Domenico spesso abbreviato
+in Mimmo). Possiamo introdurre la \textbf{distanza di edit normalizzata} come:
+\[1-\frac{edit(a,b)}{n}\]
+con $n$ numero massimo di simboli. Si ottiene un valore tra 0 e 1, con 1 che
+indica che i valori che sono identici, accuratezza pari a uno implica distanza
+nulla (misuro il complemento a 1 della distanza). Tali valori tra 0 e 1 sono
+comodi in 
+quanto spesso le metriche danno risultati che sono in questo range e posso
+quindi effettuare una somma pesata tra le varie metriche.\\
+Si hanno vari tipi di funzione di edit (ma limitate a stringhe corte):
+\begin{itemize}
+  \item Hamming distance
+  \item Levenshtein distance
+  \item Jaro-Winkler
+\end{itemize}
+o di distanza di token (per stringhe composte da più stringhe, esempio ``Sesto
+San Giovanni''):
+\begin{itemize}
+  \item Jaccard index
+  \item Sorensen-Dice
+  \item N-gram
+\end{itemize}
+Si possono avere problemi nel trovare la reference table di un certo dominio. \\
+Passiamo alla completezza.
+\begin{definizione}
+  Definiamo la \textbf{completezza} di un insieme di dati come
+  la copertura con la quale il fenomeno osservato è rappresentato nell'insieme
+  di dati. Avere ad esempio dei NULL impedisce la completezza.\\
+  Impatta valori alfanumerici e numerici e si può applicare alle tuple, agli
+  attributi, agli oggetti e alle relazioni.\\
+  Si ha che, normalizzando sempre con $1-$ per avere massima completezza a 1:
+  \begin{itemize}
+    \item la completezza di tupla è basata sul numero di NULL di una certa riga
+    rispetto al numero di attributi presenti
+    \item la completezza di attributo è basata sul numero di NULL di una certa
+    colonna rappresentante un attributo
+    \item la completezza di tabella è basata sul numero di NULL dell'intera
+    tabella 
+    \item la completezza di oggetto è il numero di valori non nulli in tutti gli
+    oggetti rappresentati nelle tuple 
   \end{itemize}
 \end{definizione}
+Nelle precedenti definizioni, abbiamo assunto una ipotesi di \textbf{mondo
+  chiuso}, ovvero tutto
+ciò che è rappresentato nella db è vero, tutto il resto è falso. Questa è
+la tipica ipotesi che si fa nei DBMS. Posso ipotizzare un \textbf{mondo aperto},
+come nei DBMS NoSQL, dove si tace di ciò che non si sa, avendo \textbf{object
+  completness}, tenendo conto del fatto che gli oggetti rappresentabili sono
+più delle tuple della tabella, e di tale cardinalità serve una stima
+indiretta. Quindi nel mondo n on relazionale è difficile stimare la completezza,
+non avendo certezza del numero di oggetti.  \\
+Parliamo ora di \textbf{proprietà temporali}, di livello di aggiornamento,
+ovvero di \textbf{currency}. Si parla anche di tempestività. Trattando il tempo
+è difficile dare una definizione formale e specificare la semantica trattata. Si
+ha che la \textbf{currency} misura con quale rapidità i dati sono aggiornati
+rispetto 
+al corrispondente fenomeno del mondo reale. Una prima misura della currency è
+il ritardo temporale tra il tempo $t1$ dell’evento del mondo reale che ha
+provocato la variazione del dato, e l’istante $t2$ della sua registrazione nel
+sistema informativo ma questa misura è costosa in quando generalmente l'evento
+non è ben noto, non sapendo quando si hanno cambiamenti etc$\ldots$. Un'altra
+metrica di currency è vederla come come differenza tra tempo di arrivo alla
+organizzazione e tempo in cui è effettuato l’aggiornamento (cosa misurabile in
+presenza di log, ad esempio, sui tempi di update). Un altra metrica è la
+differenza rispetto al metadato ``ultimo aggiornamento effettuato'' che, per
+valori con periodicita’ di aggiornamento nota, currency calcolabile in maniera
+approssimata ma poco costosa (ma non si hanno informazioni in merito alle
+modifiche del dato). \\
+La \textbf{tempestività} misura quanto i dati sono aggiornati rispetto a un
+particolare processo (o ai processi) che li utilizza. Quindi è dipendente dal
+processo, a differenza della currency, ed è associabile al momento temporale in
+cui deve essere disponibile per il processo che utilizza il dato. Posso avere
+dati obsoleti per il processo di chi li usa ma con alta currency.\\
+Trattiamo infine la \textbf{consistenza}.\\
+\begin{definizione}
+  Si definisce la \textbf{consistenza} in due modi:
+  \begin{enumerate}
+    \item come consistenza dei dati con i vincoli di integrità o dipendenze
+    funzionali definiti sullo schema (ad esempio i vincoli di integrità nel
+    modello relazionale). Si hanno anche dei vincoli di consistenza, detti
+    business rule, che possono riguardare uno o più attributi, relazioni
+    etc$\ldots$ e possono essere espressi in termini di probabilità. Si usano
+    anche vincoli di integrità in logica e si hanno dei data edit nelle indagini
+    statistiche 
+    \item come consistenza delle diverse rappresentazioni di uno stesso oggetto
+    della realtà presenti nella base di dati (come visto nella parte di data
+    integration)    
+  \end{enumerate}
+\end{definizione}
+Invece con \textbf{accessibilità} si esprime la capacità di un utente di
+accedere ai dati a partire dalla propria cultura, stato fisico e psichico e
+dalla tecnologie disponibilità, magari dal punto di vista culturale, dello stato
+fisico, delle tecnologie etc$\ldots$\\
+Un altro aspetto importante che va sempre considerato è il \textbf{tradeoff tra
+  varie qualità}, ad esempio consistenza e completezza nel modello relazionale
+possono essere non conciliabili quando si voglia rispettare l'integrità
+referenziale. Nel dominio statistico si ha tradeoff tra tempestività e
+completezza/accuratezza, che vengono però privilegiate (bisogna quindi studiare
+quanto è ``sporco'' un certo dato). Nel web si preferisce la tempestività
+rispetto ad accuratezza/completezza.
+\section{Quality assesment \& improvment}
 \end{document}
-%7.51
+
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
 % LocalWords:  join compiler DLL DDL Language step parsing Catalog metadati sql
@@ -4859,3 +5024,4 @@ Si è capito che la qualità è un concetto complicato.
 % LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
 % LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER tupla
 % LocalWords:  intensionale processamento colonnare denormalizzare enrichment
+% LocalWords:  inaccuratezza

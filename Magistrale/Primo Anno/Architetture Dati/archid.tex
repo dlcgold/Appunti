@@ -4825,7 +4825,9 @@ termini ``piccoli''. Si avevano quindi, nello ``small'' data integration:
 risolvendo le varie ambiguità, di semantica, rappresentazione (nonché
 inconsistenze) etc$\ldots$ tramite pipeline con appunto queste tre fasi.\\
 Nel caso dei big data si hanno però moltissimi dati e conseguenti inconsistenze,
-incompletezze, duplicazioni etc$\ldots$ Si hanno quindi varie tecniche.\\
+incompletezze, duplicazioni etc$\ldots$ Si hanno quindi varie tecniche.
+\subsection{Schema alignment}
+Analizziamo un attimo la prima fase.\\
 Partiamo nel caso, passando al big data, in cui si hanno dati molto specifici in
 un certo dominio. In primis ci si deve chiedere come sono distribuiti tali dati
 nel web, studiando eventuali provider di tali dati, che li raccolgono da diverse
@@ -4901,7 +4903,138 @@ catturare dati che cambiano rapidamente (nonché pensare a dei data warehouse a
 causa dei costi).\\
 Un altro problema è la varietà dei sorgenti e la loro veridicità (da LDL+13 si
 ha che scarsa qualità dei dati dei sorgenti del deep web). Tutti questi problemi
-sono delle challenge moderne da risolvere.
+sono delle challenge moderne da risolvere.\\
+Vediamo quindi alcune tecniche per lo schema alignment.\\
+Mediamente si hanno 3 step, per abilitare il linkage e ottenere risultati
+semanticamente significativi (per esempi guardare slide): 
+\begin{itemize}
+  \item \textbf{mediated schema}, dove si specifica la modellazione delle
+  informazioni con uno schema che mi permetta di unificare e di allineare tutti
+  i sorgenti, ottenendo una sorta di unico schema finale ``mediatore''. Si crea
+  una vista unica con tutte le sorgenti e si catturano le informazioni
+  principali del dominio studiato. Solitamente questa fase è manuale  e lo
+  schema mediato contiene più informazioni degli schemi dei singoli sorgenti ma
+  potrebbero essrci casi in cui si hanno informazioni mancanti
+  \item \textbf{attribute matching}, dove si cercano corrispondenze tra gli
+  attributi dello schema mediato e quelli dei singoli sorgenti. Si
+  ``connettono'' gli attributi dei sorgenti con quelli del mediatori, di solito
+  si ha una corrispondenza ``1:1''. Un attributo del mediatore può essere una
+  combinazioni di attributi del sorgente (o viceversa)
+  \item \textbf{schema mapping}, dove si costruisce il mapping tra ogni sorgente
+  e il mediatore. Tale mapping specifica la relazione di semantica tra il
+  contenuto dei sorgenti e quello del mediatore e può essere usato per
+  riformulare una query indirizzata al mediatore (che verrà poi suddivisa in
+  ogni sorgente). Ci sono tre tipi di mapping, già visti (esempi su slide):
+  \begin{itemize}
+    \item GAV
+    \item LAV
+    \item GLAV
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[scale = 0.5]{img/bds.jpg}
+    \caption{Schema dello spazio delle strategie di schema alignment}
+    \label{fig:bds}
+  \end{figure}
+\end{itemize}
+Si hanno diverse tecniche che considerano volume e varietà:
+\begin{itemize}
+  \item integrazione di interfacce di query di deep web in GMG+04 e CHZ05 
+  \item scansione, indicizzazione di dati deep web in MKK+08
+  \item estrazione di dati strutturati da tabelle web in CHW+08, LSC10, PS12 e
+  DFG+12 ed elenchi web in GS09 e EMH09. Lo studio delle tabelle è difficoltoso
+  per il loro numero (154 milioni di tabelle relazionali, con 5.5 milioni di
+  attributi e 2.6 milioni di schemi). Devo usare la ricerca per keyword. SI
+  hanno problemi di ambiguità per le tabelle, si ha che non tutte le
+  tabelle sono rilevanti per le query e spesso hanno anche specifiche
+  funzionalità. Si usano delle featureRank per stimare la qualità delle tabelle
+  basandosi su:
+  \begin{itemize}
+    \item query independent features (numero di righe/colonne, intestazioni,
+    numero di NULL etc$\ldots$)
+    \item query dependent features
+    \item regressione lineare
+    \item feature pesate
+  \end{itemize}
+  Si ottiene quindi uno score delle tabelle.\\
+  Si ha anche lo schemaRank che specifica anche la coerenza dello schema. Data
+  $p(x)$ la frazione dello schema univoco che contiene l'attributo $x$ definisco
+  il \textbf{point-wise mutual information} tra due attributi $a$ e $b$ come:
+  \[pmi(a,b)=\log_2\left(\frac{p(a,b)}{p(a)\cdot p(b)}\right)\]
+  e la coerenza è la media di tutti i $p(a,b)$ per ogni coppia di attributi
+  nello schema. \\
+  Per l'annotazione delle tabelle in LSC10 ci si chiede, data una
+  tabella Web, quali entità si verificano in quali celle, quali sono i tipi di
+  colonna e le relazioni tra le colonne. Il testo nelle celle descrive entità ma
+  può essere ambiguo e le intestazioni non usano vocabolari
+  controllati. Risolvere questi problemi mi permette di fare query sui metadati
+  relazionali ed estrarre conoscenza dalle tabelle. Per annotare le tavelle uso
+  cataloghi che consistono in una gerarchia di tipi, entità che sono istanze
+  di tipi (possibilmente multipli) e relazioni binarie (rappresentati come
+  alberi, esempi su slide). I cataloghi si usano per stimare la qualità dei
+  contenuti delle celle della tabella, studiando la similarità. Annotare mi
+  permette di estrarre la semantica e di arricchire le tabelle. Si hanno diversi
+  approcci per etichettare i varie elementi (righe, colonne, relazioni
+  etc$\ldots$). \\
+  Con DFG+12 si cercano invece tabelle simili in un ``corpus'' di altre
+  tabelle. Cerco tabelle simili ad una tabella data. Le tabelle connesse sono ad
+  esempio: 
+  \begin{itemize}
+    \item tabelle candidate ad una \textit{union} con l'aggiunta di nuove
+    entità.
+    Si usano tre segnali per stabilire se sono candidate alla \textit{union}:
+  \begin{itemize}
+    \item il rumore di entità e tipi
+    \item la cura di entità e tipi
+    \item il conto delle co-occorrenze di entità e tipi
+  \end{itemize}
+  Alcuni approcci usano:
+  \begin{itemize}
+    \item la similarità di Jaccard pesata sui set di etichette per la coerenza
+    delle entità corrispondenza del peso massimo bipartito per la coerenza dello
+    schema 
+  \end{itemize}
+    \item tabelle candidate per una \textit{join} con l'aggiunta di nuovi
+    attributi. Le tecniche sono analoghe alla \textit{union}
+  \end{itemize}
+  Si cercano le migliori tabelle tramite un ``punteggio di relazione'' con
+  quella in analisi. La metodologia è a tre step:
+  \begin{enumerate}
+    \item si verifica la consistenza delle entità tra la tabella data e quella
+    di cui si sta studiando la relazione
+    \item si verifica se si possono espandere le entità della tabella data con
+    l'altra
+    \item si verifica che i due schemi delle due tabelle siano consistenti,
+    avendo schemi simili
+  \end{enumerate}
+  Un approccio naive calcola il punteggio per ogni coppia di tabelle. Si usano
+  quindi filtri per ottenere meno comparazioni (usando i filtri come criteri di
+  blocco per classificare le tabelle ed esegui solo confronti di correlazione
+  anll'interno dei sottoinsiemi creati dai blocchi) e
+  più veloci (applicando in 
+  sequenza vari filtri, basandosi ulla selettività e l'efficienza computazionale
+  dei filtri). Come filtri utili si hanno che le tabelle condividano colonne o
+  entità. 
+  
+  
+  \item sistemi di dataspace in FHM05, HFM06 e DHY07. È un approccio quasi
+  impossibile per volume, varietà e velocità, a causa di un approccio pay-as-you
+  go (inizia con poco e poi ``esplode'')
+  \item integrazione dei dati basata sulla ricerca per parole chiave in TJM+08
+  e con dati dinamici in TIP10
+\end{itemize}
+Una big data integration automatica è possibile in DDH08 ma si ha necessità di
+modellare l'incertezza sulla semantica degli attributi nei sorgenti. Si crea
+automaticamente uno schema mediato da un insieme di origini tramite schemi
+probabilistici (tramite mapping da sorgenti a mediatori pesati) che offrono il
+beneficio di una modellazione dell'incertezza. Si ha una sorta di clustering
+degli attributi, anche se si ha incertezza sulla sua accuratezza. \\
+
+
+
+
+
+
 
 
 

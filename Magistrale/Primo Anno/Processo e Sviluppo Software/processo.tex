@@ -84,7 +84,7 @@
 \begin{document}
 \maketitle
 
-\definecolor{shadecolor}{gray}{0.80}
+\definecolor{shadecolor}{gray}{0.90}
 \setlist{leftmargin = 2cm}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definizione}{Definizione}
@@ -2821,7 +2821,341 @@ anche potenziali \textit{or esclusivi}, \textit{or non-esclusivi} e \textit{and}
 per separare in diversi modi feature in sotto-feature. Le varie combinazioni
 espresse dalle feature del digramma, seguendo la logica di opzionali o meno e
 delle varie suddivisioni esprimono le varianti del progetto.
-\textbf{Esempio di diagramma su slide}.\\
+\textbf{Esempio di diagramma su slide}.
+\chapter{Model-View-Controller}
+Il \textbf{Model-View-controller (\textit{MVC})} è un pattern architetturale
+molto diffuso nello sviluppo di sistemi software, in particolare nell'ambito
+della programmazione orientata agli oggetti e in applicazioni web, in grado di
+separare la logica di presentazione dei dati dalla logica di business. Partiamo
+analizzando il pattern:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 1.1]{img/mvc.pdf}
+\end{figure}
+Dove con le frecce piene si hanno le invocazioni di metodi e con quelle
+tratteggiate gli eventi. Analizzando meglio le tre componenti si ha che:
+\begin{enumerate}
+  \item \textbf{Model} incapsula lo stato dell'applicazione, risponde alle query
+  di stato, espone le funzionalità dell'applicazione e notifica la
+  vista delle modifiche. In altri termini fornisce i metodi per
+  accedere ai dati utili dell'applicazione
+  \item \textbf{View} renderizza il modello, richiede l'aggiornamento dai
+  modelli, invia le operazioni dell'utente al Controller e gli permette di
+  selezionare la vista. In altri termini visualizza i dati contenuti nel model
+  e si occupa dell'interazione con utenti e agenti 
+  \item \textbf{Controller} definisce il comportamento dell'applicazione, mappa
+  le azioni dell'utente ad update del Model, seleziona le viste per le
+  risposte. In altri termini riceve i comandi dell'utente (in genere attraverso
+  il View) e li attua modificando lo stato degli altri due componenti. SI ha un
+  Controller per funzionalità
+\end{enumerate}
+\begin{esempio}
+  Vediamo un esempio pratico semplice per una pagina HTML:
+  \begin{itemize}
+    \item \textbf{Model}: i file HTML e CSS
+    \item \textbf{View}: il browser
+    \item \textbf{Controller}: il web server
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio pratico semplice per una pagina dinamica:
+  \begin{itemize}
+    \item \textbf{Model}: la logica applicativa (la business logic), per esempio
+    implementata in Java
+    \item \textbf{View}: il render dei dati, tramite magari pagine JSP
+    \item \textbf{Controller}: la logica di presentazione, magari tramite
+    Servlet 
+  \end{itemize}
+\end{esempio}
+\begin{shaded}
+  \textbf{In questa parte si ha il ripasso di alcuni concetti utili.}\\
+  Ricordiamo che gli \textbf{HTML forms} permettono di passare informazioni,
+  formate da \texttt{URI} più dati, dal
+  browser all'applicazione web. Un form è formato da:
+  \begin{itemize}
+    \item \texttt{ACTION} per processare i dati
+    \item \texttt{METHOD} il metodo in cui mandare le informazioni:
+    \begin{itemize}
+      \item \texttt{GET}, dove si manda solo l'\texttt{URI}, coi dati contenuti
+      nell'\texttt{URI} stesso
+      \item \texttt{POST}, dove i dati sono nel corpo della richiesta
+      direttamente 
+    \end{itemize}
+  \end{itemize}
+  \textit{Servlet} è una componente web basata su Java fatta per generare
+  contenuto dinamico. Una servlet ha il seguente ciclo di vita:
+  \begin{itemize}
+    \item non esiste
+    \item caricamento tramite il costruttore
+    \item inizializzazione tramite un \textbf{init}
+    \item esecuzione della richiesta (il \texttt{.service()} limita il tempo di
+    vita della \texttt{request})
+    \item distruzione
+  \end{itemize}
+  Si hanno metodi come \texttt{doPost} e \texttt{doGet}. Per ottenere
+  informazioni da un form si ha \texttt{getParameter(param)}, con \texttt{param}
+  che può specificare un elemento della form, come metodo della request. \\
+  \begin{esempio}
+    Vediamo un esempio di servlet:
+    \begin{minted}{java}
+      import java.io.*;
+      import javax.servlet.*;
+      import javax.servlet.h = p.*;
+      public class Hello extends H = pServlet {
+        public void doGet(H = pServletRequestreq,
+                          H = pServletResponse res)
+               throws ServletExcepion, IOExcep3on {
+                            
+          res.setContentType("text/html");
+          PrintWriter out = res.getWriter();
+          String name = req.getParameter("name");
+          out.println("<HTML>");
+          out.println("<HEAD><TITLE>Hello,    " +
+                      name + "</TITLE></HEAD>");
+          out.println("<BODY>");
+          out.println("Hello,    " + name);
+          out.println("</BODY></HTML>");
+        }
+      \end{minted}
+  \end{esempio}
+  Un \textbf{cookies} è una piccola stringa nominata salvata sul client. I cookie
+  possono essere usati per:
+  \begin{itemize}
+    \item per identificare l'utente con una sessione web di lunga durata 
+    \item memorizzare alcuni dati di convenienza sul client (nickname, id,
+    numero di carta di credito, etc$\ldots$) 
+    \item personalizzare il sito in base al profilo utente (avendo banner
+    mirati) 
+  \end{itemize}
+  Il browser restituisce una serie di cookise al sito da cui provengono e la web
+  app le usa nel suo processo logico. Per creare un cookie si può fare:\\
+  \texttt{Cookie c = new Cookie('name', 'value'); \\resp.addCookie(c); }\\
+  e per ottenere un cookie: \\
+  \texttt{Cookie cArray[] = req.getCookies();}
+  \begin{definizione}
+    Definiamo \textbf{sessione} come una serie di richieste associate tra loro
+  \end{definizione}
+  A causa della natura del protocollo HTTP è quindi difficile mantenere una
+  sessione e si usano diversi meccanismi di tracciamento:
+  \begin{itemize}
+    \item cookies
+    \item riscrittura dell'URL
+    \item form nascosti
+  \end{itemize}
+  In ogni caso è il server a svolgere il lavoro:
+  \begin{itemize}
+    \item ottenere la sessione:\\
+    \texttt{ession session = req.getSession(true);}
+    \item salvare le informazioni delle sessione nella sessione corrente (ad
+    esempio per un carrello in un e-commerce etc$\ldots$), ad esempio:\\
+    \texttt{session.setAttribute(name, valueObject);}
+    \item recuperare informazioni dalla sessione, ad esempio:
+    \texttt{session.getAttribute(name);}
+  \end{itemize}
+  Si hanno diversi luoghi dove una servlet memorizza i dati a seconda dello
+  scopo:
+  \begin{itemize}
+    \item nella \textbf{request}, nel caso dell'esecuzione di
+    \texttt{.service()}
+    \item nella \textbf{sessione}, per multiple request dello stesso utente
+    \item nel \textbf{servletContext}, per i dati riguardanti l'intero
+    applicativo 
+  \end{itemize}
+  le servlet ragionano per \textit{container}, avendo una servlet per container
+  che è condivisa tra più utenti e richieste. Bisogna quindi preoccuparsi del
+  multithreading e fare attenzione quando si accede ai dati nella sessione e nel
+  SessionContext. \\
+  \textbf{Java Server Pages (\textit{JSP})} è usato per includere elementi
+  dinamici in una pagina web statica. Le pagine JSP vengono compilate in servlet
+  Java prima di essere eseguite secondo il seguente processo:
+  \begin{enumerate}
+    \item si ha la request
+    \item si genera la servlet dalla pagina JSP
+    \item si salva la servlet per usi futuri
+    \item si esegue la servlet
+  \end{enumerate}
+  Con \texttt{<\%= \%>} si visualizzano le variabili Java (sono le \textit{JSP
+    expression}) e con \texttt{<\% \%>} si include codice Java (sono le
+  \textit{JSP Scriplet}).
+  \begin{esempio}
+    Vediamo due esempi di codice, prima con una expression:\\
+    \texttt{<HTML>\\
+      <BODY>\\
+      Hello, sailor, it is now <\%=new java.util.Date().toString()\%>\\
+      </BODY>\\
+      </HTML>}
+    \\
+    e con uno scriptlet:\\
+    \texttt{<HTML>\\
+      <BODY>\\
+      <\% java.util.Date theDate = new java.util.Date(); \%>\\
+      <\% int theHour = theDate.getHours(); \%>\\
+      <\% if(theHour<12) { \%>\\
+        Good morning,\\
+        <\% } else { \%>\\
+        Good afternoon,<\% } \%>\\
+      sailor. It is now <\%= theDate.toString() \%>.\\
+      </BODY>\\
+      </HTML>}
+  \end{esempio}
+  In JSP si hanno variabili predefiniti per \texttt{request, response, out,
+    session,}etc$\ldots$ e dei tag di azioni standard come
+  \texttt{<jsp:useBean>, <jsp:getProperty>, <jsp:setProperty>}. Si hanno anche
+  librerie per i vari tag, includibili con:
+  \texttt{<\%@taglib uri="URIToTagLibrary" prefix="tagPrefix"\%>}.\\
+  \textbf{Esempio grosso su slide.}
+\end{shaded}
+\newpage
+Torniamo a parlare di MVC.\\
+Dal punto di vista del \textbf{Controller design} si ha:
+\begin{itemize}
+  \item \textbf{Page Controller}, che si occupa di controllare i parametri delle
+  richieste e richiamare la business logic, di selezionare la vista successiva
+  da mostrare e di preparare i dati per la presentazione. Si ha il seguente
+  flusso di controllo:
+  \begin{enumerate}
+    \item il controllo si sposta dal server Web al Page Controller
+    \item il Page Controller estrae i parametri dalla richiesta
+    \item il Page Controller utilizza alcuni oggetti di business
+    \item il Page Controller decide la vista successiva
+    \item il Page Controller prepara i dati da mostrare nella vista successiva
+    \item il Page Controller porta il controllo (e i dati) alla vista
+  \end{enumerate}
+  Dal punto di vista implementativo si possono usare soluzioni con poca logica
+  di controllo (ASP; JSP, PHP etc$\ldots$) o con una forte logica di controllo
+  (CGI scritp, servlet etc$\ldots$)
+  \item \textbf{Front Controller} che definisce un singolo componente che
+  gestisce tutte le richieste, eseguendo le operazioni comuni a tutte le
+  richieste (come autenticazione, questioni di sicurezza, tracciamento
+  etc$\ldots$) e poi esegue la specifica operazione che è stata richiesta
+  esegue la specifica operazione che è stata richiesta, passando il parametro
+  come parametro. Vediamo quindi l'UML associato:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc2.pdf}
+  \end{figure}
+  anche nel caso di un front controller si potrebbero avere più controller.\\
+  Nel dettaglio l'\textit{handler}:
+  \begin{itemize}
+    \item riceve la richiesta dal server 
+    \item esegue operazioni generali/comuni 
+    \item decide l'operazione che deve essere eseguita 
+    \item delega l'esecuzione al \textit{concrete command}
+  \end{itemize}
+  mentre il \textit{concrete command}:
+  \begin{itemize}
+    \item estrae i parametri dalla richiesta 
+    \item invoca metodi implementati nella business logic
+    \item determina la vista successiva 
+    \item dà il controllo al View
+  \end{itemize}
+  Il front controller è più complesso del page controller. Inoltre evita la
+  duplicaizone del codice tra i vari Controller, permette una semplice
+  configurazione del server avendo una sola servlet, permette di gestire
+  dinamicamente dinamicamente nuovi comandi e facilita l'estensione del
+  Controller (avendo solo un controller)
+  \item \textbf{Intercepting Filter} che è utile per gestire richieste e
+  risposte prima che vengano servite. Viene spesso usato insieme al front
+  controller per ``decorare'' richieste e risposte con funzioni aggiuntive, come
+  autenticazione, logging, conversione dati etc$\ldots$\\
+  Si ha quindi il seguente UML:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc3.pdf}
+  \end{figure}
+  \newpage
+  e il seguente comportamento:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.38]{img/mvc4.jpg}
+  \end{figure}
+  Dal punto di vista implementativo il web server fornisce \textit{Filter
+    Manager} e \textit{Filter chain}, dovendo quindi implementare e dichiarare
+  solo il filter (o più di uno)
+  \item \textbf{Application Controller} usato in quanto all'aumentare della
+  complessità del flusso, la gestione del flusso potrebbe essere concentrata in
+  una classe. Solitamente viene usato dal page controller o dal front
+  conteoller, secondo il seguente comportamento:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc5.pdf}
+  \end{figure}
+\end{itemize}
+\newpage
+Passiamo quindi al \textbf{design view}, dove si hanno:
+\begin{itemize}
+  \item \textbf{Template View} che genera codice HTML dalle pagine template
+  che includono chiamate al modello, avendo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc6.pdf}
+  \end{figure}
+  Dove nel codice HTML si hanno vari marker e l'\textit{helper} genera i dati
+  del dominio e separa la vista dalla logica di implementazione. L'helper è
+  creato dal Controller ad è accedibile da una vista. Si ha quindi un modello
+  del tipo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc7.pdf}
+  \end{figure}
+  \item \textbf{Transformation View} che trasforma le entità di dominio in HTML:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc8.pdf}
+  \end{figure}
+  Dove per il Model tipicamente ogni classe implementa un metodo
+  \texttt{-toXML()} mentre per il \textit{transformer} si ha ripicamente
+  l'implementazione tramite \textbf{eXtensible Style Language for
+    Transformations (\textit{XSLT})}. Si ha quindi che ci si concentra
+  sull'entità che deve essere trasformata, piuttosto che sulla pagina di
+  output.\\
+  Purtroppo è difficile includere la logica di implementazione nella vista 
+  anche se il testing è facile (magari
+  controllando il flusso dopo la trasformazione XSLT). È facile da applicare a
+  dati in formato XML anche se \textbf{What You See Is What You Get (WYSIWYG)}
+  sarebbe più intuitivo e facile da implementare
+  \item \textbf{Two-Steps View} dove si ha la generazione della pagina HTML in
+  due passaggi:
+  \begin{enumerate}
+    \item si genera un pagina logica
+    \item si renderizza la pagina
+  \end{enumerate}
+  Si ha un modello del tipo:
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mvc9.pdf}
+  \end{figure}
+  Si ha che il ``Look \& Feel'' è facile da cambiare perché il rendering non è
+  ottenuto tramite interazione con la strutturazione delle informazioni che
+  devono essere visualizzate nella pagina.\\
+  Dal punto di vista implementativo quindi si ha:
+  \begin{itemize}
+    \item una sequenza di due trasformazione XSLT, la prima per la costruzione
+    della pagina logica e la seconda per il suo render
+    \item una vista template con tag custom, la pagina HTML è quindi la pagina
+    logica e i tag custom il render
+  \end{itemize}
+\end{itemize}
+Si ha \textit{STRUTS2} che è un framework con l'implementazione integrata di più
+design pattern:
+\begin{itemize}
+  \item MVC2
+  \item front controller
+  \item intercepting filter
+  \item context object
+  \item view helper
+  \item etc$\ldots$
+\end{itemize}
+Con questo framework si definisce il flusso e non la codifica in
+se. L'implementazione di un'operazione in genere richiede:
+\begin{itemize}
+  \item implementazione della view
+  \item implementazione dell'azione
+  \item definizione del flusso
+\end{itemize}
+Si ha un file \texttt{web.xml} per permettere s STRUTS2 di catturare le
+richieste, indipendentemente dall'applicazione. Questo framework ha anche
+versioni GUI integrabili con editor come Ecplipse.
 \end{document}  
 % LocalWords:  Machine Learning waterfall png img slides jpg testing self step
 % LocalWords:  organizing continuous refactoring Scrum scrum product backlog as

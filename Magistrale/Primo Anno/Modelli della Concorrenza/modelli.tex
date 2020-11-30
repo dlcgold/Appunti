@@ -5458,104 +5458,130 @@ possibili run del sistema.
     \item $\forall\,b\in B:|\,^\bullet b|=1$, ovvero ho conflitti solo in
     avanti
     \item $\forall\,x,y\in B\cup E:(x,y)\in F^+\implies (y,x)\not\in F^+$,
-    ovvero non ho cicli
-    \item $\forall\,e\in E:\{x\in B\cup E|xF^*e\}$ è finito
-    \item la relazione di conflitto $\#$ non è riflessiva, avendo:
+    ovvero non ho cicli, in quanto le ripetizioni sono già registrate
+    \item $\forall\,e\in E:\{x\in B\cup E|xF^*e\}$, ovvero il passato di un
+    evento, è finito 
+    \item la \textbf{relazione di conflitto} $\#$ non è riflessiva, avendo:
     \[\#\subset X\times X\]
     definita come:
     \[x\# y\iff \exists e_1,e_2\in E:\,^\bullet e_1\cap \,^\bullet e_2\neq
       \emptyset \land e_1\leq x\land e_2\leq y\]
+    ovvero due elementi sono in conflitto sse sono in ``alternativa'' ovvero se
+    si hanno due eventi che condividono precondizioni (sicuramente non le post
+    non avendo conflitti in avanti) con i due eventi che causano i due elementi
+    $x$ e $y$, allora anche questi due sono in conflitto. Vediamo degli esempi:
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[node distance=1.7cm,bend angle=45,auto]
+        \node [place] (p0)  {};
+        \node [transitionv] (t1) [above right of = p0] {};
+        \node [transitionv] (t2) [below right of = p0] {};
+        \node [place] (p2) [right of = t1] {};
+        \node [place] (p3) [above right of = t2] {};
+        \node [place] (p4) [right of = t2, label=below:$x$] {};
+        \node [transitionv] (t3) [right of = p2, label=above:$y$] {};
+        \node [place] (p5) [right of = t3] {};
+        % \node [place] (p3) [right of = t3] {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (p0) edge (t2)
+        (t1) edge (p2)
+        (p2) edge (t3)
+        (t3) edge (p5)
+        (t2) edge (p3)
+        (t2) edge (p4)
+        ;
+      \end{tikzpicture}
+      \caption{Esempio con $x$ e $y$ non in conflitto. Nel dettaglio questa è
+        una rete di occorrenze}
+      \label{fig:esemp}
+    \end{figure}
+    \begin{figure}[H]
+      \centering
+      \begin{tikzpicture}[node distance=1.7cm,bend angle=45,auto]
+        \node [place] (p0) [label=left:$p$] {};
+        \node [transitionv] (t1) [above right of = p0, label=above:$e_1$] {};
+        \node [transitionv] (t2) [below right of = p0, label=below:$e_2$] {};
+        \node [place] (p2) [right of = t1] {};
+        \node [place] (p3) [above right of = t2] {};
+        \node [place] (p4) [right of = t2] {};
+        \node [transitionv] (t3) [right of = p2, label=above:$z$] {};
+        \node [place] (p5) [right of = t3] {};
+        % \node [place] (p3) [right of = t3] {}; 
+        
+        \path[-{Latex[width=2mm]}]
+        (p0) edge (t1)
+        (p0) edge (t2)
+        (t1) edge (p2)
+        (p2) edge (t3)
+        (t3) edge (p5)
+        (p3) edge (t3)
+        (t2) edge (p3)
+        (t2) edge (p4)
+        ;
+      \end{tikzpicture}
+      \caption{Esempio con $z$ che è in conflitto con se stessa (avendo $e_1<z$
+        e $e_2<z$, con i due eventi che condividono $p$) e quindi non può
+        essere una rete di occorrenze}
+    \end{figure}
   \end{itemize}
   È comunque possibile associare ad una rete di occorrenze $N$ un ordine
   parziale. 
 \end{definizione}
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
-    \node [place] (p0)  {};
-    \node [transitionv] (t1) [above right of = p0] {};
-    \node [transitionv] (t2) [below right of = p0] {};
-    \node [place] (p2) [right of = t1] {};
-    \node [place] (p3) [above right of = t2] {};
-    \node [place] (p4) [right of = t2, label=below:$x$] {};
-    \node [transitionv] (t3) [right of = p2, label=above:$y$] {};
-    \node [place] (p5) [right of = t3] {};
-    % \node [place] (p3) [right of = t3] {}; 
-    
-    \path[-{Latex[width=2mm]}]
-    (p0) edge (t1)
-    (p0) edge (t2)
-    (t1) edge (p2)
-    (p2) edge (t3)
-    (t3) edge (p5)
-    (t2) edge (p3)
-    (t2) edge (p4)
-    ;
-  \end{tikzpicture}
-  \caption{Esempio di rete di occorrenze}
-\end{figure}
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
-    \node [place] (p0)  {};
-    \node [transitionv] (t1) [above right of = p0] {};
-    \node [transitionv] (t2) [below right of = p0] {};
-    \node [place] (p2) [right of = t1] {};
-    \node [place] (p3) [above right of = t2] {};
-    \node [place] (p4) [right of = t2] {};
-    \node [transitionv] (t3) [right of = p2, label=above:$z$] {};
-    \node [place] (p5) [right of = t3] {};
-    % \node [place] (p3) [right of = t3] {}; 
-    
-    \path[-{Latex[width=2mm]}]
-    (p0) edge (t1)
-    (p0) edge (t2)
-    (t1) edge (p2)
-    (p2) edge (t3)
-    (t3) edge (p5)
-    (p3) edge (t3)
-    (t2) edge (p3)
-    (t2) edge (p4)
-    ;
-  \end{tikzpicture}
-  \caption{Esempio di rete  che non è una rete di occorrenze, avendo $z\#z$,
-    che quindi è una relazione riflessiva}
-\end{figure}
+
 \begin{definizione}
   Sia $\Sigma=(S,T,F,c_{in})$ un sistema elementare senza contatti e
   finito. Si ha che:
   \[\langle N=(B,E,F), \phi\rangle\]
   è un \textbf{processo ramificato} di $\Sigma$ sse:
   \begin{itemize}
-    \item $(B,E,F)$ è una rete di occorrenze (si ammettono condizioni isolate)
+    \item $(B,E,F)$ è una rete di occorrenze (si ammettono condizioni isolate,
+    volendo poter registrare il caso iniziale come un insieme di condizioni che
+    magari non vengono modificate)
     \item $\phi:B\cup E\to S\cup T$ è una mappa tale che:
     \begin{itemize}
       \item $\phi(B)\subseteq S, \phi(E)\subseteq T$
       \item $\forall e_1,e_2\in E:(\,^\bullet e_1=\,^\bullet e_2\land
-      \phi(e_1)=\phi(e_2))\implies e_1=e_2$
+      \phi(e_1)=\phi(e_2))\implies e_1=e_2$, ovvero se due eventi condividono le
+      precondizioni e corrispondono allo stesso eventi del sistema secondo la
+      mappa allora necessariamente sono lo stesso evento
       \item $\forall e\in E:\phi(\,^\bullet e)=\,^\bullet
       \phi(e)\land\phi(e^\bullet)=\phi(e)^\bullet$ quindi le precondizioni di un
       evento nella rete causale devono corrispondere alle pre dell'evento nel
       sistema elementare (e così anche per le post)
-      \item $\phi(Min(N))=c_{in}$
+      \item $\phi(Min(N))=c_{in}$, quindi il taglio iniziale deve essere il caso
+      iniziale del sistema
     \end{itemize}
   \end{itemize}
 \end{definizione}
 \begin{esempio}
-  Riprendendo il solito esempio di mutua esclusione si ha il seguente processo
-  ramificato:
+  Riprendendo il solito esempio di mutua esclusione:
   \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.6]{img/ram.jpg} 
+    \includegraphics[scale = 0.45]{img/ram0.jpg} 
   \end{figure}
+  \newpage
+  si ha il seguente processo ramificato:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.45]{img/ram.jpg} 
+  \end{figure}
+  
 \end{esempio}
+\noindent
+Cerchiamo ora di definire meglio l'unfolding, quell'oggetto che rappresenta
+tutti i possibili sottoprocessi non sequenziali di del sistema, ovvero tutti i
+possibili comportamenti del sistema.\\
+Definiamo prima dei ``prerequisiti''.
 \begin{definizione}
   Sia $\Sigma=(S,T,F,c_{in})$ un sistema elementare senza contatti e finito, e
   siano:
   \[\Pi_1=\langle N_1;\phi_1\rangle\]
   \[\Pi_2=\langle N_2;\phi_2\rangle\]
   due processi ramificati di $\Sigma$.\\
-  Si ha che $\Pi_1$ è un \textbf{prefisso} di $\Pi_2$ sse:
+  Si ha che $\Pi_1$ è un \textbf{prefisso} di $\Pi_2$ (e quindi $\Pi_1$ è un
+  sottoprocesso di $\Pi_2$) sse:
   \begin{itemize}
     \item $N_1$ è una sottorete di $N_2$
     \item $\phi_{2|N_1}=\phi_1$ ovvero $\phi_2$ ristretto a $N_1$  è uguale a
@@ -5565,6 +5591,10 @@ possibili run del sistema.
   rispetto alla relazione di prefisso tra processi e tale processo è detto
   \textbf{unfolding} di $\Sigma$:
   \[Unf(\Sigma)\]
+  Quindi è il processo ramificato più grande, largo il più possibile e lungo
+  infinito se il sistema ha comportamento ciclico.\\
+  Ha senso studiare un prefisso finito dell'unfolding che permette di
+  determinare tutto l'unfolding.\\
   Tale processo non sequenziale è un processo ramificato:
   \[\Pi=\langle N;\phi\rangle\]
   tale che $N$ è una rete causale, senza conflitti. Il processo $\Pi$ è anche
@@ -5572,15 +5602,27 @@ possibili run del sistema.
   L'unfolding tiene traccia di tutti i processi sequenziali di un sistema
   elementare. 
 \end{definizione}
+\textbf{Rivedere bene questa parte (lezione 30 novembre, con anche parte di
+  esercizi)}.\\
 
 \begin{esempio}
   Riprendendo il solito esempio di mutua esclusione si ha il seguente unfolding
   infinito:
   \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.6]{img/unf.jpg} 
+    \includegraphics[scale = 0.45]{img/unf.jpg} 
   \end{figure}
 \end{esempio}
+Si è cercato di capire se un prefisso dell'unfolding basti a studiare l'intero
+sistema.
+\begin{definizione}
+  Definiamo \textbf{prefisso completo} un prefisso che include tutti i casi
+  raggiungibili.
+\end{definizione}
+Più si ha concorrenza e più la discrepanza tra unfolding e sistema di
+transizioni aumenta a favore del prefisso finito dell'unfolding (???). Con
+concorrenza alta si hanno algoritmi più efficienti di calcolo dell'unfolding (e
+anche di model checking).
 % \subsection{Reti posti e transizioni}
 % Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
 % Posti e Transizioni}, permette di rappresentare un sistema in modo più
@@ -5672,7 +5714,8 @@ possibili run del sistema.
 %       \node [transition] (t1) [below right of = p0, label=left:d] {};
 %       \node [transition] (t2) [below left of = p0, label=left:p] {};
 %       \node [place, tokens = 1] (p1) [below right of = t2, label=below:P1] {}; 
-%       \node [place, tokens=2] (p3) [right of = t1, label=above:B] {};
+%       \node [place, tokens=2] (p3) [right of = t1, label=above:$\mbox{B,
+%         capacità=2}$] {}; 
 %       \node [transition] (t4) [right of = p3, label=right:e] {};
 
 %       \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
@@ -5756,15 +5799,357 @@ possibili run del sistema.
 % tali che una transizione possa scattare sse i pesi vengono rispettati:
 % \begin{figure}[H]
 %   \centering
-%   \includegraphics[scale = 0.7]{img/pt7.jpg}
+%   \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%     \node [transition] (t0) [label=left:$t_1$] {};
+%     \node [place] (p0) [above left of = t0, label=above:P0] {};       
+%     \node [place, tokens = 6, minimum size = 0.9cm] (p1) [above right of = t0, label=above:P1] {}; 
+%     \node [place] (p2) [below left of = t0, label=below:P2] {}; 
+%     \node [place] (p3) [below of = t0, label=below:P3] {}; 
+%     \node [place] (p4) [below right of = t0, label=below:P4] {}; 
+
+%     {}; 
+    
+%     \path[-{Latex[width=2mm]}]
+%     (p0) edge (t0)
+%     (p1) edge node {5} (t0)
+%     (t0) edge (p2)
+%     (t0) edge node {2}(p3)
+%     (t0) edge (p4)
+%     ;
+%   \end{tikzpicture}
+%   \qquad\qquad\qquad
+%   \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%     \node [transition] (t0) [label=left:$t_1$] {};
+%     \node [place, tokens = 2] (p0) [above left of = t0, label=above:P0] {};       
+%     \node [place, tokens = 4, minimum size = 0.7cm] (p1) [above right of = t0, label=above:P1] {}; 
+%     \node [place] (p2) [below left of = t0, label=below:P2] {}; 
+%     \node [place] (p3) [below of = t0, label=below:P3] {}; 
+%     \node [place] (p4) [below right of = t0, label=below:P4] {}; 
+
+%     {}; 
+    
+%     \path[-{Latex[width=2mm]}]
+%     (p0) edge (t0)
+%     (p1) edge node {5} (t0)
+%     (t0) edge (p2)
+%     (t0) edge node {2}(p3)
+%     (t0) edge (p4)
+%     ;
+%   \end{tikzpicture}
 %   \caption{Esempi con la transizione $t_i$ non abilitata}
 % \end{figure}
 % \begin{figure}[H]
 %   \centering
-%   \includegraphics[scale = 0.7]{img/pt8.jpg}
+%   \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%     \node [transition] (t0) [label=left:$t_1$] {};
+%     \node [place, tokens = 2] (p0) [above left of = t0, label=above:P0] {};       
+%     \node [place, tokens = 5, minimum size = 0.7cm] (p1) [above right of = t0, label=above:P1] {}; 
+%     \node [place] (p2) [below left of = t0, label=below:P2] {}; 
+%     \node [place] (p3) [below of = t0, label=below:P3] {}; 
+%     \node [place] (p4) [below right of = t0, label=below:P4] {}; 
+
+%     {}; 
+    
+%     \path[-{Latex[width=2mm]}]
+%     (p0) edge (t0)
+%     (p1) edge node {5} (t0)
+%     (t0) edge (p2)
+%     (t0) edge node {2}(p3)
+%     (t0) edge (p4)
+%     ;
+%   \end{tikzpicture}
+%   \qquad\qquad\qquad
+%   \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%     \node [transition] (t0) [label=left:$t_1$] {};
+%     \node [place, tokens = 1] (p0) [above left of = t0, label=above:P0] {};       
+%     \node [place] (p1) [above right of = t0, label=above:P1] {}; 
+%     \node [place, tokens = 1] (p2) [below left of = t0, label=below:P2] {}; 
+%     \node [place, tokens = 2] (p3) [below of = t0, label=below:P3] {}; 
+%     \node [place, tokens = 1] (p4) [below right of = t0, label=below:P4] {}; 
+
+%     {}; 
+    
+%     \path[-{Latex[width=2mm]}]
+%     (p0) edge (t0)
+%     (p1) edge node {5} (t0)
+%     (t0) edge (p2)
+%     (t0) edge node {2}(p3)
+%     (t0) edge (p4)
+%     ;
+%   \end{tikzpicture}
 %   \caption{Esempio con la transizione $t_i$ abilitata, a sinistra il ``prima''
 %     e a destra il ``dopo'' lo scatto di $t_i$}
 % \end{figure}
+% \subsection{I Filosofi a Cena}
+% Questo è un classico problema di sincronizzazione, introdotto da Dijkstra. Si ha
+% un tavolo rotondo con 5 filosofi ($p_i,\,i=0,\ldots 4$), ciascuno ha davanti un
+% piatto di spaghetti e si hanno solo 5 forchette ($f_i,\,i=0,\ldots 4$):
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt10.jpg}
+%   \caption{Rappresentazione schematica del problema dei 5 filosofi}
+% \end{figure}
+% Ogni filosofo ha lo stesso comportamento, un po' pensa e un po' mangia,
+% prendendo prima la forchetta alla sua destra e poi quella alla sua sinistra
+% (perché necessitano di due forchette per mangiare). Si ha quindi il
+% \textit{deadlock} se tutti vogliono mangiare, prendendo tutti in primis una
+% forchetta, impedendosi tutti a vicenda di mangiare (non potendo prendere due
+% forchette) o si ha la \textit{starvation} in quanto potrebbero accordarsi per
+% mangiare in quattro, impedendo a uno di mangiare.\\
+% Si vuole modellare tale schema. Ogni filosofo può essere modellato come una rete
+% elementare, che farà da componente al modello finale:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt11.jpg}
+% \end{figure}
+% con gli eventi \textit{upD} e \textit{upS}, dove il filosofo prende la forchetta
+% destra e sinistra, e rispettivamente \textit{downD} e \textit{downS}, dove le
+% mette giù. Si ha la condizione che specifica che il filosofo sta pensando e
+% quella che mi segnala l'azione del mangiare, oltre alle due condizioni
+% intermedie che separano le azioni tra forchetta sinistra e destra.\\
+% Si modella anche la componente della forchetta, con gli eventi che segnalano se
+% è depositata, \textit{down}, o meno, \textit{up}:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt12.jpg}
+% \end{figure}
+% \newpage
+% Combino quindi le due componenti per specificare il filosofo che prende la sua
+% forchetta destra e poi la sinistra, quindi per ogni componente \textit{filosofo}
+% si hanno due componenti \textit{forchetta}:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt13.jpg}
+% \end{figure}
+% con la \textit{forchetta 1 (fork 1)} che sarà la forchetta destra e la
+% \textit{forchetta 2 (fork 2)} che sarà la forchetta sinistra. Si hanno quindi
+% diverse transizioni di sincronizzazione tra le due componenti (ogni volta che il
+% filosofo interagisce con la forchetta).\\
+% Bisogna aggiungere che ogni forchetta può essere presa da due filosofi, ognuna a
+% destra di un filosofo e a sinistra di un altro:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt14.jpg}
+% \end{figure}
+% Ogni forchetta quindi si sincronizza alternativamente tra due filosofi, venendo
+% presa da uno dei due filosofi. Si è arrivati quindi ad una \textbf{situazione di
+%   conflitto}, o meglio ad una \textbf{situazione di confusione}.\\
+% Per ora la soluzione di questo problema viene lasciato da parte per valutare il
+% modello dello stesso.\\
+% Si ha quindi una possibile rappresentazione del modello completo:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt15.jpg}
+% \end{figure}
+% Ma ogni filosofo, come del resto ogni forchetta, si comporta nella stessa
+% maniera. Si tenda quindi di \textit{ripiegare} il modello, modellando un
+% un'unica componente filosofo con 5 marche distribuite nei vari stati locali del
+% filosofo. Stesso discorso per le forchette. Ottengo quindi il seguente modello:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.6]{img/pt16.jpg}
+% \end{figure}
+% Con le due componenti, \textit{filosofo} e \textit{forchetta}, entrambe
+% inizializzate con 5 marche ciascuno. Questo modello però perde informazione
+% sulla forchetta che un filosofo può prendere, si ha un radicale \textbf{cambio
+%   di protocollo}. Un filosofo può prendere una qualsiasi forchetta e non più
+% quella alla sua destra/sinistra. Non posso quindi usare le \textit{reti Posti e
+%   Transizioni} in quanto perdo troppe informazioni.\\
+% L'unica soluzione possibile è quindi quella di recuperare le informazioni perse
+% inserendole nelle marche, alle quali viene aggiunta una struttura dati. Si ha
+% così modo di distinguere i vari filosofi e le forchette. Per compattare il
+% sistema devo quindi rendere più complessa l'essenza della marca, viene
+% arricchita con una struttura dati.\\
+% Si arriva così ad avere una \textbf{Rete di Alto Livello}, come, per esempio,
+% una \textit{rete colorata}, a partire da un rete elementare.\\
+% Distinguo quindi filosofi e forchette nei due insiemi di strutture dati:
+% \begin{enumerate}
+%   \item $Phil=\{p_0,\ldots, p_4\}$, insieme dei filosofi
+%   \item $Fork=\{f_0,\ldots, f_4\}$, insieme delle forchette
+% \end{enumerate}
+% Si nota che per gli indici si ha una somma \textit{modulo 5}, ovvero gli indici
+% rispondono alla regola:
+% \[(i+1) \mbox{ mod } 5\]
+% In modo che gli indici siano ordinati avendo inoltre lo 0 che segue il 4, in
+% modo circolare.\\
+% Si ottiene quindi, mantenendo il protocollo iniziale:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.6]{img/pt17.jpg}
+% \end{figure}
+% Si mantiene quindi un modello simile a quello descritto sopra ma al posto di
+% marche non strutturate si ha nel posto delle 5 forchette le marche dell'insieme
+% \textit{Fork} e al posto dei 5 filosofi le marche dell'insieme \textit{Phil}:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.6]{img/pt18.jpg}
+% \end{figure}
+% Le transizioni scattano in determinate condizioni. Per esempio la prima
+% transizione, relativa al fatto che il filosofo prende la forchetta alla sua
+% destra, scatta sse con l'istanza filosofo $p_j$ e forchetta $f_i$ si ha che
+% $i=j$ (ho quindi almeno una forchetta, almeno un filosofo e la forchetta deve
+% essere quella alla sua destra, che, per come abbiamo modellato il problema, è
+% quella con lo stesso indice). Sugli archi si hanno quindi annotate determinate
+% variabili che denotano istanze. Per la forchetta a sinistra si usa il modulo
+% 5. Si procede quindi per i vari filosofi.
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[scale = 0.5]{img/pt19.jpg}
+%   \caption{Esempio con il filosofo $p_3$ che ha già preso la forchetta alla sua
+%     destra, $f_3$, e prende quella a sinistra, $f_4$}
+% \end{figure}
+% \textit{Si ha quindi un prezzo per rappresentare in maniera compatta un sistema
+%   elementare, mediante una rete di alto livello, ovvero l'arricchimento della
+%   struttura dati}.
+% \subsection{Formalizzazione delle Reti Posti e Transizioni}
+% Nonostante la sezione si occupi di formalismi ci appoggiamo ad un esempio per
+% avere un confronto diretto tra teoria e pratica. Questo esempio è un'n-sima
+% versione del sistema produttore-consumatore, con un produttore che deposita
+% a due elementi alla volta, in un buffer che ha capacità massima apri a cinque,
+% che vengono consumati da due consumatori:
+% \begin{figure}[H]
+%   \centering
+%   \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%     \node [place, tokens = 1] (p0) [label=above:P2] {};
+%     \node [transition] (t1) [below right of = p0, label=left:d] {};
+%     \node [transition] (t2) [below left of = p0, label=left:p] {};
+%     \node [place] (p1) [below right of = t2, label=below:P1] {}; 
+%     \node [place, tokens=2] (p3) [right of = t1, label=below:$\mbox{B,
+%       capacità=5}$] {}; 
+%     \node [transition] (t4) [right of = p3, label=right:e] {};
+
+%     \node [place, tokens=1] (p2) [above right of = t4,label=above:C1] {}; 
+%     \node [transition] (t3) [below right of = p2, label=right:c] {};
+%     \node [place, tokens = 1] (p4) [below right of = t4, label=below:C2]
+%     {}; 
+    
+%     \path[-{Latex[width=2mm]}]
+%     (p0) edge (t1)
+%     (t1) edge (p1)
+%     (p1) edge (t2)
+%     (t2) edge (p0)
+%     (t1) edge node {2} (p3)
+%     (p3) edge (t4)
+%     (t4) edge (p4)
+%     (p4) edge (t3)
+%     (t3) edge (p2)
+%     (p2) edge (t4)
+%     ;
+%   \end{tikzpicture}
+%   \caption{Modello produttore-consumatore compatto con due consumatori.}
+% \end{figure}
+% quindi al massimo ho cinque marche nel buffer e 2 in uno degli stati del
+% consumatore (in quanto rappresenta due consumatori).\\
+% Passiamo ora alla formalizzazione:
+
+% \begin{definizione}
+%   Si definisce un \textbf{sistema Posti e Transizioni (\textit{sistema P/T})} la
+%   sestupla: 
+%   \[\Sigma=(S,T,F,K,W;M_0)\]
+%   dove:
+%   \begin{itemize}
+%     \item $(S,T,F)$ è una rete con:
+%     \begin{itemize}
+%       \item $S$ che rappresenta l'insieme dei posti
+%       \item $T$ che rappresenta l'insieme delle transizioni
+%       \item $F$ che rappresenta la relazione di flusso che lega posti e
+%       transizioni tramite archi
+%     \end{itemize}
+%     \item $K:S\to\mathbb{N}^{+}\cup \{\infty\}$ che rappresenta una funzione che
+%     ad ogni posto in $S$ assegna un valore, che può essere un naturale
+%     strettamente positivo o anche infinito (ovvero in quel posto posso avere un
+%     numero qualsiasi di marche). Il valore zero non è ammesso in quanto
+%     implicherebbe che il posto non potrebbe mai essere occupato, rendendo la
+%     modellazione di un tale posto inutile. $K$ è detta \textbf{funzione
+%       capacità dei posti}.
+%     \item $W:F\to\mathbb{N}$ che rappresenta una funzione che
+%     assegna ad ogni arco un peso mediante un valore naturale che stavolta può
+%     essere, oltre che infinito, anche zero. $W$ è detta \textbf{funzione peso
+%       degli archi}
+%     \item $M_0:S\to \mathbb{N}\cup\{\infty\}:\,\forall s\in
+%     S\,\,\,M_0(s)\leq K(s)$ che rappresenta la \textbf{marcatura iniziale}
+%     del sistema, ovvero una funzione che assegna ad ogni posto un naturale,
+%     eventualmente nullo o infinito, minore o uguale alla capacità massima di
+%     tale posto (capacità espressa dalla funzione $K$) indicante il numero di
+%     marche allo stato iniziale. 
+%   \end{itemize}
+%   Bisogna ora definire la regola di scatto, ovvero il \textbf{gioco delle
+%     marche}, la regola per cui le marche si spostano sulla rete. Si ha quindi,
+%   dati:
+%   \[M:S\to\mathbb{N}\cup \{\infty\}\mbox{ e }t\in T\]
+%   ovvero data una marcatura e una qualsiasi transizione $t$ si ha che:
+%   \[M[t>\]
+%   ovvero una transizione è abilitata in una certa marcatura,
+%   \begin{center}
+%     sse:
+%   \end{center}
+%   \[\forall s\in S,\,\,M(s)\geq W(s,t)\wedge M(s)+W(t,s)\leq K(s)\]
+%   ovvero per ogni posto si ha che ci sono abbastanza marche nei posti perché
+%   possa scattare la transizione, ovvero c'è un arco di peso corretto che collega
+%   quel posto con la transizione, avendo peso dell'arco minore o uguale al numero
+%   di marche del posto, e, inoltre, si deve verificare che la transizione non
+%   metta troppe marche in quel posto, quindi la marcatura del posto (ovvero il
+%   numero di marche già presenti in esso) più il numero di marche che si
+%   aggiungono con lo scatto della transizione non deve superare la capacità del
+%   posto.
+%   \begin{figure}[H]
+%     \centering
+%     \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+%       \node [transition] (t0) [label=left:$t_3$] {};
+%       \node [transition] (t1) [left of = t0, label=left:$t_1$] {};
+%       \node [transition] (t2) [right of = t0, label=right:$t_2$] {};
+%       \node [place, tokens=2] (p1) [above of = t0, label=above:P1] {}; 
+%       \node [place] (p2) [below of = t0, label=below:$\mbox{capacità=3}$] {}; 
+      
+%       \path[-{Latex[width=2mm]}]
+%       (p1) edge (t1)
+%       (p1) edge node {2}(t2)
+%       (t1) edge (p2)
+%       (t2) edge node {2}(p2)
+%       (p2) edge node {3}(t0)
+%       (t0) edge (p1)
+%       ;
+%     \end{tikzpicture}
+%     %\includegraphics[scale = 0.75]{img/pt21.jpg}
+%     \caption{Nell'esempio si ha che la transizione $t_2$ può scattare sse nella
+%       posto precedente ho almeno due marche, in quanto l'arco tra i due ha peso
+%       due. Inoltre ho il posto che segue vuoto ma con capacità massima pari a
+%       tre, quindi la transizione può scattare in quanto l'arco tra i due pesa
+%       due, assicurandomi che dopo la transizione, nel posto che la segue, non
+%       verrà superata la capienza massima, arrivando infatti ad avere marcatura
+%       pari a 2}
+%   \end{figure}
+%   Lo scatto della transizione, se questa è abilitata nella marcatura, mi genera
+%   una nuova marcatura che viene ottenuta da quella precedente togliendo tante
+%   marche dal posto che è di input alla transizione quanto il peso dell'arco che
+%   connette tale posto alla transizione e aggiungendo tante marche al posto in
+%   output quante il peso dell'arco che connette la transizione a tale posto,
+%   ovvero, formalmente: 
+%   \[M[t>M'\]
+%   \begin{center}
+%     sse
+%   \end{center}
+%   \[M[t> \wedge\, \forall s\in S,\,\,M'(s)=M(s)-W(s,t)+W(t,s)\]
+%   quindi il nuovo posto avrà marcatura pari a quella precedente al più dei due
+%   contributi, il primo negativo e il secondo positivo, dei pesi dei due archi.
+% \end{definizione}
+% \begin{definizione}
+%   Dato un sistema P/T $\Sigma=(S, T , F , K , W;M_0)$ si definisce
+%   l'\textbf{insieme delle marcature raggiungibili}, dalla marcatura iniziale  di
+%   $\Sigma$ come:
+%   \[[M_0>\]
+%   ed esso è il più piccolo insieme tale che:
+%   \begin{itemize}
+%     \item $M_0\in [M_0>$, ovvero ola marcatura iniziale appartiene all'insieme
+%     delle marcature raggiungibili
+%     \item se $M\in [M_0> \wedge\,\exists t\in T:\,M[t>M'$ allora $M'\in [M_0$,
+%     ovvero se $M$ appartiene all'insieme delle marcature raggiungibili ed esiste
+%     una transizione una transizione tale per cui $M$ va in $M'$ allora, di
+%     conseguenza si ha che $M'$ appartiene all'insieme delle marcature
+%     raggiungibili dallo stato iniziale
+%   \end{itemize}
+%   \emph{Anche questa è una definizione per induzione}
+% \end{definizione}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while
@@ -5779,3 +6164,4 @@ possibili run del sistema.
 % LocalWords:  bisimulazione sender ossrvabile  Nil rietichettatura concurrency
 % LocalWords:  rinominazione true LocalWords bisimili bisimilitudine bisimile
 % LocalWords:  rietichettato interleaving handshaking estensionalità
+% LocalWords:  l'unfolding

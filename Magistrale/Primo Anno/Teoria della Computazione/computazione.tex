@@ -4177,8 +4177,11 @@ Si hanno dei casi particolari:
   posizione di $W$ quindi il confronto riparte da $i+m$ su $T$ e dal 
   simbolo in posizione $\phi(m)+1$ su $P$
 \end{itemize}
-Vediamo quindi lo pseudocodice:
-\begin{algorithm}[H]
+
+Questo algoritmo, tramite uno studia di complessità ammortizzata, nonostante il
+doppio ciclo, ha complessità $O(n)$.\\
+\textbf{Su slide esempio di esecuzione.}
+\begin{algorithm}
   \begin{algorithmic}
     \Function{KMP}{$P, T,\phi$}
     \State $m\gets |P|$
@@ -4195,10 +4198,210 @@ Vediamo quindi lo pseudocodice:
     \EndFor   
     \EndFunction
   \end{algorithmic}
+  \caption{Algoritmo Knuth-Morris-Pratt}
 \end{algorithm}
-Questo algoritmo, tramite uno studia di complessità ammortizzata, nonostante il
-doppio ciclo, ha complessità $O(n)$.\\
-\textbf{Su slide esempio di esecuzione.}
+\section{Algoritmo di Baeza-Yates e Gonnet}
+Con questo algoritmo si ha il preprocessing del pattern $P$ di lunghezza $m$ in
+tempo $O(|\Sigma|+m)$. Questo preprocessamento avviene tramite il calcolo di una
+tabella $B$ di $|\Sigma|$ word di di bit $B_\sigma$, ognuna di lunghezza
+$m$. Alla fine la scansione del testo $T$ di lunghezza $n$ è in $O(n)$.\\
+Si sfrutta il paradigma \textbf{shift-and (esatto)} confrontando quindi delle
+word binarie e non dei simboli.
+\begin{definizione}
+  L'operazione di \textbf{AND} definita su due word:
+  \[w_1\mbox{ \textbf{AND} }w_2=w\]
+  produce:
+  \begin{itemize}
+    \item $w[i]=1$ sse $w_1[i]\,\land w_2[i]=1$
+    \item $w[i]=0$ altrimenti
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  L'operazione di \textbf{or} definita su due word:
+  \[w_1\mbox{ \textbf{or} }w_2=w\]
+  produce:
+  \begin{itemize}
+    \item $w[i]=1$ sse $w_1[i]\,\lor w_2[i]=1$
+    \item $w[i]=0$ altrimenti
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  L'operazione di \textbf{RSHIFT} (shift a destra con MSB a 0) definita su una
+  word: 
+  \[\mathbf{RSHIFT}=w\]
+  produce:
+  \begin{itemize}
+    \item $w[1]=0$
+    \item $w[i]=w_1[i-1]$ con $2\leq i\leq |w|$
+  \end{itemize}
+  In pratica è lo spostamento dei bit di una posizione verso destra con bit più
+  significativo a 0 (quindi visto che avrei il buco a sinistra lì metto 0).
+\end{definizione}
+\begin{definizione}
+  L'operazione di \textbf{RSHIFT1} (shift a destra con MSB a 1) definita su una word:
+  \[\mathbf{RSHIFT}=w\]
+  produce:
+  \begin{itemize}
+    \item $w[1]=1$
+    \item $w[i]=w_1[i-1]$ con $2\leq i\leq |w|$
+  \end{itemize}
+  In pratica è lo spostamento dei bit di una posizione verso destra con bit più
+  significativo a 1 (quindi visto che avrei il buco a sinistra lì metto 1).
+\end{definizione}
+Si ha quindi che ogni word $B_\sigma$ è una word di $m$ bit $\{0,1\}$:
+\[B_\sigma=b_1b_2,\ldots b_m\]
+tale che:
+\[b_i=B_\sigma[i]=1\iff P[i]=\sigma\]
+\textbf{Esempio su slide.}\\
+La tabella prodotta $B$ è quindi l'insieme delle word
+$B_\sigma,\,\,\,\forall\,\sigma\in Sigma$
+In pratica ho la tabelle con un numero di righe pari al numero di simboli. In
+ogni riga ho una word dove a 1 ho solo gli elementi corrispondenti al carattere
+della riga nel pattern (se $P=aba$ ho due righe: $B_a=101$ e $B_b=010$).\\
+Si ha quindi il procedimento di calcolo:
+\begin{enumerate}
+  \item tutte le word di $B_\sigma$ sono inizializzate a bit di soli 0
+  \item si inizializza una maschera $M$, che è una word di $m$ bit tutti uguali
+  a 0 tranne il più significativo che è pari a 1
+  \item si esegue una scansione di $P$ da sinistra verso destra, e per ogni
+  posizione $i$ faccio:
+  \begin{itemize}
+    \item $B_{P[i]}=M\mbox{ \textbf{OR} }B_{P[i]}$
+    \item $M=\mathbf{RSHIFT}(M)$
+  \end{itemize}
+\end{enumerate}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{Compute-B}{P}
+    \State $m\gets |P|$
+    \For {\textbf{every} $\sigma \in Sigma$}
+    \State $B_\sigma \gets 00\ldots0$
+    \EndFor
+    \State $M \gets 10\ldots0$
+    \For {$i\gets 1$ \textbf{to} $m$}
+    \State $\sigma \gets P[i]$
+    \State $B_\sigma \gets M\mbox{ \textbf{OR} }B_\sigma$
+    \State $M=\mathbf{RSHIFT}(M)$
+    \EndFor
+    \State \textbf{return}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo per il calcolo di $B$}
+\end{algorithm}
+Per la scansione del testo introduciamo la notazione:
+\[P[1,i]=suff(T[1,j])\]
+per indicare il prefisso lungo $i$ sul pattern $P$ occorre esattamente come il
+suffisso di $T[1,j]$.
+\begin{definizione}
+  Dato un indice $j$, con $0\leq j\leq n$, con $n=|T|$, $D_j$ è una word di bit:
+  \[D_J=d_1d_2\ldots d_m\]
+  tale che:
+  \[d_i=D_j[i]=1\iff P[1,i]=suff(T[1,j])\]
+\end{definizione}
+\begin{esempio}
+  Preso:
+  \[T=abcbcbcabaadc\]
+  e:
+  \[P=cbcbca\]
+  Ottengo, ad esempio:
+  \[D_7=101010\]
+\end{esempio}
+In pratica avanzo sul pattern è verifico se il prefisso mano a mano occorre come
+suffisso nella prima parte del testo (parte definita da $j$ di $D_j$ che voglio
+calcolare). Avanzando sul pattern se ho il prefisso coincide con quel suffisso
+coincide metto 1, altrimenti 0 e poi aggiungo un carattere al prefisso avanzando
+fino alla fine del pattern.\\
+La word $D_0$ (ricordiamoci per l'indice inizia con 1 quindi è la word
+relativa ad un indice prima di quello reale) è per definizione:
+\[D_==00\ldots 0\]
+poiché nessun prefisso di $P$ occorre come suffisso del prefisso nullo
+$T[0,0]$.\\
+La word $d_m=D_j[m]=1$ sse $P[1,m]=suff(T[1,j])$ quindi tutto il pattern ha
+un'occorrenza che finisce in posizione $j$ sul testo $T$ e che inizia in
+$j-m+1$.\\
+Vediamo quindi come funziona la scansione del testo.\\
+\begin{enumerate}
+  \item si inizia dalla word $D_0=00\ldots0$
+  \item per ogni valore di $j$ da 1 a $n=|T|$ calcolo $D_j$ a partire da
+  $D_{j-1}$ che è stata calcolata al passo precedente
+  \item ogni volta che $D_j$ ha l'ultimo bit uguale a $1$ ho in output $j-m+1$
+  che è l'inizio dell'occorrenza di $P$ su $T$
+\end{enumerate}
+Bisogna capire come calcolare $D_j$ partendo da $j-1$:
+\begin{itemize}
+  \item se $i>1$:
+  \[D_j[i]=1\iff P[1,i]=suff(T[1,j])\]
+  ma questo può essere riscritto come:
+  \[D_j[i]=1\iff P[1,i-1]=suff(T[1,j-1])\mbox{ \textbf{AND} }P[i]=T[j]\]
+  ma la cosa può essere semplificata sapendo che $P[1,i-1]=suff(T[1,j-1])\iff
+  D_{j-1}[i-1]=1$ e quindi posso dire che:
+  \[D_j[i]=1\iff  D_{j-1}[i-1]=1\mbox{ \textbf{AND} }P[i]=T[j]\]
+  ma sapendo che $P[i]=T[j]\iff B_{T[j]}[i]=1$ ho che:
+  \[D_j[i]=1\iff  D_{j-1}[i-1]=1\mbox{ \textbf{AND} }B_{T[j]}[i]=1\]
+  Avendo un calcolo basato sulla logica, con verità a 1, possiamo anche
+  riscrivere come:
+  \[D_j[i]\iff  D_{j-1}[i-1]\mbox{ \textbf{AND} }B_{T[j]}[i]\]
+  e quindi:
+  \[D_j[i]=  D_{j-1}[i-1]\mbox{ \textbf{AND} }B_{T[j]}[i]\]
+  Si ha quindi che l'i-simo bit di $D_j$ è l'\textbf{AND} logico tra
+  l'(i-1)-esimo bit di $D_{j-1}$ e l'i-esimo bit di $B_\sigma$ in corrispondenza
+  di $\sigma=T[j]$
+  
+  \item se $i=1$:
+  \[D_j[1]=1\iff P[1,1]=suff(T[1,j])\]
+  ma questo può essere arricchito come:
+  \[D_j[1]=1\iff P[1,1]= suff(T[1,j])\iff P[1]=T[j]\]
+  e quindi posso dire, aggiungendo in \textbf{AND} un 1 che non cambia il
+  risultato: 
+  \[D_j[1]=1\iff P[1,1]= suff(T[1,j])\iff 1\mbox{ \textbf{AND} }P[1]=T[j]\]
+  Quindi il risultato non cambia se si effettua l'\textbf{AND} logico con un bit
+  uguale a 1 e quindi si ha:
+  \[D_j[1]=1\iff 1\mbox{ \textbf{AND} }P[1]=T[j]\]
+  ma si ha che $P[1]=T[j]\iff B_{T[j]}[1]=1$ e quindi:
+  \[D_j[1]=1\iff 1\mbox{ \textbf{AND} }B_{T[j]}[1]=1\]
+  e quindi:
+  \[D_j[1]\iff 1\mbox{ \textbf{AND} }B_{T[j]}[1]\]
+  che avendo logica booleana su bit diventa:
+  \[D_j[1]= 1\mbox{ \textbf{AND} }B_{T[j]}[1]\]
+  Quindi il primo bit della parola $D_j$ è uguale all'\textbf{AND} logico tra 1
+  e il primo bit della parola $B_\sigma$ in corrispondenza del simbolo
+  $\sigma=T[j]$  
+\end{itemize}
+\textbf{Esempio di calcolo su slide.}\\
+Nell'esempio si arriva a dire che:
+\[D_j=\mathbf{RSHIFT1}(D_{j-1})\mbox{ \textbf{AND} }B_{T[j]}\]
+Posso quindi approfondire l'algoritmo di scansione:
+\begin{enumerate}
+  \item si inizializza una maschera del tipo $M=00\ldots 1$ (solo l'ultimo bit è
+  pari a 1)
+  \item si inizializza $D_0=00\ldots 0$
+  \item per $j$ compreso tra 1 e $n$ calcolo:
+  \[D_j=\mathbf{RSHIFT1}(D_{j-1})\mbox{ \textbf{AND} }B_{T[j]}\]
+  \item ogni volta che $D_j\mbox{ \textbf{AND }M}$ è diverso da $00\ldots0$ ho
+  in output la posizione $j-m+1$ di inizio occorrenza $P$ su $T$
+\end{enumerate}
+Avendo quindi nel complesso complessità:
+\[O(|\Sigma|+m+n)\]
+\textbf{Su slide due esempi, uno di esecuzione e uno di calcolo più mirato.}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{BYG}{P, T}
+    \State $B\gets \mbox{Compute-B}(P)$
+    \State $n\gets |T|$
+    \State $D\gets 00\ldots 0$
+    \State $M\gets 00\ldots 1$
+    \For {$j\gets 1$ \textbf{to} $m$}
+    \State $\sigma\gets T[j]$
+    \State $D\gets \mathbf{RSHIFT}(D)\mbox{ \textbf{AND} }B_\sigma$
+    \If{$D\mbox{ \textbf{AND} }M\neq 0$}
+    \State \textbf{return} $j-m+1$
+    \EndIf
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di Baeza-Yates e Gonnet}
+\end{algorithm}
+
 \end{document}
 
 

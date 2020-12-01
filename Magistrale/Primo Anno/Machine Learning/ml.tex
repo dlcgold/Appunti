@@ -3926,6 +3926,245 @@ un qualunque $d_j$) e quindi si ha, sostituendo:
     \item $P(h_1|x_6)=P(T=1|x_6)=1$
   \end{itemize}
 \end{esercizio}
+\chapter{Clustering}
+Il \textbf{clustering} è un approccio non supervisionato. Come se stessimo
+lavorando ``ad occhio'' si potrebbero avere vari criteri per effettuare il
+raggruppamento delle istanze, in mancanza di label. Il criterio di scelta è
+praticamente arbitrario e il termine ``classificare'' diventa più un
+``raggruppare''. Il sistema è quindi flessibile nel decidere i criteri (che non
+può essere scelto in base alle label) sfruttando concetti come la distribuzione
+dei dati. I risultati ottenuti da un apprendimento
+non supervisionato potrebbero ``sorprendere'' in quanto potrebbero essere
+imprevedibili a priori. In ogni caso l'incertezza del clustering non è la sola,
+in quanto anche un sistema supervisionato potrebbe comunque lasciare spazio ad
+incertezza sulle ipotesi (non riuscendo magari ad avere tutte le label possibili
+per l'insieme dei casi).\\ 
+Possiamo pensare di rappresentare nello spazio (con dimensione pari al numero di
+attributi delle istanze) le varie istanze per poi cercare di capire come
+etichettare le varie istanze la cui etichetta non è nota. Si procede quindi
+\textbf{raggruppando per distanza} (se è vicina a istanze con una certa
+etichetta nota uguale anche istanza di cui cerchiamo l'etichetta avrà
+quell'etichetta), usando la \textit{distanza di Hamming} o la \textit{distanza
+  Euclidea}, ma prima di parlarne introduciamo meglio tutto il discorso. \\
+La ``decisione forte'' è raggruppare e quindi scegliere in base alla distanza,
+definendo prima la distanza stessa, misurando poi il risultato secondo un certo
+criterio di misura (sempre basato sulla distanza).\\
+Avendo una classificazione non supervisionata si ha una scarsa conoscenza a
+priori dei dati da analizzare, puntando quindi all'estrazione automatica delle
+classi mentre in quella supervisionata si partiva da classi etichettate, avendo
+magari speso costo computazionale per ottenerle, e e da una struttura
+classificatoria conosciuta (avendo un set di ipotesi possibili). I sistemi non
+supervisionati tornano comodo quando la distribuzione dei valori degli attributi
+è informazione sufficiente per separare le istanze in più classi, si hanno
+quindi domini dove questo fattore è determinante. Con l'apprendimento non
+supervisionato quindi la non conoscenza a priori è anche un vantaggio (magari le
+etichette che uso nel supervisionato potrebbero essere errate), insieme
+alla riduzione dell'errore umano. Un altro pro è che tutte le classi con
+caratteristiche uniche vengono identificati e quindi i metodi di apprendimento
+non supervisionato sono efficaci con elementi di tipo numerico, che diventano
+coordinate in uno spazio, e con elementi dotati di ordinamento intrinseco, per
+il calcolo delle distanze. Di contro le classi ottenute non per forza hanno un
+significato. Inoltre l'utente ha poco controllo sulla procedura e sui risultati
+e tali metodi sono meno efficaci con elementi ordinati in modo arbitrario o
+parziale. \\
+Si cerca quindi di separare un insieme di elementi in sottoinsiemi con elementi
+accomunati da caratteristiche comuni, in base a uno o più attributi con la
+scelta dell'attributo viene fatta dall'algoritmo di apprendimento. Tra i campi
+di intersse si hanno:
+\begin{itemize}
+  \item data mining
+  \item pattern recognition
+  \item image analysis 
+  \item bioinformatica 
+  \item ricerche di mercato
+  \item pianificazione urbana 
+  \item sismologia 
+  \item astronomia
+\end{itemize}
+Ogni elemento da classificare viene specificato da un vettore caratteristico e
+si ha una misura di similarità tra elementi. Si hanno quindi due criteri da 
+rispettare:
+\begin{itemize}
+  \item \textbf{omogeneità} quando elementi dello stesso cluster hanno alto
+  livello di similarità, quindi dentro il cluster
+  \item \textbf{separazione} quando elementi di cluster diversi hanno basso
+  livello di similarità, quindi tra cluster
+\end{itemize}
+\begin{definizione}
+  Dato $N=\{e_1,\ldots,e_n\}$ un insieme di $n$ elementi e sia
+  $C=\{C_1,\ldots,C_k\}$ una partizione di $N$ in sottoinsiemi. Ogni $C_i$ è
+  detto \textbf{cluster} e $C$ è detto \textbf{clustering} di $N$.
+\end{definizione}
+\begin{definizione}
+  Dati due elementi di $N$ essi sono \textbf{mates} rispetto a $C$ se
+  appartenenti allo stesso cluster $C_i$
+\end{definizione}
+Un elemento può essere rappresentato da un vettore di numeri reali, ciascuno dei
+quali misura una specifica caratteristica (feature).\\
+\begin{definizione}
+  Definiamo la \textbf{misura di similarità} tramite la \textbf{distanza tra
+    vettori}. Si hanno tre distanze:
+  \begin{itemize}
+    \item la \textbf{distanza euclidea} (che è la solita distanza ottenuta dal
+    teorema di Pitagora, è semplicemente la lunghezza del segmento che collega
+    due punti nello spazio):
+    \[d(\vec{x},\vec{y})=\sqrt{\sum_i (x_i-y_i)^2}\]
+    è invariante rispetto alle  traslazioni e rotazioni degli assi
+    \item la \textbf{distanza di Manhattan} (misuro gli spostamenti, che hanno
+    peso 1, tra due punti in termini di somma ti tali spostamenti che formano
+    una linea spezzata):
+    \[d(\vec{x},\vec{y})=\sum_i (x_i-y_i)\]
+    Non è invariante rispetto a traslazioni o rotazioni degli assi e pone meno
+    enfasi sulle variabili con distanze maggiori, non elevando al quadrato le
+    differenze
+    
+    \item la \textbf{distanza di Minkowski} (dando un peso diverso rispetto alla
+    distanza euclidea):
+    \[d(\vec{x},\vec{y})=\sqrt[k]{\sum_i (x_i-y_i)^k}\]
+    In altri termini questa è la forma generica, infatti al variare di $k$ si
+    hanno le varie distanze:
+    \begin{itemize}
+      \item con $k=1$ ottengo la distanza di Manhattan
+      \item con $k=2$ ottengo la distanza euclidea
+      \item con $k=\infty$ ottengo la distanza di Lagrange-\v{C}eby\v{s}\"{e}v
+    \end{itemize}
+    Useremo soprattutto il caso euclideo.
+  \end{itemize}
+\end{definizione}
+In generale si hanno varie tipologie di clustering, come da figura \ref{fig:clu}
+in base all'approccio di studio delle istanze o di studio dei confini tra
+cluster. Questo discorso non lo approfondiremo ma si ha:
+\begin{itemize}
+  \item \textbf{gerarchico} quando collocano gli elementi in input in una
+  struttura gerarchica ad albero, in cui le distanze tra nodi riflettono le
+  similarità degli elementi. Gli elementi sono localizzati sulle foglie
+  dell’albero. Come pro si ha intuitività grazie ad una struttura singola,
+  coerente e globale. Si ha quindi:
+  \begin{itemize}
+    \item \textbf{Agglomerativi} quando bisogna scegliere la coppia di cluster da fondere
+    \item \textbf{divisivi}, quando si deve determinare il cluster da dividere
+  \end{itemize}
+  Come algoritmi si hanno:
+  \begin{itemize}
+    \item Neighbor joining
+    \item Metodo del centroid
+  \end{itemize}
+  \item \textbf{non gerarchico/partitivo} quando mirano a ripartire le $n$ unità
+  della popolazione in $K$ gruppi, fornendo una sola partizione anziché una
+  successione di partizioni tipica dei metodi gerarchici.\\
+  Come algoritmo si ha, ad esempio, \textbf{K-means}
+  definendo $K$ cluster tali per cui si abbiano punti vicini in cluster
+  separati. È un algoritmo iterativo
+\end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1]{img/clu.pdf}
+  \caption{Albero delle tipologie di clustering}
+  \label{fig:clu}
+\end{figure}
+\section{K-Means}
+\begin{definizione}
+  definiamo \textbf{dendrogramma} come un albero (grafo) utilizzato per
+  visualizzare la somiglianza nel processo di ``raggruppamento''.
+  
+\end{definizione}
+Questi algoritmo è quello che vedremo per il metodo non approssimato. Si ha che
+la  soluzione non è visualizzabile attraverso dendrogrammi e assume che il
+numeor $K$ di cluster sia noto, puntando a minimizzare le distanze tra elementi
+e i centroidi (un punto geometrico di riferimento per i cluster) dei clusters
+loro assegnati.\\
+L'algoritmo lavora con dati numerici in cinque step:
+\begin{enumerate}
+  \item si fissano a caso $K$ centroidi iniziali di altrettanti cluster
+  \item per ogni elemento si calcola la distanza da ciascun centroide e lo si
+  assegna al più vicino. Questo è uno step di classificazione, scegliendo il cluster
+  per un elemento dato il centroide del cluster
+  \item per la partizione provvisoria così ottenuta si ricalcolano i centroidi
+  di ogni cluster, usando media aritmetica dei punti del cluster parziale,
+  ottenendo il nuovo centroide. Si aggiustano quindi tutti i centroidi
+  \item per ogni individuo si ricalcola la distanza dai centroidi e si
+  effettuano gli eventuali spostamenti tra cluster dei vari elementi in base al
+  fatto che si hanno nuovi centroidi
+  \item si ripetono le operazioni 3 e 4 finché si raggiunge il numero massimo di
+  iterazioni impostate, avendo un euristica, o non si verificano altri
+  spostamenti, avendo una stabilità di risultato, avendo il risultato
+  ``migliore'' 
+\end{enumerate}
+Si nota quindi la semplicità di implementazione e un tempo di calcolo in :
+\[O(tKn)\]
+con:
+\begin{itemize}
+  \item $n$ cardinalità dell'insieme dei dati
+  \item $K$ numero di cluster
+  \item $t$ numero di iterazioni del ciclo (avendo quindi $kt<<n$)
+\end{itemize}
+Di contro si ha una sensibilità rispetto alla scelta dei centroidi
+iniziali, sperimentalmente si è dimostrato che brutti valori iniziali corrompano
+l'intero processo. Inoltre, come detto all'inizio, non si può predire il numero
+di cluster non conoscendo a priori i dati e non esiste un $K$ ottimale e non ci
+sono proprietà che ce lo possano suggerire. \\
+In ogni caso mappa sensatamente i vari elementi in base alle loro
+caratteristiche e quindi è un approccio parecchio usato, essendo generalmente
+efficacie.\\
+Non sapendo a priori il numero di $K$ posso ottenere scarsi risultati magari non
+avendo abbastanza centroidi. Adattarsi ad un numero
+``eerato'' di centroidi può portare a risultati ``sporchi''. \\
+Un altro problema è dato da dati distribuiti secondo diverse ``dimensioni''
+nello spazio ma l'algoritmo lavorando sui centroidi potrebbe misclassificare
+questo dettaglio, non distinguendo i corretti insiemi di punti. Analogamente
+succede se si hanno insiemi di punti più o meno densi, portando a
+misclassicazioni. Sempre in modo analogo le proprietà di distribuzione
+geometrica degli elementi comporta problemi (anche con un $K$ adeguato).
+
+Per superare queste difficoltà si può provare ad aumentare il numero di cluster,
+unendo poi, in un secondo passaggio, i vari cluster secondo certi criteri,
+magari avendo una netta separazione lineare tra cluster.\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/clu1.jpg}
+  \includegraphics[scale = 0.4]{img/clu2.jpg}
+  \includegraphics[scale = 0.4]{img/clu3.jpg}
+  \caption{Esempi di problematiche per il clustering. A sinistra il valore
+    atteso e a destra quello ottenuto. Prima si ha il problema di cluster con
+    diverse dimensioni, poi con diverse densità e infine con problemi di
+    proprietà geometriche.}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/clusol.jpg}
+  \caption{Esempi di risoluzione delle tre problematiche aggiungendo cluster.}
+\end{figure}
+Per misurare le prestazioni di clustering bisogna capire come classificare i
+risultati. Si usa la \textbf{misura di silhouette} per capire se un clustering è
+migliore di un altro. Tale misura si basa sempre sul concetto di distanza. Si
+ha una tecnica di misura, supponendo che ogni cluster abbia almeno due
+elementi, avendo tecniche diverse qualora si abbia cardinalità 1, avendo la
+distanza tra due elementi $d(i,j)$ e due concetti:
+\begin{enumerate}
+  \item \textbf{distanza media ``INTRA''}, ovvero dentro i cluster
+  \[a(i)=\frac{1}{|C_i|-1}\sum_{j\in C_i, i\neq j}d(i,j)\]
+  è buono se il valore è basso
+  \item \textbf{distanza media ``INTER-cluster''}, ovvero tra cluster:
+  \[b(i)=\min_{k\neq i}\frac{1}{|C_k|}\sum_{j\in C_k}d(i,j)\]
+  è buono se il valore è alto
+\end{enumerate}
+ottenendo quindi la \textbf{silhouette per il punto $i$}:
+\[s(i)=\frac{b(i)-a(i)}{\max{a(i),b(i)}}\]
+
+La qualità viene quindi visualizzata da un diagramma che studia la silhouette al
+variare di $K$ per ogni valore di ogni attributo (mettendo per ogni attributo in
+alto i valori più studiabili).\\
+La media $s(i)$ su tutti i punti di un cluster è una misura di quanto siano
+strettamente raggruppati tutti i punti del cluster. Pertanto, la media s (i) su
+tutti i dati dell'intero set di dati è una misura di quanto adeguatamente i dati
+sono stati raggruppati. Se ci sono troppi o troppo pochi cluster, come può
+accadere quando una scelta sbagliata di $k$ viene utilizzata nell'algoritmo di
+clustering, alcuni dei cluster mostreranno tipicamente
+linee molto più strette rispetto al resto nel diagramma di silhouette. Quindi
+grafici e media di silhouette 
+possono essere utilizzati per determinare il numero ``naturale'' di cluster
+all'interno di un set di dati. 
+
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -3942,4 +4181,4 @@ un qualunque $d_j$) e quindi si ha, sostituendo:
 % LocalWords:  retropropagazione nodes branches leef outcome pdf red Shannon VC
 % LocalWords:  Support Vector Machines SVM Machines Vector Support LocalWords
 % LocalWords:  iperpiani Cervonenkis Vapnik support vector kernel trick Bayes
-% LocalWords:  riscalato Bayesano
+% LocalWords:  riscalato Bayesano clustering Lagrange

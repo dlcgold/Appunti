@@ -4200,7 +4200,8 @@ doppio ciclo, ha complessità $O(n)$.\\
   \end{algorithmic}
   \caption{Algoritmo Knuth-Morris-Pratt}
 \end{algorithm}
-\section{Algoritmo di Baeza-Yates e Gonnet}
+\section{Algoritmi shift-and}
+\subsection{Algoritmo di Baeza-Yates e Gonnet}
 Con questo algoritmo si ha il preprocessing del pattern $P$ di lunghezza $m$ in
 tempo $O(|\Sigma|+m)$. Questo preprocessamento avviene tramite il calcolo di una
 tabella $B$ di $|\Sigma|$ word di di bit $B_\sigma$, ognuna di lunghezza
@@ -4401,7 +4402,229 @@ Avendo quindi nel complesso complessità:
   \end{algorithmic}
   \caption{Algoritmo di Baeza-Yates e Gonnet}
 \end{algorithm}
+\subsection{Algoritmo di Wu e Manber}
+Vediamo ora un algoritmo di \textbf{ricerca approssimata} con paradigma
+\textbf{shift-and} (\textit{esempi per ogni step su slide}).\\
+Dato un pattern $P$ e un testo $T$, su alfabeto $\Sigma$, e una soglia d'errore
+$k$, si ha che $P$ ha un'occorrenza approssimata su $T$ in posizione finale $j$
+se esiste una sottostringa $[j-L+1,j]$ che ha distanza di edit con il pattern di
+al più $k$.\\
+In merito all'algoritmo \textbf{Wu Manber (\textit{WM})}, implementato ad
+esempio da \textit{grep}, si ha un preprocessing del pattern di lunghezza $m$ in
+$O(|\Sigma| +m)$ tramite il calcolo di una matrice $B$ di $|\Sigma|$ parole di
+$m$ bit. La scansione del testo per cercare le occorrenze approssimate è in
+$O(nk)$. Il preprocessing è come in Baeza-Yates.\\
+Studiamo la scansione.
+L'algoritmo effettua $k+1$ scansioni per un indice $h$, tale che $0\leq h\leq
+k$, dove la $h$-sima iterazione trova tutte le occorrenze del pattern con al più
+$h$ errori. Con $h$ nullo ho le occorrenze esatte. La generica iterazione $h=k$
+trova tutte le occorrenze in output all'algoritmo, ritrovando anche tutte le
+soluzioni degli step precedenti di $h$. Sembra ci sia ridondanza di calcolo ma
+si vedrà che si ha memorizzazione di tutte le occorrenze con un numero più basso
+di $h$ rispetto a quello che si sta verificando. La generica iterazione $h$
+calcola $n$ parole $D_J^h$ lunghe $m$ bit tali che $D_J^h[m]=1$ sse per ha
+un'occorrenza approssimata che finisce in $j$ con al più $h$ errori (a conferma
+che con $h=0$ ho lo shift-and esatto).\\
+Si denoti con:
+\[P[1,i]=suff_h(T[1,j])\]
+il fatto che $P[1,i]$ occorre come suffisso di $T[1,j]$ \textbf{con al più $h$
+  errori}. \\
+Definiamo quindi, per un pattern $P$ lungo $m$:
+\[D_j^h=d_1d_2\ldots d_m\,\,\,0\leq j\leq n,\,\,\, 0\leq h\leq k\]
+tale che:
+\[d_i=D_j^h[i]=1\iff P[1,j]=suff_h(T[1,j])\]
+ricordando che $D_j^h$ è una parola di $m$ bit.\\
+In particolare:
+\begin{itemize}
+  \item $D_0^h$ è per definizione $h$ bit più significativi pari a 1 e gli altri
+  0, ovvero:
+  \[
+    \begin{cases}
+      D_0^h=1&\mbox{ se } i\leq h \mbox{ (prime $h$ posizioni da sinistra)}\\
+      D_0^h=1&\mbox{ se } i> h\mbox{ (ultime $m-h$ posizioni da destra)}\\
+    \end{cases}
+  \]
+  infatti sui ha che:
+  \[
+    \begin{cases}
+      \forall i\leq h, P[1,i]=suff_h(T[1,0])\\
+      \forall i>h, P[1,i]\neq suff_h(T[1,0])
+    \end{cases}
+  \]
+  Ne segue che $D_0^0$, avendo $h$ nullo, è per definizione $00\ldots 0$
+  \item $d_m=D_j^h[m]=1\iff [1,m] = suff_k(T[1,j])$, avendo un'occorrenza che
+  finisce in $j$ con al più $h$ errori e quindi con al più $k$ errori, avendo:
+  \[D_J^h[m]=1\implies D_j^k[m]=1\]
+  per cui non devo ogni volta ricalcolare
+  \item $D_j^0$ corrisponde a Baeza-Yates
+\end{itemize}
+Nel dettaglio vediamo l'algoritmo:
+\begin{itemize}
+  \item alla prima iterazione $h=0$ $T$ viene scandito per $j$ da 1 a $n$ per
+  calcolare tutte le word $D_j^0$ (ovvero Baeza-Yates)
+  \item alla generica iterazione $h>0$ per ogni posizione $j$ del testo $T$
+  viene calcolata $D_j^h$
+  \item all'ultima iterazione $h=k$, ogni volta che la word $D_j^h$ calcolata ha
+  il bit meno significativo pari a 1 viene prodotta in output la posizione $j$ di
+  fine match con al più $k$ errori (non potrei sapere quella iniziale a causa
+  degli errori) 
+\end{itemize}
+Bisogna quindi calcolare $D_j^h$ per qualsiasi $h>0$ e $j>0$, avendo che per
+$h=0$ e $j=0$ ho word note.\\
+Abbiamo che,per $i>1$:
+\begin{itemize}
+  \item ho un primo caso:
+  \[D_j^h[i]=1\iff P[1,i]=suff_h(T[1,j])\impliedby P[1,i-1] =
+    suff_h(T[1,j-1])\]\[\land P[i] = T[j] \]
+  e quindi:
+  \[D_j^h[i]=1\impliedby P[1,i-1] = suff_h(T[1,j-1])\land P[i] = T[j] \]
+  Ma sappiamo che:
+  \[[1,i-1] = suff_h(T[1,j-1])\iff D_{j-1}^h[i-1]=1\]
+  e quindi posso riscrivere:
+  \[D_j^h[i]=1\impliedby D_{j-1}^h[i-1]=1\land P[i] = T[j] \]
+  ma so anche che:
+  \[P[i]=T[j]\iff B_{T[j]}[i] = 1\]
+  e quindi:
+  \[D_j^h[i]=1\impliedby D_{j-1}^h[i-1]=1\land B_{T[j]}[i] = 1\]
+  tolgo gli 1 per lo stesso ragionamento fatto con Baeza-Yates (avendoch a e
+  fare con bit), ottenendo:
+  \[D_j^h[i]\impliedby D_{j-1}^h[i-1]\land B_{T[j]}[i]\]
+  implicazioni a sinistra $\impliedby$ non la posso togliere avendo altri casi
+  \item ho un secondo caso:
+   ho un primo caso:
+  \[D_j^h[i]=1\iff P[1,i]=suff_h(T[1,j])\impliedby P[1,i-1] =
+    suff_h(T[1,j-1]) \]
+  avendo quindi un errore in meno nel primo caso e quindi $P[i]$ e $T[j]$
+  possono essere diversi.\\
+  Riduco:
+  \[D_j^h[i]=1\impliedby P[1,i-1] = suff_h(T[1,j-1]) \]
+  ma ho che:
+  \[P[1,i-1] = suff_h(T[1,j-1]) \iff D_{j-1}^{h-1}[i-1]=1\]
+  quindi:
+  \[D_j^h[i]=1\impliedby D_{j-1}^{h-1}[i-1]=1 \]
+  e quindi:
+  \[D_j^h[i]\impliedby D_{j-1}^{h-1}[i-1] \]
+  \item caso 3:
+  \[D^h_j[i] = 1 \iff P[1,i] = suff_h(T[1,j])\impliedby P[1,i] =
+    suff_{h-1}(T[1,j-1])\]
+  e quindi $T[j]$ genera un errore.\\
+  Compatto in:
+  \[D^h_j[i] = 1 \impliedby P[1,i] =    suff_{h-1}(T[1,j-1])\]
+  ma so che:
+  \[ P[1,i] = suff_{h-1}(T[1,j-1])\iff  D_{j-1}^{h-1}[i]=1\]
+  e quindi:
+  \[D^h_j[i] = 1 \impliedby D_{j-1}^{h-1}[i]=1\]
+  che è:
+  \[D^h_j[i]  \impliedby D_{j-1}^{h-1}[i]\]
+  \item caso 4:
+  \[d_J^H[i]=1\iff P[1,j]=suff_h(T[1,j])\impliedby P[1,i-1]=suf_{h-1}(T[1,j])\]
+  avendo che $P[i]$ genera un errore.\\
+  Ho quindi che:
+  \[d_J^H[i]=1\impliedby P[1,i-1]=suf_{h-1}(T[1,j])\]
+  ma:
+  \[P[1,i-1]=suf_{h-1}(T[1,j])\iff D_j^{h-1}[i-1]=1\]
+  quindi:
+  \[d_J^H[i]=1\impliedby D_j^{h-1}[i-1]=1\]
+  ovvero:
+  \[d_J^H[i]=\impliedby D_j^{h-1}[i-1]\]
 
+\end{itemize}
+Metto quindi in or i 4 casi:
+\[D_j^h[i]\impliedby D_{j-1}^h[i-1]\land B_{T[j]}[i]\]
+\[\lor\]
+\[D_j^h[i]\impliedby D_{j-1}^{h-1}[i-1] \]
+\[\lor\]
+\[D^h_j[i]  \impliedby D_{j-1}^{h-1}[i]\]
+\[\lor\]
+\[d_J^H[i]=\impliedby D_j^{h-1}[i-1]\]
+e quindi:
+\[D_j^h[i]\iff D_{j-1}^h[i-1]\land B_{T[j]}[i]\]
+\[\lor\]
+\[D_{j-1}^{h-1}[i-1] \]
+\[\lor\]
+\[ D_{j-1}^{h-1}[i]\]
+\[\lor\]
+\[ D_j^{h-1}[i-1]\]
+e quindi posso mettere l'uguale:
+\[D_j^h[i]= D_{j-1}^h[i-1]\land B_{T[j]}[i]\]
+\[\lor\]
+\[D_{j-1}^{h-1}[i-1] \]
+\[\lor\]
+\[ D_{j-1}^{h-1}[i]\]
+\[\lor\]
+\[ D_j^{h-1}[i-1]\]
+Passando al caso $i=1$ ho che:
+\[D_j^h[1]=1\]
+per $h>0$ e $j>0$, ovvero $P[1,1]$ occorre sempre come suffisso di $T[1,j]$ con
+al più $h$ errori.\\
+Sostituisco $i=1$ nella formula per $i>1$:
+\[D_j^h[1]= D_{j-1}^h[0]\land B_{T[j]}[i]\]
+\[\lor\]
+\[D_{j-1}^{h-1}[1] \]
+\[\lor\]
+\[ D_{j-1}^{h-1}[0]\]
+\[\lor\]
+\[ D_j^{h-1}[1]\]
+Ma sapendo che:
+\[D_{j-1}^h[0]=D_{j-1}^{h-1}[0]=D_j^{h-1}[0]=1\]
+ho che:
+\[D_j^h[1]=1\land B_{T[j]}[i]\]
+\[\lor\]
+\[1 \]
+\[\lor\]
+\[ D_{j-1}^{h-1}[0]\]
+\[\lor\]
+\[ 1\]
+Quindi il risultato è sempre 1 come deve essere sulla base della definizione.\\
+Posso quindi unire il tutto in un solo conto per $i\geq 1$ usando
+\textbf{RSHIFT}:
+\[D_j^h[i]=  RSHIFT(D_{j-1}^h)[i-1]\land B_{T[j]}[i]\]
+\[\lor\]
+\[ RSHIFT(D_{j-1}^{h-1})[i-1] \]
+\[\lor\]
+\[  RSHIFT(D_{j-1}^{h-1})[i]\]
+\[\lor\]
+\[ RSHIFT(D_j^{h-1})[i-1]\]
+e quindi, usando \textbf{RSHIFT1}:
+\[D_j^h[i]=  RSHIFT1(D_{j-1}^h)[i-1]\land B_{T[j]}\]
+\[\lor\]
+\[ RSHIFT1(D_{j-1}^{h-1})\]
+\[\lor\]
+\[  RSHIFT1(D_{j-1}^{h-1})\]
+\[\lor\]
+\[ RSHIFT1(D_j^{h-1})\]
+In generale si ricorda che:
+\[D^0_j=1\implies D_j^h[i]=1,h>0\]
+o addirittura:
+\[D^{h'}_j=1\implies D_j^{h'}[i]=1,h>h'\]
+In generale si ha anche che:
+\[D_j^h[i]=1\implies D_j^{h+1}[i+1]=1, i< m\]
+o analogamente:
+\[D_j^h[i]=1\implies D_j^{h+1}[i-1]=1, i>1\]
+In generale si ha anche che:
+\[|B(P)|=i\iff D_j[m]=1\]
+e $i$ è la più grande posizione $<m$ tale che $D_j[i]=1$.\\
+\textbf{Vari esercizi e una simulazione intera dell'algoritmo su slide.}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{WM}{P, T}
+    \State $D_0^0\gets 00\ldots 0$
+    \State $M\gets 00\ldots 1$
+    \State $D_j^0=BYG(P,T)$
+    \For {$h\gets 1$ \textbf{to} $k$}
+    \State $D_0^h=$\textit{ word con $h$ bit più significativi a 1, resto a 0}
+    \For {$j\gets 1$ \textbf{to} $n$}
+    \State \textit{calcolo} $D_j^h$ \textit{con la formula dei 4 OR, usando
+    RSHIFT1} 
+    \If{$h=k\mbox{ \textbf{AND} }(D_j^h\mbox{ \textbf{AND} } M)\neq 00\ldots 0$}
+    \State \textbf{return} $j$
+    \EndIf
+    \EndFor
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di WU Manber}
+\end{algorithm}
 \end{document}
 
 

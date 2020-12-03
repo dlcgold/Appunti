@@ -5291,7 +5291,152 @@ referenziale. Nel dominio statistico si ha tradeoff tra tempestività e
 completezza/accuratezza, che vengono però privilegiate (bisogna quindi studiare
 quanto è ``sporco'' un certo dato). Nel web si preferisce la tempestività
 rispetto ad accuratezza/completezza.
-\section{Quality assesment \& improvment}
+\section{Quality improvment}
+Avendo quindi già introdotto la fase di \textbf{quality assesment} passiamo a
+quella di \textbf{quality improvment}, ovvero al miglioramento dei dati
+stessi.\\
+L'obiettivo della fase di miglioramento, una volta misurata la qualità dei dati
+a aver scoperto che magari sono di bassa qualità rispetto alle esigenza,
+è quello di migliorare i dati. La qualità dei dati è un problema di tipo
+multidimensionale, potendo decidere di migliorare anche solo alcuni aspetti
+relativi alla qualità dei dati (come la completezza, la consistenza,
+l'aggiornamento temporale etc$\ldots$), sapendo che ci sono dei tradeoff quindi
+il miglioramento di alcuni aspetti va a discapito della qualità di altri. Si
+hanno in generale due strategie in fase di miglioramento: 
+\begin{enumerate}
+  \item \textbf{data-driven}, migliorando il dato stesso in quanto tale. Si
+  punta a migliorare la qualità dei dati modificando direttamente il valore dei
+  dati attraverso il confronto con altri dati ritenuti di buona qualità. Ad
+  esempio, i valori dei dati obsoleti vengono aggiornati aggiornando un database
+  caratterizzato da una valuta più alta. Si migliora il dataset stesso. Questo è
+  una soluzione molto usata in data science. Questa strategia si applica se la
+  raccolta dati è continuativa.\\
+  Si hanno varie procedure:
+  \begin{itemize}
+    \item \textbf{acquisizione di nuovi dati}, che migliora i dati acquisendo
+    dati di qualità superiore per sostituire i valori che sollevano problemi di
+    qualità. Questa strategia può essere utilizzata per tutte le dimensioni
+    esaminate nella fase di valutazione 
+    \item \textbf{record linkage}, detta anche \textbf{identificazione degli
+      oggetti}, che confronta i dataset con valori ``sporchi'' con una fonte
+    certificata o di qualità superiore, identificando le tuple/record nei due
+    dataset che potrebbero fare riferimento allo stesso oggetto del mondo
+    reale e pulendo i ``valori'' sporchi con corrispondenti valori di qualità
+    superiore
+    \item \textbf{affidabilità della fonte}, dove si selezionano le fonti di
+    dati sulla base della qualità dei loro dati 
+  \end{itemize}
+  \item \textbf{process-driven}, migliorando il processo di acquisizione dei
+  dati (datti errati possono portare ad errori sistematici), ottenendo che il
+  dataset viene alimentato con dati corretti. Si punta 
+  quindi a migliorare la qualità ridisegnando i processi che creano o modificano
+  i dati. Ad esempio, un processo può essere riprogettato includendo un'attività
+  che controlla il formato dei dati prima dell'archiviazione. Tale strategia fa
+  riferimento all'ambito detto \textbf{Business Process Reengineering (BPR)},
+  ovvero avendo la possibilità di riprogettare i processi, magari scoprendo che
+  una sorgente era di qualità troppo bassa.\\
+  Si hanno due tecniche:
+  \begin{enumerate}
+    \item \textbf{process control}, dove si aggiungono elementi e/o procedure
+    di controllo nel processo di produzione dei dati quando:
+    \begin{itemize}
+      \item vengono creati nuovi dati
+      \item vengono aggiornati i set di dati 
+      \item il processo accede a nuovi set di dati
+    \end{itemize}
+    Verificando errori e la qualità dei dati stessi.\\
+    In questo modo, viene applicata una strategia ``reattiva'' agli eventi di
+    modifica dei dati, evitando così la degradazione dei dati e la propagazione
+    degli errori
+    \item \textbf{process redesign}, dove si ridisegnano i processi per
+    rimuovere le cause della scarsa qualità e introduce nuove attività che
+    producono dati di qualità superiore. Se la riprogettazione del processo è
+    radicale, questa tecnica viene definita \textit{reingegnerizzazione dei
+      processi aziendali}. Queste tecniche sono puntuali e non sono facilmente
+    integrabili in un sistema di raccolta continua dei dati
+  \end{enumerate}
+\end{enumerate}
+Nel lungo termine le tecniche process-driven sono più efficaci, eliminando il
+problema alla radice, ma sono estremamente costose nel breve termine. Le
+tecniche data-driven sono più economiche ma costose nel lungo e quindi sono
+adatte per un'applicazione ``one-shot'' e, quindi, sono consigliati per i dati
+statici. \\
+Approfondiamo il data-driven.\\
+Si hanno miglioramenti specifici per la dimensione:
+\begin{itemize}
+  \item \textbf{accuratezza} tramite confronto dei valori con un dominio di
+  riferimento. Questo è il tipo di tecnica che abbiamo considerato
+  per l'accuratezza sintattica nella fase di quality assesment
+  \item \textbf{completezza} tramite completamento di dati incompleti con
+  tecniche specifiche che sfruttano la conoscenza sui dati 
+  \item \textbf{consistenza} tramite l'identificazione dei dati corretti
+  sfruttando vincoli di integrità, dipendenze funzionali o dati derivati
+  etc$\ldots$, correggendo poi tramite sorgenti esterni o acquisendo nuovamente
+  i dati
+\end{itemize}
+Come tecnica si usa anche la \textbf{error localization and correction} che
+identifica ed elimina gli errori di qualità dei dati rilevando i valori che non
+soddisfano un dato insieme di regole, dette \textbf{edits} nelle metodologie per
+i le analisi statistiche (queste tecniche sono infatti studiate principalmente
+nel dominio statistico). Rispetto ai dati elementari, i dati statistici
+aggregati (come media, somma, massimo etc$\ldots$), sono meno sensibili alla
+localizzazione probabilistica e alla correzione dei valori probabilmente
+errate. Sono state proposte tecniche per la localizzazione e correzione degli
+errori per incongruenze, dati incompleti e valori anomali, ovvero valori
+significativamente diversi da tutti gli altri valori in un set di dati per dati
+elementari e dati statistici.\\
+Un altra tecnica di quality improvment è la \textbf{deduplica} che corrisponde
+al raggruppamento di record di dataset che si riferiscono alla stessa entità nel
+mondo reale (raggruppo i doppioni). Praticamente la deduplica è un'operazione di
+record linkage fatta su un'unica tabella. Si hanno tre gruppi in output alla
+deduplica:
+\begin{enumerate}
+  \item coppie/gruppi di tuple che matchano, corrispondenti allo stesso
+  oggetto reale
+  \item coppie di tuple che non matchano che corrispondono a entità distinte nel
+  mondo reale 
+  \item possibili coppie/gruppi di tuple, per le quali non è stato possibile
+  giungere una conclusione definitiva, e sono necessarie ulteriori indagini (e
+  costi) per assegnarle al gruppo match o mismatch
+\end{enumerate}
+Un'altra attività classica, propedeutica ad altre attività (è una sorta di fase
+di preprocessamento), è la fase di
+\textbf{normalizzazione}, trasformando le stringhe, scritte nello standard del
+dominio di riferimento, effettuando, per ogni dimensione, il riconoscendo della
+stessa e il relativo miglioramento. Per la normalizzazione di domini specifici,
+tipo i nomi delle vie etc$\ldots$, esistono tool specifici.\\
+Si ha quindi il miglioramento di singoli valori o di intere tuple, migliorando
+accuratezza sintattica, completezza, currency e consistenza, in base a certe
+metriche. \\
+Ogni valore che non matcha con la tabella di riferimento (spesso disponibili
+online a seconda del dominio ma non sempre) deve essere corretto. Il
+miglioramento dell'accuratezza sintattica viene effettuato sostituendo il valore
+errato con quello a distanza inferiore nella tabella di riferimento, dove la
+distanza può essere valutata dopo una precedente verifica dei valori e delle
+loro caratteristiche (si nota come le attività data-driven sono costose dal
+punto di vista temporale). \\
+Mentre per migliorare l'accuratezza possiamo adottare procedure standard di
+confronto con le tabelle di riferimento, per la completezza è molto più
+complesso, non avendo un elemento da cui partire, avendo a disposizione solo un
+valore NULL, non riuscendo sempre a ricostruire il valore corretto per
+sostituirlo al NULL. Spesso comunque si ha un contesto per aiutare a rimuovere i
+NULL, quindi, la procedura più intuitiva è eseguire una nuova acquisizione di
+dati incompleti riempiendo di volta in volta più valori NULL possibili. Poiché
+di solito si tratta di un'attività molto costosa, 
+possiamo adottare diverse euristiche che di solito dipendono dal contesto. \\
+Per la completezza si usano anche i \textbf{dati derivati}, definiti come dati
+per i quali esiste una formula matematica per la quale questi dati possono
+essere ottenuti a partire da un altro set di dati già conosciuto (esempio banale
+un prezzo con o senza IVA).\\
+Bisogna migliorare la consistenza vedendo se la dipendenza funzionale sui dati
+derivati e altri vincoli di integrità intra-relazionale possono essere
+sfruttati, oltre che per la completezza completezza, anche per la consistenza.\\
+\textbf{Esempio case study su slide}.\\
+Dopo tutte queste operazioni si ottiene un db già abbastanza pulito ma si hanno,
+solitamente, ancora problemi con spazio di miglioramento. Si userà quindi il
+\textbf{record linkage}.\\
+
+
 \end{document}
 
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system

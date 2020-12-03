@@ -3319,6 +3319,244 @@ applicati al nuovo sample e la classe che con il più alto numero di predizioni
 positive viene usata come previsione per il classificatore combinato. Anche
 questa tecnica soffre di ambiguità in quanto alcune regioni del suo spazio di
 input possono ricevere lo stesso numero di voti.
+\subsubsection{Esercitazione su SVM e metodi kernel}
+\textbf{Nell'esercitazione ogni $\vec{w}\cdot\vec{x}$ è da caloclarsi come
+  $\vec{w}^T\cdot\vec{x}$.} 
+\begin{definizione}
+  Definiamo \textbf{iperpiano} su uno spazio euclideo a $n$ dimensioni come un
+  sottoinsieme piatto di $n-1$ dimensioni che divide lo spazio in due parti non
+  connesse. \\
+  È quindi un luogo di punti che soddisfa:
+  \[\vec{w}\cdot\vec{x}+b=0\]
+  Ovviamente:
+  \begin{itemize}
+    \item in una dimensione è un punto
+    \item in due dimensioni una retta
+    \item in tre dimensioni un piano
+    \item in più di tre dimensioni si usa direttamente il termine iperpiano
+  \end{itemize}
+  Nel caso a due dimensioni, per esempio, si ha che:
+  \[\vec{w}\cdot\vec{x}+b=0\]
+  (che in due dimensioni è la forma implicita di una retta) corrisponde a:
+  \[w_0x+w_1y+b=0\]
+  ovvero:
+  \[w_1y=-w_0x-b\]
+  Isolo quindi $y$:
+  \[y=-\frac{w_0}{w_1}x-\frac{b}{w_1}\]
+  e avendo:
+  \begin{itemize}
+    \item $m=-\frac{w_0}{w_1}$ come coefficiente angolare
+    \item $q=-\frac{b}{w_1}$ come ordinata origine della retta, il punto di
+    intercetta 
+  \end{itemize}
+  ottengo la classica equazione della retta, in forma esplicita:
+  \[y=mx+q\]
+  Quindi $\vec{w}\cdot\vec{x}+b$ assegna una sorta di ``punteggio''.
+
+\end{definizione}
+\begin{esempio}
+  Preso $\vec{w}=(-0.4,-1)$ e $b=9$ si studino i punti $A(1,3)$, $B(3,5)$ e
+  $C(5,7)$.\\
+  Si ottiene:
+  \begin{itemize}
+    \item per $A$, con $\vec{x}=(1,3)$, si ha $\vec{w}\cdot\vec{x}+b=5.6$
+    \item per $B$, con $\vec{x}=(3,5)$, si ha $\vec{w}\cdot\vec{x}+b=2.8$
+    \item per $C$, con $\vec{x}=(5,7)$, si ha $\vec{w}\cdot\vec{x}+b=0$
+  \end{itemize}
+  Avendo che $C$ giace sull'iperpiano (l'equazione è nulla) e gli altri punti,
+  essendo in due dimensioni e quindi avendo a che fare con una retta, sono sotto
+  la retta ($A$ più lontano di $B$ avendo ``punteggio'' maggiore).
+\end{esempio}
+Con il percettrone si vedeva se i punti erano linearmente separabili (trovando
+un iperpiano che separava) con SVM si cerca l'iperpiano ottimo per separare i
+punti.
+\begin{esempio}
+  Sia data una funzione d'ipotesi (che definisce un'ipotesi in $H$) tale che:
+  \[h(\vec{x}_i=
+    \begin{cases}
+      +1&\mbox{se }\vec{w}\cdot\vec{x}_i+b\geq 0\\
+      -1&\mbox{se }\vec{w}\cdot\vec{x}_i+b< 0
+    \end{cases}
+  \]
+  ovvero:
+  \[h(\vec{x_i}=sign(\vec{w}\cdot\vec{x}_i+b)\]
+  Quindi i valori positivi sono sopra etichettati come positivi e i negativi
+  come  negativi.\\
+  Siano dati:
+  \begin{itemize}
+    \item $\vec{w}=(0.4,1)$
+    \item $b=-9$
+    \item $A(8,7)$ e $B(1,3)$
+  \end{itemize}
+  Si ha:
+  \begin{itemize}
+    \item per $A$, che è sopra l'iperpiano:
+    \[\vec{w}\cdot\vec{x}_i+b=0.4\cdot 8+1\cdot 7-9=1.2\]
+    quindi è etichettato come positivo
+    \item per $B$, che è sotto l'iperpiano:
+    \[\vec{w}\cdot\vec{x}_i+b=0.4\cdot 1+1\cdot 3-9=-5.6\]
+    quindi è etichettato come negativo
+  \end{itemize}
+  Ma non si è detto nulla sulla scelta dell'iperpiano, ne in termini di calcolo
+  ne in termini studio della sua qualità.
+\end{esempio}
+Ci serve quindi una misura di confidenza per la classificazione usando i
+\textbf{margini}. \\
+Abbiamo quindi il punteggio $\beta$ dato da:
+\[\beta=\vec{w}\cdot\vec{x}+b\]
+e perché tale punteggio sia utile ci serve anche la classe di appartenenza
+$y$. Si ha quindi:
+\[f=y\cdot\beta\implies f=y\cdot(\vec{w}\cdot\vec{x}+b)\]
+avendo ottenendo il \textbf{margine funzionale} $f$ tale che:
+\begin{itemize}
+  \item $f$ è positivo se la classificazione è corretta
+  \item $f$ è negativo se la classificazione non è corretta
+\end{itemize}
+Inoltre:
+\begin{itemize}
+  \item se si ha $y=1$ allora affinché il margine funzionale sia ampio (cioè,
+  affinché la nostra previsione sia sicura e corretta), allora abbiamo bisogno
+  che $\vec{w}\cdot\vec{x}+b$ sia un numero positivo grande 
+  \item se si ha $y=-1$ allora affinché il margine funzionale sia grande, allora
+  abbiamo bisogno che $\vec{w}\cdot\vec{x}+b$ sia un grande numero negativo 
+\end{itemize}
+
+Per una certa osservazione $i$ si ha quindi (usiamo la dicitura $\hat{gamma}$ al
+posto di $f$ per il margine funzionale):
+\[\hat{\gamma}^{(i)}=y^{(i)}(\vec{w}\cdot\vec{x}+b)\]
+e quindi per tutti i dati si cerca:
+\[\hat{\gamma}=\min \hat{\gamma}^{(i)}\]
+Ma si ha ancora un problema: dipende dalla scala. Se a $\vec{w}$ sostituiamo,
+ad esempio, $2\vec{w}$ e a $b$ sostituiamo $2b$ si ha che la classificazione
+fatta con $sign(\vec{w}\cdot\vec{x}_i+b)$ resta la medesima (anche perché
+l'iperpiano resta lo stesso, avendo dipendenza lineare). D'altro canto il
+margine funzionale aumenta all'aumentare dei due valori (aumentando lo score) e
+quindi si ha una ``falsa'' confidenza (sembrando due volte più confidente quando
+è tutto uguale in realtà, dall'iperpiano alla classificazione).\\
+Si introduce quindi il \textbf{margine geometrico}, dividendo il margine
+funzionale per la norma di $\vec{w}$:
+\[\hat{\gamma}^{(i)}=y^{(i)}\left(\frac{\vec{w}}{\norm{\vec{w}}}
+    \cdot\vec{x}^{(i)}+\frac{b}{\norm{\vec{w}}}\right)\]
+si ha quindi un invaiante rispetto al fattore di scala, a differenza del margine
+funzionale (con la divisione per la norma semplifico eventuali fattori
+moltiplicativi costanti).\\
+Anche in questo caso cerco il minimo:
+\[\hat{\gamma}=\min \hat{\gamma}^{(i)}\]
+Con SVM si cerca l'iperpiano ottimo ovvero che massimizza il margine per
+entrambe le classi considerate nel training set, rendendo massima la distanza
+tra i punti più vicini di ogni classe, minimizzando il margine geometrico di
+ogni esempio. Si trovano i support vector dove giacciono i più vicini punti
+all'iperpiano per le due classi. Il risultato dell'ottimizzazione per SVM è
+trovare il gap maggiore che ci separa da tutte le classi contemporaneamente
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/svm.jpg}
+  \caption{Visualizzazione di SVM}
+  \label{fig:svm}
+\end{figure}
+Se non si può separare positivi dai negativi (o un training set non linearmente
+separabile) in uno spazio di bassa dimensione
+utilizzando un iperpiano, bisogna mappare tutto in uno spazio dimensionale
+superiore dove è possibile separarli, tramite i \textbf{metodi kernel}. Tramite
+una funzione $\phi$ si passa lo spazio di input in uno nuovo, detto
+\textbf{feature space}, a dimensione maggiore, dove i punti sono linearmente
+separabili.  
+\begin{esempio}
+  Dato $[x^{(1)},x^{(2)}]$ si ha:
+  \[\phi([x^{(1)},x^{(2)}])=[x^{(1)2},x^{(2)2},x^{(1)}x^{(2)}]\]
+  facendo, in questo esempio, il quadrato delle due componenti e il loro
+  prodotto, da due dimensioni passo a 3.
+\end{esempio}
+\begin{definizione}
+  Dato uno spazio delle istanze $X$ e un feature space $F$ si ha che una
+  funzione $k$:
+  \[k_X\to X\times X\to\mathbb{R}\]
+  è detta kernel valido sse esiste una \textit{feature map} $\phi$:
+  \[\phi:X\to F\]
+  tale che:
+  \[k(x,z)=\langle\phi(x),\phi(z)\rangle,\,\,\,\forall\,x,z\in X\]
+  avendo quindi che posso rappresentare $k$ tramite un prodotto interno di
+  feature risultate dal mapping definito da $\phi$.\\
+  La funzione $k$ ha quindi come argomenti due vettori senza restrizioni,
+  potendo mappare un ampio spettro di entità (documenti, proteine etc$\ldots$),
+  può quindi essere penata come una \textbf{funzione si similarità} (pensata
+  come prodotto euclideo), dicendo
+  quanto sono simili gli oggetti della funzione kernel.\\
+  Avendo il prodotto interno scalare si ha anche la norma, dando prova della
+  lunghezza del vettore, e avendo anche la \textbf{distanza} tra due vettori
+  nello spazio, che all'inverso è una misura di similarità.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{kernel matrix}, detta anche \textbf{gram matrix}, dato un
+  kernel $k$ e un insieme 
+  $S=x_1,x_2,\ldots x_n$, come una matrice dove ogni componente è:
+  \[G_{i,j}=\langle\phi(x_i),\phi(x_j)\rangle_{\mathcal{H}}=k(x_i,x_j)\]
+\end{definizione}
+Molti algoritmi interagiscono coi dati tramite prodotti scalari per questo sono
+importanti le funzioni kernel. Per definizione di kernel posso quindi sostituire
+un prodotto interno tra due vettori con la funzione kernel definita sui quei due
+vettori, spostandomi in una dimensione maggiore per il feature space e ottenendo
+un valore di similarità tra i due oggetti. 
+\begin{esempio}
+  Vediamo un esempio di funzione kernel. \\
+  Siano dati:
+  \begin{itemize}
+    \item $\vec{x}=(x_1,x_2)$
+    \item $\vec{z}=(z_1,z_2)$
+    \item $dim=2$
+  \end{itemize}
+  Si ha quindi:
+  \[(\vec{x}\cdot\vec{z})^2=(x_1z_1+x_2z_2)^2
+    =(x_1^2x_2^2+x_2^2z_2^2+2x_1z_1x_2z_2)\]
+  \[=\langle\left(x_{1}^{2}, x_{2}^{2}, \sqrt{2} x_{1}
+      x_{2}\right),\left(z_{1}^{2}, z_{2}^{2}, \sqrt{2} z_{1}
+      z_{2}\right)\rangle=\langle\phi(\vec{x}),\phi(\vec{z})\rangle\]
+  Avendo ottenuto le feature. Quindi la funzione iniziale è rappresentabile come
+  il prodotto interno tra le due feature, in modo implicito.\\
+  Avendo quindi:
+  \[\phi(x_1,x_2)=(x_1^2,x_2^2,\sqrt{2}x_1x_2\]
+  \[\phi(xz_1,z_2)=(z_1^2,z_2^2,\sqrt{2}z_1z_2\]
+  passando a $dim=3$.
+\end{esempio}
+Tra i tipo di kernel si segnala quello gaussiano:
+\[ k(\mathbf{x}, \mathbf{z}) =\exp \left(-\frac{\|\mathbf{x}-
+      \mathbf{z}\|^{2}}{2 \sigma^{2}}\right) 
+  =\exp \left(-\frac{\mathbf{x}^{\mathbf{T}} \mathbf{x}-\
+      mathbf{2} \mathbf{x}^{\mathbf{T}} \mathbf{z}+
+      \mathbf{z}^{\mathbf{T}} \mathbf{z}}{2 \sigma^{2}}\right)\]
+La strategia di kernel di un algoritmo è che ogni volta che si trova un prodotto
+interno di feature si ha che questo è uguale al kernel nello spazio
+originale. Non serve conoscere il mapping se il kernel è valido e posso quindi
+procedere direttamente con la sostituzione.
+\begin{definizione}
+  Un metodo è detto \textbf{kernelizzato} se il prodotto interno delle sue
+  feature può essere valutato da una qualunque funzione kernel nello spazio di
+  rappresentazione originale.
+\end{definizione}
+Le distanze e le differenze sono state questioni importanti nel machine
+learning e nel riconoscimento di modelli per molti anni, portando a molti
+algoritmi noti diversi e domande importanti.\\
+La distanza tra oggetti nello spazio delle feature è definita da:
+\[d(x,x_2)=\norm{\phi(x)-\phi(x_2)}^2_{\mathcal{H}}\]
+denotando con $\mathcal{H}$ lo spazio del prodotto interno dove le feature sono
+rappresentate dal mapping:
+\[\phi:X\to \mathcal{H}\]
+Si ha quindi per la distanza, estendendo la norma:
+\[
+  \left\|\Phi\left(x_{1}\right)-\Phi\left(x_{2}\right)\right\|_{\mathcal{H}}^{2}
+  =<\Phi\left(x_{1}\right)-\Phi\left(x_{2}\right),
+    \Phi\left(x_{1}\right)-\Phi\left(x_{2}\right)>\]
+    \[
+  =<\Phi\left(x_{1}\right), \Phi\left(x_{1}\right)>-2<\Phi
+  \left(x_{1}\right), \Phi\left(x_{2}\right)>+<\Phi\left(x_{2}\right),
+  \Phi\left(x_{2}\right)>
+\]
+e con la notazione kernel, avendo sostituito con un kernel valido $k$, ottenendo
+una riscrittura della distanza tra due feature, kernelizzando la distanza tra
+due input:
+\[\left\|\Phi\left(x_{1}\right)-\Phi\left(x_{2}\right)\right\|_{\mathcal{H}}^{2}
+  =k(x_1,x_1)-2k(x_1,x_2)+k(x_2,x_2)\]
+\textbf{Si hanno liste di funzioni kernel verificate.}
 \chapter{Apprendimento Bayesano}
 Nell'ambito Bayesano si cambia l'approccio avendo la valutazione di ipotesi in
 base alla loro probabilità. Si studia la probabilità rispetto ai dati e rispetto
@@ -4141,10 +4379,10 @@ ha una tecnica di misura, supponendo che ogni cluster abbia almeno due
 elementi, avendo tecniche diverse qualora si abbia cardinalità 1, avendo la
 distanza tra due elementi $d(i,j)$ e due concetti:
 \begin{enumerate}
-  \item \textbf{distanza media ``INTRA''}, ovvero dentro i cluster
+  \item \textbf{distanza media ``intra-cluster''}, ovvero dentro i cluster
   \[a(i)=\frac{1}{|C_i|-1}\sum_{j\in C_i, i\neq j}d(i,j)\]
   è buono se il valore è basso
-  \item \textbf{distanza media ``INTER-cluster''}, ovvero tra cluster:
+  \item \textbf{distanza media ``inter-cluster''}, ovvero tra cluster:
   \[b(i)=\min_{k\neq i}\frac{1}{|C_k|}\sum_{j\in C_k}d(i,j)\]
   è buono se il valore è alto
 \end{enumerate}
@@ -4164,7 +4402,113 @@ linee molto più strette rispetto al resto nel diagramma di silhouette. Quindi
 grafici e media di silhouette 
 possono essere utilizzati per determinare il numero ``naturale'' di cluster
 all'interno di un set di dati. 
-
+\subsubsection{Esercitazione clustering e K-Means}
+\begin{esercizio}
+  Siano dati i seguenti 8 esempi:
+  \begin{enumerate}
+    \item $A1=(1,10)$
+    \item $A2=(2,5)$
+    \item $A3=(8,4)$
+    \item $A4=(5,8)$
+    \item $A5=(7,5)$
+    \item $A6=(6,4)$
+    \item $A7=(1,2)$
+    \item $A8=(4,9)$
+  \end{enumerate}
+  $K=3$ e la distanza euclidea.\\
+  Si supponga che all'inizio i tre centroidi (rispettivamente $seed1$, $seed2$ e
+  $seed$3) siano $A1$, $A4$ e $A7$ avendo: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/clue.jpg}
+  \end{figure}
+  \noindent
+  e si esegua un'iterazione per ricalcolare i centroidi e i cluster associati.\\
+  Usando la distanza euclidea procedo coi calcoli per generare i cluster,
+  associando il cluster scegliendo il centroide che dista meno:
+  \begin{itemize}
+    \item per $A1$:
+    \begin{itemize}
+      \item $d(A1,seed1)=0$ essendo $A1$ il $seed1$ attuale
+      \item $d(A1,seed2)=3.6$
+      \item $d(A1,seed3)=8.06$
+    \end{itemize}
+    quindi $A1\in cluster1$
+    \item per $A2$:
+    \begin{itemize}
+      \item $d(A2,seed1)=5$ 
+      \item $d(A2,seed2)=4.24$
+      \item $d(A2,seed3)=3.16$
+    \end{itemize}
+    quindi $A2\in cluster3$
+    \item per $A3$:
+    \begin{itemize}
+      \item $d(A3,seed1)=6$ 
+      \item $d(A3,seed2)=5$
+      \item $d(A3,seed3)=7.28$
+    \end{itemize}
+    quindi $A3\in cluster2$
+    \item per $A4$:
+    \begin{itemize}
+      \item $d(A4,seed1)=2.6$ 
+      \item $d(A4,seed2)=0$ essendo $A4$ il $seed2$ attuale
+      \item $d(A4,seed3)=7.21$
+    \end{itemize}
+    quindi $A4\in cluster2$
+    \item per $A5$:
+    \begin{itemize}
+      \item $d(A5,seed1)=7.07$ 
+      \item $d(A5,seed2)=3.6$
+      \item $d(A5,seed3)=6.7$
+    \end{itemize}
+    quindi $A5\in cluster2$
+    \item per $A6$:
+    \begin{itemize}
+      \item $d(A6,seed1)=7.21$ 
+      \item $d(A6,seed2)=4.12$
+      \item $d(A6,seed3)=5.38$
+    \end{itemize}
+    quindi $A6\in cluster2$
+    \item per $A7$:
+    \begin{itemize}
+      \item $d(A7,seed1)=8.06$ 
+      \item $d(A7,seed2)=7.21$ 
+      \item $d(A7,seed3)=0$ essendo $A7$ il $seed3$ attuale
+    \end{itemize}
+    quindi $A7\in cluster3$
+    \item per $A8$:
+    \begin{itemize}
+      \item $d(A8,seed1)=5$ 
+      \item $d(A8,seed2)=2$
+      \item $d(A8,seed3)=7.6$
+    \end{itemize}
+    quindi $A8\in cluster2$
+  \end{itemize}
+  Quindi nei nuovi cluster si ha:
+  \begin{itemize}
+    \item $cluster1=\{A1\}$
+    \item $cluster2=\{A3,A4,A5,A6,A8\}$
+    \item $cluster3=\{A2, A7\}$
+  \end{itemize}
+  Visualmente:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/clue2.jpg}
+  \end{figure}
+  Posso fare le medie dei punti di ogni cluster per calcolare i nuovi
+  centroidi: 
+  \begin{itemize}
+    \item $seed1New=(2,10)$
+    \item $seed2New=\left(\frac{8+5+7+6+4}{5},\frac{4+8+5+4+9}{5}\right)=(6,6)$
+    \item $seed3New=\left(\frac{2+1}{2},\frac{5+2}{2}\right)=(1.5,3.5)$
+  \end{itemize}
+  Ovvero, segnando con una $x$ rossa i nuovi centroidi:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/clue3.jpg}
+  \end{figure}
+  Avendo una sola epoca da calcolare mi fermo.
+\end{esercizio}
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 
@@ -4181,4 +4525,4 @@ all'interno di un set di dati.
 % LocalWords:  retropropagazione nodes branches leef outcome pdf red Shannon VC
 % LocalWords:  Support Vector Machines SVM Machines Vector Support LocalWords
 % LocalWords:  iperpiani Cervonenkis Vapnik support vector kernel trick Bayes
-% LocalWords:  riscalato Bayesano clustering Lagrange
+% LocalWords:  riscalato Bayesano clustering Lagrange feature

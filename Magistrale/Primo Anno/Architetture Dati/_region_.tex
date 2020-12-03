@@ -136,7 +136,7 @@
     \item \textit{condivise}, ovvero usate da diversi applicativi e diversi
     utenti (fattore che porta anche allo studio del carico di lavoro,
     \textit{workload}). L'accesso può essere sia \textit{in scrittura} che
-    \textit{in lettura} (ovviamente anche entrambi) a seconda del caso. SI
+    \textit{in lettura} (ovviamente anche entrambi) a seconda del caso. Si
     pongono quindi problemi di concorrenza e sicurezza
     \item \textit{affidabili}, sia resistente dal punto di vista hardware (un
     guasto non deve farmi perdere i dati) che dal punto di vista della sicurezza
@@ -239,7 +239,7 @@ Il primo step è il \textbf{parsing}, che stabilisce se la query è sensata dal
 punto di vista sintattico e se i vari nomi di tabelle e attributi sono coerenti
 con lo schema. Per questo ultimo aspetta ci si appoggia al \textbf{Data
   Catalog}, un particolare db che contiene informazioni sui vari database, in
-primis sui vari nomi delle tabelle e per ciascuna sui nomi di ogni attributo. SI
+primis sui vari nomi delle tabelle e per ciascuna sui nomi di ogni attributo. Si
 ha quindi una soluzione per gestire i \textit{metadati}. Il parser effettua
 un'analisi lessicale, per la sintattica e la semantica, usando il dizionario e
 l a traduzione in algebra relazionale, producendo un \textbf{query tree}. Si
@@ -1711,7 +1711,7 @@ Per realizzare una replica posso fare in diversi modi:
     \textit{cpu, keyboard, screen \textnormal{e} cable}) e 3 centri di vendita
     (\textit{San Jose, Zurigo  \textnormal{e} Taiwan})
     \item le vendite sono distribuite secondo le località geografiche, i clienti
-    a Zurigo sono serviti solo dai venditori di Zurigo etc$\ldots$. SI ha però
+    a Zurigo sono serviti solo dai venditori di Zurigo etc$\ldots$. Si ha però
     che i venditori di  Zurigo servono anche Dublino
     \item ogni area geografica ha il proprio db (avremo quindi 4 db)
   \end{itemize}
@@ -4016,8 +4016,1494 @@ delle politiche per cui si hanno letture/scritture consistenti:
   \textbf{ANY to ALL}, oppure se
   almeno un nodo mi risponde o anche se tutti i nodi rispondono
 \end{itemize}
-Si ha una politica di 
+Si ha inoltre una politica di \textbf{quorum} per il calcolo della
+``maggioranza'' (per la quale anche possono avvenire read/write consistency) che
+si basa sul \textbf{replication\_factor}. La richiesta di consistenza viene
+fatta nelle query:
+\begin{minted}{sql}
+  INSERT INTO table (column1,...)
+  VALUES (value1,...)
+  USING CONSISTENCY ONE
+\end{minted}
+Dove per esempio si specifica, con \texttt{USING CONSISTENCY ONE} che basta la
+conferma di un nodo per validare l'operazione. Potrei usare poi  \texttt{USING
+  CONSISTENCY QUORUM}, che si basa sul valore $k$ del
+\textit{replication\_factor}, che stabilisce che servono almeno $k$ nodi che
+validino l'operazione. Con \texttt{USING CONSISTENCY ALL} specifico che tutti
+i nodi devono confermare l'operazione.\\
+Il problema è che se chiedo un solo nodo che verifichi l'operazione rischio di
+avere inconsistenza, avendo i nodi precedenti che non sono stati magari in grado
+di comunicare a tale nodo di aver ottenuto i dati.\\
+Posso avere poi \texttt{USING CONSISTENCY ANY}, specificando anche il booleano
+\textit{hinted\_handoff\_enable}, che autorizza la scrittura anche se si ha il
+nodo offline in quanto un'altro nodo prende la richiesta in carico e, non appena
+il nodo originale torna accessibile, ne trasferisce i dati, per procedere dopo
+la validazione del primo nodo che risponde.\\
+In merito alle operazioni di \textit{delete} si ha che esse semplicemente
+rendono il dato non disponibile, essendo più veloce cambiare un flag piuttosto
+che cancellare. A causa di ciò comunque si creano nelle tabelle fisiche dei
+problemi di spazio, quindi periodicamente si fanno dei \textbf{merge}, ovvero
+ogni singolo nodo procede alla ``compattazione'' dei propri dati, sovrascrivendo
+i valori non più disponibili.\\
+Per assicurare la sincronizzazione dei nodi e per evitare perdita di consistenza
+si utilizzano dei \textit{checksum} per comparare i dati di un nodo con quelli
+dei successivi. Per effettuare questo controllo, nel dettaglio, vengono usati
+degli hash-tree detti \textbf{Merkle tree} nel seguente modo:
+\begin{itemize}
+  \item vengono mandati degli snapshot dei dati ai nodi successivi
+  \item creati e trasmetti ad ogni ``compattazione'' principale (non lo dice ma
+  c'è scritto questo nella slide ????)
+  \item se due nodi prendono uno snapshot con un intervallo pari a\\
+  \texttt{TREE\_STORE\_TIMEOUT} allora i due snapshot sono comparati e in caso
+  di successo i dati vengono sincronizzati
+  
+\end{itemize}
+Vediamo nel dettaglio le operazioni di lettura.\\
+Le letture inconsistenti vengono fatte usando \texttt{ANY}, posso poi
+specificare che mi risponda un nodo con \texttt{ONE} etc$\ldots$, come per le
+scritture.\\
+Quindi in lettura, i nodi vengono interrogati fino a quando il numero di nodi
+che rispondono con il valore più recente non raggiunge un livello di coerenza
+specificato da \textbf{ONE to ALL}. Si ha quindi che:
+\begin{itemize}
+  \item se il livello di consistenza richiesto non
+  viene raggiunto i nodi vengono aggiornati con il valore più recente che viene
+  quindi restituito
+  \item se viene raggiunto il livello di coerenza, il valore viene restituito e
+  tutti i nodi che riportavano valori vecchi vengono aggiornati
+\end{itemize}
+Si hanno quindi, per esempio:
+\begin{minted}{sql}
+  SELECT * FROM table USING CONSISTENCY ONE  
+\end{minted}
+\section{Considerazioni finali}
+Si è notato come bene o male la scelta di algoritmi di gestione siano alla fine
+sempre gli stessi, variano invece al più le architetture (master/slave
+\textit{Peer-to-Peer}) ma i vari modelli NoSQL restano comunque da un certo
+punto di vista (in merito ad eventuali repliche, distribuzione etc$\ldots$)
+tutti simili tra loro. La differenza di modello invece consente la scelta di un
+certo sistema NoSQL in base al tipo di dato che bisogna inserire nel
+db. Un'altra differenza è il linguaggio usato e la facilità d'uso dello
+stesso (e delle altre tecnologie legate al DBMS).\\
+La scalabilità è un'altro punto da considerare durante la scelta.
+\begin{shaded}
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
+  \textbf{DynamoDB}, essendo \textit{in memory} e quindi non persistente, viene
+  usato per associare su Amazon ogni persona al suo carrello, che deve essere
+  sempre disponibile mentre navigo nell'e-commerce. Sono altri sistemi che poi
+  manipolano il carrello stesso ma la sola associazione è gestita, in modo
+  estremamente performante, tramite DynamoDB, \textit{in memory}.\\
+  Parliamo di \textbf{knowledge graph}. Studiati dai creatori di Google nel
+  1996. Nel 2000 poi Tim Berners-Lee introduce il \textit{semantic web}. Si ha,
+  in un motore di ricerca:
+  \begin{itemize}
+    \item crawling  
+    \item page ranking
+    \item word indexing
+    \item ricerca di istanze prossime a quanto richiesto
+    \item vista dei risultati tramite il ranking
+  \end{itemize}
+  Si è poi iniziato a cercare parole e non fatti, con la conoscenza
+  rappresentata tramite un grafo. La ricerca così più approfondita, riconoscendo
+  cose legate alla ricerca ed eventuali altri risultati simili o di
+  interesse. Si hanno quindi risultati più specifici, con risultati di ricerca
+  arricchiti con studi semantici. Un knowledge graph è solitamente in formato
+  RDF ed è quindi un supporto alla ricerca online. Un nuovo campo di ricerca è
+  l'estrazione di conoscenza anche dal linguaggio naturale, con concetti
+  espressi in formato testuale. Per le query si usano SparQL, Gremlin
+  etc$\ldots$
+\end{shaded}
+\chapter{Architetture di integrazione}
+L'80\% del lavoro nel caso di gestione dati si ritrova nella preparazione degli
+stessi e nella progettazione.
+Nella preparazione dei dati si parla anche di \textbf{data integration}.\\
+Si hanno diverse possibilità a seconda di carico di lavoro, tecnologie, qualità
+dei dati etc$\ldots$\\
+Posso avere (approfonditi più avanti):
+\begin{itemize}
+  \item consolidamento dei dati
+  \item gestione distribuita dei dati, senza consolidare ma facendo
+  un'integrazione virtuale, tramite il modello wrapper-moderator
+\end{itemize}
+Dal punto di vista organizzativo si hanno vari problemi:
+\begin{itemize}
+  \item autonomia, ovvero il grado di indipendenza tra i diversi DBA nelle
+  scelte progettuali
+  \item frequenza delle query
+  \item valore economico dell'integrazione, ovvero la rilevanza per il processo
+  operativo aziendale e decisionale di avere informazioni integrate in input in
+  modo da produrre output efficaci
+  \item volatilità delle fonti nel tempo, ovvero la frequenza di aggiunta o
+  eliminazione di fonti e frequenza di modifica degli schemi delle fonti
+  \item complessità gestionale, ovvero lo sforzo da dedicare alle attività di
+  gestione relative a database e infrastrutture sia hardware che software, a
+  causa della corrispondente complessità delle organizzazioni che utilizzano i
+  db
+  \item costi di eterogeneità, ovvero i costi nascosti ed espliciti relativi ai
+  processi aziendali dovuti all'utilizzo di dati eterogenei
+\end{itemize}
+Si hanno anche problemi tecnologici:
+\begin{itemize}
+  \item rilevanza dei dati storici e conseguente necessità di memorizzare
+  periodicamente nuovi dati senza cancellare quelli vecchi
+  \item complessità della query, in termini di numero di dati e tabelle visitate
+  e numero di operatori su di esse, e conseguente complessità temporale
+  nell'esecuzione della query
+  \item rilevanza delle query rispetto alle transazioni, ovvero l'importanza
+  relativa e frequenza delle query rispetto alle modifiche dei dati 
+\end{itemize}
+In base a tutti questi criteri si hanno varie soluzioni (nelle slide tabella).\\
+Con l'introduzione a NoSQL si è visto come sia possibile memorizzare i dati in
+tanti modi diversi. Ci si chiede quindi come ``unire'' diversi (per sorgente,
+formato natura etc$\ldots$) dataset anche di tipologia diversa, procedendo
+all'\textbf{integrazione} dei dati. Questo processo può avvenire anche su
+dataset di volume ridotto avendo complessità anche su dati piccoli.\\
+Si parla solitamente di:
+\begin{itemize}
+  \item \textbf{data integration}, dove si hanno diversi set di dati (anche non
+  disgiunti) con attributi diversi. Si costruisce un unico insieme con tutti gli
+  elementi dei due insiemi, con gli elementi presenti nell'eventuale
+  intersezione con tutti gli attributi dei due insiemi di partenza (mentre gli
+  altri tengono solo gli attributi iniziali). In pratica si fa un \textit{full
+    outer join} (ovvero prendo tutti i valori della tabella di sinistra e li
+  matcho, se posso, con quelli della tabella di destra, prendendo però poi anche
+  tutti gli elementi che non joinano). Il risultato finale potrebbe non avere a
+  priori dell'informazione in più sui dati
+  \item \textbf{data enrichment}, dove voglio arricchire i dati di un insieme
+  con quelli di altri insiemi, qualora possibile. In altre parole è una specie
+  di \textit{left outer join}, prendendo tutti gli elementi della tabella di
+  sinistra e aggiungo le informazioni della tabella di destra qualora ci sia un
+  match con la tabella di destra, altrimenti non aggiungo nulla. Si ha un
+  match diverso dalla semplice uguaglianza tra il set che voglio arricchire e
+  quello che contiene i potenziali arricchimenti. Potrei avere quindi
+  uguaglianza, similitudine, appartenenza etc$\ldots$ perché posso rilassare i
+  vincoli di match quando voglio arricchire l'informazione (sfruttando altre
+  relazioni più leggere, magari basate su informazioni terze, per esempio
+  relazioni geografiche etc$\ldots$). Il dataset arricchito contiene quindi solo
+  gli elementi del dataset iniziale che volevo arricchire ma questi potrebbero
+  (potrei non essere riuscito ad arricchire tutti i dati) contenere informazioni
+  in più
+\end{itemize}
+In entrambi i casi per rappresentare l'assenza di un attributo uso un NULL nella
+tabella se si parla di un modello relazionale. In caso dei vari modelli NoSQL
+seguo gli standard dei vari modelli e dei vari DBMS per rappresentare l'assenza
+di valore per un certo attributo.\\
+Solitamente si cerca di aggiungere, per integrazione o arricchimento:
+\begin{itemize}
+  \item informazioni spaziali, con informazioni geografiche dei dati che mancano
+  e quindi vanno aggiunte
+  \item informazioni temporali, con informazioni ``storiche'' dei dati da
+  integrare/arricchire. Si ha però un problema di capire cosa venga orima e cosa
+  dopo, comportando ambiguità nel rapporto causa-effetto
+\end{itemize}
+ma potrebbero esserci infinite altre casistiche.\\
+\textit{Si parlerà solo di data integration ma ogni tanto verranno aggiunti
+  incisi in merito all'enrichment.}
+\section{Data integration}
+Immaginiamo di avere due dataset con due schemi, espliciti o meno a seconda che
+siano basati sul modello relazionale o siano modelli NoSQL (e in quanto caso
+bisogno inferirli in modo abbastanza preciso vedendo magari i primi documenti
+etc$\ldots$), da voler integrare.\\
+Ipotizziamo che i due schemi rappresentino la stessa informazione ma da due
+punti di vista. Si hanno, per esempio, uno schema \textit{Libro}, con titolo,
+ISBN e autori (specificati da nome e data di nascita), e uno schema
+\textit{Autore}, con nome, data di nascita e libri scritti (specificati da
+titolo e ISBN). Ho quindi due schemi ugualmente informativi ma con diversa
+rappresentazione (ma stesso modello), rendendo quindi difficile l'integrazione
+che prevede diverse operazioni. Ovviamente la situazione si complica ancora di
+più se ho modelli eterogenei, dal punto di vista dei modelli, avendo modelli sia
+relazionali che non. Bisogna anche scegliere 
+il modello per lo schema integrato finale e non esiste una soluzione ottima a
+priori ma deve essere scelta in base allo scopo dello schema finale. Tale scelta
+influenzerà ovviamente le tecniche di costruzione dello schema finale. Per
+procedere quindi scelgo in primis il modello dello schema finale e come prima
+cosa, dopo averlo scelto, converto il modello di partenza di modello diverso in
+quel modello, ottenendo quindi omogeneità, dal punto di vista dei modelli, dei
+modelli di partenza.\\ 
+Formalizziamo un poco quanto detto. Si hanno vari livelli di
+eterogeneità/conflitti:
+\begin{itemize}
+  \item \textbf{eterogeneità di nome}, legato a come sono state etichettate le
+  eterogeneità. Ho quindi concetti di primo livello (che a seconda del modello
+  sono entità, documenti, attributi, nodi etc$\ldots$) che rappresentano le 
+  stesse informazioni ma con label diverse
+  \item \textbf{eterogeneità di tipo}, ovvero a come modellizzo effettivamente
+  un particolare ``pezzo'' della realtà
+\end{itemize}
+Oltre a questi si ha appunto l'\textbf{eterogeneità di modello}, che abbiamo
+visto sopra come risolvere fin dal principio, che ``copre'' ogni altro tipo di
+eterogeneo.
+\subsection{Eterogeneità di nome}
+Partiamo con questa prima categoria. \\
+Si hanno situazioni di:
+\begin{itemize}
+  \item \textbf{sinonimia}, ovvero rappresento lo stesso concetto con nomi
+  diversi, che sono sinonimi. Sintassi diversa e semantica uguale
+  \item \textbf{omonimia}, ovvero rappresento concetti diversi con gli stessi
+  nomi. Questo caso è più complicato da riconoscere (ad esempio potrei avere
+  \textit{Città} in due schemi ma in uno rappresenta quella di nascita e in un
+  altro quella di residenza) e rischia di comportare diversi errori, magari
+  portando a dover decidere quale valore associare senza sapere come decidere,
+  integrando in modo errato e perdendo informazione. Raramente si ha accesso
+  alla documentazione dei dataset e quindi bisogna sperare che i vari attributi
+  siano il meno ambigui possibile. Sintassi uguale e semantica diversa
+  \item \textbf{iperonimia}, ovvero tra i due concetti uno è più di alto livello
+  rispetto all'altra, secondo magari una relazione \textit{IS-A} (esempio il
+  concetto \textit{Persona} rispetto a quelli \textit{Uomo} e \textit{Donna},
+  con il primo che include i secondi)
+\end{itemize}
+In fase di progettazione dello schema integrato devo quindi riconoscere e
+gestire i casi appena elencati prima di procedere con l'integrazione.
+\subsection{Eterogeneità di tipo}
+In questo caso si ha che lo stesso concetto viene rappresentato in modo
+strutturalmente diverso in due schemi, potendo quindi avere, ad esempio:
+\begin{itemize}
+  \item domini di definizione differenti per lo stesso attributo in due schemi
+  (ad esempio da una parte il dominio delle città italiane e dall'altro quelle
+  islandesi)
+  \item un attributo in uno schema e avere un valore derivato in un altro
+  schema, avendo quindi, nel primo caso, un attributo indipendente mentre nel
+  secondo si ha una dipendenza funzionale con un altro attributo
+  \item un attributo in uno schema e un entità in un altro schema 
+  \item un attributo in uno schema e una gerarchia di generalizzazione in un
+  altro schema 
+  \item un'entità in uno schema e una relazione in un altro schema o magari, nel
+  modello a grafo, avendo in uno schema un nodo e un arco nel secondo
+  \item diversi livelli di astrazione per lo stesso concetto in due schemi
+  (ad esempio due entità con nomi omonimi legati da una gerarchia IS-A in due
+  schemi)  
+  \item diverse granularità nei domini di definizione 
+  \item diverse cardinalità nelle stesse relazioni 
+  \item key conflicts (la chiave in uno schema è diverso da quella dell'altro)
+\end{itemize}
+Si hanno quindi tantissimi casi in cui di presentano eterogeneità.
+\subsection{Data integration system}
+Succede quindi che si ha una \textbf{trasformazione di schema}. Si procede con
+uno \textbf{schema matching} per capire come unificare i vari schemi, capendo,
+per esempio, quali attributi coincidono (anche se magari con sintassi
+diverse). Si procede poi con l'\textbf{integrazione} vera e propria, ottenendo
+quindi lo schema integrato. Il software che procede con queste fasi è detto
+\textbf{data integration system} che procede prendendo e mettendo insieme delle
+sorgenti dati e cerca di ottenere uno schema integrato. Vengono presi e uniti
+tutti gli attributi degli schemi.\\
+\textit{In modo analogo funzionano i datawarehouse dove ho schemi diversi,
+  solitamente relazionali ma non sempre, che vengono messi insieme e quindi
+  manipolati}.\\
+Si hanno tantissimi modi per fare \textbf{schema matching} e si fa ancora molta
+ricerca in merito. Si hanno match singoli, match combinati, match basati sullo
+schema (vedendo label etc$\ldots$), match basati sui contenuti (vedendo i valori
+etc$\ldots$) etc$\ldots$ (per un albero più dettagliato \footnote{Rahm, Erhard
+  \& Bernstein, Philip. (2001). A Survey of Approaches to  Automatic Schema
+  Matching.. VLDB J.. 10. 334-350. 10.1007/s007780100057.} vedere figura
+\ref{fig:tree})
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/tree.jpg}
+  \caption{Esempio di albero per lo schema matching } 
+  \label{fig:tree}
+\end{figure}
+Spesso bisogna fare schema matching \textit{on the fly} dovendo integrare nuovi
+schemi in modo assai rapido. Si hanno anche sistemi su grande scala con sistemi
+\textit{pay as you go}, dove serve altrettanta velocità.\\
+Vediamo quindi meglio le fasi:
+\begin{enumerate}
+  \item \textbf{schema transformation o pre-integration}, è una fase quindi
+  propedeutica che presi in input $n$ schemi me li restituisce omogenei tramite
+  tecniche di model trasformation o reverse engineering
+  \item \textbf{Correspondences investigation}, dove si studiano le
+  corrispondenze tra gli schemi tramite tecniche specifiche
+  \item \textbf{schemas integration e mapping generation}, dove si definiscono
+  lo schema integrato e le regole di mapping necessarie
+\end{enumerate}
+Avendo da integrare/arricchire decine di schemi si hanno diverse strategie. Si
+hanno due scelte fondamentali:
+\begin{enumerate}
+  \item integro a coppie. Grazie a questa scelta binaria ho due possibilità:
+  \begin{enumerate}
+    \item prendere uno schema, integrarlo con un altro e integrare il risultato
+    con un altro ancora etc$\ldots$. Ottengo una soluzione a scala con un albero
+    binario non bilanciato
+    \item uso un approccio bilanciato aggregando schemi ``vicini'' e aggregando
+    poi i vari risultati delle integrazioni. Ottengo quindi un albero binario
+    bilanciato 
+  \end{enumerate}
+  \item integro con più schemi contemporaneamente. Ho due approcci:
+  \begin{enumerate}
+    \item integrare tutti gli schemi insieme (\textbf{questo bisogna evitarlo}
+    anche solo per $n>3$)
+    \item integrare in modo iterativo, in modo analogo a quanto fatto con il
+    bilanciamento binario ma ovviamente non con un numero fisso di schemi da
+    integrare ogni volta (magari ne integro due o magari tre, raramente di più
+    per ovvi motivi)
+  \end{enumerate}
+\end{enumerate}
+Si ha appunto anche il problema che posso dire le stesse cose con strutture
+completamente diverse. Si cercano quindi \textbf{corrispondenze semantiche}
+sfruttando la conoscenza pregressa sul dominio applicativo. Si possono sfruttare
+sia le \textbf{equivalenze} che le \textbf{generalità} (\textit{IS-A}) per
+cercare le eventuali corrispondenze. Si rischia di avere anche
+\textbf{disgiunzioni} tra attributi completamente diversi magari di schemi
+uguali rischiando di avere problemi.\\
+In uno schema non relazionale identificare i mapping è quindi molto arduo ma
+bisogna anche generare i nuovi mapping e le nuove regole di associazione.\\
+Classificando i matching si trovano anche nuove tipologie di conflitto che
+devono essere risolti con trasformazioni opportune. Dobbiamo quindi meglio
+definire in primis i conflitti. Si hanno diversi tipi di conflitti:
+\begin{itemize}
+  \item \textbf{conflitti di classificazione} quando elementi omologhi
+  descrivono insiemi diversi di oggetti del mondo reale (ad esempio docenti e
+  relatori di tesi, che sono comunque docenti ma non tutti i docenti sono
+  relatori). Si risolve tramite generalizzazione o specifica della gerarchia (i
+  relatori sono una parte dei docenti)
+  \item \textbf{conflitti descrittivi} quando tipi omologhi hanno proprietà
+  diverse o le stesse proprietà sono descritte diversamente. Si hanno:
+  \begin{itemize}
+    \item conflitti di nome, ovvero nomi diverse per le stesse cose
+    \item conflitti di composizione, ovvero diversi attributi e/o metodi (magari
+    avendone di più o di meno o anche diversi)
+  \end{itemize}
+  La soluzione dipende dai casi e può, per esempio, prevedere l'inclusione di
+  tutti gli attributi (usando l'uguaglianza) o la scelta di alcuni (usando
+  l'ereditarietà) (???)
+  \item \textbf{conflitti strutturali} dove si hanno gli stessi elementi
+  rappresentati tramite strutture diverse (magari da una parte un elemento è
+  un'intera entità e dall'altra solo un attributo). Per risolvere si sceglie,
+  per massimizzare l'informazione ottenuta, è prendere la struttura meno
+  vincolata (quindi tra entità e attributo scelgo entità). Scelgo quindi la
+  struttura ``più importante'' secondo la logica del ``più cose ho meglio è''
+  (mentre nel caso di datawarehouse si sceglie di non salvare determinate
+  informazioni) 
+  \item \textbf{conflitti di frammentazione} dove magari lo stesso elemento è in
+  un singolo oggetto in uno schema mentre è frammentato nell'altro. Si risolve
+  tramite l'aggregazione dell'elemento frammentato in quello unico (???). Si
+  integrano i dati quindi anche nell'ottica di ``rimetterli insieme'' (questo
+  tipo di tracciamento è comodo anche nella lotta evasione fiscale)
+\end{itemize}
+Parliamo quindi delle \textbf{regole di mapping} definite tra gli schemi
+``sorgente'' e quelli ottenuti dopo l'integrazione e possono essere trovate per
+lo schema sorgente guardando alle trasformazioni effettuate per la risoluzione
+di omologie e conflitti avute durante il processo di integrazione effettuato
+sullo schema sorgente. Le regole mi dicono che un elemento chiamato in un modo
+nello schema integrato ha una precisa corrispondenza con un certo elemento di
+uno schema sorgente.\\
+Se si hanno conflitti a livello direttamente di istanze, avendo che li stessi
+dati (lo stesso oggetto del mondo ideale) in sorgenti diversi hanno valori
+diversi, i problemi aumentano. Questo è un problema fondamentale nel data
+integration, anche nel caso dell'arricchimento. Posso avere:
+\begin{itemize}
+  \item un ``semplice'' \textbf{conflitto di attributi} avendo due entità che
+  rappresentano lo stesso oggetto reale con attributi diversi (anche solo uno)
+  per la stessa proprietà. Le chiavi in questo caso sono coerenti
+  \item un \textbf{conflitto di chiave} (detto anche \textbf{conflitto di entità
+    \textnormal{o} conflitto di tupla}) se ho chiavi primarie diverse in due
+  entità diverse che però rappresentano lo stesso oggetto (banalmente entità
+  che rappresenta lo studente nei db della Bicocca usa la matricola mentre in un
+  altro il codice fiscale) mentre gli altri attributi coincidono
+\end{itemize}
+Una scelta di soluzione, detta \textbf{currency}, prevede, in caso di
+conflittualità di valore di attributo, di scegliere il valore inserito
+temporalmente per ultimo, nella speranza che sia il più aggiornato (ma spesso
+non è esattamente così). Le tecniche che trattano i conflitti a livello di
+istanza possono essere applicate in due diverse fasi del ciclo di vita di un
+sistema di integrazione dati, vale a dire:
+\begin{itemize}
+  \item a \textbf{design time}
+  \item a \textbf{query time}
+\end{itemize}
+I problemi principali si hanno con i conflitti di chiave non sapendo bene se
+gli stessi oggetti sono presenti nei vari dataset e questi problemi saltano
+fuori a query time. Tuttavia, durante il design time decide la
+strategia da seguire per risolvere i conflitti prima che le query vengano
+elaborate, ovvero nella fase di progettazione del sistema di integrazione dei
+dati e le tecniche a query time incorporano le specifiche della strategia da
+seguire all'interno della formulazione della query. Si hanno quindi le
+\textbf{funzioni di risoluzione dei conflitti} che cercano, dati due valori
+conflittuali, di restituire quello più probabile. Un criterio di misura si basa
+sull'affidabilità delle sorgenti stesse da cui proviene il conflitto. In altri
+casi si ragiona in termini di funzioni matematiche di minimo, massimo, media,
+varianza etc$\ldots$ in presenza di valori numerici (introducendo probabilmente
+errori, di sottostima, sovrastima etc$\ldots$ ma l'importante è esserne
+consapevoli per stimare l'impatto dell'integrazione sui dati). Per valori non
+numerici si hanno altre funzioni, ad esempio la concatenazione nel caso di
+stringhe o la scelta delle più lunghe/corte. Ovviamente non si può sapere la
+risposta giusta ma si può imporre una logica di stima. È comunque buona pratica
+tenere traccia tali conflitti e in caso siano troppi preoccuparsi dell'effettiva
+validità dei dati. Il data integration assume quindi due forme:
+\begin{enumerate}
+  \item \textbf{deduplicazione}, dove si scopre se ci sono concetti del mondo
+  reale replicati nella tabella, avendo che l'integrazione viene fatta solo su
+  quella tabella (non avendo schema matching), internamente. Posso avere quindi
+  valori discordanti nella stessa tabella, magari per errori inserimento
+  avendo stringhe con distanza sintattica bassa (qualche carattere, secondo la
+  \textbf{distanza di edit}). Si usano tecniche empiriche. Questo check va fatto
+  di valore in valore ma non 
+  si può avere certezza avendo che distanze brevi si hanno anche tra parole
+  potenzialmente corrette (basti pensare a Carlo e Carla, entrambi
+  potenzialmente corretti per un ipotetico Carl, che potenzialmente è errato in
+  lingua italiana). Si procede quindi, in assenza di chiave, ad una pulizia di
+  eventuali duplicati cercando di ``fonderli'' del risultato corretto più
+  probabile. La distanza di edit va bene solo per stringhe piccole, per quelle
+  grosse si hanno altre funzioni (come la Jaccard index function)
+  \item integrazione in due tabelle diverse, avendo schema matching
+  etc$\ldots$. Si supponga quindi di voler fondere due tabelle senza chiave
+  primaria. Si cerca quindi una pseudo-chiave primaria (usando l'insieme più
+  grande di attributi comuni alle tabelle che siano significativi, ad esempio
+  nome, cognome e luogo di nascita) matchando le tabelle su di essa. Ma potrei
+  anche qui non matchare per errori di scrittura. Faccio quindi un matching
+  approssimato e concatenando le due tabelle e procedendo poi con la deduplica
+  della tabella risultante. Potrei comunque sempre ragionare con la distanza di
+  edit etc$\ldots$ restando con le tabelle separate, procedendo con una
+  combinazione lineare degli score delle distanze (riscalate su $\{0,1\}$, con 1
+  match perfetto, facendo una somma pesata e dividendo per il numero di score),
+  decidendo una soglia oltre la quale si ha il match. Si usano tecniche
+  probabilistiche. Si procede quindi la 
+  fusione delle tabelle e al raffinamento del risultato con l'eliminazione dei
+  duplicati 
+\end{enumerate}
+Oltre a tecniche empiriche e probabilistiche si hanno anche tecniche miste e/o
+basate su conoscenza a priori.\\
+Si sono finora trascurati quei casi in cui si sta palesemente rappresentando la
+stessa cosa ma con termini diversi (magari con nomi contratti, esempio Leonardo
+che diventa Leo.). \\
+Si ha infatti il \textbf{record linkage}, ovvero la tecnica di risoluzione dei
+conflitti a livello di istanza, dove, date le tabelle in input, posso avere in
+output: 
+\begin{itemize}
+  \item \textbf{matching tuples}, ovvero i valori che sicuramente matchano
+  (anche se non perfetti ma con score oltre una certa soglia)
+  \item \textbf{non matching tuples}, ovvero i valori che sicuramente non
+  matchano
+  \item \textbf{possible matches}, ovvero una sorta di ``area grigia'' dove non
+  si sa come dare risposta (come appunto l'esempio dl nome abbreviato). La
+  scelta della soglia per il match e di quella per il non match modifica la
+  cardinalità di questi casi, ad  esempio una coppia di soglie troppo cattiva
+  produrrà come conseguenza molti casi dubbi, essendo quest'area quella compresa
+  tra le due soglie
+\end{itemize}
+In mezzo subentra l'umano che ``a mano'' sistema i valori, non avendo altro
+modo. Da qualche hanno si è anche introdotto il machine learning, tramite
+\textbf{Deepr} (basato su reti neurali, trainato tramite specifici dati di
+training), per sostituire l'uomo nell'analisi di questa zona di mezzo. Le
+soluzioni di machine learning sono fortemente legate al dominio. Un esempio
+classico di problema è quello relativo all'indirizzo di casa nelle
+anagrafiche. In tal caso prima si cerca di normalizzare l'indirizzo (espandendo
+abbreviazioni di vie, piazze etc$\ldots$, esempio v. D. Alighieri diventa Via
+dante Alighieri) facendo poi il confronto sulle stringhe. altra tecnica è
+usare la geocodifica (tramite maps etc) usando poi latitudine e longitudine (con
+comunque un margine di differenza, dato dall'errore anche del GPS in uso
+civile e dagli standard statali di definizione degli indirizzi). Si nota quindi
+come il dominio degli indirizzi ha una risoluzione 
+particolare (oltre al fatto che lo standard degli stessi varia di stato in
+stato) e molti domini specifici hanno tecniche specifiche (difficilmente 
+apprese tutte da una rete neurale (???)). \\
+Si è dato per scontato un altro problema: le dimensione delle tabelle. La
+il check dei valori tra le tabelle esplode nel numero di confronti. Bisogna
+quindi ridurre lo \textbf{spazio di ricerca}, non potendo fare il prodotto
+cartesiano tra le tabelle ($ A\times B$), anche perché nichilizzerebbe la
+scalabilità. Si hanno tantissimi \textbf{blocking method} per ridurre lo spazio
+di ricerca. Una volta ottenuto un sottoinsieme dello spazio di ricerca posso
+partire con vaie tecniche empiriche (ad esempio ordinare sui cognomi, e sperare
+che siano corretti o con al più pochi errori, per effettuare poi il check). Si
+applica poi un \textbf{modello di decisione} per il check, tramite deep
+learning, semantica, funzione di risoluzione delle stringhe etc$\ldots$, ovvero
+un qualsiasi meccanismo per ottenere match, unmatch e possible match. Per farlo
+si necessita anche di un benchmark che sono anch'essi fortemente dipendenti dal
+dominio e quindi non sempre disponibili. Si hanno benchmark sugli indirizzi
+etc$\ldots$. \\
+Vediamo, riassumendo, nel \textbf{record linkage probabilistico} si ha:
+\begin{enumerate}
+  \item \textbf{preprocessing}, normalizzazione dei formati (espansione
+  abbreviazioni, lowecase, eliminazione spazi e caratteri speciali etc$\ldots$ o
+  passando ad altre 
+  codifiche, come la geocodifica) secondo uno standard
+  \item \textbf{blocking}, riduzione dello spazio di ricerca. Uno dei metodi è
+  il \textbf{sorted neighbour} che implementa il blocking scegliendo una
+  chiave, ordinando i record in base alla chiave univoca e spostando una
+  finestra sui file ordinati, confrontando a destra e a sinistra nelle due
+  tabelle gli elementi in questa finestra. Le finestre sono dinamiche in quanto
+  potrei avere match sul bordo che andrebbero persi
+  
+  \item \textbf{compare}, scegliendo una funzione di distanza e cercando un
+  sample con coppie conosciute di match e unmatch. Bisogna anche valutare per
+  ogni valore di distanza la frequenza di 
+  matching e unmatching
+  \item \textbf{decide}, valutando la distanza e le soglie
+\end{enumerate}
+\textit{Per confrontare se due date sono uguali prima le normalizzo al modello o
+europeo o americano, le normalizzo in base al carattere separatore e poi
+confronto}.\\
+Per la fusione posso:
+\begin{itemize}
+  \item ignorare un conflitto, mettendo tutti i valori disponibili
+  \item cercare di evitare i conflitti basandomi sui metadati, sul sorgente o
+  sulle istanze  
+  \item gestire i conflitti tramite le funzioni di risoluzione dei conflitti e
+  alle altre cose discusse sopra
+\end{itemize}
+Si hanno elenchi delle varie strategie possibili (ignorare, scegliere il più
+recente, scegliere il valore medio e molte altre), ognuna delle quali, come
+anche il record linkage, può introdurre errori. La scelta delle soglie inoltre
+può portare ad essere meno conservativi, introducendo falsi positivi, o troppo
+conservativi, riducendo drasticamente i match. Le varie scelte dipendono
+comunque dai singoli casi.
+\section{Architetture per data integration}
+\textbf{L'ordine di questa sezione è dubbio, forse andava ad inizio capitolo o
+  forse no.}\\
+Si parte come abbiamo detto da una serie di schemi separati in vari db, con
+modelli diversi. Posso avere anche file csv etc$\ldots$ Bisogna quindi
+raccogliere le varie informazioni e integrarle in un'unico dataset. Si hanno più
+tecnciche:
+\begin{itemize}
+  \item la tecnica del \textbf{consolidamento} dove si raccolgono vari dataset
+  dalle varie sorgenti informative, li integro come visto precedentemente e
+  infine salvo il risultato in un nuovo db, che sarà la mia nuova architettura
+  dati 
+  \item la tecnica che prevede di rappresentare i vari schemi separati in modo
+  che essi siano mantenuti inalterati, non memorizzando il risultato
+  dell'integrazione, ma dando possibilità all'utente di scrivere query sui dati
+  integrati. Si produce quindi un nuovo schema globale che comunica tramite un
+  mediatore software per prendere le query. Questo è la vera e propria tecnica
+  di \textbf{virtual data integration}
+\end{itemize}
+\textbf{Nel capitolo si parla soprattutto di virtual data integration anche se
+  spesso non specificato}.\\
+Il data integration è un è un'importante area di ricerca e business che ha lo
+scopo principale di consentire ad un utente un accesso uniforme a più
+fonti di dati autonome ed eterogenee, attraverso la presentazione di una visione
+unificata di questi dati. Trovare questa uniformità tra elementi eterogenei è
+complesso perché bisogna trovare differenze e somiglianze in ogni schema per
+potersi conformare. Bisogna quindi riconciliare tutte le eterogeneità di schema
+e di istanza.\\
+Il vantaggio di architetture d'integrazione rispetto alle architetture federate
+è la capacità di gestire meglio le eterogeneità, soprattutto se complesse, a
+livello di schema. Inoltre i sistemi federati non possono gestire eterogeneità a
+livello di istanze a causa della qualità (accuratezza, incompletezza
+inconsistenza etc$\ldots$) dei dati. D'altro canto nelle architetture federate si
+ha un livello di autonomia in poco più basso nel senso che nei modelli integrati
+si assume che si hanno sorgenti provenienti da chissà dove mentre nei sistemi
+federati i nodi sono scelti in modo più consapevole.\\
+Si hanno due approcci principali alla data integration:
+\begin{enumerate}
+  \item \textbf{integrated read-only views (\textit{Mediation})}, dove si ha
+  integrazione solo per lettura. I dati letti nei vari db restano quindi
+  invariati. Questa soluzione a livello aziendale viene scartata in favore delle
+  datawarehouse, avendo persistenza dei dati e profondità storica maggiore
+  (anche se perdo flessibilità nel momento in cui si rimuove una sorgente dati)
+  \item \textbf{integrated read-write views (\textit{Mediation with update})},
+  dove si hanno anche gli update. È estensione dell'architettura di Mediation
+  per supportare gli aggiornamenti in una vista integrata (dovendo poter
+  accedere ai vari db anche in scrittura). Questa cosa è
+  difficile e anche poco studiata in letteratura e quindi non la tratteremo. In
+  questo caso si preferiscono i modelli federati
+\end{enumerate}
+L'integrazione dei dati è il problema di combinare i dati che risiedono in
+diverse fonti e fornire all'utente una visione unificata di questi dati può
+quindi essere letteralmente definita come \textbf{global virtual schema
+  (\textit{GS})}.\\
+Parto dai vari db coi vari modelli e schemi e creo un GS che ha un certo
+modello. Si hanno mapping tra i vari schemi e il GS e quindi l'utente può
+effettuare delle query passando per il GS e a runtime il GS capisce dove sono le
+informazioni richieste, converte il linguaggio di query in quello necessario per
+il db dove si trova l'informazione ed effettua la query (che viene eseguita
+localmente sul db). Sempre on the fly si risolvono i conflitti e viene
+restituito il risultato della query. Potrei avere anche integrazione pay as you
+go.\\
+Si hanno quindi tre elementi fondamentali in un'architettura di integration:
+\begin{enumerate}
+  \item il GS
+  \item le varie sorgenti
+  \item il mapping tra le sorgenti e il GS
+\end{enumerate}
+Si hanno quindi due componenti fondamentali:
+\begin{enumerate}
+  \item un \textbf{mediator}, che data una query la frammenta e la riscrive per
+  poter lavorare con i vari schemi locali. Inoltre il mediator mette insieme i
+  vari risultati, risolve i conflitti e risponde alla query
+  \item vari \textbf{wrapper}, che agganciano ogni schema locale delle sorgenti
+  al GS, rappresentando la sorgente in uno schema compatibile con quello del
+  GS. Essi ricevono query nel linguaggio del GS e rispondono di conseguenza
+\end{enumerate}
+Le architetture \textbf{wrapper-mediator} sono lo standard nel mondo del virtual
+data integration, nel dettaglio della \textbf{lazy integration} (\textit{capire
+  che 
+  dice al minuto 12.05}) consentendo maggior flessibilità (\textbf{dal minuto 12
+  al minuto 12.30 si capisce davvero poco, controllare}).\\
+Bisogna studiare GS e mapping.\\
+Si hanno due tipiche architetture del sistema, a seconda della direzione dei
+mapping: 
+\begin{enumerate}
+  \item una in cui si parte dagli schemi locali per arrivare al GS
+  \item una in cui si parte dal GS e si arriva gli schemi locali
+\end{enumerate}
+In ogni caso lo scopo è interrogare l'informazioni come se fosse unica.\\
+\textbf{Nelle slide qualche esempio.}\\
+Il mediator costruisce uno schema unificato di diverse fonti di informazioni
+(eterogenee) e consente a un utente di formulare una query su di esso. La query
+dell'utente viene quindi trasformata in una serie di sottoquery, una per
+ciascuna fonte di dati coinvolta nella query e il risultato viene sempre
+raccolto e mergiato dal mediator che lo restituisce all'utente.\\
+Il mediator quindi deve riconciliare le varie istanze mettendo insieme le varie
+risposte dei vari db. Si hanno varie azioni, da svolgere in breve tempo (essendo
+tutto on the fly), fatte dal mediator:
+\begin{itemize}
+  \item raggruppare informazioni sulla stessa entità del mondo reale 
+  \item rimuovere la replicazione dei tra le varie fonti di dati 
+  \item risolvere le inconsistenze tra le varie fonti di dati 
+  \item ottenere accuratezza, completezza, etc$\ldots$ tra i dati provenienti da
+  diverse fonti di dati   
+\end{itemize}
+L'interazione con il mediator è quindi divisa in due fasi:
+\begin{enumerate}
+  \item la creazione della rappresentazione unificata (\textbf{Publishing phase
+    at design time}), creando GS e mapping
+  \item la formulazione e l'esecuzione di una query nella rappresentazione
+  unificata (\textbf{Querying Phase}). Questa fase è a runtime
+\end{enumerate}
+Nella fase di \textbf{publishing} i problemi sono quelli di modellare e definire
+linguaggi 
+per lo schema unificato, costruendo anche i mapping. Eventualmente devo gestire
+gli update. Devo anche estrarre lo schema dei vari db per capire come
+procedere.\\
+Nella fase di \textbf{querying} bisogna stabilire il linguaggio, fare query
+unfloding/rewriting grazie ai mapping. Devo inoltre cleaning e fusion dei
+risultati. Bisogna inoltre convertire i vari linguaggi da GS a schemi locali.\\
+Il mapping è centrale in entrambi. Possiamo vedere il sistema di virtual data
+integration come una tripla:
+\[(G,S,M)\]
+dove:
+\begin{itemize}
+  \item $G$ indica lo schema globale
+  \item $S$ l'insieme degli schemi sorgente
+  \item $M$ il mapping
+\end{itemize}
+Dobbiamo appunto costruire uno schema globale virtuale. Il problema è capire
+quali dati reali nelle sorgenti di dati corrispondono a quei dati virtuali
+rappresentati per scelta dallo schema globale. Per il mapping si hanno vari
+approcci, a seconda della relazione tra lo schema globale e quelli locali,
+rispetto al concetto di vista (che in SQL ricordiamo costruire una sorta di
+tabella virtuale):
+\begin{itemize}
+  \item \textbf{GAV (Global As View)}, in cui lo schema globale viene creato
+  sulla base dell'osservazione degli schemi sorgente, attraverso un
+  processo di integrazione intenzionale degli schemi sorgenti (si pensi
+  anche al processo di consolidamento, o ad una situazione in che vogliamo
+  rappresentare in modo integrato tutto il contenuto informativo
+  dell'architettura dati di un'organizzazione). L'approccio si può
+  riassumere dicendo che lo schema globale è una vista di quelli locali (tutte,
+  contemporaneamente). Ogni tabella dello schema globale è una vista degli
+  schemi locali. In questo caso il mapping va dagli schemi locali a quello
+  globale. Il vantaggio è che si prendono tutte le informazioni disponibili,
+  procedo tramite arricchimento dei dati ma potrebbe capitare che non si ottiene
+  lo schema voluto. GAV si presta poco agli update in caso di rimozione (in caso
+  di aggiunta semplicemente rifaccio l'integrazione e aggiungo elementi allo
+  schema globale, anche se questo ha un costo) in quanto tutti i concetti che
+  prima avevano a che fare con la 
+  sorgente tolta vanno cambiati, avendo poi problemi anche a livello di istanze.
+  Questo approccio ci dice come recuperare i dati da istanze di origine locale
+  (reale) per ciascuna tabella dello schema globale (virtuale). Con il GAV il
+  mediatore procede tramite unfloding delle query, cioè la sostituzione nella
+  query dei riferimenti allo schema globale con l'espressione della
+  view globale in termini delle view locali. Bisogna però riportare i
+  \textit{join} operazione che abbiamo già visto rischia di essere complessa
+  e poco efficiente. Nonostante tutto gli approcci GAV sono solitamente quelli
+  più usati
+ 
+  \item \textbf{LAV (Local As View)}, dove lo schema globale viene progettato a
+  priori indipendentemente dagli schemi sorgente, da cui prenderò solo i pezzi
+  di informazione di interesse. Il mapping tra i sorgenti e lo schema globale si
+  ottiene definendo ciascun sorgente sullo schema globale. Può capitare che
+  concetti locali non siano nello schema globale ma ogni concetto globale avrà
+  una qualche rappresentazione locale. Questo approccio rende più semplice
+  l'evoluzione temporale dello schema globale in quanto in caso di update
+  aggiungendo uno schema locale non cambia lo schema globale (che è fisso) ma si
+  ha solo un eventuale arricchimento del mapping con un nuovo query mapping. Il
+  mapping va quindi dallo schema globale a quelli sorgente/locali avendo che il
+  contenuto di ogni schema locale è descritto in termini di vista sullo schema
+  globale. Se una colonna non è presente nel globale ma solo nel locale rispondo
+  NULL. Questo approccio ci dice come le istanze sorgenti (reali). Il query
+  management è più complesso del GAV ma è più semplicemente estendibile del GAV
+  contribuiscono/sono associati alle tabelle dello schema globale (virtuale) 
+  \item \textbf{GLAV (Global and Local As View)} dove il mapping tra sorgenti e
+  schema globale si ottiene definendo un insieme di viste, alcune sullo schema
+  globale e altre sulle origini dati. È un approccio ibrido
+\end{itemize}
+\begin{esempio}
+  Un mapping GAV è del tipo:
+  \begin{minted}{sql}
+    Create View GProf as
+    Select S1.Name as Name, S1.Age as Age from S1
+    Union
+    Select S2.Name as Name, S2.Age as Age from S2
+  \end{minted}
+  (prendo tutto insieme. facendo una union)\\
+  Con la seguente query per sapere i nomi dei professori che hanno più di 50
+  anni:
+  \begin{minted}{sql}
+    Select GProf.Name
+    From GProf
+    Where Age > 50
+  \end{minted}
+  Avendo poi un'operazione di unfolding infatti nella query il mediator
+  sostituire i riferimenti a GProf con la specifica della vista in termini degli
+  schemi locali 
+\end{esempio}
+\begin{esempio}
+  Vediamo la stessa query in approccio LAV.\\
+  Si hanno nello schema globale delle create view di quello locale:
+  \begin{minted}{sql}
+    Create View S1 (Name,Age) as
+    Select GProf.Name as S1.Name, GProf.Age as S1.Age
+    From GProf
+  \end{minted}
+   \begin{minted}{sql}
+    Create View S2 (Name,Age) as
+    Select GProf.Name as S2.Name, GProf.Age as S2.Age
+    From GProf
+  \end{minted}
+    Con la seguente query per sapere i nomi dei professori che hanno più di 50
+  anni:
+  \begin{minted}{sql}
+    Select GProf.Name
+    From GProf
+    Where Age > 50
+  \end{minted}
+  Il mediator quindi parte dalle viste per cercare i nomi dei richiesti in
+  entrambe le viste mettendo poi insieme i risultati.\\
+  \textbf{Questo esempio è semplificato in quanto ho schemi locali dello stesso
+    tipo.}
+\end{esempio}
+\textit{In generale i sistemi di integrazione hanno ancora scarse prestazioni.}
+\begin{shaded}
+  \noindent
+  \textit{Vengono qui aggiunte le cose dette in live.}\\
+  \textbf{Guardare slide incontro, c'è tutto.}
+\end{shaded}
+\section{Big Data integration}
+\textbf{Queste esercitazioni sono tra le peggiori mai sentite nella mia vita. La
+prof parlava in modo completamente sconnesso, ho cercato invano un senso logico,
+non l'ho trovato. Non ho messo particolari ''(???)'' per segnalare dubbi perché
+ne servirebbe uno ogni 5 parole. Auguri!}\\
+Con Big Data integration si intende l'unione di big data e data integration. Con
+i big data ci si concentra su volume dei dati, velocità di collezione e analisi,
+priorità, valore dei dati, varierà dei dati, veridicità dei dati etc$\ldots$\\
+Si hanno due soluzioni principali:
+\begin{enumerate}
+  \item \textbf{data warehouse} che consiste nel creare un unico archivio
+  (tramite materialized view) di dati da diverse fonti offline. Questo è un
+  business milionario. Essendo i dati materializzatati (tramite liste
+  materializzate) insieme è veloce fare query ma si hanno problemi di
+  consistenza 
+  \item \textbf{virtual integration} che consiste nel supportare la query su
+  uno schema mediato (sistema wrapper/mediator (???)) applicando la
+  riformulazione della query online. Si ha il link e la fusione delle varie
+  risposte ricevute
+\end{enumerate}
+Bisogna in ogni caso accedere a tante sorgenti (e non tanto di dati) che
+cambiano molto nel tempo. Tutto quanto appena detto sui big data in merito ai
+dati diventa in merito ai sorgenti: volume dei sorgenti, velocità di collezione
+e analisi, priorità, valore dei sorgenti, varierà dei sorgenti, veridicità dei
+sorgenti etc$\ldots$\\ 
+Fare big data integration è importante per costruire grafi di conoscenza di
+grandi dimensioni, detti anche \textbf{knowledge bases} (si pensi ad esempio a
+quella di Google, \textbf{google knowledge graph}). Una knowledge base è
+un'insieme di entità con relazioni tra 
+loro dove le classi delle entità e le relazioni stesse vengono definite in un
+vocabolario. Si ottiene quindi una rete di connessioni.\\
+L'altro fattore per cui è importante è perché dai knowledge graph possiamo
+ottenere dati geo spaziali, utili in vari scopi della società. Un altro fine è
+per fare analisi scientifica, magari di geni, malattie etc$\ldots$\\
+Fin'ora si è studiato il ``small'' data integration, che era molto più semplice,
+dove comunque ogni ``pezzo'' arrivava da un certo sorgente, ma in ongi caso in
+termini ``piccoli''. Si avevano quindi, nello ``small'' data integration:
+\begin{itemize}
+  \item \textbf{scheme alignment}, che vuole risolvere il problema della
+  struttura. Se si hanno due sorgenti con schemi diversi si ``allineano'' ad uno
+  schema unico. Spesso si ha eterogeneità nei modi di esprimere classi,
+  relazioni e attributi (anche in sorgenti con lo stesso schema). Ci si
+  concentra quindi sullo schema
+  \item \textbf{record linkage}, dove si individuano delle istanze che sono le
+  stesse nonostante l'ambiguità di rappresentazione nei vari sorgenti. Sposto
+  quindi l'attenzione sul contenuto, avendo spesso eterogeneità nel
+  rappresentare le stesse entità
+  \item \textbf{data fusion}, dove si uniscono e riconciliano i contenuti che
+  sono in mismatch nei vari sorgenti. Si cerca di risolvere, secondo varie
+  tecniche i conflitti di valore
+\end{itemize}
+risolvendo le varie ambiguità, di semantica, rappresentazione (nonché
+inconsistenze) etc$\ldots$ tramite pipeline con appunto queste tre fasi.\\
+Nel caso dei big data si hanno però moltissimi dati e conseguenti inconsistenze,
+incompletezze, duplicazioni etc$\ldots$ Si hanno quindi varie tecniche.
+\subsection{Schema alignment}
+Analizziamo un attimo la prima fase.\\
+Partiamo nel caso, passando al big data, in cui si hanno dati molto specifici in
+un certo dominio. In primis ci si deve chiedere come sono distribuiti tali dati
+nel web, studiando eventuali provider di tali dati, che li raccolgono da diverse
+sorgenti etc$\ldots$ Si studiano eventuali incongruenze. Analizziamo meglio la
+distribuzione dei dati. Bisogna capire come queste informazioni possono essere,
+tramite tecniche di information extraction, raccolte da diversi
+sorgenti. Bisogna anche capire il volume e la copertura di tali informazioni,
+che sono sullo stesso dominio ma presi da sorgenti diverse. Vediamo uno
+studio.\\
+Con DMP12 si sono studiati 9 domini con accesso a grandi db di dominio
+specifico, con entità che hanno attributi che possono valere come
+identificatori. In questo caso la metodologia dello studio comprendeva:
+\begin{itemize}
+  \item utilizzare tutta la cache nell'engine di ricerca
+  \item le pagine web hanno entità con un identificatore
+  \item si aggregano insiemi di tutte le entità da ogni sorgente
+\end{itemize}
+Con lo studio si è ottenuto che fin da subito ha valori molto alti di copertura
+delle informazioni \textbf{1-coverage} (\textbf{grafici su slide}) e che resta
+stabile aumentando i sorgenti. Già con 100 sorgenti su 100000 si aveva copertura
+massima. La statistica \textbf{k-coverage} mi raccoglie la ridondanza delle
+informazioni presenti, avendo lo stessa frazione di dati in almeno $k$ sorgenti
+diversi. Per una \textbf{5-coverage} ho copertura al 90\% con 5000 sorgenti e al
+95\% con 100000 sorgenti. I dati erano in merito ai numeri telefonici dei
+ristoranti. Al variare dei dati cambiano le statistiche: una \textbf{1-coverage}
+sui siti dei ristoranti si ha l'80\% con 100 sorgenti e il 95\% con 10000
+(copertura che calava molto aumentando il $k$, grafici su slide).\\
+In merito a quanto bene erano connessi i sorgenti in un dato dominio si può
+ragionare in merito all'engine di ricerca. Con DMP12 si è considerato il grafo
+entità-sorgente per vari domini. Si ha un grafo bipartito con entità e sorgenti
+come nodi, collegati da archi se un'entità è in un certo sorgente. Si è quindi
+studiato il grafo, studiando la sua connettività si studia la robustezza
+dell'algoritmo di estrazione delle informazioni al variare delle scelte iniziali
+di architettura. Si parte da un insieme di entità, dette \textbf{seed}, e a
+partire da queste se ne cercano altre su altri sorgenti, contando le iterazioni
+necessarie per arrivare ad una \textit{convergenza}, alla quale ci si ferma. Si
+studia anche il \textit{diametro} del grafo (esempio su slide). Si studiano
+anche ridondanza dei dati e eventuali overlap.\\
+Facciamo quindi delle considerazioni fin ali dello studio.\\
+Per quanto riguarda la distribuzione anche per i domini con forti aggregatori,
+dobbiamo studiare a fondo i sorgenti per costruire un database
+ragionevolmente completo, sopratutto per un $k$ alto di coverage (per aumentare
+la confidenza). In merito alla connettività si ha che le orgenti in un dominio
+sono ben collegate, con un alto grado di ridondanza e overlap dei
+contenuti e questo resta vero anche se alcuni aggregatori principali vengono
+rimossi. \\
+Un secondo studio (grafici sempre su slide), LDL+13, è stato fatto su due
+domini, sulla qualità del web. Bisogna sperare in questo caso di avere dati
+``puliti'', sapendo che una bassa qualità comporta un grande impatto.\\
+Si è quindi studiata la consistenza dei dati, scoprendo una forte inconsistenza,
+a causa di ambiguità semantica in primis. Un altro problema sono gli errori di
+unità (precisione diversa) o errori veri e propri (con valori
+incompatibili). Spesso le sorgenti si copiano a vicenda senza controllare la
+validità dei dati copiati, portando a problemi di stima (facendo sembrare
+statisticamente corretto un valore che non lo è).\\
+Un altro problema è quello del volume dei dati, avendo milioni di sorgenti con
+dati specifici per certi domini. Nel web, secondo CHW+08, si hanno 154 milioni
+di tabelle, 10 milioni di sorgenti ad alta qualità, per MKK+08, 10 milioni di
+tabelle relazionali, per EMH09. Per i big data si hanno evidenti difficoltà
+quindi di schema alignment. Fare data warehouse sarebbe costosissimo ed è
+complicato fare virtual integration.\\
+Continuando coi problemi si ha la velocità:
+\begin{itemize}
+  \item da 43.000 a 96.000 fonti Deep Web (con form HTML), secondo B01
+  \item 450.000 database, 1,25 milioni di interfacce di query sul Web, secondo
+  CHZ05  
+  \item 10 milioni di fonti Deep Web di alta qualità, secondo MKK+08 
+  \item Molte fonti forniscono dati in rapida
+  evoluzione, ad esempio, i prezzi delle azioni 
+\end{itemize}
+È quindi difficile capire l'evoluzione della semantica, è quasi impossibile
+catturare dati che cambiano rapidamente (nonché pensare a dei data warehouse a
+causa dei costi).\\
+Un altro problema è la varietà dei sorgenti e la loro veridicità (da LDL+13 si
+ha che scarsa qualità dei dati dei sorgenti del deep web). Tutti questi problemi
+sono delle challenge moderne da risolvere.\\
+Vediamo quindi alcune tecniche per lo schema alignment.\\
+Mediamente si hanno 3 step, per abilitare il linkage e ottenere risultati
+semanticamente significativi (per esempi guardare slide): 
+\begin{itemize}
+  \item \textbf{mediated schema}, dove si specifica la modellazione delle
+  informazioni con uno schema che mi permetta di unificare e di allineare tutti
+  i sorgenti, ottenendo una sorta di unico schema finale ``mediatore''. Si crea
+  una vista unica con tutte le sorgenti e si catturano le informazioni
+  principali del dominio studiato. Solitamente questa fase è manuale  e lo
+  schema mediato contiene più informazioni degli schemi dei singoli sorgenti ma
+  potrebbero essrci casi in cui si hanno informazioni mancanti
+  \item \textbf{attribute matching}, dove si cercano corrispondenze tra gli
+  attributi dello schema mediato e quelli dei singoli sorgenti. Si
+  ``connettono'' gli attributi dei sorgenti con quelli del mediatori, di solito
+  si ha una corrispondenza ``1:1''. Un attributo del mediatore può essere una
+  combinazioni di attributi del sorgente (o viceversa)
+  \item \textbf{schema mapping}, dove si costruisce il mapping tra ogni sorgente
+  e il mediatore. Tale mapping specifica la relazione di semantica tra il
+  contenuto dei sorgenti e quello del mediatore e può essere usato per
+  riformulare una query indirizzata al mediatore (che verrà poi suddivisa in
+  ogni sorgente). Ci sono tre tipi di mapping, già visti (esempi su slide):
+  \begin{itemize}
+    \item GAV
+    \item LAV
+    \item GLAV
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[scale = 0.5]{img/bds.jpg}
+    \caption{Schema dello spazio delle strategie di schema alignment}
+    \label{fig:bds}
+  \end{figure}
+\end{itemize}
+Si hanno diverse tecniche che considerano volume e varietà:
+\begin{itemize}
+  \item integrazione di interfacce di query di deep web in GMG+04 e CHZ05 
+  \item scansione, indicizzazione di dati deep web in MKK+08
+  \item estrazione di dati strutturati da tabelle web in CHW+08, LSC10, PS12 e
+  DFG+12 ed elenchi web in GS09 e EMH09. Lo studio delle tabelle è difficoltoso
+  per il loro numero (154 milioni di tabelle relazionali, con 5.5 milioni di
+  attributi e 2.6 milioni di schemi). Devo usare la ricerca per keyword. SI
+  hanno problemi di ambiguità per le tabelle, si ha che non tutte le
+  tabelle sono rilevanti per le query e spesso hanno anche specifiche
+  funzionalità. Si usano delle featureRank per stimare la qualità delle tabelle
+  basandosi su:
+  \begin{itemize}
+    \item query independent features (numero di righe/colonne, intestazioni,
+    numero di NULL etc$\ldots$)
+    \item query dependent features
+    \item regressione lineare
+    \item feature pesate
+  \end{itemize}
+  Si ottiene quindi uno score delle tabelle.\\
+  Si ha anche lo schemaRank che specifica anche la coerenza dello schema. Data
+  $p(x)$ la frazione dello schema univoco che contiene l'attributo $x$ definisco
+  il \textbf{point-wise mutual information} tra due attributi $a$ e $b$ come:
+  \[pmi(a,b)=\log_2\left(\frac{p(a,b)}{p(a)\cdot p(b)}\right)\]
+  e la coerenza è la media di tutti i $p(a,b)$ per ogni coppia di attributi
+  nello schema. \\
+  Per l'annotazione delle tabelle in LSC10 ci si chiede, data una
+  tabella Web, quali entità si verificano in quali celle, quali sono i tipi di
+  colonna e le relazioni tra le colonne. Il testo nelle celle descrive entità ma
+  può essere ambiguo e le intestazioni non usano vocabolari
+  controllati. Risolvere questi problemi mi permette di fare query sui metadati
+  relazionali ed estrarre conoscenza dalle tabelle. Per annotare le tavelle uso
+  cataloghi che consistono in una gerarchia di tipi, entità che sono istanze
+  di tipi (possibilmente multipli) e relazioni binarie (rappresentati come
+  alberi, esempi su slide). I cataloghi si usano per stimare la qualità dei
+  contenuti delle celle della tabella, studiando la similarità. Annotare mi
+  permette di estrarre la semantica e di arricchire le tabelle. Si hanno diversi
+  approcci per etichettare i varie elementi (righe, colonne, relazioni
+  etc$\ldots$). \\
+  Con DFG+12 si cercano invece tabelle simili in un ``corpus'' di altre
+  tabelle. Cerco tabelle simili ad una tabella data. Le tabelle connesse sono ad
+  esempio: 
+  \begin{itemize}
+    \item tabelle candidate ad una \textit{union} con l'aggiunta di nuove
+    entità.
+    Si usano tre segnali per stabilire se sono candidate alla \textit{union}:
+  \begin{itemize}
+    \item il rumore di entità e tipi
+    \item la cura di entità e tipi
+    \item il conto delle co-occorrenze di entità e tipi
+  \end{itemize}
+  Alcuni approcci usano:
+  \begin{itemize}
+    \item la similarità di Jaccard pesata sui set di etichette per la coerenza
+    delle entità corrispondenza del peso massimo bipartito per la coerenza dello
+    schema 
+  \end{itemize}
+    \item tabelle candidate per una \textit{join} con l'aggiunta di nuovi
+    attributi. Le tecniche sono analoghe alla \textit{union}
+  \end{itemize}
+  Si cercano le migliori tabelle tramite un ``punteggio di relazione'' con
+  quella in analisi. La metodologia è a tre step:
+  \begin{enumerate}
+    \item si verifica la consistenza delle entità tra la tabella data e quella
+    di cui si sta studiando la relazione
+    \item si verifica se si possono espandere le entità della tabella data con
+    l'altra
+    \item si verifica che i due schemi delle due tabelle siano consistenti,
+    avendo schemi simili
+  \end{enumerate}
+  Un approccio naive calcola il punteggio per ogni coppia di tabelle. Si usano
+  quindi filtri per ottenere meno comparazioni (usando i filtri come criteri di
+  blocco per classificare le tabelle ed esegui solo confronti di correlazione
+  anll'interno dei sottoinsiemi creati dai blocchi) e
+  più veloci (applicando in 
+  sequenza vari filtri, basandosi ulla selettività e l'efficienza computazionale
+  dei filtri). Come filtri utili si hanno che le tabelle condividano colonne o
+  entità. 
+  \item sistemi di dataspace in FHM05, HFM06 e DHY07. È un approccio quasi
+  impossibile per volume, varietà e velocità, a causa di un approccio pay-as-you
+  go (inizia con poco e poi ``esplode'')
+  \item integrazione dei dati basata sulla ricerca per parole chiave in TJM+08
+  e con dati dinamici in TIP10
+\end{itemize}
+Una big data integration automatica è possibile in DDH08 ma si ha necessità di
+modellare l'incertezza sulla semantica degli attributi nei sorgenti. Si crea
+automaticamente uno schema mediato da un insieme di origini tramite schemi
+probabilistici (tramite mapping da sorgenti a mediatori pesati) che offrono il
+beneficio di una modellazione dell'incertezza. Si ha una sorta di clustering
+degli attributi, anche se si ha incertezza sulla sua accuratezza. \\
+\subsection{Record linkage}
+Passiamo quindi alle seconda fase, il \textbf{record linkage}, che si basa sul
+contenuto.\\
+Si hanno tre step principali per studiare scalabilità, semantica e similarità:
+\begin{enumerate}
+  \item \textbf{blocking}, usata per rendere gli step successivi più
+  efficiente. Si creano blocchi per creare sottoinsiemi più specifici per gli
+  step successivi. Si ragiona quindi in termini di scalabilità producendo
+  blocchi più piccoli con record simili tra loro. Si usano funzioni di blocking
+  su valori di uno o più attributi. La creazione dei blocchi deve essere il più
+  efficiente possibile
+  \item \textbf{pairwise matching}, ogni record viene comparato con un altro
+  per stabilire le coppie che matchano. Si computa la similarità di record
+  nello stesso blocco. Si hanno decisioni locali all'interno dei blocchi che
+  possono non essere consistenti a livello globale
+  \item \textbf{clustering}, dove l'obiettivo è assicurare la consistenza
+  globale. Si studia come partizionare l'insieme di tutti i record in modo che
+  ogni partizione si riferisca in modo distinto ad una entità, garantendo la
+  semantica nelle partizioni.
+\end{enumerate}
+Anche in questo caso si hanno tecniche legate al volume, dovendo gestire
+milioni di record:
+\begin{itemize}
+  \item map-reduce, una tecnica per rendere più efficacie la parallelizzazione
+  in presenza di molti dati, in VCL10 e KTR12
+  \item blocchi adattivi in DNS+12, MKB12 e VN12
+  \item blocchi in data space eterogenei, in PIO+12 e PKP+13
+\end{itemize}
+Per la velocità si ha la tecnica del record linkage incrementale in WGM10 e
+WGM13. Il numero dei sorgenti esplode velocemente e rende i confronti
+estremamente costoso. Le tecniche tradizionali di record linkage non sono
+infatti applicabili per i big data ma appunto conviene una strategia
+incrementale, aggiornando i link esistenti quando si hanno aggiornamenti dei
+dati. \\
+In merito alla prioritizzazione si ragiona su un ordine di priorità degli
+schemi.\\
+Si cerca di matchare dati strutturati e testi/dati non strutturati, in
+KGA+11 e KTT+12, per quanto riguarda la varietà (esempio su slide). Si cerca
+inoltre di matchare tabelle e cataloghi, con LSC10. \\
+Le sfide quindi nel record linkage sono
+quelle di matchare specifiche strutturate con altre non strutturate (e non
+strutturate con altre non strutturate). Si procede parsando il testo,
+semanticamente, offline o online. L'operazione ha tre step (\textbf{non si
+  capisce nemmeno quali siano, sta delirando, aiuto!}):
+\begin{enumerate}
+  \item \textbf{string tagging} per identificare tramite tag parse plausibili
+  per ottenere il parser ottimo dei un certo testo. Si crea un indice invertito
+  sui record strutturati tale per cui l'indice invertito ritorna un insieme di
+  nomi di attributi associati alla stringa nei record strutturati. È importante
+  che ci sia un parse plausibile in modo che ogni attributo abbia un parse
+  distinto. Si studiano quindi le ambiguità
+  \item si usa una funzione di matching che stabilisce uno score tra il record
+  strutturato e il testo. Si usa un vettore di feature similarity per la
+  similarità tra gli attributi
+  \item Bho
+\end{enumerate}
+Matchare dati strutturati non è così banale, a causa di limiti nei dati,
+all'eterogeneità etc$\ldots$ Spesso si usano gli identificatori se
+disponibili.\\
+In merito alla veridicità, con LDM+11, si provvede ad un link temporale dei
+record, studiando quando sono veri. \\
+\textbf{Per esercitazione 5 guardare le slide e pregare (se avete qualcuno da
+  pregare)}. 
+
+
+
+
+\chapter{Data quality}
+Il tema del \textbf{data quality} è particolarmente importante perché, dopo aver
+approfondito come gestire i dati e le loro architetture è bene studiare anche i
+dati in se. \\
+un esempio di scarsa data quality è quella di avere lo stesso dato con valori
+diversi nello stesso posto, anche semplicemente una pagina web.\\
+I dati sono una rappresentazione della realtà e questo porta al fatto che la
+realtà viene da noi modellata tramite alcuni dati specifici, tramite un pezzo
+della realtà e tale rappresentazione potrebbe non essere a priori oggettiva,
+anche a causa di strutture linguistiche e/o basate sui sensi. Si definiscono
+quindi:
+\begin{itemize}
+  \item \textbf{utilità} come precisione della rappresentazione interna
+  del dato rispetto a il compito svolto (e quindi, ad esempio, un'immagine
+  ritoccata potrebbe essere più utile per determinati scopi)
+  \item \textbf{fedeltà} come l'aderenza del dato alla realtà
+\end{itemize}
+Si è capito che la qualità è un concetto complicato.
+\begin{definizione}
+  Diamo una serie di definizioni:
+  \begin{itemize}
+    \item \textbf{qualità}: caratteristiche di un artefatto che influiscono
+    sulla sua capacità di soddisfare le esigenze e le aspettative dell'utente,
+    dichiarate o implicite. Un dato è di qualità se è adatto all'uso che se ne
+    deve fare. Si ha il concetto di \textbf{fitness for use}. ``La qualità dei
+    dati è negli occhi di chi li usa e non nelle mani di chi li produce''
+    \item \textbf{dimensione}: una caratteristica specifica che descrive la
+    qualità delle informazioni, solitamente non misurabile ma potrebbero esserlo
+    \item \textbf{sottodimensioni}: sotto-caratteristiche che spesso
+    classificano una certa dimensione
+  \end{itemize}
+  Le dimensioni misurabili lo sono tramite \textbf{metriche}, che, secondo le
+  definizioni dello standard ISO 9126-1 e secondo il framework ISM3 sono
+  un'insieme di procedure che comprende:
+  \begin{itemize}
+    \item una procedura (o metodo) di misurazione, cioè un algoritmo che prende
+    l'elemento da misurare e lo associa a una misura (sia esso un valore
+    ordinale o un intervallo)
+    \item una corretta unità di misura (o scala), cioè
+    il dominio dei valori restituiti dalla procedura di misurazione
+  \end{itemize}
+  Si possono avere metriche diverse per la stessa dimensione 
+\end{definizione}
+La qualità dei dati è un concetto che può essere espresso attraverso molteplici
+dimensioni, ad esempio la accuratezza (magari anche solo per errori di typo nei
+dati), la comprensibilità, la completezza (avendo magari valori a NULL),
+l'inconsistenza (avendo contraddizioni nei dati) etc$\ldots$\\  
+\textbf{Su slide tabella con le metodologie}.\\
+Un altro aspetto da tenere in considerazione è che si hanno metriche:
+\begin{itemize}
+  \item \textbf{oggettive}, modi formali e precisi per misurare le metriche per
+  una dimensione di qualità in termini di valori di un dominio,
+  indipendentemente dalla percezione/valutazione umana 
+  \item \textbf{soggettive}, modi per misurare le metriche per una dimensione di
+  qualità che dipendono dalla percezione (di solito valutazione esplicita e
+  ordinale) delle persone coinvolte nel processo di misurazione, dipendente
+  dalla percezione/valutazione umana 
+\end{itemize}
+Vediamo qualche aspetto nel dettaglio.\\
+Partiamo dall'\textbf{accuratezza}.
+\begin{definizione}
+  La precisione di un valore $v$ è definita come la vicinanza tra $v$ e un
+  valore $v'$ considerato come la corretta rappresentazione del fenomeno del
+  mondo reale che $v$ intende rappresentare.\\
+  Impatta valori alfanumerici e si può applicare alle tuple e alle relazioni.
+\end{definizione}
+Un esempio di inaccuratezza è un typo.\\
+Si hanno due sottodimensioni di questa qualità:
+\begin{enumerate}
+  \item \textbf{accuratezza sintattica}, magari controllando se la stringa è
+  presente in un insieme di valori di riferimento per il dominio trattato
+  (magari un vocabolario, una lista di città etc$\ldots$). Ci sono dati su cui
+  non è applicabile. Generalmente si fa:
+  \begin{itemize}
+    \item in base alle stringhe
+    \item in base ai singoli token di una stringa
+  \end{itemize}
+  \item \textbf{accuratezza semantica}, molto difficile da verificare (magari
+  tramite un'altra sorgente dati per cross validare). Per piccolissimi db si fa
+  a mano ma è generalmente impensabile
+\end{enumerate}
+Conoscere lo schema aiuta a valutare la accuratezza dei valori e si hanno
+diverse metriche. In primis posso dire se un dato è vicino a quello che mi
+aspetto in un certo dominio tramite una funzione di distanza che confronta il
+valore che ho e il dominio di riferimento. Dopo questo posso pensare a
+correggere eventualmente il dato. Si cerca il valore più vicino al dominio di
+riferimento. Potrei anche fare una stima statistica per capire quale sia il
+valore corretto. Per il calcolo delle distanze su stringhe uso la solita
+\textbf{distanza di edit (non normalizzata)} ma non è la sola. In fase di
+assesment considero solo 
+valori con una massima distanza di edit stabilita e nella fase di improvment
+posso stimare la giusta correzione per ottenere la stringa magari corretta
+(magari in corrispondenza di typo). La distanza sintattica potrebbe però essere
+poco informativa in merito alla semantica (si pensi a Domenico spesso abbreviato
+in Mimmo). Possiamo introdurre la \textbf{distanza di edit normalizzata} come:
+\[1-\frac{edit(a,b)}{n}\]
+con $n$ numero massimo di simboli. Si ottiene un valore tra 0 e 1, con 1 che
+indica che i valori che sono identici, accuratezza pari a uno implica distanza
+nulla (misuro il complemento a 1 della distanza). Tali valori tra 0 e 1 sono
+comodi in 
+quanto spesso le metriche danno risultati che sono in questo range e posso
+quindi effettuare una somma pesata tra le varie metriche.\\
+Si hanno vari tipi di funzione di edit (ma limitate a stringhe corte):
+\begin{itemize}
+  \item Hamming distance
+  \item Levenshtein distance
+  \item Jaro-Winkler
+\end{itemize}
+o di distanza di token (per stringhe composte da più stringhe, esempio ``Sesto
+San Giovanni''):
+\begin{itemize}
+  \item Jaccard index
+  \item Sorensen-Dice
+  \item N-gram
+\end{itemize}
+Si possono avere problemi nel trovare la reference table di un certo dominio. \\
+Passiamo alla completezza.
+\begin{definizione}
+  Definiamo la \textbf{completezza} di un insieme di dati come
+  la copertura con la quale il fenomeno osservato è rappresentato nell'insieme
+  di dati. Avere ad esempio dei NULL impedisce la completezza.\\
+  Impatta valori alfanumerici e numerici e si può applicare alle tuple, agli
+  attributi, agli oggetti e alle relazioni.\\
+  Si ha che, normalizzando sempre con $1-$ per avere massima completezza a 1:
+  \begin{itemize}
+    \item la completezza di tupla è basata sul numero di NULL di una certa riga
+    rispetto al numero di attributi presenti
+    \item la completezza di attributo è basata sul numero di NULL di una certa
+    colonna rappresentante un attributo
+    \item la completezza di tabella è basata sul numero di NULL dell'intera
+    tabella 
+    \item la completezza di oggetto è il numero di valori non nulli in tutti gli
+    oggetti rappresentati nelle tuple 
+  \end{itemize}
+\end{definizione}
+Nelle precedenti definizioni, abbiamo assunto una ipotesi di \textbf{mondo
+  chiuso}, ovvero tutto
+ciò che è rappresentato nella db è vero, tutto il resto è falso. Questa è
+la tipica ipotesi che si fa nei DBMS. Posso ipotizzare un \textbf{mondo aperto},
+come nei DBMS NoSQL, dove si tace di ciò che non si sa, avendo \textbf{object
+  completness}, tenendo conto del fatto che gli oggetti rappresentabili sono
+più delle tuple della tabella, e di tale cardinalità serve una stima
+indiretta. Quindi nel mondo n on relazionale è difficile stimare la completezza,
+non avendo certezza del numero di oggetti.  \\
+Parliamo ora di \textbf{proprietà temporali}, di livello di aggiornamento,
+ovvero di \textbf{currency}. Si parla anche di tempestività. Trattando il tempo
+è difficile dare una definizione formale e specificare la semantica trattata. Si
+ha che la \textbf{currency} misura con quale rapidità i dati sono aggiornati
+rispetto 
+al corrispondente fenomeno del mondo reale. Una prima misura della currency è
+il ritardo temporale tra il tempo $t1$ dell’evento del mondo reale che ha
+provocato la variazione del dato, e l’istante $t2$ della sua registrazione nel
+sistema informativo ma questa misura è costosa in quando generalmente l'evento
+non è ben noto, non sapendo quando si hanno cambiamenti etc$\ldots$. Un'altra
+metrica di currency è vederla come come differenza tra tempo di arrivo alla
+organizzazione e tempo in cui è effettuato l’aggiornamento (cosa misurabile in
+presenza di log, ad esempio, sui tempi di update). Un altra metrica è la
+differenza rispetto al metadato ``ultimo aggiornamento effettuato'' che, per
+valori con periodicita’ di aggiornamento nota, currency calcolabile in maniera
+approssimata ma poco costosa (ma non si hanno informazioni in merito alle
+modifiche del dato). \\
+La \textbf{tempestività} misura quanto i dati sono aggiornati rispetto a un
+particolare processo (o ai processi) che li utilizza. Quindi è dipendente dal
+processo, a differenza della currency, ed è associabile al momento temporale in
+cui deve essere disponibile per il processo che utilizza il dato. Posso avere
+dati obsoleti per il processo di chi li usa ma con alta currency.\\
+Trattiamo infine la \textbf{consistenza}.\\
+\begin{definizione}
+  Si definisce la \textbf{consistenza} in due modi:
+  \begin{enumerate}
+    \item come consistenza dei dati con i vincoli di integrità o dipendenze
+    funzionali definiti sullo schema (ad esempio i vincoli di integrità nel
+    modello relazionale). Si hanno anche dei vincoli di consistenza, detti
+    business rule, che possono riguardare uno o più attributi, relazioni
+    etc$\ldots$ e possono essere espressi in termini di probabilità. Si usano
+    anche vincoli di integrità in logica e si hanno dei data edit nelle indagini
+    statistiche 
+    \item come consistenza delle diverse rappresentazioni di uno stesso oggetto
+    della realtà presenti nella base di dati (come visto nella parte di data
+    integration)    
+  \end{enumerate}
+\end{definizione}
+Invece con \textbf{accessibilità} si esprime la capacità di un utente di
+accedere ai dati a partire dalla propria cultura, stato fisico e psichico e
+dalla tecnologie disponibilità, magari dal punto di vista culturale, dello stato
+fisico, delle tecnologie etc$\ldots$\\
+Un altro aspetto importante che va sempre considerato è il \textbf{tradeoff tra
+  varie qualità}, ad esempio consistenza e completezza nel modello relazionale
+possono essere non conciliabili quando si voglia rispettare l'integrità
+referenziale. Nel dominio statistico si ha tradeoff tra tempestività e
+completezza/accuratezza, che vengono però privilegiate (bisogna quindi studiare
+quanto è ``sporco'' un certo dato). Nel web si preferisce la tempestività
+rispetto ad accuratezza/completezza.
+\section{Quality improvment}
+Avendo quindi già introdotto la fase di \textbf{quality assesment} passiamo a
+quella di \textbf{quality improvment}, ovvero al miglioramento dei dati
+stessi.\\
+L'obiettivo della fase di miglioramento, una volta misurata la qualità dei dati
+a aver scoperto che magari sono di bassa qualità rispetto alle esigenza,
+è quello di migliorare i dati. La qualità dei dati è un problema di tipo
+multidimensionale, potendo decidere di migliorare anche solo alcuni aspetti
+relativi alla qualità dei dati (come la completezza, la consistenza,
+l'aggiornamento temporale etc$\ldots$), sapendo che ci sono dei tradeoff quindi
+il miglioramento di alcuni aspetti va a discapito della qualità di altri. Si
+hanno in generale due strategie in fase di miglioramento: 
+\begin{enumerate}
+  \item \textbf{data-driven}, migliorando il dato stesso in quanto tale. Si
+  punta a migliorare la qualità dei dati modificando direttamente il valore dei
+  dati attraverso il confronto con altri dati ritenuti di buona qualità. Ad
+  esempio, i valori dei dati obsoleti vengono aggiornati aggiornando un database
+  caratterizzato da una valuta più alta. Si migliora il dataset stesso. Questo è
+  una soluzione molto usata in data science. Questa strategia si applica se la
+  raccolta dati è continuativa.\\
+  Si hanno varie procedure:
+  \begin{itemize}
+    \item \textbf{acquisizione di nuovi dati}, che migliora i dati acquisendo
+    dati di qualità superiore per sostituire i valori che sollevano problemi di
+    qualità. Questa strategia può essere utilizzata per tutte le dimensioni
+    esaminate nella fase di valutazione 
+    \item \textbf{record linkage}, detta anche \textbf{identificazione degli
+      oggetti}, che confronta i dataset con valori ``sporchi'' con una fonte
+    certificata o di qualità superiore, identificando le tuple/record nei due
+    dataset che potrebbero fare riferimento allo stesso oggetto del mondo
+    reale e pulendo i ``valori'' sporchi con corrispondenti valori di qualità
+    superiore
+    \item \textbf{affidabilità della fonte}, dove si selezionano le fonti di
+    dati sulla base della qualità dei loro dati 
+  \end{itemize}
+  \item \textbf{process-driven}, migliorando il processo di acquisizione dei
+  dati (datti errati possono portare ad errori sistematici), ottenendo che il
+  dataset viene alimentato con dati corretti. Si punta 
+  quindi a migliorare la qualità ridisegnando i processi che creano o modificano
+  i dati. Ad esempio, un processo può essere riprogettato includendo un'attività
+  che controlla il formato dei dati prima dell'archiviazione. Tale strategia fa
+  riferimento all'ambito detto \textbf{Business Process Reengineering (BPR)},
+  ovvero avendo la possibilità di riprogettare i processi, magari scoprendo che
+  una sorgente era di qualità troppo bassa.\\
+  Si hanno due tecniche:
+  \begin{enumerate}
+    \item \textbf{process control}, dove si aggiungono elementi e/o procedure
+    di controllo nel processo di produzione dei dati quando:
+    \begin{itemize}
+      \item vengono creati nuovi dati
+      \item vengono aggiornati i set di dati 
+      \item il processo accede a nuovi set di dati
+    \end{itemize}
+    Verificando errori e la qualità dei dati stessi.\\
+    In questo modo, viene applicata una strategia ``reattiva'' agli eventi di
+    modifica dei dati, evitando così la degradazione dei dati e la propagazione
+    degli errori
+    \item \textbf{process redesign}, dove si ridisegnano i processi per
+    rimuovere le cause della scarsa qualità e introduce nuove attività che
+    producono dati di qualità superiore. Se la riprogettazione del processo è
+    radicale, questa tecnica viene definita \textit{reingegnerizzazione dei
+      processi aziendali}. Queste tecniche sono puntuali e non sono facilmente
+    integrabili in un sistema di raccolta continua dei dati
+  \end{enumerate}
+\end{enumerate}
+Nel lungo termine le tecniche process-driven sono più efficaci, eliminando il
+problema alla radice, ma sono estremamente costose nel breve termine. Le
+tecniche data-driven sono più economiche ma costose nel lungo e quindi sono
+adatte per un'applicazione ``one-shot'' e, quindi, sono consigliati per i dati
+statici. \\
+Approfondiamo il data-driven.\\
+Si hanno miglioramenti specifici per la dimensione:
+\begin{itemize}
+  \item \textbf{accuratezza} tramite confronto dei valori con un dominio di
+  riferimento. Questo è il tipo di tecnica che abbiamo considerato
+  per l'accuratezza sintattica nella fase di quality assesment
+  \item \textbf{completezza} tramite completamento di dati incompleti con
+  tecniche specifiche che sfruttano la conoscenza sui dati 
+  \item \textbf{consistenza} tramite l'identificazione dei dati corretti
+  sfruttando vincoli di integrità, dipendenze funzionali o dati derivati
+  etc$\ldots$, correggendo poi tramite sorgenti esterni o acquisendo nuovamente
+  i dati
+\end{itemize}
+Come tecnica si usa anche la \textbf{error localization and correction} che
+identifica ed elimina gli errori di qualità dei dati rilevando i valori che non
+soddisfano un dato insieme di regole, dette \textbf{edits} nelle metodologie per
+i le analisi statistiche (queste tecniche sono infatti studiate principalmente
+nel dominio statistico). Rispetto ai dati elementari, i dati statistici
+aggregati (come media, somma, massimo etc$\ldots$), sono meno sensibili alla
+localizzazione probabilistica e alla correzione dei valori probabilmente
+errate. Sono state proposte tecniche per la localizzazione e correzione degli
+errori per incongruenze, dati incompleti e valori anomali, ovvero valori
+significativamente diversi da tutti gli altri valori in un set di dati per dati
+elementari e dati statistici.\\
+Un altra tecnica di quality improvment è la \textbf{deduplica} che corrisponde
+al raggruppamento di record di dataset che si riferiscono alla stessa entità nel
+mondo reale (raggruppo i doppioni). Praticamente la deduplica è un'operazione di
+record linkage fatta su un'unica tabella. Si hanno tre gruppi in output alla
+deduplica:
+\begin{enumerate}
+  \item coppie/gruppi di tuple che matchano, corrispondenti allo stesso
+  oggetto reale
+  \item coppie di tuple che non matchano che corrispondono a entità distinte nel
+  mondo reale 
+  \item possibili coppie/gruppi di tuple, per le quali non è stato possibile
+  giungere una conclusione definitiva, e sono necessarie ulteriori indagini (e
+  costi) per assegnarle al gruppo match o mismatch
+\end{enumerate}
+Un'altra attività classica, propedeutica ad altre attività (è una sorta di fase
+di preprocessamento), è la fase di
+\textbf{normalizzazione}, trasformando le stringhe, scritte nello standard del
+dominio di riferimento, effettuando, per ogni dimensione, il riconoscendo della
+stessa e il relativo miglioramento. Per la normalizzazione di domini specifici,
+tipo i nomi delle vie etc$\ldots$, esistono tool specifici.\\
+Si ha quindi il miglioramento di singoli valori o di intere tuple, migliorando
+accuratezza sintattica, completezza, currency e consistenza, in base a certe
+metriche. \\
+Ogni valore che non matcha con la tabella di riferimento (spesso disponibili
+online a seconda del dominio ma non sempre) deve essere corretto. Il
+miglioramento dell'accuratezza sintattica viene effettuato sostituendo il valore
+errato con quello a distanza inferiore nella tabella di riferimento, dove la
+distanza può essere valutata dopo una precedente verifica dei valori e delle
+loro caratteristiche (si nota come le attività data-driven sono costose dal
+punto di vista temporale). \\
+Mentre per migliorare l'accuratezza possiamo adottare procedure standard di
+confronto con le tabelle di riferimento, per la completezza è molto più
+complesso, non avendo un elemento da cui partire, avendo a disposizione solo un
+valore NULL, non riuscendo sempre a ricostruire il valore corretto per
+sostituirlo al NULL. Spesso comunque si ha un contesto per aiutare a rimuovere i
+NULL, quindi, la procedura più intuitiva è eseguire una nuova acquisizione di
+dati incompleti riempiendo di volta in volta più valori NULL possibili. Poiché
+di solito si tratta di un'attività molto costosa, 
+possiamo adottare diverse euristiche che di solito dipendono dal contesto. \\
+Per la completezza si usano anche i \textbf{dati derivati}, definiti come dati
+per i quali esiste una formula matematica per la quale questi dati possono
+essere ottenuti a partire da un altro set di dati già conosciuto (esempio banale
+un prezzo con o senza IVA).\\
+Bisogna migliorare la consistenza vedendo se la dipendenza funzionale sui dati
+derivati e altri vincoli di integrità intra-relazionale possono essere
+sfruttati, oltre che per la completezza completezza, anche per la consistenza.\\
+\textbf{Esempio case study su slide}.\\
+Dopo tutte queste operazioni si ottiene un db già abbastanza pulito ma si hanno,
+solitamente, ancora problemi con spazio di miglioramento. Si userà quindi il
+\textbf{record linkage}.
+\subsection{Record Linkage}
+Il \textbf{record linkage} viene usato anche in altri contesti oltre il data
+quality con anche altri nomi (come object recognition, object matching,
+deduplicazione, se si tratta di un solo dataset, etc$\ldots$). \\
+Prima della fase di data integration si ha lo \textit{scheme integration}, con
+approcci architetturali. Dal punto di vista di integrazione si hanno, si
+ricorda, gli approcci GAV o LAV, ma in entrambi i casi si hanno elementi
+rappresentanti lo stesso oggetto reale in db diversi che
+potrebbero non essere facilmente  integrati a causa, magari, dell'assenza di una
+chiave primaria univoca. Bisogna quindi studiare come collegare i record
+presenti nei vari db tramite \textbf{record linkage} e mettere poi insieme i
+risultati con un'operazione di \textbf{fusion}, cercando di studiare eventuali
+ridondanze o ambiguità.\\
+Il record linkage consiste quindi nell'identificare le stesse osservazioni in
+diversi file/db. In generale si parla di \textbf{entity resolution task/record
+  linkage} avendo varie ``varianti'':
+\begin{itemize}
+  \item \textbf{deduplicazione}, che considerando una sola tabella è usata
+  principalmente con il modello ER. Si procede raggruppando record che
+  corrispondono allo stesso oggetto reale normalizzando lo schema e riducendo il
+  numero di record nel dataset. Come variante si hanno i cluster di calcolo
+  \item \textbf{record linkage}, dove appunto si matchano da un archivio dati
+  deduplicato a un altro (bipartito). Si ha anche la versione $k$-partita
+  lavorando con più data store. Generalmente questo metodo proposto nei
+  datastore relazionali, ma più frequentemente applicato a record non
+  strutturati da varie fonti 
+  \item \textbf{canonicalizzazione}, che generalmente fornisce il record più
+  completo, attribuisce i valori tramite la fusione, costruendo dei
+  \textbf{single version of truth}, usando metodi probabilistici. Questo metodo
+  è tipico nel \textit{master 
+    data management}, dove si raccolgono tutti i dati per poi integrarli
+  \item \textbf{referencing}, detto anche \textbf{entity disambiguation}, dove
+  si matchano record ``sporchi'' con uno ``pulito'', con una tabella di
+  riferimento deduplicata che è già stata canonizzata. Questo metodo
+  generalmente utilizzato per atomizzare più record sulla stessa chiave primaria
+  e donare informazioni aggiuntive al record  
+\end{itemize}
+Si hanno vari tool per la entity resolution:
+\begin{itemize}
+  \item \textit{NTLK}, un natural language toolkit
+  \item \textit{Dedupe*}, per lo structured deduplication
+  \item \textit{Distance}, un'implementazione in C per distance metrics
+  \item \textit{Scikit-Learn}, per machine learning models
+  \item \textit{Fuzzywuzzy}, per fuzzy string matching
+  \item \textit{PyBloom}, per probabilistic set matching
+\end{itemize}
+In input al record linkage si ha quindi una serie di tabelle e in output un
+insieme di tuple che matchano e un insieme di tuple che non matchano, nel caso
+relazionale. Si hanno anche tuple per cui non si sa dire nulla o per le quali
+non si ha certezza su match/mismatch. Lo stesso ragionamento si applica anche a
+modelli non relazionali (dati nei nodi per un modello a grafo, valori dei
+documenti nel documentale etc$\ldots$).\\
+Si hanno varie tecniche:
+\begin{itemize}
+  \item quella \textbf{empirica}, basata sulla distanza di simboli nei valori
+  delle tuple
+  \item quella \textbf{probabilistica}, dove presumo di conoscere un campione di
+  frequenze di "distanze" tra coppie di tuple, note come corrispondenti o non
+  corrispondenti e dove potrei decidere quelli corrispondenti e quelli non
+  corrispondenti nell'universo proiettando tale conoscenza sul campione
+  nell'universo della coppia
+  \item quelle  
+
+\end{itemize}
 \end{document}
+
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
 % LocalWords:  storage Administrator DBA GUI SPARC performanti primis query SQL
 % LocalWords:  join compiler DLL DDL Language step parsing Catalog metadati sql
@@ -4069,7 +5555,8 @@ Si ha una politica di
 % LocalWords:  filesystem referencing Bson binary embedding engine WiredTiger
 % LocalWords:  MMAP language MQL secondary sync hearbeat replicaSet count tag
 % LocalWords:  sharding aware chunks available utility live tracciabilità GDPR
-% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER
-% LocalWords:  intensionale processamento colonnare denormalizzare
+% LocalWords:  Gitlab compatible PosgreSQL backuppati droppato Azure ER tupla
+% LocalWords:  intensionale processamento colonnare denormalizzare enrichment
+% LocalWords:  inaccuratezza
 
-\message{ !name(archid.tex) !offset(-4075) }
+\message{ !name(archid.tex) !offset(-5562) }

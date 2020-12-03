@@ -5434,9 +5434,124 @@ sfruttati, oltre che per la completezza completezza, anche per la consistenza.\\
 \textbf{Esempio case study su slide}.\\
 Dopo tutte queste operazioni si ottiene un db già abbastanza pulito ma si hanno,
 solitamente, ancora problemi con spazio di miglioramento. Si userà quindi il
-\textbf{record linkage}.\\
-
-
+\textbf{record linkage}.
+\subsection{Record Linkage}
+Il \textbf{record linkage} viene usato anche in altri contesti oltre il data
+quality con anche altri nomi (come object recognition, object matching,
+deduplicazione, se si tratta di un solo dataset, etc$\ldots$). \\
+Prima della fase di data integration si ha lo \textit{scheme integration}, con
+approcci architetturali. Dal punto di vista di integrazione si hanno, si
+ricorda, gli approcci GAV o LAV, ma in entrambi i casi si hanno elementi
+rappresentanti lo stesso oggetto reale in db diversi che
+potrebbero non essere facilmente  integrati a causa, magari, dell'assenza di una
+chiave primaria univoca. Bisogna quindi studiare come collegare i record
+presenti nei vari db tramite \textbf{record linkage} e mettere poi insieme i
+risultati con un'operazione di \textbf{fusion}, cercando di studiare eventuali
+ridondanze o ambiguità.\\
+Il record linkage consiste quindi nell'identificare le stesse osservazioni in
+diversi file/db. In generale si parla di \textbf{entity resolution task/record
+  linkage} avendo varie ``varianti'':
+\begin{itemize}
+  \item \textbf{deduplicazione}, che considerando una sola tabella è usata
+  principalmente con il modello ER. Si procede raggruppando record che
+  corrispondono allo stesso oggetto reale normalizzando lo schema e riducendo il
+  numero di record nel dataset. Come variante si hanno i cluster di calcolo
+  \item \textbf{record linkage}, dove appunto si matchano da un archivio dati
+  deduplicato a un altro (bipartito). Si ha anche la versione $k$-partita
+  lavorando con più data store. Generalmente questo metodo proposto nei
+  datastore relazionali, ma più frequentemente applicato a record non
+  strutturati da varie fonti 
+  \item \textbf{canonicalizzazione}, che generalmente fornisce il record più
+  completo, attribuisce i valori tramite la fusione, costruendo dei
+  \textbf{single version of truth}, usando metodi probabilistici. Questo metodo
+  è tipico nel \textit{master 
+    data management}, dove si raccolgono tutti i dati per poi integrarli
+  \item \textbf{referencing}, detto anche \textbf{entity disambiguation}, dove
+  si matchano record ``sporchi'' con uno ``pulito'', con una tabella di
+  riferimento deduplicata che è già stata canonizzata. Questo metodo
+  generalmente utilizzato per atomizzare più record sulla stessa chiave primaria
+  e donare informazioni aggiuntive al record  
+\end{itemize}
+Si hanno vari tool per la entity resolution:
+\begin{itemize}
+  \item \textit{NTLK}, un natural language toolkit
+  \item \textit{Dedupe*}, per lo structured deduplication
+  \item \textit{Distance}, un'implementazione in C per distance metrics
+  \item \textit{Scikit-Learn}, per machine learning models
+  \item \textit{Fuzzywuzzy}, per fuzzy string matching
+  \item \textit{PyBloom}, per probabilistic set matching
+\end{itemize}
+In input al record linkage si ha quindi una serie di tabelle e in output un
+insieme di tuple che matchano e un insieme di tuple che non matchano, nel caso
+relazionale. Si hanno anche tuple per cui non si sa dire nulla o per le quali
+non si ha certezza su match/mismatch. Lo stesso ragionamento si applica anche a
+modelli non relazionali (dati nei nodi per un modello a grafo, valori dei
+documenti nel documentale etc$\ldots$).\\
+Si hanno varie tecniche per la comparazione delle coppie:
+\begin{itemize}
+  \item quella \textbf{empirica}, basata sulla distanza di simboli nei valori
+  delle tuple
+  \item quella \textbf{probabilistica}, dove presumo di conoscere un campione di
+  frequenze di "distanze" tra coppie di tuple, note come corrispondenti o non
+  corrispondenti e dove potrei decidere quelli corrispondenti e quelli non
+  corrispondenti nell'universo proiettando tale conoscenza sul campione
+  nell'universo della coppia. Si usano soglie per poter discernere match e
+  mismatch 
+  \item quelle \textbf{knowledge based}, dove si decide in base a regole per il
+  match delle tuple
+  \item \textbf{mista}, sia probabilistica che knowledge based 
+  
+  \item le recenti tecniche di \textbf{machine learning}
+\end{itemize}
+Ovviamente grosse tabelle portano, confrontando tutti gli elementi ogni volta, a
+complessità assurde. Si hanno quindi vari step per il record linkage:
+\begin{itemize}
+  \item costruzione dello spazio di ricerca iniziale come prodotto
+  cartesiano di tutti i dataset in input. Tale spazio è immenso. Questa è una
+  fase di preprocessamento e in questa fase si cerca di ottenere un formato
+  unico per tutti i sorgenti, sia dal punto di vista del modello che da quello
+  dei dati (normalizzando i vari valori di uno stesso dominio, ad esempio avendo
+  un solo modo per definire via, senza abbreviazioni, rimuovendo spazi
+  etc$\ldots$) 
+  \item si usano tecniche di blocking per ridurre lo spazio di ricerca,
+  ottenendo uno spazio di ricerca ridotto. Si hanno varie tecniche di blocking
+  in letteratura e vari algoritmi. Tra tutti si ha il \textit{sorted neighbour}
+  dove si prende un attributo e cerco di ordinare la tabella sugli insiemi degli
+  attributi in modo tale che i gruppi degli attributi che confronto siano vicini
+  tra loro, tutti con tutti (esempio ordino per cognome in modo da mettere
+  insieme record con cognomi vicini per vedere magari errori, ovviamente
+  funziona entro certi limiti). Ci si muove tra gli elementi tramite sliding
+  window per specificare meglio i controlli, riducendo i confronti (senza la
+  finestra ho $n^2$ confronti, con $n$ righe, con la finestra di lunghezza $m$
+  righe ho $m^2\frac{n}{m}$, quindi $m\cdot n$ confronti, avendo $m\ll
+  n$). Questa fase è facilmente distribuibile, facendo finestre di controllo in
+  parallelo i più nodi
+  \item sullo spazio ridotto si usa un metodo di comparazione, a cui è associato
+  un metodo di decisione, per definire i match, i mismatch e quelli di cui non
+  si ha certezza, che chiamiamo possible match (non sempre si hanno, dipende
+  dalle soglie usate, una soglia di certo non permette di creare i possible
+  match due invece si, nel mezzo tra le due si hanno i possible match). Si hanno
+  metodi probabilistici, metodi non supervisionati come il clustering e anche
+  supervisionati come: 
+  \begin{itemize}
+    \item svm
+    \item logistic
+    \item random forest
+    \item boosting gradient
+  \end{itemize}
+  Confrontando quindi le varie coppie di dati
+\end{itemize}
+Questo è lo schema di base diciamo e in ogni fase si ha un processo di quality
+assesment.\\ 
+Il primo problema è che i dataset potrebbero essere di formato diverso,
+relazionale o meno, e quindi, come i data integration, si cerca di trasformare
+un modello nell'altro. Potrei dover unire in un unico formato anche immagini e
+mappi, oltre a documenti json o csv etc$\ldots$ \\
+\textbf{Esempio del processo su slide.}\\
+Approfondiamo quindi l'uso di tecniche \textbf{probabilistiche} per la fase di
+comparazione, avendo un \textbf{probabilistic record linkage}, dove comunque le
+prime fasi restano normali.\\
+%30.30
 \end{document}
 
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system

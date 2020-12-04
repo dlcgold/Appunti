@@ -4625,6 +4625,166 @@ e $i$ è la più grande posizione $<m$ tale che $D_j[i]=1$.\\
   \end{algorithmic}
   \caption{Algoritmo di WU Manber}
 \end{algorithm}
+\chapter{Text indexing}
+\begin{definizione}
+  Una \textbf{struttura di indiczzazione} è una
+  struttura dati che riorganizza un testo in maniera da rendere facile ed
+  efficiente un compito che compiuto sul testo originale risulta essere
+  difficile e inefficiente. 
+\end{definizione}
+Si effettua quindi il preprocessing sul testo.\\
+Prima di tutto bisogna fissare un ordinamento dei simboli dell'alfabeto $\Sigma$
+e si fissa l'ordinamento lessicografico. Esempio si ha $a<c<g<t$.\\
+Bisogna estendere $\Sigma$ con un simbolo sentinella lessicograficamente minore
+dei simboli dell'alfabeto e usiamo il \$, avendo $\$<a<c<g<t$. Tale sentinella è
+posto a fine testo e non compare in altri punti del testo.\\
+\begin{definizione}
+  Si definisce il suffisso di indice $j$ come il suffisso che inizia in $j$ di
+  $T$ (bisogna specificare che inizia in $j$): 
+  \[T[j,|T|]\]
+  Il suffisso di indice iniziale pari a quello di \$ è nullo.
+\end{definizione}
+Posso stabilire quindi l'ordinamento dei suffissi di un testo $T$.
+Per ordinare due suffissi $s_1$ e $s_2$ si ha la regola:
+\begin{itemize}
+  \item sia $i$ la prima posizione a sinistra tale che $s_1[i]\neq s_2[i]$,
+  quindi l'indice del primo carattere per cui ho un mismatch
+  \item si ha che:
+  \begin{itemize}
+    \item se $s_1[i]< s_2[i]$ allora $s_1<s_2$
+     \item se $s_1[i]> s_2[i]$ allora $s_1>s_2$
+  \end{itemize}
+\end{itemize}
+In altri termini è il modo in cui cerco le parole in un vocabolario. Terminando
+con il \$ non posso avere suffissi uguali e non avere che un suffisso sia
+suffisso dell'altro (visto che \$ non può trovarsi nel testo).
+\begin{definizione}
+  Definiamo la rotazione di indice $j$ come la concatenazione del suffisso
+  $T[j,|T|]$ con il suffisso $T[1,j-1]$.\\
+  La rotazione con $j$ pari all'indice del carattere \$ coincide con lo spostare
+  il dollaro dalla fine all'inizio.
+\end{definizione}
+\section{Suffix Array}
+\begin{definizione}
+  Il \textbf{Suffix Array (SA)} di un testo $T$ \$-terminato di lunghezza $n$ è
+  un array $S$ di $n$ interi tale che $S[i]=J$ sse il suffisso di indice $j$ è
+  l'$i$-esimo suffisso nell'ordinamento lessicografico dei suffissi di $T$,
+  avendo $T[S[i],n]$ come i-esimo suffisso di $T$.\\
+  Se ho $i< i'$ allora:
+  \[T[S[i],n]<T[S[i'],n]\]
+  Si vede che in spazio si ha:
+  \[O(n\log n)\]
+  avendo $n$ valori interi di lunghezza a scalare da $1$ a $n$.\\
+  L'algoritmo di calcolo può essere fatto in tempo $O(n)$.
+\end{definizione}
+\textbf{Esempio su slide.}\\
+La ricerca esatta avviene in tempo $O(m\log n)$ con pattern $P$ lungo $m$.\\
+Andiamo avanti per step per capire la ricerca.\\
+Se il pattern $P$ occorre $k$ volte in $T$ allora $P$P è prefisso di $k$
+suffissi di $T$ in cui indici sono le occorrenze di $P$ in $T$. Si ha anche che
+gli indici dei $k$ suffissi di cui $P$ è prefisso sono successivi nel SA,
+essendo ordinati lessicograficamente, per cui mi muovo su finestre tramite
+ricerca binaria nel SA.\\
+Se $P$ occorre in posizione $j$ di $T$ ed è lessicograficamente minore/maggiore
+di un suffisso di indice $j'$, $j'\neq j$, allora il suffisso di indice $j$ è
+lessicograficamente minore/maggiore del suffisso di indice $j'$:
+\[ P= \mbox{prefisso di }T[j,n] \land P < T[j',n] \implies T[j,n] < T[j',n]\]
+\[P = \mbox{prefisso di }T[j,n] \land P > T[j',n] \implies T[j,n] > T[j',n]\]
+Si ha quindi il seguente algoritmo:
+\begin{enumerate}
+  \item si parte con tutto l'intervallo $[1,n]$ di posizioni su $S$, definendo
+  tale intervallo come $[L,R]$
+  \item si considera il suffisso di indice $S[p]$ relativo alla posizione di
+  mezzo, $p$, di $[L,R]$, e si verifica in tempo $O(m)$:
+  \begin{itemize}
+    \item se $P<T[S[p],n]$ ripeto il punto 2 considerando la prima metà
+    dell'intervallo corrente di ricerca come nuovo intervallo di ricerca $[L,R]$
+    \item se $P>T[S[p],n]$ ripeto il punto 2 considerando la seconda metà
+    dell'intervallo corrente di ricerca come nuovo intervallo di ricerca $[L,R]$
+    \item $P$ è prefisso di $T[S[p],n$ allora ho l'occorrenza di $P$ in $T$
+    all'indice $S[p]$. Questo trova una sola occorrenza ma può essere modificato
+    per trovare tutti i suffissi di $T$ che hanno $P$ come prefisso
+  \end{itemize}  
+\end{enumerate}
+Si nota che:
+\[p=\left\lfloor\frac{L+R}{2}\right\rfloor\]
+Se $P$ non occorre in $T$ si raggiunge un intervallo vuoto di ricerca.
+\section{BWT}
+\begin{definizione}
+  Definiamo la \textbf{Borrows Wheeler Transorm (BWT)} come una permutazione
+  reversibile del testo $T$ (e quindi è lunga $n$ come il testo). È stata creata
+  per comprimere il testo in quando tende ad avvicinare simboli uguali. La BWT
+  rende possibile il pattern matching rendendo lineare sul pattern la ricerca
+  esatta. 
+\end{definizione}
+Vediamo come costruire la BWT:
+\begin{itemize}
+  \item bisogna costruire una matrice quadrata di lato $n$ e alla riga $i$
+  mettere la rotazione di indice $i$ del testo (nella diagonale secondaria avrò
+  tutti i \$)
+  \item ordinare lessicograficamente le rotazioni spostando le righe ma
+  salvando gli indici di partenza (possiamo dire che abbiamo una colonna degli
+  indici). La nuova prima riga avrà indice $n$, iniziando con \$
+  \item L'ultima colonna di questa matrice è la BWT del testo (il \$ non si può
+  sapere dove sia)
+\end{itemize}
+\begin{definizione}
+  Operazionalemnte definiamo
+  la BWT $B$ di un testo $T$T come la permutazione di $T$ tale che $B[i]$ è
+  l'ultimo simbolo della i-sima rotazione nell'ordinamento lessicografico delle
+  rotazioni di $T$.
+  \\
+  Si ha quindi spazio:
+  \[O(n \log |\Sigma|)\]
+\end{definizione}
+La prima colonna $F$ contiene i caratteri, che formano poi la BWT, ordinati e ha
+come primo simbolo il \$. Dato un indice $i$ ho che nel testo $T$, ad un certo
+punto, il simbolo $B[i]$ precede il simbolo $F[i]$. Possiamo estendere che,
+avendo le rotazione, il \$, ultimo simbolo del testo, precede il primo
+simbolo. Questa proprietà è detta \textbf{proprietà p1}.\\
+Il simbolo $B[1]$ è sempre l'ultimo simbolo di $T$ prima di \$. \\
+Per costruzione
+$B[i]$ è un simbolo di $T$ in un certo indice $k$, avendo che $B[i]$ coincide
+con $T[k]$ (più forte di un solo =). Si arriva quindi anche alla
+\textbf{proprietà p2}, che lega $B$ e $F$, infatti l'r-simo simbolo (nelle
+colonne ho $r$ caratteri uguali di fila)
+$\sigma$ in $B$ e l'r-simo simbolo $\sigma$ in $F$ sono lo stesso simbolo in T
+. Questa proprietà è detta anche \textbf{last-first mapping}.\\
+La funzione last-first (LF) è la funzione che corrispondere una posizione $i$
+sulla BWT $B$ la pozione $j$ su $F$ in modo tale che $B[i]$ e $F[j]$ siano lo
+stesso simbolo del testo $T$:
+\[j=LF(i)\]
+Questo calcolo verrà approfondito con FM-index.\\
+Le due proprietà mi permettono di ricostruire $T$ da $B$, avendo la
+reversibilità di $BWT$. Si hanno vari step (\textbf{esempio su slide}):
+\begin{enumerate}
+  \item prima cosa calcolo $F$ da $B$ (ordinando semplicemente i caratteri)
+  \item si mette il \$ in ultima posizione del testo. So anche che \$ è il primo
+  carattere di $F$
+  \item inizio con $i=1$
+  \item applico $p1$ sapendo che $B[i]$ precede in $T$ il carattere $F[i]$ e
+  quindi posso trovare il carattere prima di \$ nel testo con $i01$ su $B$ e $F$
+  \item applico $p2$ e so che devo trovare di $F$ la prima occorrenza del
+  carattere $B[i]$ e poi ricomincio con lo step 4 fino a che non ho riempito il
+  testo
+\end{enumerate}
+Quindi passando ad ogni step da $B$ a $F$ e viceversa ricostruisco il testo.\\
+Relazioniamo ora BWT e SA.\\
+Consideriamo anche di avere la famosa colonna degli indici che indica gli indici
+delle rotazioni secondo il loro indice lessicografico. Si ha che essi sono le
+posizioni sul testo dei simboli di $F$ e sono anche il SA $S$ del testo. Posso
+quindi calcolare la BWT di un testo a partire dal SA in $O(n)$. 
+\begin{definizione}
+  Possiamo quindi ridefinire meglio la BWT.\\
+  La BWT $B$, un array di lunghezza $n$, è la permutazione dei simboli di
+  un testo $T$ tale che $B[i]$ è 
+  il simbolo che precede l'i-esimo suffisso in ordine lessicografico. Ovvero ho
+  che $B[i]$ è il simbolo (esattamente quel simbolo, è una relazione più forte
+  di =, che trascurerebbe la ripetizioni di simboli in un testo):
+  \[T[S[i]-1]\]
+\end{definizione}
+\textbf{Esempio su slide.}
+\section{FM-index}
 \end{document}
 
 

@@ -6150,6 +6150,420 @@ anche di model checking).
 %   \end{itemize}
 %   \emph{Anche questa è una definizione per induzione}
 % \end{definizione}
+\chapter{Logiche temporali e model-checking}
+Per capire l'importanza di questo argomento pensiamo di avere un codice
+concorrente scritto in un certo linguaggio, con l'utilizzo dei \textit{thread},
+con un produttore, un consumatore e un buffer. I primi due estendono la classe
+\textit{thread} mentre il buffer ha i metodi \textit{synchronized} per il
+prelevamento e il deposito. Questo codice simula il modello
+produttore-consumatore già approfondito. Bisogna capire se questo programma
+funzioni correttamente ma non posso usare le tecniche viste precedentemente per
+valutare la correttezza di programmi (logica di Hoare etc$\ldots$) in quanto
+abbiamo a che fare con un programma che non inizia, produce dati e finisce ma,
+generalmente, si ha a che fare con un programma senza stato finale, che esegue
+infinitamente le sue parti in modo concorrente. Per il modello appena ipotizzato
+possiamo dire che è corretto se, ad esempio:
+\begin{itemize}
+  \item ogni oggetto prodotto venga prima o poi consumato
+  \item nessun oggetto venga consumato più di una volta
+  \item il sistema non vada in deadlock
+\end{itemize}
+Pensiamo ora ad una rete di Petri ``complessa'' con due processi che
+condividono in un mutua esclusione una certa risorsa. Si ha quindi una sezione
+critica dove un processo usa tale risorsa. Possiamo volere, per esempio, che i
+due processi non siano mai contemporaneamente nella sezione critica (userebbero
+insieme la risorsa) e che prima o poi un processo entri in zona critica. Un
+metodo è controllare l'intero spazio delle marcature raggiungibili e verificare
+che tutto vada come voluto, per la prima richiesta, ma ci sono tecniche
+migliori.  \\
+Un altro caso d'uso è quello dei circuiti asincroni.\\
+Volendo si può adattare la logica di Hoare a modelli concorrenti ma solo se si
+ha comunque un output finale e non un'evoluzione ciclica infinita. \\
+Fino'ora ci si è basati sulla logica proposizionale ma tale logica ha dei
+limiti, si introduce quindi la 
+\textbf{logica PLTL (\textit{Propositional Linear Time Logic})} che introduce il
+concetto di \textbf{tempo}, in ottica \textbf{lineare}, nel processo logico.\\
+La logica PLTL viene usata per \textbf{model checking} e lo scopo generale che
+ci si propone è quello di presentare un approccio formale alla progettazione e
+all'implementazione di sistemi basato su un linguaggio formale che permetta di
+specificarli e ragionare sulle loro proprietà. Si vogliono studiare sia sistemi
+grandi, come software o addirittura sistemi operativi, che piccoli, come per
+esempio una coppia di semafori. Tutti questi sistemi hanno però la medesima
+caratteristica, ovvero assumono in ogni \textbf{istante di tempo} un determinato
+\textbf{stato} definito dalle \textbf{variabili} del sistema stesso. Si hanno
+quindi nel sistema, in ogni istante di tempo:
+\begin{itemize}
+  \item uno \textbf{stato}, univocamente definito dai valori delle variabili
+  \item una \textbf{transizione} che segnala un passaggio da uno stato ad un
+  altro
+  \item una \textbf{computazione} che rappresenta una sequenza di stati di cui
+  ogni coppia forma una transizione. Si introduce quindi il concetto
+  \textbf{temporale} 
+\end{itemize}
+Il \textbf{tempo} viene pensato come un oggetto discreto, cadenzato dalle
+transizioni, su cui può essere definita anche una relazione d'ordine (potrebbe
+servire che un processo termini prima, dopo o nello stesso tempo di un altro).
+\begin{definizione}
+  Si definisce \textbf{sistema reattivo} una componente:
+  \begin{itemize}
+    \item non terminante e interattivo
+    \item che può leggere il proprio input non solo all'inizio della
+    computazione e che può produrre output non solo alla fine della sua
+    computazione (si possono quindi avere multipli input e multipli output)
+    \item che interagisce con altri componenti distribuiti o concorrenti
+  \end{itemize}
+  Sono quindi:
+  \begin{itemize}
+    \item sistemi concorrenti, distribuiti e asincroni
+    \item Non obbediscono al paradigma input-computazione-output
+    \item non si possono analizzare con gli strumenti della logica di Hoare
+  \end{itemize}
+  avendo come esempi di comportamento:
+  \begin{itemize}
+    \item ``se un messaggio è stato spedito, prima o poi sarà consegnato al
+    destinatario''
+    \item ``La spia d’allarme resta accesa fino a quando il dispositivo viene
+    spento'' 
+    \item ``a partire da qualsiasi stato è possibile riportare il sistema allo
+    stato iniziale''
+  \end{itemize}
+\end{definizione}
+Bisogna stabilire la correttezza di un sistema reattivo esprimendo il criterio
+di correttezza come formula di un opportuno linguaggio logico. Il sistema
+reattivo si modella tramite un sistema di transizioni, tramite i \textbf{modelli
+di Kripke}, e valutiamo se la formula è vera nel sistema di transizioni, tramite
+logiche temporali e algoritmi specifici.\\
+Si hanno sistemi non terminanti che usano un numero \textbf{finito} di
+variabili e di conseguenza si ha un numero di stati, in cui transita il sistema,
+\textbf{finito}. Si hanno infatti sistemi di transizione finiti che
+\textit{``comprimono''} sistemi non terminanti, con computazioni di lunghezza
+infinita, in una rappresentazione finita.
+Si ricorda che si possono inoltre categorizzare le proprietà che vogliamo
+specificare come: 
+\begin{itemize}
+  \item \textbf{proprietà di safety}
+  \item \textbf{proprietà di liveness}
+  \item \textbf{proprietà di fairness}
+\end{itemize}
+Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
+\begin{definizione}
+  Definiamo un \textbf{sistema di transizioni} $A$ come:
+  \[A=(Q,T)\]
+  con:
+  \begin{itemize}
+    \item $Q$ come insieme di stati (potrebbe essere infinito ma studieremo i
+    casi finiti)
+    \item $T\subseteq Q\times Q$ insieme delle transizioni di stato che portano
+    da uno stato ad un altro
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{cammino} come:
+  \[\pi=q_0q_1q_2\ldots,\,\,\,q_i\in T,\,\,\, \forall\,i\]
+  Un cammino può essere infinito.\\
+  Definiamo \textbf{cammino massimale} un cammino che non può più essere esteso
+  (generalmente studieremo casi dove i cammini massimali sono infiniti).
+\end{definizione}
+\begin{definizione}
+  Definiamo un \textbf{modello di Kripke} $A$ come un sistema di transazioni a
+  cui ad ogni stato è associato, dato l'insieme delle proposizioni atomiche
+  $AP=\{z_1,z_2,\ldots z_n\}$, un insieme  di
+  proposizioni atomiche che sono vere in quello stato:
+  \[A=(Q,T,I)\]
+  avendo una \textbf{funzione di interpretazione} $I$, che mi restituisce
+  l'insieme delle proposizioni atomiche vere in uno stato, tale che:
+  \[I:Q\to 2^{AP}\]
+  Potrei avere stati dove nessuna proposizione atomica è vera avendo il
+  sottoinsieme associato vuoto.\\
+  NOn si specifica di base uno stato iniziale ma si può arricchire la
+  definizione con uno stato iniziale.
+\end{definizione}
+\begin{esempio}
+  Vediamo un esempio:
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=2.5cm,bend angle=45,auto]
+      \node [place] (p0) [label=below left:q] {1};
+      \node [place] (p1) [right of = p0, label=below left:q] {2};
+      \node [place] (p2) [right of = p1, label=below left:p] {5};
+      \node [place] (p3) [below of = p0, label=below left:{p,r}] {4}; 
+      \node [place] (p4) [below of = p1, label=below left:{p,q}] {3}; 
+      \node [place] (p5) [below of = p2, label=below left:{p,r}] {6}; 
+      \path[-{Latex[width=2mm]}]
+      (p0) edge (p1)
+      (p1) edge (p2)
+      (p1) edge (p4)
+      (p4) edge (p3)
+      (p3) edge (p0)
+      (p2) edge [bend left= 25](p5)
+      (p5) edge [bend left= 25](p2)
+      ;
+    \end{tikzpicture}
+  \end{figure}
+  Dove:
+  \begin{itemize}
+    \item $AP=\{p, q, r\}$, insieme delle proposizioni atomiche
+    \item $Q=\{1,2,3,4,5,6\}$, insieme degli stati
+    \item $T=\{(1,2),(2,3),(2,5),(5,6),(6,5),\cdots\}$, insieme delle
+    transizioni 
+    \item $I(4) =\{p, r\}$, $I(2) =\{q\}$ etc$\ldots$, gli altri sono indicati
+    in basso a sinistra di ogni stato
+    \item $1,2,5$ è un cammino non massimale
+    \item $1,2,5,6,\overline{5,6}$ è un cammino massimale (qui indico con la
+    linea sopra gli stati in cui poi si continua a ciclare)
+    \item $1,2,3,4,\overline{1,2,3,4}$ è un cammino massimale
+    \item $1,2,3,4,1,2,5,6\overline{5,6}$ è un cammino massimale
+  \end{itemize}
+\end{esempio}
+Si può quindi già intuire che:
+\begin{center}
+  \textit{le logiche temporali sono frammenti della logica del primo ordine}
+\end{center}
+Infatti con le logiche temporali, come la \textit{logica PLTL}, si supera il
+limite di rappresentazione temporale della logica proposizionale, permettendo,
+per esempio, di rappresentare proposizioni del tipo \textit{``prima o poi'',
+  ``accade sempre che'' etc$\ldots$}.\\
+Si ha un \textbf{tempo lineare e discreto}, che si può pensare di rappresentare
+nella logica classica proposizionale (per esempio come indice) ma questo
+comporta il doversi dotare di infinite variabili proposizionali (corrispondenti
+ad ogni \textit{``step''} temporale) e comporta l'ottenimento di una formula
+proposizionale di lunghezza infinita. Si può pensare di passare allo studio di
+questi casi con la \textit{logica predicativa} ma sarebbe ben più del
+necessario, in quanto le procedure sarebbero di complessità molto elevata, a
+causa della grande espressività della logica predicativa. Inoltre la logica dei
+predicati è indecidibile. \\
+Si cerca quindi la via di mezzo cercando logiche specializzate, meno espressive
+della logica predicativa ma decidibili rispetto ai problemi presi in
+considerazione. Si cerca una logica con procedure efficienti rispetto
+all'ampiezza della descrizione del problema in analisi (ovvero tipicamente
+l'ampiezza del sistema di transizioni), che è direttamente proporzionale al
+numero di stati del sistema (lineare rispetto al numero degli stati), e rispetto
+alla lunghezza della formula che esprime la proprietà da testare.
+
+\subsection{Sintassi}
+Vediamo innanzitutto la \textbf{sintassi} della logica PLTL che chiamiamo anche
+LTL.\\
+Si ha a che fare con un \textit{vocabolario} più ampio rispetto a quelli della
+logica proposizionale, vengono infatti aggiunti dei \textbf{connettivi} utili
+alla rappresentazione temporale richiesta.
+\begin{definizione}
+  Nella logica PLTL, oltre ai connettivi logici classici della logica
+  proporzionale, si definiscono i seguenti connettivi:
+  \begin{itemize}
+    \item \textbf{X}, detto anche \textbf{next} o \textbf{tomorrow}. È un
+    connettivo unario e viene rappresentato con $\circ$
+    \item \textbf{F}, detto anche \textbf{sometime} o \textbf{future}. È un
+    connettivo unario e viene rappresentato con $\diamond$
+    \item \textbf{G}, detto anche \textbf{globally} o \textbf{always}. È un
+    connettivo unario e viene rappresentato con $\square$
+    \item \textbf{U}, detto anche \textbf{until}. È un connettivo binario
+  \end{itemize}
+  Viene inoltre indicato con $V$ l'\textbf{insieme delle variabili
+    proposizionali}, l'\textbf{insieme delle proposizioni atomiche},
+  variabili che hanno lo stesso significato della logica
+  proposizionale, quindi ogni variabile corrisponde ad una singola proposizione
+  del linguaggio naturale. 
+\end{definizione}
+\textbf{Qui chiamo $V$ quello che prima chiamavo $AP$ per non dover riscrivere
+  tutti gli appunti tratti da metodi formali.\\}
+\begin{definizione}
+  Diamo ora una definizione, formale, procedendo per induzione di
+  \textbf{formula ben formata} del linguaggio PLTL (definendo così l'aspetto
+  sintattico della logica PLTL): 
+  \begin{itemize}
+    \item $\forall p\in V$ vale che $p$ è una formula del linguaggio PLTL,
+    ovvero le variabili proposizionali della logica classica sono formule del
+    linguaggio PLTL. Questa è una \emph{formula atomica}
+    \item i simboli $\top$ (detto anche \emph{true} che semanticamente
+    semplifica
+    una tautologia) e $\bot$ (detto anche \textit{false} o \emph{bottom} che
+    semanticamente specifica una formula sempre falsa, ovvero una
+    contraddizione) sono formule del linguaggio PLTL. Anche questa è una
+    \emph{formula atomica}
+    \item se $A$ è una formula del linguaggio PLTL allora lo sono anche:
+    \begin{itemize}[label=$\ast$]
+      \item $\neg A$
+      \item $\mathbf{X}A$
+      \item $\mathbf{F}A$
+      \item $\mathbf{G}A$
+    \end{itemize}
+   
+    \item  se $A$ e $B$ sono formule del linguaggio PLTL allora lo sono anche:
+    \begin{itemize}[label=$\ast$]
+      \item $A\to B$
+      \item $A\land B$
+      \item $A\lor B$
+      \item $A\mathbf{U}B$ (anche $\mathbf{U}(A,B)$)
+    \end{itemize}
+    \item nient'altro appartiene all'insieme delle formule del linguaggio PLTL
+  \end{itemize}
+  Quindi si nota come \textbf{l'insieme delle formule PLTL contiene quello delle
+    formule classiche della logica proporzionale}. Si ha quindi che l'insieme
+  delle formule PLTL non è altro che un'estensione di quello delle formule
+  classiche della logica proposizionale.
+\end{definizione}
+Si hanno varianti della logica temporale con anche operatori relativi al passato
+ma non sono utili in merito al model checking.
+\begin{definizione}
+  La sintassi delle formule del linguaggio PLTL possono essere definite usando
+  anche la notazione \textbf{BNF (Backus-Naur Form o Backus Normal Form)},
+  ovvero, $\forall p\in V$:
+  \[A::=p\,|\,\top\,|\,\bot\,|\,(\neg A)\,|\,(A\land A)\,|\,(A\lor A)\,|\,(A\to
+    A)\,|\,(\mathbf{X}A)\,|\,(\mathbf{F}A)\,|\,(\mathbf{G}A)\,|\,(A\mathbf{U}A)
+  \] 
+  Non si è usata quindi una definizione ricorsiva ma viene invece usata una
+  \textbf{grammatica}\\
+  \begin{shaded}
+    La BNF (Backus-Naur Form o Backus Normal Form) è una metasintassi, ovvero un
+    formalismo attraverso cui è possibile descrivere la sintassi di linguaggi
+    formali (il prefisso meta ha proprio a che vedere con la natura circolare di
+    questa definizione). Si tratta di uno strumento molto usato per descrivere
+    in modo preciso e non ambiguo la sintassi dei linguaggi di programmazione,
+    dei protocolli di rete e così via, benché non manchino in letteratura esempi
+    di sue applicazioni a contesti anche non informatici e addirittura non
+    tecnologici. La BNF viene usata nella maggior parte dei testi sulla teoria
+    dei linguaggi di programmazione e in molti testi introduttivi su specifici
+    linguaggi. \\
+    In termini formali, la BNF può essere vista come un formalismo per descrivere
+    grammatiche libere dal contesto.  \\
+    Una specifica BNF è un insieme di regole di derivazione ciascuna espressa
+    nella forma: 
+    \begin{center}
+      \textit{<simbolo> ::= \_espressione\_}
+    \end{center}
+  \end{shaded}
+\end{definizione}
+Il cammino nel modello di Kripke corrisponde ad una esecuzione di un sistema,
+che è una sequenza di stati. 
+\subsection{Semantica}
+\begin{definizione}
+  La \textbf{semantica}, ovvero il significato dei connettivi della logica PLTL,
+  è data usando i cosiddetti \textbf{modelli lineari} (si ricorda l'uso di un
+  tempo lineare).\\
+  Si consideri una struttura algebrica di questo tipo:
+  \[M=\langle S,\,\rho, \,\to, \,\Vdash\rangle\]
+  dove:
+  \begin{itemize}
+    \item $S$ è un \textbf{insieme infinito di stati}, detti anche
+    \textbf{mondi}
+    \item $\rho \in S$ è uno stato del modello detto anche \textbf{root} o
+    \textbf{radice}. In tale stato viene codificato il \textbf{tempo zero}
+    \item $\to$ è una relazione binaria su $S$ detta \textbf{relazione di
+      transizione} la quale introduce un \textbf{ordinamento lineare} sugli
+    elementi di $S$. Si ha quindi che:
+    \[\to\,\subseteq S\times S\]
+    e, $\forall \alpha \in S$, \textbf{esiste ed è unico} $\beta\in S$ tale che
+    vale:
+    \[\alpha\to\beta\]
+    Preso quindi uno stato qualsiasi ho un solo modo per passare ad un altro
+    stato (esiste quindi un ``prima'' e un ``dopo'').\\
+    Inoltre vale che, $\forall \alpha\in S$, $\alpha\not\to \rho$, dove $\rho\in
+    S$ è l'unico elemento di $S$ a godere di questa proprietà (in quanto $\rho$
+    codifica il tempo zero). 
+    \item $\Vdash$ è una relazione binaria, inclusa in $S\times V$, detta
+    \textbf{relazione di soddisfacibilità}. Solitamente con $\alpha\Vdash p$
+    si indica che $(\alpha,p)\in\,\Vdash$ è valido, ovvero che $\alpha$
+    \textbf{soddisfa} $p$, con $\alpha\in S$ e $p\in V$
+  \end{itemize}
+  La struttura $M$ viene detta \textbf{modello per PLTL}.\\
+  Si nota come questi modelli lineari seguano un ordinamento simile a quello che
+  si ha tra i numeri in $\mathbb{N}$.\\ 
+  Si nota come la semantica della logica PLTL sia drasticamente più complessa
+  di quella della logica classica proposizionale 
+\end{definizione}
+\newpage
+Bisogna dare ora significato ai connettivi PLTL. Per i connettivi della logica
+proposizionale si usano tavole di verità e induzione ma per la logica PLTL le
+cose sono un po' diverse.\\
+Per dare un significato alle formule del linguaggio PLTL bisogna basarsi sui
+modelli per PLTL.\\
+
+\begin{definizione}
+  Siano:
+  \begin{itemize}
+    \item $M=\langle S,\,\rho, \,\to, \,\Vdash\rangle$ un modello per PLTL
+    \item $\alpha\in S$ uno stato
+    \item $A$ una formula del linguaggio PLTL
+  \end{itemize}
+  si ha che la \textbf{soddisfacibilità} di $A$ nello stato $\alpha$ di $M$
+  viene indicata con:
+  \[(M,\alpha)\Vdash A\]
+  e tale soddisfacibilità (o verità) della formula $A$ viene definita per
+  induzione sulla struttura di $A$.\\
+  Diciamo anche che un a formula è vera rispetto ad uno stato $q$ del modello di
+  Kripke se è vera in tutti i cammini massimali $\pi$ che partono da $q$,
+  dicendo che la formula $\alpha$ è soddisfatta in $\pi$, ovvero $\alpha\vDash
+  \pi$.\\
+  Per comodità indichiamo un cammino massimale generico con:
+  \[\pi=q_0q_1\ldots q_n\]
+  e un suffisso di ordine $i$:
+   \[\pi^{(i)}=q_iq_{i+1}\ldots q_j,\mbox{ avendo }\pi=\pi^{(i)}\]
+  Si ha quindi: 
+  \begin{enumerate}
+    \item se $A$ è una variabile proposizionale allora vale $(M,\alpha)\Vdash A$
+    sse $\alpha\Vdash A$ per la relazione $\Vdash$ definita da $M$. Questo è un
+    \textbf{caso base}
+    \item se $A$ è $\top$ allora vale $(M,\alpha)\Vdash\top$, ovvero il true è
+    \textbf{soddisfatto} o \textbf{forzato} ovunque. Il simbolo \emph{true} è
+    vero in ogni stato e in ogni modello (siamo nel concetto di tautologia).
+    Questo è un \textbf{caso base}
+    \item se $A$ è $\bot$ allora vale $(M,\alpha)\nVdash\bot$, ovvero il false
+    non è mai soddisfatto qualsiasi sia lo stato. Questo è un \textbf{caso base}
+    \item se $A$ è $B\land C$ (con $B$ e $C$ formule PLTL) allora vale
+    $(M,\alpha)\Vdash B\land C$ sse $(M,\alpha)\Vdash B$ e $(M,\alpha)\Vdash C$
+    \item se $A$ è $B\lor C$ (con $B$ e $C$ formule PLTL) allora vale
+    $(M,\alpha)\Vdash B\lor C$ sse $(M,\alpha)\Vdash B$ oppure $(M,\alpha)\Vdash
+    C$ 
+    \item se $A$ è $B\to C$ (con $B$ e $C$ formule PLTL) allora vale\\
+    $(M,\alpha)\Vdash B\to C$ sse $(M,\alpha)\nVdash B$ oppure $(M,\alpha)\Vdash
+    C$ 
+    \item se $A$ è $\neg B$ (con $B$ formula PLTL) allora vale
+    $(M,\alpha)\Vdash\neg B$ sse vale $(M,\alpha)\nVdash B$
+    \item se $A$ è del tipo $\mathbf{X}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{X}\,B$ sse vale $(M,\beta)\Vdash B$ (ovvero quando $B$ è soddisfatto
+    nello stato $\beta$ di M), dove $\beta\in S$ è lo stato
+    successivo (nonché unico) ad $\alpha$, ovvero si ha $\alpha\to\beta$
+    \item se $A$ è del tipo $\mathbf{F}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{F}\,B$ sse esiste una sequenza finita
+    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+    0$, tale che $(M,\alpha_n)\Vdash B$ (ovvero sse esiste un punto ``nel
+    futuro'', ovvero $alpha_n$, che però potrebbe anche essere $\alpha_0$, dove
+    la formula $B$ è soddisfatta)
+    \item se $A$ è del tipo $B\,\mathbf{U}\,C$ allora vale $(M,\alpha)\Vdash
+    B\,\mathbf{U}\,C$ sse esiste una sequenza finita
+    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+    0$, tale che $(M,\alpha_n)\Vdash C$ e tale che $(M,\alpha_i)\Vdash
+    B,\,\,\,i=0,1,\ldots,n-1$ (ovvero deve esistere uno stato ``nel futuro'' di
+    $\alpha$ che soddisfa $C$ e ogni stato intermedio a quello che soddisfa $C$
+    deve soddisfare $B$) 
+    \item se $A$ è del tipo $\mathbf{G}\,B$ allora vale $(M,\alpha)\Vdash
+    \mathbf{G}\,B$ sse $(M,\alpha)\Vdash B$ e $(M,\beta)\Vdash \mathbf{G}\,B$
+    dove $\beta\in S$ è lo stato successivo (nonché unico) ad $\alpha$, ovvero
+    si ha $\alpha\to\beta$ (ovvero sse nello stato $\alpha$ è soddisfatto $B$ e
+    nello stato $\beta$ è soddisfatto $\mathbf{G}\,B$). Questa è una definizione
+    ricorsiva (anche se uso $\mathbf{G}\,B$ su uno stato successivo ad
+    $\alpha$)
+  \end{enumerate}
+  I primi 3 punti sono i casi base, quelli successivi sono i passi induttivi.\\
+  I primi 7 punti sono simili a quelli della logica proposizionale, se ci
+  limitiamo ad un solo mondo
+\end{definizione}
+\textbf{Vedere anche esempio su slide.\\}
+\begin{esempio}
+  Graficamente si ha qualcosa del tipo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.263]{img/pltl.png}
+  \end{figure}
+  \textbf{che prosegue infinitamente}. Si nota che in ogni stato si specifica se
+  una variabile proposizionale (che sono infinite) è soddisfatta e, per ciascuna
+  variabile, si definisce una sorta di \textit{tabella di verità}, che
+  specificare la soddisfacibilità di una variabile in un determinato stato
+\end{esempio}
+Si nota che la definizione di \textbf{modello PLTL} non esclude che due stati
+diversi possano soddisfare le stesse variabili, ovvero che si possano comportare
+nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

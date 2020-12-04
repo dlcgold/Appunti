@@ -2827,7 +2827,7 @@ Il \textbf{Model-View-controller (\textit{MVC})} è un pattern architetturale
 molto diffuso nello sviluppo di sistemi software, in particolare nell'ambito
 della programmazione orientata agli oggetti e in applicazioni web, in grado di
 separare la logica di presentazione dei dati dalla logica di business. Partiamo
-analizzando il pattern:
+analizzando il pattern architetturale:
 \begin{figure}[H]
   \centering
   \includegraphics[scale = 1.1]{img/mvc.pdf}
@@ -2838,17 +2838,24 @@ tratteggiate gli eventi. Analizzando meglio le tre componenti si ha che:
   \item \textbf{Model} incapsula lo stato dell'applicazione, risponde alle query
   di stato, espone le funzionalità dell'applicazione e notifica la
   vista delle modifiche. In altri termini fornisce i metodi per
-  accedere ai dati utili dell'applicazione
+  accedere ai dati utili dell'applicazione. È implementato dalle classi che
+  realizzano la logica applicativa, possiamo dire che sia il ``backend''
   \item \textbf{View} renderizza il modello, richiede l'aggiornamento dai
   modelli, invia le operazioni dell'utente al Controller e gli permette di
   selezionare la vista. In altri termini visualizza i dati contenuti nel model
-  e si occupa dell'interazione con utenti e agenti 
+  e si occupa dell'interazione con utenti e agenti. Presenta lo stato del model
+  all'utente, magari con una GUI
   \item \textbf{Controller} definisce il comportamento dell'applicazione, mappa
   le azioni dell'utente ad update del Model, seleziona le viste per le
   risposte. In altri termini riceve i comandi dell'utente (in genere attraverso
-  il View) e li attua modificando lo stato degli altri due componenti. SI ha un
-  Controller per funzionalità
+  il View) e li attua modificando lo stato degli altri due componenti. Si ha un
+  Controller per funzionalità. È un mediatore tra View e Controller
 \end{enumerate}
+La View raccoglie gli input dell'utente e li inoltra al Controller, che li mappa
+in operazioni sul Model, che viene modificato. A questo punto il Controller
+seleziona la nuova View da mostrare all'utente, che a sua volta interagisce per
+avere i dati con il Model. Cambi del model sono notificati alla View per
+eventuali cambiamenti dei dati.
 \begin{esempio}
   Vediamo un esempio pratico semplice per una pagina HTML:
   \begin{itemize}
@@ -3007,39 +3014,61 @@ tratteggiate gli eventi. Analizzando meglio le tre componenti si ha che:
 \end{shaded}
 \newpage
 Torniamo a parlare di MVC.\\
-Dal punto di vista del \textbf{Controller design} si ha:
+Durante la triennale (ad APS) si sono visti i design pattern della \textbf{Gang
+  Of Four (\textit{GOF})} che erano i design pattern relativi al Model.\\
+Dal punto di vista del \textbf{Controller design} si hanno vari design pattern:
 \begin{itemize}
   \item \textbf{Page Controller}, che si occupa di controllare i parametri delle
-  richieste e richiamare la business logic, di selezionare la vista successiva
+  richieste (tipo una \texttt{POST}) e richiamare la business logic sulla base
+  della richiesta, di selezionare la view successiva
   da mostrare e di preparare i dati per la presentazione. Si ha il seguente
   flusso di controllo:
   \begin{enumerate}
     \item il controllo si sposta dal server Web al Page Controller
     \item il Page Controller estrae i parametri dalla richiesta
     \item il Page Controller utilizza alcuni oggetti di business
-    \item il Page Controller decide la vista successiva
-    \item il Page Controller prepara i dati da mostrare nella vista successiva
-    \item il Page Controller porta il controllo (e i dati) alla vista
+    \item il Page Controller decide la view successiva
+    \item il Page Controller prepara i dati da mostrare nella view successiva
+    \item il Page Controller porta il controllo (e i dati) alla view
   \end{enumerate}
   Dal punto di vista implementativo si possono usare soluzioni con poca logica
   di controllo (ASP; JSP, PHP etc$\ldots$) o con una forte logica di controllo
-  (CGI scritp, servlet etc$\ldots$)
+  (CGI scritp, servlet etc$\ldots$). Con questo pattern si implementa un
+  controller per ciascuna ``pagina'', avendo, per la scalabilità, la crescita
+  finita del controller proporzionale al numero di ``pagine'' necessarie,
+  producendo un numero comunque finito e gestibile di file di codice piccoli.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pc.jpg}
+    \caption{Esempio di page controller, con una semplice implementazione con
+      due controller (uno per la matematica e uno per le stringhe),
+      implementati come servlet. Si nota anche il collegamento diretto tra la
+      view e il model}
+    \label{fig:pc}
+  \end{figure}
   \item \textbf{Front Controller} che definisce un singolo componente che
   gestisce tutte le richieste, eseguendo le operazioni comuni a tutte le
   richieste (come autenticazione, questioni di sicurezza, tracciamento
-  etc$\ldots$) e poi esegue la specifica operazione che è stata richiesta
-  esegue la specifica operazione che è stata richiesta, passando il parametro
-  come parametro. Vediamo quindi l'UML associato:
+  etc$\ldots$) e poi esegue la specifica operazione che è stata richiesta,
+  passando il parametro
+  come parametro. Ogni comando è rappresentato da una classe, con un metodo che
+  esegue il comando (ad esempio \texttt{process}), interagendo con la logica
+  applicativa per svolgere quanto deve.
+  Vediamo quindi l'UML associato:
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.7]{img/mvc2.pdf}
   \end{figure}
-  anche nel caso di un front controller si potrebbero avere più controller.\\
+  anche nel caso di un front controller si potrebbero avere più controller (ma
+  solitamente se ne ha uno solo).\\
+  Cresce la gerarchia di comandi e non l'handler, avendo quindi controllo sulla
+  scalabilità. 
   Nel dettaglio l'\textit{handler}:
   \begin{itemize}
     \item riceve la richiesta dal server 
-    \item esegue operazioni generali/comuni 
-    \item decide l'operazione che deve essere eseguita 
+    \item esegue operazioni generali/comuni a tutti i comandi
+    \item decide l'operazione che deve essere eseguita e alloca l'istanza del
+    comando 
     \item delega l'esecuzione al \textit{concrete command}
   \end{itemize}
   mentre il \textit{concrete command}:
@@ -3050,10 +3079,18 @@ Dal punto di vista del \textbf{Controller design} si ha:
     \item dà il controllo al View
   \end{itemize}
   Il front controller è più complesso del page controller. Inoltre evita la
-  duplicaizone del codice tra i vari Controller, permette una semplice
-  configurazione del server avendo una sola servlet, permette di gestire
-  dinamicamente dinamicamente nuovi comandi e facilita l'estensione del
-  Controller (avendo solo un controller)
+  duplicaizone del codice tra i vari Controller (avendo mediamente un solo front
+  controller e avendo un entry point unico per tutte le richeiste),
+  permette una semplice configurazione del server avendo una sola servlet,
+  permette di gestire dinamicamente dinamicamente nuovi comandi e facilita
+  l'estensione del Controller.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/fc.jpg}
+    \caption{Esempio di front controller, con una semplice implementazione}
+    \label{fig:fc}
+  \end{figure}
+  Si hanno framework dove la gerarchia dei comandi è gestita diversamente
   \item \textbf{Intercepting Filter} che è utile per gestire richieste e
   risposte prima che vengano servite. Viene spesso usato insieme al front
   controller per ``decorare'' richieste e risposte con funzioni aggiuntive, come
@@ -3063,7 +3100,6 @@ Dal punto di vista del \textbf{Controller design} si ha:
     \centering
     \includegraphics[scale = 0.7]{img/mvc3.pdf}
   \end{figure}
-  \newpage
   e il seguente comportamento:
   \begin{figure}[H]
     \centering
@@ -3081,8 +3117,7 @@ Dal punto di vista del \textbf{Controller design} si ha:
     \includegraphics[scale = 0.7]{img/mvc5.pdf}
   \end{figure}
 \end{itemize}
-\newpage
-Passiamo quindi al \textbf{design view}, dove si hanno:
+Passiamo quindi al \textbf{design view}, dove si hanno vari design pattern:
 \begin{itemize}
   \item \textbf{Template View} che genera codice HTML dalle pagine template
   che includono chiamate al modello, avendo:
@@ -3098,22 +3133,38 @@ Passiamo quindi al \textbf{design view}, dove si hanno:
     \centering
     \includegraphics[scale = 0.7]{img/mvc7.pdf}
   \end{figure}
+  Un esempio di implementazione è JSP, dove appunto si recuperano elementi della
+  view dai model. Si usano anche i metodi \textit{helper} del controller per
+  recuperare i dati dal Model, permettendo di preparare dei dati ad hoc per la
+  parte di presentazione, tramite \textit{getter} specifici.
   \item \textbf{Transformation View} che trasforma le entità di dominio in HTML:
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.7]{img/mvc8.pdf}
   \end{figure}
   Dove per il Model tipicamente ogni classe implementa un metodo
-  \texttt{-toXML()} mentre per il \textit{transformer} si ha ripicamente
+  \texttt{.toXML()} mentre per il \textit{transformer} si ha ripicamente
   l'implementazione tramite \textbf{eXtensible Style Language for
     Transformations (\textit{XSLT})}. Si ha quindi che ci si concentra
   sull'entità che deve essere trasformata, piuttosto che sulla pagina di
-  output.\\
-  Purtroppo è difficile includere la logica di implementazione nella vista 
+  output. Si ha una produzione interamente dinamica della pagina da parte del
+  transformer. Si hanno specifiche regole di trasformazioni per passare da XML e
+  XSTL ad HTML, con regole a seconda dei tag.\\
+  Purtroppo è difficile includere la logica di implementazione nella view
   anche se il testing è facile (magari
   controllando il flusso dopo la trasformazione XSLT). È facile da applicare a
   dati in formato XML anche se \textbf{What You See Is What You Get (WYSIWYG)}
-  sarebbe più intuitivo e facile da implementare
+  sarebbe più intuitivo e facile da implementare. Al contrario di template view
+  non vediamo cosa stiamo facendo fino a che non visualizziamo. Template view è
+  usato spesso per costruire solo parti di pagine.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pgtv.jpg}
+    \caption{Esempio di page controller con template view, con una semplice
+      implementazione relativa all'esempio di codice XML e XSLT che si trova
+      sulle slide}  
+    \label{fig:fc}
+  \end{figure}
   \item \textbf{Two-Steps View} dove si ha la generazione della pagina HTML in
   due passaggi:
   \begin{enumerate}
@@ -3135,17 +3186,46 @@ Passiamo quindi al \textbf{design view}, dove si hanno:
     \item una vista template con tag custom, la pagina HTML è quindi la pagina
     logica e i tag custom il render
   \end{itemize}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/pgts.jpg}
+    \caption{Esempio di page controller con two steps, con una semplice
+      implementazione} 
+    \label{fig:fc}
+  \end{figure}
 \end{itemize}
-Si ha \textit{STRUTS2} che è un framework con l'implementazione integrata di più
+Si ha \textit{SPRING} che è un framework con l'implementazione integrata di più
 design pattern:
 \begin{itemize}
-  \item MVC2
+  \item MVC
   \item front controller
   \item intercepting filter
   \item context object
   \item view helper
   \item etc$\ldots$
 \end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/spring.jpg}
+  \caption{Esempio di sequenza di processo con Spring. Si hanno terminologie
+    anche nuove. Sotto il nome di handler si ha il front controller che cattura
+    le richieste. Il controller poi implementa la gestione della richiesta. La
+    ricerca viene intercettata dal dispatcher servlet e viene inoltrata
+    all'handler mapping che seleziona un controller per servire la richiesta che
+    è stata ricevuta. Si passa poi all'handler adapter che invoca la business
+    logic del controller selezionato (che viene da noi implementato). Poi il
+    controller interagisce coi vari servizi del model. Il controller poi sceglie
+    la view da visualizzare in base al risultato delle operazioni. Tale scelta
+    arriva all'adapter che lo inoltra al view resolver che effettivamente prende
+    la view scelta. View se necesario può accedere al modello.} 
+  \label{fig:fc}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/spring2.jpg}
+  \caption{Esempio di implementazione base con Spring} 
+  \label{fig:fc}
+\end{figure}
 Con questo framework si definisce il flusso e non la codifica in
 se. L'implementazione di un'operazione in genere richiede:
 \begin{itemize}
@@ -3153,9 +3233,8 @@ se. L'implementazione di un'operazione in genere richiede:
   \item implementazione dell'azione
   \item definizione del flusso
 \end{itemize}
-Si ha un file \texttt{web.xml} per permettere s STRUTS2 di catturare le
-richieste, indipendentemente dall'applicazione. Questo framework ha anche
-versioni GUI integrabili con editor come Ecplipse.
+Si ha un file \texttt{web.xml} per permettere a SPRING di catturare le
+richieste, indipendentemente dall'applicazione. 
 \end{document}  
 % LocalWords:  Machine Learning waterfall png img slides jpg testing self step
 % LocalWords:  organizing continuous refactoring Scrum scrum product backlog as

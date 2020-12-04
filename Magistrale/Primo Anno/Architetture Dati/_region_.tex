@@ -5490,7 +5490,7 @@ relazionale. Si hanno anche tuple per cui non si sa dire nulla o per le quali
 non si ha certezza su match/mismatch. Lo stesso ragionamento si applica anche a
 modelli non relazionali (dati nei nodi per un modello a grafo, valori dei
 documenti nel documentale etc$\ldots$).\\
-Si hanno varie tecniche:
+Si hanno varie tecniche per la comparazione delle coppie:
 \begin{itemize}
   \item quella \textbf{empirica}, basata sulla distanza di simboli nei valori
   delle tuple
@@ -5498,10 +5498,76 @@ Si hanno varie tecniche:
   frequenze di "distanze" tra coppie di tuple, note come corrispondenti o non
   corrispondenti e dove potrei decidere quelli corrispondenti e quelli non
   corrispondenti nell'universo proiettando tale conoscenza sul campione
-  nell'universo della coppia
-  \item quelle  
-
+  nell'universo della coppia. Si usano soglie per poter discernere match e
+  mismatch 
+  \item quelle \textbf{knowledge based}, dove si decide in base a regole per il
+  match delle tuple
+  \item \textbf{mista}, sia probabilistica che knowledge based 
+  
+  \item le recenti tecniche di \textbf{machine learning}
 \end{itemize}
+Ovviamente grosse tabelle portano, confrontando tutti gli elementi ogni volta, a
+complessità assurde. Si hanno quindi vari step per il record linkage:
+\begin{itemize}
+  \item costruzione dello spazio di ricerca iniziale come prodotto
+  cartesiano di tutti i dataset in input. Tale spazio è immenso. Questa è una
+  fase di preprocessamento e in questa fase si cerca di ottenere un formato
+  unico per tutti i sorgenti, sia dal punto di vista del modello che da quello
+  dei dati (normalizzando i vari valori di uno stesso dominio, ad esempio avendo
+  un solo modo per definire via, senza abbreviazioni, rimuovendo spazi
+  etc$\ldots$) 
+  \item si usano tecniche di blocking per ridurre lo spazio di ricerca,
+  ottenendo uno spazio di ricerca ridotto. Si hanno varie tecniche di blocking
+  in letteratura e vari algoritmi. Tra tutti si ha il \textit{sorted neighbour}
+  dove si prende un attributo e cerco di ordinare la tabella sugli insiemi degli
+  attributi in modo tale che i gruppi degli attributi che confronto siano vicini
+  tra loro, tutti con tutti (esempio ordino per cognome in modo da mettere
+  insieme record con cognomi vicini per vedere magari errori, ovviamente
+  funziona entro certi limiti). Ci si muove tra gli elementi tramite sliding
+  window per specificare meglio i controlli, riducendo i confronti (senza la
+  finestra ho $n^2$ confronti, con $n$ righe, con la finestra di lunghezza $m$
+  righe ho $m^2\frac{n}{m}$, quindi $m\cdot n$ confronti, avendo $m\ll
+  n$). Questa fase è facilmente distribuibile, facendo finestre di controllo in
+  parallelo i più nodi
+  \item sullo spazio ridotto si usa un metodo di comparazione, a cui è associato
+  un metodo di decisione, per definire i match, i mismatch e quelli di cui non
+  si ha certezza, che chiamiamo possible match (non sempre si hanno, dipende
+  dalle soglie usate, una soglia di certo non permette di creare i possible
+  match due invece si, nel mezzo tra le due si hanno i possible match). Si hanno
+  metodi probabilistici, metodi non supervisionati come il clustering e anche
+  supervisionati come: 
+  \begin{itemize}
+    \item svm
+    \item logistic
+    \item random forest
+    \item boosting gradient
+  \end{itemize}
+  Confrontando quindi le varie coppie di dati
+\end{itemize}
+Questo è lo schema di base diciamo e in ogni fase si ha un processo di quality
+assesment.\\ 
+Il primo problema è che i dataset potrebbero essere di formato diverso,
+relazionale o meno, e quindi, come i data integration, si cerca di trasformare
+un modello nell'altro. Potrei dover unire in un unico formato anche immagini e
+mappi, oltre a documenti json o csv etc$\ldots$ \\
+\textbf{Esempio del processo su slide.}\\
+Approfondiamo quindi l'uso di tecniche \textbf{probabilistiche} per la fase di
+comparazione, avendo un \textbf{probabilistic record linkage}, dove comunque le
+prime fasi restano normali.\\
+Quindi si cerca la probabilità di match tra le coppie usando dei vettori di
+attributi:
+\[P_{match}=\sum_{score\in A}w\cdot score\]
+Avendo:
+\begin{itemize}
+  \item $w$ pesi tra 0 e 1, avendo peso maggiore per feature meglio predittibili
+  \item $A$ vettore degli attributo ciascuno con un punteggio $score$
+\end{itemize}
+Se il punteggio così pesato supera una soglia ottengo un match.\\
+Si hanno anche meccanismi basate su regole (avendo magari che lo score di un
+attributo deve essere maggiore di una soglia e quello di un altro di un'altra
+soglia). Sebbene la formulazione di regole sia difficile, è possibile applicare
+regole specifiche del dominio rendendo pià specifico l'approccio.\\
+La soluzione proposta da 
 \end{document}
 
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
@@ -5559,4 +5625,4 @@ Si hanno varie tecniche:
 % LocalWords:  intensionale processamento colonnare denormalizzare enrichment
 % LocalWords:  inaccuratezza
 
-\message{ !name(archid.tex) !offset(-5562) }
+\message{ !name(archid.tex) !offset(-5628) }

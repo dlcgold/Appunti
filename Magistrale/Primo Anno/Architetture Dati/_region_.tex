@@ -5566,8 +5566,319 @@ Se il punteggio così pesato supera una soglia ottengo un match.\\
 Si hanno anche meccanismi basate su regole (avendo magari che lo score di un
 attributo deve essere maggiore di una soglia e quello di un altro di un'altra
 soglia). Sebbene la formulazione di regole sia difficile, è possibile applicare
-regole specifiche del dominio rendendo pià specifico l'approccio.\\
-La soluzione proposta da 
+regole specifiche del dominio rendendo più specifico l'approccio.\\
+La soluzione proposta da \textbf{Fellegi Sunter}, quella probabilistica, è
+ottimale quando gli attributi di confronto erano condizionatamente
+indipendenti, permettendo comunque di avere un'area di ambiguità.\\
+Bisogna quindi per ogni coppia definire una funzione di distanza, imponendo un
+insieme finito di attributi da usare per valutare tale distanza, potrebbero
+esserci attributi non rilevanti. Un modo ``ottimale'' è scegliere attributi
+dello stesso significato e con la maggior accuratezza possibile per evitare
+errori. Si hanno anche attributi discriminatori per i quali i domini contengono
+un alto numero possibile di valori (ad esempio la lista di nomi, anche
+se in questo caso la distribuzione è eccessiva, o dei cognomi, già più
+significativa). Meno attributi si prendono in considerazione più rischio falsi
+positivi, aumentando i matching, anche se aumento le prestazioni. Scegliere
+troppi attributi può portare a falsi negativi, avendo tantissimi mismatch. È
+quindi un discorso che va approfondito di caso in caso.\\
+L'algoritmo di Fellegi Sunter, per la fase decisionale, suggerisce di
+campionare la frequenza di match e non match, prendendo una coppia che si sa
+già che matcha e valutando per ogni distanza la frequenza di match/mismatch
+(???). Per ogni distanza avrò alla fine associata una percentuale di match. Si
+fa un ragionamento in stile SVM anche se senza iperpiani ma con un separatore
+più complesso.\\
+\textbf{Esempio su slide.}\\
+All'aumentare della distanza ovviamente aumentano i match. Alla fine del
+ragionamento posso produrre le soglie (o la soglia) da usare per lo studio
+dell'intero dataset.\\
+Si rischiano comunque falsi positivi e falsi negativi che possono essere ridotti
+aumentando i possible match, allargando le soglie.\\
+Il record linkage, nel calcolo della distanza, è comunque molto legato al
+dominio.\\
+Approfondiamo ora le tecniche di comparazione basate sul machine learning. Si
+hanno approcci supervisionati, SVM, random forest, conditional random fields
+(nel caso di formati non relazionali) etc$\ldots$ \\
+Ci sono anche tecniche non supervisionate, tramite clustering, con l'idea di
+usare K-means per raggruppare elementi simili. Posso fare anche clustering
+gerarchici p usando la expectation maximization. Si hanno anche tecniche di
+apprendimento attivo come il commitee of classifiers.\\
+Matchare testi descrittivi lunghi è difficile ma con tecniche di distanza non
+euclidea e di embedding, in un contesto comunque di machine learning, si riesce
+ad ottenere dei risultati.\\ 
+In generale comunque il record linkage deve essere veloce, anche a discapito di
+un minimo di qualità.\\
+Bisogna quindi valutare la qualità in termini di:
+\begin{itemize}
+  \item true positive, TP
+  \item true negatives, TN
+  \item false positive, FP
+  \item false negative, FN
+\end{itemize}
+avendo:
+\[recall=\frac{TP}{TP+FN}\]
+\[precision=\frac{TP}{TP+FP}\]
+Avendo un'elevata conoscenza di dominio posso usare tali conoscenze per la
+comparazione e la cosa è difficilmente generalizzabile.
+\subsection{Data fusion}
+Passiamo quindi alla fusione dei record che rappresentano lo steso oggetto nel
+mondo reale.\\
+Bisogna gestire i conflitti. Si hanno varie tecniche \textit{(traduzione a
+  spanne da slide, il prof non ha detto quasi nulla}):
+\begin{itemize}
+  \item \textbf{ignorare il conflitto}, non è una buona soluzione. Queste
+  strategie non consentono di prendere la decisione in base a ciò che è in
+  conflitto con i dati e a volte non vengono rilevati i conflitti di
+  dati. Esempio di strategia di ignoramento è \textbf{Pass It On}, che presenta
+  tutti i valori e quindi rimuove il conflitto con la soluzione all'utente 
+  \item \textbf{evitare il conflitto}, con strategie basate su istanze e
+  metadati, scegliendo di prendere istanze senza conflitti, prendendo silo
+  valori consistenti senza dire niente degli altri. Queste strategie
+  riconoscono l'esistenza di possibili conflitti generali, ma non rilevano e
+  risolvono i singoli conflitti esistenti. Invece, gestiscono dati in conflitto
+  applicando una decisione unica allo stesso modo a tutti i dati, ad esempio
+  preferendo un dato da una fonte speciale con la strategia \textbf{Trust your
+    friend} 
+  \item \textbf{risolvere il conflitto}, prendendo una sorgente più sicura e
+  facendo una scelta a caso su vari aspetti, non arrivo ad una soluzione ottima
+  (???). Queste strategie considerano i dati e i metadati prima di risolvere il
+  conflitto. Si hanno due strategie:
+  \begin{enumerate}
+    \item decidere quando scegliere un valore tra tutti i valori già presenti
+    (ad esempio il dato più recente vedendo i log)
+    \item strategie di mediazione, quando scelgono un valore che non
+    necessariamente esiste tra i valori inconsistenti
+  \end{enumerate}
+\end{itemize}
+La scelta di fusione deve essere comunicata a chi poi usa i dati altrimenti si
+rischiano molti problemi (magari si è scelto di scegliere lo stipendio minimo in
+caso di inconsistenza e un addetto della contabilità deve saperlo).
+È il tema della \textbf{provenance dei dati}, il tenere traccia delle decisioni
+prese. Con al data fusion si ottiene potenzialmente qualcosa con pochi NULL.\\
+\textbf{Su slide esempio con intero caso di studio.}\\
+Alcune note con conclusive.\\
+La \textbf{data preparation} è un buon modo per ottenere ottimi risultati,
+tramite normalizzazione di dati e schemi e \textit{imputation}. Si rendono più
+facili i riscontri tramite distanze sintattiche. Nel data normalizazion si cerca
+di:
+\begin{itemize}
+  \item convertire tutto in lowercase e rimuovere gli spazi
+  \item usare uno spell checker per rimuovere typo conosciuti
+  \item espandere abbreviazione
+  \item convertire nickname
+  \item fare lookup lessicali
+  \item applicare tecniche di stemming, tokenizzazione lemmatizzazione delle
+  parole (bho ???)
+\end{itemize}
+Per lo schema normalizazion si ha il tentativo di:
+\begin{itemize}
+  \item matchare nomi di attributi che specificano la stessa cosa
+  \item spezzare attributi dove necessario
+  \item gestire valori nulli
+  \item rappresentare i dati in modo strutturato
+\end{itemize}
+Si ha poi l'imputation, la fase di decisione, dove si cerca di:
+\begin{itemize}
+  \item capire come gestire/comparare i NULL
+  \item capire come gestire/comparare, in modelli non relazionali, l'assenza di
+  valori, magari mettendo nei none o valori medi con una certa distribuzione, a
+  seconda del caso
+\end{itemize}
+Queste scelte impattano molto sul record linkage.\\
+\textbf{Su elearning slide del seminario Accenture}.
+\chapter{Big data}
+Si studia ora la tematica dei \textbf{big data} ovvero come definire piattaforme
+per la gestione di un grosso volume di dati.\\
+Non si ha una definizione formale di big data ma nel 2012 Gartner disse:
+\begin{itemize}
+  \item \textit{Big data is high volume, high velocity, and/or high variety
+    information assets} 
+\end{itemize}
+Anche se si resta molto nel generico. Si identificano comunque le prime
+\textbf{tre ``V'' dei big data}:
+\begin{itemize}
+  \item \textbf{volume}, parlando di \textit{data at rest}
+  \item \textbf{variety}, parlando di \textit{data in many form}
+  \item \textbf{velocity}, parlando di \textit{data in motion}
+\end{itemize}
+Successivamente si è anche aggiunta la \textbf{quarta ``V'' dei big data}:
+\begin{itemize}
+  \item \textbf{veracity}, parlando di \textit{data in doubt}
+\end{itemize}
+indicando che non si ha effettiva fiducia nei dati prodotti. Si hanno poi altre
+due ``V'' (spesso legate al concetto di \textbf{open data}, al come si usano i
+dati): 
+\begin{itemize}
+  \item \textbf{visibility}, parlando di \textit{data in the open}
+  \item \textbf{value}, parlando di \textit{data of many value}
+\end{itemize}
+Analizzare i dati su singola macchina è lento, costoso e difficile. La prima
+idea è quindi quella di distribuire i dati, distribuendo il loro storage ma
+anche il calcolo, in sistemi paralleli. Bisogna quindi studiare
+sincronizzazione, deadlock, bandwith, coordinazione, fallimenti etc$\ldots$,
+tipici dei sistemi paralleli. Negli ultimi anni, prima grazie ai grossi player e
+poi grazie alle soluzioni cloud, si hanno ottime soluzioni dal punto di vista
+del parallelismo soluzioni complesse ``sotto la scocca'' ma semplici da usare ad
+alto livello.\\ 
+L'elemento fondamentale è quindi il passaggio da solo storage all'aggiunta
+dell'elaborazione di grandi quantità di dati, possibilmente con scalabilità
+lineare (all'aumentare dei nodi scalo linearmente). Le elaborazioni vengono
+quindi spostate dove sono i dati e non viceversa infatti normalmente ci si
+connetteva al db, si effettuava la query, si scaricavano in locale i risultati e
+si elaboravano. Ma questo non è efficiente con grandi quantità di dati (anche
+nell'ordine di terabyte) quindi conviene spostare l'elaborazione (che pesa molto
+meno in termini di codice sorgente). Ovviamente bisogna approfondire il tema
+della gestione dei fallimenti (i nodi possono cadere), soprattutto girando su
+hardware economico (commodity). Si hanno anche problemi di estensibilità che
+devono essere gestiti.\\
+I dati ormai sono il ``nuovo petrolio'' in qaunto bisogna \textit{trovarli},
+\textit{estrarli}, \textit{rifinirli}, \textit{distribuirli} e usarli per
+guidare l'economia.\\
+Si hanno:
+\begin{itemize}
+  \item \textbf{grandi giacimenti di dati}, come i social, il web e gli opendata
+  \item \textbf{piccoli giacimenti di dati}, come quelli locali di sensori, IoT,
+  CRM (di piccoli volume)
+\end{itemize}
+Per estrarre i dati si hanno query, app dedicate, wrapper, log, stream
+etc$\ldots$ Si hanno sorgenti nativamente relazionali (come CMR), alcuni
+nativamente non relazionali, alcuni sono fermi altri in movimenti, alcuni da
+sensori etc$\ldots$ comportando varie tecniche di estrazione.\\
+Dal punto di vista dello storage si hanno due soluzioni:
+\begin{itemize}
+  \item \textbf{on-premises} (in casa)
+  \item \textbf{on-cloud}
+\end{itemize}
+La scelta è fondamentale in ottica \textbf{ecosistema digitale}, ovvero un
+insieme di tecnologie che si usano bene insieme. Sceglitore dove mettere i dati
+comporta scelte specifiche sull'ecosistema digitale. Al momento i grandi
+produttori di cloud (Amazon, Microsoft, Google, SAP etc$\ldots$) hanno un
+ecosistema digitale per cui diventa anche difficile scegliere il migliore in
+base ai propri utilizzi. Spesso si hanno comunque accordi commerciali con alcuni
+produttori. Le soluzioni cloud comunque ``vincolano'' ad un certo ecosistema,
+rendendo scomodo lì'uso di tecnologie di altri produttori.\\
+I dati fanno comunque raffinati e puliti, si hanno procedure di estrazione,
+trasformazione e caricamento, studi di privacy, integrazione e analisi dati con
+data mining e analytics. \\
+Si ha anche un problema di trasporto, garantendo interoperabilità per i dati
+grezzi, mentre le piattaforme di big data costruiscono dei \textbf{wallet
+  garden} ovvero dei ``giardini murati'', dove si ha integrazione solo
+all'interno di quel dato ecosistema digitale. Si creano dei lock-in per cambiare
+provider molto importanti (dovendo in caso riscrivere molto codice per
+``trasportare i dati da un giardino all'altro'').\\
+In una architettura di big data si ha quindi, oltre al sistema di storage, anche
+un sistema di analisi dati. I darti vengono caricati, gestiti e messi in un'area
+di staging. I dati vengono quindi processati e poi gestiti dal punto di vista
+della sicurezza, del monitoraggio e della pulizia. Bisogna ovviamente anche
+gestire l'accesso ai dati.
+In generale si ha un hardware fisico, un framework per lo storage etc$\ldots$\\
+Le nuove piattaforme di analisi dati non nascono in ambiente relazionale e i
+risultati di tale analisi, insieme ai dati relazionali, finiscono nel data
+warehouse. Un'alternativa posso usare, se ho solo dati relazionali, un
+datawarehouse. Se si aggiungono dati non relazionali posso anche pensare di
+aggiungere semplicemente un \textbf{data lake}, un'architettura di big data
+analytics che fa analisi anche con machine learning (usando ad esempio R) e poi
+contribuisce a popolare il datawarehouse.\\
+Non sempre avere più fati comunque è la soluzione migliore, in quanto da la
+percezione di avere analisi per forza migliori (ma non sempre è vero).\\
+Il rischio di overfitting comunque è sempre dietro l'angolo, non sempre i dati
+sono la risposta e non sempre l'analisi dati porta a correlazioni sensate
+(spesso da modelli predittivi, basati comunque su dati biased, si passa a
+modelli prescrittivi).
+\section{HDFS}
+Concentriamoci sullo storage di grandi quantità di dati.\\
+I dati devono poter essere distribuiti per essere poi elaborati. Il sistema
+software che permette di memorizzare dati che potenzialmente possono essere di
+qualunque volume, con qualunque tasso di velocità di arrivo e di qualunque tipo
+(per le prime tre ``V'', volume, velocity, variety, avendo \textit{any size, any
+  rate, any type}). La tecnologia più efficace non è nulla che abbiamo già visto
+(pensare ad un NoSQL obbliga ad un certo formato di dato) ma dobbiamo ragionare
+in ottica di file system. Abbiamo quindi file system apposta per dati che
+devono essere distribuiti, tra cui \textbf{Hadoop Distributed File System
+  (\textit{HDFS})}, derivato open di \textbf{Google Distributed File System
+  (\textit{GDFS})}. HDFS è molto performante anche sulle commodity, consente
+replica tra nodi anche con fallimento di nodi, ha un meccanismo nativo per cui
+ogni frammento di dato è replicato su tre nodi diversi e ha un approccio
+\textbf{write once read many} (d'aiuto nella tipica situazione di raccolta dati
+dai social e successiva analisi, sentiment analysis etc$\ldots$). I dati non si
+spostano verso i ``workers'' ma 
+è l'opposto. Prima distribuisco i dati sui vari nodi di elaborazione ed eseguo
+lì i vari task. Questo permette di gestire il ``collo di bottiglia'' dei dischi,
+che hanno accesso lento ma velocità effettiva accettabile, e di gestire meglio
+la RAM.\\
+Si fa quindi \textit{scale out} e non \textit{scale up}, avendo hardware
+economico, si ragiona la gestione di pochi file grandi da elaborare di volta in
+volta e si immagina un approccio di tipo \textit{write once read many}.\\
+L'idea di HDFS consiste nel prendere un file lo si spezza in blocchi da 64MB (o
+multipli, spesso 128MB), ogni pezzo, detto \textit{chunk}, viene distribuito in
+almeno tre 
+nodi. Si ha poi un'architettura master-slave che coordina la distribuzione e
+l'accesso. Si ha il nodo \textbf{namenode} che ha tutte le informazioni
+dell'infrastruttura HDFS (il master) e una serie di \textbf{datanode} (gli
+slave) su macchine poco costose dove si salvano i chunk e che mandano
+periodicamente degli heartbit al namenode (in modo che il namenode percepisca i
+guasti e provveda con nuove repliche). Le richieste si fanno
+al \textbf{namenode} che provvede poi a reindirizzare verso i giusti
+\textbf{datanode}. Il namenode è il single point of failure ma si ha sempre un
+\textbf{secondary namenode} verso il quale periodicamente si fa una transazione
+dei log del namenode. I datanode non dialogano tra loro ma solo con il namenode
+avendo un concetto di \textbf{cluster membership} per permettere al namenode di
+coordinarli.  \\
+Il write once read many contribuisce alla coerenza dei dati (tante richieste e
+poche scritture, assumendo un carico di lavoro di tipo
+\textbf{OnLine Analytical Processing (\textit{OLAP})}) e tramite il 
+namenode si permette al client di accedere direttamente ai giusti datanode coi
+chunk desiderati. \\
+Tipicamente si ha una replica nello stesso rack, una in un rack vicino e una
+terza molto lontano (ulteriori repliche i nodi arbitrari).  \\
+Il namenode ha quindi tutte le informazioni in memoria, l'elenco dei file,
+l'elenco dei blocchi, i soliti attributi/metadati di un file system (nome dei
+file, nome 
+delle directory, owner, dimensione etc$\ldots$ non il tipo, che non è dato
+dall'estensione) e i log.\\ 
+Il namenode quindi coordina i vari elementi e le operazioni tra file. Il
+namenode si occupa anche di curare il ``benessere'' del sistema facendo repliche
+e ribilanciamento, eliminando nodi morti.\\
+I datanode invece ricevono i dati e verificano che siano corretti. Inoltre
+segnalano il loro stato al namenode. La correttezza del dato viene verificata
+tramite checksum, usando CRC32.
+\section{Map reduce}
+Si passa ora all'elaborazione dei dati.\\
+\textbf{Map reduce} è un modello di programmazione/engine, ormai in disuso,
+utile per capire nuove tecnologie. Questo engine permette di scrivere programmi
+che sono realizzati in stile funzionale e eseguiti in parallelo su grandi
+cluster di macchine poco costose. In un programma di map reduce si hanno due
+fasi:
+\begin{itemize}
+  \item \textbf{map}, ovvero una funzione che processa coppie chiave/valore per
+  generare coppie intermedie chiave/valore. Indicando con $k$ key e $v$ value:
+  \[(k,v)\to[(k',v')]\]
+  \item \textbf{reduce}, ovvero una funzione che mergia tutti i valori
+  intermedi associati alla stessa chiave intermedia:
+  \[(k',[v'])\to[(k',v')]\]
+\end{itemize}
+In pratica si prende l'insieme di attività e lo si divide, nella
+\textit{partition}, in vari ``worker'' che 
+producono risultati che poi vengono messi insieme, nella
+\textit{combine}. Ovviamente bisogna studiare ogni step di divisione lavori,
+gestione degli stessi e unione dei risultati:
+\begin{itemize}
+  \item come assegnare lavori alle unità di lavoro
+  \item cosa succede se ci sono più work che workers
+  \item cosa succede se i workers hanno bisogo di condividere risultati
+  parziali
+  \item come aggregare risultati parziali
+  \item come capire che tutti i workers hanno terminato le loro attività
+  \item cosa fare se un workers muore
+\end{itemize}
+L'idea base consiste, nella map, nell'iterare su un gran numero di record,
+possibilmente 
+eseguiti localmente, ed estrarre qualcosa di interessante da ognuno. Si mettono
+poi insieme i risultati ordinando i risultati intermedi. Infine, nella reduce,
+si aggregano i 
+risultati e si genera il file di output. Tra map e reduce su ha una fase su . Il framework si occupa di tutto il
+resto, il developer si occupa solo della componente funzionale (\textbf{esempi
+  su slide}).\\
+
 \end{document}
 
 % LocalWords:  Machine Learning DBMS DataBase System hashmap db workload system
@@ -5625,4 +5936,4 @@ La soluzione proposta da
 % LocalWords:  intensionale processamento colonnare denormalizzare enrichment
 % LocalWords:  inaccuratezza
 
-\message{ !name(archid.tex) !offset(-5628) }
+\message{ !name(archid.tex) !offset(-5939) }

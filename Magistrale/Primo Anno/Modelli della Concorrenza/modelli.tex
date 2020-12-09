@@ -6273,7 +6273,7 @@ Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
   \[I:Q\to 2^{AP}\]
   Potrei avere stati dove nessuna proposizione atomica è vera avendo il
   sottoinsieme associato vuoto.\\
-  NOn si specifica di base uno stato iniziale ma si può arricchire la
+  Non si specifica di base uno stato iniziale ma si può arricchire la
   definizione con uno stato iniziale.
 \end{definizione}
 \begin{esempio}
@@ -6301,7 +6301,8 @@ Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
   Dove:
   \begin{itemize}
     \item $AP=\{p, q, r\}$, insieme delle proposizioni atomiche
-    \item $Q=\{1,2,3,4,5,6\}$, insieme degli stati
+    \item $Q=\{1,2,3,4,5,6\}$, insieme degli stati (fingiamo che $1$ sia lo
+    stato iniziale)
     \item $T=\{(1,2),(2,3),(2,5),(5,6),(6,5),\cdots\}$, insieme delle
     transizioni 
     \item $I(4) =\{p, r\}$, $I(2) =\{q\}$ etc$\ldots$, gli altri sono indicati
@@ -6311,6 +6312,19 @@ Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
     linea sopra gli stati in cui poi si continua a ciclare)
     \item $1,2,3,4,\overline{1,2,3,4}$ è un cammino massimale
     \item $1,2,3,4,1,2,5,6\overline{5,6}$ è un cammino massimale
+  \end{itemize}
+\end{esempio}
+\begin{definizione}
+  Definiamo le famiglie di cammini massimali, indicandole in una notazione tipo
+  regex, ($\,^*$ per indicare una o più ripetizione e $\,^\omega$ per indicare
+  un ciclo infinito), come le ``tipologie'' di cammino che si possono avere.\\
+  (\textit{Il prof non ha davvero dato una definizione})
+\end{definizione}
+\begin{esempio}
+  Nell'esempio sopra si hanno le seguenti famiglie di cammini massimali:
+  \begin{itemize}
+    \item $(1234)^\omega$
+    \item $(1234)^{*}(12)(56)^\omega$
   \end{itemize}
 \end{esempio}
 Si può quindi già intuire che:
@@ -6477,91 +6491,248 @@ Per dare un significato alle formule del linguaggio PLTL bisogna basarsi sui
 modelli per PLTL.\\
 
 \begin{definizione}
-  Siano:
-  \begin{itemize}
-    \item $M=\langle S,\,\rho, \,\to, \,\Vdash\rangle$ un modello per PLTL
-    \item $\alpha\in S$ uno stato
-    \item $A$ una formula del linguaggio PLTL
-  \end{itemize}
-  si ha che la \textbf{soddisfacibilità} di $A$ nello stato $\alpha$ di $M$
-  viene indicata con:
-  \[(M,\alpha)\Vdash A\]
-  e tale soddisfacibilità (o verità) della formula $A$ viene definita per
-  induzione sulla struttura di $A$.\\
+  Vediamo quindi la semantica dei vari operatori.
+  \begin{shaded}
+    Siano:
+    \begin{itemize}
+      \item $M=\langle S,\,\rho, \,\to, \,\Vdash\rangle$ un modello per PLTL
+      \item $\alpha\in S$ uno stato
+      \item $A$ una formula del linguaggio PLTL
+    \end{itemize}
+    si ha che la \textbf{soddisfacibilità} di $A$ nello stato $\alpha$ di $M$
+    viene indicata con:
+    \[(M,\alpha)\Vdash A\]
+    e tale soddisfacibilità (o verità) della formula $A$ viene definita per
+    induzione sulla struttura di $A$.
+  \end{shaded}
   Diciamo anche che un a formula è vera rispetto ad uno stato $q$ del modello di
   Kripke se è vera in tutti i cammini massimali $\pi$ che partono da $q$,
-  dicendo che la formula $\alpha$ è soddisfatta in $\pi$, ovvero $\alpha\vDash
-  \pi$.\\
+  dicendo che la formula $\alpha$ è soddisfatta in $\pi$.\\
   Per comodità indichiamo un cammino massimale generico con:
   \[\pi=q_0q_1\ldots q_n\]
   e un suffisso di ordine $i$:
-   \[\pi^{(i)}=q_iq_{i+1}\ldots q_j,\mbox{ avendo }\pi=\pi^{(i)}\]
-  Si ha quindi: 
+  \[\pi^{(i)}=q_iq_{i+1}\ldots q_j,\mbox{ avendo }\pi=\pi^{(i)}\]
+  La formula è vera rispetto ad uno stato $q$ del modello di Kripke se è vera in
+  tutti i cammini a partire da $q$.\\
+  Si indica con:
+  \[\pi\vDash\alpha\]
+  per indicare che $\alpha$ è vera/valida in $\pi$ (o che $\pi$ soddisfa
+  $\alpha$).\\
+  \begin{shaded}  
+    Si ha normalmente, senza usare Kripke:
+    \begin{enumerate}
+      \item se $A$ è una variabile proposizionale allora vale $(M,\alpha)\Vdash
+      A$       sse $\alpha\Vdash A$ per la relazione $\Vdash$ definita da
+      $M$. Questo è un 
+      \textbf{caso base}
+      \item se $A$ è $\top$ allora vale $(M,\alpha)\Vdash\top$, ovvero il true è
+      \textbf{soddisfatto} o \textbf{forzato} ovunque. Il simbolo \emph{true} è
+      vero in ogni stato e in ogni modello (siamo nel concetto di tautologia).
+      Questo è un \textbf{caso base}.
+      \item se $A$ è $\bot$ allora vale $(M,\alpha)\nVdash\bot$, ovvero il false
+      non è mai soddisfatto qualsiasi sia lo stato. Questo è un \textbf{caso
+        base} 
+      \item se $A$ è $B\land C$ (con $B$ e $C$ formule PLTL) allora vale
+      $(M,\alpha)\Vdash B\land C$ sse $(M,\alpha)\Vdash B$ e $(M,\alpha)\Vdash C$
+      \item se $A$ è $B\lor C$ (con $B$ e $C$ formule PLTL) allora vale
+      $(M,\alpha)\Vdash B\lor C$ sse $(M,\alpha)\Vdash B$ oppure
+      $(M,\alpha)\Vdash 
+      C$ 
+      \item se $A$ è $B\to C$ (con $B$ e $C$ formule PLTL) allora vale\\
+      $(M,\alpha)\Vdash B\to C$ sse $(M,\alpha)\nVdash B$ oppure
+      $(M,\alpha)\Vdash 
+      C$ 
+      \item se $A$ è $\neg B$ (con $B$ formula PLTL) allora vale
+      $(M,\alpha)\Vdash\neg B$ sse vale $(M,\alpha)\nVdash B$
+      \item se $A$ è del tipo $\mathbf{X}\,B$ allora vale $(M,\alpha)\Vdash
+      \mathbf{X}\,B$ sse vale $(M,\beta)\Vdash B$ (ovvero quando $B$ è
+      soddisfatto 
+      nello stato $\beta$ di M), dove $\beta\in S$ è lo stato
+      successivo (nonché unico) ad $\alpha$, ovvero si ha $\alpha\to\beta$
+      \item se $A$ è del tipo $\mathbf{F}\,B$ allora vale $(M,\alpha)\Vdash
+      \mathbf{F}\,B$ sse esiste una sequenza finita
+      $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+      0$, tale che $(M,\alpha_n)\Vdash B$ (ovvero sse esiste un punto ``nel
+      futuro'', ovvero $alpha_n$, che però potrebbe anche essere $\alpha_0$,
+      dove 
+      la formula $B$ è soddisfatta)
+      \item se $A$ è del tipo $B\,\mathbf{U}\,C$ allora vale $(M,\alpha)\Vdash
+      B\,\mathbf{U}\,C$ sse esiste una sequenza finita
+      $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
+      0$, tale che $(M,\alpha_n)\Vdash C$ e tale che $(M,\alpha_i)\Vdash
+      B,\,\,\,i=0,1,\ldots,n-1$ (ovvero deve esistere uno stato ``nel futuro''
+      di 
+      $\alpha$ che soddisfa $C$ e ogni stato intermedio a quello che soddisfa
+      $C$ 
+      deve soddisfare $B$) 
+      \item se $A$ è del tipo $\mathbf{G}\,B$ allora vale $(M,\alpha)\Vdash
+      \mathbf{G}\,B$ sse $(M,\alpha)\Vdash B$ e $(M,\beta)\Vdash \mathbf{G}\,B$
+      dove $\beta\in S$ è lo stato successivo (nonché unico) ad $\alpha$, ovvero
+      si ha $\alpha\to\beta$ (ovvero sse nello stato $\alpha$ è soddisfatto $B$
+      e 
+      nello stato $\beta$ è soddisfatto $\mathbf{G}\,B$). Questa è una
+      definizione 
+      ricorsiva (anche se uso $\mathbf{G}\,B$ su uno stato successivo ad
+      $\alpha$)
+    \end{enumerate}
+    I primi 3 punti sono i casi base, quelli successivi sono i passi
+    induttivi.\\ 
+    I primi 7 punti sono simili a quelli della logica proposizionale, se ci
+    limitiamo ad un solo mondo.
+  \end{shaded}
+  
+  Se pensiamo ai modelli di Kripke si ha, dati $\alpha,\beta$ due formule e $p$
+  una proposizione atomica:
   \begin{enumerate}
-    \item se $A$ è una variabile proposizionale allora vale $(M,\alpha)\Vdash A$
-    sse $\alpha\Vdash A$ per la relazione $\Vdash$ definita da $M$. Questo è un
-    \textbf{caso base}
-    \item se $A$ è $\top$ allora vale $(M,\alpha)\Vdash\top$, ovvero il true è
-    \textbf{soddisfatto} o \textbf{forzato} ovunque. Il simbolo \emph{true} è
-    vero in ogni stato e in ogni modello (siamo nel concetto di tautologia).
-    Questo è un \textbf{caso base}
-    \item se $A$ è $\bot$ allora vale $(M,\alpha)\nVdash\bot$, ovvero il false
-    non è mai soddisfatto qualsiasi sia lo stato. Questo è un \textbf{caso base}
-    \item se $A$ è $B\land C$ (con $B$ e $C$ formule PLTL) allora vale
-    $(M,\alpha)\Vdash B\land C$ sse $(M,\alpha)\Vdash B$ e $(M,\alpha)\Vdash C$
-    \item se $A$ è $B\lor C$ (con $B$ e $C$ formule PLTL) allora vale
-    $(M,\alpha)\Vdash B\lor C$ sse $(M,\alpha)\Vdash B$ oppure $(M,\alpha)\Vdash
-    C$ 
-    \item se $A$ è $B\to C$ (con $B$ e $C$ formule PLTL) allora vale\\
-    $(M,\alpha)\Vdash B\to C$ sse $(M,\alpha)\nVdash B$ oppure $(M,\alpha)\Vdash
-    C$ 
-    \item se $A$ è $\neg B$ (con $B$ formula PLTL) allora vale
-    $(M,\alpha)\Vdash\neg B$ sse vale $(M,\alpha)\nVdash B$
-    \item se $A$ è del tipo $\mathbf{X}\,B$ allora vale $(M,\alpha)\Vdash
-    \mathbf{X}\,B$ sse vale $(M,\beta)\Vdash B$ (ovvero quando $B$ è soddisfatto
-    nello stato $\beta$ di M), dove $\beta\in S$ è lo stato
-    successivo (nonché unico) ad $\alpha$, ovvero si ha $\alpha\to\beta$
-    \item se $A$ è del tipo $\mathbf{F}\,B$ allora vale $(M,\alpha)\Vdash
-    \mathbf{F}\,B$ sse esiste una sequenza finita
-    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
-    0$, tale che $(M,\alpha_n)\Vdash B$ (ovvero sse esiste un punto ``nel
-    futuro'', ovvero $alpha_n$, che però potrebbe anche essere $\alpha_0$, dove
-    la formula $B$ è soddisfatta)
-    \item se $A$ è del tipo $B\,\mathbf{U}\,C$ allora vale $(M,\alpha)\Vdash
-    B\,\mathbf{U}\,C$ sse esiste una sequenza finita
-    $\alpha_0\to\alpha_1\to\ldots\to\alpha_n$, con $\alpha=\alpha_0$ e $n\geq
-    0$, tale che $(M,\alpha_n)\Vdash C$ e tale che $(M,\alpha_i)\Vdash
-    B,\,\,\,i=0,1,\ldots,n-1$ (ovvero deve esistere uno stato ``nel futuro'' di
-    $\alpha$ che soddisfa $C$ e ogni stato intermedio a quello che soddisfa $C$
-    deve soddisfare $B$) 
-    \item se $A$ è del tipo $\mathbf{G}\,B$ allora vale $(M,\alpha)\Vdash
-    \mathbf{G}\,B$ sse $(M,\alpha)\Vdash B$ e $(M,\beta)\Vdash \mathbf{G}\,B$
-    dove $\beta\in S$ è lo stato successivo (nonché unico) ad $\alpha$, ovvero
-    si ha $\alpha\to\beta$ (ovvero sse nello stato $\alpha$ è soddisfatto $B$ e
-    nello stato $\beta$ è soddisfatto $\mathbf{G}\,B$). Questa è una definizione
-    ricorsiva (anche se uso $\mathbf{G}\,B$ su uno stato successivo ad
-    $\alpha$)
+    \item $\pi\vDash p$ sse $p\in I(q_0)$, con $q_0$ stato iniziale scelto
+    \item $\pi\vDash \neg \alpha$  sse $\pi\not\vDash \alpha$
+    \item $\pi\vDash \alpha\lor\beta$ sse $\pi\vDash \alpha$ o $\pi\vDash \beta$
   \end{enumerate}
-  I primi 3 punti sono i casi base, quelli successivi sono i passi induttivi.\\
-  I primi 7 punti sono simili a quelli della logica proposizionale, se ci
-  limitiamo ad un solo mondo
+  Potenzialmente bastano questi due connettivi per definire tutti gli altri per
+  la logica proposizionale. \\
+  Passando agli operatori temporali, con $\alpha\in FBF$ (formule ben formate)
+  si ha:
+  \begin{enumerate}
+    \item $\pi\vDash\mathbf{X}\,\alpha$ sse $\pi^{(1)}\vDash \alpha$ (quindi se
+    nello stato successivo vale $\alpha$)
+    \item $\pi\vDash\mathbf{F}\,\alpha$ sse $\exists
+    i\in\mathbb{N}:\pi^{(i)}\vDash  \alpha$ quindi prima o poi $\alpha$ sarà
+    vera (quindi può anche essere vera nello stato iniziale con $i=0$)
+    \item $\pi\vDash\mathbf{G}\,\alpha$ sse $\forall\, i\in
+    \mathbb{N}:\pi^{(i)}\vDash \alpha$, quindi $\alpha$ deve essere vero in
+    tutti i suffissi di $\pi$ (e quindi anche nello stato iniziale)
+    \item $\pi\vDash\alpha\,\mathbf{U}\,\beta$ sse $\pi^{(i)}\vDash \beta$ (che
+    sarebbe $\pi\vDash\mathbf{F}\,\beta$) \textbf{e} $\forall\,h, 0\leq
+    h<i,\,\,\, \pi^{(h)}\vDash \alpha$ quindi esiste uno stato $i$ dove vale
+    $\beta$ e in tutti gli stati precedenti (escluso $i$) vale $\alpha$. Se
+    $\beta$ è vera in $\pi$ posso dire che l'until è valido, trascurando la
+    parte dopo l'\textit{and} della formula (modificando la definizione possiamo
+    dire che la seconda parte vale solo ``se esistono stati precedenti'').
+  \end{enumerate}
 \end{definizione}
-\textbf{Vedere anche esempio su slide.\\}
-\begin{esempio}
-  Graficamente si ha qualcosa del tipo:
-  \begin{figure}[H]
-    \centering
-    \includegraphics[scale = 0.263]{img/pltl.png}
-  \end{figure}
-  \textbf{che prosegue infinitamente}. Si nota che in ogni stato si specifica se
-  una variabile proposizionale (che sono infinite) è soddisfatta e, per ciascuna
-  variabile, si definisce una sorta di \textit{tabella di verità}, che
-  specificare la soddisfacibilità di una variabile in un determinato stato
-\end{esempio}
+% \textbf{Vedere anche esempio su slide.}\\
+% \begin{esempio}
+%   Graficamente si ha qualcosa del tipo:
+%   \begin{figure}[H]
+%     \centering
+%     \includegraphics[scale = 0.263]{img/pltl.png}
+%   \end{figure}
+%   \textbf{che prosegue infinitamente}. Si nota che in ogni stato si specifica
+%   se 
+%   una variabile proposizionale (che sono infinite) è soddisfatta e, per
+%   ciascuna 
+%   variabile, si definisce una sorta di \textit{tabella di verità}, che
+%   specificare la soddisfacibilità di una variabile in un determinato stato
+% \end{esempio}
 Si nota che la definizione di \textbf{modello PLTL} non esclude che due stati
 diversi possano soddisfare le stesse variabili, ovvero che si possano comportare
 nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
-
+\begin{esempio}
+  Vediamo degli esempi (considerando cammini infiniti):
+  \begin{itemize}
+    \item $\mathbf{FG}\,alpha$ indica che $\alpha$ è invariante da un certo
+    punto in poi
+    \item $\mathbf{GF}\,\alpha$ indica che $\alpha$ è vera in un numero infinito
+    di stati (ma non necessariamente tutti)
+    \item $\mathbf{G}\neq (cs_1\land cs_2)$ è la mutua esclusione, avendo $cs_1$
+    e $cs_2$ per indicare che il processo 1 e 2 sono rispettivamente in sezione
+    critica 
+    \item $\mathbf{G}(req\implies\mathbf{XF}\,ack)$, avendo $req$ richiesta
+    pendente di un server e $ack$ aknowledge, per dire che se si ha una
+    richiesta pendente prima o poi si avrà il messaggio di ack subito dopo la
+    req (non avviene in contemporaneamente ma nello stato dopo)
+    \item $\mathbf{G}(req\implies(req\,\mathbf{U}\,ack))$ per dire che è sempre
+    vero che se si ha una richiesta da un certo punto in poi si dovrà avere un
+    ack, con la req che rimane vera fino al momento prima dell'ack
+    \item $\mathbf{G}(req\implies((req\land \neg ack)\,\mathbf{U}\,(ack\land\neg
+    req)))$ per dire che se ho una richiesta pendente posso avere che resti tale
+    fino all'ack ma quando arriva l'ack la req deve essere ``negativizzata''
+    (non serve il next perché tanto non possono valere nello stesso stato per
+    come è stata scritta la formula)
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+  Presa la rete:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{img/mc.jpg}
+  \end{figure}
+  con al mutua esclusione, avendo:
+  \begin{itemize}
+    \item $rd$ la risorsa disponibile
+    \item $sc1$ e $sc2$ le due sezioni critiche
+    \item $snc1$ e $snc2$ le due sezioni non critiche
+    \item $req1$ e $req2$ le due richieste pendenti di usare la risorsa
+  \end{itemize}
+  avendo il grafo dei casi (ipotizzando per semplicità $1$ come stato iniziale):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mc2.jpg}
+  \end{figure}
+  con:
+  \begin{itemize}
+    \item $1=\{rd,snc1,snc2\}$
+    \item $2=\{rd,req1,snc2\}$
+    \item $3=\{rd,snc1,req2\}$
+    \item $4=\{rd,rew1,req1\}$
+    \item $5=\{sc1, snc2\}$
+    \item $6=\{snc1,sc2\}$
+    \item $7=\{sc1, req 2\}$
+    \item $8=\{req1,sc2\}$
+  \end{itemize}
+  che può essere letto come modello di Kripke, con l'elenco sopra che può
+  essere visto come la funzione di interpretazione dello stesso.\\
+  Studiamo $\mathbf{G}\neq (cs_1\land cs_2)$ e $\mathbf{G}\,(req1\implies
+  \mathbf{F}\,sc1)$ (è sempre vero che se vale $req1$ allora prima o poi la
+  richiesta verrà soddisfatta).\\
+  Per la prima formula possiamo dire che è una \textbf{proprietà di safety},
+  esprimendo che non si può raggiungere uno stato ``pericoloso'', come l'uso
+  contemporaneo della risorsa. La verifico anche solo scorrendo le
+  interpretazioni degli stati e vedendo che non esiste una stato in cui
+  compaiono sia $sc1$ che $sc2$ (questo perché ho il globally e basta quindi
+  vale semplicemente per tutti gli stati). \\
+  Non posso fare lo stesso per la seconda. Ho sempre una globally con quindi
+  una proprietà invariante ma ho all'interno un altro operatore temporale
+  quindi non posso semplicemente scorrere la lista delle interpretazioni degli
+  stati. In ogni caso questa seconda formula non è valida in quando potrei
+  avere $(1)(2,4,8)^\omega$ in cui anche il secondo processo fa richiesta e ci
+  entra. Posso entrare in un loop in cui solamente il processo
+  due prende ogni volta la risorsa quindi la formula non è valida in quel
+  cammino massimale.\\
+  Possiamo comunque trovare cammini in cui vale, come $(1,3,6)^\omega$, in
+  quanto in quei tre stati $req1$ è sempre falsa.
+\end{esempio}
+Introduciamo nuovi operatori temporali:
+\begin{itemize}
+  \item \textbf{weak until}:
+  \[\alpha\,\mathbf{W}\,\beta\equiv \mathbf{G}\,\alpha\lor
+    (\alpha\,\mathbf{U}\,\beta)\]
+  quindi vale se $\alpha$ è sempre vera o se vale l'until classico
+  \item \textbf{release}:
+  \[\alpha\,\mathbf{R}\,\beta\mbox{ sse }\forall\,k\geq 0:(\pi^{(k)}\vDash
+    \beta\lor \exists\, h<k:\pi^{(h)}\vDash \alpha)\]
+  ovvero:
+  \[\alpha\,\mathbf{R}\,\beta\equiv \beta\,\mathbf{W}\,(\alpha\land \beta)\]
+  ovvero vale se $\beta$ è sempre vero o ad un certo punto $\beta$ è vero è
+  diventa vero anche $\alpha$ e dall'istante successivo $\beta$ può diventare
+  falso. Praticamente $\alpha$ libera $\beta$, che negli istanti successivi può
+  essere falsa
+\end{itemize}
+\begin{definizione}
+  Definiamo l'equivalenza tra due formule come:
+  \[\alpha\equiv \beta\iff \forall\,\pi:(\pi\vDash\alpha\leftrightarrow\pi\vDash
+    \beta)\]
+  per ogni cammino $\pi$. Quindi varia il modo per esprimere la stessa cosa.
+\end{definizione}
+\begin{esempio}
+  Vediamo esempi di formule equivalenti:
+  \begin{itemize}
+    \item $\mathbf{F}\,\alpha\equiv\alpha\lor\mathbf{XF}\,\alpha$
+    \item $\mathbf{G}\,\alpha\equiv\alpha\land\mathbf{XG}\,\alpha$
+    \item $\alpha\mathbf{U}\,\beta\equiv\beta\lor(\alpha\land
+    \mathbf{X}\,(\alpha\,\mathbf{U}\,\beta)$ 
+  \end{itemize}
+\end{esempio}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

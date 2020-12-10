@@ -4784,7 +4784,202 @@ quindi calcolare la BWT di un testo a partire dal SA in $O(n)$.
   \[T[S[i]-1]\]
 \end{definizione}
 \textbf{Esempio su slide.}
+\subsection{Ricerca esatta con la BWT}
+Studiamo ora la ricerca esatta di un pattern $P$, di lunghezza $m$, in un testo
+$T$, di lunghezza $n$, di cui si riconosce la BWT. Per fare questo dovremo
+definire alcuni concetti tra cui \textbf{Q-intervallo} e \textbf{backward
+  extension di un Q-intervallo}.\\
+\begin{shaded}
+  Ricordiamo che la BWT $B$ è definita in modo tale che $B[i]$ è il simbolo
+  finale 
+  della $i$-esima rotazione nell'ordinamento lessicografico delle rotazioni del
+  testo $T$. Invece l'array $F$ è definito in modo tale che $F[i]$ è il simbolo
+  iniziale dell'$I$-esima rotazione.\\
+  Ricordiamo anche che l'\textbf{LF-mapping} dice che l'$r$-esimo simbolo
+  $\sigma$ 
+  in $B$ e l'$r$-esimo simbolo $\sigma$ in $F$ sono lo stesso simbolo in $T$.\\
+  Ricordiamo anche che $B$ è definita in modo tale che $B[i]$ è il simbolo che
+  in 
+  $T$ precede l'$i$-esimo suffisso nell'ordinamento lessicografico dei suffissi
+  di 
+  $T$, ovvero il suffisso di indice $S[i]$ (con $S$ suffix array). Si ha quindi
+  che $F$ è definito in  
+  modo tale che $F[i]$ è il simbolo iniziale dell’i-esimo suffisso. Possiamo
+  quindi anche dire che l'\textbf{LF-mapping} dice che l'$r$-esimo simbolo
+  $\sigma$ in $B$ è il simbolo iniziale dell'$r$-esimo suffisso nell'ordinamento
+  lessicografico che inizia con un simbolo $\sigma$. Possiamo quindi in generale
+  dire che dato il simbolo $B[i]$ che precede il simbolo di indice $S[i]$ allora
+  il suffisso:
+  \[B[i], T[S[i],]\]
+  è l'$r$-esimo suffisso che inizia con un simbolo $\sigma=B[i]$ sse in $B[1,i]$
+  esistono esattamente $r$ simboli uguali a $B[i]$.
+\end{shaded}
+Passiamo ora al \textbf{Q-intervallo}.
+\begin{definizione}
+  Data la BWT $B$ di un testo $T$ e una stringa $Q$ definita su
+  $\Sigma\backslash\{\$\}$ diciamo che il \textbf{Q-intervallo} è l'intervallo
+  $[b,e)$ di posizioni che contiene i simboli che precedono i suffissi che
+  condividono $Q$ come prefisso.
+\end{definizione}
+\begin{definizione}
+  Dato il suffix array $S$ di $T$ e una stringa $Q$ definita su
+  $\Sigma\backslash\{\$\}$ diciamo che il \textbf{Q-intervallo} è l'intervallo
+  $[b,e)$ di posizioni che contiene gli indici dei suffissi che condividono $Q$
+  come prefisso.
+\end{definizione}
+Nel dettaglio si ha che $[1,n+1)$ è il \textbf{Q-intervallo} per $Q=\varepsilon$
+relativo ai suffissi che condividono la stringa nulla come prefisso, ovvero
+tutti i prefissi di $T$.\\
+In pratica sono gli intervalli, di indici di righe della tabella dove si hanno
+i prefissi delle rotazioni che terminano in \$, con gli stessi caratteri
+iniziali (se tale prefisso comune è $ac$ diremo \textit{ac-intervallo}). \\
+\textbf{Esempio su slide.}\\
+\begin{definizione}
+  Dato un Q-intervallo $[b,e)$ si ha che:
+  \begin{itemize}
+    \item i valori del suffix array in $[b,e)$ forniscono le occorrenze della
+    stringa $Q$ in $T$
+    \item i simboli della BWT in $[b,e)$ sono simboli che precedono le occorrenza
+    della stringa $Q$ in $T$
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  Dato un Q-intervallo $[b,e)$ si ha che le occorrenze di $Q$ in $T$:
+  \begin{itemize}
+    \item sono in numero $e-b$
+    \item iniziano nelle posizioni $S[b,e-1]$
+    \item sono precedute dai simboli $B[b,e-1]$
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+ Dato un Q-intervallo $[b,e)$ e un simbolo $\sigma$ definiamo la
+ \textbf{backward extension} di $[b,e)$ con $\sigma$ come il:
+ \[\sigma Q\mbox{-}intervallo\]
+\end{definizione}
+In pratica aggiungiamo il carattere (se avevo l'\textit{ac-intervallo} e
+aggiungo $\sigma=g$ cerco il \textit{gac-intervallo}) e ricerco il nuovo
+Q-intervallo (che ovviamente può essere nullo).\\
+\textbf{Esempio su slide.}\\
+Possiamo quindi alala ricerca esatta. Si hanno 3 step:
+\begin{enumerate}
+  \item si fanno $m$ iterazioni di \textit{backward extension} a partire
+  dall'\textit{$\varepsilon$-intervallo} $[1,n+1)$
+  \item all'ultima di queste iterazioni, la $m$-esima, si trova il Q-intervallo
+  $[b,e)$ per $Q=P$
+  \item i valori $S[b,e)$ del suffix array nel $P$-intervallo trovato forniscono
+  le occorrenze di $P$ in $T$
+  \item se $P$ non occorre in $T$ non si arriva a trovare il $P$-intervallo e le
+  iterazioni si fermano prima
+\end{enumerate}
+Più in dettaglio chiamando $i$ il generico indice di iterazione, avendo quindi
+$1\leq i\leq m$ si ha che:
+\begin{enumerate}
+  \item la generica iterazione $i$-esima estende il Q-intervallo per:
+  \[Q=P[i+1,m]\]
+  con il simbolo $P[i]$ e ottiene in risultato il Q-intervallo per $Q=P[i,m]$.\\
+  Nel dettaglio:
+  \begin{itemize}
+    \item la prima iterazione, $i=m$, estende
+    l'\textit{$\varepsilon$-intervallo} $[1,n+1)$ con il simbolo $P[m]$ per
+    ottenere il Q-intervallo per:
+    \[Q=P[m]\]
+    \item l'ultima iterazione, $i=1$, estende il Q-intervallo per:
+    \[Q=P[2,m]\]
+    con il simbolo $P[1]$ per ottenere il Q-intervallo per:
+    \[Q=P[1,m]\]
+    ovvero $P$ stesso
+    \item se $P$ non occorre in $T$ e $P[q,m]$ è il massimo suffisso che occorre
+    in $T$ allora all'iterazione $i=q-1$ la \textbf{backward extension} prodotta
+    è nulla
+  \end{itemize}
+\end{enumerate}
+\textbf{Esempio su slide}.\\
+Il punto diventa quindi trovare, dato un Q-intervallo $[b,e)$ e un simbolo
+$\sigma$, il \textit{$\sigma$Q-intervallo} $[b',e')$, ovvero fare la
+\textbf{backward extension}:
+\begin{enumerate}
+  \item si considerano sulla BWT tutte e sole le $k$ posizioni in $[b,e)$ che
+  contengono il simbolo $\sigma$ e le si chiamino $i_1,i_2,\ldots, i_k$,
+  elencandole in ordine crescente
+  \item i vari simboli $B[i_1],B[i_2],\ldots,B[i_k]$ sono tutti pari a $\sigma $
+  e precedono i $k$ suffissi $S[i_1],S[i_2],\ldots,S[i_k]$, rispettivamente,
+  che condividono $Q$ come prefisso, comune
+  \item i $k$ suffissi che si ottengono concatenando
+  $B[i_1],B[i_2],\ldots,B[i_k]$ al relativo suffisso che precedono
+  condivideranno il prefisso comunque $\sigma Q$
+  \item le $k$ posizioni $j_1,j_2,\ldots j_k$ di tali suffissi, nell'ordinamento
+  lessicografico dei suffissi di $T$, determinano un intervallo continuo di
+  posizioni che sarà proprio il \textit{$\sigma$Q-intervallo} $[b',e')$, con:
+  \[[b',e')=[j_1,j_k+1]\]
+\end{enumerate}
 \section{FM-index}
+\begin{definizione}
+  Dato un testo $T$ di cui si conosce la BWT $B$ si definisce
+  l'\textbf{FM-index} del testo come composto da due funzioni:
+  \begin{enumerate}
+    \item la funzione:
+    \[C:\Sigma\to \mathbb{N}\]
+    dove $C(\sigma)$ è il numero di simboli di $B$ lessicograficamente minori di
+    $\sigma$. Si ha quindi:
+    \begin{itemize}
+      \item $C(\sigma)=0$ per i suffissi che iniziano con caratteri
+      lessicograficamente minori di \$
+      \item $C(\sigma)=1$ per i suffissi che iniziano con caratteri
+      lessicograficamente minori del primo carattere di $\Sigma$ in ordine
+      lessicografico. In pratica solo la sentinella avendo come simbolo minore
+      solamente \$, quindi 1 è è la posizione del suffisso che inizia con \$
+      nell’ordinamento lessicografico 
+    \end{itemize}
+    In generale $C(\sigma)$ fornisce:
+    \begin{itemize}
+      \item il numero di suffissi che iniziano con un simbolo minore di $\sigma$
+      \item la massima
+      posizione nell’ordinamento lessicografico di un suffisso che inizia con il
+      simbolo immediatamente inferiore a $\sigma$    
+    \end{itemize}
+    \item la funzione:
+    \[Occ:\{1,2,3,\ldots,|B|+1\}\times \Sigma\to \mathbb{N}\]
+    avendo che $Occ(i,\sigma)$ è pari al numero di simboli uguali a $\sigma$ in
+    $B[1,i-1]$ 
+  \end{enumerate}
+  Si ha quindi che FM-index è un \textbf{self index} (\textbf{approfondire})
+\end{definizione}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{compute-C-function}{$B$}
+    \State $n\gets |B|$
+    \For {\textit{every} $\sigma\in \Sigma$}
+    \State $C(\sigma)\gets 0$
+    \EndFor
+    \For {$i\gets 1$ \textbf{to} $n$}
+    \State $\sigma\gets B[i]$
+    \For {\textit{every} $\sigma'\in \Sigma$ \textit{with} $\sigma'>\sigma$}
+    \State $C(\sigma')\gets C(\sigma')+1$
+    \EndFor
+    \EndFor
+    \State \textbf{return} $C$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di calcolo di C}
+\end{algorithm}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{compute-Occ-function}{$B$}
+    \State $n\gets |B|$
+    \For {\textit{every} $\sigma\in \Sigma$}
+    \State $Occ(1,\sigma)\gets 0$
+    \EndFor
+    \For {$i\gets 2$ \textbf{to} $n+1$}
+    \State $\sigma\gets B[i-1]$
+    \State $Occ(i,.)\gets Occ(i-1,.)$
+    \State $Occ(i,\sigma)\gets Occ(i,\sigma)+1$
+    \EndFor
+    \State \textbf{return} $Occ$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di calcolo di Occ}
+\end{algorithm}
+\textbf{Esercizi ed esempi su slide}.
 \end{document}
 
 

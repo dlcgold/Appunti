@@ -4785,11 +4785,14 @@ quindi calcolare la BWT di un testo a partire dal SA in $O(n)$.
 \end{definizione}
 \textbf{Esempio su slide.}
 \subsection{Ricerca esatta con la BWT}
+\textbf{Vedremo per ora solo ad alto livello.}\\
 Studiamo ora la ricerca esatta di un pattern $P$, di lunghezza $m$, in un testo
-$T$, di lunghezza $n$, di cui si riconosce la BWT. Per fare questo dovremo
+$T$, di lunghezza $n$, di cui si riconosce la BWT. Più avanti capiremo perché è
+lineare nella lunghezza del pattern. Per fare questo dovremo
 definire alcuni concetti tra cui \textbf{Q-intervallo} e \textbf{backward
   extension di un Q-intervallo}.\\
 \begin{shaded}
+  Definiamo in base alle rotazione.\\
   Ricordiamo che la BWT $B$ è definita in modo tale che $B[i]$ è il simbolo
   finale 
   della $i$-esima rotazione nell'ordinamento lessicografico delle rotazioni del
@@ -4798,7 +4801,8 @@ definire alcuni concetti tra cui \textbf{Q-intervallo} e \textbf{backward
   Ricordiamo anche che l'\textbf{LF-mapping} dice che l'$r$-esimo simbolo
   $\sigma$ 
   in $B$ e l'$r$-esimo simbolo $\sigma$ in $F$ sono lo stesso simbolo in $T$.\\
-  Ricordiamo anche che $B$ è definita in modo tale che $B[i]$ è il simbolo che
+  Definiamo ora in base al suffix array e ai suffissi.\\
+  Ricordiamo che $B$ è definita in modo tale che $B[i]$ è il simbolo che
   in 
   $T$ precede l'$i$-esimo suffisso nell'ordinamento lessicografico dei suffissi
   di 
@@ -4810,17 +4814,21 @@ definire alcuni concetti tra cui \textbf{Q-intervallo} e \textbf{backward
   lessicografico che inizia con un simbolo $\sigma$. Possiamo quindi in generale
   dire che dato il simbolo $B[i]$ che precede il simbolo di indice $S[i]$ allora
   il suffisso:
-  \[B[i], T[S[i],]\]
+  \[B[i]\cdot T[S[i],]\]
+  aggiungo quindi davanti a $T[S[i],]$ il carattere $B[i]$, ricordando che il
+  primo precede il secondo nel testo) e quindi
   è l'$r$-esimo suffisso che inizia con un simbolo $\sigma=B[i]$ sse in $B[1,i]$
   esistono esattamente $r$ simboli uguali a $B[i]$.
 \end{shaded}
-Passiamo ora al \textbf{Q-intervallo}.
+Passiamo ora al \textbf{Q-intervallo}.\\
+Prima lo definiamo rispetto alla BWT.
 \begin{definizione}
   Data la BWT $B$ di un testo $T$ e una stringa $Q$ definita su
   $\Sigma\backslash\{\$\}$ diciamo che il \textbf{Q-intervallo} è l'intervallo
   $[b,e)$ di posizioni che contiene i simboli che precedono i suffissi che
   condividono $Q$ come prefisso.
 \end{definizione}
+Ora lo definiamo rispetto al suffix array.
 \begin{definizione}
   Dato il suffix array $S$ di $T$ e una stringa $Q$ definita su
   $\Sigma\backslash\{\$\}$ diciamo che il \textbf{Q-intervallo} è l'intervallo
@@ -4829,11 +4837,14 @@ Passiamo ora al \textbf{Q-intervallo}.
 \end{definizione}
 Nel dettaglio si ha che $[1,n+1)$ è il \textbf{Q-intervallo} per $Q=\varepsilon$
 relativo ai suffissi che condividono la stringa nulla come prefisso, ovvero
-tutti i prefissi di $T$.\\
+tutti i suffissi di $T$ (l'$n+1$ è perché è aperto a destra, quindi lo faccio
+fermare ad $n$).\\
 In pratica sono gli intervalli, di indici di righe della tabella dove si hanno
 i prefissi delle rotazioni che terminano in \$, con gli stessi caratteri
 iniziali (se tale prefisso comune è $ac$ diremo \textit{ac-intervallo}). \\
-\textbf{Esempio su slide.}\\
+Posso avere Q-intervalli ``uguali'' in termini di indici anche per stringhe $Q$
+diverse.\\
+\textbf{Esempio su slide.}
 \begin{definizione}
   Dato un Q-intervallo $[b,e)$ si ha che:
   \begin{itemize}
@@ -4855,12 +4866,15 @@ iniziali (se tale prefisso comune è $ac$ diremo \textit{ac-intervallo}). \\
  Dato un Q-intervallo $[b,e)$ e un simbolo $\sigma$ definiamo la
  \textbf{backward extension} di $[b,e)$ con $\sigma$ come il:
  \[\sigma Q\mbox{-}intervallo\]
+ cerco quindi il Q-intervallo di $Q=\sigma Q$.\\
+ \textbf{Potremo calcolarla dopo aver parlato di FM-index}.
 \end{definizione}
 In pratica aggiungiamo il carattere (se avevo l'\textit{ac-intervallo} e
 aggiungo $\sigma=g$ cerco il \textit{gac-intervallo}) e ricerco il nuovo
 Q-intervallo (che ovviamente può essere nullo).\\
 \textbf{Esempio su slide.}\\
-Possiamo quindi alala ricerca esatta. Si hanno 3 step:
+Possiamo quindi alala ricerca esatta. Si hanno 3 step (le iterazioni vanno al
+contrario, dalla $m$ alla $1$):
 \begin{enumerate}
   \item si fanno $m$ iterazioni di \textit{backward extension} a partire
   dall'\textit{$\varepsilon$-intervallo} $[1,n+1)$
@@ -4896,7 +4910,7 @@ $1\leq i\leq m$ si ha che:
 \textbf{Esempio su slide}.\\
 Il punto diventa quindi trovare, dato un Q-intervallo $[b,e)$ e un simbolo
 $\sigma$, il \textit{$\sigma$Q-intervallo} $[b',e')$, ovvero fare la
-\textbf{backward extension}:
+\textbf{backward extension}. Si ha quindi il seguente procedimento:
 \begin{enumerate}
   \item si considerano sulla BWT tutte e sole le $k$ posizioni in $[b,e)$ che
   contengono il simbolo $\sigma$ e le si chiamino $i_1,i_2,\ldots, i_k$,
@@ -4913,6 +4927,8 @@ $\sigma$, il \textit{$\sigma$Q-intervallo} $[b',e')$, ovvero fare la
   \[[b',e')=[j_1,j_k+1]\]
 \end{enumerate}
 \section{FM-index}
+L'FM-index ha permesso alla BWT di essere sfruttata nel pattern matching
+permettendo il calcolo dell'LF-mapping.
 \begin{definizione}
   Dato un testo $T$ di cui si conosce la BWT $B$ si definisce
   l'\textbf{FM-index} del testo come composto da due funzioni:
@@ -4920,11 +4936,12 @@ $\sigma$, il \textit{$\sigma$Q-intervallo} $[b',e')$, ovvero fare la
     \item la funzione:
     \[C:\Sigma\to \mathbb{N}\]
     dove $C(\sigma)$ è il numero di simboli di $B$ lessicograficamente minori di
-    $\sigma$. Si ha quindi:
+    $\sigma$. $\Sigma$ comprende anche \$. Si ha quindi:
     \begin{itemize}
-      \item $C(\sigma)=0$ per i suffissi che iniziano con caratteri
+      \item $C(\$)=0$ per i suffissi che iniziano con caratteri
       lessicograficamente minori di \$
-      \item $C(\sigma)=1$ per i suffissi che iniziano con caratteri
+      \item $C(\sigma)=1$ (con $\sigma$ carattere lessicograficamente più
+      piccolo di $\Sigma$ escluso \$)per i suffissi che iniziano con caratteri
       lessicograficamente minori del primo carattere di $\Sigma$ in ordine
       lessicografico. In pratica solo la sentinella avendo come simbolo minore
       solamente \$, quindi 1 è è la posizione del suffisso che inizia con \$
@@ -4940,10 +4957,27 @@ $\sigma$, il \textit{$\sigma$Q-intervallo} $[b',e')$, ovvero fare la
     \item la funzione:
     \[Occ:\{1,2,3,\ldots,|B|+1\}\times \Sigma\to \mathbb{N}\]
     avendo che $Occ(i,\sigma)$ è pari al numero di simboli uguali a $\sigma$ in
-    $B[1,i-1]$ 
+    $B[1,i-1]$. Attenzione al $|B|+1$ nella definizione della funzione, quando
+    la calcolo avrò una ``tabella'' lunga una riga in più di $B$ (larga
+    ovviamente quanto $|\Sigma|$). L'ultima riga
+    della tabella di $Occ$ mi da l' ``istrogramma'' dei conteggi della BWT, con
+    il conteggio di ogni simbolo della BWT
   \end{enumerate}
-  Si ha quindi che FM-index è un \textbf{self index} (\textbf{approfondire})
+  Si ha quindi che FM-index è un \textbf{self index} infatti avendo solo $C$ e
+  $Occ$ senza avere testo e BWT ho ``tutto'', non serve altro. È un indice
+  indipendente. Da $Occ$ infatti posso ricostruire la BWT, infatti per ogni riga
+  della $Occ$ guardo la cella che si è incrementata e quella corrisponde al
+  simbolo che ho in corrispondenza sulla BWT (riga $i$ della $Occ$ corrisponde
+  alla posizione $i-1$ sulla BWT). Dalla BWT poi posso tornare al testo. 
 \end{definizione}
+Concettualmente potrei calcolare $C$ anche su $T$, ottenendo lo stesso risultato
+ma per comodità e per ``consistenza'' anche con $Occ$ la calcoliamo su $B$.\\
+$C$ potenzialmente è inutile rispetto a $Occ$ ma garantisce l'accesso costante
+durante la ricerca esatta quindi la si usa. Posso calcolare $C$ da $Occ$ in
+quanto $Occ(|B|+1,\sigma)$ fornisce il numero di simboli uguali a $\sigma$ in
+$B$ e quindi per ottenere $C(\sigma)$ banalmente sommo i valori delle celle
+nell'ultima riga di $Occ$ fino alla cella prima di quella corrispondente a
+$\sigma$. 
 \begin{algorithm}
   \begin{algorithmic}
     \Function{compute-C-function}{$B$}

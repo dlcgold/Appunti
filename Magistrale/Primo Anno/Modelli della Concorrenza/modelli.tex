@@ -6674,7 +6674,7 @@ nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
     \item $1=\{rd,snc1,snc2\}$
     \item $2=\{rd,req1,snc2\}$
     \item $3=\{rd,snc1,req2\}$
-    \item $4=\{rd,rew1,req1\}$
+    \item $4=\{rd,req1,req2\}$
     \item $5=\{sc1, snc2\}$
     \item $6=\{snc1,sc2\}$
     \item $7=\{sc1, req 2\}$
@@ -6718,21 +6718,251 @@ Introduciamo nuovi operatori temporali:
   falso. Praticamente $\alpha$ libera $\beta$, che negli istanti successivi può
   essere falsa
 \end{itemize}
+\textit{Per tradurre un enunciato in linguaggio naturale in logica temporale per
+  prima cosa, occorre individuare le proposizioni atomiche; in seguito si
+  analizza la struttura della frase, eventualmente riformulandola in una frase
+  equivalente con espressioni corrispondentiagli operatori temporali.}\\
 \begin{definizione}
   Definiamo l'equivalenza tra due formule come:
   \[\alpha\equiv \beta\iff \forall\,\pi:(\pi\vDash\alpha\leftrightarrow\pi\vDash
     \beta)\]
-  per ogni cammino $\pi$. Quindi varia il modo per esprimere la stessa cosa.
+  per ogni cammino $\pi$. Quindi varia il modo per esprimere la stessa cosa, per
+  ogni cammino $\alpha$ è soddisfatta nel cammino sse lo è anche $\beta$ (e
+  avendo il sse vale il viceversa).
 \end{definizione}
 \begin{esempio}
   Vediamo esempi di formule equivalenti:
   \begin{itemize}
-    \item $\mathbf{F}\,\alpha\equiv\alpha\lor\mathbf{XF}\,\alpha$
-    \item $\mathbf{G}\,\alpha\equiv\alpha\land\mathbf{XG}\,\alpha$
+    \item $\mathbf{F}\,\alpha\equiv\alpha\lor\mathbf{XF}\,\alpha$\\
+    infatti prima o poi diventerà vero $\alpha$ equivale a dire che vale nello
+    stato corrente e nello stato prossimo vale che prima o poi sarà vero
+    $\alpha$ 
+    \item $\mathbf{G}\,\alpha\equiv\alpha\land\mathbf{XG}\,\alpha$\\
+    infatti dire che vale sempre $\alpha$ è come dire che ora vale $\alpha$ e
+    che nel prossimo stato vale il globally di $\alpha$
     \item $\alpha\mathbf{U}\,\beta\equiv\beta\lor(\alpha\land
-    \mathbf{X}\,(\alpha\,\mathbf{U}\,\beta)$ 
+    \mathbf{X}\,(\alpha\,\mathbf{U}\,\beta)$ \\
+    ovvero l'until è equivalente a dire che ora vale $\beta$ o che ora vale
+    $\alpha$ ma nello stato successivo varrà l'until
+  \end{itemize}
+  Si evidenzia in tutti e tre i casi la natura ricorsiva delle formule della
+  logica temporale.\\
+  Vediamo infatti altri esempi:
+  \begin{itemize}
+    \item $\mathbf{FGF}\,\alpha\equiv\mathbf{GF}\,\alpha$
+    quindi aggiungere il primo future in \textbf{\textit{FGF}} è inutile
+    \item $\mathbf{GFG}\,\alpha\equiv\mathbf{FG}\,\alpha$
+    quindi aggiungere il primo globally in \textbf{\textit{GFG}} è inutile   
   \end{itemize}
 \end{esempio}
+
+Prendiamo la formula:
+\[\top\,\mathbf{U}\,\alpha\]
+ma per definizione ci basta dire che $\alpha$ prima o poi diventi vera e
+quindi basta:
+\[\top\,\mathbf{U}\,\alpha\equiv F\alpha\]
+\textbf{Il future può sempre essere rappresentato dall'until}.\\
+Vediamo un altra formula:
+\[\neg\mathbf{F}\,(\neg\alpha)\]
+ma questo equivale a dire:
+\[\neg\mathbf{F}\,(\neg\alpha)=\mathbf{G}\,\alpha\]
+Quindi il globally può essere derivato dal future che è derivato dall'until e
+quindi \textbf{anche il globally potrebbe essere rimosso}.\\
+Si può dimostrare che il \textbf{next non è derivabile} e che \textbf{l'until, a
+  sua volta, non è derivabile}. 
+\begin{definizione}
+  Definiamo un \textbf{insieme minale di operatori}. L'insieme
+  $\{\mathbf{X},\mathbf{U}\}$ forma un insieme minimale di operatori, dal quale
+  possiamo derivare tutti gli altri (\textbf{\textit{F,G,W,R}}).\\
+  Potenzialmente potrei quindi usare solo until e next.\\
+  Si hanno anche altri insiemi minimali di operatori volendo (ma in tutti ci
+  sarà l'until essendo l'unico operatore binario, non potendo derivarlo da uno
+  unario). 
+\end{definizione}
+\noindent
+Studiamo ora meglio la negazione di connettivi logici.\\
+Pensiamo a ``non è vero che $\mathbf{F}\,\alpha$''. Possiamo riformularla con
+``Non è vero che in ogni cammino,prima o poi $\alpha$ diventa vera'', cioè
+``esiste un cammino nel quale $\alpha$ è sempre falsa''. D'altro canto
+$\neg\mathbf{F}\,\alpha$ significa ``in ogni cammino non è vero che prima o poi
+$\alpha$ diventa vera'', che equivale a $\mathbf{G}\,(\neg \alpha)$, quindi in
+realtà $\neg\mathbf{F}\,\alpha$ non è la negazione logica di
+$\mathbf{F}\,\alpha$ perché nasconde il concetto di ``per ogni cammino'', con
+quindi il quantificatore $\forall$. Dalla logica predicativa sappiamo che la
+negazione di una formula dove compare un quantificatore equivale a cambiare il
+quantificatore e aggiungere la negazione e quindi la riformulazione giusta
+sarebbe ``esiste un cammino in cui vale $\mathbf{F}\,alpha$'', che non può
+essere rappresentato in logica temporale LTL (\textbf{CONTROLLARE}). Si ha
+quindi un limite 
+espressivo, non può esprimere proprietà del tipo:
+\begin{center}
+  \textbf{\textit{esiste un cammino in cui $\alpha$}}
+\end{center}
+\begin{esempio}
+  Vediamo esempi di proprietà di questo tipo:
+  \begin{itemize}
+    \item ``è sempre possibile ritornare allo stato iniziale''
+    (``è possibile'' si traduce in ``esiste un cammino'')
+    \item ``e il processo $P$ chiede la risorsa, è possibile raggiungere uno
+    stato di deadlock'' 
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+  Si prenda:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/kri.jpg}
+  \end{figure}
+  che è un modello di Kripke che rappresenta le evoluzioni di un programma con
+  due variabili $x$ e $y$. I vari $q_i$ rappresentano i possibili stati.\\
+  Studiamo:
+  \begin{itemize}
+    \item $\mathbf{G}\,(x=0\lor y=0)$
+    \item $\mathbf{GF}\,(y=0)$
+    \item $\mathbf{GF}\,(y=1)$
+    \item $\mathbf{G}\,(x=1\implies \mathbf{F}\,(y=1))$
+  \end{itemize}
+  per farlo bisogna studiare ogni possibile evoluzione a partire da ogni stato
+  (che di volta in volta diventa uno stato iniziale).
+  \begin{itemize}
+    \item per il primo basta osservare i vari stati e osservare che vale
+    l'argomento del globally in ogni stato, quindi qualsiasi sia lo stato
+    iniziale varrà il globally (visto che passo in stati in cui vale sempre
+    l'argomento) e quindi la formula è verificata
+    \item parto dalla formula più interna (dopo aver valutato dove vale
+    l'argomento, ovvero in $q_1$ e $q_2$), ovvero il future, e studiare dove
+    vale. Per proprietà del future vedo che posso partire da $q_1$ e dire che
+    vale (dato che vale anche in $q_1$ stesso), posso partire da $q_2$ per lo
+    stesso ragionamento di $q_1$. Ragiono ora su $q_3$, dove non vale $y=0$, ma
+    da lui parte un solo arco e porta in uno stato dove vale $y=0$ quindi ogni
+    ca,mino che parte da $q_3$ soddisfa $y=0$. Il future vale quindi in ogni
+    stato e di conseguenza anche il globally e quindi la formula è verificata
+    \item ragiono come per il caso 2. Per $q_3$ vale ovviamente il future. Passo
+    a $q_1$ e già qui vedo che potrei avere un cammino massimale con solo $q_1$
+    e $q_2$ e quindi non vale il future. Analogamente si fa lo stesso per $q_2$,
+    che non soddisfa il future. Il globally quindi non vale in $q_1$ e $q_2$,
+    non valendo lì il future. Studiamo ora $q_3$ ma anche qui non vale in quanto
+    potrei, in uno dei cammini da $q_3$ entrare nel loop tra $q_1$ e $q_2$,
+    quindi anche per $q_3$ non vale il globally e quindi la formula non è
+    verificata    
+    \item prendo il cammino che parte da $q_1$ e cicla infinitamente con $q_3$ e
+    $q_2$, in questo cammino la formula è verificata. In ogni cammino in qui da
+    $q_1$ passo a $q_3$ la formula è verificata ma non lo è nel solito loop tra
+    $q_1$ e $q_2$ e quindi la formula non è verificata
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+  Studiamo il modello di Kripke della mutua esclusione:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/mc2.jpg}
+  \end{figure}
+  \noindent
+  con:
+  \begin{itemize}
+    \item $1=\{rd,snc1,snc2\}$
+    \item $2=\{rd,req1,snc2\}$
+    \item $3=\{rd,snc1,req2\}$
+    \item $4=\{rd,req1,req2\}$
+    \item $5=\{sc1, snc2\}$
+    \item $6=\{snc1,sc2\}$
+    \item $7=\{sc1, req 2\}$
+    \item $8=\{req1,sc2\}$
+  \end{itemize}
+  avendo:
+  \begin{itemize}
+    \item $rd$ la risorsa disponibile
+    \item $sc1$ e $sc2$ le due sezioni critiche
+    \item $snc1$ e $snc2$ le due sezioni non critiche
+    \item $req1$ e $req2$ le due richieste pendenti di usare la risorsa
+  \end{itemize}
+  Si richiede:
+  \begin{itemize}
+    \item i due processi non sono mai contemporaneamente nella sezione critica
+    \item se un processo richiede la risorsa, prima o poi entrerà nella sezione
+    critica, escludendo la starvation
+    \item se un solo processo richiede la risorsa, deve poter accedere alla
+    sezione critica
+  \end{itemize}
+  Esprimiamo ciò in logica temporale:
+  \begin{itemize}
+    \item $\mathbf{G}\,\neg(sc1\land sc2)$
+    \item $\mathbf{G}\,(req1\implies \mathbf{F}\,sc1)$
+    \item non è esprimibile in logica temporale in quanto esprime una
+    possibilità 
+  \end{itemize}
+  Studiamo quindi, informalmente i primi due requisiti:
+  \begin{itemize}
+    \item la prima proprietà è verificata non avendo stati dove valgono
+    contemporaneamente i due argomenti
+    \item la seconda non è verificata avendo un cammino massimale
+    $(1)(2,4,8)^\omega$ che impedisce al primo processo di entrare in sezione
+    critica (c'è anche un cammino massimale dove non entra mai il secondo)
+  \end{itemize}
+  Intuitivamente posso ragionare anche sul terzo requisito possiamo dire che è
+  valida in quanto può accedere infinitamente alla risorsa con l'altro che non
+  cerca mai di accederci.\\
+  Per validare anche la seconda formula possiamo ricordarci l'ultimo accesso e
+  in caso di conflitto dare priorità sull'altro accesso. Nel modello di Kripke
+  avremmo: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/mc3.jpg}
+  \end{figure}
+  dove lo stato 4 viene sdoppiato in 4 e 9, che hanno le stesse proposizioni
+  atomiche, $rd,req1,re2$ ma da entrambi ora parte un singolo arco che
+  rispettivamente porta dove l'altro processo è in pending, dandogli poi i
+  privilegi di accesso. Si garantisce comunque la mutua esclusione, si soddisfa
+  la seconda proprietà (garantendo alternanza di accesso).
+\end{esempio}
+\section{Computation tree logic}
+Studiamo ora \textbf{alberi di computazione} derivati da modelli di Kripke.
+\begin{esempio}
+  Prendiamo il modello:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/kri.jpg}
+  \end{figure}
+  Scegliamo come nodo iniziale $q_1$ e costruiamo un albero che rappresenta le
+  possibili computazioni:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{img/mc4.jpg}
+  \end{figure}
+\end{esempio}
+\begin{definizione}
+  Propriamente definiamo \textbf{computazione} un cammino dell'albero a partire
+  dalla radice.
+\end{definizione}
+Passiamo ora alla sintassi delle formule ben formate della \textbf{Computational
+  Tree Logic (\textit{CTL})}.
+\begin{definizione}
+  Si ha che, dato $AP$ insieme delle proposizioni atomiche:
+  \begin{itemize}
+    \item $\forall p\in AP,p\in FBF$
+    \item $\forall\,\alpha,\beta\in FBF$ valgono gli operatori della logica
+    proposizionale 
+  \end{itemize}
+  Aggiungiamo ora i nuovi connettori, \textbf{\textit{A}} e \textit{\textbf{E}},
+  che si associano ai connettivi temporali:
+  \begin{itemize}
+    \item $\mathbf{A}$ indica il ``per ogni cammino''
+    \item $\mathbf{E}$ indica il ``esiste almeno un cammino tale che''
+  \end{itemize}
+  \textbf{Questi operatori possono precedere un solo operatore temporale per
+    volta}.\\
+  Si ha quindi che:
+  \begin{itemize}
+    \item $\mathbf{AX}\,\alpha,\mathbf{EX}\,\alpha\in FBF$
+    \item $\mathbf{AFG}\,\alpha,\mathbf{EF}\,\alpha\in FBF$
+    \item $\mathbf{AX}\,\alpha,\mathbf{EG}\,\alpha\in FBF$
+    \item $\mathbf{A}\,(\alpha\,\mathbf{U}\,\beta),\,\mathbf{E}\,
+    (\alpha\,\mathbf{U}\,\beta)\in FBF$    
+  \end{itemize}
+  Si hanno formule, come $\mathbf{AFG}\,\alpha$ non è una formula CTL. \\
+ \textbf{Si hanno formule LTL che non sono formule CTL, e viceversa}.
+\end{definizione}
+
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

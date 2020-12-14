@@ -5013,7 +5013,153 @@ $\sigma$.
   \end{algorithmic}
   \caption{Algoritmo di calcolo di Occ}
 \end{algorithm}
-\textbf{Esercizi ed esempi su slide}.
+\textbf{Esercizi ed esempi su slide}.\\
+\subsection{Ricerca esatta con FM-index}
+Riprendiamo il concetto di LF-mapping in termini di suffissi e approfondiamolo.
+\begin{definizione}
+  Dato il simbolo $B[i]$ della BWT che precede il suffisso di indice $S[i]$ ho
+  che il suffisso:
+  \[B[i]\cdot T[S[i],n]\]
+  è l'$r$-esimo suffisso che inizia con un simbolo uguale a $B[i]$ sse in
+  $B[1,i]$ esistono esattamente $r$ simboli uguali a $B[i$].\\
+  Quindi la posizione assoluta $j$ del suffisso $B[i]\cdot T[S[i],n]$ è:
+  \[j=p+r\]
+  con $p$ è il numero di suffissi che iniziano con un simbolo inferiore a
+  $B[i]$. \\
+  \textbf{Esempio su slide.}\\
+\end{definizione}
+\begin{definizione}
+  Definiamo la \textbf{LF-function} come la funzione che data una posizione $i$
+  su $B$ restituisce la posizione $j$ nell'ordinamento lessicografico del
+  suffisso $B[i]\cdot T[S[i],n]$, ovvero:
+  \[j=LF(i)=p+r\]
+\end{definizione}
+Si ha che se $B[i]$ precede $T[S[i],n]$ si ha che:
+\begin{itemize}
+  \item $B[i]$ è il simbolo di $T$ in posizione $S[i]-1$
+  \item $B[i]\cdot T[S[i],n]$ è il suffisso di indice $S[i]-1$
+\end{itemize}
+Se $j$ è la posizione di $B[i]\cdot T[S[i],n]$ nell'ordinamento lessicografico
+allora si ha che:
+\[S[j]=S[i]-1\]
+Bisogna capire come calcolare la LF-function tramite FM-index.\\
+Bisogna esprimere $p+$ in funzione della posizione $i$ su $B$ e si ha che:
+\begin{itemize}
+  \item $p$ è il numero di simboli inferiori a $B[i]=C(B[i])$
+  \item $r$ è il numero di simboli uguali a $B[i]$ in $B[1,i]=Occ(i+1,B[i])$
+\end{itemize}
+Si ha quindi che il numero di simboli uguali a $B[i]$ in $B[1,i]$ è uguale al
+numero di simboli uguali a $B[i]$ in $B[1,i-1]+1$ e quindi posso anche cambiare
+e dire che:
+\begin{itemize}
+  \item $r$ è il numero di simboli uguali a $B[i]$ in $B[1,i]=Occ(i,B[i])+1$
+\end{itemize}
+Quindi si ha che:
+\[j=C(B[i])+Occ(i,B[i])+1\]
+\textbf{Esempio su slide.}\\
+Passo quindi al calcolo della backward extension di un Q-intervallo con un
+simbolo $\sigma$ tramite FM-index.\\
+Ricordiamo che,d ato il Q-intervallo $[b,e)$:
+\begin{itemize}
+  \item $S[b,e)$ sono gli indici dei suffissi che condividono il prefisso comune
+  $Q$
+  \item $B[b,e)$ sono i simboli che precedono i suffissi che condividono il
+  prefisso comune $Q$
+\end{itemize}
+Per trovare la backward extension di un Q-intervallo con un simbolo $\sigma$
+basta trovare l'intervallo delle posizioni di tutti i suffissi che condividono
+il prefisso comune $\sigma Q$.\\
+Per farlo si considerino tutte le posizioni $i_1,i_2,\ldots, i_k$ del
+Q-intervallo $[b,e)$ tali che
+$B[i_p]=\sigma,\,\,\,\forall\,p=1,\ldots,k$. Supponiamo che:
+\[i_1<i_2<\cdots<i_k\]
+allora si ha che i $k$ suffissi di indici $S[i_1],S[i_2],\ldots,S[i_k]$:
+\begin{itemize}
+  \item condividono il prefisso comune $Q$
+  \item sono preceduti dai $k$ simboli $B[i_1],B[i_2],\ldots,B[i_k]$ tutti
+  uguali a $\sigma$
+\end{itemize}
+Si ha quindi che i $k$ suffissi:
+\begin{itemize}
+  \item $B[i_1]\cdot T[S[i_1],n]$
+  \item $B[i_2]\cdot T[S[i_2],n]$
+  \item $\cdots$
+  \item $B[i_k]\cdot T[S[i_k],n]$
+\end{itemize}
+condividono il prefisso comunque $\sigma Q$ e hanno posizioni:
+\begin{itemize}
+  \item $j_1=LF(i_1)$
+  \item $j_2=LF(i_2)$
+  \item $\cdots$
+  \item $j_k=LF(i_k)$
+\end{itemize}
+e si ha che l'intervallo continuo di posizioni $[j_1,j_k+1)$ è il $\sigma
+Q$-intervallo.\\
+Calcoliamo quindi il $\sigma Q$-intervallo $[b',e')$ con:
+\begin{itemize}
+  \item $b'=LF(i_1)$
+  \item $e'=LF(i_k)+1$
+\end{itemize}
+avendo:
+\begin{itemize}
+  \item $i_1$ come la più piccola posizione in $[b,e)$ tale che $B[i_1]=\sigma$
+  \item $i_k$ come la più grande posizione in $[b,e)$ tale che $B[i_k]=\sigma$
+\end{itemize}
+Ma possiamo migliorare la cosa sapendo che:
+\begin{itemize}
+  \item $b'=LF(i_1)=C(B[i_1])+Occ(i_1,B[i_1])+1$
+  \item $e'=LF(i_k)+1=C(B[i_k])+Occ(i_k,B[i_k])+1+1$
+\end{itemize}
+ma quindi, avendo $B[i_1]=B[i_k]=\sigma$:
+\begin{itemize}
+  \item $b'=C\sigma+Occ(i_1,\sigma)+1$
+  \item $e'=C(\sigma)+Occ(i_k,\sigma)+1+1$
+\end{itemize}
+ma possiamo andare oltre, sapendo che:
+\begin{itemize}
+  \item $Occ(i_1,\sigma)$ è uguale a $Occ(b,\sigma)$ in quanto nelle posizioni
+  da $b$ a $i_1-1$ non esistono simboli uguali a $\sigma$
+  \item $Occ(i_k,\sigma)+1$ è il numero di simboli uguali a $\sigma$ in
+  $B[1,i_k]$ e quindi $Occ(i_k,\sigma)+1=Occ(i_k+1,\sigma)$ che a sua volta è
+  uguale a $Occ(e,\sigma)$ in quanto nelle posizioni
+  da $i_k+1$ a $e-1$ non esistono simboli uguali a $\sigma$
+\end{itemize}
+Si arriva quindi a definire il tutto solo in funzione dell'FM-index:
+\begin{itemize}
+  \item $b'=C\sigma+Occ(vv,\sigma)+1$
+  \item $e'=C(\sigma)+Occ(e,\sigma)+1$
+\end{itemize}
+\textbf{Se trovo che $e'\leq b'$ significa che il $\sigma Q$-intervallo non
+  esiste}.\\
+Passiamo quindi alla ricerca esatta di un pattern $P$ di lunghezza $m$ in un
+testo $T$. Si hanno vari step:
+\begin{itemize}
+  \item si eseguono $m$ operazioni di backward extension successive a partire
+  dall'$\varepsilon$-intervallo $[1,n+1)$
+  \item si trova, se esiste, all'ultima iterazione, il $P$-intervallo $[b,e)$
+  \item si ha che le occorrenze di $P$ in $T$ sono fornite dai valori $S[B,e)$
+  nel suffix array nel $P$-intervallo
+\end{itemize}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{exactSearch}{$C, Occ, P, S$}
+    \State \textit{\# questo primo assegnamento potrebbe essere errato}
+    \State $n\gets |S|$
+    \State $[b,e)\gets [1, n+1)$
+    \State $i\gets |P|$
+    \While {$[b,e)\neq \emptyset\,\,\,\land\,\,\, i>0$}
+    \State $\sigma\gets P[i]$
+    \State $b\gets C(\sigma)+Occ(b,\sigma)+1$
+    \State $e\gets C(\sigma)+Occ(e,\sigma)+1$
+    \State $i\gets i-1$
+    \EndWhile
+    \If {$[b,e)\neq emptyset$}
+    \State \textbf{return} $S[b,e)$
+    \EndIf
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di ricerca esatta tramite FM-index}
+\end{algorithm}
 \end{document}
 
 

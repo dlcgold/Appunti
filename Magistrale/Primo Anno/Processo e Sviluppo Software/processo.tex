@@ -3236,15 +3236,18 @@ Si ha un file \texttt{web.xml} per permettere a SPRING di catturare le
 richieste, indipendentemente dall'applicazione.
 \section{Object Relational Mapping}
 Come sappiamo non si ha una relazione diretta tra OOP e modello relazionale e
-per questo si usa l'\textbf{Object Relational Mapping (\textit{ORM})}. Si
-sfrutta quindi un \textit{gateway} tra i client e le risorse dati (il database
-in questo caso) che
+per questo si usa l'\textbf{Object Relational Mapping (\textit{ORM})} quando si
+lavora con la OOP ma con dati persistenti in un db (con le classi che vanno
+``mappate'' nelle entità e viceversa). Si cercano implementazioni il più
+trasparenti possibili. Molti dei concetti si applicano ad altri mapping con
+modelli anche NoSQL. Si sfrutta quindi un \textit{API gateway} tra il client e
+le risorse dati (il database in questo caso) che
 ``incapsula'' l'accesso a una risorsa esterna con una classe e traduce le
 richieste di accesso alla risorsa esterna in chiamate all'API. Con questo
 approccio si nasconde l'accesso alle risorse (rendendone anche facile la
 modifica) e la complessità delle API.\\
 Si hanno tipicamente 4 pattern per il \textbf{db gateway} (di cui approfondiremo
-solo gli ultimi due):
+solo gli ultimi due in quanto i primi due sono più primitivi):
 \begin{itemize}
   \item \textbf{Table Data Gateway}, che prevede un oggetto per tabella. Prevede
   classi stateless ed è comodo nel paradigma procedurale ma meno in quello OOP
@@ -3259,20 +3262,23 @@ solo gli ultimi due):
 \end{itemize}
 \subsection{Active record}
 Questo pattern è una versione ottimizzata del \textit{row data gateway}.\\
-Un \textbf{active record} include:
+Considerate le classi che implementano i dati che devono essere persistenti si
+arricchiscono le classi con metodi per permettere l'interazione col db.
+Un \textbf{active record} include quindi:
 \begin{itemize}
   \item la business logic
-  \item il mapping logico al db, avendo statici i metodi finder e non statici
-  quelli di gateway
+  \item il mapping logico al db, avendo statici i \textit{metodi finder}
+  (invocabili avendo accesso alla classe) che comunque restituiscono risultati
+  già nel dominio OOP (oggetti o collezioni di oggetti) e non statici i
+  \textit{metodi gateway} (per lavorare con le istanze)
 \end{itemize}
 Tra i metodi abbiamo quindi:
 \begin{itemize}
-  \item \textbf{metodo load}, che crea un'istanza a partire dai risultati di un
-  query 
-  SQL. Potrebbe essere necessario creare altri oggetti con accesso a più tabelle
-  nel casi di reference
+  \item \textbf{metodo load}, che crea un'istanza a partire dai risultati di una
+  query SQL. Potrebbe essere necessario creare altri oggetti con accesso a più
+  tabelle nel casi di reference
   \item \textbf{costruttore}, per creare nuove istanze che saranno poi rese
-  persistenti 
+  persistenti invocando metodi appositi
   \item \textbf{metodi finder}, statici, che incapsulano la query SQL e
   ritornano una collezione di oggetti
   \item \textbf{metodi write}, tra cui si hanno:
@@ -3284,25 +3290,34 @@ Tra i metodi abbiamo quindi:
     \item \textbf{delete}, per cancellare il record corrispondente all'oggetto
     in analisi
   \end{itemize}
+  serve sincronizzazione tra oggetto in memoria ed entità nel db. Per farlo si
+  ha un attributo identificatore nella classe che compare anche nel record e che
+  serve per trovare il record corrispondente ad un oggetto
   \item \textbf{metodi getter e setter}, che a seconda del caso devono essere
   subito sincronizzati con il db
   \item \textbf{metodo business}
 \end{itemize}
 Si nota quindi che è una semplice implementazione ORM senza separazione tra
 business logic e meccanismo di persistenza, tendendo a forzare una
-corrispondenza ``uno a uno'' tra oggetti della OOP e istanze nell'ER.
+corrispondenza ``uno a uno'' tra oggetti della OOP e istanze nell'ER (anche se
+questo vale per molti pattern).
 \subsection{Data mapper}
 Con il pattern \textbf{data mapper} invece si ha un layer software indipendente
 dedicato alla persistenza e all'ORM, in modo che la logica di dominio non
 conosca la struttura del db e nemmeno le query SQL. Si usano quindi interfacce
 per consentire l'accesso ai mapper indipendentemente dalla loro
-implementazione. Si ha il seguente esempio in UML:
-\begin{figure}[H]
+implementazione.
+\begin{figure}
   \centering
   \includegraphics[scale = 0.4]{img/dm.jpg}
+  \caption{Esempio di UML di data mapper, dove si nota la separazione della
+    classe dai metodi dedicati alla persistenza (nel mapper).}
 \end{figure}
+Framework moderni implementano questo tipo di pattern (che offre la parte di
+mapping senza doverli implementare ,a solo configurare). 
 \subsection{Ulteriori pattern ORM}
-In generale si hanno dei pattern di comportamento:
+In generale si hanno dei pattern di comportamento per risolvere altri problemi
+ORM: 
 \begin{itemize}
   \item \textbf{unit of work}
   \item \textbf{identity map}
@@ -3317,43 +3332,67 @@ e anche pattern strutturali:
 \end{itemize}
 \subsubsection{Unit of work}
 In questo caso si approfondiscono le operazioni ACID cercando di capire quando
-sincronizzare le informazioni \textit{in memory} con il db. Si hanno varie
-soluzioni:
+sincronizzare le informazioni \textit{in memory} con il db. Questo aspetto è
+importante introducendo il concetto di \textbf{business transaction} per
+operazioni con semantica di tipo \textit{all or nothing} dove o si accettano
+tutte le operazioni richieste o nessuna (si pensi ad esempio alla prenotazione
+di un biglietto). Le business transaction vanno quindi mappate nelle
+\textbf{system transaction} fatte dal sistema sul db.\\
+Si hanno varie soluzioni (\textbf{immagini delle soluzioni su slide}):
 \begin{itemize}
   \item \textit{aggiornare il db ogni volta che si ha una modifica in
-    memory}. Questa soluzione è poco pratica per transazioni molto lunghe
+    memory}. In pratica business transaction e system transaction coincidono
+  ogni volta, dall'apertura alla chiusura oppure ogni volta che l'utente
+  modifica qualcosa si effettua una system transaction. La prima soluzione è
+  poco pratica a causa di transazioni molto lunghe 
   (\textit{long-lasting db transactions}) in quanto un perfetto isolamento
   implica gestire/servire una sola query alla volta mentre un isolamento
   imperfetto implica che si hanno transazioni che leggono dati non definitivi,
-  comportando inconsistenze. Inoltre si rischia di non poter implementare
-  l'atomicità delle transazioni di business
+  comportando inconsistenze. L'utente può aprire la transazione e restarci
+  minuti. Con il secondo caso si rischia di non poter implementare
+  l'atomicità delle transazioni di business, che se in un certo momento fallisce
+  non impedisce alle vecchie modifiche di essere già scritte, rompendo la
+  \textit{all or nothing}, avendo molte difficoltà nel fare gli \textit{undo}
   \item \textit{tracciare le operazioni (nella transazione di business) e
-    attuare tutte le modifiche in una singola transazione di sistema}. In questo
-  caso si incapsula ogni update/insert/delete, mantenendo l'integrità del db ed
-  evitando deadlock
+    attuare tutte le modifiche in una singola transazione di sistema}. Tutte le
+  operazioni sul sistema si eseguono alla fine 
 \end{itemize}
 \textbf{Esempio di codice Java su slide}.\\
-
-A proposito di locking si ha che due transazioni possono essere attive nello
-stesso momento. In questo caso si hanno due strategie:
+La unit of work quindi traccia ogni cambiamento (coi metodi \textit{register}) e
+lo attuta in una singola 
+system transaction finale (con il \textit{commit}). Per fare questo incapsula
+ogni update/insert/delete, 
+mantenendo l'integrità del db ed evitando deadlock.\\
+A proposito di locking si ha che due business transaction possono essere attive
+nello stesso momento e bisogna capire come devono lavorare sul db. In questo
+caso si hanno due strategie: 
 \begin{itemize}
   \item \textbf{optimistic locking}, usato quando si hanno poche probabilità di
-  generare conflitti e si bassa su un numero che identifica la versione degli
-  oggetti registrati. Esempio di diagramma di sequenza:
+  generare conflitti, avendo diversi utenti che lavorano spesso su dati
+  differenti, e si bassa su un numero che identifica la versione degli 
+  oggetti registrati. Due business transaction possono quindi
+  interferire accedendo e modificando i record ma si sfrutta il numero di
+  versione per tenere traccia delle modifiche e se una transazione vede che il
+  numero di versione di un record è incrementato e in tal caso si ricarica il
+  record tramite un rollback.
+  \newpage
+  Esempio di diagramma di sequenza:
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.4]{img/ol.jpg}
   \end{figure}
   \item \textbf{pessimistic locking}, usato quando hanno alte probabilità di
   generare conflitti. Gli oggetti sono bloccati non appena vengono usati
-  riducendo la concorrenza. Esempio di diagramma di sequenza:
+  riducendo la concorrenza. Non si permette quindi alle transazioni di lavorare
+  concorrentemente riducendo però le prestazioni del sistema ma aumentando la
+  sicurezza. Esempio di diagramma di sequenza: 
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.4]{img/pl.jpg}
   \end{figure}
 \end{itemize}
 Poi, per avvisare la unit of work che un'operazione di persistenza è stata
-schedulata si hanno due pattern:
+schedulata, si hanno due pattern:
 \begin{itemize}
   \item \textbf{caller registration}, dove chi modifica l'entità lo notifica
   direttamente alla unit of work. Questa soluzione è rischiosa in quanto il
@@ -3363,7 +3402,7 @@ schedulata si hanno due pattern:
   record):
   \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{img/cr.jpg}
+    \includegraphics[scale = 0.35]{img/cr.jpg}
   \end{figure}
   \item \textbf{object registration}, dove è l'entità modificata a notifica la
   unit of work, che però deve obbligatoriamente avere accesso globale. Ogni
@@ -3371,29 +3410,34 @@ schedulata si hanno due pattern:
   (basato su active record):
   \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{img/or.jpg}
+    \includegraphics[scale = 0.35]{img/or.jpg}
   \end{figure}
+  Solitamente si usa questa soluzione ma nella variante in cui le classi
+  persistenti non includono il codice per la notifica ma tramite una
+  strumentazione trasparente offerta dai framework
 \end{itemize}
-\textbf{Esempio di codice Java su slide per entrambe le tecniche}.\\
-
+\textbf{Esempio di codice Java su slide per entrambe le tecniche}.
 \subsubsection{Identity map}
 In questo caso si studia il load di un'istanza direttamente a partire dal
 db. Se un certo record viene richiesto due volte si generano due oggetti uguali
-(esempio prima chiedo lo \textit{user1} e poi tutti gli \textit{user}, avendo
+(esempio prima chiedo lo \textit{user1} e poi tutti gli \textit{user} (che
+ipotizziamo siano \textit{user1 \textnormal{e} user2}), avendo
 alla fine due copie istanziate di \textit{user1}). In pratica uno stesso oggetto
 può essere caricato più volte, o da azioni differenti dello stesso utente
-(rischiando inconsistenze oltre ad avere ridondanza di dati) o da utenti diversi
-(in questo spesso è intenzionale).\\
+(rischiando inconsistenze, se una istanza viene modificata, oltre ad avere
+ridondanza di dati) o da utenti diversi (in questo spesso è intenzionale).\\
 \textbf{Identity map} è quindi un oggetto con la responsabilità di identificare
 gli oggetti caricati in una sessione, funzionando come una sorta di cache,
 controllando l'eventuale presenza dell'oggetto ``in cache'' (anche se non si ha
-una vera cache) prima di caricarne uno nuovo. Vediamo il diagramma di sequenza:
+una vera cache) prima di caricarne uno nuovo (se già presente si ritorna un
+riferimento all'oggetto). Identity map quindi mantiene i riferimenti agli
+oggetti tramite un sistema chiave-valore. Vediamo il diagramma di sequenza:
 \begin{figure}[H]
   \centering
   \includegraphics[scale = 0.4]{img/im.jpg}
 \end{figure}
 Generalmente la chiave della mappa è quella primaria del db. Si hanno diverse
-identity maps:
+identity map:
 \begin{itemize}
   \item una per applicazione, se chiavi di entità differenti sono disgiunte
   \item una per classe
@@ -3404,29 +3448,34 @@ La mappa è sempre accessibile.\\
 \subsubsection{Lazy load}
 A volte è necessario avere solo una parte di un oggetto per eseguire una certa
 operazione anche perché alcuni attributi (collection, bitmaps, grafi
-etc$\ldots$) possono essere particolarmente pesanti.\\
+etc$\ldots$) possono essere particolarmente pesanti. Si parla quindi di
+efficienza.\\ 
 Si procede quindi con il pattern \textbf{lazy load} che crea oggetti
 inizializzando solo alcuni attributi (evitando spesso quelli più ``pesanti'')
 lasciando comunque possibilità si caricare in seguito ulteriori attributi non
-ancora inizializzati se ce ne fosse necessità.\\
+ancora inizializzati se ce ne fosse necessità, in modo \textit{on-demand},
+tramite i \textit{finder}.\\
 \textbf{Su slide esempio di codice Java dedicato}.
 \subsubsection{Value holder}
 Con questa tecnica si usa un oggetto, il \textbf{value holder}, come uno storage
 intermediario per un attributo. Anche in questo caso si ha un'inizializzazione
 ``lazy'' implementata da questo oggetto che caso per caso potrebbe essere
-instanziato con diverse strategie di load. Si separa la locgia di dominio da
+istanziato con diverse strategie di load. Si separa la locgia di dominio da
 quella ``lazy'' di loa3ding.\\
 \textbf{Esempio di codice Java su slide.}
-
 \subsubsection{Identify field}
 Normalmente si hanno:
 \begin{itemize}
   \item l'identità in memory rappresentata dalla reference dell'oggetto
   \item l'identità nel db rappresentata dalla chiave primaria
 \end{itemize}
-e si ha bisogno di accoppiare le due identità per la consistenza dei dati.\\
-La soluzione è usare l'\textbf{identity field} ovvero un attributo nell'oggetto
-il cui valore è la chiave primaria.\\
+e si ha bisogno di accoppiare/sincronizzare le due identità per la consistenza
+dei dati.\\ 
+La soluzione è usare l'\textbf{identity field} ovvero un ``nuovo'' attributo
+nell'oggetto il cui valore diventa la ``chiave primaria'' (solitamente chiamato
+\texttt{id}, di tipo \texttt{long}). Non si 
+usano i normali attributi/identificatori della classe perché potrebbero
+modificare nel tempo di sviluppo del programma.\\
 Si hanno infatti due tipi di chiave:
 \begin{itemize}
   \item una chiave derivata da attributi dell'oggetto (che sono usati anche
@@ -3441,7 +3490,8 @@ Si hanno infatti due tipi di chiave:
 Si hanno varie strategie per la generazione delle chiavi:
 \begin{itemize}
   \item direttamente dal db (con sequenze o id delle colonne)
-  \item tramite \textit{GUID}, ovvero Globally Unique IDentifier
+  \item tramite \textit{GUID}, ovvero Globally Unique IDentifier, tramite
+  opportuni software e libreria
   \item dall'applicazione, principalmente in due modi:
   \begin{itemize}
     \item \textit{table scan}, usando una query SQL per determinare il valore
@@ -3450,9 +3500,11 @@ Si hanno varie strategie per la generazione delle chiavi:
     tabelle e il valore successivo della chiave
   \end{itemize}
 \end{itemize}
-\textbf{I moderni framework ORM supportano i vari design pattern appena discussi
+I moderni framework ORM supportano i vari design pattern appena discussi
 e quelli mancanti, relativi a chiavi esterne, cascading, ereditarietà
-etc$\ldots$}.
+etc$\ldots$ \\
+In ogni caso i pattern appena discussi sono tutti supportati dai moderni
+framework ORM. 
 \subsubsection{Embedded value}
 Con questo pattern si hanno semplici oggetti, senza un chiaro concetto di
 identità, che possono essere inclusi in oggetti che fungono da alter-ego delle
@@ -3471,29 +3523,47 @@ con il versioning delle classi.\\
 Si ha anche \textbf{Character BLOB (CLOB)}, ad esempio tramite \textit{XML}, che
 però richiede librerie per il parsing e non è compatto, anche se printabile e
 supportato generalmente dai db
-\subsection{ORM con JPA}
-Le \textbf{Java Persistence API (\textit{JPA})} ono un framework per il
+\subsection{JPA 2.0}
+Vediamo quindi un framework Java che implementa ORM: \textbf{JPA}.\\
+Le \textbf{Java Persistence API (\textit{JPA})} sono un framework per il
 linguaggio di programmazione Java che si occupa della gestione della persistenza
 dei dati di un DBMS relazionale nelle applicazioni.\\
-Si ha quindi un grande set di pattern già implementati (ad esempio
-\textit{declaratively} che specifica il mapping tra entità di dominio e db). Si
-hanno varie implementazioni di JPA con ORM (tramite annotations e services,
-schema in figura \ref{fig:jo}), tra
+Si ha quindi un grande set di pattern già implementati che usiamo in modo
+dichiarativo specificando il mapping tra enità di dominio e db. Si
+hanno varie implementazioni di JPA con ORM (tramite annotations e services, per
+comandare operazioni di persistenza, schema in figura \ref{fig:jo}), tra
 cui \textit{Hibernate}. Studiamo quindi nel dettaglio le varie componenti.
 \begin{figure}
   \centering
   \includegraphics[scale = 0.65]{img/jpaorm.jpg}
-  \caption{Schema generale di JPA e ORM}
+  \caption{Schema generale di JPA. Si hanno varie classi con la business logic
+    tra cui le entity class, che contengono i dati che si mappano sul db,
+    definite tramite annotazioni. Si ha
+    un servizio, detto \textit{EntityManager} che implementa i vari pattern
+    ORM. Volendo il database può essere generato automaticamente dalle entity
+    class o viceversa.}
   \label{fig:jo}
 \end{figure}
 \subsubsection{EntityManager}
-Chiamiamo \textbf{Plain Old Java Objects (\textit{POJO})} le classi delle
-entità, con oggetti che vengono creati tramite il \texttt{new} e che sono
+Chiamiamo \textbf{Plain Old Java Objects (\textit{POJO})} le entity class, con
+oggetti che vengono creati tramite il \texttt{new} e che sono 
 oggetti regolari fino a che non interagiscono con
-l'\textbf{EntityManager}. Tramite tale interazione le entità sono memorizzate
+l'\textbf{EntityManager} (sono normali classi con annotazioni).\\
+Un'entità in memoria può essere in due stati:
+\begin{itemize}
+  \item \textbf{managed/attached}, se l'entità è sotto gestione
+  dell'EntityManager 
+  \item \textbf{unmanaged/detached}, se l'entità non è sotto gestione
+  dell'EntityManager, che non sa che esiste quell'entità
+\end{itemize}
+Posso spostare esplicitamente un oggetto da uno stato all'altro in quanto può
+essere utile avere oggetti unmanaged, spesso in caso di distribuzione durante
+l'invio ad un altro nodo (diciamo che sono situazioni obbligate dalla
+pratica).\\ 
+Tramite tale interazione con l'EntityManager le entità sono memorizzate 
 nell'\textit{identity map} ed eventuali cambiamenti sono tracciati dalla
 \textit{unit of work}, con notifiche tramite l'EntityManager (con \textit{caller
-  responsability}).  D'altro canto create/remove sono responsabilità dello
+  responsability}). D'altro canto create/remove sono responsabilità dello
 sviluppatore mentre le update sono rilevate automaticamente
 dall'EntityManager.\\
 Si ha quindi uno schema del tipo:
@@ -3501,41 +3571,50 @@ Si ha quindi uno schema del tipo:
   \centering
   \includegraphics[scale = 0.57]{img/em.jpg}
 \end{figure}
-Con il file \texttt{persistence.xml} contenuto nella cartella \texttt{META-INF}
-del progetto. Sono indicate nel file le classi della \textit{persistent unit}
+Nello schema si ha in alto la parte di configurazione e in basso quella di
+runtime. Le classi sono divise in varie \textbf{persistent unit}, ciascuna che
+può lavorare con un db diverso. \\
+Il file \texttt{persistence.xml} è contenuto nella cartella \texttt{META-INF}
+del progetto e gestisce tutte le varie configurazioni. Sono indicate nel file le
+classi della \textit{persistent unit} 
 ovvero tutte le classi di entità nel progetto java (con il tag \texttt{<class>})
-o contenute in un jar (con il tag \texttt{<jar-file}).\\
+o contenute in un jar (con il tag \texttt{<jar-file>}).\\
 In merito al mapping tra classi e db si ha che esso è definito tramite
 annotazioni nelle classi e l'orm-mapping è definito nel
 \texttt{persistence.xml} tramite il tag \texttt{<mapping-file>}.\\
 \textbf{Esempio di \texttt{persistence.xml} e di codice java su slide.}\\
 \textit{Sulle slide si trova anche una spiegazione dei vari metodi in Java che
-  possono tornare utili, auguri.}
+  possono tornare utili in quanto è stato ritenuto inutile metterli in questi
+  appunti.} \\
+\textbf{Nelle query si usano comunque i nomi degli oggetti}.
 \subsubsection{Mapping Hierachies}
 Nella OOP posso avere gerarchie tra gli oggetti ed ereditarietà ma questi
 concetti non si hanno nei database e quindi serve un mapping dedicato per
-eseguire query che sfruttano le gerarchie.\\
+eseguire query che sfruttano le gerarchie. Il mapping deve essere esplicitamente
+specificata.\\
 Si hanno tre strategie per il mapping (\textbf{su slide esempi delle varie
   annotazioni per Java}):
 \begin{enumerate}
   \item \textbf{single table}, che prevede una tabella per ogni classe in
   rapporto di gerarchia tra loro. Si ha quindi una colonna che deve
-  rappresentare il tipo di oggetto (per distinguere le varie classi). È un
-  metodo facile da implementare e veloce ma obbliga ad avere tabelle che possono
-  contenere valori NULL (una classe derivata ha attributi in più di quella
-  orinale e diversi da un'0altra classe derivata dalla stessa classe originale
-  etc$\ldots$) 
+  rappresentare il tipo di oggetto (per distinguere le varie classi) di tipo
+  stringa. È un metodo facile da implementare e veloce ma obbliga ad avere
+  tabelle che possono contenere valori NULL (una classe derivata ha attributi in
+  più di quella orinale e diversi da un'altra classe derivata dalla stessa
+  classe originale etc$\ldots$). Si ha comunque uno spreco di risorse
   \item \textbf{one table per concrete class}, dove ogni classe (sia padre che
   figli) hanno una tavella associata con un campo per ogni attributo (per le
-  figlie anche quelli ereditati). Si ha un maggior controllo dei vincoli e un
-  mapping ancora semplice ma è difficile da gestire con l'EnityManager e il DBMS
-  deve supportare la \textit{SQL UNION}
+  figlie anche quelli ereditati). Tutti gli attributi di una classe sono quindi
+  in una singola tabella dedicata. Si ha un maggior controllo dei vincoli e un
+  mapping ancora semplice ma è difficile da gestire con l'EntityManager e il
+  DBMS deve supportare la \textit{SQL UNION}
   \item \textbf{one table per subclass} dove si ha una classe per tabella ma
   senza ricopia degli attributi per le classi figlie (che sono caratterizzate
-  solo dall'id e dagli attributi extra rispetto alla classe padre). Questa
+  solo dall'id e dagli attributi extra rispetto alla classe padre). Si ha quindi
+  un mapping ``uno a uno''. Questa
   strategia supporta i vincoli tabellari e non richiede la \textit{SQL UNION} ma
   si ha un istanza ``splittata'' su più tabelle ed è generalmente una soluzione
-  lenta in esecuzione 
+  lenta in esecuzione (dovendo eseguire i \textit{join})
 \end{enumerate}
 \chapter{Component-based systems}
 Parliamo ora di \textbf{sviluppo per componenti}.\\

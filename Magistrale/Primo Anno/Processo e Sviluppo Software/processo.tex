@@ -3515,7 +3515,7 @@ annotazioni nelle classi e l'orm-mapping è definito nel
 Nella OOP posso avere gerarchie tra gli oggetti ed ereditarietà ma questi
 concetti non si hanno nei database e quindi serve un mapping dedicato per
 eseguire query che sfruttano le gerarchie.\\
-Si hanno tra strategie per il mapping (\textbf{su slide esempi delle varie
+Si hanno tre strategie per il mapping (\textbf{su slide esempi delle varie
   annotazioni per Java}):
 \begin{enumerate}
   \item \textbf{single table}, che prevede una tabella per ogni classe in
@@ -3537,6 +3537,400 @@ Si hanno tra strategie per il mapping (\textbf{su slide esempi delle varie
   si ha un istanza ``splittata'' su più tabelle ed è generalmente una soluzione
   lenta in esecuzione 
 \end{enumerate}
+\chapter{Component-based systems}
+Parliamo ora di \textbf{sviluppo per componenti}.\\
+Partiamo con alcuni design pattern per gestire le dipendenze per poi passare ad
+un modello per lo sviluppo per componenti, ovvero \textbf{EJB 
+3.0}, che è uno standard implementato in framework come \textbf{Glassfish} che
+verrà usato spesso negli esempi presenti nelle slide e nel materiale del
+corso.\\
+Con sviluppo per componenti si parla di uno sviluppo che ci permette di creare
+unità, i componenti, di cui si può fare indipendentemente il deployment, senza
+quindi dipendenze statiche ma con dipendenze che possono essere soddisfatte a
+runtime nell'ambiente di esecuzione.
+\section{Gestione delle dipendenze}
+Parliamo quindi nel dettaglio dei pattern di gestione delle dipendenze.\\
+Un aspetto chiave è il \textbf{decoupling}, ovvero rendere indipendenti le
+componenti da deployare anche se a runtime tali componenti devono comunque
+interagire. Non si parla quindi della rimozione della dipendenza funzionale ma
+si ha una soddisfazione dinamica (a runtime) delle dipendenze tramite linking di
+diverse 
+componenti per differenti sistemi, senza che queste interferiscano con il
+deployment. \\
+\textbf{Su slide esempio di codice con dipendenza statica dove si crea
+  un'istanza in una classe usando il costruttore di un'altra classe}.\\
+Si hanno quindi alcuni design pattern per gestire le dipendenze dinamicamente
+(\textbf{su slide anche esempi con diagrammi UML}):
+\begin{itemize}
+  \item \textbf{inversion of control}, dove i campi che memorizzano riferimenti
+  ad altri componenti vengono popolati automaticamente da un componente esterno
+  anche se non viene chiesto di farlo. Questo pattern è anche chiamato
+  \textbf{dependency injection}. Si introduce un elemento esterno chiamato
+  \textit{assembler} che ha la responsabilità di individuare il componente che
+  deve essere usato e ``iniettare'' la dipendenza di cui ha bisogno, questo
+  senza che la classe che necessita della dipendenza faccia nulla. L'assembler,
+  se pensiamo all'UML, ad esempio, è collegato all'interfaccia della classe in
+  cui iniettare le dipendenze.\\
+  La dipendenza viene iniettata alla creazione dell'oggetto nella maggior parte
+  dei casi concreti (nella maggioranza dei framework che implementano il
+  pattern). Per fare l'iniezione si hanno diverse modalità:
+  \begin{itemize}
+    \item \textbf{constructor injection}, dove si usa un parametro del
+    costruttore 
+    \item \textbf{setter or field injection}, dove si usa un metodo setter
+    \item \textbf{interface injection}, dove si usa un'interfaccia dedicata (ma
+    questo metodo non è molto usato)
+  \end{itemize}
+  \textbf{Esempi di codice Java dei tre casi su slide.}\\
+  Solitamente comunque l'assembler è già messo a disposizione dai vari framework
+  e può essere configurato eventualmente tramite file di configurazione (per la
+  scelta dell'implementazione) e
+  annotazioni nelle classi che devono subire la injection di dipendenze. In
+  alcuni framework le classi vengono ``strumentate'' per non dover aggiungere
+  esplicitamente i metodi delle injection (magari usando annotazioni specifiche
+  per dire come valorizzare una variabile tramite dependency injection, tipo
+  \texttt{@PersistenceContext}). In ogni 
+  caso i riferimenti non devono essere ambigui e devono essere ovvi nel
+  contesto. Eventualmente si possono usare informazioni aggiuntive per
+  disambiguare il tutto. L'accesso alla variabile viene fatto dall'assembler, in
+  java, fine fatto tramite accesso diretto, con la \textbf{reflection}, o
+  ``strumentando'' la classe aggiungendo metodi di setting. Il framework rende
+  tutto questo ``trasparente'' nel codice
+  \item \textbf{service locator}, dove la classe che ha bisogno di popolare un
+  campo con un riferimento chiede esplicitamente al service locator il valore
+  del riferimento. Questo pattern è anche chiamato \textbf{dependency
+    lookup}. L'idea è quella di avere un ``registro'', il service locator
+  appunto, che conosce qual è l'implementazione che deve essere usata di volta
+  in volta. A questo punto la classe che deve soddisfare la dipendenza fa un
+  accesso al service locator chiedendo che venga ritornato un riferimento al
+  componente che deve essere utilizzato. Si ha l'assembler che popola il service
+  locator per specificare che componenti esistono e che interfaccia implementano
+  queste componenti. Il service locator può essere più o meno complesso a
+  seconda delle informazioni che devono essere aggiunte al suo interno e al tipo
+  di query che devono essere usate per recuperare i vari riferimenti.\\
+  Nella sua accezione più semplice il service locator è un \textit{singleton}
+  che memorizza coppie chiave-valore dove il valore è il riferimento al
+  componente che deve essere usato e la chiave può essere l'interfaccia che il
+  componente implementa. In questo modo nei componenti possiamo chiedere quali
+  altri implementano l'interfaccia con cui bisogna interagire per poi
+  utilizzarli (???). Nelle classi, per interrogare il service locator, serve un
+  riferimento al service locator stesso che può essere stabilito tramite
+  dependency injection, si aggiunge quindi un'annotazione e l'assembler, in modo
+  trasparente, imposta un reference al service locator che andremo ad usare
+  direttamente nel codice. Alcuni framework permettono di assegnare nomi ai
+  componenti che scriviamo e poi laddove in un altro componente serva un
+  reference ad un componente già scritto posso usare annotazioni che
+  specificano il nome cosicché il framework recuperi in modo trasparente il
+  riferimento del componente, che nel frattempo viene registrato nel service
+  locator, assegnando quindi il valore della variabile 
+\end{itemize}
+Si raggiunge quindi un ottimo livello di astrazione.\\
+\section{EJB 3.0}
+Vediamo quindi un modello di sviluppo per componenti per Java: \textbf{EJB
+  3.0}, uno standard implementato in molti framework.\\
+Tra i framework principali che implementano questo standard abbiamo:
+\begin{itemize}
+  \item \textbf{Glassfish}
+  \item \textbf{JBoss}
+\end{itemize}
+Si hanno varie tecnologie come EJB, ogni tecnologia con il suo modello,
+ciclo di vita dei componenti, servizi.
+EJB comunque include tanti servizi, fornendo un supporto completo, ma si hanno
+framework 
+che supportano solo sottoinsiemi degli stessi (tra questi troviamo anche
+Spring).\\ 
+In generale all'interno di applicazioni EJB troviamo, lato server-side e
+component-model:
+\begin{itemize}
+  \item implementazione della business logic
+  \item distribuzione dei componenti (che quindi possono essree in esecuzione su
+  macchine diverse), usando \textbf{Remote Method Invocation (\textit{RMI})}
+  dietro le quinte (ricordando che RMI è una tecnologia che consente a processi
+  Java distribuiti di comunicare attraverso una rete) 
+  \item facilità di integrazione
+  \item presenza di numerosi servizi configurabili in fase di deploy in merito a
+  sicurezza, transazioni, persistenza etc$\ldots$ Nel dettaglio per la
+  persistenza si ha come standard JPA come meccanismo di ORM
+  \item presenza di comunicazione tra componenti sia sincrona che asincorna,
+  quest'ultima usando un \textbf{message-oriented-middleware} che implementa
+  \textbf{Java Message Service (\textit{JMS})}, ovvero l'insieme di API,
+  appartenente a Java EE, che consente ad applicazioni Java presenti in una rete
+  di scambiarsi messaggi tra loro
+  \item implementazione di interfacce di web service, con supporto al protocollo
+  \textbf{SOAP} (per lo scambio di messaggi tra componenti software) e \textbf{
+    Web Services Description Language (\textit{WSDL})}, ovvero un linguaggio
+  formale in formato XML utilizzato per la creazione di "documenti" per la
+  descrizione di web service. Si hanno anche \textbf{Remote Procedure Call
+    (RPC)} (attivazione da parte di un programma di una procedura o subroutine
+  attivata su un computer diverso da quello sul quale il programma viene
+  eseguitoattivazione da parte di un programma di una procedura o subroutine
+  attivata su un computer diverso da quello sul quale il programma viene
+  eseguito) e chiamate \textit{document-style} tramite \textbf{Java API for XML
+    Web Services (\textit{JAX-WS})}, ovvero un insieme di interfacce (API) del
+  linguaggio di programmazione Java dedicate allo sviluppo di servizi web,
+  tramite annotazioni
+\end{itemize}
+Inoltre con le tecnologie di EJB si possono costruire diverse view.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.65]{img/ejb.jpg}
+  \caption{Schema d'esempio di un'applicazione \textbf{Java 2 Enterprise Edition
+      (\textit{J2EE})}, con le entità persistenti dei POJO. I \textit{bean}
+    implementano 
+    la logica applicativa e sono divisi in due gruppi: \textit{session bean} e
+    \textit{message bean} (i primi sincroni e i secondi asincroni). Si hanno
+    vari protocolli per interagire con i bean e si hanno poi i vari componenti
+    per le view.}
+  \label{fig:ejb}
+\end{figure}
+\textbf{EJB} è conosciuto anche come la \textit{tecnologia dei tre bean},
+chiamando quindi con il termine bean i componenti di EJB. Si hanno, avendo già
+discusso di due di questi in figura \ref{fig:ejb}:
+\begin{enumerate}
+  \item \textbf{entity bean}, che altro non sono che i POJO nel dominio di EJB
+  \item \textbf{session bean}, per le operazioni sincrone della business
+  logic.\\
+  Un session bean è una classe che implementa un'interfaccia locale e/o una
+  remota e/o un interfaccia endpoint. Implementa delle operazioni simil API e
+  interagisce con gli entity bean e con altri session bean. Si hanno quindi
+  varie annotazioni:
+  \begin{itemize}
+    \item \textbf{local interface}, annotata con \texttt{@javax.ejb.Local}
+    specifica metodi che possono essere invocati localmente
+    \item \textbf{remote interface}, annotata con\\ \texttt{@javax.ejb.Remote}
+    specifica metodi che possono essere invocati da remoto con RMI
+    \item \textbf{endpoint interface}, annotata con
+    \texttt{@javax.jws.WebService} 
+    specifica metodi che possono essere invocati da remoto usano SOAP con
+    JAX-RPC, avendo WSDL generato automaticamente
+  \end{itemize}
+  I session bean possono essere \textit{stateless} o \textit{statefull}
+  (non contenendo o contendo informazioni di stato)
+  specificando:
+  \begin{itemize}
+    \item \texttt{@javax.ejb.Stateful}
+    \item \texttt{@javax.ejb.Stateless}
+  \end{itemize}
+  e permettendo al framework di gestire diversamente il session bean a seconda
+  del caso.\\
+  \textbf{Esempio di implementazione in Java su slide.}
+  \item \textbf{message bean}, per le operazioni asincrone della business
+  logic. Questi sono classi che implementano un'interfaccia ben definita che
+  viene eseguita quando si riceve un messaggio asincrono. Tali classi hanno
+  l'annotazione 
+  \texttt{@javax.ejb.MessageDriven} e i messaggi JMS usano
+  \texttt{javax.jms.MessageListener} nella loro interfaccia.\\
+  Bisogna implementare un metodo \texttt{onMessage(Message message)} che ha
+  appunto come parametro il messaggio ricevuto (messaggio solitamente di tipo
+  chiave-valore).\\ 
+  \textbf{Esempio di implementazione in Java su slide.}
+\end{enumerate}
+Gli ultimi due implementano task serve-side e sono \textit{transient} in quanto
+la loro esecuzione può modificare il db ma i bean in se non sono persistenti.\\
+In un framework che implementa EJB dobbiamo immaginare le classi/bean come
+incapsulate in \textit{container} che intercetta le richieste fatte al bean. Si
+possono, nella realtà implementativa,e avere componenti dette \textit{stub},
+indipendenti dal bean oppure ``strumentando'' il bean che va ad includere i
+vari \textit{stub}, che vengono comunque prima eseguiti del bean (???). Avere
+questo ulteriore layer che protegge l'accesso al bean si possono aggiungere
+servizi di sicurezza, transazioni, instance pooling, gestione del ciclo di vita
+etc$\ldots$ usando un modo dichiarativo per specificare come deve comportarsi il
+software per quei vari aspetti, confutazione che comporta poi la natura degli
+\textit{stub} (in pratica si richiede una certa logica, non la si programma).\\
+I vari vendor che implementano EJB competono sulla parte dei \textit{container},
+oltre che sulla parte di prestazioni per i vari aspetti standard e sulla parte
+di servizi extra fuori standard. Attualmente i container sono auto-generati dai
+bean, dalle interfacce, dalle annotazioni, da file di configurazione etc$\ldots$
+Per configurare i container si ha:
+\begin{itemize}
+  \item un comportamento di default definito dal vendor
+  \item annotazioni che sovrascrivono il comportamento di default che vengono
+  definite dal programmatore
+  \item dei \textit{descrittori}, file di configurazione esterni spesso in XML,
+  che descrivono il comportamento con priorità rispetto alle annotazioni. Sono
+  definiti da un amministratore di sistema in quanto utili/necessari in fase di
+  deployment  
+\end{itemize}
+In alcuni casi accedere ad un container dal bean per risalire ad alcune
+informazioni di contesto dell'applicazione. Per farlo si sfruttando le
+dependency injection sfruttando l'annotazione \texttt{@Resource} per inserire in
+una variabile la \texttt{SessionContext}.\\
+I bean hanno un ciclo di vita, creati quando utile e poi distrutti. Si hanno
+quindi vari metodi chiamati poi dal container tramite callback quando si hanno
+eventi alla creazione del bean o alla sua distruzione (esempio per liberare
+risorse). Si hanno quindi annotazione per i metodi, sempre del bean, come
+ad esempio \texttt{@PreDestroy}. \\
+\textbf{EJB} supporta, per la gestione delle dipendenze:
+\begin{itemize}
+  \item \textit{setter/field dependency injection}
+  \item \textit{service locator}, tramite \textbf{Java Naming and Directory
+    Service (\textit{JNDI})}
+\end{itemize}
+\textbf{Su slide descrizione dei codici di esempio trovabili sulla pagina del
+  corso.}\\ 
+Vediamo ora i servizi che un container può dare ad una applicazione EJB.\\
+Si hanno due aspetti:
+\begin{itemize}
+  \item \textbf{resource management} per la gestione efficiente delle
+  risorse. Infatti applicazioni enterprise potrebbero avere migliaia di client
+  causando la generazione di milioni di oggetti server-side, che devono essere
+  gestiti in modo efficace 
+  \item \textbf{services} per i vari servizi configurabili ed usabili
+  nell'applicazione 
+\end{itemize}
+Lato \textit{resource manager troviamo} l'\textbf{instance pooling}, un
+meccanismo chiave per la gestione delle 
+risorse in quanto si riduce il numero di oggetti necessari a soddisfare una
+certa richiesta, sfruttando la presenza del container per il riuso dei vari
+oggetti, non rendendo necessario la ricreazione degli stessi (che nel
+dettaglio sono session bean). In generale infatti non serve avere un oggetto
+per ogni richiesta. In base all'annotazione che definisce se un bean è
+stateless o statefull si ha un impatto sulla gestione dell'istance pooling. Se
+un bean è stateless lo stesso bean, portato in memoria per effettuare delle
+operazioni, può essere usato per servire altre richieste (finendo in un pool
+delle istanze con lo stato \textit{ready}). Si ha quindi un pool di stateless
+session bean con i container (di tipo \texttt{EJBObject}) che intercettano le
+richieste e ottimizzano l'uso delle risorse tramite il pool. \\
+Se invece si hanno bean statefull si ha che essi non possono essere usate per
+richieste di client differenti, cosa che porterebbe ad ambiguità nello stato.
+Quindi si ha un meccanismo di \textbf{activation/passivation}. Si ha il
+container che riceve le richieste quindi i bean possono anche non essere
+mantenuti in memoria se non vengono usati e quindi, se questi non sono
+utilizzati per lungo tempo (definito nella configurazione del framework)
+vengono ``passivizzati'', ovvero rimossi dalla memoria e salvati su disco
+(tramite \texttt{serialization} che scrive in binario un oggetto in
+memoria). Qualora servissero vengono nuovamente ``attivizzati'', rimessi in
+memoria ed usati. Anche in questo caso si ha quindi un'ottimizzazione anche se
+minore al caso dei bean stateless.\\
+L'istance pooling viene poi accompagnato da vari service, nel dettaglio otto
+(alcuni già visti che verranno quindi meno approfonditi):
+\begin{enumerate}
+  \item \textbf{concurrency}. Nel dettaglio in realtà non si ha concurrency non
+  potendo implementare codice concorrente nei bean ma si può avere concorrenza
+  su client multipli, ognuno che carica una propria copia dei dati, avendo
+  quindi concorrenza tra i bean ma non nei bean. Per gestire i conflitti si
+  hanno le strategia di locking ottimistiche o pessimistiche già viste,
+  bloccando eventuali record per alcuni client etc$\ldots$ nel caso pessimistico
+  o suando i numeri di versione in quello ottimistico. Anche lato messaggi non
+  si ha concorrenza
+  \item \textbf{transaction management}, con le transazioni definite in modo
+  dichiarativo specificando la semantica transazionale dei bean tramite
+  annotazioni. Si ha che ua transazione inizia quando inizia l'esecuzione di un
+  metodo associato a una transazione e termina quando termina
+  l'esecuzione di un metodo associato a una transazione.\\
+  Si separa la business logic dalla logica transazionale (anche se è possibile
+  unirle con una gestione manuale delle transazioni).\\
+  L'annotazione \texttt{@TransactionAttribute(<option>)} può essere utilizzata
+  per 
+  specificare la semantica transazionale di un metodo nel bean. Bisogna studiare
+  quando il chiamante apre una transazione. Si hanno varie
+  opzioni per l'annotazione (\textbf{su slide immagine per ogni opzione}):
+  \begin{itemize}
+    \item \texttt{NotSupported}, a prescindere dal contesto transazionale del
+    chiamante quando il bean viene eseguito non viene eseguito all'interno del
+    contesto transazionale (e in caso di rollback non si fa rollback di ciò che
+    è stato fatto nel bean)
+    \item \texttt{Supports}, che indica che il bean segue il contesto
+    transazionale del chiamante e quindi ciò che viene fatto dal bean fa parte
+    della transazione (e può essere annullata con essa), se è stata aperta una
+    transazione. Se non è stata aperta una transazione quello che viene fatto
+    nel bean non fa parte di alcuna transazione
+    \item \texttt{Required} (\textit{default}), che indica che se il chiamante
+    ha aperto una transazione le operazioni del bean faranno parte della
+    transaction altrimenti, se non è stata aperta, se ne apre una apposta per
+    l'operazione del bean che viene chiusa subito dopo
+    \item \texttt{RequiresNew}, dove il bean lavora in una transaction
+    indipendente da quella del chiamante, sia che ha aperto una transaction che
+    no 
+    \item \texttt{Mandatory}, dove è responsabilità del chiamante aver creato
+    una transazione (nella quale si ha anche l'esecuzione del bean) altrimenti
+    si ha errore/eccezione
+    \item \texttt{Never}, dove un'operazione può essere eseguita solo in un
+    contesto non transazionale altrimenti si ha errore/eccezione (in pratica se
+    il  chiamante apre una transaction si ha errore)
+    
+  \end{itemize}
+  Posso usare la stessa annotazione a livello di classe per adottare la cosa per
+  ogni singolo metodo.\\
+  In merito alle annotazioni:
+  \begin{itemize}
+    \item per i session bean non si hanno regole
+    \item per gli entity bean, interagendo con il db, si ha che bisogna vere
+    sempre semantica transazionale, quindi tramite \texttt{Required,
+      RequisresNew, Mandatory}
+    \item per i messagedriven bean si ha che sono asincroni e quindi sono
+    indipendenti dal contesto transazionale del chiamante. Si usano quindi
+    \texttt{NotSupported, RequiresNew}
+  \end{itemize}
+  \textbf{Su slide esempio grafico di sistema con transazioni.}\\
+  Questo sistema è presente anche in altri framework Java e non solo in quelli
+  che implementano EJB (ma anche non Java).\\
+  Parlando di persistenza e transazioni parliamo anche di \textbf{isolation} e
+  \textbf{database  locking}, ovvero quando si creano transazioni non
+  necessariamente sono perfettamente ``isolate'' (anche se le vorremmo
+  perfette). L'isolation può
+  essere configurato per permettere un certo livello di interferenza con la
+  creazione temporanea di oggetti da parte di transazioni non ancor concluse ma
+  che possono essere letti da altre transaction. Si hanno vari livelli di
+  interferenza per non avere isolation perfetta e i suoi costi di prestazioni
+  (\textbf{immagini d'esempio per i tre modi su slide}):
+  \begin{itemize}
+    \item \textbf{dirty reads}, dove due transaction possono interferire avendo
+    una transazione che può leggere dati modificati dall'altra transazione che
+    però non si è ancora conclusa. In ogni caso le due transaction non si
+    comportano come se l'altra non esistesse avendo interferenza tra scritture e
+    letture 
+    \item \textbf{unrepeatable reads}, quando le stesse operazioni di lettura
+    eseguite con una stessa transazione potrebbero restituire risultati
+    diversi, in quanto dovuti a commit di un'altra transaction
+    \item \textbf{phantom reads}, quando una transazione potrebbe leggere nuovi
+    record generati (non si parla più di modifica ma di aggiunta) dopo l'avvio
+    dell'altra transazione, che si è chiusa prima 
+  \end{itemize}
+  A seconda dei casi alcune interferenze sono accettabili e altre no.\\
+  Si hanno quindi vari livelli di isolation (dalla meno isolata e più
+  performante alla più isolata ma meno performante):
+  \begin{itemize}
+    \item \textbf{read uncommitted}, con dirty reads, unrepeatable reads e
+    phantom reads 
+    \item \textbf{read committed}, con unrepeatable reads e phantom reads 
+    \item \textbf{repeatable read}, con phantom rwad
+    \item \textbf{serializable}, l'isolation perfetta
+  \end{itemize}
+  Con la massima isolation ho scarse prestazioni in quanto due transazioni che
+  accedono agli stessi dati non possono essere eseguite contemporaneamente e
+  d'altro canto avere bassa isolation permette a transazioni non isolate di
+  poter lavorare su dati spuri e non aggiornati, aumentando le prestazioni. Si
+  ha il locking ottimistico usando
+  l'attributo \textit{version} che viene incrementato ogni volta che l'entità
+  viene  modificata e che viene controllato a commit time (e se viene rilevato
+  un conglitto si effettua il rollback). Questa è una soluzione altamente
+  efficace quando la probabilità di rollback è bassa, altrimenti inefficiente.
+  \textbf{EJB} supporta il locking ottimistico tramite l'annotazione
+  \texttt{@version}.
+  \item \textbf{persistency}, gestito da JPA
+  \item \textbf{distribution}, tramite protocolli (RMI, SOAP, JMS
+  etc$\ldots$) che fanno parte 
+  dello standard e che possono essere usati in modo trasparente per far
+  comunicare i componenti tramite messaggi. È sia client-server (entity bean
+  serializzati possono essere trasferiti al client) che server-side (avendo RMI
+  utilizzato anche per la comunicazione tra i componenti EJB lato server) 
+  \item \textbf{naming}, gestito da JNDI con dependency injection
+  \item \textbf{security}. Si hanno tre livelli basati su \textbf{Java
+    Authentication and Authorization Service (\textit{JAAS})}:
+  \begin{itemize}
+    \item \textbf{authentication}, per validare l'identità dell'utente tramite
+    login forms, certificati etc$\ldots$
+    \item \textbf{authorization}, per applicare criteri di sicurezza per
+    verificare se un utente può eseguire l'operazione richiesta 
+    \item \textbf{secure communications} per creare canali sicuri
+  \end{itemize}
+  La sicurezza viene definita in modo dichiarativo e poi gestita dal framework
+  \item \textbf{asynchronous communication}, con JMS
+  \item \textbf{timer}, tramite un servizio di timing per comportamenti
+  proattivi regolari in base ai setting
+\end{enumerate}
+
 \end{document}  
 % LocalWords:  Machine Learning waterfall png img slides jpg testing self step
 % LocalWords:  organizing continuous refactoring Scrum scrum product backlog as
@@ -3580,4 +3974,4 @@ Si hanno tra strategie per il mapping (\textbf{su slide esempi delle varie
 % LocalWords:  simil embedded firewall tracciabilità forward reference slide RD
 % LocalWords:  understanding elicitation agreement rationale Document bias
 % LocalWords:  stakeholder engagement transcript osservazionali Evaluation
-% LocalWords:  interaction elicitazione
+% LocalWords:  interaction elicitazione vendor

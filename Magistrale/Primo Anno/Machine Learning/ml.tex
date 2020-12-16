@@ -4603,6 +4603,189 @@ nell'apprendimento della rete. \\
 Tutte queste nuove tecniche permettono prestazioni migliori di
 classificazione.\\
 \textbf{Su slide esempio reale di struttura di deep learning per CIFAR-100.}
+\chapter{Misura delle performance}
+Si studia quanto ci si può fidare di un modello e come classificare i risultati
+di un modello, per capire se è migliore di un altro.
+\section{Modelli supervisionati}
+Partiamo dagli approcci supervisionati. \\
+Uno egli indicatori è legato alla misurazione dell'errore sui dati di training e
+testing (facendo training sul training e testing sempre sul training) ma questa
+non è una buona misura ma si fa per capire se il modello ha buone performance su
+dati ``ovvi'' ma questo non è garanzia di qualità, non studiando dati non
+osservati in fase di training. Si rischiano overfitting/underfitting (nel primo
+caso si impara molto bene sui dati di training ma quel modello appreso ha
+performance basse e complessità computazionale alta su dati nuovi mentre nel
+secondo caso il modello ha già performance basse e quindi risultati pessimi su
+nuovi dati, anche se si ha minor complessità computazionale, avendo magari meno
+parametri).
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.3]{img/of.jpg}
+  \caption{Esempio di modello in overfitting}
+  \label{fig:over}
+\end{figure}
+Normalmente quindi si fa il testing su un testing set. Spesso è meglio avere un
+modello meno preciso ma con complessità computazionale adeguata al dominio in
+cui sto lavorando.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.5]{img/of2.jpg}
+  \caption{Andamento di overfitting/underfitting sulla qualità del modello, con
+    indicato il range ideale. Spesso sull'asse delle $x$ si ha il numero di
+    iterazioni necessarie per capire quando terminarle per non andare in
+    overfitting, come nel caso delle reti neurali}
+  \label{fig:over2}
+\end{figure}
+Si hanno quindi varie misure di performance:
+\begin{itemize}
+  \item error rate e accuratezza
+  \item true/false positive/negative
+  \item precisione, recall, F-Measure
+  \item curve ROC
+  \item complessità temporale
+\end{itemize}
+Si hanno quindi:
+\begin{itemize}
+  \item successo, se le istanze sono predette correttamente
+  \item errore, se le istanze non sono predette correttamente
+\end{itemize}
+Calcolando, per il primo punto:
+\begin{itemize}
+  \item l'error rate come percentuale di errori commessi sull'intera serie di
+  istanze 
+  \item accuratezza come proporzione di istanze classificate correttamente
+  sull'intero set di istanze 
+\end{itemize}
+Passiamo al secondo punto.\\
+Normalmente si munta a minimizzare falsi positivi/negativi anche se tutte e 4 le
+entry della matrice di confusione andrebbero ottimizzate (con le entry che
+possono avere costi 
+diversi a seconda del dominio, si pensi alle diagnosi mediche dove i falsi
+negativi sono più gravi dei falsi positivi).\\
+In un problema multiclasse ho su righe e colonne le classi reali e le classi
+predette, rispettivamente, non avendo più chiari i veri/falsi positivi/negativi,
+che comunque possono essere ricavati per ogni classe.\\
+\begin{definizione}
+  Definiamo (in pratica per il caso binario):\\
+  \textbf{accuratezza}:
+  \[\frac{TP+TN}{TP+TN+FP+FN}\]
+  (che nel caso multiclasse è la somma dei valori sulla diagonale principale
+  diviso la somma del resto)\\
+  \textbf{precisione}:
+  \[\frac{TP}{TP+FP}\]
+  \textbf{recall}:
+  \[\frac{TP}{TP+FN}\]
+  \textbf{F-measure}:
+  \[\frac{2\cdot precisione\cdot recall}{precisione+ recall}\]
+  \textbf{Queste sono le tradizionali misure globali.}
+\end{definizione}
+Si costruiscono quindi le matrici di confusione a seconda del caso binario o
+multiclasse. Ma per il caso multiclasse posso calcolare solo la precisione di
+una singola classe, come anche per recall e F-measure.\\
+Spesso quindi si lavora a livello di classe.
+\begin{definizione}
+  Si hanno, data una label $l$ nell'insieme delle etichette $L$:\\
+  \textbf{precisione}:
+  \[P(l)=\frac{\# \text { of instances correctly predicted as } 1}{\#\text { of
+        instances predicted as } 1}\]
+  \textbf{recall}:
+  \[R(l)=\frac{\# \text { of instances correctly predicted as } 1}{\#\text { of
+        instances of class } 1}\] 
+  \textbf{F-measure} (ovvero tramite media armonica):
+  \[F(l)=\frac{2 \cdot P(l) \cdot R(l)}{P(l)+R(l)}\]
+  Potrei avere un parametro $\beta$ per dare più importanza ad una certa classe.
+\end{definizione}
+Si hanno modi per aggregare le misure di performance per scoprire comportamenti
+particolari. 
+\begin{definizione}
+  Data un'etichetta $l$ ho due tecniche di aggregazione:\\
+  \textbf{Macro-average} di una misura di performance $Perf$:
+  \[\text {Perf}\,^{*}=\frac{1}{|L|} \sum_{i=1}^{|L|} \text {Perf}(l)\]
+  dicendo che tutte le classi sono ugualmente importanti e hanno tutte lo stesso
+  peso.\\
+  \noindent
+  \textbf{Micro-average} dove ho una media pesata:
+  \[\text {Perf}\,^{*}=\sum_{l=1}^{|L|} \frac{|class(l)|}{\#\text{ of istances}}
+    \text {Perf}(l)\] 
+  Dando quindi più peso alle classi più ``corpose'' e predominanti.
+\end{definizione}
+Parliamo ora di curve \textbf{Receiver Operating Characteristic (\textit{ROC})},
+che rappresentano delle curve che dimostrano la 
+capacità discriminativa di un modello al variare di una certa soglia. Si
+confrontano veri/falsi positivi al variare di una certa soglia (che varia la
+variabile sperimentale). Variare la
+soglia permette di avere decisioni diverse e permette di costruire la curva
+ROC. In problemi con tante classi, soprattutto se alcune sotto dimensionate, si
+rischia di non riconoscerle queste classi ma abbassando la soglia si può aiutare
+il modello a riconoscerle. \textbf{Si ha una curva ROC per ogni classe} (con una
+soglia unica però). L'uso delle curve ROC è comodo per fare tuning su modelli
+indotti da dati molto sbilanciati. Si confrontano i vari modelli a seconda delle
+singole classi studiando l'impatto della soglia. 
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.5]{img/roc.jpg}
+  \caption{Esempio di curva ROC per una certa classe. Se una curva, associata ad
+    un certo metodo, domina tutte le altre allora quello è il metodo
+    migliore. Se vale per ogni classe non si hanno più dubbi.}
+  \label{fig:roc}
+\end{figure}
+Passiamo ora alla \textbf{learning curve}. Sono utili per studiare come evitare
+l'overfitting, confrontando la cardinalità degli esempi con una miusra di
+performance, come l'accuratezza. Ad un certo punto si arriva ad un plateau e
+quindi è inutile aumentare il numero di esempi (e la complessità computazionale)
+se tanto non si hanno miglioramenti. Non solo, si aumenta anche la probabilità
+di overfitting. 
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.5]{img/lc.jpg}
+  \caption{Esempio di learning curve.}
+  \label{fig:roc}
+\end{figure}
+Normalmente abbiamo lavorato con train e test (divisi circa per $\frac{2}{3}$ e
+$\frac{1}{3}$, rispettivamente, per poi trainare il modello sul training e
+testare i risultati sul test) ma questa è una visione parziale.  \\
+In generale più è grande il test set e più accurata la stima
+dell'errore. D'altro canto più è grande il training set e meglio sarà fatta la
+classificazione, al più di overfitting. Il test set non deve essere usato per il
+training e per il tuning ma si usa il validation set per il tuning, che quindi è
+un set aggiuntivo usato per ottimizzare i parametri (soglia, parametro di
+complessità della SVM etc$\ldots$) quando il dataset è abbastanza grande da
+permetterlo. Il validation è solitamente il $10\%$ del training set.\\
+Se il dataset è piccolo magari la divisione appena detta non è rappresentativa
+ma si usano tecniche di \textbf{repeated holdout}, in cui si divide più volte
+usando di volta i dati nei vari set. Si usa la \textbf{cross-validation} e la
+\textbf{k-fold-cross-validation} dove si hanno due step:
+\begin{enumerate}
+  \item i dati vengono suddivisi in $k$ sottoinsieme di uguale dimensione 
+  \item ogni sottoinsieme a sua volta viene utilizzato per il test e il resto
+  per l'addestramento 
+\end{enumerate}
+pesso i sottoinsiemi vengono stratificati prima che venga eseguita la cross
+validation e viene calcolata la media delle stime di errore per fornire una 
+stima complessiva dell'errore.\\
+Per costruire una matrice di confusione su una time-fold-convalidation
+costruisco per ogni iterazione di folding la matrice di confusione dello
+specifico test set e alla fine le si somma per ottenere la matrice finale.\\
+Una variante è la \textbf{stratified ten-fold cross-validation} in quanto
+esperimenti approfonditi hanno dimostrato che questa è la scelta migliore per
+ottenere una stima accurata (usare 10 fold) e avendo che la distribuzione delle
+istanze selezionate, rispetto alla classe da prevedere in ogni volta, è simile
+alla distribuzione originale del set di dati (per lo stratified). La
+stratificazione riduce la stima  
+della varianza ma è ancora meglio ripetere tale stratificazione dieci volte.\\
+Si hanno altre tecniche definite di \textbf{bootstrap} che utilizzano il
+campionamento con rimpiazzo dal training set, avendo che la stessa istanza può
+finire puiù volte nello stesso ``esperimento'' di time fold cross validation. Le
+istanze del dataset originale che non compaiono nel nuoo training set vengono
+usate come test. \textbf{Su slide 0.632 bootstrap, una tecnica empiricamente
+  efficiente ma poco usata per la distorsione dei risultati a casua del suo
+  pessimismo intrinseco}.\\
+Una tecnica alternativa è \textbf{leave-one-out} che perfeziona il bootstrap. In
+questa tecnica si ha una $k$ fold validation con $k$ pari al numero delle
+istanze. Un'istanza sola viene lasciata per il test e tuutte le altre per il
+training, cambiando ad ogni iterazione quella di testing fino ad esaurimento. È
+computazionalmente pesante ($n$ fold per $n$ istanze)ma fa il miglior uso dei
+dati. 
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 

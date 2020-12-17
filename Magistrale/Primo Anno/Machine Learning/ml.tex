@@ -4604,6 +4604,8 @@ Tutte queste nuove tecniche permettono prestazioni migliori di
 classificazione.\\
 \textbf{Su slide esempio reale di struttura di deep learning per CIFAR-100.}
 \chapter{Misura delle performance}
+\textbf{Questa parte è stata fatta per il laboratorio, è parecchio incompleta ed
+è bene guardare anche le slide.}\\
 Si studia quanto ci si può fidare di un modello e come classificare i risultati
 di un modello, per capire se è migliore di un altro.
 \section{Modelli supervisionati}
@@ -4784,8 +4786,65 @@ Una tecnica alternativa è \textbf{leave-one-out} che perfeziona il bootstrap. I
 questa tecnica si ha una $k$ fold validation con $k$ pari al numero delle
 istanze. Un'istanza sola viene lasciata per il test e tuutte le altre per il
 training, cambiando ad ogni iterazione quella di testing fino ad esaurimento. È
-computazionalmente pesante ($n$ fold per $n$ istanze)ma fa il miglior uso dei
-dati. 
+computazionalmente pesante ($n$ fold per $n$ istanze) ma fa il miglior uso dei
+dati. \\
+Da un punto di vista metodologico vediamo ora come misurare la robustezza di un
+modello, anche rispetto ad un altro modello. Si misurano quindi gli
+\textbf{intervalli di confidenza} per un certo livello di confidenza. Tra
+modelli si confrontano quindi gli intervalli di confidenza, preferendo quello
+con intervallo più stretto (per l'intervallo esempi con t-student). Oltre alle
+misure già elencate precedentemente si 
+usa anche l'entropia (\textbf{esempio su slide}).\\
+Un secondo elemento per preferire un modello ad un altro (dicendo che
+``out-performa'' l'altro) è usare i \textbf{test di significatività}. Per farlo
+si usa il \textbf{test della t-student} e se i due modelli stanno lavorando
+sulla stessa configurazione di fold allora posso usare il \textbf{paired t-test}
+confrontando direttamente le predizioni, non avendo variabilità sperimentale tra
+i due risultati. \textbf{Sulle slide eventuali formule per il calcolo riprese
+  dalle basi di statistica}.\\
+Quindi:
+\begin{itemize}
+  \item si fissa il livello di significatività desiderato (normalmente $95\%$)
+  \item si divide per due avendo un test a due cose
+  \item si cerca il valore di $z$
+  \item se $t\leq -z$ o $t\geq z$ la differenza è significativa
+\end{itemize}
+Potrebbe capitare che un t-test paired non sia effettuabile, anche solo se nel
+mezzo del lancio dei modelli si ha un fattore di randomicità o avendo una $k$
+diversa di fold convalidation.\\
+In generale:
+\begin{itemize}
+  \item non basarsi solo sui numeri per le prestazioni
+  \item guardare bene l'output del modello
+  \item non trascurare la complessità del modello
+\end{itemize}
+\section{Modelli non supervisionati}
+Si hanno diverse tecniche per studiare la bontà del clustering tra cui:
+\begin{itemize}
+  \item clustering tendency
+  \item clustering quality
+\end{itemize}
+Per la \textbf{cluster tendency} ci dice che bisogna verificare se i dati hanno
+una certa tendenza e che non siano punti distribuiti uniformemente nello
+spazio. Per studiare la cosa all'aumentare delle dimensioni si usano:
+\begin{itemize}
+  \item \textbf{Hopkin statistic} che studia la probabilità che il dataset sia
+  generato con distribuzione uniforme, campionando $N$ punti e calcolando la
+  distanza da ogni punto rispetto al punto più vicino. Si genera quindi un
+  dataset simulato, campionando da una distribuzione uniforme e infine si
+  calcola con:
+  \[H=\frac{\sum_{i=1}^{n} y_{i}}{\sum_{i=1}^{n} x_{i}+\sum_{i=1}^{n} y_{i}}\]
+  $H$ (hopkin statistic) oltre $0.75$ indica clustering tendency al $90\%$ di
+  livello di confidenza
+  \item  \textbf{VAT algorithm} dove si calcola la matrice di dissimilarità e si
+  mettono vicini gli elementi simili, creando una matrice a blocchi riducendo il
+  problema ad due dimensioni, facilmente visualizzabile
+\end{itemize}
+In merito al \textbf{clustering quality} posso misurare misure interne
+(silhouette, somma dei quadrati etc$\ldots$) ma anche esterne (precisione,
+recall etc$\ldots$), qualora si abbia a che fare con anche le classi ottenute
+dal cluster. Posso quindi fare t-test paired o unpaired a seconda della
+situazione. 
 \end{document} 
 
 % LocalWords:  Machine Learning machine learning dataset fit overfitting sse 

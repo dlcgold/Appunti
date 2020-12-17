@@ -46,11 +46,11 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Metodi Formali
 
 ##### I anno Magistrale
-- [ ] Archietture Dati
-- [ ] Machine Learning
+- [x] Archietture Dati (RC)
+- [x] Machine Learning (RC)
 - [ ] Modelli della Concorrenza
-- [ ] Processo e Sviluppo Software
-- [ ] Teoria della Computazione
+- [x] Processo e Sviluppo Software (RC)
+- [x] Teoria della Computazione (RC)
 
 ### Altro
 Suggeriamo queste repository open:

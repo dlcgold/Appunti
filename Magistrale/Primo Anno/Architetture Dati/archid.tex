@@ -5980,7 +5980,153 @@ poi vanno analizzati e processati):
 \end{itemize}
 Bene o male sono tutti molto simili.\\
 \textbf{Su slide immagini delle varie data platform e breve spiegazione dei vari
-strumenti}
+  strumenti}
+\chapter{Data management for machine learning}
+Vediamo un argomento che unisce architetture dati e machine learning.\\
+Normalmente in machine learning si parte da dati di training già puliti, si fa
+il training e si ottiene il modello che a sua volta, con una serie di dati
+reali, produce dei risultati. In produzione tutto questo non è sufficiente e non
+si ha tanta importanza nella fase di \textit{train} e \textit{serve} ma nei dati
+in 
+se. Bisogna prepare bene i dati per il ML, avendo il rischio di \textbf{garbage
+  in, garbage out} in quanto i computer elaborano in modo acritico anche un
+insieme di dati in entrata palesemente insensati (garbage in) producendo, a loro
+volta, un risultato insensato (garbage out). La fase di \textit{prepare} dei
+dati è quindi fondamentale, mediamente:
+\begin{itemize}
+  \item $80\%$ del tempo è \textit{data preparation}
+  \item $5\%$ del tempo è \textit{identificazione del modello}
+  \item $5\%$ del tempo è \textit{training}
+  \item $5\%$ del tempo è \textit{deployment} e altri lavori minori 
+\end{itemize}
+Bisogna poi, per i risultati, fare \textit{data validation}, \textit{data
+  monitoring} ed eventuali correzioni.\\
+I dati di input vengono mediamente divisi in training (grandi) e serving
+(piccoli) come già sappiamo.\\
+Nella fase di \textit{prepare} dei dati di training bisogna valutare quali sono
+le 
+feature rilevanti, fare data exploration dei valori delle feature, quali sono le
+migliori pratiche per estrarre dai valori delle feature i migliori valori per il
+modello di machine learning etc$\ldots$ Si parla di \textbf{feature selection} e
+\textbf{feature engineering}. Bisogna poi valutare il modello, capendo se è
+abbastanza buono, se deve essere modificato o se servono più dati o più
+feature.\\
+In produzione però bisogna andare oltre, basti pensare che magari una fonte dei
+dati subisce un refactoring e tutto il modello si ``rompe'', avendo \textbf{data
+failure}, con performance che crollano o peggio, se si parla di reinforcment
+learning, si ha il modello che viene allenato con dati errati (e riaddestrare è
+costoso). Si vede quindi che il problema non è il modello in se ma i dati.\\
+Bisogna quindi validare i dati in input al modello prima di darli in pasto al
+modello per capire se è tutto corretto. Bisogna tenere conto anche delle
+``deviazioni'' dei dati che dipendono dalle situazioni a contorno
+dell'environment (ad esempio un modello per il traffico addestrato l'anno scorso
+non vale ora causa pandemia). I problemi vanno quindi fixati, per poter poi
+ricreare i dati di testing  serving e riprendere l'intero ciclo di vita.\\
+Dal punto di vista del personale si hanno almeno tre figure:
+\begin{itemize}
+  \item \textbf{l'esperto di ML}, che studia il modello
+  \item \textbf{il software/web engineering (\textit{SWE})}, che effettivamente
+  sviluppa il modello
+  \item \textbf{il site reliability engineering (\textit{SRE})}, che si occupa
+  appunto di fixare i vari problemi (sia dei dati che di interazione con il
+  cliente) 
+\end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.65]{img/pipe.pdf}
+  \caption{Esempio di pipeline completa di machine learning in produzione.}
+  \label{fig:pipe}
+\end{figure}
+In figura \ref{fig:pipe} può essere studiata la \textbf{data understanding}
+nell'ambito del machine learning, avendo un \textit{sanity check} prima di
+trainare il primo modello e avendo altre analisi a ciclo dopo. Tra i check
+classici nel sanity check abbiamo:
+\begin{itemize}
+  \item il controllo di valore massimo, minimo e più frequente di ogni feature,
+  studiando l'accuratezza sintattica come dimensione di qualità
+  \item l'istogramma dei valori continui e categorici per vedere la
+  distribuzione dei valori 
+  \item se una feature è presente in un numero sufficiente di esempi per lo
+  studio in analisi, studiando quindi la completezza come dimensione di qualità
+  \item se una feature ha il giusto numero di valori, dando un vincolo di
+  consistenza ai dati
+\end{itemize}
+Non sempre i dataset reali sono ``puliti''.\\
+Se sapessimo a priori cosa cercare basterebbero una seria di query per la
+\textit{data exploration}. La realtà però è che spesso non si sa come è fatto un
+dataset e quindi si sfrutta la \textit{data visualization}, ovvero strumenti di
+visualizzazione per poter guardare graficamente i vari elementi per procedere
+poi al sanity check. Mediamente per la visualizzazione si usano metriche basate
+sulla deviazione e, in ogni caso, si hanno informazioni da visualizzare più
+interessanti/utili di altre.\\
+Questo è all'inizio del processo mentre durante la
+fase di messa in produzione e delle varie iterazioni si hanno altri aspetti per
+la data understanding. In ordine di importanza:
+\begin{itemize}
+  \item \textbf{analisi feature-based}, studiando la sensitività di una feature
+  rispetto ai dati e studiando le conseguenze di eventuali variazioni degli
+  stessi. Si usano approcci visuali o alla datawarehouse (???)
+  \item \textbf{analisi del ciclo di vita dei dati}, studiando dipendenze delle
+  feature nascoste (fattore necessario in alcuni modelli, come quello bayesano
+  che assume indipendenza delle feature). Può essere successo che un dato sia
+  stato spezzato in due dati tra loro dipendenti 
+  \item \textbf{altre questioni aperte}, tra cui la fairness del modello di
+  machine learning, ovvero studiando il ``pregiudizio'' di alcuni modelli
+  rispetto a certe classi (magari perché addestrati solo su alcune classi o
+  avendo pochi dati per alcune classi, ad esempio predire il nuovo presidente
+  degli USA e ottenere solo uomini, non avendo donne nello storico dei dati),
+  avendo quindi modelli biased perché i dati sono biased (il modello è corretto
+  ma i dati no). Questo orimo aspetto è molto importante nel mondo del
+  lavoro. Un'altra questione è quello di cercare di ``fregare'' i modelli 
+  di ML tramite dati di tipo \textit{adversarial}. Si parla in questo caso di
+  \textbf{reti GAN} e \textbf{deep fake}, ovvero sistemi in cui si usa un
+  secondo sistema con cui si cerca di ingannare il primo classificatore con dati
+  simili ma ``sintetici''. In pratica si cerca di imparare dal passato per
+  ricreare qualcosa di simile. Questa seconda questione ha più valenza nel mondo
+  della ricerca
+\end{itemize}
+Per la fase di \textbf{data validation} si studiano eventuali cambiamenti nei
+dati in input al modello (anche solo un uppercase che diventa lowercase con le
+feature in uppercase che diventano \textit{rare}),
+fattore che può rovinare i risultati (è una situazione tipica in produzione).\\
+Bisogna capire come fare le correzioni e si deve riconoscere quando accadono
+queste cose. Si hanno delle \textit{best practice}:
+\begin{itemize}
+  \item \textbf{alert}, facendo un \textit{continuous data cleaning} posso avere
+  alert per errori tecnici ma anche per cambi di dati (magari per variazioni dei
+  tempi a cui si riferisocno i dati ad esempio i dati presi in pandemia sono
+  diversi da quelli di due anni fa)
+  \item \textbf{playbook}, che contengono le classi di problemi e vanno
+  consultati manualmente (per ora)
+\end{itemize}
+Si hanno errori che hanno anche impatto basso sulle prestazioni. Bisogna
+considerare anche che eventuali correzioni possono avere conseguenze su altre
+fasi della pipeline.\\
+Passiamo alla \textbf{data preparation}. Bisogna fare \textbf{feature
+  engineering} per capire come migliorare le performance,
+aggiungendo/rimuovendo dati/feature/attributi (e studiandone la qualità prima
+dell'aggiunta). Si hanno tecniche per passare da un dato grezzo in una
+rappresentazione (magari booleana, tramite \textit{One Hot Encoding}) più adatta
+ai modelli di ML (queste tecniche si fanno a Data Analytics). Tra le altre
+tecniche standard abbiamo:
+\begin{itemize}
+  \item Normalization
+  \item Bucketization
+  \item Winsorizing
+  \item Feature crosses
+  \item usare un modello pre-addestrato o l'embedding per estrarre feature 
+\end{itemize}
+Anche i risultati di reti neurali possono essere usati per alimentare i dati,
+tramite \textit{rapresentational learning} (???).\\
+La feature engineering richiede molta conoscenza di dominio e avere buoni dati
+richiede anche una cardinalità minore degli stessi per ottenere ottime
+prestazioni. Conviene quindi migliorare la qualità dei dati più che aumentarli a
+dismisura, nella maggioranza dei casi di classificazione. In altri campi, come i
+sistemi generativi di linguaggi (naturali), quindi questo trade-off sembra
+essere non così ben definito in ogni caso. Si hanno tecniche di data management
+per migliorare la qualità delle label etc$\ldots$\\
+Aggiungere feature in produzione è comunque complesso, anche dal punto di vista
+computazionale, oltre al fatto che aggiungere dati è costoso.
 \end{document}
 
 

@@ -6992,7 +6992,8 @@ tipo $\mathbf{EFG}\,\alpha$).\\
 Potrei avere formule di CTL$^*$ che non sono esprimibili in CTL e
 PLTL, estendendone la capacità espressiva ma aumentando la complessità degli
 algoritmi associati. In pratica l'insieme delle formule CTL$^*$ contiene gli
-altri due (che per di più hanno un'intersezione tra loro).\\
+altri due (che per di più hanno un'intersezione tra loro).
+\section{Model checking}
 \begin{definizione}
   Due modelli di Kripke $M_1$ e $M_2$ con stati iniziali $q_0$ e $s_0$, si ha
   che essi sono \textbf{equivalenti} rispetto ad una logica $I$ (che può essere
@@ -7246,6 +7247,244 @@ quindi un altro teorema.
   stati già inclusi nell'insieme in uno step precedente fino a che non ho più
   passi possibili. Si arriva a trovare il massimo punto fisso.
 \end{esempio}
+\begin{definizione}
+  Definiamo \textbf{automi di B\"{u}chi} come automi finiti che riconoscono
+  parole infinite su un alfabeto $\Sigma$. Si indicano con la quadrupla:
+  \[B=(Q,q_0,\delta,F)\]
+  con:
+  \begin{itemize}
+    \item $Q$ insiemi di stati, detti \textit{locations}
+    \item $q_0\in Q$ stato iniziale
+    \item $\delta\subseteq Q\times \Sigma\times Q$ relazione di transizione
+    \item $F\subseteq Q$ insieme di stati accettanti (non si può dire finali in
+    quanto le stringhe sono infinite)
+  \end{itemize}
+  Presa quindi una parola infinita:
+  \[w=a_0a_1\cdots\]
+  essa è accettata da $B$ se la sequenza di stati corrispondente $q_0q_1\cdots$
+  passa infinite volte per almeno uno stato di $F$. In altri termini mi fermo se
+  uno stato non ha un arco uscente che porta alla lettera successiva altrimenti
+  mi sposto in quello stato ma non serve che mi fermo in uno stato accettante ma
+  è sufficiente passarci infinite volte.\\
+  Diciamo che $L(B)$ è il linguaggio, ovvero l'insieme di tutte le parole
+  accettate dalla'automa.
+\end{definizione}
+\begin{teorema}
+  Il problema:
+  \[L(B)=\emptyset\]
+  è \textbf{decidibile}.
+\end{teorema}
+\begin{esempio}
+  Sia:
+  \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state, initial, accepting] (q_0) {$q_0$};
+      \node[state] (q_1) [right=of q_0] {$q_1$};
+      \path[->]
+      (q_0) edge  [bend left = 25]node {$a$} (q_1)
+      (q_1) edge  [bend left = 25]node {$b$} (q_0)
+      (q_0) edge [loop above] node {$b$} (q_0)
+      (q_1) edge [loop above] node {$a$} (q_1)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Si ha:
+  \begin{itemize}
+    \item $w_1=bbbbbbbbb\cdots$ che è accettata
+    \item $w_2=bbaaabbbb\cdots$ che è accettata
+    \item $w_3=babababab\cdots$ che è accettata
+    \item $w_4=baabbbaaa\cdots$ che non è accettata
+  \end{itemize}
+\end{esempio}
+\begin{esempio}
+  Studiamo la formula $\mathbf{GF}\,p$ e sia:
+   \begin{center}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+      \node[state, initial] (q_0) {$q_0$};
+      \node[state, accepting] (q_1) [right=of q_0] {$q_1$};
+      \path[->]
+      (q_0) edge  [bend left = 25]node {$\{p\}$} (q_1)
+      (q_1) edge  [bend left = 25]node {$\emptyset$} (q_0)
+      (q_0) edge [loop above] node {$\emptyset$} (q_0)
+      (q_1) edge [loop above] node {$\{p\}$} (q_1)
+      ;
+    \end{tikzpicture}
+  \end{center}
+  Immaginiamo qualche computazione:
+  \begin{itemize}
+    \item $w_1=\emptyset\{p\}\{p\}\emptyset\{p\}\emptyset\emptyset\cdots$ che
+    non è accettata 
+    \item $q_2=\emptyset\{p\}\emptyset\{p\}\emptyset\{p\}\emptyset\cdots$ che è
+    accettata 
+  \end{itemize}
+  
+\end{esempio}
+Possiamo associare ad una computazione su un modello di Kripke una parola che
+viene eseguita su un certo automa di di B\"{u}chi.\\
+Un automa di B\"{u}chi corrisponde quindi ad una formula PLTL, ma bisogna notare
+che l'insieme degli stati dell'automa non ha una relazione diretta con il
+modello di Kripke.\\
+Vediamo quindi l'algoritmo per vedere se una formula $\alpha$ è vera in
+$(M,q_0)$:
+\begin{itemize}
+  \item costruiamo l'automa che verifica quando $\alpha$ non è verificata
+  $B_{\neg\alpha}$ (non dimenticando i discorsi fatti in merito alla negazione
+  in PLTL)
+  \item trasformiamo $M$ in un automa etichettato come $B_{\neg\alpha}$ ovvero
+  in un automa etichettato da insiemi diproposizioni atomiche 
+  \item calcoliamo il prodotto sincrono dei due automi, che chiamiamo $PS$. Dati
+  due automi definiti sullo stesso alfabeto il prodotto sincrono è un automa che
+  corrisponde ad eseguire in parallelo i due automi in modo che procedano con le
+  stesse etichette. Gli stati sono quindi il risultato del prodotto cartesiano
+  tra gli stati dei due automi
+  \item se $L(PS)=\emptyset$ allora $M,q_0\vDash\alpha$, in quando nel modello
+  di Kripke $M$ non c'è nessun cammino infinito nel quale non è verificata
+  $\alpha$, che quindi è valida nel modello di Kripke. Altrimenti si potrebbe
+  eseguire un cammino in $M$ in cui non sarebbe soddisfatto $\alpha$ (si genera
+  in caso anche un controesempio in cui la formula $\alpha$ è violata)
+\end{itemize}
+Passiamo ora cercare un algoritmo per CTL.
+\begin{definizione}
+  Fissiamo $M=(Q,T,I)$ e sia $\alpha$ una formula. Si definisce
+  \textbf{estensione di $\alpha$}:
+  \[[[\alpha]]=\{q\in Q|\,M,q\vDash \alpha\}\]
+  Se $\alpha=\top$ estensione è l'insieme di tutti gli stati, se è $\bot$ è
+  l'insieme vuoto. Se la formula è una proposizione atomica allora l'estensione
+  è l'insieme degli stati dove vale la proposizione atomica. Se ho un connettivo
+  tra due formule già estese segue la logica dell'operatore (esempio se ho l'and
+  in un certo stato è valido sse valgono entrambe le proposizioni).\\
+  Passiamo a CTL.\\
+  Sia $\alpha\equiv\mathbf{AF}\,\beta$. Si
+  definisce la funzione:
+  \[f_\alpha:2^Q\to 2^Q\]
+  ovvero una funzione che prende un sottoinsieme di stati e lo trasforma in un
+  sottoinsieme di stati. Si ha che $\forall H\subseteq Q$:
+  \[f_\alpha(H)=[[\beta]]\cup\{q\in Q|\forall(q,q')\in T:q'\in H\}\]
+  Si noti che $f_a(\emptyset)=[[\beta]]$.\\
+  Si dimostra che $[[\alpha]]$ è il minimo punto fisso di $f_\alpha$.\\
+  Ogni volta si aggiungono nuovi stati.\\
+  Posso usare lo stesso algoritmo per vedere se $\alpha$ vale in un certo stato,
+  osservando se alla fine lo stato che ci interessa è contenuto
+  nell'estensione.\\
+  Sia ora $\alpha\equiv \mathbf{EG}\,\beta$. Si
+  definisce la funzione:
+  \[g_\alpha:2^Q\to 2^Q\]
+  Si ha che $\forall H\subseteq Q$:
+  \[g_\alpha(H)=[[\beta]]\cap\{q\in Q|\exists(q,q')\in T:q'\in H\}\]
+  Si noti che $g_\alpha(Q)=[[\beta]]$.\\
+  Si dimostra che $[[\alpha]]$ è il massimo punto fisso di $g_\alpha$.\\
+  Ogni volta si tolgono stati.\\
+  In generale si nota che il ``per ogni'' e l' ``esiste'' compaiono nella
+  formula.\\
+  Per l'operatore next è sufficiente guardare il passo successivo quindi non
+  serve un ragionamento così complesso mentre per l'until si fa un ragionamento
+  simile al future, essendo nella pratica una sua forma rafforzata (poi si
+  cerca, come per il future, il minimo punto fisso).
+\end{definizione}
+Possiamo quindi trovare un algoritmo per CTL che sarà ricorsivo.
+\begin{definizione}
+  Definiamo \textbf{$\mu$ calcolo} come un linguaggio logico che permette di
+  definire formule ricorsive.  
+\end{definizione}
+Si supponga di avere solo l'operatore temporale next e i
+quantificatori. Cerchiamo di esprimere, solo con il next, la proprietà
+$\mathbf{EF}\,\alpha$. Si ha quindi una sorta di srotolamento:
+\[\mathbf{EF}\,\alpha\equiv \alpha\lor
+  \mathbf{EX}\,\alpha\lor\mathbf{EXEX}\,\alpha\lor\cdots\]
+che è una formula infinita ma con una struttura ben definita, dal secondo
+termine si inizia sempre con $\mathbf{EX}$. Raccogliamo:
+\[\mathbf{EF}\,\alpha\equiv \alpha\lor
+  \mathbf{EX}(\,\alpha\lor\mathbf{EX}\,\alpha\lor\cdots)\]
+ma quindi tra parentesi si ha in pratica la formula completa di
+$\mathbf{EF}\,\alpha$ e quindi posso dire che:
+\[\mathbf{EF}\,\alpha\equiv\alpha\lor\mathbf{EX}\,(\mathbf{EF}\,\alpha)\]
+Fisso quindi una notazione per scrivere questa cosa:
+\[\mu Y.(\alpha\lor \mathbf{EX}\,Y)\]
+Dove la $\mu$ indica tradizionalmente il minimo punto fisso, Quindi la formula
+si legge ``minimo punto fisso della funzione $(\alpha\lor \mathbf{EX}\,Y)$ dove
+$Y$ è l'oggetto che cerchiamo di definire''. È quindi una forma compatta di
+scrivere la formula infinita.\\
+Passo a $\mathbf{AG}\alpha$:
+\[\mathbf{AG}\,\alpha\equiv \alpha\land
+  \mathbf{AX}\,\alpha\land\mathbf{AXAX}\,\alpha\land\cdots\]
+e quindi, raccogliendo:
+\[\mathbf{AG}\,\alpha\equiv\alpha\land \mathbf{AX}\,(\mathbf{AG}\alpha)\]
+ovvero:
+\[\nu Y.(\alpha\land\mathbf{AX}\,Y)\]
+Possiamo generalizzare fino ad avere un linguaggio completo, una nuova logica,
+detto appunto \textbf{calcolo $\mu$}.
+\begin{definizione}
+  Dato $AP$ l'insieme delle proposizioni atomiche e siano $\alpha$ e $\beta$ due
+  formule. Si ha che la sintassi del linguaggio è:
+  \begin{itemize}
+    \item $\alpha\lor\beta$ e $\neg \alpha$ sono formule (forse anche le altre
+    ottenute con connettivi logici (???))
+    \item $\mathbf{AX}\,\alpha$ e $\mathbf{AX}\,\alpha$ sono formule
+    \item $\mu Y.f(Y)$ è una formula è una formula, dove $f$ è una formula nella
+    quale compare $Y$ (con restrizioni sulle negazioni) 
+    \item $\nu Y.f(Y)$ è una formula è una formula, dove $f$ è una formula nella
+    quale compare $Y$ (con restrizioni sulle negazioni)
+  \end{itemize}
+  Si ha quindi un modo molto libero di costruire formule.\\
+  La semantica del calcolo $\mu$ è definita sui modelli di Kripke attraverso gli
+  operatori di punto fisso, usando idee simili a quelle usate per definire le
+  estensioni di formule temporali.
+\end{definizione}
+Si nota che:
+\[CTL^*\subset \mbox{calcolo } \mu\]
+quindi tutte le formule di $CTL^*$ sono esprimibili nel $\mu$ calcolo che quindi
+è più espressivo di tutte le logiche finora considerate (ed esprime anche cose
+che le altre non possono). La massima potenza espressiva si paga in complessità
+degli algoritmi e con una sorta di ``oscurità'' delle formule, che non sono
+facilmente leggibili ed interpretabili.\\
+Vediamo qualche dettaglio sulla complessità temporale, dato un modello di
+Kripke $M$ e una formula $f$, a parità di algoritmo canonico:
+\begin{itemize}
+  \item PLTL ha complessità $O(|M|\cdot 2^{|f|})$
+  \item CTL ha complessità $O(|M|\cdot |f|)$
+\end{itemize}
+In realtà la dimensione della formula rende difficile un confronto diretto in
+quanto una proprietà può avere una formula breve in LTL e una lunga in CTL (come
+abbiamo già visto). Anche il numero di stati, $|M|$, è da non trascurare in
+quanto può essere immenso, anche dal punto di vista della complessità
+spaziale. Si hanno quindi strategie per la trattazione 
+efficiente, tra cui:
+\begin{itemize}
+  \item rappresentazioni simboliche, tramite diagrammi di traduzione
+  binari (Ordered Binary Decision Diagrams, OBDD)
+  \item partial order reduction (tramite unfolding), spesso usato per le
+  reti di Petri. SI hanno tecniche efficienti dal punto di vista spaziale
+  \item traduzione in SAT, usando i SAT solver
+\end{itemize}
+Quindi, per concludere, per fare model checking una tecnica è ridurre il
+problema ad un modello di kripke.\\
+Parliamo giusto un secondo di \textbf{fairness}.
+\begin{definizione}
+  Si dice che un'esecuzione è \textbf{unfair} se un evento rimane sempre
+  abilitato da un certo istante in poi ma non scatta mai.\\
+\end{definizione}
+\begin{definizione}
+  Si definisce \textbf{fairness debole} se un evento che è abilitato
+  prima o poi scatta o viene disabilitato.
+\end{definizione}
+Bisogna quindi limitare la valutazione di una formula alla sua esecuzione
+\textbf{fair}, nella realtà è irrealistico pensare che qualcosa non scatti
+mai essendo sempre abilitata.
+\begin{definizione}
+  Si definisce \textbf{fairness forte} se ogni evento che viene abilitato
+  infinite volte scatta infinite volte (a lungo termine senza curarsi degli
+  aspetti quantitativi). Ovvero, in PLTL, se:
+  \[\mathbf{GF}\,(\mbox{evento è abilitato})\to\mathbf{GF}\,(\mbox{evento
+      scatta})\] 
+\end{definizione}
+\textbf{Su slide vari esempi per la fairness.}\\
+Per il model checkng si hanno diversi tool, tra cui:
+\begin{itemize}
+  \item \textbf{Spin} per PLTL, tramite un linguaggio chiamato Promela
+  \item \textbf{NuSMV} per PLTL e CTL
+  \item \textbf{mCLR2} per il $\mu$ calcolo
+  \item \textbf{TiNA} per PLTL e reti di Petri
+\end{itemize}
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread
 % LocalWords:  race condition graph sottoprocessi Petri Morgan int const while

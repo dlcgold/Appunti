@@ -6268,7 +6268,8 @@ accuratezza bisogna dare pesi maggiori ai voti sulle sorgenti più
 del ``peso'' del voto di tali sorgenti.\\
 È importante misurare l'accuratezza delle sorgenti (in YHY08 e DBS09a) e per
 farlo bisogna calcolare una media di tutti i valori di un certo sorgente $S$,
-ovvero quanti valori sono veri date tutte le osservazioni. Si ha quindi:
+ovvero quanti valori sono veri date tutte le osservazioni. Si ha quindi il
+calcolo dell'accuratezza di $S$, ovvero $A(S)$:
 \[A(S)=\operatorname*{avg}_{v_i(D)\in S}Pr(v_i(D) true\,\,|\,\,\Phi)\]
 Avendo:
 \begin{itemize}
@@ -6280,8 +6281,82 @@ Avendo:
 In input si hanno quindi i vari elementi $D$, con ognuno associato i vari
 valori per gli attributi:
 \[val(D)=\{v_0,v_1,\ldots,v_n\}\]
-(quindi $val(D)$ è in input). In input si hanno anche le osservazioni $\Phi$.
-%9.12
+(quindi $val(D)$ è in input). In input si hanno anche le osservazioni $\Phi$.\\
+In output si ha $Pr(v_i(D) true\,\,|\,\,\Phi), \,\,\,\forall\,i=0,\ldots,n$,
+sapendo che la somma di tali valori è pari a 1. Ci si basa quindi sulla formula
+di Bayes e quindi bisogna calcolare:
+\[Pr(\Phi\,\,|\,\,v_i(D) true)\]
+questo:
+\begin{itemize}
+  \item sotto le condizioni di indipendenza, dovendo avere che\\
+  $Pr(\Phi_D(S\,\,|\,\,v_i(D) true)$  
+  \item se $S$ fornisce $v_i$ allora: $Pr(\Phi_D(S\,\,|\,\,v_i(D) true)=A(S)$  
+  \item se $S$ non fornisce $v_i$ allora: $Pr(\Phi_D(S\,\,|\,\,v_i(D)
+  true)=\frac{1-A(S)}{n}$ 
+\end{itemize}
+Si calcola l'accuratezza fino a che non converge, avendo in ciclo i seguenti
+conti:
+\begin{itemize}
+  \item calcolo dell'accuratezza del sorgente:\\
+  $A(S)=\operatorname*{avg}_{v(D)\in S} Pr(v(D) \mid \Phi)$ 
+  \item calcolo del conteggio dei voti del sorgente: $A^{\prime}(S)=\ln \frac{n
+    A(S)}{1-A(S)}$ 
+  \item calcolo del conteggio dei valori del voto:\\
+  $C(v(D))=\sum_{s \in S(v(D))}
+  A^{\prime}(S)$.\\
+  Si usa un conto di similarità per il conto dei voti, avendo\\
+  $C^{*}(v)=C(v)+\rho \sum_{v^{\prime} \neq v} C\left(v^{\prime}\right) \cdot
+  \operatorname{sim}\left(v, v^{\prime}\right) $
+  \item calcolo della probabilità: $\operatorname{Pr}(v(D) \mid
+  \Phi)=\frac{e^{C(v(D))}}{\sum_{v_{0} \in 
+      \operatorname{val}(D)} e^{C\left(v_{0}(D)\right)}}$ 
+\end{itemize}
+%\section{Topic emergenti}
+Ci si pone la domanda di voler integrare \textbf{tutti} i dati. Alcuni di essi
+possono essere ridondanti o di bassa qualità. Si è scoperto che i dati
+ridondanti non portano guadagni (all'aumentare il numero di sorgenti raggiungo
+un asintoto orizzontale quasi subito, avendo sulla $y$ i risultati voluti e
+sulla $x$ il numero di sorgenti, \textbf{esempio su slide} dove con 35 sorgenti
+si hanno praticamente gli stessi risultati di 894 sorgenti). Integrare tutti i
+sorgenti quindi non sempre porta guadagni.\\
+Bisogna misurare l'accuratezza dei sorgenti, avendo che dati errati rovinano la
+qualità. Per misurare l'accuratezza spesso si usa una raccolta selezionata e
+verificata manualmente di sorgenti, definendo un \textit{gold standard}. Si ha
+l'accuratezza delle sorgenti in input (come percentuali dei valori
+correttamente forniti rispetto al \textit{gold standard}) e si assegna voto
+maggiore in base all'accuratezza (\textbf{esempio su slide, qui non si è capito
+  una mazza}).\\
+Bisogna quindi studiare come scegliere i sorgenti prima di fare integrazione per
+trovare il giusto bilanciamento tra guadagno e costo, massimizzando la qualità
+sotto un certo budget (\textbf{grafico su slide}) o di minimizzare il costo
+entro un certo range di qualità (\textbf{grafico su slide}). Si ha la cosiddetta
+\textbf{teoria del marginalismo}, presa dalla \textit{teoria economica}, ovvero
+andare a integrare ma sapendo che l'integrazione ha un costo e quindi il costo
+deve essere essere bilanciato con il guadagno. Si studiano il margine di
+guadagno e il margine di costo per ottenere il ``massimo profitto''
+(\textit{inutile dire che si continua a capire poco di questa lezione}).\\
+Il problema è quindi, spesso quello di comprendere il guadagno e il costo del
+processo, di integrazione dovendo affrontare varie difficoltà:
+\begin{itemize}
+  \item ambiguità e record linkage
+  \item decidere quali dati integrare con il data fusion
+  \item i costi del processo di integrazione
+\end{itemize}
+\textbf{Su slide (\textit{che allo stato attuale non sono online, in caso auguri
+    con la rec}) descrizione di un progetto che aveva come fine
+  l'approfondimento delle tematiche legate all''integrazione e l'uso di
+  algoritmi per ottimizzare il processo di selezione, dimostrando quanto
+  integrare molte sorgenti senza uno studio precedente non porti risultati
+  interessanti. Si segnala che ci sono le
+  rec anche su altri due progetti: \textit{Temporal scoping of fact} e
+  \textit{MantisTable}}. 
+
+
+
+
+
+
+
 \chapter{Data management for machine learning}
 Vediamo un argomento che unisce architetture dati e machine learning.\\
 Normalmente in machine learning si parte da dati di training già puliti, si fa

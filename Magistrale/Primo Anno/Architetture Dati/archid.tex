@@ -6499,6 +6499,219 @@ essere non così ben definito in ogni caso. Si hanno tecniche di data management
 per migliorare la qualità delle label etc$\ldots$\\
 Aggiungere feature in produzione è comunque complesso, anche dal punto di vista
 computazionale, oltre al fatto che aggiungere dati è costoso.
+\section{SANSA framework}
+Parliamo ora del framework \textbf{SANSA (\textit{Scalable Seamntic Analytic
+    Stack})} che viene utilizzato per processare 
+dati in \textbf{RDF}, il modello dati usato per poter rappresentare le
+informazioni strutturate come delle \textit{triple}, quando si parla di dati di
+grandi dimensioni (dati scalabili). Nel dettaglio tratta anche dei \textit{data
+  lake eterogenei}.\\
+Partiamo dalle motivazioni. \\
+Esistono tante informazioni strutturate, anche \textit{machine readable}, in
+formato \textit{RDF} (ad esempio dataset inter disciplinari come \textit{Life
+  Science Data} etc$\ldots$, dati generici come \textit{DBpedia}, \textit{Google
+Knowledge Graph} etc$\ldots$, social graph come \textit{Facebook, Twitter}
+etc$\ldots$). C'è inoltre una grande necessità di interrogare e inferire
+informazioni e di applicare tecniche di machine learning in modo da predire
+collegamenti tra i dati, completare informazioni mancanti che si possono trovare
+in un knowledge graph e poter fare analisi predittive sulle informazioni
+trovare.\\
+Negli ultimi anni il \textit{semantic web} è diventato un formato conosciuto per
+consumare, pubblicare, convertire e scambiare dati utilizzando degli standard e
+dei protocolli secondo il modello dati \textit{RDF}. Questo ha portato ha un
+risultato che è quello di pubblicare dei knowledge graph, tanti e ciascuno molto
+grande e sempre in crescita. I knowledge graph vengono adottati come un formato
+per poter integrare informazioni che derivano da diverse sorgenti dati. Si hanno
+circa 10000 dataset che sono in un formato \textit{RDF}, quindi standard, che
+sono anche open e disponibili. Ovviamente si hanno anche molti dataset
+closed. Gestire questa grande quantità di dati comporta diverse sfide. Un primo
+problema è che questi sono difficili da gestire su una singola macchina quindi
+bisogna pensare ai sistemi di storage, pensando anche alla questione
+dell'integrazione dati. Tra i vari problemi si ha anche quello di capire quale
+vocabolario usare che si adatti al meglio al dataset che sto creando e che si
+deve integrare con quelli già presenti. Si ha poi che si deve capire se i
+dataset che devo integrare con il mio hanno informazioni per l'integrazione
+e se il mio contiene le informazioni necessarie (???). Ci si deve anche occupare
+della privacy e se i dataset esterni che uso contengono informazioni
+sensibili. Si cerca di capire quini quali altri dataset sono buoni candidati per
+essere collegati/linkati. Gli altri dataset si prendono da \textit{LOD cloud}.\\
+Il problema non è quindi solo la grandezza dell'insieme dei dataset ma anche la
+grandezza dei singoli e per poter gestire questo secondo aspetto ci viene in
+aiuto \textit{Hadoop} (che ricordiamo essere un'ecosistema per le applicazioni d
+big data, che ormai è diventato lo standard). Si usa quindi tale ecosistema
+anche per i dati semantici. Il vantaggio è quello di poter computare delle
+informazioni distribuite in memoria, distribuendo il dataset su diversi nodi,
+tenendo i dati in memoria (facendo lettura su disco solo quando necessario) e
+processandoli in parallelo. \\
+\textit{Apache Spark} e \textit{Flink} sono due
+framework che permettono di creare \textit{workflow interattivi} (\textit{che
+  immagino siano quanto appena detto}).\\
+Il processamento di dati distribuiti \textit{RDF} è necessario per i task
+difficili da risolvere in una singola macchina (dati che consumano pià di un
+terabyte di memoria):
+\begin{itemize}
+  \item querying ed elaborazione di LinkedGeoData 
+  \item statistiche del set di dati e valutazione della qualità del \textit{LOD
+    Cloud} (per intero)
+  \item vandalismo e rilevamento di valori anomali e outlier in
+  \textit{Wikidata} 
+  \item inferenza sui dati delle scienze della vita (esempio \textit{UniProt,
+    EggNOG, 
+  StringDB}) 
+  \item clustering dei dati \textit{DBpedia}
+  \item clustering dei log degli utenti della piattaforma di integrazione
+  \textit{Big Data Europe} (una piattaforma di integrazione) per il creazione
+  di profili utente  
+  \item arricchimento \textit{large-scale} e previsione dei collegamenti per
+  esempio \textit{DBpedia} con \textit{LinkedGeoData}
+\end{itemize}
+L'architettura di SANSA combina il processamento da un lato di tecnologie
+\textit{RDF}, che permettono l'integrazione di dati eterogenei, e dall'altro
+algoritmi e tecniche di machine learning.\\
+Si hanno diversi layer appartenenti a due categorie:
+\begin{itemize}
+  \item \textbf{distribution}, con la parte di \textit{RDF} data handling,
+  distribuzione e processamento in memory, rappresentazione (potendo computare
+  anche statistiche in \textit{RDF} e fare quality assesment) etc$\ldots$ Nel
+  dettaglio:
+  \begin{itemize}
+    \item \textbf{Distribuited In-Memory Processing}
+    \item \textbf{Knowledge Distribution \& Representation}
+  \end{itemize}
+  \item \textbf{analytics}, con la parte di querying (\textit{SPARQL}),
+  inferenza, analytics su knowledge graph, machine learning etc$\ldots$ Nel
+  dettaglio:
+  \begin{itemize}
+    \item \textbf{Querying}
+    \item \textbf{Inference}
+    \item \textbf{Machine Learning}
+  \end{itemize}
+\end{itemize}
+SANSA permette anche di interrogare una vasta gamma di dati eterogenei che non
+sono in \textit{RDF} ma che vengono memorizzati in \textit{Hadoop} o altri
+storage non SQL, usando però sempre \textit{SPARQL}.\\
+Combinare big data e semantic web ha diversi pro e contro. Per fare data
+integration abbiamo Spark e Flink però bisogna fare tanto preprocessing manuale
+ma usando il semantic web si ha un lavoro semi automatico e standardizzato. In
+merito alla modellazione si ha che è semplice ma a volte ``piatta'' ma usando il
+semantic web si aggiunge espressività. In merito al supporto per interscambio di
+dati su ha che questo è limitato nei big data, avendo formati eterogenei con
+limitate informazioni sugli schemi, ma usando il semantic web si ha uno
+standard, \textit{RDF}, con lo schema rappresentato da OWL che ci permette di
+usare uno standard che ha informazioni sullo schema.\\
+D'altro campo i big data hanno un diretto valore di business e permette
+scalabilità orizzontale mentre il semantic web ha valore di business indiretto e
+non permette scalabilità orizzontale.\\
+Risulta evidente quanto convenga mischiare i due mondi, traendo vantaggi da
+entrambi. \\
+Si ha quindi con SANSA un flusso di processamento dei dati che fornisce la
+distribuzione dei dati, senza il problema di \textit{fault tollerance} perché si
+usa Spark per la computazione distribuita, usando comunque dati di grandi
+dimensioni. Si hanno quindi varie librerie usate:
+\begin{itemize}
+  \item read/write di \textit{RDF}
+  \item librerie di \textit{OWL}
+  \item librerie di querying e inference
+  \item librerie di machine learning core
+\end{itemize}
+Parliamo ora dei vari layer.\\
+Partiamo con \textbf{Knowledge Distribution \& Representation}, ovvero il layer
+che si occupa di read/write. In questo layer si hanno API per poter leggere e
+scrivere dati in diversi formati, a partire da quei dati che possono essere
+memorizzati in HDFS o nei drive locali. Tale layer ha molte funzionalità per
+manipolazioni distribuite su dati, tra cui \textit{filtering}, computazione di
+statistiche, quality assesment. Si assicura scalabilità orizzontale. Esempio nel
+listing \ref{lst:sansa}.
+\begin{listing}
+  \begin{minted}{sparql}
+    val triples = spark.rdf(Lang.NTRIPLES)(input)
+    
+    triples.find(None,
+    Some(NodeFactory.createURI("<uri>/influenced")),
+    None)
+    
+    val rdf_stats_prop_dist = triples.statsPropertyUsage()
+  \end{minted}
+  \caption{Esempio di lettura di tripla in \textit{RDF}. Il metodo \textit{find}
+    poi è della forma (soggetto, predicato, oggetto). nell'esempio si avrebbe
+    come 
+    predicato un link a \textit{DBpedia} con il predicato
+    \textit{influenced}. Alla 
+    fine si chiedono tutte le statistiche sull'uso del predicato nel knowledge
+    graph.}
+  \label{lst:sansa}
+\end{listing}
+Si hanno quindi i dati in \textit{RDF}, i vari knowledge graph e i dati su HDFS
+e si procede alla lettura e il trattamento delle informazioni con SANSA, avendo:
+\begin{itemize}
+  \item data rapresentation
+  \item graph processing
+  \item \textit{OWL}
+  \item partioning strategies
+  \item \textit{RDF} stats
+  \item quality assesment
+  \item \textit{tensors/KGE}
+  \item \textit{R2RML} mapping, mappando altri formati in \textit{RDF} tramite
+  una vista materializzata
+\end{itemize}
+Si produce quindi un insieme di strutture dati distribuite.\\
+In merito al supporto di \textit{OWL} si ha il supporto di sintassi funzionale e
+\textit{Manchester OWL}. Le strutture dati distribuite derivate possono essere
+delle rappresentazioni di matrici di relazioni o assiomi di proprietà come
+\textit{subclass-of}, per poter computare la chiusura transitiva tramite
+operazioni sulla matrice (esempio nel listing \ref{lst:sansa2}).
+\begin{listing}
+  \begin{minted}{sparql}
+    val rdd = spark.owl(Syntax.MANCHESTER)("file.owl")
+    // get all subclass-of axioms
+    val sco = rdd.filter(_.isInstanceOf[OWLSubClassOfAxiom])
+  \end{minted}
+  \caption{Esempio di uso di OWL, dove si legge il file \textit{OWL}, con
+    sintassi \textit{Manchester} e lo si salva come \textit{RDD}. Si chiedono
+    poi tutte le relazioni di \textit{subclass-of}}
+  \label{lst:sansa2}
+\end{listing}
+Si ha in \textit{RDF} un supporto sperimentale ai \textbf{tensori}. Si applica
+alla casella $t_{ijk}$ della matrice il valore 1 se l'entità i-esima è collegata
+all'entità j-esima tramite il k-esimo predicato, altrimenti si mette 0. \\
+Passiamo ora al layer di \textbf{querying}. In questo layer si interrogano i
+dati, si cercano/esplorano dati in un grafo \textit{RDF}. Si usa \textit{SPARQL}
+come linguaggio standard, per \textit{W3C}, per interrogare un grafo in
+\textit{RDF}. SANSA usa delle strategie di partioning e trasformazione in modo
+tale da poter processare le query in modo efficiente. SANSA fornisce delle API
+per fare query SPARQL, esempio in listing \ref{lst:sansa3}. Le interrogazioni
+sono in una forma molto ``classica'' e ``naturale''.
+\begin{listing}
+  \begin{minted}{sparql}
+    val triples = spark.rdf(Lang.NTRIPLES)(input)
+    val sparqlQuery = "SELECT * WHERE {?s ?p ?o} LIMIT 10"
+    val result = triples.sparql(sparqlQuery)
+  \end{minted}
+  \caption{Esempio di query dove si legge un input in \textit{RDF}, si seziona
+  tutto, tramite la query, quello che corrisponde al pattern ``\{?s ?p ?o\}'',
+  prendendo i primi 10. Tali risultati vengono poi salvati.}
+  \label{lst:sansa3}
+\end{listing}
+Nel caso di partioning quando si effettuano le query \textit{SPARQL} si lavora
+con un insieme di viste del dataset, applicando le query sulle piccole porzioni,
+ottenendo tante matrici che rappresentano i dati distribuiti e strutturati che
+vengono infine aggregati. In questa fase si applica una baseline, quella di
+\textit{Sparklifying}, ovvero potendo applicare partitioning a livello di triple
+su un dataset in input che è in \textit{RDF}. Oltre a questo si ha, in SANSA,
+l'interrogazione di dati eterogenei che partono da dati storicizzati in HDFS, da
+dati anche non in SQL, utilizzando però sempre \textit{SPARQL}, tutto ciò usando
+\textit{SANSA-DataLake}. \textit{SANSA-DataLake} attualmente supporta dati in
+\textit{CSV, Apache Parquet, Cassandra, MongoDB, CouchBase, Elastic Search} e
+diverse varianti di \textit{jdbc} come \textit{MySQL, SQL} Server etc$\ldots$\\
+Tecnicamente le interrogazioni di \textit{SPARQL} sono internamente spezzate in
+sotto query che estrae ciascuna un sottoinsieme di risultato. In
+\textit{SANSA-DataLake} (\textit{semantic datalake}) si ha una soluzione per
+poter integrare dati di grandi dimensioni direttamente interrogando i dati
+originali senza però una trasformazione/caricamento a priori dei dati. Si
+applicano quindi i \textit{join}, avendo un'esecuzione di interrogazioni
+intra-source, in modo scalabile, in modo tale che anche dati eterogenei possono
+essere integrati e interrogati.
+%39.26
 \end{document}
 
 

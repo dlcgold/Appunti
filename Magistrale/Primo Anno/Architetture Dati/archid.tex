@@ -6702,7 +6702,7 @@ l'interrogazione di dati eterogenei che partono da dati storicizzati in HDFS, da
 dati anche non in SQL, utilizzando però sempre \textit{SPARQL}, tutto ciò usando
 \textit{SANSA-DataLake}. \textit{SANSA-DataLake} attualmente supporta dati in
 \textit{CSV, Apache Parquet, Cassandra, MongoDB, CouchBase, Elastic Search} e
-diverse varianti di \textit{jdbc} come \textit{MySQL, SQL} Server etc$\ldots$\\
+diverse varianti di \textit{JDBC} come \textit{MySQL, SQL Server} etc$\ldots$\\
 Tecnicamente le interrogazioni di \textit{SPARQL} sono internamente spezzate in
 sotto query che estrae ciascuna un sottoinsieme di risultato. In
 \textit{SANSA-DataLake} (\textit{semantic datalake}) si ha una soluzione per
@@ -6710,8 +6710,41 @@ poter integrare dati di grandi dimensioni direttamente interrogando i dati
 originali senza però una trasformazione/caricamento a priori dei dati. Si
 applicano quindi i \textit{join}, avendo un'esecuzione di interrogazioni
 intra-source, in modo scalabile, in modo tale che anche dati eterogenei possono
-essere integrati e interrogati.
-%39.26
+essere integrati e interrogati. Si hanno quindi dati che provengono da vari tipi
+di file (con dati di db in vari formati), si passa per vari wrapper che
+permettono di mappare i vari formati, ottenendo un formato standard e
+distribuito, in un \textit{data lake layer}, a cui si applicano delle query in
+\textit{SPARQL} per produrre i risultati, integrati a partire da vari formati.\\
+Il mapping è fatto tramite \textit{RML}. Si ha poi il punto di accesso ai dati
+accedendo alle partizioni. Alla fine si studia anche il costo del modello che
+viene costruito (possiamo avere una rappresentazione ad albero che integra,
+tramite \textit{join}, di volta in volta partendo dalle foglie).\\
+\textbf{Su slide esempio completo di query dove la query è spezzata in varie
+  parti indipendenti.}\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/sansa.jpg}
+  \caption{Schema di SANSA datalake tratto dalle slide.}
+\end{figure}
+In merito al layer \textbf{inference} si ha che esso si occupa di inferire
+asserzioni o fatti in aggiunta, tramite vari standard tra cui  l'uso di
+\textit{RDFS} e \textit{OWL} per la rappresentazione degli schemi. L'inferenza è
+fatta in memory tramite \textit{rule-based forward chaining}. Oltre allo stato
+dell'arte si ha che in modo dinamico viene costruito un grafo di dipendenze
+delle regole.\\
+Passiamo al layer di \textbf{machine learning} dove si applicano algoritmi di
+machine learning distribuiti che lavorano su \textit{RDF} e che quindi ne usano
+sia la struttura che la semantica. Si hanno ad esempio algoritmi di clustering
+sui grafi (\textit{power iteration, borderFlow, link based, modularity based
+  clustering} etc$\ldots$). Si hanno poi algoritmi come \textit{association rule
+  mining, otlier detection, knowledge graph kernels} etc$\ldots$\\
+SANSA ha una sorta di \textit{notebook} usabile da browser. SANSA è quindi un
+\textbf{big data environment}, avendo, a livello ora architetturale, in un layer
+i vari nodi (la parte hardware), un layer con il \textit{resource manager} come
+\textbf{Docker Swarm} e infine un layer con i vari applicativi (\textit{HDFS},
+\textit{Spark}, \textit{Flink}, \textit{4Store}, \textit{semantic big data}
+etc$\ldots$) e anche le applicazioni della parte di \textit{support layer}.\\
+SANSA ha release semestrali sotto \textit{Apache Open Source License}.
 \end{document}
 
 

@@ -28,7 +28,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
-- [x] Fondamenti dell'Informatica
+- [x] Fondamenti dell'Informatica (di [Marco](https://github.com/bigboss98/))
 
 ##### II anno Triennale
 - [ ] Metodi Algebrici per l'Informatica
@@ -46,7 +46,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Metodi Formali
 
 ##### I anno Magistrale
-- [x] Archietture Dati (RC)
+- [x] Architetture Dati (RC)
 - [x] Machine Learning (RC)
 - [x] Modelli della Concorrenza (RC)
 - [x] Processo e Sviluppo Software (RC)

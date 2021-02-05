@@ -15,9 +15,19 @@ MATCH (p:Person)-[:DIRECTED]->(m:Movie {title: "Cloud Atlas"}) RETURN p, m
 MATCH (tom:Person {name:"Tom Hanks"})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]
       -(coactors) RETURN tom, m, coactors
       // How people are related to "Cloud Atlas" (cerco una relazione r)    
-MATCH (p:Person)-[r]->(m:Movie) return p.name, type(r), r, m.title
+MATCH (p:Person)-[r]->(m:Movie {title:"Cloud Atlas"}) return p.name, type(r),
+      r, m.title
       // Movies and actors up to 4 "hops" away from Kevin Bacon
 MATCH (p:Person {name: "Kevin Bacon"})-[*1..4]-(m) RETURN DISTINCT p, m
       // Bacon path, the shortest path of any relationships to Meg Ryan
 MATCH sp = shortestPath((p:Person {name: "Kevin Bacon"})-[*]
-		       -(m:Person {name: "Meg Ryan"})) RETURN sp
+			-(m:Person {name: "Meg Ryan"})) RETURN sp
+      // Find actors that Tom Hanks hasn't yet worked with, but his co-actors have
+MATCH (tom:Person {name:"Tom Hanks"})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]
+      -(coactors), (p:Person)-[:ACTED_IN]->(m2:Movie)<-[:ACTED_IN]
+      -(coactors) Where not (p)-[:ACTED_IN]->(m) RETURN p
+     // Find someone who can introduce Tom to his potential co-actor
+MATCH (tom:Person {name:"Tom Hanks"})-[:ACTED_IN]->(m)<-[:ACTED_IN]-(coActors),
+      (coActors)-[:ACTED_IN]->(m2)<-[:ACTED_IN]-(cruise:Person {name:"Tom Cruise"})
+RETURN tom, m, coActors, m2, cruise
+

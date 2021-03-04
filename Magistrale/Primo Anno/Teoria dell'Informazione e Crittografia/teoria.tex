@@ -172,7 +172,8 @@ alcune assunzioni sulla sorgente:
   escano più di uno solo 
   \item la sorgente è \textbf{senza memoria (\textit{memoryless})}, avendo che
   i simboli già usciti non influenzano per nulla il simbolo che sta per
-  uscire. Ogni simbolo che esce non tiene conto del passato
+  uscire. Ogni simbolo che esce non tiene conto del passato, \textit{è come se
+    fosse il primo}
   \item è \textbf{probabilistica e randomizzata}. Si ha quindi che i simboli
   $S=\{s_1, s_2,\ldots,s_q\}$ escono con le probabilità
   $(p_1,p_2,\ldots,p_q)$. Deve valere che, ovviamente, che $p_i\in
@@ -195,6 +196,9 @@ alcune assunzioni sulla sorgente:
     uno schema prefissato, deterministico, sono poco interessanti, avendo un
     comportamento banale}
 \end{itemize}
+Il concetto di \textit{spedire in un canale} può anche essere generalizzato in
+altre ``idee'', come il disco su cui salvo dei dati e il tempo per cui li
+salvo.\\ 
 La parte di \textit{codifica e decodifica} può essere approfondita. Nello schema
 in figura \ref{fig:teo} ci si è infatti concentrati sul canale, avendo che la
 codifica serve a fare in modo che il simbolo trasmesso vada bene per essere
@@ -225,7 +229,12 @@ Per capire meglio quanto detto diamo alcune formalità.
   vuota $\varepsilon$, che posso quindi formare coi simboli di $\Gamma$. Quindi
   ad ogni $s_i\in S$ assegno un $\gamma_i\in Gamma^*$, avendo che:
   \[cod:S\to \Gamma^*\]
-  
+  generalmente si ha che:
+  \[|\Gamma|<|\Sigma|\]
+  e quindi i simboli di $\Sigma$ sono mappati da $cod$ in  sequenze  di  simboli
+  di $\Gamma$, a meno che non si ritenga accettabile il fatto che due o più
+  simboli di $\Sigma$ vengano mappati nellostesso simbolo di $\Gamma$. \\
+  \textit{Più avanti nel corso vedremo casi in cui $|\Gamma|>|\Sigma|$}
 \end{definizione}
 Si hanno quindi i simboli $S=\{s_1, s_2,\ldots,s_q\}$ che escono con
 probabilità $(p_1,p_2,\ldots,p_q)$ e che vengono codificati con le stringhe
@@ -265,14 +274,14 @@ Analizziamo meglio i codici, le codeword. Possono essere:
 \end{enumerate}
 Ne segue quindi che il discorso di minimizzare $L$ ha senso solo in presenza di
 \textit{codeword a lunghezza variabile} (potendo decidere per ogni simbolo che
-codeword associare).\\
+codeword associare), avendo la \textbf{codifica a lunghezza variabile}.\\
 Con \textit{codeword a lunghezza fissa} avrei tutte le $l_i$ uguali e quindi
 avrei, avendo $l_i=l,\forall i$:
 \[L=\sum_{i=1}^q p_i\cdot l_i \sum_{i=1}^q p_i\cdot l =l\cdot\sum_{i=1}^q
   p_i=l\cdot 1 = l\]
 avendo, come facilmente intuibile, che la lunghezza media è la lunghezza fissa
 stessa. Si hanno codifiche a lunghezza fissa, come banalmente numeri a 64bit
-etc$\ldots$\\
+etc$\ldots$ in tal caso si parla di \textbf{codici a blocchi}.\\
 Usando codifiche a lunghezza fissa si hanno anche esempi interessanti come
 quello del \textit{codice pesato}, detto \textbf{codice pesato 01247}. Il nome
 deriva dal fatto che si possono codificare le cifre da 0 a 9 (da 1 a 9 con poi
@@ -334,6 +343,8 @@ simboli, che si suppongono già codificati con codeword, in modo tale che in
 queste codeword, spedite nel canale dove eventualmente si possono avere
 modifiche causate dal rumore, vengano eventualmente riconosciuti (ed
 eventualmente corretti) errori in fase di \textit{decodifica}.\\
+\textit{Parlando di codici per individuare errori solitamente, nei disorsi, si
+  ha che $|\Gamma|<|\Sigma|$}
 Qualora il ricevente con la sua decodifica si accorga che è successo qualcosa ma
 non si è in grado di 
 correggere quel qualcosa si hanno i cosiddetti \textbf{codici per individuare
@@ -341,17 +352,31 @@ correggere quel qualcosa si hanno i cosiddetti \textbf{codici per individuare
 la sua decodifica si accorga dell'errore ci si chiede anche se può correggerlo
 autonomamente senza chiedere che la sorgente spedisca nuovamente il
 messaggio. Non sempre questa cosa si può fare ma quanto accade si parla di
-\textbf{codici a correzione d'errore (\textit{error correction codes})}.
+\textbf{codici a correzione d'errore (\textit{error correction codes})}.\\
+Vediamo come capire se un messaggio ricevuto è valido.\\
+Si supponga di spedire un pacchetto di $n$ bit (ma potrebbe essere qualsiasi
+altra cosa ma per praticità prendiamo un bit) nel canale e che da esso esca un
+certo pacchetto sempre di $n$ bit (per il rumore potrebbe non essere lo stesso).
 \begin{definizione}
-  Si definisce il \textbf{controllo di parità}. \\
+  Definiamo il \textbf{controllo di parità}. \\
   Avendo una sequenza di $n$ bits in
-  cui si ha $n-1$ bits, dette \textbf{cifre di messaggio} di \textbf{messaggio vero}, che chiameremo
+  cui si ha $n-1$ bits, dette \textbf{cifre di messaggio} di
+  \textbf{messaggio vero}, che chiameremo
   \textbf{\textit{msg}} e un bit che è la \textbf{cifra di controllo}, che
   chiameremo \textbf{\textit{check}}. Le cifre di messaggio si indicano con
   $\circ$ mentre la cifra di controllo con $\times$ e quindi il messaggio è del
   tipo:
-  \[\circ\circ\circ\circ\cdots\circ\times\]
-  avendo $n-1$ $\circ$ e u $\times$.\\
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|}
+      \hline
+      $\circ$&$\circ$&$\circ$&$\circ$&$\cdots$&$\circ$&$\times$\\
+      \hline
+    \end{tabular}
+  \end{table}
+  avendo $n-1$ $\circ$ e un solo $\times$ (che potrebbe anche non essere in
+  fondo, basta avere coscienza della posizione nel pacchetto, concordando la
+  cosa tra mittente e ricevente).\\
   Si ha che:
   \begin{itemize}
     \item chi spedisce ha le cifre di messaggio e deve calcolare la cifra di
@@ -359,7 +384,134 @@ messaggio. Non sempre questa cosa si può fare ma quanto accade si parla di
     \item chi riceve controlla che la cifra di controllo sia coerente con le
     cifre di messaggio
   \end{itemize}
-  \textbf{To be continued...}
+  Nell'\textbf{error detection code} il ricevente è solo in grado di capire che
+  la sequenza non è valida ma per farlo bisogna assumere di avere limitazioni
+  nella sequenza di $n$ bit che è entrata nel canale. Questa limitazione è che
+  gli $n$ bit entranti nel canale siano una \textbf{codeword valida}, avendo
+  che, preso un sottoinsieme $M$ di tutto l'insieme di $n$ bit, ovvero
+  $M\subseteq\{0,1\}^n$, $M$ è un insieme di \textit{codeword valide}. Quindi
+  solo un messaggio appartenente a $M$ può entrare nel canale. Fatta questa
+  premessa, quando esce un messaggio, ho che, a causa del rumore, questo
+  messaggio viene rovinato, non avendo più un messaggio
+  valido (cosa che viene capita dal ricevente). \textit{Purtroppo può succedere
+    che il rumore trasformi un messaggio valido in un altro messaggio valido ma
+    non considereremo questa opzione per ora}. \\
+  Nel \textbf{controllo di parità semplice} il pacchetto di $n$ bit, come visto
+  è formato da $n-1$ bit di messaggio e un bit di controllo, la \textbf{check
+    digit}. Si procede quindi, ricordando che siamo in un caso binario, a
+  contare il numero di $1$ nei primi $n-1$ bit e se questo è dispari setto il
+  bit di check a $1$ e si nota che così il numero di $1$ nel pacchetto intero
+  di $n$ bit diventa pari, avendo la cosiddetta \textbf{parità pari} (ovvero
+  ogni sequenza valida ha un numero pari di $1$). Controllando il numero di $1$
+  il ricevente capisce se il rumore ha modificato il messaggio anche se non può
+  capire cosa è successo (avendo quindi che il \emph{controllo di parità
+    semplice} è solo un \emph{error detecting code} e non un \emph{error
+    correcting code}). Non potendo fare nulla, in caso di errore identificato,
+  il ricevente può solo chiedere al mittente di inviare nuovamente il messaggio.
+  Qualora il rumore modificasse il messaggio in modo tale che si abbia comunque
+  un numero apri di $1$ si rientrerebbe nella casistica sopra descritta in cui
+  il rumore forma ancora un messaggio valido. Questa cosa può succedere se, nel
+  caso binario, il rumore modifica un numero pari di cifre e quindi il
+  \emph{controllo di parità semplice} funziona solo se viene modificato un
+  \emph{numero dispari di cifre}.
+  
 \end{definizione}
+Vediamo quindi meglio come calcolare la \textbf{check digit}.\\
+Si rinominiamo gli $n$ bit come:
+\[x_1x_2\cdots x_{n-1}\,y\]
+quindi con $y$ \textit{check digit}.\\
+Si ha che, con $\oplus$ \textit{xor}:
+\[y=x_1\oplus x_2\oplus\cdots\oplus x_{n-1}\]
+Ricordando che:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c|c|c}
+    $a$& $b$ & $a\land b$& $a\oplus b$\\
+    \hline
+    0 & 0 & 0 &0\\
+    0 & 1 & 0 & 1\\
+    1 & 0 & 0 &1\\
+    1 & 1 & 1 & 0\\    
+  \end{tabular}
+\end{table}
+quindi vale $1$ sse i due bit in input sono diversi ma questo non ci aiuta su
+$n-1$ input. Altrimenti si ha che vale $1$ sse il numero di $1$ in input è
+dispari e questo ci aiuta su $n-1$ input infatti la generalizzazione dello
+\textit{xor} a più di due input è detta \textbf{funzione di parità}. Un altro
+punto di vista per considerare lo \textit{xor} è quello della \textbf{somma a
+  modulo 2} usando la notazione:
+\[y=\bigoplus_{i=1}^{n-1}x_i=\sum_{i=1}^{n-1}x_i\mbox{ mod } 2\]
+avendo che faccio prima la somma e poi il modulo 2 mi dice 0 se è pari e 1 se è
+dispari. \\
+Si ha inoltre una relazione interessante tra le formule scritte usando solo
+$\oplus$ e $\land$ nella cosiddetta \textbf{forma algebrica normale
+  (\textit{ANF})}. Queste formule booleane possono essere trasformate in formule
+aritmetiche con \textit{modulo 2}, quindi in $\mathbb{Z}_2$ dicendo che lo
+\textit{xor} equivale alla \textit{formula modulo due} e l'\textit{and} al
+\textit{prodotto modulo due} (la cosa vale in entrambi i versi).\\
+La funzione di parità è così usata che in tutti i microprocessori, fin dagli
+anni settanta, si ha un \textit{flag di parità} tra i flag della CPU, che viene
+settato come appena visto a seconda dei bit caricati su un registro particolare
+(a volte detto \textit{accumulatore}). Tale calcolo è facilmente mappabile in
+un circuito, avendo che lo \textit{xor} gode della proprietà associativa (avendo
+un circuito che fa un albero di porte \textit{xor}).
+\newpage
+Posso anche simulare lo \textit{xor} con un \textbf{automa a stati finiti}, con
+due stati ``pari'' e ``dispari'', con il ``pari'' stato iniziale (diciamo che
+input vuoto è pari):
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto]
+    \node[state, initial, accepting] (q_0) {$pari$};
+    \node[state, accepting] (q_1) [right=of q_0] {$dispari$};
+    \path[->]
+    (q_0) edge [bend left = 25] node {1} (q_1)
+    edge [loop above] node {0} ()
+    (q_1) edge [bend left = 25] node {1} (q_0)
+    edge [loop right] node {0} ();
+  \end{tikzpicture}
+\end{center}
+Questo metodo ha senso se il canale è pochissimo rumoroso, avendo pochissima
+probabilità di avere la modifica di un bit e ancora meno di due (due modifiche
+si ricorda che non verrebbero rilevate essendo pari), così poca da poter
+ipotizzare che non avvengano mai due errori (e se mai dovesse succedere
+bisognerà valutare l'impatto del problema e le conseguenze). Stiamo assumendo
+quindi che la \textbf{probabilità d'errore} può essere \textbf{trascurabile}
+infatti canali di buona qualità dovrebbero sbagliare non più di un bit su un
+milione, per canali più affidabili anche uno su un miliardo. Possiamo quindi
+trascurare che possano accadere due errori e dire che il \textbf{controllo di
+  parità} va bene. \\
+Parliamo ora meglio di \textbf{ridondanza}, definendola formalmente.
+\begin{definizione}
+  La \textbf{ridondanza} $R$ è definita come:
+  \[R=\frac{\mbox{il numero totale di simboli/cifre spediti}}{\mbox{numero di
+        simboli/cifre che sono effettivamente parte del messaggio}}\] 
+  Nel caso del \emph{controllo di parità} i simboli che vogliamo spedire sono
+  $n$ bit a fronte di $n-1$ bit di vero messaggio. Si ha quindi:
+  \[R=\frac{n}{n-1}=\frac{(n-1)+1}{n-1}=1+\frac{1}{n-1}\]
+  Mettendo in evidenza che la ridondanza è sempre $R\geq 1$, visto che a
+  numeratore abbiamo almeno una cifra in più (quella della \emph{check digit}) e
+  che quindi è sicuramente maggiore del denominatore. In realtà per avere $R=1$
+  dovrei avere numeratore e denominatore uguali che non ha molto senso parlando
+  di ridondanza, quindi nei casi \emph{interessanti} si ha che $R>1$. Guardando
+  la formula la cosa è confermata da $1+\frac{1}{n-1}$ con $\frac{1}{n-1}$ che
+  viene detto \textbf{eccesso di ridondanza}.
+\end{definizione}
+\begin{definizione}
+  Possiamo \textbf{generalizzare} la definizione di \textbf{ridondanza}:
+  \[R=\frac{msg+check}{msg}\]
+  avendo:
+  \begin{itemize}
+    \item $msg$ numero di simboli/cifre di messaggio
+    \item $check$ numero di cifre di controllo
+  \end{itemize}
+  Ma allora (avendo $check<msg$ per avere qualcosa di sensato):
+  \[R=\frac{msg+check}{msg}=1+\frac{check}{msg}\]
+  che è la forma ``generale'' della ridondanza. Si ha che $\frac{check}{msg}$ è
+  \textbf{eccesso di ridondanza}. 
+\end{definizione}
+\textit{Si può dire di non avere necessità di ``proteggere'' di più il bit di
+  parità in quanto, per la macchina, conta come tutti gli altri. Tutti vanno
+  ``protetti'' nello stesso modo.}\\ 
+Introduciamo ora il \textbf{modello del rumore bianco}
 \end{document}
 % LocalWords:  clock

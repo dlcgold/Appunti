@@ -47,10 +47,14 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 
 ##### I anno Magistrale
 - [x] Architetture Dati (RC)
+- [ ] Bioinformatica
 - [x] Machine Learning (RC)
+- [ ] Metodi del Calcolo Scientifico
 - [x] Modelli della Concorrenza (RC)
+- [ ] Modelli Probabilistici per le Decisioni
 - [x] Processo e Sviluppo Software (RC)
 - [x] Teoria della Computazione (RC)
+- [ ] Teoria dell'informazione e Crittografia
 
 ### Altro
 Suggeriamo queste repository open:

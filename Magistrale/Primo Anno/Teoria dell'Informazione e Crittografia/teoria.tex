@@ -511,7 +511,199 @@ Parliamo ora meglio di \textbf{ridondanza}, definendola formalmente.
 \end{definizione}
 \textit{Si può dire di non avere necessità di ``proteggere'' di più il bit di
   parità in quanto, per la macchina, conta come tutti gli altri. Tutti vanno
-  ``protetti'' nello stesso modo.}\\ 
-Introduciamo ora il \textbf{modello del rumore bianco}
-\end{document}
+  ``protetti'' nello stesso modo.}\\
+\textit{Come ho la \textbf{parità pari} potrei avere la \textbf{parità dispari},
+dove i messaggi validi hanno un numero dispari di $1$. I vari ragionamenti sono
+analoghi, essendo tutto uguale dal punto di vista matematico, avendo un
+isomorfismo tra le due tecniche. La scelta tra i due dipende dai casi è dalla
+celta di cosa rappresentiamo con $0$ e $1$ (pensiamo con $0$ che rappresenta
+assenza di segnale, in questo caso meglio usare la parità dispari, mentre se $0$
+e $1$ rappresentassero diverse quantità di Volt andrebbe bene la parità
+pari)}. \\ 
+\textbf{Nel corso si userà comunque solo la \textit{parità pari}}.\\
+Introduciamo ora un primo \textit{modello di rumore}, il \textbf{modello del
+  rumore bianco}.
+\begin{definizione}
+  Un \textbf{modello di rumore} è un modello matematica che descrive cosa
+  succede nel canale quando il rumore rovina i bit.
+\end{definizione}
+\begin{definizione}
+  Il \textbf{modello del rumore bianco} consiste nell'avere il messaggio con i
+  bit $x_1x_2\cdots x_n$ (con magari $x_n$ come controllo di parità ma dato che
+  ``i bit non sono colorati'' la cosa non ci interessa davvero) e avere una
+  certa probabilità $p$. Si hanno due condizioni:
+  \begin{enumerate}
+    \item si ha che $p\in(0,1)$ che è la probabilità che avvenga
+    un errore in ogni posizione $i\in [1,n]$ del messaggio. Si ha quindi che la
+    probabilità $p$ è uguale in tutte le posizioni
+    \item le posizioni sono tutte indipendenti, ovvero il fatto che magari si ha
+    un errore nella posizione $i$ non influisce sulle altre. Avendo quindi
+    l'eventi casuale $E_i$ con:
+    \[E_i=\mbox{è avvenuto un errore in i}\]
+    allora:
+    \[E_i\mbox{ ed }E_j \mbox{ sono indipendenti, }\forall i\neq j\]
+  \end{enumerate}
+  \textbf{Le due proprietà sopra elencate rendono molto semplice il modello}.\\
+  Questo però non è molto realistico, basti pensare al rumore dovuto ad uno
+  sbalzo di corrente, dove da un bit in poi e per diversi bit si avranno alte
+  probabilità d'errore. Quando l'errore influisce su una certa porzione di bit
+  si dice che si ha un \textbf{burst di errori} (che non può essere gestito con
+  le tecniche per il \textit{rumore bianco}, anche se si riesce con qualche
+  workaround).\\
+  Si è visto che $p\in(0,1)$ infatti:
+  \begin{itemize}
+    \item se si avesse $p=0$ si avrebbe che ogni bit arriverebbe sempre
+    corretto, ma questo può avvenire solo in un mondo utopico e non in quello
+    reale/fisico. Non esiste un canale reale non affetto da errori, quindi si ha
+    $p\neq 0$
+    \item se si avesse $p=1$ si avrebbe che ogni bit del messaggio arriverebbe
+    errato ma questa non sarebbe una brutta situazione, anzi sarebbe ottima
+    infatti mi basterebbe avere una porta logica \textit{not} della linea di
+    trasmissione per riottenere il messaggio corretto, ottenendo un canale $p=0$
+    d'errore. Anche questo però è irrealistico quindi $p\neq 1$ 
+  \end{itemize}
+  Supponiamo ora che $p>\frac{1}{2}$ quindi ho più probabilità che un bit arrivi
+  sbagliato che giusto. Anche in questo caso una porta logica \textit{not} alla
+  fine della linea di trasmissione per ottenere un canale con $1-p$ come
+  probabilità d'errore. Quindi anche questo non ha molto senso quindi si
+  considera che:
+  \[p\in(0,\frac{1}{2})\]
+  Manca solo da valutare $p=\frac{1}{2}$. \\
+  Con $p=\frac{1}{2}$ si ha che il bit
+  di output è completamente causale e indipendente da cosa sia stato spedito. È
+  come se il canale generasse $n$ bit casuali con probabilità uniforme
+  ($\frac{1}{2}$), avendo un cosiddetto \textbf{canale completamente
+    rumoroso}. Dal punto di vista pratico sarebbe interessante un tale canale,
+  per altri punti di vista (come quello della crittografia), avendo infatti un
+  \textbf{generatore di bit completamente casuali}. Purtroppo questo non si può
+  fare quindi si assume $p\neq \frac{1}{2}$.
+\end{definizione}
+Cerchiano di capire quale sia la probabilità che avvengano $k$ errori con $0\leq
+k\leq n$ (quindi da nessun errore a tutti gli $n$ bit errati), che indichiamo
+con: 
+\[p[\mbox{ k errori }]\]
+Valutiamo i vari casi:
+\begin{itemize}
+  \item partiamo con 1 errore, quindi $k=1$, avendo $p[\mbox{ 1 errori }]$.\\
+  Questo significa che per il messaggio di $n$ bit si immagina un vettore di bit
+  associato con $0$ e $1$ come
+  ``bandierine'' che indicano se è avvenuto un errore o no in una certa
+  posizione. Quindi se in un 
+  certa posizione ho $0$ diciamo che significa che non ho un errore di
+  trasmissione mentre se ho $1$ ho un errore. Il messaggio di $n$ bit diventa
+  quindi una sorta di \textit{maschera} che con gli $1$ mi dice dove è avvenuto
+  l'errore. Se suppongo che ne è avvenuto uno solo avrò un solo $1$ e bisogna
+  calcolare la  probabilità che questo avvenga.\\
+  Supponga che l'errore sia al primissimo bit, quindi in posizione $i=1$, avendo
+  quindi, per il discorso delle ``bandierine'' che $msg=10000\ldots 0$ e quindi
+  si ha, avendo che la probabilità che avvenga la trasmissione avvenga
+  correttamente è $1-p$ (cosa che avviene $n-1$ volte), mentre $p$ che avvenga
+  sbagliata (cosa che avviene una sola volta):
+  \[p[\mbox{ 1 errori }]=p^1\cdot(1-p)^{n-1}=p\cdot(1-p)^{n-1}\]
+  \textbf{Posso fare $\cdot$ in quanto si è supposta l'\textit{indipendenza}
+    (non avendo intersezioni tra gli eventi)}.\\
+  Ma questo non sta considerando tutto ma solo la prima posizione. Completando
+  il calcolo avendo di volta in volta in somma la probabilità di un errore nella
+  posizione $i$ ho che:
+  \[p[\mbox{ 1 errori }]=p^1\cdot(1-p)^{n-1}+(1-p)^1\cdot
+    p^1\cdot(1-p)^{n-2}+\cdots\]
+  ma questo conto si può semplificare, avendo sempre gli stessi termini che si
+  ripetono:
+  \[p[\mbox{ 1 errori }]=n\cdot p^1\cdot(1-p)^{n-1}=n\cdot p\cdot(1-p)^{n-1}\]
+  Infatti so che $p\cdot(1-p)^{n-1}$ è la probabilità di avere un errore in una
+  certa 
+  posizione fissata. Mi chiedo dove posso mettere questa posizione in tutti i
+  modi possibili nel pacchetto di $n$ bit e ho che, avendo un solo errore, ho
+  $n$ modi per posizionarlo, ciascuno con probabilità $p\cdot(1-p)^{n-1}$
+  
+  \item passiamo a due errori, avendo $p[\mbox{ 2 errori }]$.\\
+  Ho un ragionamento analogo. Parto supponendo di avere i due errori nelle prime
+  due posizioni del messaggio/pacchetto, avendo quindi 1 nelle prime due
+  posizioni della maschera. Abbiamo comunque già visto che poi il ragionamento
+  si generalizza per qualsiasi posizione, in questo caso coppie (anche non
+  consecutive) di posizioni. Si ha che, ipotizzando che le prime due siano
+  errate:
+  \[p[\mbox{ 2 errori }]=p^1\cdot p^1\cdot(1-p)^{n-2}=p^2\cdot(1-p)^{n-2}\]
+  Ma anche qui dobbiamo vedere la probabilità per qualsiasi coppia, facendo
+  variare le due posizioni d'errore in tutti i modi possibili ma questo è come
+  prendere un qualsiasi sottoinsieme di due elementi a partire da un insieme di
+  $n$ elementi ma questo altro non è che il calcolo che si fa tramite il
+  coefficiente binomiale, avendo quindi:
+  \[p[\mbox{ 2 errori }]={{n}\choose{2}}\cdot p^2\cdot(1-p)^{n-2}\]
+  \item analogamente a quanto fatto per due errori potrei fare con tre,
+  quattro, etc$\ldots$
+  \item possiamo generalizzare con $k$ errori, avendo $p[\mbox{
+    k errori }]$.\\
+  Si hanno quindi $k$ uni da disporre in tutti i modi possibili nel vettore di
+  $n$ bit. Si ha quindi:
+  \[p[\mbox{ k errori }]={{n}\choose{k}}\cdot p^k\cdot(1-p)^{n-k}\]
+  E quindi posso valutare la cosa nei due casi estremi:
+  \begin{itemize}
+    \item $k=0$, avendo 0 errori. Ho un solo modo per mettere zero $1$ nella
+    maschera di bit (da nessuna parte) e infatti (avendo poi tutti gli $n$ bit
+    la stessa probabilità di uscire corretti): 
+    \[p[\mbox{ 0 errori }]={{n}\choose{0}}\cdot p^0\cdot(1-p)^{n-0}=1\cdot
+      1\cdot (1-p)^n=(1-p)^n\]
+    \item $k=n$, avendo $n$ errori\footnote{Su dispense del prof grafico con
+      $n=8$, $p=0.1$ e $k$ che varia tra 0 e 8}. Ho un solo modo per mettere
+    tutti $1$ nella  maschera di bit (ovunque) e infatti (avendo poi tutti gli
+    $n$ bit la stessa probabilità di uscire errati):
+    \[p[\mbox{ n errori }]={{n}\choose{n}}\cdot p^n\cdot(1-p)^{n-n}=1\cdot
+      p^n\cdot 1=p^n\]
+  \end{itemize}
+  \textit{Si nota che i due casi estremi sono ``speculari''}.
+\end{itemize}
+\textit{In questo elenco puntato si è quindi ragionato sulle celle della
+  maschera di bit associata al pacchetto e non del pacchetto in se, anche se
+  spesso risulti ambiguo}.\\
+Consideriamo ora nuovamente $p[\mbox{ 1 errore }]$, si ha che, dalla
+generalizzazione è:
+\[p[\mbox{ 1 errore }]={{n}\choose{1}}\cdot p^1\cdot(1-p)^{n-1}=n\cdot p\cdot
+  (1-p)^{n-1}\]
+Introduciamo un'approssimazione interessante dell'analisi matematica che vale
+per $\alpha\in \mathbb{R}$ e $|X|<1$, ovvero $-1<x<1$:
+\[(1+x)^\alpha\simeq 1+\alpha\cdot x\]
+Ovvero $1+\alpha\cdot x$ sono i primi due termini dello sviluppo in serie di
+$(1+x)^\alpha$.\\
+Tratto quindi la formula per un errore in base a questa approssimazione:
+\[p[\mbox{ 1 errore }=n\cdot p\cdot(1-p)^{n-1}\simeq n\cdot p\cdot
+  [1-p\cdot(n-1)]=n\cdot p-n^2\cdot p^2+n\cdot p^2\]
+Ma so che $p\in(0,1)$ e quindi $p^2<p$, infatti (\textit{grafico
+  approssimativo}): 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/p.pdf}
+\end{figure}
+ma quindi, sempre approssimando (avendo quindi già due approssimazioni):
+\[p[\mbox{ 1 errore }=n\cdot p\cdot(1-p)^{n-1}\simeq n\cdot p-n^2\cdot
+  p^2+n\cdot p^2\simeq n\cdot p\]
+Quindi:
+\[p[\mbox{ 1 errore }\simeq n\cdot p\]
+Analogamente ragiono per due errori:
+\[p[\mbox{ 2 errori }]={{n}\choose{2}}\cdot
+  p^2\cdot(1-p)^{n-2}\simeq{{n}\choose{2}}\cdot
+  p^2\cdot[1-p\cdot(n-2)]={{n}\choose{2}}\cdot (p^2-n\cdot p^3+2p^3)\]
+Ma anche qui si ha che $p\in(0,1)$ e quindi $p^3<p$, e quindi si ha:
+\[p[\mbox{ 2 errori }]\simeq{{n}\choose{2}}\cdot p^2=\frac{n\cdot
+    (n-1)}{2}\cdot p^2\]
+In generale, per $k$ errori, con gli stessi passaggi:
+\[p[\mbox{ k errori }]\simeq{{n}\choose{k}}\cdot p^k\]
+\textbf{I conti diventano molto più semplici}.\\
+Si è detto che se la probabilità di due errori è piccoli si può decidere di
+trascurarla (usando poi solo il \textit{controllo di parità semplice}). Da
+queste approssimazioni vediamo che la probabilità di un errori è $\simeq n\cdot
+p$ mentre per due $\simeq\frac{n\cdot (n-1)}{2}\cdot p^2$. Se ipotizziamo $p\sim
+10^{-6}$, quindi uno su un milione, si ha che $p^2=10^{-12}$ quindi assolutamente
+trascurabile. Si segnala comunque che questa non è una pratica standard.
+Normalmente si hanno, ad esempio, \textbf{low density parity codes (LDPC)} dove
+si sparano a caso vari controlli di qualità nell'ottica di mantenere le
+proprietà di correzione degli errori usando meno controlli possibile, avendo,
+tornando alla ridondanza $R=1+\frac{check}{msg}$, che si vuole usare il minor
+numero di cifre di controllo per abbassare l'\textit{eccesso di ridondanza},
+abbassando la ridondanza stessa, avvicinandosi quindi a $1^+$ (ci si avvicina
+da destra ovviamente). Riducendo l'l'\textit{eccesso di ridondanza} si ha che
+ogni cifra di controllo \textit{copre/protegge} il maggior numero ci
+simboli/cifre del messaggio. \textit{A parità di simboli inviati si vuole quindi
+  ridurre il numero di cifre di controllo}.
+\end{document} 
 % LocalWords:  clock

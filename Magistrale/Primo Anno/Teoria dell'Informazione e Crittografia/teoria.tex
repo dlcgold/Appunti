@@ -352,7 +352,8 @@ correggere quel qualcosa si hanno i cosiddetti \textbf{codici per individuare
 la sua decodifica si accorga dell'errore ci si chiede anche se può correggerlo
 autonomamente senza chiedere che la sorgente spedisca nuovamente il
 messaggio. Non sempre questa cosa si può fare ma quanto accade si parla di
-\textbf{codici a correzione d'errore (\textit{error correction codes})}.\\
+\textbf{codici a correzione d'errore (\textit{error correction codes})}.
+\subsection{Controllo di parità semplice}
 Vediamo come capire se un messaggio ricevuto è valido.\\
 Si supponga di spedire un pacchetto di $n$ bit (ma potrebbe essere qualsiasi
 altra cosa ma per praticità prendiamo un bit) nel canale e che da esso esca un
@@ -440,7 +441,7 @@ dispari e questo ci aiuta su $n-1$ input infatti la generalizzazione dello
 \textit{xor} a più di due input è detta \textbf{funzione di parità}. Un altro
 punto di vista per considerare lo \textit{xor} è quello della \textbf{somma a
   modulo 2} usando la notazione:
-\[y=\bigoplus_{i=1}^{n-1}x_i=\sum_{i=1}^{n-1}x_i\mbox{ mod } 2\]
+\[y=\bigoplus_{i=1}^{n-1}x_i=\sum_{i=1}^{n-1}x_i\bmod 2\]
 avendo che faccio prima la somma e poi il modulo 2 mi dice 0 se è pari e 1 se è
 dispari. \\
 Si ha inoltre una relazione interessante tra le formule scritte usando solo
@@ -455,7 +456,7 @@ settato come appena visto a seconda dei bit caricati su un registro particolare
 (a volte detto \textit{accumulatore}). Tale calcolo è facilmente mappabile in
 un circuito, avendo che lo \textit{xor} gode della proprietà associativa (avendo
 un circuito che fa un albero di porte \textit{xor}).
-\newpage
+
 Posso anche simulare lo \textit{xor} con un \textbf{automa a stati finiti}, con
 due stati ``pari'' e ``dispari'', con il ``pari'' stato iniziale (diciamo che
 input vuoto è pari):
@@ -520,7 +521,8 @@ celta di cosa rappresentiamo con $0$ e $1$ (pensiamo con $0$ che rappresenta
 assenza di segnale, in questo caso meglio usare la parità dispari, mentre se $0$
 e $1$ rappresentassero diverse quantità di Volt andrebbe bene la parità
 pari)}. \\ 
-\textbf{Nel corso si userà comunque solo la \textit{parità pari}}.\\
+\textbf{Nel corso si userà comunque solo la \textit{parità pari}}.
+\subsection{Il rumore bianco}
 Introduciamo ora un primo \textit{modello di rumore}, il \textbf{modello del
   rumore bianco}.
 \begin{definizione}
@@ -701,9 +703,240 @@ proprietà di correzione degli errori usando meno controlli possibile, avendo,
 tornando alla ridondanza $R=1+\frac{check}{msg}$, che si vuole usare il minor
 numero di cifre di controllo per abbassare l'\textit{eccesso di ridondanza},
 abbassando la ridondanza stessa, avvicinandosi quindi a $1^+$ (ci si avvicina
-da destra ovviamente). Riducendo l'l'\textit{eccesso di ridondanza} si ha che
+da destra ovviamente). Riducendo l'\textit{eccesso di ridondanza} si ha che
 ogni cifra di controllo \textit{copre/protegge} il maggior numero ci
 simboli/cifre del messaggio. \textit{A parità di simboli inviati si vuole quindi
-  ridurre il numero di cifre di controllo}.
+  ridurre il numero di cifre di controllo}.\\
+Approfondiamo e usiamo quindi il\textit{ modello del rumore bianco} per vedere
+qual è a probabilità che il ricevente non riesca a capire che c'è stato un
+errore utilizzando il \textit{controllo di parità semplice}.\\
+Ricordiamo che il messaggio è della forma:
+\[x_1x_2\cdots x_{n-1}y\]
+con $y$ \textit{controllo di parità semplice} calcolato come:
+\[y=\bigoplus_{i=1}^{n-1}x_i\]
+Un numero dispari di errore mi segnala che ci sono stati problemi, usando la
+\textit{parità pari} (i pacchetti inseriti nel canale hanno un numero apri di
+$1$).\\ 
+Vogliamo quindi la probabilità che il controllo di parità fallisca, ovvero:
+\[p[\mbox{ controllo }\bigoplus \mbox{ fallisce }]\]
+ma questo è uguale alla probabilità che avvenga un numero pari di errori
+(\textbf{zero escluso}, ovviamente):
+{\footnotesize{\[p[\mbox{ controllo }\bigoplus \mbox{ fallisce }]=p[\mbox{ numero
+      pari di errori }]=p[\mbox{ 2 errori }]+p[\mbox{ 4 errori }]+\cdots \]}}
+Diciamo che, per comodità:
+\[1=(1-p)+p=[(1-p)+p]^n\]
+Ma so che $(a+b)^n=\sum_{k=0}^n{{n}\choose{k}}a^{n-k}b^k$, quindi:
+\[1=[(1-p)+p]^n=\sum_{k=0}^n{{n}\choose{k}}(1-p)^{n-k}p^k\]
+ma questa è ${{n}\choose{k}}(1-p)^{n-k}p^k=p[\mbox{ k errori }]$ (infatti la
+somma di tutte le probabilità è appunto 1), quindi:
+\[1=[(1-p)+p]^n=\sum_{k=0}^n{{n}\choose{k}}(1-p)^{n-k}p^k=\sum_{k=0}^np[\mbox{
+    k errori }]\]
+D'altro canto posso anche dire che, sempre applicando l'espansione di $(a+b)^n$,
+scomponendo però $(-p)^k$ in $(-1)^k\cdot p^k$ (dove $(-1)^k$ vale $1$ per k
+pari e $-1$ per $k$ dispari). Si ha quindi:
+\[(1-2\cdot p)^n=[(1-p)-p]^n=\sum_{k=0}^n(-1)^k\cdot {{n}\choose{k}}\cdot
+  p^k\cdot(1-p)^{n-k}\]
+Ma quindi ho:
+\[(1-2\cdot p)^n=
+  \begin{cases}
+    {{n}\choose{k}}\cdot  p^k\cdot(1-p)^{n-k} &\mbox{sse $k$ è pari}\\
+    -{{n}\choose{k}}\cdot  p^k\cdot(1-p)^{n-k} &\mbox{sse $k$ è dispari}\\
+  \end{cases}
+\]
+Quindi se $k$ è dispari le espansioni di $1$ e $(1-2\cdot p)^n$ sono uguali ma
+di segno opposto mentre se $k$ è pari sono uguali con lo stesso segno. Ma quindi
+questa somma delle due espansioni mi lascia col doppio dei soli termini con $k$
+pari che ci aiuta volendo calcolare proprio le probabilità con un numero di
+errori pari. Si ha quindi, dividendo già per due avendo il discorso del doppio:
+\[\frac{1+(1-2\cdot p)^n}{2}=\sum_{t=0}^{\lfloor \frac{n}{2}\rfloor}
+  {{n}\choose{2\cdot t}}\cdot p^{2t}\cdot(1-p)^{n-2t}\]
+La somma va quindi da 0 alla parte intera di $\frac{n}{2}$. Nel coefficiente
+binomiale ho $2\cdot r$ che è una quantità sicuramente pari. In generale è come
+se avessi $k=2\cdot t$ ciclando solo sui $k$ pari. Ho quindi ottenuto:
+\[p[\mbox{ 0 errori }]+p[\mbox{ 2 errori }]+p[\mbox{ 4 errori }]+\cdots \]
+Non vogliamo però $t=0$ quindi:
+{\footnotesize{\[p[\mbox{ controllo }\bigoplus \mbox{ fallisce }]=p[\mbox{
+        numero pari di errori }]=\frac{1+(1-2\cdot 
+    p)^n}{2}-p[\mbox{ 0 errori }]\]}}
+\[=\frac{1+(1-2\cdot p)^n}{2}-  {{n}\choose{0}}\cdot
+  p^{0}\cdot(1-p)^{n-0}=\frac{1+(1-2\cdot p)^n}{2}-(1-p)^n\]
+E quindi:
+{\small{\[p[\mbox{ controllo }\bigoplus \mbox{ fallisce }]=p[\mbox{ numero pari
+        di errori }]=\frac{1+(1-2\cdot p)^n}{2}-(1-p)^n\]}}
+D'altro canto potrei anche calcolare $p[\mbox{ numero dispari di errori }]$:
+\[p[\mbox{ numero dispari di errori }]=1-p[\mbox{ numero pari di errori }]\]
+(\textit{o anche modificando la sommatoria per ciclare sui $k$ dispari}).\\
+Facendo qualche conto\footnote{i calcoli
+  per il numero dispari di errore sono materiale extra sulle dispense del
+  docente} si ottiene che: 
+\[p[\mbox{ numero dispari di errori }]=1-(p[\mbox{ numero pari di errori
+  }]+p[\mbox{ 0 errori }])\]
+ovvero:
+\[p[\mbox{ numero dispari di errori }]=\frac{1-(1-2\cdot p)^n}{2}\]
+\textit{In generale il numero dispari di errori è meno interessante}.\\
+\subsection{Gestione dei burst}
+Come abbiamo introdotto con il solo \textit{controllo di parità} e con
+il \textit{rumore bianco} non si possono gestire i \textbf{burst di
+  errori}. Vediamo quindi un modo semplice per gestirli.\\
+Si supponga di voler spedire dei messaggi formati da lettere, ad esempio:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    c&i&a&o\\
+    \hline
+  \end{tabular}
+\end{table}
+Posiamo di rappresentare ogni lettera tramite l'\textbf{ASCII standard} a 7 bit:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    char & bit\\
+    \hline
+    c&1000011\\
+    i&1001001\\
+    a&1000001\\
+    o&1001111
+  \end{tabular}
+\end{table}
+Si supponga di avere dei burst di errori di lunghezza $L$ e per semplicità
+assumo $L$ di lunghezza pari alle singole word, quindi $L=7$. Per gestire il
+burst spedisco prima i 7 bit della prima lettera poi quelli della seconda
+etc$\ldots$\\
+Infine spedisco un intero pacchetto di bit di controllo di 7 bit dove ogni bit
+viene calcolato controllando quella posizione di bit in tutti i pacchetti
+precedenti, sempre tramite lo \textit{xor}. Nel caso d'esempio si ha quindi, con
+$x$ per indicare il \textbf{check} (se nella colonna sopra ho un numero apri di
+$1$ metto $0$ altrimenti $1$):
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    c&1000011\\
+    i&1001001\\
+    a&1000001\\
+    o&1001111\\
+    \hline
+    x&0000100\\
+  \end{tabular}
+\end{table}
+Suppongo un burst che rovini dalla posizione 2 alla 4 incluse (avendo che quindi
+molto probabilmente non ci torneranno i conti facendo il check su
+$x[2,4]=000$).\\
+Ovviamente anche qui un numero pari di errori inganna il sistema avendo comunque
+un \textit{controllo di parità semplice} e anche in caso d'errore il ricevente
+non sa comunque dove sia avvenuto e quindi fa \textbf{detection} ma non può fare
+\textbf{correction}.
+\subsection{Codici pesati}
+Abbiamo già parlato del \textbf{codice 01247} vediamo ora un codice pesato più
+interessante e utilizzato.\\
+\begin{definizione}
+  Definiamo questo \textbf{codice pesato} come un codice per cui si hanno alcune cifre
+  di messaggio $msg=m_1m_2\cdots m_nc$ alle quali associamo dei pesi che
+  dipendono dalla posizione in cui si trovano le varie cifre. In particolare si
+  ha peso:
+  \begin{itemize}
+    \item $1$ per la \textbf{check digit} $c$
+    \item $2$ per $m_n$
+    \item si prosegue sempre aumentando di 1 per le altre cifre
+    \item $n$ per $m_2$
+    \item $n+1$ per $m_1$
+  \end{itemize}
+\end{definizione}
+Questo si fa perché la cifra di controllo è calcolata per far ottenere:
+\[m_1\cdot (n+1)+m_2\cdot n+\cdots+m_n\cdot 1+c\cdot 1=0\]
+ma ovviamente questo non sembra possibile e infatti i conti sono fatti in
+\textbf{modulo numero primo}, avendo per esempio, se scegliamo come numero
+prima $37$:
+\[m_1\cdot (n+1)+m_2\cdot n+\cdots+m_n\cdot 1+c\cdot 1\equiv 0\bmod 37\]
+La scelta di 37 non è causale, infatti volendo:
+\begin{itemize}
+  \item rappresentare le 21 lettere dell'alfabeto inglese
+  \item rappresentare dieci cifre da 0 a 9
+  \item un simbolo per lo spazio
+\end{itemize}
+e quindi siamo a 32 simboli e ci serve un numero primo $\geq 31$ e quindi va
+bene 37.\\
+Vogliamo un numero prima perché se vogliamo fare i conti con le congruenze è
+più semplice farle in \emph{modulo numero primo}.\\
+Lavoriamo quindi nella classe dei resti:
+\[[0]_{37},[1]_{37},\ldots, [36]_{37}\]
+e in questo modo se facciamo le varie operazioni è tutto uguale al solito fino
+a 36 (cosa che non succede per le classi dei resti in modulo non numero
+primo).\\
+La classe dei resti in modulo numero primo è un \textbf{campo} mentre se non
+fosse primo si avrebbe un \textbf{anello}. In un campo se $x\cdot y=0$ o che
+$x=0$ oppure $y=0$ (cosa che non succede negli anelli). Inoltre in un campo ho
+che se $x\cdot y =z$ allora $x=z\cdot y^{-1}$ (in un anello non per tutti gli
+$y$ esiste un $y^{-1}$ mentre in un campo sì).\\
+Facendo dipendere il calcolo del peso della \textbf{check digit} da tutti gli
+altri pesi perché, così facendo, sopratutto nelle comunicazioni di tipo
+\textbf{seriale} (dove si spedisce una cifra alla volta), ci si accorge subito
+se una cifra è andata persa oppure se si è aggiunta cifra o se due cifre si
+sono scambiate (cosa comunque difficile in un sistema di comunicazione
+elettronico ma è utile in altre situazioni, sopratutto di conti ``a
+mano'').\\
+Si supponga di avere delle cifre $b$ e $a$, la prima con peso $k+1$ e la
+seconda con peso $k$, avendo una scrittura del tipo $cifra(peso)$:
+\[b(k+1)+a(k)\]
+Ipotizziamo di scambiare $a$ e $b$ (ora $a$ pesa $k+1$ e $b$ pesa $k$),
+avendo:
+\[a(k+1)+b(k)\]
+Ma, facendo la differenza non è nulla:
+\[[b(k+1)+a(k)]-[a(k+1)+b(k)]\neq 0\]
+infatti ho:
+\[b\cdot k+b+a\cdot k-a\cdot k-a-b\cdot k=b-a\]
+ma $b-a=0$ sse $b=a$ e quindi l'unico caso in cui non ci si accorge dello
+scambio è avere lo scambio di due cifre uguali che non fa cambiare il
+risultato.\\
+Questa idea viene usata anche nei codici a barre. Vediamo quindi un algoritmo
+per calcolare la cifra di controllo:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{CheckCalc}{}
+    \State $sum \gets 0$
+    \State $ssum \gets 0$
+    \While {\textit{not} EOF}
+    \State \textbf{read} \textit{sym}
+    \State $sum \gets sum+sym (\bmod 37)$
+    \State $ssum \gets ssum+sum (\bmod 37)$
+    \EndWhile
+    \State $temp \gets ssum+sum (\bmod 37)$
+    \State $c \gets 37-temp (\bmod 37)$
+    \State \textbf{return} $c$ 
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di calcolo dei pesi per codice pesato}
+\end{algorithm}
+Dove:
+\begin{itemize}
+  \item $sum$ tiene conto della somma numerica della nostro calcolo, accumulando
+  i vari termini 
+  \item $ssum$ che è una \textit{somma delle somme} e tiene conto implicitamente
+  dei vari persi che crescono spostandoci da destra a sinistra come visto sopra
+\end{itemize}
+I $\bmod 37$ nel ciclo sono in realtà superflui ma conviene farli per non non
+far diventare i numeri troppo grossi.\\
+Vediamo una più chiara simulazione.
+Il mittente ha un messaggio e ci calcola la \textbf{check digit}.
+Avendo, simulando per un messaggio $wxyzc$, con $c$ \textit{check digit}:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    msg & sum & ssum \\
+    \hline
+    $w$ & $w$ & $w$ \\
+    $x$ & $w+x$ & $2\cdot w+x$ \\
+    $y$ & $w+x+y$ & $3\cdot w+2 x+y$ \\
+    $z$ & $w+x+y+z$ & $4\cdot w+ 3\cdot x+2\cdot y+z$ \\
+    $c$ & $w+x+y+z+c$ & $5\cdot w+4\cdot x+3 y+2\cdot z+c$ \\
+    \hline
+  \end{tabular}
+\end{table}
+Arrivato alla fine voglio calcolare $c$ in modo che:
+\[5\cdot w+4\cdot x+3 y+2\cdot z+c \equiv 0 \bmod 37\]
+Chi riceve fa lo stesso calcolo e alla fine controlla la \textbf{check
+  digit}. Un altro modo per il ricevente è quello di fare solo l'ultimo calcolo
+se farli tutti step by step.
 \end{document} 
-% LocalWords:  clock
+% LocalWords:  clock burst

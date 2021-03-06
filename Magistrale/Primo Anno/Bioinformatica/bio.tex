@@ -476,5 +476,182 @@ Si useranno per questi scopi varie nozioni, tra cui:
 \end{itemize}
 Studiare i grafi di assemblaggio può essere utile anche in ottica di applicare
 procedimenti simili ad altri problemi posti dai biologi.
+\section{Grafi in bioinformatica}
+In bioinformatica infatti uno strumento molto usato, anche oltre il
+sequenziamento, è quello dei \textbf{grafi}.\\
+In letteratura la nozione di grafo compare nel 1735 con il \textbf{grafo di
+  Eulero}, con Eulero che, si dice, fosse ossessionato dal problema dei
+\textbf{ponti di K\"{o}nigsberg}, volendo trovare il ciclo che attraversasse
+ogni ponte solo una volta. Ogni isola di K\"{o}nigsberg diventava un nodo e ogni
+ponte tra isole un arco tra nodi. Da qui la definizione del problema.
+\begin{definizione}
+  Il  \textbf{problema del ciclo Euleriano} consiste nel trovare un ciclo in un
+  grafo tale che visiti ogni arco una e una sola volta prima di tornare al punto
+  di partenza. Si può passare dallo stesso nodo più volte.\\
+  Questo problema si dimostra risolvibile in \textbf{tempo lineare} sull'input
+  $G=(V,E)$. 
+\end{definizione}
+Vediamo poi il ``problema duale'', quello in cui si vuole fare un cilo che non
+visiti due volte uno stesso nodo.
+\begin{definizione}
+  Il  \textbf{problema del ciclo Hamiltoniano} consiste nel trovare un ciclo in un
+  grafo tale che visiti ogni vertice una e una sola volta prima di tornare al punto
+  di partenza.\\
+  Questo problema si dimostra essere \textbf{NP-complete}.
+\end{definizione}
+La differenza di complessità di questi due problemi sarà qualcosa che bisognerà
+considerare parlando dello studio dei grafi in bioinformatica. Anche solo il
+problema dell'assemblaggio si vedrà è riducibile alla visita di un grafo (quindi
+non potremo formularlo come un problema di ciclo Hamiltoniano, la cui soluzione
+potrebbe richiedere anni).\\
+La comparsa dei grafi nel mondo chimico è intorno a metà del 1800 con Cayley che
+li usò per rappresentare strutture chimiche, nel dettaglio usò \textbf{alberi}
+(che ricordiamo esserei grafi connessi aciclici) per contare gli isomeri
+strutturali.\\
+In biologia l'uso dei grafi è stato introdotto a metà 1900 con l'esperimento di
+Benzer, che capì l'importanza dei grafi mentre cercava di distinguere quando
+determinati virus attaccano determinati batteri. Benzer è riuscito a mostrare che
+il DNA di questi virus era \textit{lineare} mentre prima si congetturava che il
+DNA avesse delle biforcazioni. Per capire che non avesse delle biforcazioni ha
+sfruttato la capacità di alcuni geni dei virus di aggredire batteri,
+rappresentando la cosa coi \textbf{grafi ad intervallo}.
+\begin{definizione}
+  Nella teoria dei grafi, un \textbf{grafo d'intervallo} è il grafo
+  d'intersezione di un 
+  multiinsieme di intervalli sulla linea reale. Ha un solo vertice per ciascun
+  intervallo dell'insieme, e uno spigolo tra ogni coppia di vertici
+  corrispondenti agli intervalli che
+  intersecano.
+  \footnote{\url{https://it.wikipedia.org/wiki/Grafo\_d\%27intervallo}}\\
+  In poche parole associo una lettera ad ogni intervallo e collego nel grafo i
+  vertici corrispondenti alla lettera qualora i due intervalli abbiano
+  sovrapposizioni.
+\end{definizione}
+Il punto di svolta si ha però nel 1977 col sequenziamento e i due metodi di
+Sanger (che è tutti gli effetti il primo metodo di sequenziamento) e Gilbert,
+entrambi chimici. Entrambi i metodi generano frammenti etichettati di lunghezza
+variabile che vengono ``letti'' tramite elettroforesi. \\
+\textit{Non approfondiamo nel dettaglio i metodi, essendo prettamente chimici e
+  biologici}.\\ 
+L'assemblaggio dei frammenti del DNA è invece un problema prettamente
+computazionale, avendo l'assemblaggio dei singoli frammenti, ovvero delle
+\textbf{read} prodotte dal sequenziamento, anche in più copie, in un'unica
+sequenza genomica, detta \textbf{superstringa}. \textit{Fino alla fine degli
+  anni '90 l'assemblaggio di frammenti del genoma umano era visto come un
+  problema intrattabile.}
+\begin{definizione}
+  Definiamo \textbf{stringa} come la concatenazione di simboli di un alfabeto
+  $\Sigma$.\\
+  In bioinformatica spesso si ha $\Sigma=\{a,c,g,t\}$
+\end{definizione}
+\begin{definizione}
+  Definiamo il problema della \textbf{shortest superstring} come la ricerca,
+  dato un insieme di stringhe, di trovare la più corta superstringa che le
+  contiene tutte. So hanno quindi:
+  \begin{itemize}
+    \item \textbf{input}: una collezione $s_1,s_2,\ldots,s_n$ di stringhe che
+    possono anche essere lunghe uguali o a lunghezza variabile
+    \item \textbf{output}: una stringa $s$ che contiene tutte le stringhe
+    $s_1,s_2,\ldots,s_n$ dell'input come sottostringhe tale che $|s|$, ovvero la
+    lunghezza della stringa $s$, sia \textbf{minima}
+  \end{itemize}
+  Questo problema è \textbf{NP-complete} e assume che non ci siano errori di
+  sequenziamento nella produzione delle stringhe $s_1,s_2,\ldots,s_n$
+\end{definizione}
+\begin{esempio}
+  Vediamo un esempio di shortest superstring. Si assume per semplicità alfabeto
+  binario $\Sigma=\{0,1\}$.\\
+  Si ha la collezione di stringhe binarie in input (che nel dettaglio sono tutte
+  le possibili combinazioni di 3 simboli binari):
+  \[C_I=\{000,001,010,011,100,101,110,111\}\]
+  Si può verificare che la shortest superstring è:
+  \[s=0001110100\]
+\end{esempio}
+Con la shortest superstring ho letteralmente assemblato le stringhe in input.\\
+Le read determinano la \textbf{coverage (\textit{copertura})} del DNA. Per
+valutare il coverage vado a vedere ogni base da quante read è coperta. Con
+Illumina ho un coverage di almeno 50x, quindi ogni posizione è coperta da almeno
+50 read (lunghe ciascuna $\sim$150 basi). Per poter ricostruire la sequenza di
+DNA originale serve una certa quantità di coverage. Una coverage bassa potrebbe
+impedire la ricostruzione. Illumina va dal 50x minimo anche a 80x.
+MinION, della Oxford Nanopore, produce long read anche di 20000 basi ma con
+basso coverage, anche 3x, ma avendo read lunghe si riesce comunque ad
+assemblare. Quindi se ho long read mi basta un basso coverage mentre se ho short
+read mi serve un elevato coverage, avendo un insieme di read molto ``fitto'' e
+con poca ``sparsità'', in quanto si avrebbero gap, con zone non coperte. Il
+coverage è comunque dato ``per media'' e quindi poter comunque avere buchi.\\
+Il punto chiave che mi permette di ricostruire il DNA è la sovrapposizione tra
+le varie read. Il DNA inoltre ha ripetizioni e questo costituisce, purtroppo, un
+limite all'assemblaggio e in merito studieremo il \textbf{fragment assembly
+  problem}, che serve anche in altri contesti, oltre a quello dell'assemblaggio
+del DNA. Fin'ora abbiamo anche trascurato anche un altro problema, gli
+\textbf{errori di sequenziamento}, dati dal fatto che il processo di sequenziare
+non è \textit{ottimo}, ovvero privo di errori, dove con errore si intende che
+nel DNA si ha una certa base e nella read prodotta dal sequenziamento se ne ha
+un'altra. In fase di assemblaggio questo tipo di errore comporta che non si
+riesce a sovrapporre bene le read, non potendo vedere più alcuni
+\textbf{overlap} tra coppie read. Si ha quindi \textbf{perdita di informazione
+  dell'overlap} e diventa più complicato assemblare il DNA, non impossibile ma
+più complicato.
+\begin{esempio}
+  Si hanno un pezzo di DNA e tre read che sono sovrapponibili:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{cccccccccc}
+      \hline
+      & 1 & 2 & 3 & 4 & 5 &6 &7 &8\\
+      \hline
+      $DNA=$ & a & c & c & g & t &a &c &g\\
+      \hline
+      $R_1=$ & a & c & c & g & t &&&\\
+      $R_2=$ &  & c & c & g & t & a &&\\
+      $R_3=$ &  &  &  & g &t & a &c & g&\\
+    \end{tabular}
+  \end{table}
+  Possiamo quindi assemblare il pezzo di DNA.\\
+  Ma se ipotizziamo di avere un errore di sequenziamento con la terza base della
+  seconda read:
+   \begin{table}[H]
+    \centering
+    \begin{tabular}{cccccccccc}
+      \hline
+      & 1 & 2 & 3 & 4 & 5 &6 &7 &8\\
+      \hline
+      $DNA=$ & a & c & c & g & t &a &c &g\\
+      \hline
+      $R_1=$ & a & c & c & g & t &&&\\
+      $R_2=$ &  & c & c & \textbf{c} & t & a &&\\
+      $R_3=$ &  &  &  & g &t & a &c & g&\\
+    \end{tabular}
+  \end{table}
+  Diventa più difficile assemblare.
+\end{esempio}
+Il tasso di errore nei macchinari Illumina è dello 0.01\%, avendo circa due
+errori per read lunga 150. Per MinION si ha un tasso d'errore anche di circa il
+10\%, quindi ogni 50 basi ho una serie d'errore. Di recente, in ambito long
+read, si stanno progettando i \textbf{PacBio HiFi} (con HiFi che qui sta per
+``high quality framents'') che producono long read con tasso d'errore allo
+0.1\%, facendo ben sperare per il futuro.\\
+Tra i primi informatici che hanno fatto sequenziamento abbiamo Gene Myers che
+era un esperto di algoritmi su stringhe e di pattern matching (parte attiva
+nella creazione dei suffix array), nonché responsabile della creazione
+dell'algoritmo di assemblaggio (famoso anche per BLAST). Gene Myers era un
+esperto del problema della shortest superstring. A partire dalla tecnica di
+costruzione della shortest superstring ha sviluppato l'algoritmo di
+assemblaggio. Vediamo quindi, in primis, come costruire la shortest
+superstring. Per farlo bisogna in primis capire come confrontare le varie
+stringhe in input e come ``foldarle''. Per farlo faccio l'overlap che però a
+questo punto necessita di una definizione formale.
+\begin{definizione}
+  Definiamo \textbf{overlap} tra una coppia di stringhe $s_i$ e $s_j$ in input
+  come il più lungo prefisso di $s_j$ che ha un match perfetto (coincide) con un
+  suffisso di $s_i$. Posso anche dire che è il più lungo suffisso di $s_i$ che
+  ha un match perfetto con un prefisso di $s_j$, ribaltare la definizione non
+  cambia. L'overlap tra le due stringhe si indica con: 
+  \[ov(s_i,s_j)\]
+  % 46.04 lezione 2
+\end{definizione}
+
 \end{document}  
-% LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF
+% LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP
+% LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap

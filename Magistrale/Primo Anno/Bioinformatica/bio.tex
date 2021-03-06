@@ -532,7 +532,8 @@ Sanger (che è tutti gli effetti il primo metodo di sequenziamento) e Gilbert,
 entrambi chimici. Entrambi i metodi generano frammenti etichettati di lunghezza
 variabile che vengono ``letti'' tramite elettroforesi. \\
 \textit{Non approfondiamo nel dettaglio i metodi, essendo prettamente chimici e
-  biologici}.\\ 
+  biologici}.
+\section{Superstringhe e grafo di overlap}
 L'assemblaggio dei frammenti del DNA è invece un problema prettamente
 computazionale, avendo l'assemblaggio dei singoli frammenti, ovvero delle
 \textbf{read} prodotte dal sequenziamento, anche in più copie, in un'unica
@@ -545,7 +546,7 @@ sequenza genomica, detta \textbf{superstringa}. \textit{Fino alla fine degli
   In bioinformatica spesso si ha $\Sigma=\{a,c,g,t\}$
 \end{definizione}
 \begin{definizione}
-  Definiamo il problema della \textbf{shortest superstring} come la ricerca,
+  Definiamo il \textbf{shortest superstring problem (SSP)} come la ricerca,
   dato un insieme di stringhe, di trovare la più corta superstringa che le
   contiene tutte. So hanno quindi:
   \begin{itemize}
@@ -556,7 +557,8 @@ sequenza genomica, detta \textbf{superstringa}. \textit{Fino alla fine degli
     lunghezza della stringa $s$, sia \textbf{minima}
   \end{itemize}
   Questo problema è \textbf{NP-complete} e assume che non ci siano errori di
-  sequenziamento nella produzione delle stringhe $s_1,s_2,\ldots,s_n$
+  sequenziamento nella produzione delle stringhe $s_1,s_2,\ldots,s_n$.\\
+  \textbf{La shortest superstring potrebbe non essere unica}.
 \end{definizione}
 \begin{esempio}
   Vediamo un esempio di shortest superstring. Si assume per semplicità alfabeto
@@ -649,9 +651,140 @@ questo punto necessita di una definizione formale.
   ha un match perfetto con un prefisso di $s_j$, ribaltare la definizione non
   cambia. L'overlap tra le due stringhe si indica con: 
   \[ov(s_i,s_j)\]
-  % 46.04 lezione 2
+  Ricordiamo che una stringa la posso scrivere in modo scomposto in due modi:
+  \begin{itemize}
+    \item $s_i=s_i'x$, con $x$ suffisso
+    \item $s_j=xs_j'$, con $x$ prefisso
+  \end{itemize}
+  Tendenzialmente si prende l'\textbf{overlap più lungo}.
 \end{definizione}
+\begin{esempio}
+  Siano:
+  \[s_i=accgtgtgt\]
+  \[s_j=gtgtgtccaa\]
+  Allora si ha che:
+  \[ov(s_i,s_j)=gtgtgt\]
+  con l'overlap lungo 6.
+\end{esempio}
+Proseguiamo quindi con il calcolo della shortest superstring dopo aver calcolato
+l'overlap di tutte le stringhe in input.\\
+Creo un grafo con un nodo per ogni sequenza, etichettato con la sequenza
+stessa. Tracciamo quindi un arco tra due nodi sse i due nodi sono in overlap,
+associando all'arco la lunghezza dell'overlap.\\
+Una tecnica per fare il grafo consiste in:
+\begin{itemize}
+  \item collegare a priori di tutti i nodi ottenendo un grafo completo non
+  orientato 
+  \item per ogni coppia di stringhe $s_i$ e $s_j$ metto l'arco pesato con
+  l'overlap massimo $ov(s_i,s_j)$, dando anche direzione all'arco. Eventualmente
+  posso anche dare doppio peso all'arco in base alla direzione. Si è ottenuto il
+  \textbf{grafo di overlap}, che quindi è un grafo orientato (se in entrambi i
+  versi non ho overlap lo lascio per praticità senza orientamento con peso 0)
+\end{itemize}
+\begin{esempio}
+  Sia la collezione di stringhe in input:
+  \[C_i=\{atc,cca,cag,tcc,agt\}\]
+  e costruisco il grafo completo come detto sopra:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/gra3.pdf}
+  \end{figure}
+  Aggiungo quindi i pesi relativi agli overlap dando l'eventuale orientamento e
+  ottengo il grafo di overlap:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/gra4.pdf}
+  \end{figure}
+\end{esempio}
+Per calcolare la shortest superstring dovremo calcolare un certo cammino sul
+grafo di overlap. Sicuramente un cammino che visita tutti i nodi mi porta ad
+avere una superstringa. Vediamo quindi una prima idea intuitiva:
+\begin{esempio}
+  Riprendendo il grafo di overlap dell'esempio precedente faccio:
+  \begin{itemize}
+    \item parto dal nodo $atc$ e lo aggiungo alla superstringa, che per ora è
+    $s=atc$ 
+    \item seguo l'arco di peso 2 e arrivo in $tcc$
+    \item aggiungo $c$ (ovvero la parte non in overlap) alla superstringa, che
+    per ora è $s=atcc$ 
+    \item seguo l'arco di peso 2 e arrivo in $cca$
+    \item aggiungo $a$ (ovvero la parte non in overlap) alla superstringa, che
+    per ora è $s=atcca$
+    \item seguo l'arco di peso 2 e arrivo in $cag$
+    \item aggiungo $g$ (ovvero la parte non in overlap) alla superstringa, che
+    per ora è $s=atccag$
+    \item seguo l'arco di peso 2 e arrivo in $agt$
+    \item aggiungo $t$ (ovvero la parte non in overlap) alla superstringa, che
+    per ora è $s=atccagt$ 
+    \item mi fermo avendo visitato tutti i nodi
+  \end{itemize}
+  Alla fine ho:
+  \[s=atccagt\]
+  che so essere una superstringa.
+\end{esempio}
+Si vede che il cammino, a conferma, tocca ogni vertice una e una sola volta,
+avendo un cammino Hamiltoniano ma, avendo i pesi, abbiamo a che fare con un
+\textbf{Traveling Salesman Problem (\textit{TSP})}. Dobbiamo però dimostrare che
+la superstringa ottenuta è anche la più breve. \\
+Diamo però una piccola definizione formale del grafo di overlap.
+\begin{definizione}
+  Definiamo il \textbf{grafo di overlap} $G_{ov}=(V,E)$ tale che, data una
+  collezione di stringhe $s_1,\ldots,s_n$:
+  \begin{itemize}
+    \item $V=\{s_1,\ldots,s_n\}$
+    \item $E$ è definito in modo che ogni arco $(s_i,s_j)\in E$ è un arco
+    orientato da $s_i$ a $s_j$ di peso $|ov(s_i,s_j)|$ (quindi pesato con la
+    lunghezza dell'overlap)
+  \end{itemize}
+\end{definizione}
+Si dimostra poi che il \textbf{cammino Hamiltoniano di massimo costo}
+``produce'' una shortest superstring. Facciamo una dimostrazione non
+formale. Innanzitutto per ``produce'' si intende che, dato il cammino prodotto
+da Hamilton di massimo costo, con i vertici etichettati dalle stringhe
+$s_{i,1},s_{i,2},\ldots,s_{i,n}$, la superstringa si ottiene sapendo che una
+stringa $s_{i,j+1}$ che è ha un prefisso in overlap con al precedente stringa
+$s_{i,j}$ la si può scrivere come: 
+\[s_{i,j+1}=ov(s_{i,j},s_{i,j+1})\cdot x_{i,j+1}\]
+Possiamo anche dire che:
+\[r(s_{i,j},s_{i,j+1})=x_{i,j+1}\]
+indicando con $x_{i,j+1}$ la parte della stringa fuori dall'overlap, il
+``resto'' possiamo dire. A questo
+punto so che la superstringa parte con $s_{i,1}$ e prosegue concatenando i vari
+$x_{i,j+1}$:
+\[s=s_{i,1}\cdot x_{i,2}\cdot x_{i,3}\cdot\ldots\cdot \cdot x_{i,n}\]
 
+Bisogna dimostrare che il cammino Hamiltoniano di massimo peso coincide con la
+shortest superstring. Bisogna dimostrare che:
+\begin{itemize}
+  \item un cammino Hamiltoniano di massimo peso calcolato come sopra è una
+  superstringa, e questo di dimostra perché tocca ogni vertice e quindi ogni
+  stringa che di conseguenza viene inclusa
+  \item la superstringa appena calcolata è la più breve e per dimostrarlo si ha
+  l'intuizione che se massimizzo l'overlap ``globale'' minimizzo la lunghezza
+  della superstringa 
+\end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/ssp.pdf}
+  \caption{Esempio di formazione di una shortest superstring a partire da una
+    collezione di stringhe sfruttando i ``resti'' degli overlap}
+\end{figure}
+Il calcolo della shortest superstring può quindi risolvere l'assemblaggio di
+stringhe anche se \textbf{si ricorda che il problema del cammino Hamiltoniano è
+  NP-complete}. \\
+La miriade di read però, quando ci lavorò per primo Gene Myers, rendeva
+davvero difficile il calcolo (problema NP-complete e hardware storicamente poco
+potente). Servirono quindi anni per il primo calcolo, circa una quindicina,
+usando appunto il metodo della superstringa.\\
+Si ha però un'euristica per calcolare la superstringa, usando un
+\textbf{algoritmo 2-approssimante} usando la \textbf{tecnica greedy}. In base a
+questa tecnica si sceglie sempre l'arco che pesa di più nel senso che ordino in
+ordine di peso tutti gli archi e faccio gli overlap tra le stringhe.
+%1.24.30 lezione 2
+
+Non si ha la
+soluzione ottima ma appunto è 2-approssimante.
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
+% LocalWords:  superstringa

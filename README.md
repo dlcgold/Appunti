@@ -49,7 +49,6 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Architetture Dati (RC)
 - [ ] Bioinformatica
 - [x] Machine Learning (RC)
-- [ ] Metodi del Calcolo Scientifico
 - [x] Modelli della Concorrenza (RC)
 - [ ] Modelli Probabilistici per le Decisioni
 - [x] Processo e Sviluppo Software (RC)

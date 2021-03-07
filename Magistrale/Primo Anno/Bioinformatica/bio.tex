@@ -533,7 +533,7 @@ entrambi chimici. Entrambi i metodi generano frammenti etichettati di lunghezza
 variabile che vengono ``letti'' tramite elettroforesi. \\
 \textit{Non approfondiamo nel dettaglio i metodi, essendo prettamente chimici e
   biologici}.
-\section{Superstringhe e grafo di overlap}
+\subsection{Superstringhe e grafo di overlap}
 L'assemblaggio dei frammenti del DNA è invece un problema prettamente
 computazionale, avendo l'assemblaggio dei singoli frammenti, ovvero delle
 \textbf{read} prodotte dal sequenziamento, anche in più copie, in un'unica
@@ -750,8 +750,8 @@ Possiamo anche dire che:
 indicando con $x_{i,j+1}$ la parte della stringa fuori dall'overlap, il
 ``resto'' possiamo dire. A questo
 punto so che la superstringa parte con $s_{i,1}$ e prosegue concatenando i vari
-$x_{i,j+1}$:
-\[s=s_{i,1}\cdot x_{i,2}\cdot x_{i,3}\cdot\ldots\cdot \cdot x_{i,n}\]
+$x_{i,j+1}$ (come si può vedere in figura \ref{fig:ssp}):
+\[s=s_{i,1}\cdot x_{i,2}\cdot x_{i,3}\cdot\ldots\cdot  x_{i,n}\]
 
 Bisogna dimostrare che il cammino Hamiltoniano di massimo peso coincide con la
 shortest superstring. Bisogna dimostrare che:
@@ -768,6 +768,7 @@ shortest superstring. Bisogna dimostrare che:
   \includegraphics[scale = 0.8]{img/ssp.pdf}
   \caption{Esempio di formazione di una shortest superstring a partire da una
     collezione di stringhe sfruttando i ``resti'' degli overlap}
+  \label{fig:ssp}
 \end{figure}
 Il calcolo della shortest superstring può quindi risolvere l'assemblaggio di
 stringhe anche se \textbf{si ricorda che il problema del cammino Hamiltoniano è
@@ -779,12 +780,116 @@ usando appunto il metodo della superstringa.\\
 Si ha però un'euristica per calcolare la superstringa, usando un
 \textbf{algoritmo 2-approssimante} usando la \textbf{tecnica greedy}. In base a
 questa tecnica si sceglie sempre l'arco che pesa di più nel senso che ordino in
-ordine di peso tutti gli archi e faccio gli overlap tra le stringhe.
-%1.24.30 lezione 2
-
-Non si ha la
-soluzione ottima ma appunto è 2-approssimante.
+ordine di peso tutti gli archi e faccio gli overlap tra le stringhe collegate.
+Dopo avere selezionato l'arco si prendono i due estremi e se ne fa la
+superstringa. Si continua quindi cercando sempre gli archi che pesano di più
+creando poi la superstringa. \textbf{Non si vede nel dettaglio il funzionamento}
+e ovviamente non si ha la soluzione ottima e in realtà si congettura sia
+2-approssimante ma non si ha una dimostrazione in merito, è un problema aperto
+da trent'anni e solo a livello sperimentale si è ipotizzata la
+2-approssimazione.\\
+Si ricorda che con il cammino Hamiltoniano ottimo si ottiene comunque una
+soluzione che potrebbe non essere unica.
+\subsection{Grafi di De Brujin e k-mers}
+Il metodo della superstringa è stato quindi usato per l'assemblaggio del primo
+sequenziamento (quello con il metodo Sanger) ma l'appoggio ad un problema
+NP-complete (il \textit{ciclo Hamiltoniano}) rendeva il tutto troppo
+dispendioso. Il primo \textit{assemblatore}, quello di Celera, usava però questo
+metodo più lento per il \textit{fragment assembly}.\\
+Vediamo ora una soluzione diversa, basata sui \textbf{grafi di De Brujin} che
+invece come problema sottostante ha il \textit{ciclo Euleriano} che sappiamo
+avere soluzione lineare. \\
+Vediamo in primis qualche definizione.
+\begin{definizione}
+  Definiamo \textbf{k-mer} come è una sottostringa di lunghezza
+  $k$. I k-mers sono quindi tutte le sottostringhe distinte di lunghezza $k$,
+  non estraggo più volte lo stesso k-mer. Si segnala però che troppe
+  ripetizioni dello stesso k-mer, che vengono trascurate, possono rendere
+  difficile l'assemblaggio. Quindi il caso ideale è che tutti i k-mer estratti
+  da una stringa siano distinti ma si seleziona il $k$ in modo che ci siano al
+  più due o tre ripetizioni dello stesso k-mer nella sequenza.
+\end{definizione}
+\begin{definizione}
+  Data una stringa $s$ definiamo \textbf{spettro di $s$ di dimensione/ampiezza
+    $l$} è il 
+  \textbf{multiinsieme}, \textbf{avendo quindi ripetizioni}, di tutte le
+  occorrenze di sottostringhe di lunghezza $l$ (gli l-mers) e si indica con:
+  \[spectrum(s,l)\]
+\end{definizione}
+\begin{esempio}
+  Prendiamo una stringa $s$:
+  \[s=tatggtac\]
+  Fissiamo $k=3$ e si ha lo spettro di dimensione $3$:
+  \[spectrum(s,3)=\{tat, atg, tgg, ggt, gta, tac\}\]
+  (\textit{che in questo caso, non avendo ripetizioni, è un insieme di 3-mers.})
+\end{esempio}
+Dati i frammenti/read (che sono short read lunghe circa 150 basi) si estraggono
+da essi i \textbf{k-mers}, con $k$ usualmente pari a 32, 31 o 28 per avere il
+minor numero di ripetizioni (i numeri sono stati identificati
+sperimentalmente). Si segnala che questa ``proprietà'' di avere sequenze circa
+lunghe 32 che non si ripetono è probabilmente legata anche al fatto che il DNA,
+preso come sequenza di simboli, è difficile da comprimere con i tool standard
+(zip, uso della BWT etc$\ldots$), creando non pochi problemi alle banche dati
+anche se ancora non si è scoperto bene ne perché ne come risolvere la cosa.\\  
+Il problema di assemblaggio diventa quindi ricostruire una stringa da un insieme
+di k-mer:
+\begin{itemize}
+  \item \textbf{input}: un insieme di stringhe $s_1,s_2,\ldots,s_n$
+  \item estraggo i k-mer da tutte le $s_i$ in input, per un $k$ fissato
+  \item assemblo i k-mer usando i grafi di De Brujin
+\end{itemize}
+Ma prima di introdurre i grafi di De Brujin vediamo un esempio di cosa
+significhi assemblare k-mers, partendo dal caso \textbf{senza ripetizioni},
+avendo quindi un \textbf{insieme di k-mers} e non uno \textbf{spettro} (che è un
+multiinsieme).
+\begin{esempio}
+  Si prenda in input una collezione di k-mers con $k=3$ (quindi 3-mers):
+  \[C=\{atg, agg, tgc,tcc, gtc, ggt, gca, cag\}\]
+  Non essendo coincidenti se facessi gli overlap tra ogni coppia avrei al più
+  overlap di lunghezza 2. Ipotizzando di fare il grafo di overlap avrei il
+  seguente cammino Hamiltoniano (uno dei possibili):
+  \[atg\to tgc\to gca\to cag\to agg\to ggt\to gtc\to tcc\]
+  che produrrebbe la superstringa:
+  \[s=atgcaggtcc\]
+  Vedendo che anche con i k-mer posso ragionare in ottica di superstringa.
+\end{esempio}
+Ma con l'approccio che vogliamo ora non si passa per ogni vertice una e una
+sola volta ma per ogni arco una e una sola volta, usando il cammino
+Euleriano.\\
+Dobbiamo fare si che quindi prendere ogni arco una e una sola volta
+corrisponde a prendere tutti i k-mers, avendo quindi che ogni arco deve essere
+associato ad un k-mer. Costruiamo quindi un grafo che soddisfi queste
+condizioni (grafo che poi definiremo essere un \textbf{grafo di De
+  Brujin}). Si ha quindi un grafo dove gli archi sono i k-mer mentre i vertici
+all'estremo di un arco sono etichettati con il prefisso di lunghezza $k-1$ e
+il suffisso di lunghezza $K-1$ del
+k-mer (quindi i suffissi e i prefissi unici formano l'insieme dei
+vertici). L'arco è orientato dal prefisso al suffisso. \\
+In altri termini i vertici agli estremi di un arco etichettato con il k-mer $x$
+altro non sono che i due unici (k-1)-mer estraibili da $x$. 
+\begin{esempio}
+  Prendendo una collezione di k-mer:
+  \[C=\{acc,cct,cgt\}\]
+  so che, per il grafo $G=(V,E)$, ho $E=C$ mentre per $V$ so che:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gra5.pdf}
+  \end{figure}
+  Quindi $V=\{ac,cc,ct,tg\}$.\\
+  Costruiamo quindi il grafo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gra6.pdf}
+  \end{figure}
+  Quindi il cammino di Eulero (qui banale) e otteniamo la superstringa (e quindi
+  l'assemblaggio)
+  concatenando le etichette degli archi nell'ordine in cui vengono visitati,
+  ragionando nello stesso modo in cui si faceva coi grafi di overlap, quindi
+  partendo con la prima etichettata e proseguendo concatenando solo i resti dei
+  vari overlap tra etichette degli archi:
+  \[s=acctg\]
+\end{esempio}
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
-% LocalWords:  superstringa
+% LocalWords:  superstringa sottostringa

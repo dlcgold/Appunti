@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt, oneside]{book}
+\message{ !name(critto.tex)}\documentclass[a4paper,12pt, oneside]{book}
 
 % \usepackage{fullpage}
 \usepackage[italian]{babel}
@@ -32,7 +32,6 @@
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage{algorithm}
-\usepackage{manfnt}
 % \usepackage{algpseudocode}
 \usepackage[cache=false]{minted}
 \usepackage{mathtools}
@@ -92,6 +91,9 @@
 
 \pgfplotsset{compat=1.13}
 \begin{document}
+
+\message{ !name(critto.tex) !offset(-3) }
+
 \maketitle
 
 \definecolor{shadecolor}{gray}{0.80}
@@ -499,9 +501,8 @@ Parliamo ora meglio di \textbf{ridondanza}, definendola formalmente.
   viene detto \textbf{eccesso di ridondanza}.
 \end{definizione}
 \begin{definizione}
-  Possiamo \textbf{generalizzare} la definizione di \textbf{ridondanza},
-  indicando $tot=msg+check$:
-  \[R=\frac{msg+check}{msg}=\frac{tot}{msg}\]
+  Possiamo \textbf{generalizzare} la definizione di \textbf{ridondanza}:
+  \[R=\frac{msg+check}{msg}\]
   avendo:
   \begin{itemize}
     \item $msg$ numero di simboli/cifre di messaggio
@@ -1118,120 +1119,36 @@ In questo caso si ha un triangolo con un cateto di lunghezza $n$, ad esempio
     x&&&&
   \end{tabular}
 \end{table}
-Ho quindi $n$ check digit (\textit{parte in dubbio}). Si ha infatti che le ci
-cifre di messaggio sono (per la \textbf{formula di Gauss}):
+Ho quindi $n$ check digit per un pacchetto contenente $n-1$ cifre di messaggio e
+una check digit. Si ha infatti che le ci cifre di messaggio sono (per la
+formula di Gauss):
 \[msg=\sum_{i=1}^{n-1}i=\frac{(n-1)\cdot n}{2}\]
 (in altre parole il numero di diagonali che ho nella matrice meno uno).\\
-Ho inoltre che il numero di cifre totali è:
-\[tot=msg+check=\frac{(n-1)\cdot n}{2}+n=\frac{n(n+1)}{2}\]
-che altro non è che la sommatoria fatta per calcolare $msg$ ma con un'iterazione
-in più:
-\[tot=msg+check=\sum_{i=1}^{n}i\]
+Ho inoltre che:
+\[tot=msg+check=\frac{(n-1)\cdot n}{2}+n\]
 Le check digit vengono calcolate dal mittente in base alle cifre sulla riga e
-sulla colonna della check digit. Quindi, ad esempio, per calcolare la check
-digit in grassetto di:
-\begin{table}[H]
-  \centering
-  \begin{tabular}{ccccc}
-    $\circ$ & $\circ$ & $\circ$ &$\circ$  & x\\
-    $\circ$ & $\circ$ & $\circ$  & x&\\
-    $\circ$ & $\circ$ & \textbf{x}&&\\
-    $\circ$ &x&&&\\
-    x&&&&
-  \end{tabular}
-\end{table}
-La calcola tramite le cifre di messaggio in verde:
-\begin{table}[H]
-  \centering
-  \begin{tabular}{ccccc}
-    $\circ$ & $\circ$ & ${\color{green}\circ}$ &$\circ$  & x\\
-    $\circ$ & $\circ$ & ${\color{green}\circ}$  & x&\\
-    ${\color{green}\circ}$ & ${\color{green}\circ}$ & \textbf{x}&&\\
-    $\circ$ &x&&&\\
-    x&&&&
-  \end{tabular}
-\end{table}
-Si nota che il bit di parità della prima riga è calcolato solo tramite la prima
-riga mentre il bit di parità dell'ultima riga viene calcolato solo tramite la
-prima colonna.\\
+sulla colonna della check digit.\\
 Il ricevente, per capire dove è il bit errato, verifica in quali check digit è
 coinvolto, che sono due check digit, e incrociando scopro quale sia il simbolo
-errato. Vedendo in pratica si supponga errato il bit in rosso:
-\begin{table}[H]
-  \centering
-  \begin{tabular}{ccccc}
-    $\circ$ & $\circ$ & $\circ$ &$\circ$  & x\\
-    $\circ$ & $\circ$ & {$\color{red}\circ$}  & x&\\
-    $\circ$ & $\circ$ & x&&\\
-    $\circ$ &x&&&\\
-    x&&&&
-  \end{tabular}
-\end{table}
-Esso è coinvolto nelle seguenti cifre di parità in grassetto, calcolate, oltre
-che grazie alla cifra in rosso anche da quelle in verde:
-\begin{table}[H]
-  \centering
-  \begin{tabular}{ccccc}
-    $\circ$ & $\circ$ &  ${\color{green}\circ}$&  ${\color{green}\circ}$ & x\\
-    ${\color{green}\circ}$ & ${\color{green}\circ}$ & {$\color{red}\circ$}  & \textbf{x}&\\
-    ${\color{green}\circ}$ &  ${\color{green}\circ}$ & \textbf{x}&&\\
-    $\circ$ &x&&&\\
-    x&&&&
-  \end{tabular}
-\end{table}
-Mentre le altre cifre di parità saranno corrette. Il destinatario può quindi
-scoprire quale sia il bit che è stato modificato per poterlo poi correggere.\\
-Passiamo quindi alla ridondanza del codice triangolare.
-Si ha che:
-\[R_\triangle=\frac{tot}{msg}=\frac{\frac{n(n+1)}{2}}{\frac{(n-1)n}{2}}=
-  \frac{n+1}{n-1}= \frac{(n-1+2)}{n-1}=1+\frac{2}{n-1}\]
+errato. Si ha che:
+\[R_\triangle=\frac{\frac{n(n+1)}{2}}{\frac{(n-1)n}{2}}=\frac{n+1}{n-1}=
+  \frac{(n-1+2)}{n-1}=1+\frac{2}{n-1}\]
 Confronto questa ridondanza con quella dei migliori codici rettangolari, ovvero
-quella dei codici quadrati, dove vedo che si ha un termine positivo in più nei
-codici quadrati, ovvero $\frac{1}{(n-1)^2}$, che essendo positivo può solo
-aumentare la ridondanza. Si ha quindi che:
+quella dei codici quadrati, dove vedo che si ha un termine positivo in più. Si
+ha quindi che:
 \[R_\triangle<R_\square\]
-e quindi i codici triangolari sono migliori di quelli
-rettangolari, anche dei migliori tra quelli rettangolari.\\
-L'unico limite per avere un codice triangolare è quello di avere un
-messaggio di $n$ cifre che permette l'espressione $\frac{(n-1)\cdot n}{2}$,
-ovvero che sia rappresentabile da un triangolo (per fare tornare i conti posso
-comunque aggiungere uno 0, per esempio), avendo $n$ lunghezza del cateto. 
+e quindi i codici triangolari sono assolutamente migliori di quelle
+rettangolari, anche delle migliori di quelle rettangolari anche se devo avere un
+messaggio di $n$ cifre che permette l'espressione $\frac{(n-1)\cdot n}{2}$, per
+fare tornare i conti posso comunque aggiungere uno 0, per esempio.
 \subsection{Codici cubici}
 Per cercare di abbassare ancora meno la ridondanza cerchiamo la disposizione
 geometrica più conveniente. Si è provato quindi ad aumentare le dimensioni dello
 spazio in cui ci troviamo, pensando ad un cubo, ipotizzando di avere una cifra
 di controllo (posta in basso a destra per il piano) che controlla tutto un piano
-(contando che ho piani per ognuna delle tre dimensioni). Si ha quindi un bit di
-parità per ogni piano (che è ciò che rappresenta le cifre di messaggio) con cui
-posso tagliare il cubo. Nel complesso si ha quindi un intero spigolo del cubo
-che rappresenta le check digit che sono rappresentati da i piani in una
-certa direzione. In totale posso sezionare in tre direzioni avendo quindi 3
-spigoli di check digit che ``proteggono'' tutte le cifre di messaggio
-contenute nel cubo.\\
-In maniera approssimata, su circa $n^3$ posizioni si hanno $3(n-1)+1=3n-2$ check
-digit. Si ha quindi che la ridondanza è:
-\[R_{\mbox{\mancube}}=\frac{(n-1)^3+3n-2}{(n-1)^3}\simeq 1+\frac{3}{n^2}\]
-Posso pensare quindi pensare di aumentare ancora le dimensioni, considerando
-cubi a quattro dimensioni, avendo:
-\begin{itemize}
-  \item $(n-1)^4$ cifre di messaggio 
-  \item $4(n-1)+1=4n-3$ check digit
-\end{itemize}
-ottenendo la seguente ridondanza:
-\[R_{\mbox{\mancube  \textit{4-dim}}}=1+\frac{4n-3}{(n-1)^4}\simeq 1+\frac{4}{n^3}\]
-Posso pensare di andare quindi in $k$ dimensioni, avendo:
-\begin{itemize}
-  \item $(n-1)^k$ cifre di messaggio 
-  \item $k(n-1)+1=kn-3$ check digit
-\end{itemize}
-ottenendo la seguente ridondanza:
-\[R_{\mbox{\mancube  \textit{k-dim}}}=1+\frac{kn-k+1}{(n-1)^k}\simeq
-  1+\frac{k}{n^{k-1}}\]
-Ma anche se la ridondanza è sempre migliore vedo che a denominatore dell'eccesso
-di ridondanza $\frac{k}{n^{k-1}}$ trovo un polinomio elevato alla dimensione
-meno uno. Vedremo che nei \textbf{codici di Hamming}, per correggere un errore,
-il \textit{gap} è esponenziale al variare delle dimensioni. Inoltre il
-\textit{codice di Hamming} è \textbf{ottimale}.
+(contando che ho piani per ognuna delle tre dimensioni).
 \textbf{to be continued}
 \end{document} 
 % LocalWords:  clock burst
+
+\message{ !name(critto.tex) !offset(-1154) }

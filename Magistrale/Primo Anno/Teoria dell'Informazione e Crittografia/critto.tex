@@ -961,7 +961,7 @@ In realtà ho trattini dopo la prima cifra, dopo la quinta e dopo la nona ma non
 contano nulla ai fini del calcolo ma sono aiutati solo per facilitare la
 leggibilità dello stesso.\\
 \textbf{A causa dei problemi sopra descritti i codici ISBN vengono assegnati
-  ormai con libertà, usando il primo codice libero}.\\
+  ormai con libertà dalle case editrici, usando il primo codice libero}.\\
 ISBN è un codice pesato dove i conti sono
 fatti in $\bmod\,\,\,11$ (il più piccolo numero primo più grande di 10). Potrei
 avere come risultato 10 avendo $\bmod\,\,\,11$ ma in quel caso uso $X$ come
@@ -994,8 +994,133 @@ checksum, come ultima cifra.
   verificato.\\ 
   Avrei inoltre, per l'algoritmo, controllando la check digit:
   \[temp = 7+5=12\equiv 1\]
-  \[c=11-1=10\]
+  \[c=11-1=10\equiv X\]
 \end{esempio}
 \section{Codici per correggere errori}
+In questo caso il ricevente non solo deve capire dove è l'errore ma deve anche
+correggerlo. 
+\subsection{Codici rettangolari}
+Il modo più semplice per correggere errori è usare i \textbf{codici a correzione
+  rettangolari}. \\
+In questo caso il codice viene organizzato in modo logico in forma di
+rettangolo, ovviamente solo in modo logico/astratto.
+Indichiamo con $\circ$ i bit di messaggio e con $x$ le check digit. In questa
+prima soluzione penso ai codici come se fossero a forma di rettangolo, con $m-1$
+righe e $n-1$ colonne, con extra una colonna di check digit e una riga extra di
+check digit. Contando la riga di check digit e la colonna di check digit
+arriviamo a $m$ righe e $n$ colonne.
+\begin{table}[H]
+  \centering
+  \begin{tabular}{cccccc}
+    $\circ$ & $\circ$ & $\circ$ &$\ldots$ & $\circ$ & x\\
+    $\circ$ & $\circ$ & $\circ$ &$\ldots$ & $\circ$ & x\\
+    $\circ$ & $\circ$ & $\circ$ &$\ldots$ & $\circ$ & x\\
+    $\vdots$ & $\vdots$ & $\vdots$ &$\ddots$ & $\circ$ & x\\
+    $\circ$ & $\circ$ & $\circ$ &$\ldots$ & $\circ$ & x\\
+    x&x&x&x&x&(x)
+  \end{tabular}
+\end{table}
+\textit{L'ultima check digit in fondo a destra è superflua, anche se a volte è
+  lo xor di tutte le cifre di controllo, richiedendo che abbia numero pari di
+  1}.\\ 
+I codici rettangolari riescono a correggere un errore, uno e uno solo ma ovunque
+avvenga.\\
+La check digit della prima riga fa la parità della prima riga, analogamente la
+seconda lo fa per la seconda riga etc$\ldots$\\
+Faccio un discorso analogo sulle colonne (la colonna 1 ha la check digit come
+prima cifra della riga di check digit etc$\ldots$).\\
+La check digit mi dice sempre se ho cifre pari tra cifre di messaggio e check
+digit.\\ 
+Tramite la check digit a fine riga capisco che in una riga si ha un errore, e
+posso controllare lo stesso per la colonna. Identifico quindi il punto preciso
+in cui è avvenuto l'errore e semplicemente lo inverto, essendo binario.\\
+Identificare l'errore singolo è dato dal fatto che solo una riga e solo una
+colonna avranno la rispettiva check digit ``rotta'' (nella colonna di check
+digit identifico la riga dell'errore mentre nella riga di check digit identifico
+la colonna dell'errore) e quindi posso riconoscere il preciso elemento che è
+errato. Da questo discorso si capisce che la check digit in fondo a destra è in
+realtà inutile.\\ 
+Ovviamente questo è garantito funzionare solo per un errore in quanto due errori
+potrebbero avere in comune riga o colonna e non saprei più capire dove siano gli
+errori. Potrebbe funzionare per più di un errore ma non sempre causa ambiguità e
+quindi questo metodo è \textbf{garantito per uno e un solo errore, ovunque si
+  trovi}.\\ 
+Studiamo quindi la ridondanza, che ricordiamo essere in generale:
+\[R=\frac{msg+check}{msg}=1+\frac{check}{msg}\]
+Per il codice rettangolare si ha quindi:
+\[R_{\sqsubset \! \sqsupset}=\frac{m\cdot n}{(n-1)\cdot
+    (m-1)}=1+\frac{1}{m-1}+\frac{1}{n-1}+\frac{1}{(n-1)\cdot (m-1)}\]
+Con quindi $\frac{1}{m-1}+\frac{1}{n-1}+\frac{1}{(n-1)\cdot (m-1)}$ che è il
+nostro \textit{eccesso di ridondanza} e si ha che è $\geq 0$, quindi in
+generale:
+\[R_{\sqsubset \! \sqsupset}\geq 1\]
+Ricordando che ``i bit non sono colorati'' potrei avere errori anche nelle
+check digit. Supponendo però che si ha al massimo un errore e supponendo di non
+avere, in quanto inutile, la check digit in basso a destra,  si ha che al più
+trovo ``rotta'' o una riga (se ho errore un errore nella colonna di check digit)
+o su una colonna (se ho errore un errore nella riga di check digit), capendo
+così che ho ``rotta'' una check digit, sapendo anche quale.
+%12.10 parte 2 lezione 3
+\begin{esempio}
+  Se devo spedire 24 bit posso rappresentarli in vari modi, secondo vari
+  rettangoli:  
+  \begin{itemize}
+    \item una riga per 24 colonne (più la riga di controllo), con quindi 24
+    check digit
+    \item 2 righe per 12 colonne (più la riga di controllo), con quindi 15
+    check digit
+    \item 3 righe per 8 colonne (più la riga di controllo), con quindi 12
+    check digit
+    \item 4 righe per 6 colonne (più la riga di controllo), con quindi 11
+    check digit
+    \item le simmetriche di quelle dette sopra
+  \end{itemize}    
+\end{esempio}
+Quindi per scegliere $n$ e $m$ si cerca di fare si che siano il più uguali
+possibili, avendo meno cifre di controllo e migliorando la ridondanza.\\
+La ridondanza la posso vedere come una funzione:
+\[f(n,m)\]
+e si può cercare il punto minimo, che è in $m=n$.\\
+Si ha quindi, avendo un quadrato:
+\[R_\square=\mbox{manca una parte}=1+\frac{2}{(n-1)}+\frac{1}{(n-1)^2}\]
+\subsection{Codici triangolari}
+Vediamo quindi i \textbf{codici a correzione triangolari.}\\
+In questo caso si ha un triangolo, ad esempio (con $n=4$):
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccc}
+    $\circ$ & $\circ$ & $\circ$ &$\circ$  & x\\
+    $\circ$ & $\circ$ & $\circ$  & x&\\
+    $\circ$ & $\circ$ & x&&\\
+    $\circ$ &x&&&\\
+    x&&&&
+  \end{tabular}
+\end{table}
+Ho quindi $n$ check digit con:
+\[msg=\sum_{i=1}^{n-1}i=\frac{(n-1)\cdot n}{2}\]
+e:
+\[tot=msg+check=\frac{(n-1)\cdot n}{2}+n\]
+Le check digit vengono calcolate dal mittente in base alle cifre sulla riga e
+sulla colonna della check digit.\\
+Il ricevente, per capire dove è il bit errato, verifica in quali check digit è
+coinvolto, che sono due check digit, e incrociando scopro quale sia il simbolo
+errato. Si ha che:
+\[R_\triangle=\frac{\frac{n(n+1)}{2}}{\frac{(n-1)n}{2}}=\frac{n+1}{n-1}=
+  \frac{(n-1+2)}{n-1}=1\frac{2}{n-1}\]
+Confronto questa ridondanza con quella dei migliori codici rettangolari, ovvero
+quella dei codici quadrati, dove vedo che si ha un termine positivo in più. Si
+ha quindi che:
+\[R_\triangle<R_\square\]
+e quindi i codici triangolari sono assolutamente migliori di quelle
+rettangolari, anche delle migliori di quelle rettangolari anche se devo avere un
+messaggio di $n$ cifre che permette l'espressione $\frac{(n-1)\cdot n}{2}$, per
+fare tornare i conti posso comunque aggiungere uno 0, per esempio.
+\subsection{Codici cubici}
+Per cercare di abbassare ancora meno la ridondanza cerchiamo la disposizione
+geometrica più conveniente. Si è provato quindi ad aumentare le dimensioni dello
+spazio in cui ci troviamo, pensando ad un cubo, ipotizzando di avere una cifra
+di controllo (posta in basso a destra per il piano) che controlla tutto un piano
+(contando che ho piani per ognuna delle tre dimensioni).
+\textbf{to be continued}
 \end{document} 
 % LocalWords:  clock burst

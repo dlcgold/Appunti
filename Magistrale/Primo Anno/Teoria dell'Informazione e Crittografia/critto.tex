@@ -441,7 +441,7 @@ dispari e questo ci aiuta su $n-1$ input infatti la generalizzazione dello
 \textit{xor} a più di due input è detta \textbf{funzione di parità}. Un altro
 punto di vista per considerare lo \textit{xor} è quello della \textbf{somma a
   modulo 2} usando la notazione:
-\[y=\bigoplus_{i=1}^{n-1}x_i=\sum_{i=1}^{n-1}x_i\bmod 2\]
+\[y=\bigoplus_{i=1}^{n-1}x_i=\sum_{i=1}^{n-1}x_i\bmod\,\, 2\]
 avendo che faccio prima la somma e poi il modulo 2 mi dice 0 se è pari e 1 se è
 dispari. \\
 Si ha inoltre una relazione interessante tra le formule scritte usando solo
@@ -847,7 +847,7 @@ Questo si fa perché la cifra di controllo è calcolata per far ottenere:
 ma ovviamente questo non sembra possibile e infatti i conti sono fatti in
 \textbf{modulo numero primo}, avendo per esempio, se scegliamo come numero
 prima $37$:
-\[m_1\cdot (n+1)+m_2\cdot n+\cdots+m_n\cdot 1+c\cdot 1\equiv 0\bmod 37\]
+\[m_1\cdot (n+1)+m_2\cdot n+\cdots+m_n\cdot 1+c\cdot 1\equiv 0\bmod\,\, 37\]
 La scelta di 37 non è causale, infatti volendo:
 \begin{itemize}
   \item rappresentare le 21 lettere dell'alfabeto inglese
@@ -881,7 +881,7 @@ seconda con peso $k$, avendo una scrittura del tipo $cifra(peso)$:
 Ipotizziamo di scambiare $a$ e $b$ (ora $a$ pesa $k+1$ e $b$ pesa $k$),
 avendo:
 \[a(k+1)+b(k)\]
-Ma, facendo la differenza non è nulla:
+Ma facendo la differenza si nota che non è nulla:
 \[[b(k+1)+a(k)]-[a(k+1)+b(k)]\neq 0\]
 infatti ho:
 \[b\cdot k+b+a\cdot k-a\cdot k-a-b\cdot k=b-a\]
@@ -897,11 +897,11 @@ per calcolare la cifra di controllo:
     \State $ssum \gets 0$
     \While {\textit{not} EOF}
     \State \textbf{read} \textit{sym}
-    \State $sum \gets sum+sym (\bmod 37)$
-    \State $ssum \gets ssum+sum (\bmod 37)$
+    \State $sum \gets sum+sym\,\,\, (\bmod\,\, 37)$
+    \State $ssum \gets ssum+sum\,\,\, (\bmod\,\, 37)$
     \EndWhile
-    \State $temp \gets ssum+sum (\bmod 37)$
-    \State $c \gets 37-temp (\bmod 37)$
+    \State $temp \gets ssum+sum\,\,\, (\bmod\,\, 37)$
+    \State $c \gets 37-temp\,\,\, (\bmod\,\, 37)$
     \State \textbf{return} $c$ 
     \EndFunction
   \end{algorithmic}
@@ -912,31 +912,90 @@ Dove:
   \item $sum$ tiene conto della somma numerica della nostro calcolo, accumulando
   i vari termini 
   \item $ssum$ che è una \textit{somma delle somme} e tiene conto implicitamente
-  dei vari persi che crescono spostandoci da destra a sinistra come visto sopra
+  dei vari persi che crescono spostandoci da destra a sinistra come visto
+  sopra. Si accumulano i termini e i loro pesi
 \end{itemize}
-I $\bmod 37$ nel ciclo sono in realtà superflui ma conviene farli per non non
-far diventare i numeri troppo grossi.\\
+\textit{I $\bmod 37$ nel ciclo sono in realtà superflui ma conviene farli per
+  non far diventare i numeri troppo grossi. Le ultime due operazioni servono a
+  risolvere alcune problematiche che non vediamo qui.}\\
 Vediamo una più chiara simulazione.
+\begin{esempio}
+  Avendo, simulando per un messaggio $wxyzc$, con $c$ \textit{check digit}:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      msg & sum & ssum \\
+      \hline
+      $w$ & $w$ & $w$ \\
+      $x$ & $w+x$ & $2\cdot w+x$ \\
+      $y$ & $w+x+y$ & $3\cdot w+2\cdot x+y$ \\
+      $z$ & $w+x+y+z$ & $4\cdot w+ 3\cdot x+2\cdot y+z$ \\
+      \hline
+      $c$ & $w+x+y+z+c$ & $5\cdot w+4\cdot x+3\cdot y+2\cdot z+c$ \\
+      \hline
+    \end{tabular}
+  \end{table}
+  Arrivato alla fine voglio calcolare $c$ in modo che:
+  \[5\cdot w+4\cdot x+3\cdot y+2\cdot z+c \equiv 0 \bmod\,\, 37\]
+\end{esempio}
 Il mittente ha un messaggio e ci calcola la \textbf{check digit}.
-Avendo, simulando per un messaggio $wxyzc$, con $c$ \textit{check digit}:
-\begin{table}[H]
-  \centering
-  \begin{tabular}{|c|c|c|}
-    \hline
-    msg & sum & ssum \\
-    \hline
-    $w$ & $w$ & $w$ \\
-    $x$ & $w+x$ & $2\cdot w+x$ \\
-    $y$ & $w+x+y$ & $3\cdot w+2\cdot x+y$ \\
-    $z$ & $w+x+y+z$ & $4\cdot w+ 3\cdot x+2\cdot y+z$ \\
-    $c$ & $w+x+y+z+c$ & $5\cdot w+4\cdot x+3\cdot y+2\cdot z+c$ \\
-    \hline
-  \end{tabular}
-\end{table}
-Arrivato alla fine voglio calcolare $c$ in modo che:
-\[5\cdot w+4\cdot x+3\cdot y+2\cdot z+c \equiv 0 \bmod 37\]
 Chi riceve fa lo stesso calcolo e alla fine controlla la \textbf{check
   digit}. Un altro modo per il ricevente è quello di fare solo l'ultimo calcolo
-se farli tutti step by step.
+se farli tutti step by step.\\
+Introduciamo un particolare tipo di codice, quello \textbf{ISBN
+  (\textit{(International Standard BookNumber})} dei libri, che 
+sono legati, per il codice a barre, allo standard europeo \textbf{EAN13} (negli
+USA si usa lo standard 
+\textbf{UPC}). In questo codice si hanno 10 cifre (con al più il carattere $X$)
+che un identificano in modo univoco ad un libro. Nel dettaglio:
+\begin{itemize}
+  \item la prima cifra rappresenta lo stato in cui è stampato il libro. Questo
+  ha problemi non avendo solo 9 stati che producono libri
+  \item le successive 2 cifre sono le prime due per l'editore, anche questo è un
+  problema in quanto alcuni stati hanno più di 100 case editrice
+  \item le successive 6 sono il numero del libro
+  \item l'ultima cifra è il checksum, la check digit
+\end{itemize}
+In realtà ho trattini dopo la prima cifra, dopo la quinta e dopo la nona ma non
+contano nulla ai fini del calcolo ma sono aiutati solo per facilitare la
+leggibilità dello stesso.\\
+\textbf{A causa dei problemi sopra descritti i codici ISBN vengono assegnati
+  ormai con libertà, usando il primo codice libero}.\\
+ISBN è un codice pesato dove i conti sono
+fatti in $\bmod\,\,\,11$ (il più piccolo numero primo più grande di 10). Potrei
+avere come risultato 10 avendo $\bmod\,\,\,11$ ma in quel caso uso $X$ come
+checksum, come ultima cifra.
+\begin{esempio}
+  Prendiamo l'ISBN:
+  \[0\mbox{-}1315\mbox{-}2447\mbox{-} x\]
+  e vogliamo verificare che sia effettivamente $X$. Si ha (con $\equiv$ indico i
+  conti $\bmod\,\,\,11$):
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      msg & sum & ssum \\
+      \hline
+      0 & 0 & 0\\
+      1 & 1 & 1\\
+      3  & 4 & 5\\
+      5 & 10 & $20\equiv 9$\\
+      2& $12\equiv 1$ & $21\equiv 10$\\
+      4 & 5 & $15\equiv 4$\\
+      4 & 9 & $13\equiv 2$\\
+      7 & $16\equiv 5$ & 7\\
+      \hline
+      $X\equiv 10$ & $15\equiv 4$ & $11\equiv 0$\\
+      \hline
+    \end{tabular}
+  \end{table}
+  Avendo che effettivamente la somma $\bmod\,\,\,11$ fa 0 e quindi è
+  verificato.\\ 
+  Avrei inoltre, per l'algoritmo, controllando la check digit:
+  \[temp = 7+5=12\equiv 1\]
+  \[c=11-1=10\]
+\end{esempio}
+\section{Codici per correggere errori}
 \end{document} 
 % LocalWords:  clock burst

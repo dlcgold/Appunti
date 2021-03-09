@@ -1281,10 +1281,15 @@ Tutte queste equazioni devono essere \textbf{linearmente indipendenti}, in modo
 che ogni check digit abbia informazioni differenti. Supponiamo infatti:
 \[c_1=x_1\oplus x_2\oplus x_5 \oplus x_7\]
 \[c_2=x_5\oplus x_7\oplus x_8 \oplus x_9\]
-Ma in realtà $c_i$ è una della $x_j$ della formula quindi:
+Ma in realtà $c_i$ è una della $x_j$ della formula infatti:
+\[c_1\oplus x_1\oplus x_2\oplus x_5 \oplus x_7=0\]
+e quindi:
+\[x_1\oplus x_2\oplus x_5 \oplus x_7=c_1\]
+Scriviamo quindi:
 \[c_1\to x_1\oplus x_2\oplus x_5 \oplus x_7=0\]
 \[c_2\to x_5\oplus x_7\oplus x_8 \oplus x_9=0\]
 In generale le equazioni mi danno 0 se il numero di 1 è pari.\\
+\textbf{In ogni formula si assume di avere una sola cifra di messaggio.}\\
 Faccio poi lo $\oplus$ tra $c_1$ e $c_2$ bit a bit, ottenendo (avendo tipo $x_5$
 da entrambe le parti si semplifica):
 \[c\to x_1\oplus x_2\oplus x_8\oplus x_9=0\]
@@ -1329,5 +1334,148 @@ $n$ possibili condizioni d'errore. Si ha quindi che:
 \[2^m\geq n+1\]
 ovvero le configurazioni che posso fare con $m$ cifre di controllo deve
 indicarmi le $n$ possibili condizioni d'errore più una per l'assenza di errore.
+Nel caso dei codici di Hamming ``propriamente detti'' si avrebbe:
+\[2^m= n+1\]
+usando tutte le combinazioni in quanto il $>$ implicherebbe che sto
+``sprecando'' qualche configurazione delle cifre di controllo. \textbf{Non
+  sempre posso usare ``=''}.\\
+Posso quindi capire quante siano le cifre di controllo.
+\begin{esempio}
+  Si supponga di voler spedire $k=4$ cifre di messaggio. Ci chiediamo di
+  calcolare $m$:
+  \[2^m\geq n+1\]
+  ma quindi, avendo $n=m+k$:
+  \[2^m\geq m+k+1\]
+  Mi serve quindi l'$m$ più piccolo possibile che risolva la disequazione con
+  $k=5$: 
+  \[2^m\geq m+5\]
+  Non si ha però una soluzione analitica ma $2^m$ cresce più velocemente di
+  $m+5$ ($m=0$ non ha senso ma lo si mette, si hanno comunque tecniche anche per
+  non partire da 1):
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c}
+      $m$& $2^m$ & $m+5$\\
+      \hline
+      \hline
+      0 & 1 & 5\\
+      1 & 2 & 6\\
+      2 & 4 & 7\\
+      3 & 8 & 8
+    \end{tabular}
+  \end{table}
+  quindi $m=3$ è il più piccolo valore che risolve, risolvendo per di più con
+  $=$ e non $\geq$. Per 4 bit di messaggio mi servono 3 cifre di controllo. Ho
+  quindi $n=7$.
+\end{esempio}
+In generale per correggere un errore devo sapere in che posizione è, sapendo
+l'indice da 1 a $n$ indicante tale posizione nel pacchetto. Il metodo che lo
+calcola può restituire 0, indicante che non si ha errore.\\
+Faccio una tabella con posizione/binario, ad esempio per l'esempio precedente
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    pos& bin \\
+    \hline     
+    1 & 001\\
+    2 & 010\\
+    3 &011\\
+    4&100\\
+    5&101\\
+    6&110\\
+    7&111\\
+    \hline
+    \hline
+    &   $c_3c_2c_1$
+  \end{tabular}
+\end{table}
+Ho che i bit hanno $m$ cifre, e ho $c_3c_2c_1$ (si parte da destra) come le
+cifre di parità ottenute dalle tre colonne di binari.\\
+Ipotizzo un errore in posizione 5. Ho che, mettendo le $x_i$ dove si ha 1:
+\[c_1\to x_1\oplus x_3\oplus x_5 \oplus x_7=0\]
+ma ho problemi con $x_5$, avendo l'equazione pari a 1.\\
+\[c_2\to x_2\oplus x_3\oplus x_6 \oplus x_7=0\]
+dove non ho problemi con $x_5$.\\
+\[c_3\to x_4\oplus x_5\oplus x_6 \oplus x_7=0\]
+ma ho problemi con $x_5$, avendo l'equazione pari a 1.\\
+Si ha quindi che:
+\[c_1\to x_1\oplus x_3\oplus x_5 \oplus x_7=1\]
+\[c_2\to x_2\oplus x_3\oplus x_6 \oplus x_7=0\]
+\[c_3\to x_4\oplus x_5\oplus x_6 \oplus x_7=1\]
+Che quindi mi mostra dopo l'uguale la posizione in cui è avvenuto
+l'errore. I bit letti dal basso verso l'alto sono $101$ e questo è detto
+\textbf{sindrome}, che quindi nei codici di Hamming è la 
+posizione dell'errore in codice binario. \\
+Se la \textit{sindrome} è 0 non ho errori (è come se avessi 000 nella prima riga
+della tabella).\\
+Il ricevente è sistemato ma manca il mittente che deve calcolare gli $m$ bit di
+controllo e spedire. Usando la tecnica di usare nelle equazioni le $x_i$
+relative agli 1 mi genera equazioni linearmente indipendenti. \\
+Manca capire dove
+mettere la check digit. Le cifre di controllo vengono messe nelle posizioni in
+cui si ha un 1 solo, ovvero 001, 010 e 100, in modo che $c_1$ è solo nella prima
+equazione, $c_2$ nella seconda e $c_3$ nella terza, non dovendo risolvere in
+realtà il sistema lineare. Si quindi, nell'esempio sopra:
+\[c_1\oplus x_3\oplus x_5 \oplus x_7=0\]
+\[c_2\oplus x_3\oplus x_6 \oplus x_7=0\]
+\[c_3\oplus x_5\oplus x_6 \oplus x_7=0\]
+ottenendo quindi il pacchetto.
+\[pacchetto = c_1c_2m_1c_3m_2m_3m_4\]
+e quindi:
+\[c_1\oplus m_1\oplus m_2 \oplus m_4=0\]
+\[c_2\oplus m_1\oplus m_3 \oplus m_4=0\]
+\[c_3\oplus m_2\oplus m_3 \oplus m_4=0\]
+ma isolando le $c_i$, sommando da entrambe le parti dell'equazione:
+\[c_1= m_1\oplus m_2 \oplus m_4\]
+\[c_2= m_1\oplus m_3 \oplus m_4\]
+\[c_3= m_2\oplus m_3 \oplus m_4\]
+\textbf{Si noti che le posizioni delle cifre di controllo $c_i$ sono potenze di
+  2 $2^0,2^1,2^2,\ldots$} e all'aumentare delle cifre della grandezza si ha
+crescita logaritmica delle check digit, che quindi controllano un numero
+esponenziale di cifre di messaggio.\\
+\begin{esempio}
+  Scelgo un messaggio di 4 bit:
+  \[msg=1011\]
+  quindi:
+  \[pacchetto=c_1c_21c_3011\]
+  So che, per le formule sopra (ma lo posso vedere anche col discorso di avere
+  periodicità nella tabella di bit, pensando a come li scrivi quando fai le
+  tabelle di verità):
+  \[c_1=0\]
+  \[c_2=1\]
+  \[c_3=0\]
+  quindi:
+  \[pacchetto=0110011\]
+  che viene inviato ma al destinatario arriva:
+  \[pacchetto=0110111\]
+  quindi con il bit in $i=5$ errato. Si rifanno i conti e si ottiene, calcolando
+  la sindrome:
+  \[s_1=1\]
+  verificata vedendo i bit dispari.
+  \[s_2=0\]
+  verificata vedendo a coppie alternate ma saltando il primo bit (che sarebbe la
+  coppia di 0 se avessi 000 in cima alla tabella).
+  \[s_3=1\]
+  verificata vedendo gli ultimi 4 bit.\\
+  Avendo sindrome $s=s_3s_2s_1=101$ che indica proprio la posizione 5.\\
+  Vediamo invece se arriva:
+  \[pacchetto=0010011\]
+  quindi con il bit in $i=2$ errato (e sarebbe una check digit). Si ha che:
+  \[s_1=0\]
+  \[s_2=1\]
+  \[s_3=0\]
+  Avendo sindrome $s=s_3s_2s_1=010$ che indica proprio la posizione 2.\\
+  Supponiamo ora che arrivi senza errori:
+  \[pacchetto=0110011\]
+  Si ha:
+  \[s_1=0\]
+  \[s_2=0\]
+  \[s_3=0\]
+\end{esempio}
+\textit{I pacchetti di 7 bit che producono sindrome nulla sono quindi
+  $2^{4}=16$, avendo che posso fare $2^4$ modi diversi di avere i 4 bit di
+  messaggio ma ciascuno ha una sola tripla, 000, di check digit che mi dice che
+  il pacchetto è valido.} \\ 
+
 \end{document} 
 % LocalWords:  clock burst Hamming

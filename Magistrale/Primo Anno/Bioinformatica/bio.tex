@@ -496,9 +496,9 @@ ponte tra isole un arco tra nodi. Da qui la definizione del problema.
 Vediamo poi il ``problema duale'', quello in cui si vuole fare un cilo che non
 visiti due volte uno stesso nodo.
 \begin{definizione}
-  Il  \textbf{problema del ciclo Hamiltoniano} consiste nel trovare un ciclo in un
-  grafo tale che visiti ogni vertice una e una sola volta prima di tornare al punto
-  di partenza.\\
+  Il  \textbf{problema del ciclo Hamiltoniano} consiste nel trovare un ciclo in
+  un grafo tale che visiti ogni vertice una e una sola volta prima di tornare al
+  punto di partenza.\\
   Questo problema si dimostra essere \textbf{NP-complete}.
 \end{definizione}
 La differenza di complessità di questi due problemi sarà qualcosa che bisognerà
@@ -512,10 +512,10 @@ li usò per rappresentare strutture chimiche, nel dettaglio usò \textbf{alberi}
 strutturali.\\
 In biologia l'uso dei grafi è stato introdotto a metà 1900 con l'esperimento di
 Benzer, che capì l'importanza dei grafi mentre cercava di distinguere quando
-determinati virus attaccano determinati batteri. Benzer è riuscito a mostrare che
-il DNA di questi virus era \textit{lineare} mentre prima si congetturava che il
-DNA avesse delle biforcazioni. Per capire che non avesse delle biforcazioni ha
-sfruttato la capacità di alcuni geni dei virus di aggredire batteri,
+determinati virus attaccano determinati batteri. Benzer è riuscito a mostrare
+che il DNA di questi virus era \textit{lineare} mentre prima si congetturava che
+il DNA avesse delle biforcazioni. Per capire che non avesse delle biforcazioni
+ha sfruttato la capacità di alcuni geni dei virus di aggredire batteri,
 rappresentando la cosa coi \textbf{grafi ad intervallo}.
 \begin{definizione}
   Nella teoria dei grafi, un \textbf{grafo d'intervallo} è il grafo
@@ -535,6 +535,8 @@ variabile che vengono ``letti'' tramite elettroforesi. \\
 \textit{Non approfondiamo nel dettaglio i metodi, essendo prettamente chimici e
   biologici}.
 \subsection{Superstringhe e grafo di overlap}
+Siamo in ottica \textbf{short read sequencing} del \textbf{fragments
+  assembly}.\\ 
 L'assemblaggio dei frammenti del DNA è invece un problema prettamente
 computazionale, avendo l'assemblaggio dei singoli frammenti, ovvero delle
 \textbf{read} prodotte dal sequenziamento, anche in più copie, in un'unica
@@ -792,6 +794,8 @@ da trent'anni e solo a livello sperimentale si è ipotizzata la
 Si ricorda che con il cammino Hamiltoniano ottimo si ottiene comunque una
 soluzione che potrebbe non essere unica.
 \subsection{Grafi di De Brujin e k-mers}
+Siamo sempre in ottica \textbf{short read sequencing} del \textbf{fragments
+  assembly}.\\ 
 Il metodo della superstringa è stato quindi usato per l'assemblaggio del primo
 sequenziamento (quello con il metodo Sanger) ma l'appoggio ad un problema
 NP-complete (il \textit{ciclo Hamiltoniano}) rendeva il tutto troppo
@@ -890,6 +894,166 @@ altro non sono che i due unici (k-1)-mer estraibili da $x$.
   vari overlap tra etichette degli archi:
   \[s=acctg\]
 \end{esempio}
+Si ha quindi che:
+\begin{definizione}
+  Un grafo $G=(V,E)$ \textbf{orientato} è un \textbf{grafo di De Brujin} di
+  ordine $k$ se:
+  \begin{itemize}
+    \item i vertici sono un sottoinsieme di $\Sigma^{k-1}$, ovvero $V\subseteq
+    \Sigma^{k-1}$ 
+    \item $\forall u,v\in V$ si ha che $(u,v)\in E$ se esiste una parola $w\in
+    \Sigma^*$ tale che $u$ è (ha come etichetta) il prefisso di lunghezza $k-1$
+    di $w$ e $v$ è (ha come etichetta) il suffisso di lunghezza $k-1$ di $u$ 
+  \end{itemize}
+  Quindi possiamo dire che, in modo astratto:
+  \begin{itemize}
+    \item i vertici sono etichettati con un (k-1)-mer
+    \item gli archi sono etichettati con un k-mer
+  \end{itemize}
+  Tali grafi sono stati introdotti dal matematico De Brujin nel 1946.
+\end{definizione}
+\begin{definizione}
+  Si ha che un vertice è \textbf{bilanciato} sse, $\forall v\in V$:
+  \[in(v)=out(v)\]
+  con:
+  \begin{itemize}
+    \item $in(v)$ numero di archi entranti in $v$
+    \item $out(v)$ numero di archi uscenti in $v$
+  \end{itemize}
+\end{definizione}
+\begin{teorema}[Teorema di Eulero]
+  Un grafo \textbf{connesso} è un \textbf{grafo Euleriano} sse suo ogni vertice
+  è \textbf{bilanciato}. 
+\end{teorema}
+\begin{proof}
+  Vediamo le due direzioni della dimostrazione, avendo il \textit{sse}.\\
+  Se si ha che per ogni arco entrante nel vertice $v$ deve esistere almeno un
+  arco uscente da $v$ in quanto altrimenti mi ``bloccherei'' in un nodo,
+  arrivando ad una contraddizione e non avendo quindi un cammino di
+  Eulero. Quindi se non è bilanciato sicuramente non è Euleriano.\\
+  Se si ha un grafo bilanciato allora esiste (facciamo il caso ``semplice'') un
+  ciclo Euleriano (e di conseguenza il caso ``difficile'' del cammino
+  Euleriano). Infatti possiamo dare l'algoritmo che trova il ciclo Euleriano. Si
+  ha quindi una \textbf{dimostrazione costruttiva}. Si ha quindi che:
+  \begin{enumerate}
+    \item si parte da un vertice arbitrario $v$
+    \item si connette $v$ ad un altro vertice usando archi, si riparte da tale
+    arco e si fa la stessa operazione. Si ripete l'operazione fino a che non si
+    è formato un ciclo 
+    \item alla fine o uso tutti gli archi o altrimenti chiudo un ciclo lasciando
+    vertici non usati. Nel secondo caso ripeto lo step 1) cercando di usare
+    altri archi non usati. Facendo la \textbf{decomposizione del grafo in
+      cicli}. In caso mi fermo quando ho usato tutti gli archi ma mi trovo con
+    tanti cicli. Per derivare un unico ciclo da due cicli sfrutto il vertice di
+    congiunzione in modo che se entro partendo da un ciclo in quel nodo esco con
+    l'arco che mi porta nell'altro ciclo, facendo la cosiddetta \textbf{apertura
+      dei cicli} (vedere figura \ref{fig:cic}). \\
+    Riassumendo si combinano due cicli in uno unico e si itera questo passaggio
+    fino alla creazione di un singolo ciclo. \textit{Per fare questo uso
+      l'ipotesi che $G$ è bilanciato}
+  \end{enumerate}
+  Questo algoritmo è lineare nella dimensione di un grafo, ovvero\\
+  $O(|V|+|E|)$.  
+\end{proof}
+  \begin{figure}
+    \centering
+    \includegraphics[scale = 0.7]{img/gra11.pdf}
+    \caption{Idea del processo di apertura dei cicli dove si hanno due cicli, a
+      sinistra in rosso e blu. Dopo l'apertura il cammino passa dal ciclo sopra a
+      quello sotto, seguendo i colori nell'immagine a destra.}
+    \label{fig:cic}
+  \end{figure}
+Quindi per costruire il grafo di De Brujin:
+\begin{itemize}
+  \item \textbf{input:} una collezione $F$ di frammenti
+  \item si genera da $F$ l'insieme dei k-mer (non lo spettro)
+  \item per ogni k-mer dell'insieme dei k-mer estraggo il prefisso e il suffisso
+  di lunghezza $k-1$
+  \item si verifica l'esistenza del cammino di Eulero. Quindi:
+  \begin{itemize}
+    \item se esiste si prosegue
+    \item se non è bilanciato si deve passare alla cosiddetta \textbf{pulitura
+      del grafo}, eliminando gli archi detti \textbf{tip} (comportando la
+    rimozione anche del nodo ``destinatario'' del grafo). Potrei avere perdita
+    di k-mer. Le tip solamente sono singoli archi ma porrebbero anche essere
+    cammini.\\
+    Si usa anche il concetto di \textbf{bubble}, come effetto degli
+    errori di sequenziamento. Una bubble è una situazione in cui si viola il
+    teorema di Eulero ma che si elimina essendo un errore di sequenziamento,
+    \textbf{risolvendo la bolla}. Per capire quale sia l'errore di
+    sequenziamento sfrutto il fatto che ho più read che coprono la stessa
+    porzione, scegliendo la base che è più frequente. \textbf{Il $k$ condiziona
+      le bolle oltre che alla connettività del grafo (\textit{se è troppo grande
+        rischio di non avere un grafo connesso})}.\\
+    Spesso si ha anche lo \textbf{scaffolding} per ottenere la connettività
+  \end{itemize}
+  \item trovo il vertice ``\textit{head}'' (l'unico che non ha vertici entranti)
+  e il vertice ``\textit{tail}'' (l'unico che non ha vertici uscenti), che
+  saranno inizio e fine del cammino di Eulero
+  \item si estrae il cammino di Eulero
+\end{itemize}
+\begin{esempio}
+  Vediamo un esempio di tip, con le tip in rosso:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/gra9.pdf}
+  \end{figure}
+  quindi gli archi in rosso e i nodi a cui puntano possono essere rimossi.\\
+  Vediamo un esempio di bubble. Ipotizzo di avere:
+  \[F=\{acgtatg, acgaatg\}\]
+  Notiamo quindi che:
+  \[acg\mathbf{t}atg\]
+  \[acg\mathbf{a}atg\]
+  Ma sappiamo che, tra le varie read, la $t$ occorre molto più frequentemente
+  della $a$ in quella posizione.
+  Si assuma di avere $k=3$. Ho quindi, con la bolla (notando come la sua
+  presenza impedisce di avere un cammino Euleriano) segnalata dall'ovale:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/gra10.pdf}
+  \end{figure}
+  (dove si nota come la $k$ influisca sulla natura della bolla).\\
+  Avendo però che la $t$ occorre più frequentemente in quelle posizioni posso
+  rimuovere il cammino con gli archi rossi e i due nodi centrali.
+\end{esempio}
+\begin{esempio}
+  Sia:
+  \[F=\{atgcc, caatg, gcgtt\}\]
+  e sia $k=3$.\\
+  Avendo lo spettro:
+  \[\{atg, tgc, gcc, caa, aat, atg, gcg, cgt, gtt\}\]
+  ho l'insieme dei k-mer, ovvero l'insieme degli archi del grafo,  è:
+  \[E=\{atg, tgc, gcc, caa, aat, gcg, cgt, gtt\}\]
+  Genero quindi i prefissi e i suffissi di lunghezza $k-1$ di ogni k-mer:
+  \[\{at,tg,tg,gc,gc,cc,ca,aa,aa,at,at,tg,gc,cg,cg,gt,gt,tt\}\]
+  e quindi l'insieme dei vertici è:
+  \[V=\{at,tg,gc,cc,ca,aa,cg,gt,tt\}\]
+  Avendo quindi il grafo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gra7.pdf}
+  \end{figure}
+  \textbf{Le etichette degli sono per pura comprensione}.\\
+  Bisogna quindi capire se esiste un cammino di Eulero. Purtroppo si hanno i
+  vertici con $tt$ e con $cc$ che creano problemi. Inoltre il vertice $gc$ non è
+  bilanciato. Quindi il grafo non ammette cammini di Eulero.\\
+  Elimino quindi un arco ``problematico'', quello tra $gc$ e $cc$, ottenendo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gra8.pdf}
+  \end{figure}
+  Dove ho un cammino Euleriano, partendo dal vertice $ca$ e arrivando al vertice
+  $tt$. Si compone così la superstringa, ovvero l'assemblaggio: 
+  \[s=caatgcgtt\]
+\end{esempio}
+
+
+
+
+
+
+
+
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero
 \textbf{DNA} (figura \ref{fig:dna}) e \textbf{RNA}, intese come molecole
@@ -1065,6 +1229,7 @@ Per il sequenziamento ci sono stati vari step:
       \item Proton 
     \end{itemize}
   \end{itemize}
+  Per indicare i dati prodotti diciamo \textbf{NGS data}
   \item \textbf{third generation}, con le \textbf{Next
     Next-Generation-Sequencing technologies}, più avanti negli anni 2000. Si
   hanno:
@@ -1138,6 +1303,6 @@ del biologo e dell'informatico riutilizzarlo). Il file EMBL è pieno di
 informazioni, con in fondo la sequenza nucleotidica. Banche dati così ci sono
 ancora, come l'\textbf{ENA (\textit{European Necleotide Archive})}.
 \end{document}  
-% LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP
+% LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Brujin
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
-% LocalWords:  superstringa sottostringa
+% LocalWords:  superstringa sottostringa Euleriano scafholding

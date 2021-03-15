@@ -1519,13 +1519,13 @@ $m$ posso riscrivere $k= n-\log_2n$). Ne segue che:
   sindrome)}.\\ 
 Vediamo quindi l'interpretazione geometrica del codice di Hamming, ricordando
 che $n$ bit entrano nel canale ed escono $n$ bit $\in \{0,1\}^n$. Il messaggio
-$M$ è quindi $M\subseteq \{0,1\}$.
-\textbf{risentire parte}\\
+$M$ è quindi $M\subseteq \{0,1\}$. Cerchiamo di capire come assegnare che un
+messaggio sia valido o meno.\\
 Posso vedere $\{0,1\}^n$ come uno \textbf{spazio vettoriale} dove i vettori sono
-$\vec{x}=(x_1,x_2,\ldots,\x_n), \forall x_i\in\{0,1\}$ ovvero
+$\vec{x}=(x_1,x_2,\ldots,x_n), \forall x_i\in\{0,1\}$ ovvero
 $x_i\in\mathbb{Z}_2$. Due vettori in questo spazio, per definizione di spazio
 vettoriale, possono essere sommati. Preso 
-anche $\vec{x}=(y_1,y_2,\ldots,\y_n), \forall y_i\in\{0,1\}$ la somma altro non
+anche $\vec{x}=(y_1,y_2,\ldots,y_n), \forall y_i\in\{0,1\}$ la somma altro non
 è che lo \textit{xor} componente per componente $\vec{x}+\vec{y}=(x_1\oplus y_1,
 x_2\oplus y_2,\ldots)$. \\
 Preso uno scalare $a\in \mathbb{Z}_2$ ho che $a\vec{x}=(ax_1,ax_2\ldots)$ con il
@@ -1550,7 +1550,7 @@ che un errore mi porti da un messaggio valido ad un altro.
   \begin{itemize}
     \item $d(\vec{x},\vec{y})$ sse $\vec{x}=\vec{y}$
     \item $d(\vec{x},\vec{y})=d(\vec{y},\vec{x})$
-    \item $d(\vec{x},\vec{z})\leqd(\vec{x},\vec{y})+d(\vec{y},\vec{z})$,
+    \item $d(\vec{x},\vec{z})\leq(\vec{x},\vec{y})+d(\vec{y},\vec{z})$,
     \textbf{diseguaglianza triangolare}
   \end{itemize}
   e quindi la \textbf{distanza di Hamming} è una \textbf{metrica} per lo spazio
@@ -1560,9 +1560,9 @@ che un errore mi porti da un messaggio valido ad un altro.
 \begin{definizione}
   Definiamo \textbf{peso di Hamming} come il numero di bit uguali a 1 e lo si
   indica con:
-  \[w_j(\vex{x})\]
+  \[w_j(\vec{x})\]
   Avendo che:
-  \[w_j(\vex{x})=\sum_{i=1}^n x_1=d_h(\vec{x},\vec{0})\]
+  \[w_j(\vec{x})=\sum_{i=1}^n x_1=d_h(\vec{x},\vec{0})\]
 \end{definizione}
 \begin{esempio}
   Prendiamo $n=3$. \\
@@ -1611,19 +1611,113 @@ Se ho la distanza di Hamming e varie caratteristiche del codice ho che:
   viene sempre riconosciuto, anche se non può essere corretto. Se ho due errori
   potrei finire nuovamente in una codeword valida ma si sta assumendo che avendo
   scelto questo codice si sappia che la probabilità che avvengano due errori sia
-  pressoché nulla
+  pressoché nulla. Il\textit{ controllo di parità semplice} è di questo
+  tipologia.
+  \newpage
+  Graficamente avrei 
+  una cosa del tipo, avendo in blu le codeword valide e in rosso quelle non
+  valide: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/circ2.pdf}
+  \end{figure}
+  Notando come non sarei in grado di capire a che codeword valida ricondurmi.
   \item se ho due codeword valide che hanno distanza 3 (e non esistono due
   codeword valide con distanza minore di 3) allora il codice ha
   capacità di \textbf{2 detection e 1 correction}, riuscendo a correggere un
   errore. Se avessi due errori riconoscerei come codeword valida una a distanza
-  1 da quella errata che però non è quella giusta, introducendo un nuovo errore
+  1 da quella errata che però non è quella giusta, introducendo un nuovo
+  errore. I \textit{codici di Hamming} sono di questo tipo. Graficamente avrei
+  una cosa del tipo, avendo in blu le codeword valide e in rosso quelle non
+  valide: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/circ3.pdf}
+  \end{figure}
+  Notando che con un solo errore sarei in grado di capire a che codeword
+  ricondurmi 
   \item se ho due codeword valide che hanno distanza 4 (e non esistono due
   codeword valide con distanza minore di 4) allora il codice ha
   capacità di \textbf{3 detection e 1 correction}, riuscendo a correggere un
   errore. Se avessi due errori riconoscerei avrei più codeword valide alla
   stessa distanza. Se avessi tre errori varrebbe quanto detto nel caso di
-  distanza 3
+  distanza 2
+   \item se ho due codeword valide che hanno distanza 5 (e non esistono due
+  codeword valide con distanza minore di 5) allora il codice ha
+  capacità di \textbf{4 detection e 2 correction}, per gli stessi discorsi fatti
+  avendo distanza 3
 \end{itemize}
-
+Si nota quindi che al crescere della distanza di Hamming minima tra due codeword
+cresce la capacità di detection e correction.\\
+Possiamo ipotizzare che la codeword valida venga avvolta da una sfera di raggio
+pari a $r$ avendo che $r$ sia tale per cui le sfere di due codeword valide non
+si sovrappongano. Possiamo notare che in base alle osservazioni fatte sopra $r$
+è il valore della capacità di detection. \\
+Una sfera centrata nel punto $\vec{x}$ di raggio $r$ è l'insieme dei punti
+$\vec{y}\in\{0,1\}^n$ tale che la distanza da $\vec{x}$ è minore di $r$, ovvero:
+\[S(\vec{x},r)=\{\vec{y}\in\{0,1\}^n|\,d_h(\vec{x},\vec{y})\leq r\}\]
+\textbf{Si noti che in $\{0,1\}^n$ somma e sottrazione bit a bit portano allo
+  stesso risultato. }\\
+Possiamo dire che:
+\[output=input+errore\]
+dove $errore$ è un vettore rappresentante l'errore (avendo $1$ dove ho
+l'errore). Quindi:
+\[errore = output -input\]
+\begin{esempio}
+  Tornando all'esempio sopra ipotizzo entri $011$ ed esca $111$, avendo quindi
+  $d_h=1$. \\
+  Sommo i due vettori:
+  \[011\oplus 111=100\]
+  Avendo che $100$ è l'errore.
+\end{esempio}
+\begin{esempio}
+  Si vuole costruire un codice che consenta di correggere un errore, per poi
+  confrontarlo con il codice di Hamming.\\
+  Ci servono quindi codeword valide ad almeno distanza 3, prendendo messaggi
+  validi e circondarli di sfere di raggio 1 tali che non si abbiano
+  sovrapposizioni con altre sfere.\\
+  Si ha $\{0,1\}^n$ come spazio vettoriale dove si hanno $2^n$
+  elementi/vettori. \\
+  In generale se prendo il volume dello spazio e lo divido per il volume di una
+  sfera ho il numero di sfere che posso metterci:
+  \[\frac{V_{spazio}}{V_{sfera}}\geq \mbox{numero massimo di sfere}\]
+  Pongo $k$ uguale al numero di bit dei messaggi validi (non pari a $n$ ma
+  prendo quindi una porzione di messaggio rappresentante il messaggio valido, ai
+  quali poi aggiungerei le $m$ check digit).\\
+  Rivedo quindi la formula, sapendo che il volume dello spazio è il numero di
+  vettori di quello spazio, che le sfere abbiano raggio $1$, avendo che hanno
+  volume $n+1$ (il vettore rappresentante originale più un vettore per ogni
+  possibile vettore ottenuto da quello originale con un solo errore, avendo
+  quindi ${{n}\choose{1}}$ più il messaggio valido, ovvero $n+1$): 
+  \[\frac{2^n}{n+1}\geq 2^k\]
+  sapendo che $n=k+m$ si ha che:
+  \[\frac{2^{k+m}}{n+1}\geq 2^k\]
+  \[\frac{2^{k}2^m}{n+1}\geq 2^k\]
+  \[2^m\geq n+1\]
+  Arrivando allo stesso risultato di Hamming.
+\end{esempio}
+Se volessi sfere di raggio maggiore di 1, prendendo per esempio con codeword
+distanti almeno 5 e raggio pari a 2. Avendo raggio pari a 2 avrei il centro
+della sfera, tutti i punti distanti 1, ovvero potendo cambiare due bit $n$, e
+tutti i punti distanti due (avendo due 
+cambiamenti di bit), ovvero:
+\[V_{sfera}=1+n+{{n}\choose{2}}=1+n+\frac{n(n-1)}{2}\]
+\[\frac{2^n}{1+n+\frac{n(n-1)}{2}}\geq 2^k\]
+sapendo che $n=k+m$ si ha che:
+\[\frac{2^{k+m}}{1+n+\frac{n(n-1)}{2}}\geq 2^k\]
+\[\frac{2^{k}2^m}{1+n+\frac{n(n-1)}{2}}\geq 2^k\]
+\[2^m\geq 1+n+\frac{n(n-1)}{2}\]
+Avendo una generica sfera di raggio $r$ avrei:
+\[V_{sfera}=1+n+{{n}\choose{2}}+{{n}\choose{3}}+\cdots+{{n}\choose{r}}=
+  \sum_{k=0}^n{{n}\choose{k}}\] 
+\textit{Nella realtà, con messaggi molto grandi, si usano i cosiddetti
+  \textbf{low density parity codes}, che consiste, per proteggere il pacchetto
+  di $n$ bit, nel trovare il minor numero di equazioni di parità atte a
+  proteggere il messaggio (meno equazioni implica meno circuiti e quindi meno
+  costo). Si procede per euristiche per capire quante e quali.}
+\section{Codifica di Sorgente}
+Finora si è parlato di \textbf{codifica di canale}, passiamo quindi ad
+approfondire la \textbf{codifica di sorgente}, cercando anche in questo caso il
+codice ottimale (con la lunghezza media minima).
 \end{document} 
 % LocalWords:  clock burst Hamming codeword

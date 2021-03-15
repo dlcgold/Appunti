@@ -1517,6 +1517,113 @@ $m$ posso riscrivere $k= n-\log_2n$). Ne segue che:
   13, occhio che non è $\frac{2}{3}$ ma $\frac{2}{1}$ nella ridondanza. Guardare
   anche per spunti teorici (manca la parte di esercizio in se calcolando la
   sindrome)}.\\ 
-\textbf{To be continued}
+Vediamo quindi l'interpretazione geometrica del codice di Hamming, ricordando
+che $n$ bit entrano nel canale ed escono $n$ bit $\in \{0,1\}^n$. Il messaggio
+$M$ è quindi $M\subseteq \{0,1\}$.
+\textbf{risentire parte}\\
+Posso vedere $\{0,1\}^n$ come uno \textbf{spazio vettoriale} dove i vettori sono
+$\vec{x}=(x_1,x_2,\ldots,\x_n), \forall x_i\in\{0,1\}$ ovvero
+$x_i\in\mathbb{Z}_2$. Due vettori in questo spazio, per definizione di spazio
+vettoriale, possono essere sommati. Preso 
+anche $\vec{x}=(y_1,y_2,\ldots,\y_n), \forall y_i\in\{0,1\}$ la somma altro non
+è che lo \textit{xor} componente per componente $\vec{x}+\vec{y}=(x_1\oplus y_1,
+x_2\oplus y_2,\ldots)$. \\
+Preso uno scalare $a\in \mathbb{Z}_2$ ho che $a\vec{x}=(ax_1,ax_2\ldots)$ con il
+prodotto scalare che è praticamente l'\textit{and}. Si ha che:
+\[a\vec{x}=
+  \begin{cases}
+    \vec{0} &\mbox{se } a=0\\
+    \vec{x} &\mbox{se } a=1
+  \end{cases}
+\]
+Vediamo i messaggi come \textbf{vertici di un n-cubo} ma non tutti i messaggi
+sono validi. Ci serve un modo per capire quali sono validi per rendere difficile
+che un errore mi porti da un messaggio valido ad un altro.
+\begin{definizione}
+  Definiamo \textbf{distanza di Hamming} come il numero di posizioni in cui due
+  vettori $\vec{x}$, $\vec{y}$ differiscono, cioè per cui $x_1\neq y_i$. Questa
+  è una vera e propria distanza in $\{0,1\}^n$. Tale distanza si indica con:
+  \[d(\vec{x},\vec{y})\]
+  con:
+  \[d:\{0,1\}^n\times\{0,1\}^n\to\mathbb{R}\]
+  Si hanno tre proprietà:
+  \begin{itemize}
+    \item $d(\vec{x},\vec{y})$ sse $\vec{x}=\vec{y}$
+    \item $d(\vec{x},\vec{y})=d(\vec{y},\vec{x})$
+    \item $d(\vec{x},\vec{z})\leqd(\vec{x},\vec{y})+d(\vec{y},\vec{z})$,
+    \textbf{diseguaglianza triangolare}
+  \end{itemize}
+  e quindi la \textbf{distanza di Hamming} è una \textbf{metrica} per lo spazio
+  $\{0,1\}^n$.\\
+  Spesso $d(\vec{x},\vec{y})$ si indica con $d_h(\vec{x},\vec{y})$.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{peso di Hamming} come il numero di bit uguali a 1 e lo si
+  indica con:
+  \[w_j(\vex{x})\]
+  Avendo che:
+  \[w_j(\vex{x})=\sum_{i=1}^n x_1=d_h(\vec{x},\vec{0})\]
+\end{definizione}
+\begin{esempio}
+  Prendiamo $n=3$. \\
+  Disegnano supponiamo di avere qualcosa del tipo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/cubeh.pdf}
+  \end{figure}
+  Prendo i vertici $(x_1,x_2,x_3$):
+  \begin{itemize}
+    \item $(0,0,0)$
+    \item $(1,0,0)$
+    \item $(0,1,0)$
+    \item $(0,0,1)$
+    \item $(1,1,0)$
+    \item $(0,1,1)$
+    \item $(1,0,1)$
+    \item $(1,1,1)$
+  \end{itemize}
+  \textit{Questi sono i nostri messaggi}.\\
+  \textbf{Oltre $n=3$ farei lo stesso ma non saprei disegnarlo, avrei $n$
+    lati che partono dall'origine appoggiati agli $n$ assi}.\\
+  Suppongo di spedire $010$ e che si abbia un errore che porti a $110$ e sul
+  cubo si nota che ci ha fatto spostare lungo un lato. \\
+  Suppongo che da $010$ si arrivi a $100$, con due errori, si nota che ho due
+  lati visitati sul cubo.\\
+  Scegliamo quindi come messaggi validi punti che sono abbastanza distanti tra
+  loro. Sicuramente quelli che si ottengono con un solo cambiamento non sono
+  validi, parto quindi dal messaggio valido e impongo che tutti quelli che sono
+  a \textbf{distanza 1} (parlando di \textbf{distanza di Hamming}) sul cubo,
+  ovvero tutti quelli che raggiungo con un solo lato, non siano validi.\\
+  \textbf{Essendo in $\{0,1\}^n$ in realtà esistono solo i vertici del cubo, i
+    lati servono solo per capire meglio.}
+\end{esempio}
+Generalizziamo meglio.\\
+Se ho la distanza di Hamming e varie caratteristiche del codice ho che:
+\begin{itemize}
+  \item se ho due codeword valide che hanno distanza 1 allora il codice ha
+  capacità di \textbf{0 detection e 0 correction} in quanto potrei passare con
+  un solo errore ad un messaggio valido
+  \item se ho due codeword valide che hanno distanza 2 (e non esistono due
+  codeword valide con distanza minore di 2) allora il codice ha
+  capacità di \textbf{1 detection e 0 correction} in potrei avere più codeword
+  valide a distanza di 1 da quella errata e quindi non saprei come fare
+  correzione, non sapendo dove si trovi il bit errato. In ogni caso un errore
+  viene sempre riconosciuto, anche se non può essere corretto. Se ho due errori
+  potrei finire nuovamente in una codeword valida ma si sta assumendo che avendo
+  scelto questo codice si sappia che la probabilità che avvengano due errori sia
+  pressoché nulla
+  \item se ho due codeword valide che hanno distanza 3 (e non esistono due
+  codeword valide con distanza minore di 3) allora il codice ha
+  capacità di \textbf{2 detection e 1 correction}, riuscendo a correggere un
+  errore. Se avessi due errori riconoscerei come codeword valida una a distanza
+  1 da quella errata che però non è quella giusta, introducendo un nuovo errore
+  \item se ho due codeword valide che hanno distanza 4 (e non esistono due
+  codeword valide con distanza minore di 4) allora il codice ha
+  capacità di \textbf{3 detection e 1 correction}, riuscendo a correggere un
+  errore. Se avessi due errori riconoscerei avrei più codeword valide alla
+  stessa distanza. Se avessi tre errori varrebbe quanto detto nel caso di
+  distanza 3
+\end{itemize}
+
 \end{document} 
-% LocalWords:  clock burst Hamming
+% LocalWords:  clock burst Hamming codeword

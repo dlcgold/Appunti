@@ -1750,7 +1750,7 @@ Si richiede quindi che la funzione $cod$, quindi il nostro codice, \textbf{deve
 Un algoritmo che riconosce che un codice è univocamente decodificabile non è
 banale.
 \begin{esempio}
-  si supponga di avere le seguenti codeword binarie per 4 simboli $s_i$:
+  Si supponga di avere le seguenti codeword binarie per 4 simboli $s_i$:
   \begin{itemize}
     \item $s_1\to 0$
     \item $s_2\to 01$
@@ -1810,7 +1810,6 @@ Nell'esempio abbiamo usato gli $0$ come \textit{end of codeword}, infatti questo
 codice è detto \textbf{comma code}, avendo che il decodificatore vede che le
 codeword, tranne l'ultima, terminano per 0. Quindi o arriva uno zero terminando
 la codeword o arrivano 3 uni che terminano il messaggio.\\
-
 Potrei inoltre vedere la decodifica come un albero di
 decodifica, in quanto ogni volta che arriva un simbolo posso escludere certe
 codeword.
@@ -1848,6 +1847,296 @@ avere due foglie associate a due codeword una prefissa dell'altra).
 \end{esempio}
 Se devo costruire un codice istantaneo posso quindi usare un \textbf{comma code}
 o costruire un albero di decodifica che sia il più possibile simile ad un albero
-completo. 
+completo.
+\begin{esempio}
+  Si supponga di avere le seguenti codeword binarie per 5 simboli $s_i$:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 10$
+    \item $s_3\to 110$
+    \item $s_4\to 1110$
+    \item $s_4\to 11110$
+  \end{itemize}
+  Si ha quindi:
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/ct3.pdf}
+  \end{figure}
+  (e si nota come si possa generalizzare l'albero per un comma code).
+\end{esempio}
+\begin{esempio}
+  Avendo l'albero:
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ct4.pdf}
+  \end{figure}
+  Riconosco il codice:
+  \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 10$
+    \item $s_4\to 110$
+    \item $s_5\to 111$
+  \end{itemize}
+  
+\end{esempio}
+\begin{esempio}
+  Avendo il codice 1:
+   \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 10$
+    \item $s_3\to 110$
+    \item $s_4\to 1110$
+    \item $s_5\to 11110$
+  \end{itemize}
+  e il codice 2:
+   \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 10$
+    \item $s_4\to 110$
+    \item $s_5\to 111$
+  \end{itemize}
+  assegno ad entrambi le probabilità:
+   \begin{itemize}
+    \item $p_1\to 0.9$
+    \item $p_2\to 0.025$
+    \item $p_3\to 0.025$
+    \item $p_4\to 0.025$
+    \item $p_5\to 0.025$
+  \end{itemize}
+  Ho che, per il primo codice:
+  \[L_1=0.9\cdot 1+0.025\cdot 2+0.025\cdot 3+0.025\cdot 4+0.025\cdot 4=1.225\]
+  Avendo che mediamente per rappresentare un simbolo della sorgente mi servono
+  $1.225$ bit.\\
+  Passo al secondo codice:
+  \[L_2=0.9\cdot 2+0.025\cdot 2+0.025\cdot 2+0.025\cdot 3+0.025\cdot 3=2.05\]
+  Avendo che mediamente per rappresentare un simbolo della sorgente mi servono
+  $2.05$ bit.\\
+  Ne segue, avendo $L_1<L_2$, per questa sorgente con queste probabilità è
+  meglio il primo codice, il comma code.\\
+  Se avessi avuto probabilità uniforme ($p_i=0.2$) avrei avuto:
+  \[L_1=2.8\]
+  \[L_2=2.4\]
+  Essendo meglio il secondo codice.
+\end{esempio}
+\begin{definizione}
+  Si definisce \textbf{codice r-ario} un codice con $r$ simboli con cui si
+  ottengono le codeword.\\
+  Un codice che parte da $\Gamma=\{0,1\}$ è un codice binario.
+\end{definizione}
+Ad un certo punto Kraft scopre un teorema che contiene una disuguaglianza che
+fornisce una condizione necessaria e sufficiente affinché esista un codice
+istantaneo con certe lunghezze $l_1,l_2,\ldots,l_n$ date.
+\begin{teorema}[disuguaglianza di Kraft]
+  Si ha che \textbf{esiste} un \textbf{codice istantaneo r-ario} per una
+  sorgente $S$ di $q$ simboli, con codeword di lunghezza $l_1,l_2,\ldots,l_q$,
+  sse: 
+  \[\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1\]
+  In onore di Kraft si ha che:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_i}} \mbox{ e quindi } K\leq 1\]
+  \textbf{Non si sta vedendo come sono fatte le codeword ma solo se può esistere
+    un certo codice istantaneo. Sapendo che esiste poi bisogna costruire le
+    codeword ma il teorema non dice nulla in merito.}\\
+  La condizione necessaria e sufficiente è quindi una caratterizzazione
+  dell'esistenza del codice istantaneo.
+\end{teorema}
+\begin{proof}
+  Dobbiamo dimostrare i due versi del sse:
+  \begin{enumerate}
+    \item per ogni codice istantaneo r-ario di $q$ simboli con lunghezze
+    $l_1,l_2,\ldots,l_q$ si ha che $K\leq 1$
+    \item se $K\leq 1$ allora esiste un codice istantaneo con lunghezze
+    $l_1,l_2,\ldots,l_q$ 
+  \end{enumerate}
+  Dimostriamo la \textbf{prima parte}.\\
+  Prendo il codice e lo rappresento sull'albero di decodifica (dove ogni nodo ha
+  al più $r$ archi uscenti). Ricorsivamente un albero o è vuoto o è un nodo che
+  punta ad altri nodi.\\
+  Parto con $r=2$, avendo codeword binarie su $\{0,1\}$ e di conseguenza alberi
+  binari di decodifica. Procedo quindi con una dimostrazione per induzione sulla
+  profondità dell'albero:
+  \begin{itemize}
+    \item \textbf{base}: profondità pari a 1. Si hanno due casi:
+    \begin{enumerate}
+      \item la radice o punta ad una foglia. In questo caso:
+      \[K=\frac{1}{2^1}=\frac{1}{2}\leq 1\]
+      \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.7]{img/ct6.pdf}
+      \end{figure}
+      \item punta a due foglie (una per ogni simbolo). In questo caso:
+      \[K=\frac{1}{2^1}+\frac{1}{2^1}=1\leq 1\]
+      \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.7]{img/ct5.pdf}
+      \end{figure}
+    \end{enumerate}
+    
+    \item \textbf{passo induttivi}: assunto che il teorema è vero per ogni
+    albero di profondità $n-1$ dimostriamo che il teorema vale anche per gli
+    alberi di profondità $n$. In realtà così non ci va bene in quanto i
+    sottoalberi dovrebbero avere entrambi profondità $n-1$ (cosa non vera come
+    visto negli esempi precedenti, ad esempio ``l'\textit{albero a pettine}''
+    del comma code). Cambiamo quindi dicendo che  assunto che il teorema è vero
+    per ogni albero di profondità $<n$ dimostriamo che il teorema vale anche per
+    gli alberi di profondità $n$.\\
+    Considero i due sottoalberi come alberi a se stanti:
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.7]{img/ct7.pdf}
+    \end{figure}
+    Dico che $K_1\leq 1$ per il primo sottoalbero e $K_2\leq 1$ per il secondo
+    sottoalbero. \\
+    Calcolo ora $K$ di tutto l'albero ma devo capire come si rapporta a $K_1$ e
+    $K_2$. Si ha che se attacco il primo sottoalbero alla nuova radice per
+    costruire l'albero globale ho che attacco ad ogni codeword un simbolo, che
+    quindi si allungano di 1:
+    \[\sum_{i=1}^q\frac{1}{r^{l_i+1}}\leq 1\]
+    ma altro non è che:
+    \[\sum_{i=1}^q\frac{1}{r}\cdot\frac{1}{r^{l_i}}\leq 1\]
+    ma allora:
+    \[\frac{1}{r}\cdot\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1=\frac{1}{r}\cdot K_1\]
+    Faccio lo stesso per $K_2$ e quindi, avendo $r=2$:
+    \[K=\frac{1}{2}\cdot K_1+\frac{1}{2}\cdot K_2\]
+    ma sto sommando due quantità $\leq \frac{1}{2}$ (avendo $K_1\leq 1$ e
+    $K_2\leq 1$) e quindi: 
+    \[K\leq 1\]
+  \end{itemize}
+  Qualora si avesse $r>2$ si ha:
+  \begin{itemize}
+    \item \textbf{base}, si hanno alberi r-ari, con
+    $\Gamma=\{0,1,2,\ldots,r-1\}$, di probabilità 1. Tutti questi alberi hanno
+    $s$ foglie e $s-r$ non foglie. Quindi, essendo tutti gli $l_i$ uguali a 1
+    essendo a profondità uno:
+    \[K=\sum \frac{1}{r^{l_1}}=\sum \frac{1}{r}=\frac{s}{r}\leq 1\]
+    $\frac{s}{r}\leq 1$ in quanto $s<r$
+    \item \textbf{passo induttivo} si ha un albero r-ario a profondità $n$ con
+    un certo numero di sottoalberi $s$ e un certo numero di sottoalberi vuoti,
+    di cardinalità $s-r$, a profondità $n-1$. Per tutti i $K_1,K_2,\ldots K_s$
+    ho che $K_i\leq 1$ e quindi ottengo $K$ aggiungendo un simbolo alle codeword 
+    dei sottoalberi non vuoto (quelli vuoti contribuiscono con 0 alla
+    sommatoria): 
+    \[K=\frac{1}{r}K_1+\frac{1}{r}K_2+\cdots+\frac{1}{r}K_s\]
+    Ma per lo stesso ragionamento del caso binario, essendo ogni $K_1<leq 1$ e
+    quindi ogni componente della sommatoria è $\leq \frac{1}{r}$:
+    \[K=\frac{1}{r}K_1+\frac{1}{r}K_2+\cdots+\frac{1}{r}K_s\leq \frac{s}{r}\leq
+      1\] 
+  \end{itemize}
+  Vediamo la \textbf{seconda parte} della dimostrazione.\\
+  Se $K\leq 1$ dobbiamo dimostrare che esiste un codice istantaneo con lunghezze
+  $L_1,\ldots, l_q$.\\
+  Sappiamo che:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1\]
+  Vediamo un esempio per capire come vedere diversamente la diseguaglianza:
+  \begin{esempio}
+    se avessi $r=2$, con quindi codeword binarie, e lunghezze 2,2,3,3,4 (con
+    quindi $q=5$). Si ha che: 
+    \[K=\frac{1}{2^2}+\frac{1}{2^2}+\frac{1}{2^3}+\frac{1}{2^3}+\frac{1}{2^4}\]
+    Ma quindi:
+    \[K=\frac{2}{2^2}+\frac{2}{2^3}+\frac{1}{2^4}\]
+    Avendo ora 2,2,1 come numeratori.
+  \end{esempio}
+
+  Indico con $t_j$ il numero di codeword di lunghezza $j$. Si hanno quindi, per
+  l'esempio precedente:
+  \begin{itemize}
+    \item $t_1=0$
+    \item $t_2=2$
+    \item $t_3=2$
+    \item $t_4=1$
+  \end{itemize}
+  Riscrivo quindi $K$:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_i}}=\sum_{j=1}^l\frac{t_j}{r^{j}}\]
+  con $l=\max\{l_1,\ldots,l_q\}$ (per l'esempio sopra $l=4$).\\
+  Si ha quindi che:
+  \[\sum_{j=1}^l\frac{t_j}{r^{j}}\leq 1\]
+  Ma posso dire che, per arrivare ad isolare i $t_j$ senza alterare la
+  diseguaglianza: 
+  \[r^l\cdot \sum_{j=1}^l\frac{t_j}{r^{j}}\leq 1\cdot r^l\]
+  ma quindi ho che:
+  \[r^l\cdot \sum_{j=1}^lt_j\cdot r^{l-j}\leq 1\cdot r^l\]
+  Si ha che:
+  \[ \sum_{j=1}^lt_j\cdot r^{l-j}= t_1\cdot r^{l-1}+\cdots+t_{l-1}\cdot
+    r+t_l\leq r^l\]
+  Ma quindi:
+  \[t_l\leq r^l- t_1\cdot r^{l-1}-\cdots-t_{l-1}\cdot r\]
+  ma so anche che:
+  \[0\leq t_l\]
+  e quindi:
+  \[0\leq t_l\leq r^l- t_1\cdot r^{l-1}-\cdots-t_{l-1}\cdot r\]
+  e quindi:
+  \[0\leq r^l- t_1\cdot r^{l-1}-\cdots-t_{l-1}\cdot r\]
+  porto quindi $t_{l-1}$ a sinistra e divido per $r$, ottenendo:
+  \[t_{l-1}\leq r^{l-1}-t_1\cdot r^{l-1}-\cdots t_{l-2}\cdot r\]
+  lo faccio per tutti i $t_j$ partendo da $t_{l-2}$ e arrivando a:
+  \[t_2\leq r^2-t_1\cdot r\]
+  sapendo per di più che:
+  \[0\leq t_2\leq r^2-t_1\cdot r\]
+  e poi a:
+  \[0\leq t_1\leq r\]
+  Risalgo quindi partendo dalle codeword più corte. Cerco $t_1$ codeword di
+  lunghezza 1, avendo a disposizione l'alfabeto $\Gamma$ r-ario. Per farlo
+  prendo i primi $t_1$ simboli e dico che sono le stringhe di lunghezza 1. Posso
+  farlo perché $t_1\leq r$ e mi avanzano $r-t_1$ simboli dell'alfabeto.\\
+  Passo alle codeword di lunghezza 2, me ne servono $t_2$. Queste codeword sono
+  due simboli concatenati in modo che il primo simbolo non si stato utilizzato
+  per $t_1$ (altrimenti creerei prefissi), quindi prendo un simbolo dai $r-t_1$
+  simboli dell'alfabeto. Il secondo simbolo posso mettere un qualsiasi simbolo
+  di $\Gamma$, avendo $r$ possibili scelte. In totale ho quindi un numero di
+  combinazioni pari a:
+  \[(r-t_1)\cdot r=r^2-t_1\cdot r\]
+  e ho abbastanza combinazioni avendo che $t_2\leq r^2-t_1\cdot r$ per i conti
+  precedenti. Le codeword le scelgo come voglio, ci sono tantissimi modi
+  possibili.\\  
+  Mi avanzano quindi $r^2-t_1\cdot r-t_2$.\\
+  Creo le codeword di lunghezza 3 dove i primi due simboli non devono essere una
+  combinazione usata per quelle di lunghezza 2, facendo poi gli stessi discorsi
+  fatti sopra. \\
+  Avanzo così per tutte le lunghezze di codeword avendo che posso costruire
+  almeno un codice istantaneo, dimostrando la validità del teorema.
+\end{proof}
+\begin{esempio}
+  Riprendiamo l'esempio di sopra.\\
+  Si ha che: 
+  \[K=\frac{1}{2^2}+\frac{1}{2^2}+\frac{1}{2^3}+\frac{1}{2^3}+\frac{1}{2^4}\]
+  Ma quindi:
+  \[K=\frac{2}{2^2}+\frac{2}{2^3}+\frac{1}{2^4}=\frac{3}{4}+\frac{1}{16}\leq 1\]
+  \newpage
+  Se volessi le codeword costruisco l'albero di decodifica:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ct8.pdf}
+  \end{figure}
+  Avendo:
+   \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 100$
+    \item $s_4\to 101$
+    \item $s_5\to 1100$
+  \end{itemize}
+  Ma vedo che ho nodi interni inutili (tipo i due nodi che portano a $s_5$).
+  Butto via quindi i nodi con un solo ramo in uscita:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ct9.pdf}
+  \end{figure}
+  ottenendo:
+  \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 100$
+    \item $s_4\to 101$
+    \item $s_5\to 11$
+  \end{itemize}
+  e quindi:
+  \[K=\frac{3}{2^2}+\frac{2}{2^3}=\frac{3}{4}+\frac{1}{4}=1\leq 1\]
+\end{esempio}
+Quindi un nodo interno che solo un figlio mi fa allungare le lunghezze delle
+codeword facendo sommare valori più piccoli. Se ho solo nodi interni con due
+figli si può dimostrare per induzione che $K=1$ (nel caso base ho $K=1$ e in
+quello induttivo vedo che ho $K_i=1$ per ogni sottoalbero, avendo poi che
+$K=\frac{1}{2}K_1+\frac{1}{2}K_2=\frac{1}{2}\cdot 1+\frac{1}{2}\cdot 1= 1$).
 \end{document} 
-% LocalWords:  clock burst Hamming codeword
+% LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero

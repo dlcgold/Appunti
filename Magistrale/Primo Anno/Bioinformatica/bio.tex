@@ -637,10 +637,10 @@ errori per read lunga 150. Per MinION si ha un tasso d'errore anche di circa il
 read, si stanno progettando i \textbf{PacBio HiFi} (con HiFi che qui sta per
 ``high quality framents'') che producono long read con tasso d'errore allo
 0.1\%, facendo ben sperare per il futuro.\\
-Tra i primi informatici che hanno fatto sequenziamento abbiamo Gene Myers che
+Tra i primi informatici che hanno fatto sequenziamento abbiamo Eugene Myers che
 era un esperto di algoritmi su stringhe e di pattern matching (parte attiva
 nella creazione dei suffix array), nonché responsabile della creazione
-dell'algoritmo di assemblaggio (famoso anche per BLAST). Gene Myers era un
+dell'algoritmo di assemblaggio (famoso anche per BLAST). Eugene Myers era un
 esperto del problema della shortest superstring. A partire dalla tecnica di
 costruzione della shortest superstring ha sviluppato l'algoritmo di
 assemblaggio. Vediamo quindi, in primis, come costruire la shortest
@@ -776,7 +776,7 @@ shortest superstring. Bisogna dimostrare che:
 Il calcolo della shortest superstring può quindi risolvere l'assemblaggio di
 stringhe anche se \textbf{si ricorda che il problema del cammino Hamiltoniano è
   NP-complete}. \\
-La miriade di read però, quando ci lavorò per primo Gene Myers, rendeva
+La miriade di read però, quando ci lavorò per primo Eugene Myers, rendeva
 davvero difficile il calcolo (problema NP-complete e hardware storicamente poco
 potente). Servirono quindi anni per il primo calcolo, circa una quindicina,
 usando appunto il metodo della superstringa.\\
@@ -820,6 +820,8 @@ Vediamo in primis qualche definizione.
   \textbf{multiinsieme}, \textbf{avendo quindi ripetizioni}, di tutte le
   occorrenze di sottostringhe di lunghezza $l$ (gli l-mers) e si indica con:
   \[spectrum(s,l)\]
+  \textbf{Spesso lo spettro poi si rappresenta con i vari l-mer in ordine
+    lessicografico}. 
 \end{definizione}
 \begin{esempio}
   Prendiamo una stringa $s$:
@@ -910,7 +912,16 @@ Si ha quindi che:
     \item i vertici sono etichettati con un (k-1)-mer
     \item gli archi sono etichettati con un k-mer
   \end{itemize}
-  Tali grafi sono stati introdotti dal matematico De Brujin nel 1946.
+  Tali grafi sono stati introdotti dal matematico De Brujin nel 1946.\\
+  Questa è una definizione \textbf{edge-centric} in quanto i \textbf{k-mer}
+  vengono usati per gli archi. Si può avere anche una definizione
+  \textbf{node-centric} dove estraggo i nodi per poi ottenere gli archi,
+  collegando due vertici quando il prefisso nel primo nodo coincide con il
+  suffisso del secondo ma avendo i nodi etichettati coi k-mer. Non
+  necessariamente il k-mer dell'arco potrebbe non esistere. Normalmente per
+  l'assemblaggio si usa la versione edge-centric. L'edge-centric implica il
+  node-centric ma non viceversa. In entrambi i casi etichetto l'arco con il
+  resto/estensione. \textbf{Capire meglio!}
 \end{definizione}
 \begin{definizione}
   Si ha che un vertice è \textbf{bilanciato} sse, $\forall v\in V$:
@@ -1046,6 +1057,155 @@ Quindi per costruire il grafo di De Brujin:
   $tt$. Si compone così la superstringa, ovvero l'assemblaggio: 
   \[s=caatgcgtt\]
 \end{esempio}
+\begin{definizione}
+  Si indica con il termine \textbf{de novo} quando si fa una cosa ``da zero''.\\
+  Ad esempio si ha il \textbf{de novo genome assembly}.
+\end{definizione}
+\begin{definizione}
+  Si indica con il termine \textbf{reference bases} quando non si fa una cosa
+  ``da zero'' ma si parte da una reference già preesistente. 
+\end{definizione}
+\section{Note extra sui Grafi}
+I grafi di assemblaggio vengono usati anche nella \textbf{metagenomica}, ovvero
+lo studio di campioni di DNA di diversi organismi assieme. Questa cosa può
+essere utile quando il campione contiene vari organismi, si pensi ad esempio
+allo studio di un campione d'acqua o allo studio di un tampone faringeo.\\
+\begin{definizione}
+  Definiamo il paradigma \textbf{overlap-layout-consesus (\textit{OLC})},
+  proposto da Eugene Myers, come il
+  paradigma per il quale si procede alla costruzione del grafo a partire da un
+  insieme di read. Tramite le read si calcola poi il grafo di overlap per poi
+  inferire il cammino, ovvero la \textbf{sequenza di consenso}. Il costo
+  computazionale di calcolo non è indifferente.\\
+  Rispetto ai grafi di De Brujin è che possono immediatamente disambiguare brevi
+  ripetizioni che i grafici di de Bruijn potrebbero risolvere solo nelle fasi
+  successive.
+\end{definizione}
+\begin{definizione}
+  Definiamo formalmente il \textbf{grafo di overlap}.\\
+  Dato un insieme di read $R$ un grafo di overlap è un grafo orientato:
+  \[G=(R,E)\]
+  dove i vertici sono le read stesse e si ha un arco tra $r_i$ e $r_j$ sse un
+  suffisso di $r_i$ è un prefisso di $r_j$, essendo in overlap. Il resto
+  dell'overlap è detto $e_{ij}$ ed etichetta l'arco (e si nota che il prefisso
+  di $r_i$ prima dell'overlap può essere usato come etichetta).
+  
+\end{definizione}
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.8]{img/olc.pdf}
+    \caption{Esempio di grafo di overlap}
+  \end{figure}
+Si ha che:
+\begin{itemize}
+  \item un cammino nel grafo di overlap rappresenta una stringa che è ottenuta
+  assemblando le read. Tale stringa è ottenuta tramite $r_1e_{i1}e_{i2}\cdots
+  e_{ik}$
+  \item se un arco $(r_i,r_j)$ è un cammino con solo due vertici è la stringa
+  $s=r_ie_{ij}$ 
+  \item  un arco $(r_i,r_j)$ è detto \textbf{riducibile} se esiste un
+  percorso da $r_i$ a $r_j$, con anche altri vertici, che rappresenta la stessa
+  stringa di $(r_i,r_j)$. Tali archi possono essere eliminati da un grafo di
+  overlap ottenendo uno \textbf{string graph}, che offre una struttura più
+  semplice e utile per la ricostruzione del genoma
+\end{itemize}
+Il grafo di overlap può essere usato per trovare le \textbf{varianti}.
+\begin{definizione}
+  Dato un insieme $R$ di read si ha che un \textbf{edge-centric De Brujin
+    Graph}:
+  \[G=(V,E)\]
+  di ordine $k$ è un grafo dove i vertici sono i vari (k-1)-mer e si ha un arco
+  tra $u$ e $v$ sse esiste un k-mer $w\in R$ tale che si il prefisso di
+  lunghezza k-1 di $w$ è uguale a $u$ e il suffisso lungo k-1 di $w$ è
+  $v$. L'arco tra $u$ e $v$ è etichettato con l'ultimo carattere di $v$.
+  
+\end{definizione}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/dbg.pdf}
+  \caption{Esempio di grafo di De Bruijn con $k=5$ edge-centric (anche se
+    rappresentato non con l'intero 5-mer ma solo con il resto).}
+\end{figure}
+Se teniamo conto che i k-mer sono ripetuti possiamo usare un
+\textbf{multigrafo}.
+\begin{definizione}
+  Un \textbf{multigrafo} è un grafo in cui gli archi sono specificati da un
+  \textbf{multinsieme}, il che significa che lo stesso arco può essere ripetuto
+  più volte.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{isola} in un grafo di De Bruijn sono un insieme di nodi
+  isolati. Sono generate da k-mer non frequenti e quindi probabilmente sono
+  errori di sequenziamento.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{tip} in un grafo di De Bruijn come un nodo che si separa
+  singolarmente con un arco dagli altri. 
+\end{definizione}
+I k-mer relativi a isole e tip vanno eliminati.\\
+Se si ha che un k-mer è troppo ripetuto si è davanti probabilmente ad una
+\textbf{ripetizione}. L'uomo ha molti geni replicati, avendo magari varie
+versioni di un certo gene. Posso avere ripetizioni corte o molto lunghe.\\
+Oltre alle bolle legate ad errori ho anche bolle legate magari al fatto che
+l'uomo è \textbf{diploide}, avendo \textbf{due copie} di ciascun cromosoma, una
+ereditata dalla madre e una dal padre, che possono avere comunque il 0.1\% di
+differenza. Le read mi arrivano in eguale proporzione dai due cromosomi, sto
+assemblando quindi due fonti in una sola sequenza. Nelle banche solitamente si
+ha comunque solo l'\textbf{allele di maggioranza} (l'\textbf{allele}, dal punto
+di vista informatico, è la base variata a livello di cromosoma). \\
+Vanno rimosse anche le \textbf{bubble} e i cammini vengono assemblate nelle
+stringhe dette \textbf{contigs}.\\
+Un assemblatore che usa i grafi di De Brujin è davvero complesso.\\
+Nell'ultimo periodo in realtà si lavora con una reference e con un file VCF
+contenente le varianti. Le read da cui si parte solitamente sono a lunghezza
+fissata. \\
+In fase di metagenomica si parte da read ``colorate'' provenienti da diversi
+organismi. Si costruisce un \textbf{grafo di De Brujin misto} da cui si riesce
+ad estrarre le sequenze delle singole specie. Per farlo si sfruttano varie
+informazioni, ad esempio la concertazione di copie di una certa read per le
+varie specie. Come informazione si usa anche il fatto che alcune specie hanno
+k-mer \textbf{unici}. \\
+Diamo uno sguardo anche ai tempi computazionali, con $n$ basi, $g$ lunghezza del
+genoma e $a$ lunghezza overlap (con ST indichiamo con \textit{suffix array}, con
+DP \textit{programmazione dinamica} e con NE \textit{senza errori}): 
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c|c}
+    &\textbf{\textit{De brujin}} &\textbf{\textit{Overlap}}\\
+    \hline
+    tempo & $O(n)$ & $O(n+a)$ ST, $O(n^2)$ DP\\                 
+    \hline
+    spazio & $O(n)$, $O(\min\{N,g\})$ NE, & $O(n+a)$
+  \end{tabular}
+\end{table}
+Normalmente il sequenziamento viene fatto tramite \textbf{elettroforesi} ma
+picchi irregolari portano sicuramente ad errori di sequenziamento.\\
+Tornando al discorso \textbf{ripetizioni} si ha che essere conferiscono
+``confusione'' all'assemblaggio.\\
+\textbf{Risentire ultimi minuti lezione 16 marzo}\\
+Potrei avere, con Illumina, buchi di read non coperti che vengono colmati in
+modo algoritmico, tramite \textbf{contigs} che si collegano in
+\textbf{supercontigs}. Questa operazione è detta \textbf{scaffolding}.
+\subsection{Sequenziamento per Ibridazione}
+\textbf{Sezione molto oscura.}\\
+Per leggere porzioni di DNA si usa il \textbf{sequenziamento per ibridazione
+  \textit{SBH}}, ad esempio per leggere le porzioni atta a capire il test di
+paternità. Viene fatta tramite \textbf{affymetrix chip}, ovvero una piastra di
+materiale plastico dove viene depositato, dentro celle, il DNA da studiare. Il
+DNA sfrutta la complementarietà delle basi e queste celle contengono particolari
+k-mer così che le celle mi restituiscono i k-mer completi, ottenuti tramite il
+processo chimico dell'ibridazione che fa attaccare basi complementari.\\
+
+Si ha quindi il \textbf{SBH problem}, che consiste di ricostruire una stringa
+dai suoi l-mer, con:
+\begin{itemize}
+  \item \textbf{input}: un insieme $S$ con tutti gli $l-mer$ di una stringa $s$
+  \item \textbf{output}: una stringa $s$ tale che $Spectrum(s,l)=S$
+\end{itemize}
+Si usa il cammino Hamiltoniano per risolvere il problema oppure posso usare il
+cammino di Eulero usando i (k-1)-mer e il grafi di De Brujin.
+
+
 
 
 

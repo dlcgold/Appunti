@@ -1718,6 +1718,136 @@ Avendo una generica sfera di raggio $r$ avrei:
 \section{Codifica di Sorgente}
 Finora si è parlato di \textbf{codifica di canale}, passiamo quindi ad
 approfondire la \textbf{codifica di sorgente}, cercando anche in questo caso il
-codice ottimale (con la lunghezza media minima).
+codice ottimale (con la lunghezza media minima).\\
+Avendo magari una distribuzione non uniforme per la distribuzione dei caratteri
+non ha senso usare una \textbf{codice a blocchi} ma si usa un 
+\textbf{codice a lunghezza variabile} (\textit{riguardare quanto detto nella
+  prima sezione di questi appunti}).\\
+Ci si propone quindi di minimizzare, parlando di codici a lunghezza variabile:
+\[L=\sum_{i=1}^1 p_il_i\]
+Bisogna prima fare un discorso sull'univocità dei codici.
+\begin{esempio}
+  si supponga di avere le seguenti codeword binarie per 4 simboli $s_i$:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 11$
+    \item $s_4\to 00$
+  \end{itemize}
+  Suppongo che il ricevente riceva $0011$. Cerco di capire che sequenza ha
+  ricevuto. Deve calcolare una:
+  \[cod^{-1}:\Gamma^*\to S\]
+  Ma ci sono delle ambiguità. Potrebbe essere;
+  \begin{itemize}
+    \item $s_4s_3$
+    \item $s_1s_1s_3$
+  \end{itemize}
+  Non è quindi in grado di trovare una sequenza di simboli univoca.\\
+  Ne segue che il codice \textbf{non è univocamente decodificabile}.
+\end{esempio}
+Si richiede quindi che la funzione $cod$, quindi il nostro codice, \textbf{deve
+  essere univocamente decodificabile}. \\
+Un algoritmo che riconosce che un codice è univocamente decodificabile non è
+banale.
+\begin{esempio}
+  si supponga di avere le seguenti codeword binarie per 4 simboli $s_i$:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 011$
+    \item $s_4\to 111$
+  \end{itemize}
+  Si dimostra che questo codice è \textbf{univocamente decodificabile},
+  esistendo un'unica possibile divisione in codeword di ogni stringa che riceve
+  il ricevente.\\
+  Suppongo che il ricevente riceva:
+  \[0111111111\]
+  Ma anche solo all'inizio potrei avere sia $s_1$ che $s_2$ che $s_3$ ma una
+  volta che è finito posso partire dal fondo raggruppando gli $1$ tre a tre e mi
+  accorgo che ho un solo modo:
+  \[0\,\,\,111\,\,\,111\,\,\,111\]
+  \[s_1s_4s_4s_4\]
+  \textbf{Bisogna quindi aspettare la fine della trasmissione}.
+\end{esempio}
+Lato elettronico per fare questa operazione uso un \textbf{contatore
+  elettronico}.\\
+D'altro canto aspettare la fine non è ``comodo'' e si vorrebbe analizzare i
+simboli man mano che arrivano.\\
+Si definiscono quindi due categorie di codici a lunghezza variabile:
+\begin{itemize}
+  \item \textbf{non univocamente decodificabili}
+  \item \textbf{univocamente decodificabili}
+\end{itemize}
+e suddividiamo gli univocamente decodificabili in:
+\begin{itemize}
+  \item \textbf{istantaneo}, dove appena arriva una codeword il ricevente sa che
+  è arrivata completamente e che è unica
+  \item \textbf{non istantaneo}
+\end{itemize}
+\begin{esempio}
+  Trasformiamo l'ultimo esempio in un codice istantaneo. Si hanno:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 011$
+    \item $s_4\to 111$
+  \end{itemize}
+  ma non andrebbero bene (per il problema dell'inizio del messaggio). D'altro
+  canto:
+   \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 10$
+    \item $s_3\to 110$
+    \item $s_4\to 111$
+  \end{itemize}
+  ottenuto con la \textit{reverse} delle stringhe, è un codice istantaneo con
+  codeword di lunghezza pari a quelle precedenti.\\
+  Posso facilmente vedere che qualsiasi cosa arrivi posso capire che codeword è,
+  appena l'intera codeword viene letta. Non devo aspettare l'intero messaggio ma
+  al più due simboli.
+\end{esempio}
+Nell'esempio abbiamo usato gli $0$ come \textit{end of codeword}, infatti questo
+codice è detto \textbf{comma code}, avendo che il decodificatore vede che le
+codeword, tranne l'ultima, terminano per 0. Quindi o arriva uno zero terminando
+la codeword o arrivano 3 uni che terminano il messaggio.\\
+
+Potrei inoltre vedere la decodifica come un albero di
+decodifica, in quanto ogni volta che arriva un simbolo posso escludere certe
+codeword.
+\newpage
+Vediamo l'esempio relativo all'esempio precedente:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/ct.pdf}
+\end{figure}
+Avendo che ogni cammino dalla radice ad una voglia è una codeword con la
+foglia etichettata con il simbolo relativo alla codeword. Si ha quindi un
+sottoalbero per ogni simbolo di $\Gamma$ (quindi dalla radice escono
+$|\Gamma|$ archi) e da ogni nodo interno esce un numero
+di archi minore o uguale al numero di simboli. Il ricevente sfrutta l'albero di
+decodifica.\\ 
+Posso anche usare l'albero per costruire il codice istantaneo.\\
+Inoltre dato che un codice istantaneo è associato ad un albero di codifica non
+succede mai che una codeword sia prefissa di un'altra (e lo si vede non prendo
+avere due foglie associate a due codeword una prefissa dell'altra).
+\begin{esempio}
+  Vediamo l'albero di decodifica di un codice non istantaneo.\\
+  Si hanno:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 011$
+    \item $s_4\to 111$
+  \end{itemize}
+  Si ha:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/ct2.pdf}
+  \end{figure}
+  Avendo foglie che sono prefisse di altre.
+\end{esempio}
+Se devo costruire un codice istantaneo posso quindi usare un \textbf{comma code}
+o costruire un albero di decodifica che sia il più possibile simile ad un albero
+completo. 
 \end{document} 
 % LocalWords:  clock burst Hamming codeword

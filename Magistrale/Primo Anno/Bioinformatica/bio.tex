@@ -1195,20 +1195,246 @@ materiale plastico dove viene depositato, dentro celle, il DNA da studiare. Il
 DNA sfrutta la complementarietà delle basi e queste celle contengono particolari
 k-mer così che le celle mi restituiscono i k-mer completi, ottenuti tramite il
 processo chimico dell'ibridazione che fa attaccare basi complementari.\\
-
 Si ha quindi il \textbf{SBH problem}, che consiste di ricostruire una stringa
 dai suoi l-mer, con:
 \begin{itemize}
-  \item \textbf{input}: un insieme $S$ con tutti gli $l-mer$ di una stringa $s$
+  \item \textbf{input}: un insieme $S$ con tutti gli l-mer di una stringa $s$
   \item \textbf{output}: una stringa $s$ tale che $Spectrum(s,l)=S$
 \end{itemize}
 Si usa il cammino Hamiltoniano per risolvere il problema oppure posso usare il
 cammino di Eulero usando i (k-1)-mer e il grafi di De Brujin.
 
+\chapter{Allineamento di Sequenze}
+L'\textbf{allineamento} è la procedura principe usata per comparare sequenze
+biologiche. \\
+Il confronto di sequenze, tramite sequenze di genomi, permette di creare
+\textbf{alberi di filogenesi}, alberi no-rooted con le specie attuali come
+foglie, che rappresentano l'evoluzione delle varie specie. La ricostruzione di
+tale albero avviene grazie al confronto, tramite allineamento, di sequenze.\\
+Confrontare le sequenze consiste nello studiare il processo di evoluzione,
+risalendo al processo evolutivo tramite le varie mutazioni del DNA.\\
+SI hanno due tipi di mutazioni:
+\begin{itemize}
+  \item a livello nucleotidico, su singole basi, che sono \textbf{operazioni di
+    edit}. Una singola base comporta la creazione di una diversa proteina e
+  potrebbe portare a varie patologie. Le varie forme di una malattia genetica
+  (tipo l'anemia) possono derivare da proteine diverse. A questo tema si
+  affianca la medicina traslazionale
+  \item a livello più ampio, cromosomico, che riguardano
+  \textbf{riarrangiamenti}, ovvero scambi di pezzi di DNA o inversione di
+  orientamento di alcune porzioni. Questo è legato magari a fenomeni ambientali
+  e comporta il cambiamento di proteine e caratteristiche della specie,
+  comportando un processo di adattamento e selezione naturale
+\end{itemize}
+
+Con l'allineamento si confrontano sequenze per vedere quanto sono
+simili/diversi. Si vuole o massimizzare la simiglianza o minimizzare le
+differenze. Per allineare si inseriscono i \textbf{gap}.
+% insierire tabella
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c||c|c|c|c|c|c|c|c|c}
+    \hline
+    \textbf{v}& a& t & & g& t & t& a & t &\\
+    \hline
+    \textbf{w}& a& t &c & g& t & & a &  &c\\
+    \hline
+  \end{tabular}
+\end{table}
+Il biologo attribuisce alle mutazioni un punteggio, uno \textbf{score}. Tale
+score è stabilito attraverso uno studio probabilistico sulle mutazione avvenute
+nel corso dell'evoluzione.\\
+Se allineo più di due sequenze parlo di \textbf{allineamento multiplo}. Si
+segnala che il 98\% dei geni è pari tra due mammiferi e si ha più del 70\% di
+similarità nelle sequenze proteiche.\\
+L'allineamento dal punto di vista algoritmico è fatto tramite programmazione
+dinamica (mentre all'inizio erano fatte a mano dai biologi). Dal punto di vista
+bioinformatico l'allineamento è il processo base per praticamente qualsiasi
+software.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.6]{img/almat.jpg}
+  \caption{Esempio di matrice di programmazione dinamica per calcolare
+    l'allineamento, dove si hanno 4 match, due inserzioni e due delezioni (si
+    ragiona dal punto di vista di $v$).} 
+\end{figure}
+
+\begin{definizione}
+  Definiamo l'allineamento di due sequenze $A$ e $B$ su $\Sigma^*$ è una matrice
+  $A^{2\times l}$ in cui la prima riga è associata ad $A$ e la seconda a
+  $B$. Ciascuna riga contiene i caratteri della sequenza associata
+  intervallati da gap/spazi, rappresentati con il trattino.\\
+  \textbf{Non è permesso avere due gap nelle due righe per la stessa
+    posizione. In altri termini non posso avere una colonna di gap}.\\
+  Ne segue che al massimo, avendo $|A|=n$ e $|B|=m$ allora:
+  \[l\leq n+m\]
+  e la matrice $2\times n+m$, ovvero quella massima, consiste nell'avere la
+  prima sequenza allineata con soli gap (che saranno sotto) e la seconda
+  allineata con soli gap (che saranno sopra).
+\end{definizione}
+Per definire il problema dell'allineamento ottimo ho bisogno di una:
+\[\delta:=(\Sigma\cup\{-\})^2\to\mathbb{R}^+\]
+Potrei avere anche versioni della delta con pesi negativi:
+\[\delta:=(\Sigma\cup\{-\})^2\to\mathbb{R}^-\]
+dove $\delta$ rappresenta la \textbf{funzione di score}, tramite \textbf{matrice
+  di punteggio}, che ha i caratteri 
+dell'alfabeto che etichettano righe e colonne. Ogni $a_{ij}$ è lo score.
+Sulla diagonale avrò soli 0.\\
+Dati in input quindi $A$, $B$ e $\delta$ si ha che il costo della matrice di
+allineamento $M$ è il minimo (o a seconda massimo) della somma del costo delle
+colonne: 
+\[c(M)=\sum_{1\leq i\leq l}\delta(M_{1i,2i})\]
+Dove $A_{1i,2i}$ è una scrittura $M[1,i],M[2,i]$.\\
+In altri termini è la somma delle delta delle colonne (delta prima colonne più
+delta seconda, più delta terza etc$\ldots$)
+\textbf{Persa parte al minuto circa 40}.\\
+La \textbf{distanza di edit} è un caso particolare dell'allineamento.\\
+Il problema \textbf{LCS}, dove date due sequenze $A$ e $B$ si cerca la lunghezza
+della più lunga sottostringa comune, è calcolabile tramite la \textbf{matrice di
+  allineamento}, dove l'unico elemento della matrice che costa 1 è quando si ha
+un match ($\delta(\sigma,\sigma)=1$), avendo alla fine che che
+$c(M)=|lcs(A,B)|$.  \\
+Se passo all'\textbf{allineamento multiplo di sequenza} ho in input ho
+$A_1,A_2,\ldots,A_k$ con $k$ sequenze. 
+\begin{definizione}
+  Definiamo l'allineamento multiplo di $A_1,A_2,\ldots,A_k$ è una matrice $M$
+  di $k$ righe e $l$ colonne con:
+  \[l\leq k\cdot \max\{|A_i|\}\]
+  tale che la riga i-esima, $\forall 1\leq i\leq k$, di $M$ contiene la sequenza
+  $A_i$ intervallata da gap. Anche qui non si possono avere colonne di soli
+  gap. È quindi un'estensione/generalizzazione di quanto detto per due
+  sequenze. 
+\end{definizione}
+\begin{definizione}
+  Definiamo anche in questo caso lo scoring, avendo che è identico al caso di
+  due colonne. Infatti rappresenta il corso di una operazione tra
+  \textbf{coppie} di simboli.
+\end{definizione}
+\begin{definizione}
+  Definiamo il \textbf{costo di una matrice di allineamento multiplo}. Tale
+  costo dipende da cosa si vuole evidenziare e si hanno varie definizioni
+  alternativa. \\
+  La definizione classica è quella della \textbf{sum of pairs}, ma anche le
+  alternative, tipo \textbf{consesus}, si basa sul dire che il costo è comunque
+  in qualche modo la somma dei costi delle colonne della matrice. Bisogna però
+  capire come stabilire tali costi. Per farlo penso ad ogni cella di una colonne
+  come nodo di un grafo e costruisco un grafo completo. Il \textbf{sum of pairs}
+  è il costo di quel grafo completo. Ogni arco tra coppie $\sigma_1$ e
+  $\sigma_2$ (con $\sigma_i$ contenuto della cella i-esima della colonna) è di
+  peso pari al $\delta(\sigma_1,\sigma_2)$. Confronto quindi ogni cella della
+  colonna con ogni altra, calcolando il delta, e faccio la sommatoria:
+  \[c(M)=\sum_{1\leq t,s\leq k} \delta(\sigma_t,\sigma_s)\]
+  Nel caso del \textbf{consesus} dovrei vedere solo le differenze rispetto ad
+  una sequenza reference, anch'essa in input. Confronto tutte le altre sequenze
+  contro questa sequenza reference $A^*$. Avrei quindi come grafo un albero con
+  la reference come radice. Alla fine sommo i costi degli archi come per il sum
+  of pairs. Tale allineamento è anche detto \textbf{star alignment}.\\
+  Questi due sono i due metodi principali ma ci possono anche essere altri
+  ``mapping'' tra cui prendere alberi specifici basati sull'evoluzione delle
+  specie. Questa tecnica è detta \textbf{tree alignment}, confrontando solo
+  coppie di un albero specifico di evoluzione.\\
+  A seconda dello scoring poi si procede massimizzando o minimizzando.
+\end{definizione}
+Bisogna quindi capire come calcolare $M$ tale che il costo di $M$ sia ottimo.\\
+Per farlo si applica la programmazione dinamica. Per due sequenze lunghe
+rispettivamente $n$ e $m$ il costo sarebbe $O(n\cdot m)$, $O(n^2)$ se lunghe
+uguali.\\
+Per $k$ sequenze si ha sempre la programmazione dinamica ma il costo è più
+elevato. Se le sequenze sono in numero fissato si ha $O(l^k)$ ma se non conosco
+il numero di sequenze in input il problema diventa \textbf{NP-hard} anche quando
+prendo uno score delta banale che soddisfa la disuguaglianza triangolare su
+alfabeto binario. Si hanno quindi diverse euristiche per risolvere il problema e
+si basano sempre sull'idea del \textbf{consesus}, con tecniche greedy. Un
+esempio di software per farlo è \textbf{MAFFT}.
+\begin{esempio}
+  Date:
+  \begin{itemize}
+    \item $A_1=accgtc$
+    \item $A_2=ccgcc$
+    \item $A_3=accttc$
+  \end{itemize}
+  Ho una possibile (sarebbero diverse) matrice di allineamento, fatta per
+  massimizzare i match:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c|c|c|c|c|c|}
+      $A_1$& a&c&c&g&t&c&-\\
+      \hline
+      $A_2$& -&c &c & g&-& c&c\\
+      \hline
+      $A_3$&a&c&c&t&t&c&-
+    \end{tabular}
+  \end{table}
+  Per esempio per la prima colonne avrei:
+  \begin{itemize}
+    \item $\delta(a,-)$
+    \item $\delta(a,a)$
+    \item $\delta(-,a)$
+  \end{itemize}
+  coi tre valori che andrebbero sommati nel caso di sum of pairs.
+\end{esempio}
+Fondamentalmente allineare sequenze significa trovare un cammino in una griglia,
+un problema del tipo \textbf{Manhattan Tourist Problem (MTP)}. La griglia
+rappresenta diversi modi per attraversare la città da un punto $A$ ad uno $B$
+dove si hanno pesi per ogni arco (i lati dei quadrati della gruglia hanno un
+peso associato) per specificare il numero di attrazioni. Lo
+scopo è arrivare alla fine massimizzando il numero di attrazioni viste.\\
+Si cerca quindi il cammino più pesante in una griglia pesata. In input si ha la
+griglia, il punto di partenza e di arrivo. Una strategia greedy per la quale ad
+ogni istante scelgo l'arco più pesante non sempre porta alla soluzione ottima.\\
+Si ha quindi un algoritmico di programmazione dinamica con il criterio di
+memorizzazione. \\
+L'algoritmo ricorsivo si preoccupa di capire come arrivare al nodo finale
+ragionando a partire dal nodo finale stesso, sapendo che posso fare solo certi
+movimenti sulla griglia. Derivo il costo ottimo di un nodo a partire dai costi
+ottimi dei nodi che portano a quel nodo (scegliendo il migliore).
+\begin{algorithm}
+  \begin{algorithmic}
+    \If{$n=0\lor m=0$}
+    \State \textbf{return} $MT(n,m)$
+    \EndIf
+    \State $x\gets MT(n-1,m) + w(u,v),\,\,\, u=(n-1,m),v=(n,m)$
+    \State $y\gets MT(n,m-1) + w(z,v),\,\,\, u=(n,m-1),v=(n,m)$
+    \State \textbf{return} $\max\{x,y\}$
+  \end{algorithmic}
+  \caption{Algoritmo MTP con ricorsione}
+\end{algorithm}
+Con la programmazione dinamica parto dalla sorgente e accumulo il punteggio per
+ogni percorso possibile, scegliendo poi il miglior percorso. Visito l'intera
+griglia e calcolo ogni volta il modo migliore per arrivare ad un nodo,
+risolvendo ogni volta problemi di massimo. Alla fine vado a ritroso per capire
+che percorso fare mentre nell'ultimo nodo potrò già vedere il peso ottimo del
+percorso scelto.
+
+\[s_{i,j}=\max\
+  \begin{cases}
+    s_{i-1,j} + w(u,v),\,\,\, u=(i-1,j),v=(i,j)\\
+    s_{i,j-1} + w(z,v),\,\,\, z=(i,j-1),v=(i,j)
+  \end{cases}
+\]
+Si a quindi, per una griglia $n\times m$, un costo pari a $O(n\cdot m)$.
+
+Potrei aggiungere al problema l'uso delle diagonali, dovendo cambiare il
+sistema, aggiungendo il costo della diagonale:
+\[s_{i,j}=\max\
+  \begin{cases}
+    s_{i-1,j} + w(u,v),\,\,\, u=(i-1,j),v=(i,j)\\
+    s_{i,j-1} + w(z,v),\,\,\, z=(i,j-1),v=(i,j)\\
+    s_{i-1,j-1} + w(o,v),\,\,\, o=(i-1,j-1),v=(i,j)
+  \end{cases}
+\]
+Trovare il cammino ottimo della griglia corrisponde all'allineamento tra
+sequenze. 
+% inseriee pd
 
 
 
 
+Dato il costo quadratico di confrontare due sequenze si passa a considerare
+anche metodi di confronto \textbf{alignment-free}, dove si decide che due
+sequenze sono molto simili senza fare l'allineamento.\\
+Per allineare nel modo più veloce possibile si è passati poi dalla
+programmazione dinamica i metodi \textbf{bwt-based}.\\
 
 
 

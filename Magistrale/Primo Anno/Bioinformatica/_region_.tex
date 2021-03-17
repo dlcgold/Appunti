@@ -18,6 +18,7 @@
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{fontspec}
 \usepackage{enumerate}
 \usepackage{physics}
@@ -25,6 +26,7 @@
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
+\usepackage{svg}
 \usepackage{polynom}
 \usepackage{booktabs}
 \usepackage{enumitem}
@@ -497,9 +499,9 @@ ponte tra isole un arco tra nodi. Da qui la definizione del problema.
 Vediamo poi il ``problema duale'', quello in cui si vuole fare un cilo che non
 visiti due volte uno stesso nodo.
 \begin{definizione}
-  Il  \textbf{problema del ciclo Hamiltoniano} consiste nel trovare un ciclo in un
-  grafo tale che visiti ogni vertice una e una sola volta prima di tornare al punto
-  di partenza.\\
+  Il  \textbf{problema del ciclo Hamiltoniano} consiste nel trovare un ciclo in
+  un grafo tale che visiti ogni vertice una e una sola volta prima di tornare al
+  punto di partenza.\\
   Questo problema si dimostra essere \textbf{NP-complete}.
 \end{definizione}
 La differenza di complessità di questi due problemi sarà qualcosa che bisognerà
@@ -513,10 +515,10 @@ li usò per rappresentare strutture chimiche, nel dettaglio usò \textbf{alberi}
 strutturali.\\
 In biologia l'uso dei grafi è stato introdotto a metà 1900 con l'esperimento di
 Benzer, che capì l'importanza dei grafi mentre cercava di distinguere quando
-determinati virus attaccano determinati batteri. Benzer è riuscito a mostrare che
-il DNA di questi virus era \textit{lineare} mentre prima si congetturava che il
-DNA avesse delle biforcazioni. Per capire che non avesse delle biforcazioni ha
-sfruttato la capacità di alcuni geni dei virus di aggredire batteri,
+determinati virus attaccano determinati batteri. Benzer è riuscito a mostrare
+che il DNA di questi virus era \textit{lineare} mentre prima si congetturava che
+il DNA avesse delle biforcazioni. Per capire che non avesse delle biforcazioni
+ha sfruttato la capacità di alcuni geni dei virus di aggredire batteri,
 rappresentando la cosa coi \textbf{grafi ad intervallo}.
 \begin{definizione}
   Nella teoria dei grafi, un \textbf{grafo d'intervallo} è il grafo
@@ -524,8 +526,7 @@ rappresentando la cosa coi \textbf{grafi ad intervallo}.
   multiinsieme di intervalli sulla linea reale. Ha un solo vertice per ciascun
   intervallo dell'insieme, e uno spigolo tra ogni coppia di vertici
   corrispondenti agli intervalli che
-  intersecano.
-  \footnote{\url{https://it.wikipedia.org/wiki/Grafo\_d\%27intervallo}}\\
+  intersecano.\\
   In poche parole associo una lettera ad ogni intervallo e collego nel grafo i
   vertici corrispondenti alla lettera qualora i due intervalli abbiano
   sovrapposizioni.
@@ -537,6 +538,8 @@ variabile che vengono ``letti'' tramite elettroforesi. \\
 \textit{Non approfondiamo nel dettaglio i metodi, essendo prettamente chimici e
   biologici}.
 \subsection{Superstringhe e grafo di overlap}
+Siamo in ottica \textbf{short read sequencing} del \textbf{fragments
+  assembly}.\\ 
 L'assemblaggio dei frammenti del DNA è invece un problema prettamente
 computazionale, avendo l'assemblaggio dei singoli frammenti, ovvero delle
 \textbf{read} prodotte dal sequenziamento, anche in più copie, in un'unica
@@ -637,10 +640,10 @@ errori per read lunga 150. Per MinION si ha un tasso d'errore anche di circa il
 read, si stanno progettando i \textbf{PacBio HiFi} (con HiFi che qui sta per
 ``high quality framents'') che producono long read con tasso d'errore allo
 0.1\%, facendo ben sperare per il futuro.\\
-Tra i primi informatici che hanno fatto sequenziamento abbiamo Gene Myers che
+Tra i primi informatici che hanno fatto sequenziamento abbiamo Eugene Myers che
 era un esperto di algoritmi su stringhe e di pattern matching (parte attiva
 nella creazione dei suffix array), nonché responsabile della creazione
-dell'algoritmo di assemblaggio (famoso anche per BLAST). Gene Myers era un
+dell'algoritmo di assemblaggio (famoso anche per BLAST). Eugene Myers era un
 esperto del problema della shortest superstring. A partire dalla tecnica di
 costruzione della shortest superstring ha sviluppato l'algoritmo di
 assemblaggio. Vediamo quindi, in primis, come costruire la shortest
@@ -776,7 +779,7 @@ shortest superstring. Bisogna dimostrare che:
 Il calcolo della shortest superstring può quindi risolvere l'assemblaggio di
 stringhe anche se \textbf{si ricorda che il problema del cammino Hamiltoniano è
   NP-complete}. \\
-La miriade di read però, quando ci lavorò per primo Gene Myers, rendeva
+La miriade di read però, quando ci lavorò per primo Eugene Myers, rendeva
 davvero difficile il calcolo (problema NP-complete e hardware storicamente poco
 potente). Servirono quindi anni per il primo calcolo, circa una quindicina,
 usando appunto il metodo della superstringa.\\
@@ -794,6 +797,8 @@ da trent'anni e solo a livello sperimentale si è ipotizzata la
 Si ricorda che con il cammino Hamiltoniano ottimo si ottiene comunque una
 soluzione che potrebbe non essere unica.
 \subsection{Grafi di De Brujin e k-mers}
+Siamo sempre in ottica \textbf{short read sequencing} del \textbf{fragments
+  assembly}.\\ 
 Il metodo della superstringa è stato quindi usato per l'assemblaggio del primo
 sequenziamento (quello con il metodo Sanger) ma l'appoggio ad un problema
 NP-complete (il \textit{ciclo Hamiltoniano}) rendeva il tutto troppo
@@ -818,6 +823,8 @@ Vediamo in primis qualche definizione.
   \textbf{multiinsieme}, \textbf{avendo quindi ripetizioni}, di tutte le
   occorrenze di sottostringhe di lunghezza $l$ (gli l-mers) e si indica con:
   \[spectrum(s,l)\]
+  \textbf{Spesso lo spettro poi si rappresenta con i vari l-mer in ordine
+    lessicografico}. 
 \end{definizione}
 \begin{esempio}
   Prendiamo una stringa $s$:
@@ -892,18 +899,354 @@ altro non sono che i due unici (k-1)-mer estraibili da $x$.
   vari overlap tra etichette degli archi:
   \[s=acctg\]
 \end{esempio}
+Si ha quindi che:
+\begin{definizione}
+  Un grafo $G=(V,E)$ \textbf{orientato} è un \textbf{grafo di De Brujin} di
+  ordine $k$ se:
+  \begin{itemize}
+    \item i vertici sono un sottoinsieme di $\Sigma^{k-1}$, ovvero $V\subseteq
+    \Sigma^{k-1}$ 
+    \item $\forall u,v\in V$ si ha che $(u,v)\in E$ se esiste una parola $w\in
+    \Sigma^*$ tale che $u$ è (ha come etichetta) il prefisso di lunghezza $k-1$
+    di $w$ e $v$ è (ha come etichetta) il suffisso di lunghezza $k-1$ di $u$ 
+  \end{itemize}
+  Quindi possiamo dire che, in modo astratto:
+  \begin{itemize}
+    \item i vertici sono etichettati con un (k-1)-mer
+    \item gli archi sono etichettati con un k-mer
+  \end{itemize}
+  Tali grafi sono stati introdotti dal matematico De Brujin nel 1946.\\
+  Questa è una definizione \textbf{edge-centric} in quanto i \textbf{k-mer}
+  vengono usati per gli archi. Si può avere anche una definizione
+  \textbf{node-centric} dove estraggo i nodi per poi ottenere gli archi,
+  collegando due vertici quando il prefisso nel primo nodo coincide con il
+  suffisso del secondo ma avendo i nodi etichettati coi k-mer. Non
+  necessariamente il k-mer dell'arco potrebbe non esistere. Normalmente per
+  l'assemblaggio si usa la versione edge-centric. L'edge-centric implica il
+  node-centric ma non viceversa. In entrambi i casi etichetto l'arco con il
+  resto/estensione. \textbf{Capire meglio!}
+\end{definizione}
+\begin{definizione}
+  Si ha che un vertice è \textbf{bilanciato} sse, $\forall v\in V$:
+  \[in(v)=out(v)\]
+  con:
+  \begin{itemize}
+    \item $in(v)$ numero di archi entranti in $v$
+    \item $out(v)$ numero di archi uscenti in $v$
+  \end{itemize}
+\end{definizione}
+\begin{teorema}[Teorema di Eulero]
+  Un grafo \textbf{connesso} è un \textbf{grafo Euleriano} sse suo ogni vertice
+  è \textbf{bilanciato}. 
+\end{teorema}
+\begin{proof}
+  Vediamo le due direzioni della dimostrazione, avendo il \textit{sse}.\\
+  Se si ha che per ogni arco entrante nel vertice $v$ deve esistere almeno un
+  arco uscente da $v$ in quanto altrimenti mi ``bloccherei'' in un nodo,
+  arrivando ad una contraddizione e non avendo quindi un cammino di
+  Eulero. Quindi se non è bilanciato sicuramente non è Euleriano.\\
+  Se si ha un grafo bilanciato allora esiste (facciamo il caso ``semplice'') un
+  ciclo Euleriano (e di conseguenza il caso ``difficile'' del cammino
+  Euleriano). Infatti possiamo dare l'algoritmo che trova il ciclo Euleriano. Si
+  ha quindi una \textbf{dimostrazione costruttiva}. Si ha quindi che:
+  \begin{enumerate}
+    \item si parte da un vertice arbitrario $v$
+    \item si connette $v$ ad un altro vertice usando archi, si riparte da tale
+    arco e si fa la stessa operazione. Si ripete l'operazione fino a che non si
+    è formato un ciclo 
+    \item alla fine o uso tutti gli archi o altrimenti chiudo un ciclo lasciando
+    vertici non usati. Nel secondo caso ripeto lo step 1) cercando di usare
+    altri archi non usati. Facendo la \textbf{decomposizione del grafo in
+      cicli}. In caso mi fermo quando ho usato tutti gli archi ma mi trovo con
+    tanti cicli. Per derivare un unico ciclo da due cicli sfrutto il vertice di
+    congiunzione in modo che se entro partendo da un ciclo in quel nodo esco con
+    l'arco che mi porta nell'altro ciclo, facendo la cosiddetta \textbf{apertura
+      dei cicli} (vedere figura \ref{fig:cic}). \\
+    Riassumendo si combinano due cicli in uno unico e si itera questo passaggio
+    fino alla creazione di un singolo ciclo. \textit{Per fare questo uso
+      l'ipotesi che $G$ è bilanciato}
+  \end{enumerate}
+  Questo algoritmo è lineare nella dimensione di un grafo, ovvero\\
+  $O(|V|+|E|)$.  
+\end{proof}
+  \begin{figure}
+    \centering
+    \includegraphics[scale = 0.7]{img/gra11.pdf}
+    \caption{Idea del processo di apertura dei cicli dove si hanno due cicli, a
+      sinistra in rosso e blu. Dopo l'apertura il cammino passa dal ciclo sopra a
+      quello sotto, seguendo i colori nell'immagine a destra.}
+    \label{fig:cic}
+  \end{figure}
+Quindi per costruire il grafo di De Brujin:
+\begin{itemize}
+  \item \textbf{input:} una collezione $F$ di frammenti
+  \item si genera da $F$ l'insieme dei k-mer (non lo spettro)
+  \item per ogni k-mer dell'insieme dei k-mer estraggo il prefisso e il suffisso
+  di lunghezza $k-1$
+  \item si verifica l'esistenza del cammino di Eulero. Quindi:
+  \begin{itemize}
+    \item se esiste si prosegue
+    \item se non è bilanciato si deve passare alla cosiddetta \textbf{pulitura
+      del grafo}, eliminando gli archi detti \textbf{tip} (comportando la
+    rimozione anche del nodo ``destinatario'' del grafo). Potrei avere perdita
+    di k-mer. Le tip solamente sono singoli archi ma porrebbero anche essere
+    cammini.\\
+    Si usa anche il concetto di \textbf{bubble}, come effetto degli
+    errori di sequenziamento. Una bubble è una situazione in cui si viola il
+    teorema di Eulero ma che si elimina essendo un errore di sequenziamento,
+    \textbf{risolvendo la bolla}. Per capire quale sia l'errore di
+    sequenziamento sfrutto il fatto che ho più read che coprono la stessa
+    porzione, scegliendo la base che è più frequente. \textbf{Il $k$ condiziona
+      le bolle oltre che alla connettività del grafo (\textit{se è troppo grande
+        rischio di non avere un grafo connesso})}.\\
+    Spesso si ha anche lo \textbf{scaffolding} per ottenere la connettività
+  \end{itemize}
+  \item trovo il vertice ``\textit{head}'' (l'unico che non ha vertici entranti)
+  e il vertice ``\textit{tail}'' (l'unico che non ha vertici uscenti), che
+  saranno inizio e fine del cammino di Eulero
+  \item si estrae il cammino di Eulero
+\end{itemize}
+\begin{esempio}
+  Vediamo un esempio di tip, con le tip in rosso:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/gra9.pdf}
+  \end{figure}
+  quindi gli archi in rosso e i nodi a cui puntano possono essere rimossi.\\
+  Vediamo un esempio di bubble. Ipotizzo di avere:
+  \[F=\{acgtatg, acgaatg\}\]
+  Notiamo quindi che:
+  \[acg\mathbf{t}atg\]
+  \[acg\mathbf{a}atg\]
+  Ma sappiamo che, tra le varie read, la $t$ occorre molto più frequentemente
+  della $a$ in quella posizione.
+  Si assuma di avere $k=3$. Ho quindi, con la bolla (notando come la sua
+  presenza impedisce di avere un cammino Euleriano) segnalata dall'ovale:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/gra10.pdf}
+  \end{figure}
+  (dove si nota come la $k$ influisca sulla natura della bolla).\\
+  Avendo però che la $t$ occorre più frequentemente in quelle posizioni posso
+  rimuovere il cammino con gli archi rossi e i due nodi centrali.
+\end{esempio}
+\begin{esempio}
+  Sia:
+  \[F=\{atgcc, caatg, gcgtt\}\]
+  e sia $k=3$.\\
+  Avendo lo spettro:
+  \[\{atg, tgc, gcc, caa, aat, atg, gcg, cgt, gtt\}\]
+  ho l'insieme dei k-mer, ovvero l'insieme degli archi del grafo,  è:
+  \[E=\{atg, tgc, gcc, caa, aat, gcg, cgt, gtt\}\]
+  Genero quindi i prefissi e i suffissi di lunghezza $k-1$ di ogni k-mer:
+  \[\{at,tg,tg,gc,gc,cc,ca,aa,aa,at,at,tg,gc,cg,cg,gt,gt,tt\}\]
+  e quindi l'insieme dei vertici è:
+  \[V=\{at,tg,gc,cc,ca,aa,cg,gt,tt\}\]
+  Avendo quindi il grafo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gra7.pdf}
+  \end{figure}
+  \textbf{Le etichette degli sono per pura comprensione}.\\
+  Bisogna quindi capire se esiste un cammino di Eulero. Purtroppo si hanno i
+  vertici con $tt$ e con $cc$ che creano problemi. Inoltre il vertice $gc$ non è
+  bilanciato. Quindi il grafo non ammette cammini di Eulero.\\
+  Elimino quindi un arco ``problematico'', quello tra $gc$ e $cc$, ottenendo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gra8.pdf}
+  \end{figure}
+  Dove ho un cammino Euleriano, partendo dal vertice $ca$ e arrivando al vertice
+  $tt$. Si compone così la superstringa, ovvero l'assemblaggio: 
+  \[s=caatgcgtt\]
+\end{esempio}
+\begin{definizione}
+  Si indica con il termine \textbf{de novo} quando si fa una cosa ``da zero''.\\
+  Ad esempio si ha il \textbf{de novo genome assembly}.
+\end{definizione}
+\begin{definizione}
+  Si indica con il termine \textbf{reference bases} quando non si fa una cosa
+  ``da zero'' ma si parte da una reference già preesistente. 
+\end{definizione}
+\section{Note extra sui Grafi}
+I grafi di assemblaggio vengono usati anche nella \textbf{metagenomica}, ovvero
+lo studio di campioni di DNA di diversi organismi assieme. Questa cosa può
+essere utile quando il campione contiene vari organismi, si pensi ad esempio
+allo studio di un campione d'acqua o allo studio di un tampone faringeo.\\
+\begin{definizione}
+  Definiamo il paradigma \textbf{overlap-layout-consesus (\textit{OLC})},
+  proposto da Eugene Myers, come il
+  paradigma per il quale si procede alla costruzione del grafo a partire da un
+  insieme di read. Tramite le read si calcola poi il grafo di overlap per poi
+  inferire il cammino, ovvero la \textbf{sequenza di consenso}. Il costo
+  computazionale di calcolo non è indifferente.\\
+  Rispetto ai grafi di De Brujin è che possono immediatamente disambiguare brevi
+  ripetizioni che i grafici di de Bruijn potrebbero risolvere solo nelle fasi
+  successive.
+\end{definizione}
+\begin{definizione}
+  Definiamo formalmente il \textbf{grafo di overlap}.\\
+  Dato un insieme di read $R$ un grafo di overlap è un grafo orientato:
+  \[G=(R,E)\]
+  dove i vertici sono le read stesse e si ha un arco tra $r_i$ e $r_j$ sse un
+  suffisso di $r_i$ è un prefisso di $r_j$, essendo in overlap. Il resto
+  dell'overlap è detto $e_{ij}$ ed etichetta l'arco (e si nota che il prefisso
+  di $r_i$ prima dell'overlap può essere usato come etichetta).
+  
+\end{definizione}
+\begin{figure}
+    \centering
+    \includegraphics[scale = 0.8]{img/olc.pdf}
+    \caption{Esempio di grafo di overlap}
+  \end{figure}
+Si ha che:
+\begin{itemize}
+  \item un cammino nel grafo di overlap rappresenta una stringa che è ottenuta
+  assemblando le read. Tale stringa è ottenuta tramite $r_1e_{i1}e_{i2}\cdots
+  e_{ik}$
+  \item se un arco $(r_i,r_j)$ è un cammino con solo due vertici è la stringa
+  $s=r_ie_{ij}$ 
+  \item  un arco $(r_i,r_j)$ è detto \textbf{riducibile} se esiste un
+  percorso da $r_i$ a $r_j$, con anche altri vertici, che rappresenta la stessa
+  stringa di $(r_i,r_j)$. Tali archi possono essere eliminati da un grafo di
+  overlap ottenendo uno \textbf{string graph}, che offre una struttura più
+  semplice e utile per la ricostruzione del genoma
+\end{itemize}
+Il grafo di overlap può essere usato per trovare le \textbf{varianti}.
+\begin{definizione}
+  Dato un insieme $R$ di read si ha che un \textbf{edge-centric De Brujin
+    Graph}:
+  \[G=(V,E)\]
+  di ordine $k$ è un grafo dove i vertici sono i vari (k-1)-mer e si ha un arco
+  tra $u$ e $v$ sse esiste un k-mer $w\in R$ tale che si il prefisso di
+  lunghezza k-1 di $w$ è uguale a $u$ e il suffisso lungo k-1 di $w$ è
+  $v$. L'arco tra $u$ e $v$ è etichettato con l'ultimo carattere di $v$.
+  
+\end{definizione}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/dbg.pdf}
+  \caption{Esempio di grafo di De Bruijn con $k=5$ edge-centric (anche se
+    rappresentato non con l'intero 5-mer ma solo con il resto).}
+\end{figure}
+Se teniamo conto che i k-mer sono ripetuti possiamo usare un
+\textbf{multigrafo}.
+\begin{definizione}
+  Un \textbf{multigrafo} è un grafo in cui gli archi sono specificati da un
+  \textbf{multinsieme}, il che significa che lo stesso arco può essere ripetuto
+  più volte.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{isola} in un grafo di De Bruijn sono un insieme di nodi
+  isolati. Sono generate da k-mer non frequenti e quindi probabilmente sono
+  errori di sequenziamento.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{tip} in un grafo di De Bruijn come un nodo che si separa
+  singolarmente con un arco dagli altri. 
+\end{definizione}
+I k-mer relativi a isole e tip vanno eliminati.\\
+Se si ha che un k-mer è troppo ripetuto si è davanti probabilmente ad una
+\textbf{ripetizione}. L'uomo ha molti geni replicati, avendo magari varie
+versioni di un certo gene. Posso avere ripetizioni corte o molto lunghe.\\
+Oltre alle bolle legate ad errori ho anche bolle legate magari al fatto che
+l'uomo è \textbf{diploide}, avendo \textbf{due copie} di ciascun cromosoma, una
+ereditata dalla madre e una dal padre, che possono avere comunque il 0.1\% di
+differenza. Le read mi arrivano in eguale proporzione dai due cromosomi, sto
+assemblando quindi due fonti in una sola sequenza. Nelle banche solitamente si
+ha comunque solo l'\textbf{allele di maggioranza} (l'\textbf{allele}, dal punto
+di vista informatico, è la base variata a livello di cromosoma). \\
+Vanno rimosse anche le \textbf{bubble} e i cammini vengono assemblate nelle
+stringhe dette \textbf{contigs}.\\
+Un assemblatore che usa i grafi di De Brujin è davvero complesso.\\
+Nell'ultimo periodo in realtà si lavora con una reference e con un file VCF
+contenente le varianti. Le read da cui si parte solitamente sono a lunghezza
+fissata. \\
+In fase di metagenomica si parte da read ``colorate'' provenienti da diversi
+organismi. Si costruisce un \textbf{grafo di De Brujin misto} da cui si riesce
+ad estrarre le sequenze delle singole specie. Per farlo si sfruttano varie
+informazioni, ad esempio la concertazione di copie di una certa read per le
+varie specie. Come informazione si usa anche il fatto che alcune specie hanno
+k-mer \textbf{unici}. \\
+Diamo uno sguardo anche ai tempi computazionali, con $n$ basi, $g$ lunghezza del
+genoma e $a$ lunghezza overlap (con ST indichiamo con \textit{suffix array}, con
+DP \textit{programmazione dinamica} e con NE \textit{senza errori}): 
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c|c}
+    &\textbf{\textit{De brujin}} &\textbf{\textit{Overlap}}\\
+    \hline
+    tempo & $O(n)$ & $O(n+a)$ ST, $O(n^2)$ DP\\                 
+    \hline
+    spazio & $O(n)$, $O(\min\{N,g\})$ NE, & $O(n+a)$
+  \end{tabular}
+\end{table}
+Normalmente il sequenziamento viene fatto tramite \textbf{elettroforesi} ma
+picchi irregolari portano sicuramente ad errori di sequenziamento.\\
+Tornando al discorso \textbf{ripetizioni} si ha che essere conferiscono
+``confusione'' all'assemblaggio.\\
+\textbf{Risentire ultimi minuti lezione 16 marzo}\\
+Potrei avere, con Illumina, buchi di read non coperti che vengono colmati in
+modo algoritmico, tramite \textbf{contigs} che si collegano in
+\textbf{supercontigs}. Questa operazione è detta \textbf{scaffolding}.
+\subsection{Sequenziamento per Ibridazione}
+\textbf{Sezione molto oscura.}\\
+Per leggere porzioni di DNA si usa il \textbf{sequenziamento per ibridazione
+  \textit{SBH}}, ad esempio per leggere le porzioni atta a capire il test di
+paternità. Viene fatta tramite \textbf{affymetrix chip}, ovvero una piastra di
+materiale plastico dove viene depositato, dentro celle, il DNA da studiare. Il
+DNA sfrutta la complementarietà delle basi e queste celle contengono particolari
+k-mer così che le celle mi restituiscono i k-mer completi, ottenuti tramite il
+processo chimico dell'ibridazione che fa attaccare basi complementari.\\
+Si ha quindi il \textbf{SBH problem}, che consiste di ricostruire una stringa
+dai suoi l-mer, con:
+\begin{itemize}
+  \item \textbf{input}: un insieme $S$ con tutti gli l-mer di una stringa $s$
+  \item \textbf{output}: una stringa $s$ tale che $Spectrum(s,l)=S$
+\end{itemize}
+Si usa il cammino Hamiltoniano per risolvere il problema oppure posso usare il
+cammino di Eulero usando i (k-1)-mer e il grafi di De Brujin.
+
+\chapter{Allineamento di Sequenze}
+L'\textbf{allineamento} è la procedura principe usata per comparare sequenze
+biologiche. \\
+Il confronto di sequenze, tramite sequenze di genomi, permette di creare
+\textbf{alberi di filogenesi}, alberi no-rooted con le specie attuali come
+foglie, che rappresentano l'evoluzione delle varie specie. La ricostruzione di
+tale albero avviene grazie al confronto, tramite allineamento, di sequenze.\\
+Confrontare le sequenze consiste nello studiare il processo di evoluzione,
+risalendo al processo evolutivo tramite le varie mutazioni del DNA.\\
+SI hanno due tipi di mutazioni:
+\begin{itemize}
+  \item a livello nucleotidio, su singole basi, che sono 
+\end{itemize}
+
+
+
+
+
+
+
+
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero
-\textbf{DNA} e \textbf{RNA}, intese come molecole biologiche che vengono
-trattate come stringhe.\\
-Il \textbf{DNA (\textit{acido desossiribonucleico})} è una molecola composta da
+\textbf{DNA} (figura \ref{fig:dna}) e \textbf{RNA}, intese come molecole
+biologiche che vengono trattate come stringhe.\\
+Il \textbf{DNA (\textit{acido deossiribonucleico})} è una molecola composta da
 nucleotidi, che è formato da:
 \begin{itemize}
-  \item il desossiribosio, uno zucchero, \textbf{D}
+  \item il deossiribosio, uno zucchero, \textbf{D}
   \item un gruppo fosfato, \textbf{p}
   \item una base azotata (Adenina, Citosina, Guanina, Timina). Citosina e Timina
-  sono dette \textbf{piramidini}, le altre due \textbf{purine}
+  sono dette \textbf{piramidine}, le altre due \textbf{purine}
 \end{itemize}
+\begin{figure}
+  \centering
+  \includesvg[scale = 0.8]{img/dna.svg}
+  \caption{Rappresentazione grafica del
+    DNA tratta da \url{https://it.wikipedia.org/wiki/DNA}} 
+  \label{fig:dna}
+\end{figure}
 Si ha la cosiddetta \textbf{direzione 5'3'} per leggere le sequenze del DNA
 (avendo la direzione posso leggere in sequenza le basi, solitamente è dal basso
 all'alto).\\
@@ -921,7 +1264,7 @@ viceversa) mentre la Citosina alla Guanina (e viceversa), questa è la
 direzione 5'3' dall'alto verso il basso l'altra lo ha dal basso all'alto (ma
 sempre da 5' a 3') e viceversa. Si legge sempre in direzione 5'3' e si hanno
 così le \textbf{due sequenze primarie appaiate}, una detta \textbf{forward
-  strand (+)} e una detta \textbf{reverse strand (-)}.\\
+  strand (+,1,+1)} e una detta \textbf{reverse strand (-,-1)}.\\
 Tra Adenina e Timina abbiamo due legami idrogeno mentre tra Citosina e Guanina
 se ne hanno tre (si richiede quindi più energia per eventualmente separare).\\
 Si ha quindi a che fare con un alfabeto $\Sigma=\{a,c,g,t\}$ o
@@ -951,7 +1294,40 @@ sempre in \textbf{singola catena}.\\
 Una \textbf{proteina} p una catena di amminoacidi e la sua sequenza primaria è
 una stringa costruita su un alfabeto di 20 simboli che rappresentano i 20
 \textbf{amminoacidi} presenti in natura.
-% aggiungere tabella amminoacidi per sfizio
+\begin{table}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline simbolo&sigla & nome \\
+    \hline A & Ala & Alanina \\
+    \hline C & Cys & Cisteina \\
+    \hline D & Asp & Acido aspartico \\
+    \hline E & Glu & Acido glutammico \\
+    \hline F & Phe & Fenilalanina \\
+    \hline G & Gly & Glicina \\
+    \hline H & His & Istidina \\
+    \hline I & Ile & Isoleucina \\
+    \hline K & Lys & Lisina \\
+    \hline L & Leu & Leucina \\
+    \hline
+  \end{tabular}
+  \begin{tabular}{|c|c|c|}
+    \hline simbolo&sigla & nome \\
+    
+    \hline M & Met & Metionina \\
+    \hline N & Asn & Asparagina  \\
+    \hline P & Pro & Prolina  \\
+    \hline Q & GIn & Glutammina \\
+    \hline R & Arg & Arginina  \\
+    \hline S & Ser & Serina  \\
+    \hline T & Thr & Treonina\\
+    \hline V & Val & Valina  \\
+    \hline W & Trp & Triptofano \\
+    \hline Y & Tyr & Tirosina \\
+    \hline
+  \end{tabular}
+  \caption{Tabella con l'elenco degli amminoacidi}
+  \label{tab:ammi}
+\end{table}
 I \textbf{geni} è il ``responsabili'' della produzione di proteine, che poi
 ``regolano'' la vita. Ogni proteina è prodotta da un gene e un gene genera più
 proteine.\textbf{ I geni sono il 10\% del genoma}, quindi solo una piccola
@@ -961,7 +1337,9 @@ gene ha un identificativo detto \textbf{HUGO NAME}, con una precisa nomenclatura
 che è ``circa'' un acronimo. Un gene può appartenere al genoma di diversi
 organismi. \\
 Sia il forward strand che il reverse strand contengono geni e gli uni non
-c'entrano con gli altri. L'uomo ha circa 20000 geni codificanti, ciascuno che
+c'entrano con gli altri (figura \ref{fig:gene}). L'uomo ha circa 20000 geni
+codificanti (più i cosiddetti \textbf{geni non codificanti} che hanno altri
+scopi), ciascuno che  
 codifica una o più proteine. Ogni cellula contiene l'intero set di geni che
 regolano la vita dell'organismo, ma nelle varie cellule si \textbf{esprime} solo
 un sotto-set di geni mentre gli altri rimangono \textbf{inattivi}, è il
@@ -974,6 +1352,13 @@ Si ha quindi:
   trascritto
   \item il trascritto porta alla proteina
 \end{enumerate}
+  \begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{img/gene.pdf}
+    \caption{Rappresentazione stilizzata dei due strand con in azzurro e rosso,
+      rispettivamente, i geni sul forward strand e sul backward strand}
+    \label{fig:gene}
+  \end{figure}
 Per determinare la sequenza primaria di DNA e RNA usiamo il sequenziamento,
 producendo varie read e procedendo poi alla ricostruzione
 \textbf{in-silico}. Posso avere due tipi di output dal sequenziamento:
@@ -983,16 +1368,117 @@ producendo varie read e procedendo poi alla ricostruzione
   coppie di sequenze che sappiamo circa quanto distavano sulla sequenza
   originale 
 \end{itemize}
-Per il sequenziamento si è usato in primis il metodo Sanger, con read lunghe
-circa 1000bp ma molto costose è la \textbf{first generation}.\\
-Si hanno poi la \textbf{Next-generation sequencing} di seconda generazione con
-read 
-tra i 100 e i 400bp con alta copertura e poco costo.\\
-Si hanno poi la \textbf{Next Next generation sequencing} con read di 10000bp ma
-di bassa qualità, è la 
+Per il sequenziamento ci sono stati vari step:
+\begin{itemize}
+  \item \textbf{first generation}, per il \textbf{metodo Sanger} nel 1975. Si
+  hanno:
+  \begin{itemize}
+    \item {\color{OliveGreen}read lunghe fino a 1000bp}
+    \item {\color{OliveGreen}elevata qualità}
+    \item {\color{Maroon}bassa coverage}
+    \item {\color{Maroon}costi elevati}
+  \end{itemize}
+  \item \textbf{second generation}, con le \textbf{Next-Generation-Sequencing
+    (\textit{NGS}) technologies}, dagli inizi degli anni 2000. Si
+  hanno:
+  \begin{itemize}
+    \item {\color{Maroon}read corte, da 100bp a 400bp}
+    \item {\color{OliveGreen}alta coverage}
+    \item {\color{OliveGreen}bassi costi}
+  \end{itemize}
+  Tra le tecnologie \textit{NGS} abbiamo:
+  \begin{itemize}
+    \item Illumina (Solexa) con:
+    \begin{itemize}
+      \item HiSeq System 
+      \item Genome analyzer lix
+      \item \textbf{MySeq}, che produce read di 300bp, con il 99.90\% di
+      accuratezza, producendo 25 milioni di read per run
+    \end{itemize}
+    \item Ion Torrent-Life technologies con:
+    \begin{itemize}
+      \item \textbf{Personal Genome Machine (\textit{PGM})}, che produce read di
+      200bp, con il 99.00\% di accuratezza, producendo 11 milioni di read per
+      run  
+      \item Proton 
+    \end{itemize}
+  \end{itemize}
+  Per indicare i dati prodotti diciamo \textbf{NGS data}
+  \item \textbf{third generation}, con le \textbf{Next
+    Next-Generation-Sequencing technologies}, più avanti negli anni 2000. Si
+  hanno:
+  \begin{itemize}
+    \item {\color{OliveGreen}read lunghe fino a 10000bp}
+    \item {\color{OliveGreen}qualità relativamente bassa}
+  \end{itemize}
+  Tra le tecnologie \textit{Next-Next} abbiamo:
+  \begin{itemize}
+    \item Pacific Biosciences con PacBio RS
+    \item Oxford Nanopore Technologies con:
+    \begin{itemize}
+      \item GridION System 
+      \item MinION
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+\section{Formato FASTA/FASTQ}
+Vediamo il formato standard per sequenze primarie nucleotidiche:
+\begin{itemize}
+  \item \textbf{FASTA} per le sequenze ottenute al metodo Sanger, quindi con
+  pochi errori 
+  \item \textbf{FASTQ} per le sequenze ottenute con NGS. È un'evoluzione del
+  FASTA in cui si associa alle sequenze dei reads un valore di qualità, uno per
+  base 
+\end{itemize}
+Il FASTA ha le seguenti caratteristiche:
+\begin{itemize}
+  \item è un plain text
+  \item ha la sequenza primaria (ma anche sequenze di amminoacidi) più
+  eventuali informazioni extra a scelta. Si ha:
+  \begin{itemize}
+    \item un header introdotto da $>$ con tutte le informazioni extra in una
+    sola riga (tra cui, volendo, cromosoma di partenza, indici di inizio e fine
+    per specificare la porzione, ricordando che le posizioni sono 1-based, la
+    ``release'', ad esempio tramite la sigla \textit{GRC}, lo strand tramite +1
+    e -1 etc$\ldots$)  
+    \item la sequenza genomica separata in righe di 60 o 80 bp (quindi dopo 60 o
+    80 simboli vado a capo)
+  \end{itemize}
+  \item è stato pensato come formato di input del software FASTA per
+  l'allineamento
+  \item ha come estensione \texttt{.fa} o \texttt{.fasta}
+\end{itemize}
+\section{ENSEMBL}
+ENSEMBL è il \textbf{genome browser} attualmente più usato. Un genome browser è
+un database con associata un'interfaccia di esplorazione. È un progetto partito
+nel 1999 da \textbf{EMBL (\textit{European Molecular Biology Laboratory})} e dal
+\textbf{Wellcome Trust Sanger Center}. Dal 2017 fa capo a 
+\textbf{EMBL-EBI (\textit{European Bioinformatics Institute})}, sempre di
+\textbf{EMBL}. Si hanno i dati di 250 specie di cordati, tra cui uomo, topo,
+ratto e 
+zebrafish. Si hanno vari livelli di informazione (ovvero di annotazioni), tra
+cui; genoma, gene, proteina etc$\ldots$\\
+I genome browser sono consistenti rispetto a progetti di ricerca e
+analisi genomiche. SI può accedere, tra le altre cose a:
+\begin{itemize}
+  \item la sequenza del genoma di una data specie o dei singoli cromosomi
+  \item le sequenze dei geni annotati su di un genoma e i relativi trascritti
+  espressi
+  \item le variazioni annotate rispetto al genoma di riferimento che
+  caratterizzano i singoli individui  
+\end{itemize}
+\textbf{Le coordinate sono sempre rispetto alla catena forward}.\\
+ENSEMBL si può raggiungere tramite \url{www.ensembl.org}.\\
+Si ha anche il formato \textbf{EMBL} stesso, pensato originariamente per
+memorizzare sequenze 
+nucleotidiche in banche dati che non erano db relazionali ed erano senza
+accesso. Il file poteva essere scaricato tramite un ID e basta (era poi scopo
+del biologo e dell'informatico riutilizzarlo). Il file EMBL è pieno di
+informazioni, con in fondo la sequenza nucleotidica. Banche dati così ci sono
+ancora, come l'\textbf{ENA (\textit{European Necleotide Archive})}.
 \end{document}  
-% LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP
+% LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Brujin
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
-% LocalWords:  superstringa sottostringa
+% LocalWords:  superstringa sottostringa Euleriano scafholding
 
-\message{ !name(bio.tex) !offset(-998) }
+\message{ !name(bio.tex) !offset(-1484) }

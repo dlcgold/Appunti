@@ -234,8 +234,16 @@ Avendo quindi la probabilità di una causa dato un effetto.
 \textit{Dato l'effetto modello la causa}.\\
 Se non si ha una delle due probabilità a priori posso stimare per poi
 normalizzare. In altri termini il denominatore $P(D)$ è spesso solo una quantità
-di normalizzazione, essendo spesso difficile da stimare. 
-
+di normalizzazione, essendo spesso difficile da stimare. \\
+Le probabilità possono essere definite su due approcci:
+\begin{itemize}
+  \item \textbf{approccio frequentista o oggettivista} che considera la
+  probabilità come un'entità misurabile legata alla frequenza di accadimento,
+  come si fa ne machine learning
+  \item \textbf{approccio soggettivista} che considera la
+  probabilità come una misura del grado di attesa soggettivo del verificarsi di
+  un evento, come si fa nel corso di statistica
+\end{itemize}
 
 \chapter{Modelli Probabilistici}
 Nel passato si sono usati \textbf{sistemi a regole}, dove codificando tutto
@@ -331,5 +339,139 @@ da:
   \item combinazioni di sorgenti di evidenza
 \end{itemize}
 In ogni caso si hanno quindi evidenze empiriche.\\
+Vediamo ora il rapporto tra i \textbf{modelli causali} e la \textbf{regola di
+  Bayes}.\\
+Ricordiamo che per Bayes si ha:
+\[P(causa|effetto)=\frac{P(effetto|causa)P(causa)}{P(effetto)}\]
+Con le reti causali vorremmo risalire dall'effetto alla causa ma normalmente si
+hanno più informazioni su $P(causa|effetto)$ che su $P(effetto|causa)$.\\
+Conoscendo $P(effetto|causa)$ per ogni causa posso evitare di calcolare
+$P(effetto)$, infatti, dato $c=causa$ ed $e=effeto$:
+\[P(c|e)=\frac{P(e|c)P(c)}{P(e)}=\frac{P(e|c)P(c)}{\sum_{\forall h\in
+      causa}P(e|h)P(h)}\] 
+Vediamo un po' di notazione:
+\begin{itemize}
+  \item con $<\top,\bot>$ indichiamo una distribuzione di probabilità
+  \item $\alpha$ costante di normalizzazione per trascurare il denominatore di
+  Bayes (lo sostituisce). È detto \textbf{fattore di normalizzazione}
+\end{itemize}
+\begin{esempio}
+  Vediamo un esempio:
+  \[P(meningite=<\top,\bot>|s=\top)=\alpha<P(s|m)P(m),P(s|\neg m)P(\neg m)>\]
+\end{esempio}
+SI assume che l'effetto deve essere scaturito a causa di una delle cause
+ipotizzate e non altre. A volte è più difficile calcolare $P(effeto|causa)$ per
+tutte le cause indipendentemente che calcolare direttamente $P(effetto)$.\\
+Dato:
+\[P(A|B)=\alphaP(B|A)P(A)\]
+si ha che:
+\begin{itemize}
+  \item $P(A)$ è la probabilità a priori
+  \item $P(B|A)$ probabilità a posteriori
+  \item $P(B|A)$ verosimiglianza
+\end{itemize}
+Se la probabilità a priori è nulla si assegna una probabilità $\varepsilon$
+(anche solo per un'osservazione) a tutti gli eventi che riteniamo possibili,
+anche se ancora non sono accaduti. Se un evento può realizzarsi deve avere una
+probabilità a priori, anche se molto piccola. Bisogna poi riscalare la
+probabilità di tutti per poter includere anche questi eventi
+rari. \textbf{Esempi su slide}.\\
+Vediamo quindi come si \textbf{combinano le evidenze}. Qualora si abbiano più
+effetti il modello diventa più complesso. Per $n$ effetti arei $2^n$ possibili
+combinazioni di evidenze da modellate. Si utilizza quindi la \textbf{catena di
+  probabilità condizionali}, che, per esempio, per 4 eventi è:
+\[P(A,B,C,D)=P(A|B,C,D)P(B|C,D)P(C|D)P(D)\]
+ottenuta sfruttando la regola del prodotto:
+\[P(A,B)=P(A|B)P(B)\]
+La catena di probabilità condizionali è utile per rappresentare la probabilità
+congiunta in quanto permette una rappresentazione più compatta (potendo mettere
+anche insieme diverse fonti).\\
+\begin{definizione}
+  Considerato un insieme di eventi $E_1,\ldots E_n$ e tutte le possibili
+  combinazioni dei loro valori $\top$ e $\bot$. Supponiamo di conoscere tutti i
+  valori $P(E_1,\ldots,E_n)$.  Supponiamo che un sottoinsieme di questi presenti
+  un valore definito, ovvero $E_j=e=\top$ allora chiamo \textbf{inferenza
+    probabilistica} il processo di calcolo del valore:\\
+  \[P(E_i=\top|E_i=e)\]
+  In generale l'inferenza probabilistica non è trattabile con questo metodo
+  avendo $2^n$ probabilità congiunte $P(E_1,\ldots E_n)$.\\
+  Si ragiona quindi spesso tramite \textbf{metodi approssimati/qualitativi},
+  avendo magari centinaia di evidenze.
+\end{definizione}
+\textbf{Esempio su slide}.\\
+
+Per risolvere il problema viene anche incontro l'\textbf{indipendenza
+  condizionata}.\\
+Due eventi possono diventare indipendenti data la presenza di un altro evento,
+che è causa comune di entrambi. Si passa da una dipendenza causale diretta alla
+dipendenza dovuta ad un effetto causale indiretto (???). Se si conosce la causa
+i due eventi sono indipendenti se non la si conosce potrebbero essere
+dipendenti.
+\begin{definizione}
+  Definiamo la \textbf{regola di marginalizzazione} per due insiemi di variabili
+  $Y$ e $Z$ come:
+  \[P(Y)=\sum_{z\in Z}P(Y,z)\]
+  In alternativa uso le probabilità condizionate usando la \textbf{regola del
+    condizionamento}:
+  \[P(Y)=\sum_{z\in Z}P(Y|z)P(z)\]
+  Potrei anche usare l'\textbf{inferenza per enumerazione} dove semplicemente
+  sommo i valori della tabella rispetto a ciò che mi interessa (se voglio
+  $P(c=\top,m=\top)$ sommo tutti i valori con almeno uno dei due nella tabella).
+\end{definizione}
+\textbf{Su slide esempio di conto per tutti con anche conto per $\alpha$}.\\
+Un principio generale di computazione è:
+\begin{itemize}
+  \item specificare la variabile oggetto della ``query''
+  \item fissare lo stato delle variabili per le quali è disponibile l'evidenza
+  \item calcolare la probabilità a posteriori sommando
+  rispetto alle variabili sulle quali non è disponibile evidenza 
+\end{itemize}
+Quindi indiciamo con $x$ tale variabile oggetto di query. Data la realizzazione
+congiunta $e(evidenza)$ per un sottoinsieme $E$ di variabili dette
+\textbf{variabili con evidenza} si indica con $Y$ l'insieme restanti
+variabili. $Y$ è detto insieme delle variabili senza evidenza. L'intero insieme
+delle variabili del problema è quindi:
+\[\{X\}\cup E \cup Y\]
+La distribuzione marginale a posteriori di $X$ è ottenuto per marginalizzazione
+rispetto a $Y$:
+\[P(X|E=e)=\alpha P(X,E=e)=\alpha\sumP(X,E=e,Y=y)\]
+Posso quindi fare query per qualsiasi variabili avendo la tabella delle
+probabilità congiunte ma tale metodo non è efficiente.
+\subsection{Reti Bayesiane}
+Le relazioni di indipendenza condizionata può essere illustrata da un grafo,
+dove un nodo è collegato ad un altro con arco diretto sse il primo è causa
+dell'altro:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/b.pdf}
+\end{figure}
+\begin{esempio}
+  Vediamo un esempio:
+  \[P(carie|mal\_di\_denti\land incastro)=\alpha P(|mal\_di\_denti\land
+    incastro|carie)P(carie)\]
+  \[=\alpha P(|mal\_di\_denti|carie)P(incastro|carie)P(carie)\]
+\end{esempio}
+\textbf{Ulteriori esempi su slide}.\\
+\textit{Le probabilità congiunte le posso rappresentare in una tabella.}\\
+Le \textbf{reti Bayesiane} sfruttano grafi diretti aciclici per rappresentare le
+assunzioni di indipendenza condizionale tra variabili in modo chiaro ed
+efficiente. Un arco diretto tra $A$ e $B$ rappresenta una relazione di
+causalità: $A$ influenza $B$. Si ha quindi che ``pattern'' di ragionamenti sono
+un cammino tra un nodo e un altro.\\
+Si passa da $O(2^n)$ a $O(n)$, per $n$ numero di effetti.
+\begin{definizione}
+  Si ha che l'evento $A$ è condizionalmente indipendente dall'evento $B$ se,
+  dato l'evento $C$:
+  \[P(A|B,C)=P(A|C)\]
+  ovvero la conoscenza di $B$ non porta a nessuna ulteriore variazione della
+  probabilità di $A$ rispetto a quella dell'avverarsi di $C$. \\
+  Dall'indipendenza di $A$ e $B$ dato $C$ si ha che:
+  \[P(A,B|C)=P(A|C)P(B|C)=P(A,B|C)\]
+  Se $C$ è un insieme vuoto ho, non avendo correlazione:
+  \[P(A,B)=P(A)P(B)\]
+\end{definizione}
+Le reti Bayesiane quindi analizzano le cause dirette e indirette.
+
 \end{document}  
-% LocalWords:  clock  Bayesana machine learning Bayes
+% LocalWords:  clock  Bayesana machine learning Bayes riscalare
+% LocalWords:  condizionalmente

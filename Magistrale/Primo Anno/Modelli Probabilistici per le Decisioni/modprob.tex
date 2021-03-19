@@ -14,7 +14,7 @@
 \usepackage{rotating}
 \usepackage{verbatim}
 \usepackage[safe,extra]{tipa}
-%\usepackage{showkeys}
+% \usepackage{showkeys}
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -44,16 +44,16 @@
   /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every
   relationship /.style={draw=Chartreuse2,
     fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
-  \usetikzlibrary{arrows.meta}
-  \usetikzlibrary{decorations.markings}
-  \usetikzlibrary{arrows,shapes,backgrounds,petri}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows,shapes,backgrounds,petri}
 \tikzset{
   place/.style={
-        circle,
-        thick,
-        draw=black,
-        minimum size=6mm,
-    },
+    circle,
+    thick,
+    draw=black,
+    minimum size=6mm,
+  },
   transition/.style={
     rectangle,
     thick,
@@ -67,8 +67,8 @@
     fill=black,
     minimum height=8mm,
     inner xsep=2pt
-    }
-  } 
+  }
+} 
 \usetikzlibrary{automata,positioning,chains,fit,shapes}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -471,8 +471,189 @@ Si passa da $O(2^n)$ a $O(n)$, per $n$ numero di effetti.
   Se $C$ è un insieme vuoto ho, non avendo correlazione:
   \[P(A,B)=P(A)P(B)\]
 \end{definizione}
-Le reti Bayesiane quindi analizzano le cause dirette e indirette.
-
+Le reti Bayesiane quindi analizzano le cause dirette e indirette permettendo di
+rappresentare in modo efficiente la distribuzione congiunta di probabilità,
+tramite dipendenza e indipendenza condizionale.\\
+L'inferenza basata su enumerazione è in $O(d^n)$ sia in spazio che tempo con:
+\begin{itemize}
+  \item $d$ massima cardinalità del supporto (se binario $d=2$)
+  \item $n$ numero di variabili
+\end{itemize}
+è questo non va bene.\\
+Una distribuzione congiunta può essere rappresentata come produttoria di $n$
+valori di probabilità di \textbf{eventi indipendenti}, passando da un arrivando
+a $O(n)$, avendo:
+\[P(C_1,\ldots C_n)=P(C_1)\cdots \ldots P(C_n)\]
+Rappresentando quindi, tramite l'indipendenza delle variabili, in modo compatto
+una distribuzione congiunta. \\
+Nel mondo reale però non si ha indipendenza assoluta tra le variabili e spesso
+anche il gran numero di variabili rende difficile la specifica di una
+distribuzione congiunta. \\
+Si usa quindi l'indipendenza condizionale, sfruttando le variabili
+condizionalmente indipendenti. \\
+Per scrivere la definizione congiunta usiamo la \textbf{chain rule}.
+Dato $P(X,Y,Z)$ si ha che, avendo $X$ e $Y$ indipendenti:
+\[P(X,Y,Z)=P(X|Y,Z)P(Y,Z)=P(Z|Y,Z)P(Y|Z)P(Z)=P(X|Z)P(Y|Z)P(Z)\]
+riducendo quindi il numero di valori di probabilità necessari al conto.\\
+Le asserzioni di indipendenza condizionate si basano sul dominio in analisi e
+consente di limitare le complessità del modello. Il caso in cui tutte le
+variabili sono indipendenti ho la fattorizzazione delle probabilità delle
+singole variabili ed è un caso specifico di questo discorso.\\
+Ricordando che per Bayes:
+\[P(Y|X)=\frac{P(X|Y)P(Y)}{P(X)}=\alpha P(X|Y)P(Y)\]
+calcolando la probabilità della causa data la conoscenza dello stato degli
+effetti. Quindi, avendo $X$ e $Y$ indipendenti:
+\[P(X|Y,Z)=\alpha P(X,Y|Z)P(Z)=\alpha P(X|Z)P(Y|Z)P(Z)\]
+Avendo graficamente $P(X,Y,Z)=\alpha P(X|Z)P(Y|Z)P(Z)$:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/b2.pdf}
+\end{figure}
+Possiamo quindi parlare meglio delle \textbf{reti Bayesiane}, spesso indicata
+con:
+\begin{itemize}
+  \item \textbf{Bayesian Belief Network, BBN}
+  \item \textbf{Probabilistic Network, PN}
+  \item \textbf{Causal Network, CN}
+\end{itemize}
+Tali reti appartengono alla classe dei \textbf{modelli
+  grafico-probabilistici}.\\ 
+\begin{definizione}
+  Una \textbf{rete Bayesiana} è un grafo cui nodi sono annotati da una
+  informazione quantitativa, tramite tabelle di probabilità condizionata, e i
+  cui archi definiscono dipendenza e indipendenza tra le variabili dei nodi. Si
+  hanno solo archi orientati. Se $X$ è causa diretta di $Y$ ho un arco tra $X$ e
+  $Y$. $X$ è detto genitore e $Y$ figlio. Le variabili possono essere sia
+  continue che discrete.\\
+  La topologia della rete e le probabilità condizionate dei nodi dati genitori
+  sono sufficienti a specificare (implicitamente) la distribuzione congiunta di
+  tutte le variabili.\\
+  Uno o più nodi isolati segnalano indipendenza assoluta. Due figli di uno
+  stesso genitore segnalano che sono condizionalmente
+  indipendenti. Nell'immagine $X$ e $Y$ sono condizionalmente indipendenti, $W$
+  è indipendente dalle altre 3 variabili, $Z$ è causa diretta di $X$ e $Y$
+  mentre tra queste ultime non esiste una relazione diretta di causalità:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.9]{img/b3.pdf}
+  \end{figure}
+  Tale grafo non contiene cicli e quindi si parla di \textbf{Directed Acyclic
+    Graph (\textit{DAG})}, non essendo possibile che una variabile causi se
+  stessa. 
+\end{definizione}
+Come detto la componente quantitativa è costruita da un insieme di tabella di
+probabilità condizionale. Ogni nodo ha associata quindi una \textit{Conditioned
+  Probability Table (\textit{CPT})} che traduce l'impatto dei genitori sulla
+variabile stessa.\\
+\textbf{Su slide esempio esteso.}\\
+Ricapitolando:
+\begin{itemize}
+  \item ogni nodo ha CPT
+  \item ogni riga della CPT somma ad uno (e se ho un solo valore non scrivo sia
+  il vero che il falso visto che posso fare $1-$)
+  \item la CPT di una variabile booleana con $K$ variabili genitori contiene
+  $2^K$ valori che possono essere specificati indipendentemente
+  \item una variabile senza genitori ha una sola riga con i valori di
+  probabilità a priori per ogni possibile valore che la variabile può assumere 
+\end{itemize}
+Possiamo dire che si hanno due chiavi di lettura dal punto di vista della
+semantica, semanticamente equivalenti: 
+\begin{itemize}
+  \item la rete rappresenta una \textbf{distribuzione congiunta di
+    probabilità}. Questa 
+  lettura è utile per progettare e implementare procedure di inferenza. Per
+  questa lettura dice che ogni rete costituisce una descrizione completa del
+  dominio che rappresenta e pertanto ogni elemento della distribuzione di
+  probabilità congiunta può essere calcolato a partire dall’informazione
+  contenuta nella rete. Un generico elemento della distribuzione di probabilità
+  congiunta è associato ad una realizzazione congiunta delle variabili (nodi)
+  presenti nella rete:
+  \[P(X_1=x_1\land\cdots\land X_n=x_n)=P(x_1,\ldots
+    ,x_n)=\prod_{i=1}^nP(x_i|parents(X_i))\]
+  che è detta \textbf{formula di fattorizzazione}.\\
+  Avendo che con le maiuscole abbiamo le variabili (anche per $Parents$) e con
+  le minuscole le realizzazioni (anche per $parents$). Si ha quindi che ogni
+  elemento della distribuzione congiunta è rappresentato come prodotto di
+  opportune componenti delle CPT che costituiscono quindi una rappresentazione
+  decomposta della distribuzione di probabilità congiunta. Per questa
+  rappresentazione posso usare le reti per rispondere a qualsiasi query relative
+  al dominio che descrive tramite marginalizzazioni.\\
+  \textbf{Esempio su slide}.
+  
+  \item la rete codifica un \textbf{insieme di relazioni di indipendenza
+    condizionale}. Questa lettura è utile per costruire un modello di rete
+  Bayesiana.
+\end{itemize}
+Sfrutto la formula di fattorizzazione per determinate la
+componente topologica della rete. Si ricorda che per la \textbf{cchin rule}:
+\small{\[P\left(x_{1}, \ldots, x_{n}\right)=P\left(x_{n} \mid x_{n-1}, \ldots,
+      x_{1}\right) \cdot P\left(x_{n-1} \mid x_{n-2}, \ldots, x_{1}\right) \cdot
+    \ldots \cdot P\left(x_{2} \mid x_{1}\right) \cdot
+    P\left(x_{1}\right)\]\[
+    =\prod_{i=1}^n P\left(x_{i} \mid x_{n-1}, \ldots,
+      x_{1}\right)\]}
+Noto che tale formula è confrontabile con la formula di fattorizzazione e ho
+che, a patto che $Parents(X_1)\subseteq \{x_{i-1},\ldots,x_1\}$:
+\[\mathbf{P}\left(x_{i} \mid x_{i-1}, \ldots,
+    x_{1}\right)=\mathbf{P}\left(x_{i} \mid \text { parents
+    }\left(X_{i}\right)\right)\] 
+Quindi una Rete Bayesiana rappresenta correttamente un dominio solo a
+condizione che ogni nodo risulti condizionalmente indipendente dai suoi
+predecessori, per un dato ordinamento, dati i suoi genitori. Pertanto, per
+costruire una Rete Bayesiana che abbia la corretta struttura del dominio da
+modellare è necessario scegliere, per ogni nodo, i nodi genitore in modo che
+tale proprietà risulti verificata. Quindi i genitori di $X_i$ devono essere
+scelti da $\{X_1,\ldots,X_{i-1}\}$.\\
+Si ha quindi la seguente procedura di costruzione incrementale della
+componente topologica;
+\begin{enumerate}
+  \item Si seleziona un insieme di variabili $\{X_1,\ldots, X_n\}$ per
+  descrivere il modello
+  \item scelgo un ordinamento per le variabili $\{X_{(1)},\ldots,
+  X_{(n)}\}$. Con un ordinamento sbagliato arrivo a definire reti sbagliate o
+  reti più complesse del necessario, magari con informazioni ridondanti
+  \item inizializzo i nodi aggiunti alla rate partendo da $i=1$
+  \item si seleziona la variabile $X_{(i)}$ alla rete, si pone
+  $Parents(X_{(i)})$ uguale all’insieme minimale di nodi, attualmente
+  appartenenti alla rete ${X_{(1)},\ldots, X_{(i-1)}}$, che soddisfa la
+  proprietà di indipendenza condizionale:
+  \[\mathbf{P}\left(X_{(i)} \mid X_{(i-1)}, \ldots,
+      X\right)=\mathbf{P}\left(X_{(i)} \mid\right. \text { Parents
+    }\left(X_{(i)}\right)\]
+  per poi calcolare la CPT di $X_{(i)}$
+  \item tengo conto del nodo aggiunto nel conto totale dei nodi e faccio
+  i++. Se ho finito le variabili termino altrimenti torno a 4)
+\end{enumerate}
+Una rete è più compatta, solitamente, dell'intera distribuzione di probabilità
+congiunta e tale compattezza è un esempio della proprietà dei \textbf{sistemi
+  strutturati localmente o sparsi}, dove ogni sotto-componente interagisce solo
+con un numero limitato di 
+altre componenti, indipendentemente dal numero totale di componenti del
+sistema. La strutturazione locale normalmente ha crescita lineare e non
+esponenziale (mediamente con una rete Bayesiana è ragionevole pensare che ogni
+variabile sia influenzata da al massimo $k$, con $k$ costante, variabili).\\  
+Nel caso in cui si consideri una Rete Bayesiana costituita da $n$ variabili
+(nodi) booleane. Si ha che la quantità di informazione per specificare una CPT è
+limitata superiormente da $2^k$ per cui la rete completa richiede $n\cdot 2^k$
+cifre contro i $2^n$ dell'intera distribuzione di probabilità congiunta.\\
+Si hanno quindi vari tipi di rete:
+\begin{itemize}
+  \item \textbf{rete completamente connessa (\textit{fully connected network})},
+  dove ogni variabile può essere potenzialmente influenzata da tutte le altre e
+  quindi specificare una CPT richiede le stesse informazioni della distribuzione
+  congiunta
+  \item \textbf{rete con relazioni di causalità tenui}
+  (\textbf{\textit{risentire}}) 
+\end{itemize}
+Anche in un dominio strutturato localmente la costruzione di una Rete Bayesiana
+non è semplice, volendo un numero limitato di influenze per ogni variabile e che
+la topologia della rete rifletta le relazioni di influenza diretta. La procedura
+di costruzione di una Rete Bayesiana funziona in modo tale che quando si giunge
+ad aggiungere un nodo, i nodi candidati ad essere suoi genitori, ovvero i nodi
+che lo influenzano direttamente o indirettamente, siano già stati aggiunti alla
+corrente struttura della rete. Il corretto ordine comporta che si devono prima
+stabilire le cause radice per poi aggiungere quelle variabili che da loro
+vengono influenzate, procedendo fino alle foglie che non sono causa di nulla. 
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare
 % LocalWords:  condizionalmente

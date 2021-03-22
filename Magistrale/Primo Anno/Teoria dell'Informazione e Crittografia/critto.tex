@@ -2170,7 +2170,8 @@ Si vuole costruire un codice binario per un certo $q$.
   infatti esattamente due figli).
 \end{esempio}
 \textbf{Su file esercizi esempio con codice non binario}.\\
-Si sta parlando appunto di \textbf{codici a blocchi accorciati}.
+Si sta parlando appunto di \textbf{codici a blocchi accorciati}.\\
+\textbf{Manca una parte credo}
 \subsection{Disuguaglianza di McMillan}
 \begin{teorema}[Disuguaglianza di McMillan]
   Data una sorgente $S=\{s_1,\ldots,s_q\}$ si ha che una condizione necessaria e
@@ -2216,6 +2217,8 @@ Si sta parlando appunto di \textbf{codici a blocchi accorciati}.
   Se $K>1$ ad un certo punto la curva supera $n\cdot l$. Per $K<1$ sicuramente
   ho punti per cui è $<n\cdot l$ e quindi si arriva a dire che:
   \[K^n<n\cdot l\implies K\leq 1\]
+  dimostrando la tesi.\\
+  
   La \textbf{seconda parte} è che se $K\leq 1$ allora esiste un codice r-ario
   per $S$ univocamente decodificabile con lunghezze $l_1,l\dots,l_q$. Per Kraft,
   avendo $K\leq 1$ esiste un codice istantaneo per $S$, r-ario, con tali
@@ -2223,6 +2226,197 @@ Si sta parlando appunto di \textbf{codici a blocchi accorciati}.
   avendo quindi dimostrato la tesi.
 \end{proof}
 Ma avendo che i codici univocamente decodificabili sono meno utili di quelli
-istantanei vengono trascurati.
+istantanei vengono trascurati, considerando che dovrei fare la ``stessa
+fatica''.\\
+Abbiamo visto comunque che non si hanno indicazioni in merito a come fare le
+codeword e abbiamo anche trascurato finora l'uso delle probabilità.
+\section{Codici di Huffman}
+I codici di Huffman sono ottimali, ovvero raggiungono il minimo valore possibile
+della lunghezza media $L$:
+\[L=\sum_{i=1}^q p_i\cdot l_i\]
+\begin{teorema}
+  In input abbiamo quindi il codice $S$, con $s_i,\ldots s_q$, con probabilità
+  $p_1,\ldots, p_q$. Il codice di Huffman ci restituisce in output sia le
+  lunghezze $l_i$ che le codeword $\gamma_i$.\\
+  Bisogna prima fare qualche ragionamento.\\
+  Si supponga di avere i simboli in ordine di probabilità, avendo:
+  \[p_1\leq p_2\leq \cdots\leq p_q\]
+  ma quindi si ha che:
+  \[l_1\leq l_2\leq \cdots \leq l_q\]
+  perché altrimenti non avrei il codice ottimale.
+\end{teorema}
+\begin{proof}
+  Si supponga infatti di avere
+  $p_m>p_n$ e $l_m>l_n$. Studio quindi il contributo dei due simboli:
+  \[p_m\cdot l_m+p_n\cdot l_n\]
+  Scambio in modo che $p_m$ riceva la codeword $l_n$:
+  \[p_m\cdot l_n+p_n\cdot l_m\]
+  Faccio la differenza:
+  \[(p_m\cdot l_n+p_n\cdot l_m)-(p_m\cdot l_m+p_n\cdot l_m)\]
+  \[=p_m\cdot (l_n-l_m)-p_n\cdot (l_n-l_m)\]
+  \[=(p_m-p_n)\cdot(l_n-l_m)\]
+  Ma abbiamo che $p_m>p_n$ e quindi $(p_m-p_n)>0$ e per lo stesso ragionamento,
+  avendo $l_m>l_n$, $(l_n-l_m)<0$. Si ha quindi che:
+  \[(p_m\cdot l_n+p_n\cdot l_m)-(p_m\cdot l_m+p_n\cdot l_m)<0\]
+  e quindi:
+  \[p_m\cdot l_n+p_n\cdot l_m<[p_m\cdot l_m+p_n\cdot l_n\]
+  perdendo quindi l'ottimalità del codice. 
+\end{proof}
+Deve quindi valere:
+\[p_1\leq p_2\leq \cdots\leq p_q\]
+e
+\[l_1\leq l_2\leq \cdots \leq l_q\]
+Si ha quindi un algoritmo greedy per ottimizzare la lunghezza media. Non
+sappiamo se si ha un matroide ma si vedrà che tale algoritmo porta
+all'ottimo. Vediamo in primis un esempio.
+\begin{esempio}
+  Vediamo un esempio di questo algoritmo:\\
+  Presa una sorgente con $5$ simboli con le annesse probabilità (sono già
+  ordinati): 
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_2$ con $p_2=0.2$
+    \item $s_3$ con $p_3=0.2$
+    \item $s_4$ con $p_4=0.1$
+    \item $s_5$ con $p_5=0.1$
+  \end{itemize}
+  Si assuma $r=2$.\\
+  Prendo i due simboli meno probabili e li unisco creando un nuovo simbolo
+  ``fittizio'' con probabilità pari alla somma dei due (nel nostro caso quindi
+  $0.1+0.1=0.2$). Si ha quindi, mantenendo sempre l'ordine (metto il simbolo
+  combinato in coda a parità di probabilità):
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_2$ con $p_2=0.2$
+    \item $s_3$ con $p_3=0.2$
+    \item $s_{4,5}$ con $p_{4,5}=0.2$
+  \end{itemize}
+  Avendo ora una nuova sorgente di 4 simboli (quindi ipoteticamente più semplice
+  da codificare di quella da $5$).\\
+  Itero facendo la stessa cosa:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_{3,4,5}$ con $p_{3,4,5}=0.4$
+    \item $s_2$ con $p_2=0.2$
+  \end{itemize}
+  Avendo ora 3 simboli. Proseguo:
+  \begin{itemize}
+    \item $s_{2,3,4,5}$ con $p_{2,3,4,5}=0.6$
+    \item $s_1$ con $p_1=0.4$
+  \end{itemize}
+  Che è facile da codificare, associando 0 e 1 (l'ordine è opzionale):
+  \begin{itemize}
+    \item $s_{2,3,4,5}$ con $p_{2,3,4,5}=0.6$: 0
+    \item $s_1$ con $p_1=0.4$: 1
+  \end{itemize}
+  Costruisco quindi la sorgente a 3 (usando 0 come prefisso di tutti i nuovi):
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_{3,4,5}$ con $p_{3,4,5}=0.4$: 00
+    \item $s_2$ con $p_2=0.2$: 01 (infatti 10 non andrebbe bene avendo 1 come prefisso)
+  \end{itemize}
+  proseguo (usando 00 come prefisso di tutti i nuovi):
+    \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_2$ con $p_2=0.2$: 01
+    \item $s_3$ con $p_3=0.2$: 000
+    \item $s_{4,5}$ con $p_{4,5}=0.2$: 001
+  \end{itemize}
+  termino con lo stesso ragionamento (avendo ora 001 come prefisso):
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_2$ con $p_2=0.2$: 01
+    \item $s_3$ con $p_3=0.2$: 000
+    \item $s_4$ con $p_4=0.1$: 0010
+    \item $s_5$ con $p_5=0.1$: 0011
+  \end{itemize}
+  Che ha:
+  \[L=0.4\cdot 1+0.2\cdot 2+0.2\cdot 3+0.1\cdot 4+0.1\cdot 4 =
+    2.2\frac{bit}{simbolo}\]
+  Se invece metto i nuovi simboli più in alto possibile avrei:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_{4,5}$ con $p_{4,5}=0.2$
+    \item $s_2$ con $p_2=0.2$
+    \item $s_3$ con $p_3=0.2$
+  \end{itemize}
+  \begin{itemize}
+    \item $s_{2,3}$ con $p_{2,3}=0.4$
+    \item $s_1$ con $p_1=0.4$
+    \item $s_{4,5}$ con $p_{4,5}=0.2$
+  \end{itemize}
+  \begin{itemize}
+    \item $s_{1,4,5}$ con $p_{1,4,5}=0.6$
+    \item $s_{2,3}$ con $p_{2,3}=0.4$
+  \end{itemize}
+  Procedendo come nel caso precedente sopra si avrebbe (\textbf{verificare i
+    passaggi}): 
+   \begin{itemize}
+    \item $s_{1,4,5}$ con $p_{1,4,5}=0.6$: 0
+    \item $s_{2,3}$ con $p_{2,3}=0.4$: 1
+  \end{itemize}
+  e quindi:
+  \begin{itemize}
+    \item $s_{2,3}$ con $p_{2,3}=0.4$: 1
+    \item $s_1$ con $p_1=0.4$: 00
+    \item $s_{4,5}$ con $p_{4,5}=0.2$: 01
+  \end{itemize}
+  e quindi:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_{4,5}$ con $p_{4,5}=0.2$: 01
+    \item $s_2$ con $p_2=0.2$: 000
+    \item $s_3$ con $p_3=0.2$: 001
+  \end{itemize}
+  e infine:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 00
+    \item $s_2$ con $p_2=0.2$: 10
+    \item $s_3$ con $p_3=0.2$: 11
+    \item $s_4$ con $p_4=0.1$: 010
+    \item $s_5$ con $p_5=0.1$: 011
+  \end{itemize}
+  Che ha:
+  \[L=0.4\cdot 2+0.2\cdot 2+0.2\cdot 2+0.1\cdot 3+0.1\cdot 3 =
+    2.2\frac{bit}{simbolo}\]
+  che è uguale a prima.
+\end{esempio}
+\begin{teorema}
+  Si può dimostrare che non cambia nulla, in termini di lunghezza media,
+  mettendo il nuovo simbolo il più in alto/basso possibile, a parità di
+  probabilità.\\
+  Si può anche
+  dimostrare che se metto il simbolo combinato in basso aumenta la varianza tra
+  le codeword (avendo codeword di lunghezza più ``distante'') mentre mettendoli
+  più in alto possibile si diminuisce la varianza. SI ricorda che la varianza è:
+  \[V=\sum_{i=1}^q p_i\cdot (l_i-L)^2\]
+\end{teorema}
+\textbf{Esempi sul file di esercizi}.\\
+\textit{Solitamente comunque si preferisce abbassare la varianza tenendo quindi
+  il nuovo simbolo più in alto possibile.}\\
+\begin{teorema}
+  Il codice di Huffman è ottimo, avendo la minor lunghezza media.
+\end{teorema}
+\begin{proof}
+  Si procede per assurdo.\\
+  Supponiamo, data una sorgente $S$ con $q$ simboli $s_1,\ldots,s_q$, con
+  $p_1,\ldots, p_q$, che $l_1,\ldots, l_q$ siano le lunghezze di Huffman, avendo
+  quindi in corrispondenza $L_H$, lunghezza di Huffman, come:
+  \[L_H=\sum_{i=1}^q p_i\cdot l_i\]
+  Se non fosse ottimo avremmo un altro codice con una migliore lunghezza media
+  $L'$, tale che $L'< L_H$. Entrambi sono codici istantanei con associati i due
+  alberi di decodifica. Prendo quindi i due simboli meno probabili (che sono
+  anche i più lunghi) per il codice di Huffman: $s_q$ e $s_{q-1}$. Questi due
+  simboli sono presi, a parità di probabilità, in modo che condividano il nodo
+  genitore nell'albero. Si ha che $l_q=l_{q-1}$, condividendo il genitore e non
+  avendo nodi ``sprecati'' nell'albero.\\
+  Collasso questi due nodi e il genitore in un solo simbolo fittizio che tiene
+  conto di entrambi i simboli. La lunghezza decresce di una certa quantità.\\
+  Faccio lo stesso ragionamento nell'altro codice, prendendo $s_q'$ e
+  $s_{q-1}'$, fondendoli in un nuovo simbolo fittizio. La riduzione della
+  lunghezza è la stessa che nel caso di Huffman $L_H-x$ e $L'-x$.\\
+  \textbf{To be continued}
+\end{proof}
+
 \end{document} 
 % LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero

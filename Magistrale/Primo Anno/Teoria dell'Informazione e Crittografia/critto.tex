@@ -22,6 +22,7 @@
 \usepackage{enumerate}
 \usepackage{physics}
 \usepackage{braket}
+\usepackage{multicol}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -2454,7 +2455,7 @@ all'ottimo. Vediamo in primis un esempio.
   che quindi ha lunghezza media pari a $1$. Si è dimostrato che l'assurdo è
   impossibile e quindi l'algoritmo di Huffman produce codici ottimali.
 \end{proof}
-\subsection{Codici di Huffman r-ari}
+\subsubsection{Codici di Huffman r-ari}
 Vediamo ora i codici di Huffman per $r>2$.\\
 \begin{esempio}
   Vogliamo un codice r-ario con $r=4$ e quindi $\Gamma=\{0,1,2,3\}$ con una
@@ -2584,7 +2585,9 @@ Vediamo ora i codici di Huffman per $r>2$.\\
     \item $p_6=0.05$: 030
     \item $p_7=0.02$: 031
   \end{itemize}
-  \textbf{Che è ottimale}.
+  \textbf{Che è ottimale}.\\
+  Si può calcolare che:
+  \[L=1.47\,\,\,simboli\,\,\, quaternari\]
 \end{esempio}
 Si dimostra che si ottengono con questo processo codici ottimali e si dimostra
 in modo analogo al caso binario con $r=2$ (avendo che si ragiona non con due
@@ -2611,5 +2614,172 @@ Quindi devo trovare il più piccolo $q'\geq q$ tale che $q'$ è congruo a $1\bmo
   \[\{1,4,7,10\}\]
   e il più piccolo $\geq 8$ è 10 e quindi $q'=10$ e quindi $q'-q=2$. 
 \end{esempio}
+\textbf{Per $r=2$ facendo i conti si vede che arrivo sempre ad avere sempre e
+  solo due simboli nell'ultimo passaggio}.\\
+Si nota che posso codificare le cifre quaternarie tramite quelle binarie, $0\to
+00$, $1\to 01$, $2\to 10$ e $3\to 11$, passando da uno a due simboli,
+raddoppiando quindi anche le lunghezze delle codeword e il doppio della
+lunghezza media, raggiungendo però un codice non ottimale (applicando
+direttamente l'algoritmo di Huffman con $r=2$ si può dimostrare si ottiene un
+codice migliore, avendo codeword di lunghezza due e tre e non due e quattro).\\
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{Huffman}{$S=\{s_1,s_2,\ldots,s_n\},\,\,\, F$}
+    \State $Q\gets \emptyset$
+    \State \textit{inserire tutti gli} $s_i$ \textit{in} $Q$
+    \For{$i\gets 1$ \textbf{to} $|S|$}
+    \State \textit{alloca un nodo} $n$
+    \State $left[n]\gets x\gets\mbox{extract\_min(Q)}$
+    \State $right[n]\gets y\gets \mbox{extract\_min(Q)}$
+    \State $F(n)\gets F(x)+F(z)$
+    \State $Q.insert(n)$
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+  \caption{Pseudocodice dell'algoritmo di Huffman, con $S$ insieme dei simboli,
+  $F$ che associa una frequenza ad ogni simbolo, $Q$ coda di priorità. Il codice
+  non è stato trattato in aula ma mi sembrava interessante averlo.}
+\end{algorithm}
+Finora le sorgenti funzionavano che ad ogni colpo di clock uscisse un simbolo,
+con probabilità associata, ignorando quanto successo prima. Si ha quindi che
+queste sorgenti sono \textbf{memoryless}. 
+\begin{definizione}
+  Definiamo una \textbf{sorgente con memoria}.\\
+  SU supponga di avere una memoria di ordine $j$. Si ha che il simbolo $s_i$
+  esce con probabilità:
+  \[p(s_i|s_{i1},s_{i2},\ldots,s_{ij})\]
+  in pratica la probabilità di un simbolo è condizionata dai $j$ simboli usciti
+  precedentemente. Questa è una sorgente con memoria.\\
+  Il loro studio avviene tramite \textbf{processi di Markov} e
+  \textbf{matrici}.\\
+  Si cerca una distribuzione di probabilità, espressa tramite vettore, $\pi$
+  tale che $\pi=M\pi$, con $M$ matrice. Si vuole quindi che ciascun simbolo esce
+  con la probabilità indicata nel vettore $\pi$ in modo che sia un \textbf{punto
+    fisso} (???). \\
+  \textbf{\textit{Spiegazione superficiale in quanto al tematica non viene
+      approfondita.}} 
+\end{definizione}
+L'algoritmo di Huffman si può adattare alle sorgenti con memoria.
+\section{L'informazione}
+Si ha sempre una sorgente $S$ senza memoria con i simboli $s_i$ a cui sono
+associate le probabilità $p_i$. Cerchiamo di capire quanta informazione ci dà un
+simbolo:
+\[I(s_i)=?\]
+L'informazione dipende soprattutto dal destinatario, da quanto è in grado di
+comprendere tale informazione. Cambiare ricevente cambia tale valore.\\
+Si arriverà a capire quanto si può comprimere un messaggio tramite la quantità
+di informazione ma studiando solo dal punto di vista del messaggio ignorando il
+ricevente.\\
+Studiamo il rapporto tra $p_i$ e $I(s_i)$. Shannon dice che eventi più rari
+forniscono una maggior quantità di informazione, essendo inversamente
+proporzionale: 
+\[I(s_i)=\frac{1}{p_i}\]
+Si vuole anche che da due sottosistemi che producono due quantità di
+informazioni $I(A)$ e $I(B)$ si possa ottenere l'informazione totale del
+sistema $C$. Si vuole che valga l'additività:
+\[I(C)=I(A)+I(B)\]
+In realtà possiamo dire che che $I$ prende in input la probabilità stessa,
+avendo:
+\[I(p_i)=\frac{1}{p_i}\]
+Se ho a che fare con due eventi indipendenti ho che:
+\[I(p_i\cdot p_j)=\frac{1}{p_i\cdot p_j}\]
+ma ho che $[I(p_i)=\frac{1}{p_i}$ e $I(p_j)=\frac{1}{p_j}$ e quindi vorrei:
+\[I(p_i\cdot p_j)=\frac{1}{p_i\cdot
+    p_j}=\frac{1}{p_i}+\frac{1}{p_j}=\frac{p_i+p_j}{p_i\cdot p_j}\neq
+  \frac{1}{p_i\cdot p_j}\]
+e quindi non va bene.\\
+Ma l'additività la hanno potenze e logaritmi, quindi si dice che:
+\[I(p_i)=\log_2\frac{1}{p_i}\]
+Ma quindi:
+\[I(p_i\cdot p_j)=\log_2\frac{1}{p_i\cdot
+    p_j}=\log_2\left(\frac{1}{p_i}\cdot\frac{1}{p_j}\right)=
+  \log_2\frac{1}{p_i}+\log_2\frac{1}{p_j}=I(p_i)+I(p_j)\]
+Dal punto di vista assiomatico chiediamo che la quantità di informazione goda di
+queste proprietà, avendo $I:[0,1]\to\mathbb{R}_0^+$:
+\begin{itemize}
+  \item $I(p)>0$
+  \item $I(p_1\cdot p_2)=I(p_1)+I(p_2)$ se gli eventi sono indipendenti, valendo
+  l'additività 
+  \item $I(p)$ è una funzione continua, per non avere situazioni scomode
+\end{itemize}
+Già solo con queste proprietà se ne ricavano altre:
+\begin{itemize}
+  \item $I(P^n)=n\cdot I(p),\forall n\in \mathbb{N}$ e si potrebbe dimostrare
+  per induzione. $I(P^1)=1\cdot I(P)$ e \[I(p^n)=I(p^{n-1}\cdot
+    p)=I(P^{n-1})+I(p)=I(p)+(n-1)\cdot I(p)=n\cdot I(p)\]
+  \item $y=p^n\to p=y^{\frac{1}{n}}$ e quindi:
+  \[I(y)=I(p^n)=n\cdot I(p)=n\cdot I(y^{\frac{1}{n}})\]
+  e quindi:
+  \[I(y^{\frac{1}{n}})=\frac{1}{n}I(y)\]
+  \item $I(y^\frac{m}{n})= I((y^{\frac{1}{n}})^m)=m\cdot
+  I(y^{\frac{1}{m}})=\frac{m}{n}I(y)$ 
+\end{itemize}
+\begin{teorema}
+  Tale $I$ è unica, ovvero è l'unica che soddisfa le prime tre proprietà.
+\end{teorema}
+\begin{proof}
+  Ipotizzo che esista $g$ tale che $g(p^n)=n\cdot g(p)$. Si ha che $I(p)=c\cdot
+  \log_2\frac{1}{p}$ per un certo $c$ costante. Si ha che, avendo $I(p^n)=c\cdot
+  \log_2\frac{1}{p^n}$:
+  \[g(p^n)-c\log_2\frac{1}{p^n}=n\cdot[g(p)-c\cdot \log_2 \frac{1}{p}]\]
+  pongo, per un certo $p_0\neq 0,1$:
+  \[c=\frac{g(p_0)}{\log_2\frac{1}{p_0}}\]
+  in modo da ottenere, sostituendo, con $p=p_0$, ignorando traslazioni delle
+  funzioni nel grafico
+  \[g(p^n)-c\log_2\frac{1}{p^n}=n\cdot[g(p)-c\cdot \log_2 \frac{1}{p}]=0\]
+  infatti:
+  \[g(p_0)=I(p_0)\]
+  Si ha che:
+  \[\forall z\exists n\mbox{ t.c. }z=p_0^n\]
+  Allora:
+  \[g(z)-c\cdot \log_2\frac{1}{z}=0\implies g(z)=c\cdot\log_2\frac{1}{z}=I(z)\]
+  dimostrando che:
+  \[g(z)=I(z)\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/grap2.pdf}
+    \includegraphics[scale = 0.6]{img/grap3.pdf}
+    \caption{Grafici usati nella dimostrazione \textbf{da capire come}}
+  \end{figure}
+\end{proof}
+L'unità di misura dell'informazione varia a seconda della base del logaritmo.\\
+Si ha che $\log_2$ è l'unità di misura se ho a che fare con i bit (anche se
+all'inizio 0 e 1 erano detti \textit{binit}) Misuro quindi in \textit{bit}. \\
+Se ho $\log_e=\ln$ misuro in \textit{nat}.\\
+Se ho $\log_{10}$ misuro in \textit{Hartley}.\\
+La sorgente $s$ quindi emette il simbolo $s_i$ con $p_i$ e produce una quantità
+di informazione pari a:
+\[I(p_i)=\log_2\frac{1}{p_i}\]
+e questo per ogni simbolo.\\
+Si ha anche la quantità di informazione media della sorgente, facendo la media
+pesata con le probabilità. Questa è detta \textbf{entropia} $H$:
+\[H(S)=\sum_{i=1}^qp_i\cdot I(p_i)=\sum_{i=1}^qp_i\cdot \log_2\frac{1}{p_i}\]
+spesso si usa $H_b$ con $b$ pari alla base del logaritmo, quindi:
+\[H_2(S)=\sum_{i=1}^qp_i\cdot I(p_i)=\sum_{i=1}^qp_i\cdot \log_2\frac{1}{p_i}\]
+Con $H_2$ funzione che ha in input tutte le probabilità:
+\[H(p_1,\ldots,p_q)\]
+che per praticità indichiamo con, per $S$ sorgente:
+\[H(S)\]
+Un altro modo di indicarla è (spesso per motivi tipografici):
+\[H_2(S)=-\sum_{i=1}^qp_i\cdot \log_2{p_i}\]
+Sempre dietro $H$ si ha uno scopo tipografico, non si usa $E$ in quanto sarebbe
+ambiguo con \textit{energia}. Si è pensato ad usare la $\eta$ ma era comunque
+scomodo da usare in documenti dattiloscritti, prima che Knuth arrivasse con \TeX
+e \LaTeX.\\
+La storia dietro il nome ``entropia'' era stato anche trattato con Von Neumann,
+in quanto Shannon temeva fosse un termine errato.\\
+\textbf{Risentire esperimento del diavoletto di Maxwell}.\\
+Quindi la sorgente, ad ogni colpo di clock, emette un simbolo con una certa
+quantità di informazione. \\
+Un altro modo per vedere che l'entropia è una sorta di media è prendere la
+sorgente $S$ e considerare messaggi di lunghezza $n$. Voglio avere $n\cdot p_i$
+volte $s_i$, avendo: 
+\[P=p_1^{n\cdot p_1}\cdot p_1^{n\cdot p_2}\cdot \ldots cdot p_q^{n\cdot
+    p_q}=(p_1^{p_1}\cdots p_q^{p_q})^n\]
+ma allora:
+\[\log_\frac{1}{P}=log_2\left[\frac{1}{p_1^{p_1}\cdots
+      p_q^{p_q}}\right]=n\sum_{i=1}^q\log_2\left(\frac{1}{p_i}\right)^{p_1}=n\cdot
+    \sum_{i=1}^qp_i\log_2\frac{1}{p_1}=n\cdot H_2(S)\]
 \end{document} 
 % LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero
+% LocalWords:  Pseudocodice

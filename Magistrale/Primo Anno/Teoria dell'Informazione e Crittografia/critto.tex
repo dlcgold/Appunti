@@ -2195,7 +2195,7 @@ Si sta parlando appunto di \textbf{codici a blocchi accorciati}.\\
   \[K^n=\left(\sum_{i=1}^q\frac{1}{r^{l_1}}\right)^n\]
   Ottenendo qualcosa di davvero difficile da studiare. Ma posso scrivere:
   \[K^n=\sum_{t=n}^{n\cdot l}\frac{n_t}{r^{t}}\]
-  indicando con $n_t$ il numero di termini con $t$ (???) e con
+  indicando con $n_t$ il numero di termini con $t$ (??? risentire) e con
   $l=\max\{l_1,\ldots,l_q\}$. Si ha che $n_t$ è anche il numero di codeword di
   lunghezza $t$. Ma dato che il codice è univocamente decodificabile si ha che:
   \[n_t\leq r^t\]
@@ -2230,7 +2230,7 @@ istantanei vengono trascurati, considerando che dovrei fare la ``stessa
 fatica''.\\
 Abbiamo visto comunque che non si hanno indicazioni in merito a come fare le
 codeword e abbiamo anche trascurato finora l'uso delle probabilità.
-\section{Codici di Huffman}
+\subsection{Codici di Huffman}
 I codici di Huffman sono ottimali, ovvero raggiungono il minimo valore possibile
 della lunghezza media $L$:
 \[L=\sum_{i=1}^q p_i\cdot l_i\]
@@ -2340,11 +2340,15 @@ all'ottimo. Vediamo in primis un esempio.
     \item $s_2$ con $p_2=0.2$
     \item $s_3$ con $p_3=0.2$
   \end{itemize}
+  e quindi:
+
   \begin{itemize}
     \item $s_{2,3}$ con $p_{2,3}=0.4$
     \item $s_1$ con $p_1=0.4$
     \item $s_{4,5}$ con $p_{4,5}=0.2$
   \end{itemize}
+  e quindi:
+
   \begin{itemize}
     \item $s_{1,4,5}$ con $p_{1,4,5}=0.6$
     \item $s_{2,3}$ con $p_{2,3}=0.4$
@@ -2381,6 +2385,8 @@ all'ottimo. Vediamo in primis un esempio.
     2.2\frac{bit}{simbolo}\]
   che è uguale a prima.
 \end{esempio}
+\textit{Questo algoritmo greedy funziona, producendo l'ottimo, quando
+  sottostante al problema si ha un matroide.}
 \begin{teorema}
   Si può dimostrare che non cambia nulla, in termini di lunghezza media,
   mettendo il nuovo simbolo il più in alto/basso possibile, a parità di
@@ -2393,12 +2399,15 @@ all'ottimo. Vediamo in primis un esempio.
 \end{teorema}
 \textbf{Esempi sul file di esercizi}.\\
 \textit{Solitamente comunque si preferisce abbassare la varianza tenendo quindi
-  il nuovo simbolo più in alto possibile.}\\
+  il nuovo simbolo più in alto possibile.}
 \begin{teorema}
-  Il codice di Huffman è ottimo, avendo la minor lunghezza media.
+  Il codice di Huffman è ottimo, avendo la minor lunghezza media. In altri
+  termini produce codici istantanei ottimali.
 \end{teorema}
 \begin{proof}
   Si procede per assurdo.\\
+  Si ricorda che le lunghezza vengono conosciute solo a fine algoritmo di
+  calcolo.\\ 
   Supponiamo, data una sorgente $S$ con $q$ simboli $s_1,\ldots,s_q$, con
   $p_1,\ldots, p_q$, che $l_1,\ldots, l_q$ siano le lunghezze di Huffman, avendo
   quindi in corrispondenza $L_H$, lunghezza di Huffman, come:
@@ -2406,17 +2415,201 @@ all'ottimo. Vediamo in primis un esempio.
   Se non fosse ottimo avremmo un altro codice con una migliore lunghezza media
   $L'$, tale che $L'< L_H$. Entrambi sono codici istantanei con associati i due
   alberi di decodifica. Prendo quindi i due simboli meno probabili (che sono
-  anche i più lunghi) per il codice di Huffman: $s_q$ e $s_{q-1}$. Questi due
+  anche i più lunghi) per il codice di Huffman: $s_q$ e $s_{q-1}$. Si potrebbe
+  dimostrare che la lunghezza delle due codeword più lunghe è uguale. Questi due
   simboli sono presi, a parità di probabilità, in modo che condividano il nodo
   genitore nell'albero. Si ha che $l_q=l_{q-1}$, condividendo il genitore e non
-  avendo nodi ``sprecati'' nell'albero.\\
+  avendo nodi ``sprecati'' nell'albero di decodifica.\\
   Collasso questi due nodi e il genitore in un solo simbolo fittizio che tiene
-  conto di entrambi i simboli. La lunghezza decresce di una certa quantità.\\
-  Faccio lo stesso ragionamento nell'altro codice, prendendo $s_q'$ e
-  $s_{q-1}'$, fondendoli in un nuovo simbolo fittizio. La riduzione della
-  lunghezza è la stessa che nel caso di Huffman $L_H-x$ e $L'-x$.\\
-  \textbf{To be continued}
+  conto di entrambi i simboli. In pratica faccio uno dei ``passi in avanti''
+  dell'algoritmo sopra specificato per il calcolo dei codici di Huffman. La
+  lunghezza decresce di una certa quantità $x$. Si ha in partenza che
+  $p_{q-1}\cdot l_{q-1}+p_q\cdot l_q=l_q\cdot (p_{q-1}+p_q)$. Il nuovo simbolo
+  avrà:
+  \[(l_q-1)\cdot (p_{q-1}+p_q)=l_q\cdot (p_{q-1}+p_q)- (p_{q-1}+p_q)\]
+  ovvero la stessa quantità di prima meno $(p_{q-1}+p_q)$. Quindi dalla
+  lunghezza media tiro via questa quantità, ovvero $x=(p_{q-1}+p_q)$.\\
+  Se vogliamo minimizzare la lunghezza media il simbolo con $p_i$ più alta ha
+  $l_i$ più bassa (come dimostrato precedentemente).\\
+  Faccio lo stesso ragionamento nell'altro codice (che suppongo per assurdo
+  migliore di quello di Huffman e quindi essendo ottimale vale lo stesso
+  rapporto tra $p_i$ e $l_i$), prendendo $s_q'$ e
+  $s_{q-1}'$ (che sono quelli con probabilità minore, lunghezza maggiore nel
+  secondo codice e lunghezza uguale), fondendoli in un nuovo simbolo
+  fittizio, facendo gli stessi ragionamento fatto per il codice di Huffman.
+  Si ha in partenza che $p_{q-1}\cdot l_{q-1}+p_q\cdot l_q=l_q\cdot
+  (p_{q-1}+p_q)$.  
+  Il nuovo simbolo avrà:
+  \[(l_q-1)\cdot (p_{q-1}+p_q)=l_q\cdot (p_{q-1}+p_q)- (p_{q-1}+p_q)\]
+  La riduzione della lunghezza quindi è la stessa che nel caso di Huffman 
+  $L_H-x$ e $L'-x$.\\ 
+  Si stanno ``collassando'' gli stessi simboli e le lunghezze medie decrescono
+  della stessa quantità.\\
+  Ad un certo punto da entrambe le parti si arriva ad avere due
+  simboli. Nell'albero si avranno quindi la radice e due simboli fittizi. Per il
+  secondo codice si avrà comunque una sorgente con due figli e basta. \\
+  Per Huffman so che ho due codeword di lunghezza 1 (un ramo con 0 e uno con 1)
+  e quindi $L_h=1$ ma sotto questo valore non posso andare, non posso codificare
+  due codeword che mi portino ad una lunghezza media $<1$ per il secondo codice
+  che quindi ha lunghezza media pari a $1$. Si è dimostrato che l'assurdo è
+  impossibile e quindi l'algoritmo di Huffman produce codici ottimali.
 \end{proof}
-
+\subsection{Codici di Huffman r-ari}
+Vediamo ora i codici di Huffman per $r>2$.\\
+\begin{esempio}
+  Vogliamo un codice r-ario con $r=4$ e quindi $\Gamma=\{0,1,2,3\}$ con una
+  sorgente di $q=8$ simboli. Si hanno le seguenti probabilità:
+  \begin{itemize}
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+    \item $p_3=0.15$
+    \item $p_4=0.10$
+    \item $p_5=0.08$
+    \item $p_6=0.05$
+    \item $p_7=0.02$
+  \end{itemize}
+  In questo caso non fondo gli ultimi due simboli ma gli ultimi 4. Al primo
+  passo ottengo:
+  \begin{itemize}
+    \item $p_{4,5,6,7}=0.25$
+    \item $p_0=0.20$
+    \item $p_1=0.28$
+    \item $p_2=0.15$
+    \item $p_3=0.10$
+  \end{itemize}
+  e poi:
+  \begin{itemize}
+    \item $p_{0,1,2,3}=0.75$
+    \item $p_{4,5,6,7}=0.25$
+  \end{itemize}
+  Associo 0 e 1:
+    \begin{itemize}
+    \item $p_{0,1,2,3}=0.75$: 0
+    \item $p_{4,5,6,7}=0.25$: 1 
+  \end{itemize}
+  ricostruisco usando tutti e 4 i simboli:
+    \begin{itemize}
+    \item $p_{4,5,6,7}=0.25$: 1
+    \item $p_0=0.20$: 00
+    \item $p_1=0.28$: 01
+    \item $p_2=0.15$: 02
+    \item $p_3=0.10$: 03
+  \end{itemize}
+  e infine:
+  \begin{itemize}
+    \item $p_0=0.22$: 00
+    \item $p_1=0.20$: 01
+    \item $p_2=0.28$: 02
+    \item $p_3=0.15$: 03
+    \item $p_4=0.10$: 10
+    \item $p_5=0.08$: 11
+    \item $p_6=0.05$: 12
+    \item $p_7=0.02$: 13
+  \end{itemize}
+  \textbf{Ma questo non è ottimale}, infatti potrei dire che $13$ è 2 e che $12$
+  è $3$ che non sono prefissi, per esempio. Questo succede perché nell'ultimo
+  step ho usato solo 0 e 1 e non tutti i simboli possibili della sorgente,
+  perdendo diverse codeword. Voglio quindi arrivare all'ultimo step con
+  esattamente 4 simboli. Per farlo aggiungo simboli fittizi alla sorgente in
+  modo che raccogliendo a botte di $r$ si arrivi alla fine con $r$ simboli.\\
+  Si ha ad esempio:
+  \begin{itemize}
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+    \item $p_3=0.15$
+    \item $p_4=0.10$
+    \item $p_5=0.08$
+    \item $p_6=0.05$
+    \item $p_7=0.02$
+    \item $p_8=0$
+    \item $p_9=0$
+  \end{itemize}
+  Al primo passo ottengo:
+  \begin{itemize}
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+    \item $p_3=0.15$
+    \item $p_4=0.10$
+    \item $p_5=0.08$
+    \item $p_{6,7,8,9}=0.07$
+  \end{itemize}
+  e poi:
+  \begin{itemize}
+    \item $p_{3,4,5,6,7,8,9}=0.40$
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+  \end{itemize}
+  associo quindi i simboli:
+   \begin{itemize}
+    \item $p_{3,4,5,6,7,8,9}=0.40$: 0
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2
+    \item $p_2=0.28$: 3
+  \end{itemize}
+  avendo:
+  \begin{itemize}
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2
+    \item $p_2=0.28$: 3
+    \item $p_3=0.15$: 00
+    \item $p_4=0.10$: 01
+    \item $p_5=0.08$: 02
+    \item $p_{6,7,8,9}=0.07$: 03
+  \end{itemize}
+  e quindi:
+  \begin{itemize}
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2 
+    \item $p_2=0.28$: 3
+    \item $p_3=0.15$: 00
+    \item $p_4=0.10$: 01
+    \item $p_5=0.08$: 02
+    \item $p_6=0.05$: 030
+    \item $p_7=0.02$: 031
+    \item $p_8=0$: 032
+    \item $p_9=0$: 033
+  \end{itemize}
+  Ma le ultime due non mi servono:
+  \begin{itemize}
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2 
+    \item $p_2=0.28$: 3
+    \item $p_3=0.15$: 00
+    \item $p_4=0.10$: 01
+    \item $p_5=0.08$: 02
+    \item $p_6=0.05$: 030
+    \item $p_7=0.02$: 031
+  \end{itemize}
+  \textbf{Che è ottimale}.
+\end{esempio}
+Si dimostra che si ottengono con questo processo codici ottimali e si dimostra
+in modo analogo al caso binario con $r=2$ (avendo che si ragiona non con due
+figli ma con $r$ figli).\\
+Capiamo meglio quanti simboli fittizi con probabilità nulla vanno aggiunti.
+Avendo $q$ simboli mi serve un numero, che sia il minore possibile, $q'$ di
+simboli tale che $q'\geq q$. Devo quindi aggiungere $q'-q$ simboli fittizi con
+probabilità 0. In ogni passo tolgo $r$ simboli e ne aggiungo 1, quindi ne tolgo
+$r-1$. Partendo da $q'$ diventano poi $q'-(r-1)$ e poi $q'-(r-1)-(r-1)$ e così
+via. Alla fine voglio che ne restino $r$. Partendo dal fondo ho $r+(r-1)$ poi
+$(r+2\cdot (r-1))$ etc$\ldots$ Si ha quindi che, per un certo $k$:
+\[q'=k\cdot(r-1)+r\]
+Ma posso togliere il numero $K$ di passi:
+\[q'=(k+1)\cdot (r-1)+1\to q' \equiv 1\bmod (r-1)\]
+Quindi devo trovare il più piccolo $q'\geq q$ tale che $q'$ è congruo a $1\bmod
+(r-1)$. Al massimo dovrò mettere $r-1$ simboli fittizi.
+\begin{shaded}
+  Si ricorda che:
+  \[a\equiv b\bmod n\iff \exists z\in\mathbb{Z}\mbox{ t.c. }a-b=z\cdot n\]
+\end{shaded}
+\begin{esempio}
+  Nell'esempio sopra avevamo $q=8$ e $r=4$. Mi serve $q'\geq 8$ tale che $q'$ è
+  congruo a $1\bmod 3$. I primi numeri congrui a $1\bmod 3$ sono:
+  \[\{1,4,7,10\}\]
+  e il più piccolo $\geq 8$ è 10 e quindi $q'=10$ e quindi $q'-q=2$. 
+\end{esempio}
 \end{document} 
 % LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero

@@ -1682,7 +1682,7 @@ Per il sequenziamento ci sono stati vari step:
     \end{itemize}
   \end{itemize}
 \end{itemize}
-\section{Formato FASTA/FASTQ}
+\section{Formato FASTA}
 Vediamo il formato standard per sequenze primarie nucleotidiche:
 \begin{itemize}
   \item \textbf{FASTA} per le sequenze ottenute al metodo Sanger, quindi con
@@ -1709,7 +1709,7 @@ Il FASTA ha le seguenti caratteristiche:
   l'allineamento
   \item ha come estensione \texttt{.fa} o \texttt{.fasta}
 \end{itemize}
-\section{ENSEMBL}
+\subsection{ENSEMBL}
 ENSEMBL è il \textbf{genome browser} attualmente più usato. Un genome browser è
 un database con associata un'interfaccia di esplorazione. È un progetto partito
 nel 1999 da \textbf{EMBL (\textit{European Molecular Biology Laboratory})} e dal
@@ -1737,7 +1737,266 @@ accesso. Il file poteva essere scaricato tramite un ID e basta (era poi scopo
 del biologo e dell'informatico riutilizzarlo). Il file EMBL è pieno di
 informazioni, con in fondo la sequenza nucleotidica. Banche dati così ci sono
 ancora, come l'\textbf{ENA (\textit{European Necleotide Archive})}.
+\section{Qualità dei Dati e FASTQ}
+Valutiamo quindi la \textbf{qualità del dato di sequenziamento} e il formato
+standard \textbf{FASTQ}, il formato di output dei sequenziatori di nuova
+generazione. \\ 
+Le NGS producono una gran quantità di frammenti, piuttosto corti, per i quali è
+essenziale conoscere la qualità di ogni base in fase di processamento della
+read, per eliminare/modificare le parti problematiche. Per ogni base di una read
+NGS si ha quindi un \textit{indice di qualità}, detto \textbf{Phred Quality
+  Score}.\\
+Phred, abbreviato, è stato creato per il \textit{base caller Phred}, che sfrutta
+il cromatogramma che valutare la qualità.
+\begin{definizione}
+  Definiamo \textbf{Phred Quality Score} $q$ tramite la formula:
+  \[q=-10\log_{10}p\]
+  con:
+  \begin{itemize}
+    \item base $b$
+    \item $p$ probabilità che $b$ sia errata
+  \end{itemize}
+  il valore $q$ viene arrotondato all'intero più vicino.\\
+  Chiedere una base corretta al 100\% comporterebbe $q=\infty$ (avendo $p=0$) e
+  quindi si considera corretta una base con $q\geq 50$ (che comporterebbe
+  probabilità che sia errata pari a $p=0.00001$, quindi 0.001\%).\\
+  Una base con $30\leq q\leq 50$ è solitamente considerata buona ma dipende dal
+  contesto. Avere $q=30$ hanno probabilità delle 0.1\% di essere errate. 
+\end{definizione}
+\textbf{Esempi su slide}.\\
+Il formato \textbf{FASTQ} è standard per i sequenziatori NGS, che quindi non
+producono un \textbf{FASTA}.\\
+SI ha che è:
+\begin{itemize}
+  \item plain text
+  \item è stato sviluppato per associare ad una sequenza il Phred Quality Score
+  \item ha estensione \texttt{.fq} o \texttt{,fastq}
+\end{itemize}
+Si hanno 4 righe, dette record:
+\begin{itemize}
+  \item un header con l'identificatore. Tale riga ha ``@'' come simbolo
+  iniziale. Non si hanno informazioni extra come per il FASTA
+  \item sequenza delle basi della read in una riga
+  \item un header dei phred values. Tale riga inizia con il simbolo ``+''
+  \item la sequenza dei valori di qualità, una per ogni base della read
+\end{itemize}
+\begin{esempio}
+  Vediamo un esempio:
+\begin{verbatim}
+@HWUSI-EAS522:8:5:662:692#0/1
+TATGGAGGCCCAACTTCTTGTATTCACAGGTTCTGC
++HWUSI-EAS522:8:5:662:692#0/1
+aaaa`aa`aa`]__`aa`_U[_a`^\\UTWZ`X^QX
+\end{verbatim}
+  con:
+  \begin{itemize}
+    \item l'header della sequenza un identificatore tipico di illumina
+    \item le basi su una riga
+    \item l'header, con lo stesso identificatore della sequenza (è opzionale,
+    potrei non averlo), dei phred
+    \item la sequenza dei phred values, con una codifica che permette di
+    associare facilmente il valore di qualità. Ogni valore è in corrispondenza
+    di indice con la base di cui rappresenta la qualità (se usassi gli interi
+    avrei magari un intero di due simboli che renderebbe impossibile capire a
+    che base si riferisce)
+  \end{itemize}
+\end{esempio}
+I valori interi di qualità vengono quindi convertiti in un certo carattere e
+ogni sequenziatore ha la sua funzione per convertire l'intero rappresentante la
+qualità $q$ in char:
+\[c=f(q)\]
+Ad esempio per Illumina è (con $ASCII(X)$ che converte in char l'intero):
+\[c=ASCII(\min\{q,93\}+33)\]
+\textbf{Esempi su slide}.\\
+Conoscere la qualità delle basi permette di fare \textbf{trimming} che, fissata
+una soglia minima di qualità (decisa di volta in volta), consiste in:
+\begin{itemize}
+  \item trovare la più lunga sottostringa della read composta da basi con
+  qualità superiore a questa soglia minima
+  \item sostituire tale sottostringa all'intero read sse questa sottostringa è
+  lunga a sufficienza (lunghezza anch'essa decisa di volta in volta). Qualora la
+  sottostringa sia troppo corta si elimina la read. Su milioni di read
+  sacrificarne qualcuna non è un problema particolare e non solo, si migliorano
+  le analisi successive
+\end{itemize}
+\section{Espressione di un Gene e GTF}
+Ricordiamo che un gene è un locus che codifica una proteina. La sequenza
+primaria del locus di DNA del gene è detta \textbf{sequenza genomica del gene}
+(e si ricorda che entrambi gli strand contengono geni, negli esempi si studia
+comunque il forward essendo già da ``sinistra a destra'').\\
+I geni si identificano tramite il cosiddetto \textbf{HUGO NAME}.\\
+I geni sono formati da \textbf{esoni}, regioni codificanti, e
+\textbf{introni}, regioni non codificanti. Il confine tra un esone a sinistra
+e un introne a destra è detto \textbf{sito di slicing al 5'}, detto anche
+\textbf{donor splice site}. Se ho un introne
+a sinistra e un esone a destra ho un \textbf{sito di slicing al 3'}, detto
+anche \textbf{acceptor splice site}. Nell'uomo il 99.24\% degli introni
+iniziano con GT e finiscono con AG e si parla di \textbf{introne canonico}. Si
+hanno anche introni non canonici.\\
+Vediamo gli step di sintesi proteica in modo ``operativo'':
+\begin{itemize}
+  \item si ha la \textbf{trascrizione} dove l'intero locus del gene viene
+  copiato in una molecola di RNA (convertendo T in U), detta \textbf{pre-mRNA},
+  lunga quanto il locus del gene
+  \item avviene quindi lo \textbf{splicing}, dove si eliminano gli intorni dal
+  pre-mRNA producendo l'\textbf{mRNA}, che è una sequenza continua di esoni, di
+  regioni codificanti, detta anche \textbf{trascritto}
+  \item il trascritto viene tradotto in proteina. In realtà all'interno del
+  trascritto si ha una parte centrale detta \textbf{coding sequence
+    (\textit{CDS})} che è la parte che da origine alla traduzione in
+  proteina. La CDS inizia sempre con la \textbf{tripletta di inizio} AUG e
+  finisce con una tra le seguenti \textbf{triplette di fine} UAG, UAA o UGA. La
+  lunghezza della CDS è sempre un multiplo di tre per cui la si puà vedere come
+  una sequenza di triplette dette \textbf{codoni} (quindi si hanno il
+  \textbf{codone di inizio} e \textbf{codone di fine} anziché chiamarle
+  triplette). Le due parti a monte e valle della CDS sono dette \textbf{5'UTR}
+  (la parte prima) e \textbf{3'UTR} (la parte dopo)
+  \item dalla sequenza di codoni si passa alla sequenza di amminoacidi e quindi
+  alla proteina. Questo passaggio è facilmente studiabile tramite
+  il \textbf{codice genetico} (dove per comodità l'uracile è spesso segnato
+  segnato con la timina, questa è una cosa standard nelle banche dati in quanto
+  permette confronti diretti con il genoma). Ogni codone corrisponde ad un
+  amminoacido. Il codice genetico è \textbf{degenere} quindi più codoni mappano
+  lo stesso amminoacido. Si nota che AUG è la metionina (e solo AUG lo
+  codifica) che è l'amminoacido che inizia ogni proteina. I codoni di fine hanno
+  associato solo un ``segnale di stop'', non producendo alcun amminoacido, che
+  ferma la traduzione
+\end{itemize}
+Il sequenziamento che produce read di RNA, se di tipo NGS, produce read dette
+\textbf{RNA-seq read}, se invece si usa Sanger si chiamano \textbf{Expressed
+  Sequence Tag (\textit{EST})}, che sono ormai in disuso. \\
+Come si era già detto 20000 geni producono centinaia di migliaia di proteine e
+quindi non si ha una corrispondenza ``1:1''. Un gene può esprimere una
+molteplicità di proteine. Questo accade in quanto si ha lo \textbf{splicing
+  alternativo}, dove un gene è in grado di combinare i suoi esoni in modo
+diversi. Si definisce \textbf{isoforma} un particolare trascritto che un gene
+esprime in virtù dello splicing alternativo. Lo splicing alternativo è
+importante in quanto:
+\begin{itemize}
+  \item è \textbf{tessuto-specifico} quindi un gene esprime trascritti diversi
+  in tessuti diversi
+  \item dipende dalle condizioni della cellula 
+  \item è fortemente legato alle malattie (studiare le differenze tra la sintesi
+  di cellule sane e malate è fondamentale per trovare terapie mirate)
+\end{itemize}
+Si descrivono i vari eventi di splicing alternativo:
+\begin{itemize}
+  \item l'\textbf{exon skipping}, ovvero \textit{salto dell'esone}, dove un
+  esone 
+  (o anche più esoni) può essere escluso dal trascritto primario
+  %oppure dove un nuovo esone (o più nuovi esoni) può essere incluso nellostesso 
+  \item l'\textbf{alternative acceptor site}, ovvero \textit{sito di taglio
+    alternativo $3'$}, detto anche \textbf{3' competing site}, dove una parte
+  del secondo esone può essere considerata 
+  non codificante o, alternativamente, una porzione dell'introne adiacente può
+  essere considerata codificante
+  \item l'\textbf{alternative donor site}, ovvero \textit{sito di taglio
+    alternativo $5'$}, detto anche \textbf{5' competing site}, dove una parte
+  del primo esone viene considerata non 
+  codificante o, alternativamente, una porzione di introne adiacente può
+  essere considerata codificante
+  \item i \textbf{mutually exclusive exons}, ovvero \textit{esoni mutuamente
+    esclusivi}, dove solo uno di due esoni viene conservato nel trascritto. In
+  due isoforme diverse non ho mai entrambi gli esoni
+  \item l'\textbf{intron retention}, ovvero \textit{introne trattenuto}, dove un
+  certo introne viene incluso nel trascritto primario o dove un esone viene
+  considerato in più parti con un introne in mezzo
+  \item \textbf{multiple promoters} dove non si considera un prefisso del
+  primissimo esone
+  \item \textbf{multiple polyA} dove non si considera un suffisso del'ultimo
+  esone 
+\end{itemize}
+\subsection{Il formato GTF}
+Il \textbf{formato GTF (\textit{Gene Transfer Format})}, \texttt{.gtf} è il
+formato standard che permette di 
+annotare un dato gene su una sequenza genomica di riferimento che contiene il
+locus del gene (la sequenza può anche essere nello strand opposto a quello
+dato). Un GTF fornisce per un gene: 
+\begin{itemize}
+  \item la composizione in esoni delle sue isoforme di splicing (quindi di tutti
+  i trascritti)
+  \item la composizione delle CDS in relazione ai trascritti
+  \item la composizione delle 5/3'UTR in relazione ai trascritti
+  \item la presenza dello start e dello stop codon delle CDS
+\end{itemize}
+Da un file GTF si possono ricostruire tutti i trascritti e le coding sequence
+del gene annotato. \\
+GTF deriva dal formato GFF, spesso si hanno ancora GTF in \texttt{.ggf} ed è
+formato da 9 campi separati da tabulazioni. \\
+Il trascritto viene annotato ``all'indietro'' sul locus del gene.\\
+Ogni record del GTF fornisce una \textbf{feature}, ovvero una regione continua
+della sequenza genomica, che rappresenta uno tra:
+\begin{itemize}
+  \item un esone, tramite \texttt{exon}. Ad un trascritto corrispondono tante
+  feature di tipo \texttt{exon} sulla genomica di riferimento quanti sono gli
+  esoni che lo compongono (e per ogni feature di tipo \texttt{exon} ho un
+  record) 
+  \item una porzione di CDS, tramite \texttt{CDS}. Una porzione in quanto la CDS
+  completa sul locus è ``spezzata'' dagli introni e quindi mi servono più
+  feature per rappresentarla. Ipotizzando che una CDS sia un pezzo di un esone e
+  un intero secondo esone avrò due feature \texttt{CDS} con gli indici di queste
+  due parti (se corrisponde ad un esone avrò anche una feature con gli stessi
+  indici di tipo \texttt{exon}). Ad una CDS corrispondono tante feature quanti
+  gli esoni che copre sul trascritto
+  \item uno start codon, con \texttt{start\_codon}. Solitamente è un unico
+  record 
+  \item uno stop codon, con \texttt{stop\_codon}. Solitamente è un unico record 
+  \item una porzione 5'UTR, con \texttt{5UTR}. A un 5'UTR corrispondono tante
+  feature sulla sequenza di riferimento quanti sono gli esoni che copre sul
+  trascritto 
+  \item una porzione 3'UTR, con \texttt{3UTR}. A un 3'UTR corrispondono tante
+  feature sulla sequenza di riferimento quanti sono gli esoni che copre sul
+  trascritto
+\end{itemize}
+Il file GTF ha solo gli indici di partenza e fine dei vari elementi e quindi mi
+serve associato un file FASTA con la genomica di riferimento.\\
+Un GTF può avere più geni annotati.\\
+Ogni record ha 9 campi:
+\begin{enumerate}
+  \item identificatore della genomica di riferimento (presa su uno dei due
+  strand) che copre il locus del gene
+  \item la sorgente che ha prodotto l’annotazione (ad esempio un software se
+  prodotta ``in silico'') 
+  \item il nome della feature (\textit{exon, CDS, 5UTR, 3UTR, start\_codon,
+    stop\_codon}) 
+  \item la posizione (1-based, non si parte da 0 ma 1 con gli indici) di inizio
+  della feature sulla genomica di riferimento 
+  \item la posizione (1-based) di fine della feature sulla genomica di
+  riferimento 
+  \item lo score della feature
+  \item lo strand (``+'', ''-''). In un file GTF possono coesistere geni che si
+  esprimo su strand opposti e che vengono annotati su un'unica genomica di
+  riferimento. Il GTF permette di annotare un gene che contiene il sup locus
+  sulla catena opposto e questo campo mi permette di segnalare la cosa. Se ho
+  ``-'' so che il gene è sullo strand opposto rispetto a quello della genomica
+  di riferimento (con ``+'' è sullo stesso). Con ``-'' e features del gene
+  avranno coordinate decrescenti passando da sinistra a destra sul trascritto
+  mentre con ``+'' avranno coordinate crescenti passando da sinistra a destra
+  sul trascritto. Ne segue che:
+  \begin{itemize}
+    \item per ottenere la sequenza di una feature con strand ``+'' basta
+    estrarre la sottostringa della genomica di riferimento che corrisponde alla
+    feature 
+    \item per ottenere la sequenza di una feature con strand ``-'' bisogna
+    estrarre la sottostringa della genomica di riferimento che corrisponde alla
+    feature e fare \textit{reverse\&complement} della sottostringa estratta
+  \end{itemize}
+  \item il frame (0, 1, 2) solo per feature CDS, start\_codon
+  e stop\_codon. Nel dettaglio si ha che:
+  \begin{itemize}
+    \item 0, sela prima base della feature è la prima base di un codone 
+    \item 1, se la prima base della feature è la terza base di un codone
+    \item 2, se la prima base della feature è la seconda base di un codone 
+  \end{itemize}
+  Per le altre feature trovo un ``.''
+  \item il campo degli attributi della feature come coppie chiave-valore: 
+  \small{\textit{<attribute\_name1> <value1>; <attribute\_name2> <value2>;
+      ...}}\\ 
+  Gli attributi \textit{gene\_id} e \textit{transcript\_id} sono attributi
+  obbligatori 
+\end{enumerate}
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
-% LocalWords:  superstringa sottostringa Euleriano scafholding
+% LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
+% LocalWords:  feature

@@ -3,11 +3,11 @@
 void A1(int* fdv){
   *fdv = 0;
 }
-void A2(int* j, int*fdv){
+void A2(int* j, int* fdv){
   *fdv = 1;
   *j = *j + 1;
 }
-void A3(int* j, int*fdv){
+void A3(int* j, int* fdv){
   *fdv = 0;
   *j = *j + 1;
 }

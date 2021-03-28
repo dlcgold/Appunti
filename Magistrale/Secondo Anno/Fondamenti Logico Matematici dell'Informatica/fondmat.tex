@@ -592,8 +592,9 @@ dato di input. Si ha quindi un diverso modello di calcolo/computazione.
 La \textbf{logica proposizionale intuizionistica} è il primo paradigma che
 trattiamo di \textbf{logica costruttiva}, dove appunto valgono la \textbf{DP} e
 la \textbf{EDP}, che sono i due requisiti minimali per dire che una logica è
-costruttiva. L'intuizionismo è il paradigma minimale di logica costruttiva.
-\section{Intuizionismo Proposizionale}
+costruttiva. L'intuizionismo proposizionale è il paradigma minimale di logica
+costruttiva. 
+\section{Sintassi}
 Iniziamo a parlare dell'intuizionismo proposizionale e già a livello di
 linguaggio si ha una differenza tra la logica classica e quella
 intuizionistica.\\
@@ -692,7 +693,12 @@ sotto-dimostrazioni, che contiene una coppia complementare, ovvero una formula
 segnata $T$ e la stessa formula segnata $F$. La logica intuizionistica (come 
 quella classica) è \textbf{decidibile} quindi con un numero finito di passi
 riesco sempre a stabilire se una formula è dimostrabile o meno nella logica
-intuizionistica. Nella logica intuizionistica, a differenza di quella classica,
+intuizionistica. Questo accade in quanto la lunghezza della formula è sempre
+finita, non si ha possibilità di generare formule infinite, e le regole vanno a
+destrutturare le formule ottenendo sempre formule di complessità minore ad ogni
+applicazione di regola e quindi prima o pi si arriva alle formule atomiche,
+finendo il processo in quanto non hanno ovviamente regole di destrutturazione.\\
+Nella logica intuizionistica, a differenza di quella classica,
 non tutti gli ordini di applicazione delle regole portano ad
 una tavola chiusa, ovvero ad una dimostrazione della formula, anche se la
 formula è dimostrabile. Esistono strategia di soluzione che non vanno a buon
@@ -700,7 +706,12 @@ fine e questo è dovuto all'ordine dell'applicazione delle regole e alla
 concorrenza tra l'applicazione di due regole. Le uniche regole che però hanno
 questo problema sono le due con restrizione. Non tutti (a priori rispetto
 all'ordine di applicazione delle regole) i tableaux quindi sono
-chiusi, a differenza della logica classica. 
+chiusi, a differenza della logica classica. Mi basta un tableaux chiuso (se
+ottengo più branch per una regola devono comunque chiudere tutti) per
+dimostrare che una formula è dimostrabile mentre per dire che non lo è mi serve
+che tutti i possibili tableaux non siano chiusi. Si ricorda che non è necessaria
+una formula atomica con $F$ e $T$ per chiudere un tableaux ma una qualsiasi FBF
+con $F$ e $T$.
 \begin{esempio}
   Vediamo che il principio del terzo escluso nell'intuizionismo non è
   dimostrabile.\\
@@ -778,9 +789,177 @@ chiusi, a differenza della logica classica.
   \[\neg (A\land B)\to (\neg A)\lor (\neg B)\]
   non è dimostrabile, non arrivando mai ad un tableaux chiuso. Non ho mai una
   strategia vincente  quindi la formula non è dimostrabile nella logica
-  intuizionistica. Dietro a questo comportamento si ha un motivo semantico. 
+  intuizionistica. Dietro a questo comportamento si ha un motivo semantico che
+  vedremo.  
 \end{esempio}
-Il motivo
+\begin{esempio}
+  Tramite i tableaux si vede che la legge della doppia negazione:
+  \[\neg\neg A\to A\]
+  non è dimostrabile (per di più avendo un solo cammino) in logica
+  intuizionistica. 
+\end{esempio}
+Si vedrà che la legge del terzo escluso o la legge della negazione, se aggiunti
+(ne basta uno dei due)
+alla logica intuizionistica la trasformano nella logica classica e viceversa, se
+nella logica classica non dimostro il terzo escluso o la doppia negazione
+ottengo la logica intuizionistica.
+\begin{esempio}
+  Tramite i tableaux si vede che la legge della conversa (non sono sicuro di
+  aver sentito bene il nome):
+  \[A\to \neg\neg A\]
+  è dimostrabile (per di più avendo un solo cammino) in logica
+  intuizionistica. \\ 
+  Si può quindi vedere come valendo un solo verso dell'implicazione (non vale la
+  legge della doppia negazione) non può valere l'equivalenza $A\iff\neg \neg A$
+  in logica intuizionistica.
+\end{esempio}
+Il backtracking ha conseguenze nella complessità dell'algoritmo di decisione
+della logica proposizionale intuizionistica che è stato dimostrato da Stackman
+avere complessità spaziale pari a: 
+\[O(n+\log n)\]
+Il backtracking si può iterare a seconda dell'ordine delle regole.\\
+Non posso dire nell'intuizionismo che vale $A$ sse non vale $\neg\neg
+A$. Infatti il sse altro non è che:
+\[A\iff\neg \neg A\]
+e quindi dovrei avere sia che:
+\[A\to\neg \neg A\]
+\[\neg \neg A\to A\]
+ma abbiamo solo la prima valida.
+\begin{esempio}
+  Ci chiediamo se la formula:
+  \[A\to B\]
+  equivale, come in logica classica, a:
+  \[\neg A\lor B\]
+  ovvero:
+  \[A\to B\iff \neg A\lor B\]
+  Già da subito possiamo dire che non vale in quanto si avrebbe dipendenza tra
+  connettivi, cosa che abbiamo detto non esistere in logica intuizionistica.\\
+  Vediamo se sono dimostrabili i due versi:
+  \[(A\to B)\to(\neg A\lor B)\]
+  \[(\neg A\lor B)\to(A\to B)\]
+  Facendo i passaggi si dimostra che la prima formula non è dimostrabile e
+  quindi già sappiamo che non vale il sse. Comunque possiamo fare i conti e
+  veder che il secondo verso è dimostrabile in logica intuizionistica.
+\end{esempio}
+\noindent
+Vediamo un trucco per le strategia:
+\textit{se si ha una formula la cui regola restringe $S$ a $S_T$ se ho formule
+complesse segnate $T$ mi conviene aspettare ad applicare queste $T$ e
+applicare la $F$ delle regole che restringono, ovvero quelle di $\neg$ e
+$\to$.}\\
+Abbiamo quindi descritto un genuino sistema di decisione con però un piccolo
+problema per il quale serve un esempio. 
+\begin{esempio}
+  Proviamo a vedere se la formula della doppia negazione del principio del terzo
+  escluso è dimostrabile nella logica intuizionistica. Studiamo quindi la
+  formula: 
+  \[\neg\neg(A\lor \neg A)\]
+  Si ha quindi:
+  \[F(\neg\neg(A\lor \neg A))\]
+  E quindi:
+  \[\frac{F(\neg\neg(A\lor \neg A))}{T(\neg (A\lor \neg A))}\]
+  Da cui segue:
+  \[\frac{T(\neg (A\lor \neg A))}{F(A\lor \neg A)}\]
+  Proseguendo:
+  \[\frac{F(A\lor \neg A)}{FA, F(\neg A)}\]
+  E infine:
+  \[\frac{FA, F(\neg A)}{TA}\]
+  Coi soliti passaggi si arriverebbe (si noti il condizionale) a dire che non è
+  dimostrabile arrivando nell'unico percorso possibile ad un tableaux non
+  chiuso. \\
+  Anche Fitting arriva a questa conclusione
+\end{esempio}
+Ma per capire meglio il problema serve un teorema.
+\begin{teorema}[Teorema di Kolmogorov-Glivenko]
+  Se una formula $A$ è dimostrabile in logica classica allora e solo allora è
+  dimostrabile in logica intuizionistica la doppia negazione di tale formula, a
+  livello proposizionale (a livello predicativo se cose si complicano
+  particolarmente). 
+\end{teorema}
+Ma questo stona rispetto all'esempio appena fatto. Il terzo escluso è
+dimostrabile in logica classica e quindi ci aspetteremmo che la sua doppia
+negazione sia dimostrabile in logica intuizionistica, contraddicendo il teorema.
+Proviamo a rivedere i conti:
+\[F(\neg\neg(A\lor \neg A))\]
+E quindi:
+\[\frac{F(\neg\neg(A\lor \neg A))}{T(\neg (A\lor \neg A))}\]
+da cui segue:
+\[\frac{T(\neg (A\lor \neg A))}{F(A\lor \neg A)}\]
+applicando però $T$ di $\neg$ mi premuro di riscrivere la formula a cui ho
+applicato la regola, ottenendo al posto del risultato precedente:
+\[\frac{T(\neg (A\lor \neg A))}{F(A\lor \neg A), T(\neg (A\lor \neg A))}\]
+questo complica molto il calcolo ma si dimostrerà che comunque ripetere le
+formule non rende il calcolo infinito.\\
+Ora avrei più scelte quindi lo segnalo con il solito asterisco:
+\[*F(A\lor \neg A), T(\neg (A\lor \neg A))\]
+Proseguo in primis con l'$F$ dell'or:
+\[\frac{F(A\lor \neg A), T(\neg (A\lor \neg A))}{FA, F(\neg A), T(\neg (A\lor
+    \neg A))}\]
+Anche qui ho più scelte, lo segnalo:
+\[**FA, F(\neg A), T(\neg (A\lor\neg A))\]
+Proseguo con $F$ di $\neg$:
+\[\frac{FA, F(\neg A), T(\neg (A\lor\neg A))}{TA, T(\neg (A\lor\neg A))}\]
+Proseguo con $T$ di $\neg$:
+\[\frac{TA, T(\neg (A\lor\neg A))}{TA, F(A\lor\neg A)}\]
+E quindi:
+\[\frac{TA, F(A\lor\neg A)}{TA, FA, F(\neg A)}\]
+Avendo $TA$ e $FA$ mi posso fermare avendo chiuso il tableaux (si nota che
+risolvere il $\neg$ avrebbe portato ad avere $TA,TA$ non chiudendo il
+tableaux). Si è quindi dimostrato che la formula è dimostrabile, confermando
+quanto detto nel teorema di di Kolmogorov-Glivenko.\\
+Ripetere ogni volta la regola come fatto al secondo passaggio, però renderebbe
+il tableaux ingestibile e renderebbe il calcolo semi-decidibile, perché se la
+formula non è dimostrabile posso andare avanti all'infinito a ripetere le
+formule, comportando un serio problema. Si nota inoltre che abbiamo subito
+scelto il percorso che portava alla chiusura ma ci sono stati due punti in cui
+abbiamo scelto una regola rispetto ad un'altra. La seconda scelta nella formula
+con $*$ avrebbe portato ad un tableaux non chiuso (e si vedeva quasi ad occhio
+che lo avrebbe fatto). Anche in merito alla formula con $**$ si nota che la
+seconda scelta avrebbe portato ad un tableaux che non chiudeva. \\
+Possiamo dire che la regola di poter riusare le formule a cui applichi la regola
+riportandola nel tableaux è una sorta di \textbf{meta-regola}. L'aggiunta di
+questa meta-regola è un calcolo completo rispetto alla logica proposizionale
+intuizionistica, ovvero tutte le formule intuizionistiche dimostrabili hanno un
+tableaux chiuso.\\
+Le uniche formule che eventualmente richiedono al ripetizione, ovvero l'uso di
+questa meta-regola, sono le formule $T$ di $\neg$ e $T$ di $\to$. Possiamo
+quindi riformulare quelle due regole.\\
+Per il $\to$:
+\[T\to=\frac{S,T(A\to B)}{S,FA,T(A\to B)/S,TB}\]
+notando che nella seconda parte non devo ripetere la formula.\\
+Per il $\neg$:
+\[T\neg=\frac{S,T(\neg A)}{S,FA,T(\neg A)}\]
+Con le regole così modificate (queste due modificate più tutte le altre non
+modificate) abbiamo un \textbf{calcolo completo e corretto} per la 
+logica proposizionale intuizionistica. Non ci sono quindi formule dimostrabili
+intuizionisticamente per cui non esiste un tableaux chiuso con le regole
+descritte. D'ora in poi per i due casi useremo sempre le due nuove regole
+modificate anche se potenzialmente non è sempre necessario. Se ottengo un
+tableaux chiuso senza ripetizione lo ottengo anche con ma se lo ottengo con la
+ripetizione non per forza lo ottengo senza. Volendo posso ricordarmi della
+ripetizione usando un ``placeholder'' senza dover riscrivere ogni volta la
+formula intera  per segnalare che in caso non riesca a
+chiudere il tableaux senza la ripetizione posso usare la ripetizione.\\ 
+Esplicitare i due casi in cui può servire la ripetizione della formula è un
+grande aiuto dal punto di vista computazionale, essendo solo due casi.\\
+\textit{In logica classica predicativa si ha una situazione analoga per quanto
+  riguarda l'istanziazione dei parametri, con la $T$ di $\forall$ e la $F$ di
+  $\exists$ (controllare appunti di fondamenti dell'informatica)}.\\
+La logica classica proposizionale non richiederebbe mai un artificio simile a
+quello della meta-regola, così come non richiede backtracking perché vale la
+\textbf{proprietà di Chruch-Rosser} che ci assicura che se un tableaux deve
+chiudere chiuderà qualsiasi percorso si scelga.\\
+Ricordando che $\neg\neg A\to A$ non è dimostrabile intuizionisticamente ma
+sappiamo che vale classicamente essendo una tautologia classica. Ma allora, per
+il teorema di Kolmogorov-Glivenko al formula:
+\[\neg\neg(\neg\neg A\to A)\]
+è dimostrabile in logica intuizionistica e si può verificare coi soliti
+passaggi (usando per di più una sola volta una ripetizione, nonostante
+potenzialmente se ne creino di più durante la dimostrazione).
+\section{Semantica}
+Abbiamo parlato finora di \textbf{sintassi}, parliamo ora della
+\textbf{semantica}, in termini di \textbf{modelli di Kripke}
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare Prolog Morgan
-% LocalWords:  condizionalmente l'algoritmicità
+% LocalWords:  condizionalmente l'algoritmicità tableaux intuizionisticamente
+% LocalWords:  l'istanziazione

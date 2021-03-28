@@ -588,7 +588,7 @@ computazione è un'\textit{istanza di dimostrazione} che varia di caso in caso e
 quindi non si ha una dimostrazione generale. Possiamo dire che un programma
 Prolog non rappresenta l'algoritmo che risolve il problema specificato per ogni
 dato di input. Si ha quindi un diverso modello di calcolo/computazione.
-\chapter{Logica Proposizionale Intuizionistica}
+\chapter{Logica Intuizionistica}
 La \textbf{logica proposizionale intuizionistica} è il primo paradigma che
 trattiamo di \textbf{logica costruttiva}, dove appunto valgono la \textbf{DP} e
 la \textbf{EDP}, che sono i due requisiti minimali per dire che una logica è
@@ -709,9 +709,73 @@ chiusi, a differenza della logica classica.
   e chiediamoci se è dimostrabile nella logica intuizionistica.\\
   So che non lo è quindi mi aspetto di non trovare un tableaux chiuso, ovvero
   che termina con tutti i rami che contengono una formula segnata $T$ e la stessa
-  segnata $F$. Tale formula può essere diversa ramo per ramo.
-  %37.49 lezione2
+  segnata $F$. Tale formula può essere diversa ramo per ramo anche se non
+  succederà in questo caso avendo solo $A$.\\
+  Parto segnando $F$ la formula:
+  \[F(A\lor \neg A)\]
+  Applico la $F$ di $\lor$:
+  \[\frac{F(A\lor \neg A)}{FA,F(\neg A)}\]
+  Applico ora l'unica regola che posso applicare, essendo $A$ atomica, ovvero
+  la $F$ di $\neg$ (con praticamente $S=FA$ e quindi $S_T=\emptyset$):
+  \[\frac{FA,F(\neg A)}{TA}\]
+  Questo tableaux non è un tableaux chiuso e quindi la formula non è
+  dimostrabile nella logica intuizionistica, come volevasi dimostrare.
 \end{esempio}
+\begin{esempio}
+  Vediamo un'altro esempio.\\
+  Prendiamo la legge di De Morgan:
+  \[\neg (A\lor B)\to (\neg A)\land (\neg B)\]
+  Parto con la dimostrazione:
+  \[F(\neg (A\lor B)\to (\neg A)\land (\neg B))\]
+  Procedo con l'implicazione:
+  \[\frac{F(\neg (A\lor B)\to (\neg A)\land (\neg B))}{T(\neg (A\lor B)),F((\neg
+      A)\land (\neg B))}\]
+  Qui entra il problema della strategia. In questa situazione potrei applicare
+  il $T$ di $\neg$ o l'$F$ di $\land$. Nella mia testa, o nel prover, devo
+  comunque ricordare che ad un certo punto avevo la scelta, in modo da poter
+  fare backtracking qualora non si chiuda il tableaux. Si ricorda che questo non
+  poteva avvenire in logica classica. Lo segnalo con un
+  asterisco:
+  \[*T(\neg (A\lor B)),F((\neg A)\land (\neg B))\]
+  Procedo prima con il $T$ di $\neg$:
+  \[\frac{T(\neg (A\lor B)),F((\neg A)\land (\neg B))}{F(A\lor B), F((\neg
+      A)\land (\neg B))}\]
+  Ma anche qui ho più scelte (l'$F$ di $\lor$ e l'$F$ di $\land$), me lo segno
+  con due asterischi: 
+  \[**F(A\lor B), F((\neg A)\land (\neg B))\]
+  Scelgo la $F$ di $\lor$ perché non crea branch:
+  \[\frac{F(A\lor B), F((\neg A)\land (\neg B))}{FA, FB, F((\neg A)\land (\neg
+      B))}\]
+  Procedo con la $F$ di $\land$, creando due branch:
+  \[\frac{FA, FB, F((\neg A)\land (\neg B))}{FA, FB, F(\neg A)/ FA, FB, F(\neg
+      B)}\]
+  Ma:
+  \[\frac{FA, FB, F(\neg A)/ FA, FB, F(\neg B)}{TA/TB}\]
+  e quindi il tableaux non è chiuso. Effettuo il backtracking cominciando dal
+  primo asterisco. Torno alla formula e rimuovo l'asterisco:
+  \[T(\neg (A\lor B)),F((\neg A)\land (\neg B))\]
+  Applico quindi la $F$ di $\land$:
+  \[\frac{T(\neg (A\lor B)),F((\neg A)\land (\neg B))}{T(\neg (A\lor B)),F(\neg
+      A)/T(\neg (A\lor B)),F(\neg B)}\]
+  Studiamo i due branch in parallelo ma devo mettere un asterisco, potendo fare
+  sia $T$ che $F$ di $\neg$:
+  \[*T(\neg (A\lor B)),F(\neg A)/T(\neg (A\lor B)),F(\neg B)\]
+  Conviene fare il $F$ di $\neg$ perché conserviamo l'altra parte di formula:
+  \[\frac{T(\neg (A\lor B)),F(\neg A)/T(\neg (A\lor B)),F(\neg B)}{T(\neg (A\lor
+      B)),TA/T(\neg (A\lor B)),TB}\] 
+  Procedo con la $T$ di $\neg$:
+  \[\frac{T(\neg (A\lor B)),TA/T(\neg (A\lor B)),TB}{F(A\lor B),TA/F(A\lor B),
+      TB}\]
+   e quindi, con l'$F$ di $\lor$:
+   \[\frac{F(A\lor B),TA/F(A\lor B), TB}{FA,FB,TA/FA,FB,TB}\]
+   Nel primo branch ho $FA$ e $TA$ e quindi ho una formula con sia $F$ che $T$,
+   ovvero $A$. Discorso analogo nel secondo con $B$ e quindi il tableaux è
+   chiuso. Quindi questa legge di De Morgan è dimostrabile in logica
+   proposizione intuizionistica. Mi basta una percorso che porta ad un
+   tableaux chiuso (e volendo qui si potrebbe vedere che è anche l'unica facendo
+   gli altri percorsi mancanti). 
+ \end{esempio}
+ %58.40 lezione 2
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare Prolog Morgan
 % LocalWords:  condizionalmente l'algoritmicità

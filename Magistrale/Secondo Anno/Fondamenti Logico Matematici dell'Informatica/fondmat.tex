@@ -117,11 +117,13 @@
   contenere errori, sia di stampa che di vero e proprio contenuto. Per
   eventuali proposte di correzione effettuare una pull request. Link: }
 \url{https://github.com/dlcgold/Appunti}.\\
-\chapter{Il Paradigma Dimostrazioni = Algoritmi}
+\chapter{Dimostrazioni = Algoritmi}
+Parliamo in primis del \textbf{paradigma dimostrazioni = algoritmi}.\\
 Prendiamo come \textit{linguaggio di specifica} un \textbf{linguaggio
   del prim'ordine con identità}.
 \begin{shaded}
-  Si ricorda che, in \textit{logica matematica}:
+  Si riportano alcune definizioni utili in \textit{logica matematica} tratte da
+  Wikipedia: 
   \begin{definizione}
     Definiamo \textbf{linguaggio del primo ordine} come un linguaggio formale
     che serve per gestire meccanicamente enunciati e ragionamenti che
@@ -345,8 +347,218 @@ dimostrazione classica di $A\lor\neg A$ io non tiro fuori una dimostrazione
 classica di $A$ oppure una dimostrazione classica di $\neg A$ quindi non vale la
 DP. Inoltre non vale nemmeno la EDP, ho dimostrato l'esistenza di $n$ e $m$ (che
 sono termini chiusi) ma non ho trovato se vale la proprietà che siano
-irrazionali. La logica classica quindi non è una logica costruttiva.\\
-%20.00
+irrazionali. La logica classica quindi non è una logica costruttiva.
+\section{Interpretazione BHK}
+Passiamo quindi ad una semantica informale che per ogni costante logica associa
+una condizione per la sua \textit{costruibilità}. Questa è
+\textbf{l'interpretazione Brouwer-Heyting-Kreisel (\textit{BHK})}.
+\begin{definizione}
+  Presa una costruzione $\pi$ per questa semantica proposizionale si ha che:
+  \begin{itemize}
+    \item $\pi(A\land B)=\pi'(A)\mbox{ e } \pi''(B)$ ovvero una costruzione di
+    $A\land B$ e uguale ad un'altra costruzione di $A$ \textbf{e} un'altra
+    ancora di $B$ 
+    \item $\pi(A\lor B)=\pi'(A)\mbox{ o } \pi''(B)$ ovvero una costruzione di
+    $A\lor B$ e uguale ad un'altra costruzione di $A$ \textbf{o} un'altra ancora
+    di $B$
+    \item $\pi(A\implies B)$ è una funzione  (o un funzionale, ovvero un
+    insieme di funzioni) $f$ che associa ad ogni
+    costruzione $\pi'(A)$ una costruzione $\pi''(B)$ tale che
+    $\pi''=f(\pi')$. Quindi $f$ associa costruzioni di $A$ a costruzioni di $B$
+    \item $\pi(\neg A)$ è una costruzione $\pi'$ di $A\implies\bot$
+  \end{itemize}
+  Lato semantica predicativa si ha che, dato un dominio $D$ per la variabile
+  $x$: 
+  \begin{itemize}
+    \item $\pi(\exists xA(x))=\langle c,\pi'\rangle|\,c\in D\mbox{ e
+    }\pi'(A(c))$ quindi è uguale ad una coppia $=\langle c,\pi'\rangle$ tale che
+    $c$ appartiene al dominio e $\pi'$ è una costruzione effettiva di $A(c)$
+    \item $\pi(\forall xA(x))=$ è una funzione $f$ che associa ad ogni elemento
+    $c\in D$ una costruzione $\pi'(A(c))$ tale che $\pi'=f(c)$
+  \end{itemize}
+\end{definizione}
+Questa semantica ``naive'' ha alcune problematiche/aporie:
+\begin{itemize}
+  \item la BHK non specifica la costruzione di una formula atomica
+  \item la BHK non dimostra il falso infatti nella costruzione di $\neg$
+  associamo la costruzione del $\neg A$ a quella dell'implicazione, che è una
+  costruzione che associa costruzioni di $A$ e costruzioni di $B$ e quindi
+  nessuna costruzione potrebbe avere il falso (???)
+\end{itemize}
+Bisognerà quindi chiarire alcune restrizioni dell'interpretazione BHK.\\
+Si hanno varie semantiche per il costruttivismo che hanno ``precisato'' la BHK:
+\begin{itemize}
+  \item la semantica della\textbf{realizzabilità ricorsiva} di Kleene
+  \item la semantica dell'\textbf{interpretazione dialettica} di G\"{o}del
+  \item la semantica delle \textbf{prove possibili} di Prawitz
+  \item la semantica dei \textbf{problemi finiti} di Medvedev
+\end{itemize}
+Queste 4 semantiche sono coerenti con la BHK e quindi sono \textbf{semantiche
+  del costruttivismo}.\\
+Passiamo ora ad una definizione formale.
+\begin{definizione}
+  Definiamo come \textbf{sistema costruttivo} un sistema $S$:
+  \[S=T+L\]
+  dove:
+  \begin{itemize}
+    \item $T$ è una teoria con assiomi di forma particolare
+    \item $L$ è una logica intuizionistica, che prendiamo come punto di partenza
+    per il costruttivismo, con le sue estensioni
+  \end{itemize}
+  Non sempre comunque date $T$ e $L$ si ha che $S$ è un sistema costruttivo.
+\end{definizione}
+Un esempio di sistema costruttivo è dato dall'\textbf{aritmetica
+  intuizionistica}, ovvero la PA interpretata all'interno della logica
+intuizionistica. Altri esempi sono le \textbf{teorie con assiomi di Harrop},
+teorie con assiomi $\forall\exists$ con matrice positiva priva di quantificatori
+e con minimo modello di Herbrandt etc$\ldots$\\ 
+Le clausole di Horn usate i Prolog hanno un
+modello minimo di Herbrandt e hanno  assiomi $\forall\exists$ con matrice
+positiva priva di quantificatori dove $\exists$ viene eliminato attraverso
+skolemizzazione e il $\forall$ è implicito nelle regole del programma in quanto
+tutte le $X$, $Y$ etc$\ldots$ si intendono quantificati universalmente.\\
+Quindi la parte assiomatica di una teoria non basta a rendere costruttivo il
+sistema anche se la logica è costruttiva. Tuttavia se si restringono le
+assiomatizzazioni con formule del primo ordine di tipo particolare si possono
+ottenere sistemi costruttivi in cui vale come minimo la \textit{DP} e la
+\textit{EDP}.
+\section{Deduzione naturale}
+Vediamo un accenno della \textbf{deduzione naturale} ovvero di un
+\textbf{calcolo diretto} (quindi differente dal calcolo indiretto dei
+tableaux). Nella deduzione naturale si ha per ogni connettivo una \textbf{regola
+di introduzione} $i$ e una \textbf{regola di eliminazione} $e$. Ad esempio se ho
+$A$ e $B$ come premesse posso introdurre l'and con la regola d:i introduzione
+dell'and: 
+\[\frac{A\,\,\,\,B}{A\land B}i\land\]
+Se invece ho $A\land B$ come premessa posso usare la regola di eliminazione
+dell'and, producendo:
+\[\frac{A\land B}{A}e\land\mbox{ oppure }\frac{A\land B}{B}e\land\]
+Avendo quindi due regole di eliminazione per l'and.\\
+Passiamo all'or. Ho due regole di introduzione:
+\[\frac{A}{A\lor B}i\lor\mbox{ oppure }\frac{B}{A\lor B}i\lor\]
+L'eliminazione della or è complessa e verrà trattata più avanti ma è della
+forma:
+\[\frac{A\lor B\,\,\,\,C\,\,\,\,C}{C}e\lor\]
+Dove si ha che se se ho $A\lor B$ come premessa e assumendo $A$ ho $C$ ma anche
+assumendo $B$ ho $C$ posso eliminare l'or e ottenere $C$.\\
+Passiamo all'implicazione. Se ho come assunzione $A$ e da $B$ riesco a
+dimostrare $B$ allora posso introdurre l'implicazione:
+\[\frac{\stackrel{\stackrel{[A]}{\cdots}}{B}}{A\implies B}i\implies\]
+Per l'eliminazione ho che, tramite \textbf{modus ponens}:
+\[\frac{A\implies B\,\,\,\,A}{B}e\implies\]
+Abbiamo poi la \textbf{regola del falso} che dice che dal falso segue qualsiasi
+cosa: 
+\[\frac{\bot}{B}\bot\]
+e la regola dell'eliminazione della negazione che dice che se assumo $\neg A$ e
+ottengo il falso significa che si è ottenuta una contraddizione e quindi elimino
+il $\neg$:
+\[\frac{\stackrel{[\neg A]}{\bot}}{A}e\neg\]
+Passiamo al $\forall$. Se ho dedotto $A(p)$ per $p$ generico posso introdurre il
+$\forall$:
+\[\frac{A(p)}{\forall xA(x)}i\forall\]
+Se ho come assunzione $\forall xA(x)$ posso dedurre un qualsiasi $A(t)$:
+\[\frac{\forall xA(x)}{A(t)}e\forall\]
+Possiamo fare l'equivalente per l'$\exists$, dove se esiste $A(t)$ posso dedurre
+l'esistenza di un certo $x$ per cui vale $A(x)$:
+\[\frac{A(t)}{\exists xA(x)}i\exists\]
+L'eliminazione dell'esiste è complessa e verrà trattata più avanti ma è della
+forma:
+\[\frac{\exists xA(x)\,\,\,\,\stackrel{[A(p)]}{C}}{C}e\exists\]
+Dove assumendo $\exists xA(x)$, assumendo $A(p)$ con $p$ generico e riuscendo ad
+ottenere $C$ da quest'ultima assunzione con una serie di restrizioni posso
+ottenere $C$ eliminando $\exists$.\\
+Una dimostrazione in deduzione naturale è modulare alle logiche si vogliono
+usare:
+\begin{itemize}
+  \item nelle dimostrazioni in logica classica utilizzo tutte le regole della
+  deduzione naturale appena introdotte
+  \item nelle dimostrazioni in logica intuizionistica non devo usare la regola
+  di eliminazione della negazione
+  \item  nelle dimostrazioni in logica minimale non devo usare la regola
+  di eliminazione della negazione e nemmeno la regola che dal falso segue
+  qualsiasi cosa
+\end{itemize}
+Possiamo quindi caratterizzare queste tre logiche e nelle ultime due, quella
+intuizionistica e quella minimale, si può dimostrare che valgono DP e EDP mentre
+non posso dire lo 
+stesso per la logica classica. Si ha inoltre che:
+\[\mbox{logica minimale}\subseteq\mbox{logica
+    intuizionistica}\subseteq\mbox{logica classica}\]
+Discorso diverso vale per le teorie, ovvero per i sistemi, dove
+l'assiomatizzazione può fare la differenza portando anche fuori dalla
+costruttività (se ad esempio assumo come assioma che $\forall xA(x)\lor\neg
+A(x)$ e gli aggiungo la logica intuizionistica ottengo la logica classica che
+non è costruttiva).\\
+Una teoria specifica è l'aritmetica di Peano dove si hanno i seguenti assiomi:
+\begin{itemize}
+  \item $\forall x\neg(S(x)=0)$
+  \item $\forall x\forall y(S(x)=S(y)\implies x=y)$
+  \item $\forall x(x+0=x)$
+  \item $\forall x\forall y(x+S(y)=S(x+y))$
+  \item $\forall x(x\times 0 =0)$
+  \item $\forall x\forall y(x\times S(y)=(x\times y)+x)$
+\end{itemize}
+Dove si ha la regola d'identità che in realtà sono due, ovvero $id1$ e $id2$:
+\[\frac{}{x=x}id1\mbox{ e } \frac{x=y\,\,\,\,A(x)}{A(y)}id2\]
+Dove si ha anche il principio/regola d'induzione:
+\[\frac{A(0)\,\,\,\,\stackrel{\stackrel{[A(j)]}{\cdots}}{A(S(j))}}{A(t)}ind\]
+Dove se dimostro $A(0)$ e assunto $A(j)$ dimostro il successore di $A(j)$ allora
+posso dedurre $A(t),\forall t$.
+\begin{esempio}
+  Vediamo ora un esempio con degli assiomi specifici, costruttivi:
+  \begin{itemize}
+    \item $pari(0)$
+    \item $\forall x(pari(x)\implies \neg pari(S(x)))$
+    \item $\forall x(\neg pari(x)\implies pari(S(x)))$
+  \end{itemize}
+  Quindi si ha che se $x$ è apri non lo è il successore e se $x$ non è pari lo è
+  il successore. Assumiamo inoltre che 0 sia pari.\\
+  \textup{Scritta così potrebbe essere riscritta ``1:1'' in Prolog.}\\
+  Cerchiamo quindi din dimostrare che che:
+  \[\forall x(pari(x)\lor \neg pari(x))\]
+  che si può pensare si un terzo escluso e quindi valga sempre. Questa formula,
+  a 
+  livello di specifica, va letta come una funzione ``per ogni numero naturale
+  costruisce $pari(x)$ o $\neg pari(x)$'' quindi costruisce o la parte sinistra
+  o 
+  la parte destra. Quindi la formula i può leggere come la specifica di
+  algoritmo 
+  che per ogni naturale mi dice se vale la parte sinistra o la parte destra
+  dell'or e quindi è un algoritmo di decisione effettivo che per ogni naturale
+  ti 
+  dice se è pari o non è pari. Questa è un'interpretazione diversa da quella
+  classica. \\
+  Posso quindi fare una dimostrazione per induzione.\\
+  Il \textbf{caso base} è, chiamando $pari$ $p$, assunto per assioma $p(0)$ e
+  usando l'introduzione dell'or:
+  \[\frac{p(0)}{p(0)\lor \neg p(0)}i\lor\]
+  Passo al \textbf{caso passo}.\\
+  Assumo per ipotesi induttiva $p(j)\lor \neg p(j)$ e assumiamo $\forall
+  x(p(x)\lor \neg p(S(x)))$ che è un altro degli assiomi. Procedo eliminando il
+  $\forall$:
+  \[\frac{\forall x(p(x)\lor \neg p(S(x)))}{p(j),p(j)\implies\neg
+      p(S(j))}e\forall\]
+  procedo quindi eliminando l'implicazione:
+  \[\frac{p(j),p(j)\implies\neg
+      p(S(j))}{\neg p(S(j))}e\implies\]
+  e continuo inserendo l'or:
+  \[\frac{\neg p(S(j))}{p(S(j))\lor\neg p(S(j))}i\lor\]
+  Analogamente faccio per l'altro assioma $\forall x(\neg p(x)\lor p(S(x)))$:
+  \[\frac{\forall x(\neg p(S(x) )\lor  p(S(x)))}{\neg p(j),\neg p(j)\implies
+      p(S(j))}e\forall\]
+  \[\frac{\neg p(j),\neg p(j)\implies
+      p(S(j))}{p(S(j))}e\implies\]
+  \[\frac{p(S(j))}{p(S(j))\lor\neg p(S(j))}i\lor\]
+  Partendo quindi da $p(j)\lor \neg p(j)$ posso fare l'eliminazione dell'or
+  ottenendo il \textbf{caso passo}:
+  \[\frac{p(j)\lor\neg p(j)}{p(S(j))\lor\neg p(S(j))}e\lor\]
+  e quindi posso concludere il passo induttivo:
+  \[\frac{p(0)\lor \neg p(0)\,\,\,\,p(S(j))\lor\neg p(S(j))}{\forall
+      x(p(x)\lor \neg p(x))}ind\]
+  concludendo al dimostrazione.
+\end{esempio}
+
+
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare
 % LocalWords:  condizionalmente

@@ -1483,8 +1483,64 @@ queste distanze, che rappresenta il minimo numero di operazioni epr trasformare
 una stringa in un'altra. Un altra è la \textbf{distanza di Hamming}, che si
 riferisce a sequenze di distanza uguale, senza ammettere spazi, calcolando il
 numero di posizioni in cui si hanno mismatch. Non si hanno inserzioni e
-delezioni in Hamming, mentre si hanno entrambe in edit.
-
+delezioni in Hamming, mentre si hanno entrambe in edit.\\
+Le matrici di confronto più note, per il confronto proteico, sono le:
+\begin{itemize}
+  \item \textbf{PAM (\textit{point accepted mutations})}
+  \item \textbf{BLOSUM (\textit{blcok substitution})}
+\end{itemize}
+\subsection{Allineamento Multiplo}
+Ricordiamo che l'allineamento multiplo permette di confrontare più specie,
+cercando di studiare i cambiamenti evolutivi. L'allineamento multiplo rivela
+similarità che con l'allineamento normale non si riescono a comprendere. 
+Per praticità consideriamo tre sequenze e quindi 3 dimensioni.\\
+Confrontando 3 sequenze ho quindi bisogno di un cammino in uno spazio a tre
+dimensioni. Si usa il cosiddetto \textbf{3-D Manhattan cube} che comporta un
+\textbf{3-D edit graph}.\\
+Pensando a come posso arrivare ad un punto ho quindi non più 3 modi, come nel
+caso a due dimensioni, ma ne ho 7:
+\[s_{i,jk}=\max
+  \begin{cases}
+    s_{i-1,j-1,k-1}+\delta(v_j,w_k,u_k)\\
+    s_{i-1,j-1,k}+\delta(v_j,w_k,\_)\\
+    s_{i-1,j,k-1}+\delta(v_j,\_,u_k)\\
+    s_{i,j-1,k-1}+\delta(\_,w_k,u_k)\\
+    s_{i-1,j,k}+\delta(v_j,\_,\_)\\
+    s_{i,j-1,k}+\delta(\_,w_k,\_)\\
+    s_{i,j,k-1}+\delta(\_,\_,u_k)\\  
+  \end{cases}
+\]
+Si arriva a:
+\[O(n^3)\]
+mentre per $k$ dimensioni si avrebbe:
+\[O(2^kn^k)\]
+Per $k$ fissato è quindi parametrico ma se non so quante $k$ sequenze ho è un
+problema particolarmente complesso, esponenziale. \\
+Ogni allineamento multiplo comporta, nei passaggi interni, allineamenti a
+coppie, per poi ``chiudere'' tramite la transitività.\\
+Dall'allineamento multiplo induco all'allineamento a coppie ma non vale il
+viceversa, avendo che partendo da coppie di allineamento potrei avere tipologie
+diverse di allineamento a parità di sequenza non potendo quindi usare la
+transitività. Potrei quindi arrivare a inconsistenze.\\
+Per allineare possiamo usare un approccio greedy. Si considerino 4 sequenze, si
+hanno quindi:
+\[{{4}\choose {2}}=6\]
+possibilità di allineamento. Si usa il \textbf{progressive alignment} e non si
+usa quindi una strategia di programmazione dinamica.\\
+Un altro metodo è quello già anticipato del \textbf{sum of pairs score
+  (\textit{SP-Score})}. \\
+L'allineamento multiplo può anche essere visualizzato come un grafo, tramite il
+\textbf{grafo del pangenoma}. In tale grafo si ha un nodo in corrispondenza di
+match perfetto e vari branch in presenza di non match. Posso tenere traccia dei
+``collassamenti'' in un solo nodo dei vari match e della sequenza di provenienza
+di ogni nodo. Valutando i percorsi studio gli allineamenti anche se potrei avere
+un percorso non corrispondente ad alcuna sequenza e questo è un side
+effect. Questa rappresentazione ha i suoi vantaggi, definendo il \textbf{partial
+order multiple sequence alignment} per cui ogni volta che arriva una nuova
+sequenza il confronto avviene direttamente con il grafo, arricchendolo,
+ottenendo un modo efficienze per fare allineamento multiplo in modo
+incrementale. Il creatore di questo metodo ha anche sviluppato un metodo simile
+per confrontare più grafi.
 
 
 

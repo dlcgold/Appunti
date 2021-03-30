@@ -3109,10 +3109,83 @@ Moltiplico per $p_i$:
 \[p_i\log_r \frac{1}{p_i}\leq p_il_i<p_i \log_r\frac{1}{p_i}+p_i\]
 e sommo tutto:
 \[\sum_{i=1}^qp_i\log_r \frac{1}{p_i}\leq \sum_{i=1}^qp_il_i<\sum_{i=1}^qp_i
-  \log_r\frac{1}{p_i}+\sum_{i=1}^q p_il_ip_i\] 
+  \log_r\frac{1}{p_i}+\sum_{i=1}^q p_i\] 
 Ma è:
-\[H_r(S)\geq L< H_r(S)+1\]
-Avendo ottenuto i limiti superiore e inferiore.
+\[H_r(S)\leq L< H_r(S)+1\]
+Avendo ottenuto i limiti superiore e inferiore (anche se quello inferiore già si
+sapeva, visto che $H_r(S)\leq L$ valeva per tutti i codici univocamente
+decodificabili e per quelli istantanei). I codici di Huffman hanno lunghezza
+media minore, essendo ottimali, di quelli di Shannon-Fano. Vedo quindi che
+Shannon-Fano dista di 1 dall'ottimo ma non sempre è così buono. Vediamo un
+esempio con due simboli:
+\[p_1=1-\frac{1}{2^j}\mbox{ e }p_2=\frac{1}{2^j}\]
+per $j\geq 2$ fissato.\\
+Si ha che il secondo simbolo esce raramente.\\
+Calcolo le lunghezze di Shannon-Fano:
+\[\log_2\frac{1}{p_2}\leq l_2\to \log_2 2^j\leq l_2\to l_2=j\]
+\[\log_2\frac{1}{p_1}\leq l_2\to\log_2\frac{2^j}{2^j-1}\leq\log_2\left( 1+ l_2\to
+    \frac{1}{2^j-1}\right)\leq l_2\to 1\leq l_1\to l_1=1\]
+Si noti che Huffman darebbe lunghezza 1 ad entrambe mentre Shannon-Fano 1 e $j$
+e quindi sono ben lontane da essere ottime, anche se la lunghezza media dista al
+più 1 da quella ottima (questo per l'intervento nel conto delle probabilità di
+uscita dei simboli). Posso comunque poi accorciare gli alberi con nodi interni
+inutili, soprattutto con alfabeto binario. Quindi pur non essendo ottimo è
+comunque accettabile.\\ 
+Possiamo dire che si ha una tendenza verso l'ottimo con la codifica di
+Shannon-Fano.
+\begin{definizione}
+  %mettere figura
+  Definisco l'n-sima estensione $S^n$ di una sorgente $S$, con $n\geq 1, n\in
+  \mathbb{N}$, Per $n=1$ l'estensione coincide con $n$. Per $n>1$ immagino di
+  avere $n$ copie della sorgente che lavorano in parallelo in modo sincrono,
+  quindi con un colpo di clock unico per tutte. La prima sorgente emette
+  $s_{i1}$, la seconda $s_i2$ e l'ultima $s_{in}$. L'n-esima estensione
+  considera questi $s_{ij}$ come un vettore, considerando le $n$ copie come una
+  singola sorgente $S^n$ che ha come alfabeto i simboli $\sigma_1,
+  \ldots,\sigma_m$, con $\sigma_i=\{s_{i1},\ldots, s_{in}\}$, dove ogni $s_i$ è
+  lungo $j$ e quindi $m=q^n$. \\
+  Ho che:
+  \[Prob[\sigma_i]=p_{i1}\cdot p_{i2}\cdot \ldots p_{in}\]
+  Questa probabilità e $q^n$ sono due problematiche, più è grande l'estensione e
+  più simboli si dovrà costruire (con limiti anche macchina). Se ho probabilità
+  piccole come $p_{ij}$ moltiplicandoli diventano ancora più piccoli.\\
+  Si ha quindi un codice istantaneo con $q^n$ simboli che sono n-uple di simboli
+  della sorgente di partenza, che in ogni $\sigma_i$ possono essere
+  mescolati. \\
+  Ogni singolo $S$ ha un $H_r(S)$ quindi si ha che, valendo l'additività per
+  l'entropia: 
+  \[H_r(S^n)=n\cdot H_r(S)\]
+  
+\end{definizione}
+\begin{teorema}[Primo teorema di Shannon, noiseless coding theorem]
+  Avendo:
+  \[H_r(S)\leq L< H_r(S)+1\]
+  Si ha che vale qualunque sia la sorgente e qualunque sia il codice
+  istantaneo.\\
+  In particolare, per $n\geq 1$ vale anche per l'n-esima estensione:
+  \[H_r(S^n)\leq L_n< H_r(S^n)+1\]
+  Con $L_n$ lunghezza media del codice per $S^n$. SI ha quindi che:
+  \[n\cdot H_r(S)\leq L_n< n\cdot H_r(S)+1\]
+  Divido per $n$, ottenendo la formula del \textbf{primo teorema di Shannon}:
+  \[H_r(S)\leq \frac{L_n}{n}< H_r(S)+\frac{1}{n}\]
+  Al crescere di $n$ tale quantità viene schiacciata verso l'ottimo (a mo' dei
+  due carabinieri). So che, avendo $\sigma_i=\{s_{i1},\ldots, s_{in}\}$ ogni
+  $s_{ij}$ ha lunghezza media $\frac{L_n}{n}$. Quindi ha senso confrontare
+  $H_r(S)\leq \frac{L_n}{n}< H_r(S)+\frac{1}{n}$ con $H_r(S)\leq L< H_r(S)+1$.\\
+  \textbf{Manca parte}
+\end{teorema}
+\section{Canali di Comunicazione}
+Prima di parlare del\textbf{ secondo teorema di Shannon} dobbiamo approfondire
+il canale, in forma di modello matematico. \\
+In input al canale ho simboli di un alfabeto $A$, ovvero
+$a_1,a_2,\ldots,a_q$. Dal canale escono simboli di un alfabeto $B$
+potenzialmente diverso, $b_1,\ldots, b_s$. Il rumore può cambiare un simbolo e
+quindi il canale viene modellato con probabilità condizionate tra simbolo in
+entrata e simbolo in uscita:
+\[P(b_j|a_i)\]
+Per queste probabilità usiamo una matrice $M$ con $q$ righe, una per ogni
+simbolo di A, e $s$ colonne, una per ogni simbolo di $B$, con:
+\[M_{ij}=P(b_j|a_i)\]
 \end{document} 
 % LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero
 % LocalWords:  Pseudocodice

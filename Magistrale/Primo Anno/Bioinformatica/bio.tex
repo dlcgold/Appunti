@@ -1489,7 +1489,7 @@ Le matrici di confronto più note, per il confronto proteico, sono le:
   \item \textbf{PAM (\textit{point accepted mutations})}
   \item \textbf{BLOSUM (\textit{blcok substitution})}
 \end{itemize}
-\subsection{Allineamento Multiplo}
+\subsubsection{Allineamento Multiplo}
 Ricordiamo che l'allineamento multiplo permette di confrontare più specie,
 cercando di studiare i cambiamenti evolutivi. L'allineamento multiplo rivela
 similarità che con l'allineamento normale non si riescono a comprendere. 
@@ -1541,10 +1541,364 @@ sequenza il confronto avviene direttamente con il grafo, arricchendolo,
 ottenendo un modo efficienze per fare allineamento multiplo in modo
 incrementale. Il creatore di questo metodo ha anche sviluppato un metodo simile
 per confrontare più grafi.
-
-
-
-
+\section{Algoritmi di Allineamento}
+\subsection{Allineamento Globale di Needleman-Wunsch}
+Vediamo quindi l'allineamento globale di due sequenze. Si ricorda che:
+\begin{itemize}
+  \item \textbf{input:} due sequenze, $A=a_1,\ldots a_m$ e $B=b_1,\ldots,b_n$,
+  definite su algoritmo $\Sigma$, e uno schema di punteggio $\delta$
+  \item \textbf{output:} un allineamento $M$ tra $A$ e $B$ che corrisponde
+  al'ottimo (a seconda dell'impostazione del problema massimo/minimo) score $D$
+\end{itemize}
+Si ha che:
+\begin{itemize}
+  \item il problema è di massimo se $\delta$ fornisce una misura di somiglianza
+  tra simboli
+  \item il problema è di minimo se $\delta$ fornisce una misura di diversità
+  tra simboli
+\end{itemize}
+Dato $A_i=A[1,i]$, ovvero il prefisso di $i$ caratteri di $A$, e dato
+$B_J=B[1,j]$, ovvero il prefisso dei primi $j$ caratteri di $B$, ho che,
+$\forall i=0,\ldots,m$ e $\forall j=0,\ldots, n$:
+\[D(i,j)\]
+è lo \textbf{score} di allineamento globale tra $A_i$ e $B_j$. \\
+Si ha quindi che:
+\[D(m,n)\]
+è lo \textbf{score di allineamento globale} tra $A$ e $B$.\\
+Si ha quindi che:
+\[D(i,j)=opt
+  \begin{cases}
+    D(i-1,j-1)+\delta(a_i,b_j)\\
+    D(i-1,j)+\delta(a_i,-)\\
+    D(i, j-1)+\delta(-,b_j)
+  \end{cases}
+\]
+avendo che, per un certo $k$, $s$ e $d$ (in base ai quali si capisce se è un
+problema di massimo o minimo):
+\begin{itemize}
+  \item $\delta(a_i,b_j)=k$ se $a_i=b_j$
+  \item $\delta(a_i,b_j)=s$ se $a_i\neq b_j$
+  \item $\delta(a_i,-)=\delta(-,b_j)=d$
+\end{itemize}
+Come casi base si ha quindi:
+\begin{itemize}
+  \item $D(0,0)=0$
+  \item $D(i,0) = i\cdot d = D(i-1,0) + d $
+  \item $D(0,j) = j\cdot d = D(0,j-1) + d $
+\end{itemize}
+L'algoritmo consiste quindi in:
+\begin{enumerate}
+  \item riempire la matrice di score calcolando tutti i $D(i,j)$
+  \item individuare la cella ottima, ovvero $D(m,n)$
+  \item ricostruzione della matrice di allineamento $M$ a partire da tale cella
+  ottima 
+\end{enumerate}
+Bisogna quindi capire come riempire tale matrice $D$, dati $k$, $s$ e $d$:
+\begin{enumerate}
+  \item si specifica che $D$ è una matrice $(m+1)\times(n+1)$, con righe
+  indicizzate per $i\in[0,m]$ e colonne indicizzate per $j\in[0,n]$. La riga di
+  incide $i,i>0$, corrisponde ad $a_i$ e la colonne di indice $j,j>0$ al simbolo
+  $b_j$ 
+  \item inizializzo $D(i,0)=i\cdot d, \forall i\in[0,m]$ (quindi inizializzo la
+  prima colonna) e $D(0,j)=j\cdot d, \forall j\in[0,n]$ (quindi inizializzo la
+  prima riga)
+  \item scorro riga per riga (o colonna per colonna) e riempio al matrice
+  secondo il calcolo sopra 
+  definito per $D(i,j)$. Tengo traccia della cella di partenza da cui ho
+  ottenuto l'ottimo (se quella sopra, sotto o sulla diagonale). Se ho pari
+  valori posso scegliere di dare priorità a considerare di aver fatto un
+  movimento sula diagonale
+  \item identifico in $D(m,n)$ la cella ottima
+\end{enumerate}
+In merito alla ricostruzione dell'allineamento si procede quindi a ritroso:
+\begin{enumerate}
+  \item si inizializza una matrice $M$ di allineamento vuota
+  \item parto dalla cella ottima di $D$ e seguo un percorso a ritroso fino alla
+  cella $(0,0)$
+  \item ogni passaggio da una cella aggiungo una coppia di simboli a $M$.
+  Si hanno quindi tre casi:
+  \begin{itemize}
+    \item il punteggio migliore lo ottengo dalla cella sulla diagonale (ovvero
+    l'ottimo è il valore $D(i-1,j-1)+\delta(a_i,b_j)$) e in tal
+    caso aggiungo:
+    \[{{a_i}\choose{b_j}}\]
+    alla matrice di allineamento $M$
+    \item il punteggio migliore lo ottengo dalla cella in alto (ovvero
+    l'ottimo è il valore $D(i-1,j)+\delta(a_i,-)$) e in tal caso
+    aggiungo:
+    \[{{a_i}\choose{-}}\]
+    alla matrice di allineamento $M$
+    \item il punteggio migliore lo ottengo dalla cella in basso (ovvero
+    l'ottimo è il valore $D(i,j-1)+\delta(-,b_j)$) e in tal caso
+    aggiungo:
+    \[{{-}\choose{b_j}}\]
+    alla matrice di allineamento $M$
+  \end{itemize}
+\end{enumerate}
+Questo algoritmo ha complessità sia in tempo che in spazio pari a:
+\[O(m\cdot n)\]
+\textbf{Su slide esempio pratico}.
+\subsection{Allineamento Locale di Smith-Waterman}
+Vediamo quindi l'allineamento locale di due sequenze. Si ricorda che:
+\begin{itemize}
+  \item \textbf{input:} due sequenze, $A=a_1,\ldots a_m$ e $B=b_1,\ldots,b_n$,
+  definite su algoritmo $\Sigma$, e uno schema di punteggio $\delta$
+  \item \textbf{output:} la coppia di sottostringhe di $A$ e $B$ a cui
+  corrisponde il massimo (l'ottimo in questo caso può solo essere il massimo)
+  score di allineamento globale 
+\end{itemize}
+Vista la natura del problema, che può essere solo di massimo, si ha che,
+riprendendo la stessa nomenclatura dell'algoritmo di Needleman-Wunsch, si ha che
+lo score $\delta$ è solo di \textbf{similarità}, avendo quindi che:
+\begin{itemize}
+  \item $s,d<0$
+  \item $k>0$
+\end{itemize}
+L'algoritmo di Smith-Waterman permette di identificare una regione comune a due
+sequenze che non verrebbe evidenziata dall'allineamento globale con
+Needleman-Wunsch. Un approccio di allineamento globale permette di evidenziare
+le sottostringhe più simili.\\
+Si procede quindi fissando $i$ e $j$ e, considerando tra tutte le coppie di
+sottostringhe che finiscono in $a_i$ su $A$ e $b_j$ su $B$ quella che ha il
+massimo score di allineamento globale $D(i,j)$.\\
+Si ha che:
+\[\max \{D(i,j)\}\]
+è lo score di allineamento locale tra $A$ e $B$.\\
+Il calcolo di $D(i,j)$ varia quindi rispetto all'algoritmo di Needleman-Wunsch
+in quanto, per come sono stati definiti $k$, $s$ e $d$, potrei avere valori
+negativi ma si impone un limite inferiore pari a 0 che tonerà poi utile
+nell'algoritmo. Si ha quindi:
+\[D(i,j)=\max
+  \begin{cases}
+    D(i-1,j-1)+\delta(a_i,b_j)\\
+    D(i-1,j)+\delta(a_i,-)\\
+    D(i, j-1)+\delta(-,b_j)\\
+    0
+  \end{cases}
+\]
+con:
+\begin{itemize}
+  \item $\delta(a_i,b_j)=k$ se $a_i=b_j$
+  \item $\delta(a_i,b_j)=s$ se $a_i\neq b_j$
+  \item $\delta(a_i,-)=\delta(-,b_j)=d$
+\end{itemize}
+Anche i casi base variano, avendo che la prima riga e la prima colonna sono
+interamente inizializzate a 0:
+\begin{itemize}
+  \item $D(0,0)=0$
+  \item $D(i,0)=0, \forall i=1,\ldots m$
+  \item $D(0,i)=0, \forall j=1,\ldots n$
+\end{itemize}
+L'algoritmo è analogo, a livello di ``procedura'' (salvo ovviamente
+l'individuazione della cella ottima), a quello di Needleman-Wunsch
+e consiste quindi in: 
+\begin{enumerate}
+  \item riempire la matrice di score calcolando tutti i $D(i,j)$
+  \item individuare la cella ottima, ovvero la cella con in massimo valore in
+  $D$  
+  \item ricostruzione della matrice di allineamento $M$ a partire da tale cella
+  ottima 
+\end{enumerate}
+Bisogna quindi capire come riempire tale matrice $D$, dati $k$, $s$ e $d$:
+\begin{enumerate}
+  \item si specifica che $D$ è una matrice $(m+1)\times(n+1)$, con righe
+  indicizzate per $i\in[0,m]$ e colonne indicizzate per $j\in[0,n]$. La riga di
+  incide $i,i>0$, corrisponde ad $a_i$ e la colonne di indice $j,j>0$ al simbolo
+  $b_j$ 
+  \item inizializzo a 0 la prima riga e la prima colonna
+  \item scorro riga per riga (o colonna per colonna) e riempio al matrice
+  secondo il calcolo sopra definito per $D(i,j)$. Si ricorda che se dalle tre
+  direzioni si ha massimo negativo si inserisce 0
+  \item identifico $D(j,i)$ la cella ottima $D(j,i)$
+\end{enumerate}
+In merito alla ricostruzione dell'allineamento si procede quindi a ritroso:
+\begin{enumerate}
+  \item si inizializza una matrice $M$ di allineamento vuota
+  \item parto dalla cella ottima di $D$ e seguo un percorso a ritroso fino alla
+  prima cella contente 0 che si incontra
+  \item ogni passaggio da una cella aggiungo una coppia di simboli a $M$.
+  Si hanno quindi tre casi:
+  \begin{itemize}
+    \item il punteggio migliore lo ottengo dalla cella sulla diagonale (ovvero
+    l'ottimo è il valore $D(i-1,j-1)+\delta(a_i,b_j)$) e in tal
+    caso aggiungo:
+    \[{{a_i}\choose{b_j}}\]
+    alla matrice di allineamento $M$
+    \item il punteggio migliore lo ottengo dalla cella in alto (ovvero
+    l'ottimo è il valore $D(i-1,j)+\delta(a_i,-)$) e in tal caso
+    aggiungo:
+    \[{{a_i}\choose{-}}\]
+    alla matrice di allineamento $M$
+    \item il punteggio migliore lo ottengo dalla cella in basso (ovvero
+    l'ottimo è il valore $D(i,j-1)+\delta(-,b_j)$) e in tal caso
+    aggiungo:
+    \[{{-}\choose{b_j}}\]
+    alla matrice di allineamento $M$
+  \end{itemize}
+\end{enumerate}
+Questo algoritmo ha complessità sia in tempo che in spazio pari a:
+\[O(m\cdot n)\]
+\textbf{Su slide esempio pratico}.
+\subsection{Allineamento Semiglobale}
+Vediamo quindi l'allineamento semiglobale tra due sequenze. Si ha che;
+\begin{itemize}
+  \item \textbf{input:} due sequenze, $A=a_1,\ldots a_m$ e $B=b_1,\ldots,b_n$,
+  definite su algoritmo $\Sigma$, e uno schema di punteggio $\delta$
+  \item \textbf{output:} si hanno 8 possibili output:
+  \begin{enumerate}
+    \item il prefisso di $A$ più simile a $B$
+    \item i due prefissi più simili
+    \item i due suffissi più simili
+    \item la sottostringa di $A$ e il suffisso di $B$ più simili
+    \item il suffisso di $A$ più simile a $B$
+    \item la sottostringa di $A$ più simile a $B$
+    \item la sottostringa di $A$ e il prefisso di $B$ più simili
+    \item il suffisso di $A$ e il prefisso di $B$ più simili
+  \end{enumerate}
+\end{itemize}
+Bisogna quindi determinare opportunamente $D(i,j)$ a partire da:
+\begin{itemize}
+  \item le equazioni di ricorrenza per il calcolo di $D(i,j)$
+  \item i valori di $D(i,0)$ e $D(0,j)$
+  \item particolari valori $i$ e $j$ che risolvano il problema
+\end{itemize}
+A questo punto si può:
+\begin{itemize}
+  \item riempire la matrice degli score $D$
+  \item trovare la cella ottima
+  \item ricostruire la matrice di allineamento $M$ andando a ritroso a partire
+  dalla cella ottima di $D$
+\end{itemize}
+Vediamo quindi i vari casi (\textbf{per ognuno esempio pratico su slide}) per
+ottenere gli 8 output:
+\begin{enumerate}
+  \item \textbf{ricerca del prefisso di $A$ più simile a $B$}. Per farlo si
+  ricerca tra tutti i prefissi di $A$ quello con il massimo score di
+  allineamento globale con $B$. In altri termini $D(i,j)$ è lo score di
+  allineamento globale tra il prefisso di $A$ che finisce in posizione $i$ e il
+  prefisso di $B$ che finisce in posizione $j$ e nel dettaglio: 
+  \begin{itemize}
+    \item $D(i,n)$ è lo score di allineamento globale tra il prefisso di $A$ che
+    termina in $i$ e tutta la sequenza $B$
+    \item $i_m$, tale che $D(i_m,n)$ è massimo, è la posizione di fine su $A$
+    del prefisso che ha il massimo score di allineamento globale con tutta
+    $B$. Applico quindi Needleman-Wunsch con ottimo pari al massimo presente
+    nella colonna di indice $n$ di $D$, ripartendo da lì per ricostruire $M$
+    (ricostruendo quindi fino a che non arrivo in $D(0,0$)
+  \end{itemize}
+ 
+  \item \textbf{ricerca dei due prefissi più simili}, ovvero tra tutte le coppie
+  di prefissi di $A$ e di $B$ cercare quella che ha il massimo score di
+  allineamento globale. In altri termini $D(i,j)$ è lo score di
+  allineamento globale tra il prefisso di $A$ che finisce in posizione $i$ e il
+  prefisso di $B$ che finisce in posizione $j$ e nel dettaglio: 
+  \begin{itemize}
+    \item $i_m,j_m$, tali che $D(i_m,j_m)$ è massimo, sono rispettivamente la
+    posizione di fine su $A$ e $B$ dei prefissi che hanno il massimo score di
+    allineamento globale. Applico quindi Needleman-Wunsch con ottimo pari al
+    massimo presente nella matrice $D$, ovvero tale $D(i_m,j_m)$ e parto da lì
+    per ricostruire $M$ (ricostruendo quindi fino a che non arrivo in $D(0,0$)
+  \end{itemize}
+  \item \textbf{ricerca dei due suffissi più simili}, ovvero tra tutte le coppie
+  di suffissi di $A$ e di $B$ cercare quella che ha il massimo score di
+  allineamento globale. In altri termini $D(i,j)$ è lo score di
+  allineamento globale tra la coppia di sottostringhe più simili che finiscono
+  in posizione $i$ su $A$ e in posizione $j$ su $B$. Nel dettaglio:
+   \begin{itemize}
+    \item $D(m,n)$ è lo score di allineamento globale tra la coppia di suffissi
+    che hanno il massimo score di allineamento globale. Applico quindi
+    Smith-Waterman con cella ottima pari a $D(m,n)$ e ricostruisco, ovvero
+    costruisco $M$ procedendo a ritroso dalla cella ottima fino a che non trovo
+    uno 0 nella matrice $D$. Tale 0 si trova in un certo $D(i_0,j_o)$ e ho che
+    $i_0+1$ e $j_0+1$ sono rispettivamente la posizione di inizio del suffisso
+    su $A$ e $B$
+  \end{itemize}
+  \item \textbf{ricerca della sottostringa di $A$ e del suffisso di $B$ che sono
+    più simili}, ovvero tra tutte le coppie formate da una sottostringa di $A$ e
+  un suffisso di $B$ cercare quella che ha il massimo score di allineamento
+  globale. In altri termini $D(i,j)$ è lo score di
+  allineamento globale tra coppie di sottostringhe più simili che finiscono in
+  posizioni $i$ di $A$ e $j$ di $B$. Nel dettaglio: 
+  \begin{itemize}
+    \item $D(i,n)$ è lo score di allineamento globale tra la coppia più simile
+    composta da una sottostringa che finisce in posizione $i$ su $A$ e un
+    suffisso di  $B$  
+    \item $i_m$, tale che $D(i_m,n)$ è massimo, è la posizione di fine su $A$
+    della sottostringa su $A$ più simile ad un suffisso di
+    $B$. Applico quindi Smith-Waterman con ottimo pari al massimo presente
+    nella colonna di indice $n$ di $D$, ripartendo da lì per ricostruire $M$,
+    ricostruendo quindi fino a che non arrivo in al primo 0. Tale 0 si trova in
+    un certo $D(i_0,j_o)$ e ho che $i_0+1$ e $j_0+1$ sono rispettivamente la
+    posizione di inizio della sottostringa su $A$ e del suffisso $B$
+  \end{itemize} 
+  \item \textbf{ricerca del suffisso di $A$ più simile a $B$}, ovvero tra tutti
+  i suffissi di $A$ cercare quello ha il massimo scoredi allineamento globale
+  con tutta la sequenza $B$. In altri termini $D(i,j)$ è lo score di
+  allineamento globale della coppia più simile formata da una sottostringa di
+  $A$ che finisce in posizione $i$ e il prefisso di $B$ che termina in posizione
+  $j$. Costruisco $D$ in modo che sia inizializzata come previsto per
+  Needleman-Wunsch ma con la prima colonna pari a 0. Nel dettaglio: 
+   \begin{itemize}
+    \item $D(m,n)$ è lo score di allineamento globale tra tutta la sequenza $B$
+    e il suffisso più simile su $A$. Applico quindi Needleman-Wunsch con ottimo
+    pari a $D(m,n)$ e parto da lì per ricostruire $M$, ricostruendo quindi fino
+    a che non arrivo in $D(i_0,0)$. Si ha che $i_0+1$ è la posizione di inizio
+    del suffisso su $A$
+  \end{itemize}
+  \item \textbf{ricerca della sottostringa di $A$ più simile a $B$}, ovvero tra
+  tutte le sottostringhe di $A$ cercare quella ha il massimo score di
+  allineamento globale con tutta la sequenza $B$. In altri termini $D(i,j)$ è lo
+  score di allineamento globale della coppia più simile formata da una
+  sottostringa di $A$ che finisce in posizione $i$ e il prefisso di $B$ che
+  termina in posizione $j$. La matrice $D$ è la inizializzata come la $D$ di
+  Needleman-Wunsch ma con tutti $0$ sulla prima colonna. Nel dettaglio:  
+  \begin{itemize}
+    \item $D(i,n)$ è lo score di allineamento globale tra tutta $B$ e la
+    sottostringa di $A$ più simile 
+    \item $i_m$, tale che $D(i_m,n)$ è massimo, è la posizione di fine su $A$
+    della sottostringa più simile a $B$. Applico quindi Needleman-Wunsch con
+    ottimo pari a $D(i_m,n)$ e parto da lì per ricostruire $M$, ricostruendo
+    quindi fino a che non arrivo in $D(i_0,0)$. Si ha che $i_0$ è la posizione
+    di inizio della sottostringa su $A$ mentre $i_m$ quella di fine
+  \end{itemize} 
+  \item \textbf{ricerca della sottostringa di $A$ e del prefisso di $B$ più
+    simili}, ovvero tra tutte le coppie formate da una sottostringa di $A$ e un
+  prefisso di $B$ cercare quella che ha il massimo score di allineamento
+  globale.  In altri termini $D(i,j)$ è lo score di
+  allineamento globale tra la coppia formata da una sottostringa di $A$ che
+  finisce in posizione $i$ e il suffisso di $B$ che finisce in posizione $j$.
+  La matrice $D$ è la inizializzata come la $D$ di 
+  Needleman-Wunsch ma con tutti $0$ sulla prima colonna e
+  nel dettaglio:  
+  \begin{itemize}
+    \item $i_m,j_m$, tali che $D(i_m,j_m)$ è massimo, sono rispettivamente la
+    posizione di fine su $A$ e $B$ della sottostringa e del prefisso più simile
+    su $A$ e $B$. Applico quindi Needleman-Wunsch con ottimo pari al
+    massimo presente nella matrice $D$, ovvero tale $D(i_m,j_m)$ e parto da lì
+    per ricostruire $M$ (ricostruendo quindi fino a che non arrivo in
+    $D(i_0,0$). Si ha che $i_m$ e $j_m$ sono rispettivamente la posizione di fine
+    della sottostringa su $A$ e del prefisso su $B$. Inoltre $i_0+1$ è la
+    posizione di inizio della sottostringa su $A$
+  \end{itemize}
+  \item \textbf{ricerca del suffisso di $A$ e del prefisso di $B$ più simili},
+  ovvero tra tutte le coppie formate da un suffisso di $A$ e un prefisso di $B$
+  cercare quella che ha il massimo score di allineamento globale. In altri
+  termini $D(i,j)$ è lo score di allineamento globale della coppia più simile
+  formata da una sotto stringa di $A$ che finisce in posizione $i$ e il prefisso
+  di $B$ che termina in posizione $j$. $D$ è costruita come la matrice di
+  Needleman-Wunsch con però la prima colonna a 0 nel dettaglio: 
+  \begin{itemize}
+    \item $D(m,j)$ è lo score di allineamento globale tra il prefisso di $B$ che
+    termina in $j$ e il suffisso di $A$ più simile
+    \item $j_m$, tale che $D(m,j_m)$ è massimo, è la posizione di fine su $B$
+    del prefisso più simile ad un suffisso di $A$. Applico quindi
+    Needleman-Wunsch con ottimo pari al massimo presente 
+    nell'ultima riga di $D$, ripartendo da lì per ricostruire $M$,
+    ricostruendo fino a che non arrivo in $D(i_0,0)$. S ha che$j_m$ è la
+    posizione di fine del prefisso su $B$ mentre $i_0+1$ è la posizione di
+    inizio del suffisso su $A$
+  \end{itemize} 
+\end{enumerate}
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero
 \textbf{DNA} (figura \ref{fig:dna}) e \textbf{RNA}, intese come molecole
@@ -2062,4 +2416,4 @@ Ogni record ha 9 campi:
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
 % LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
-% LocalWords:  feature
+% LocalWords:  feature semiglobale

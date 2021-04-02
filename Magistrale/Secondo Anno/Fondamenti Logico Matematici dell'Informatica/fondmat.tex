@@ -1550,7 +1550,7 @@ Vediamo qualche esempio.
 deterministiche.\\
 Si è notato come non ci sia un metodo preciso per ottenere la strategia e per di
 più la strategia non è unica potenzialmente. Nel primo esempio si parte
-dall'alto, nel seocndo dal basso.\\
+dall'alto, nel secondo dal basso.\\
 Per capire se esiste una dimostrazione faccio prima la prova coi tableaux, che
 se chiude mi garantisce l'esistenza di una dimostrazione.\\
 L'idea di partire a dimostrare sapendo a quali connettivi bisogna arrivare sia
@@ -1595,9 +1595,146 @@ Comunque non si hanno strategie deterministiche per iniziare una dimostrazione,
 si hanno comunque suggerimenti in base alla formula, ad esempio se ho una cosa
 del tipo $A\to B$ si parte spesso, ma non sempre, assumendo $A$ per poi cercare
 di scaricarla. Bisogna sempre prima guardare bene la formula che si deve
-dimostrare, ragionando su sottoformule etc$\ldots$\\
+dimostrare, ragionando su sottoformule etc$\ldots$
+\section{Ottimizzazione dei Tableux}
+Parliamo ora di \textbf{ottimizzazione dei tableaux intuizionistici}.\\
+\begin{esempio}
+  Riprendiamo il tableaux di Fitting per la doppia negazione del terzo escluso:
+  \[F\neg \neg (A\lor \neg A)\]
+  che ricordiamo dimostrabile in logica intuizionistica per il teorema di
+  Kolmogorov-Glivenko. \\
+  Riprendiamo il tableaux di Fitting:
+  \begin{gather*}
+    \frac{F\neg \neg (A\lor \neg A)}{}\\
+    \frac{T\neg(A\lor \neg A)}{}\\
+    \frac{FA\lor \neg A}{}\\
+    \frac{FA,F\neg A}{TA}
+  \end{gather*}
+  Che sembra non chiudere. \\
+  Si ricorda però che, sempre Fitting, risolve la questione ripetendo una
+  formula: 
+  \begin{gather*}
+    \frac{F\neg \neg (A\lor \neg A)}{}\\
+    \frac{T\neg(A\lor \neg A)}{}\\
+    \frac{FA\lor \neg A, T\neg(A\lor \neg A)}{}\\
+    \frac{FA,F\neg A,T\neg(A\lor \neg A)}{}\\
+    \frac{TA,T\neg(A\lor \neg A)}{}\\
+    \frac{TA, FA\lor \neg A}{TA, FA, F\neg A}
+  \end{gather*}
+  che chiude.\\
+  Si è usato il fatto che si è usata, come regola per il $T$ di $\neg$:
+  \[\frac{S, T\neg A}{S, FA, T\neg A}\]
+\end{esempio}
+Nell'esempio ci si è rifatti al concetto di \textbf{realizzabilità}.
+\begin{definizione}
+  Preso un nodo $\Gamma$ di un modello di Kripke per la logica intuizionistica
+  diremo che $\Gamma$ \textbf{realizza} $TA$ sse $\Gamma$ \textup{forza} $A$,
+  ovvero sse: 
+  \[\Gamma\vDash A\]
+  Inoltre si ha che $\Gamma$ \textbf{realizza} $FA$ sse in $\Gamma$ \textbf{non
+    è vera} $A$, ovvero sse:
+  \[\Gamma\nvDash A\]
+  Abbiamo quindi legato il segno $T/F$ al \textbf{forcing intuizionista}. Le
+  regole devono quindi mantenere la realizzabilità.
+\end{definizione}
+Vediamo, sempre pensando all'esempio, cosa significhi mantenere la
+realizzabilità parlando di $T\neg A$. Si ha che, intuizionisticamente:
+\[\Gamma\vDash \neg A\]
+Ma nell'intuizionismo significa che:
+\[\forall\Delta \mbox{ t.c }\Gamma R \Delta, \Delta\nvDash A\]
+Se diciamo che una formula realizzata prima di applicare una regola deve essere
+realizzata anche dopo tale applicazione si ha che, avendo:
+\[\frac{S, T\neg A}{S, FA, T\neg A}\]
+$FA$ può essere eliminata, quindi restringendo $S$ a $S_C$ non è più garantito
+che sia realizzato $FA$ ovvero che sia forzata $A$. Dato che questo deve
+avvenire $\forall\Delta$ mi ``porto dietro'' $T\neg A$ in modo che in ogni punto
+del tableaux sia realizzabile la formula $\neg A$ (ma questo succede solo se
+ripeto il $T$).\\
+Non sempre bisogna ripetere la $T$, ad esempio:
+\[\frac{S, T(A\land B)}{S, TA, TB}\]
+che passando da una $T$ a due $T$ non crea problemi anche se restringo a
+$S_T$, avendo un $\Gamma$ che realizza $TA$ e $TB$ allora ho che forza $A\land
+B$.\\
+Vale lo stesso discorso anche avendo:    
+\[\frac{S, T(A\lor B)}{S, TA/S, TB}\]
+garantendo o da un alto o dall'altro la realizzabilità di $A\lor B$. Infatti se
+è 
+realizzato $TA$ ho un $\Gamma$ che forza $A$ e che automaticamente forza $A\lor
+B$. Viceversa con $TB$ ho un $\Gamma$ che forza $B$ e che automaticamente forza
+$A\lor B$.\\
+Abbiamo un'altra regola che obbliga a ripete:
+\[\frac{S, T(A\to B)}{S, FA, T(A\to B)/S, TB}\]
+Dove, avendo che $FA$ può essere ``tagliato'' da una restrizione $S_T$ nel primo
+branch, conservo anche la formula (non avendo $F$ nel secondo branch non devo
+ripetere). \\
+Vediamo un calcolo che, ``modulo backtracking'', non necessiterà della
+ripetizione delle formule, avendo già tutta la sua semantica all'interno del
+calcolo. Si parla quindi di \textbf{semantic tableaux}, avendo che i tableaux
+``mimano'' la semantica della logica di riferimento. Più semantica
+incorporariamo nelle regole stesse e migliore sarà il calcolo dal punto di vista
+dell'efficienza.\\
+Quanto detto viene bene con il $T$ di $\neg$.\\
+Aggiungiamo a $T$ e $F$ il segno $F_C$ che significa \textbf{falso certo}:
+\begin{table}[H]
+  %\large
+  \centering
+  \begin{tabular}{c||c|c|c}
+    & {\small{$T$-regola}}& {\small{$F$-regola}} & {\small{$F_C$-regola}}\\
+    \hline
+    \hline
+    $\land$ & $T\land=\frac{S,T(A\land B)}{S,TA,TB}$&
+              $F\land=\frac{S,F(A\land B)}{S,FA/S,FB}$&
+              $F_C\land=\frac{S,F_C(A\land B)}{S_C,F_CA/S_C,F_CB}$\\ 
+    \hline
+    $\lor$ & $T\lor=\frac{S,T(A\lor B)}{S,TA/S,TB}$&
+                        $F\lor=\frac{S,F(A\lor B)}{S,FA,FB}$&
+                        $F_C\lor=\frac{S,F_C(A\lor B)}{S,F_CA,F_CB}$\\
+    \hline
+    $\to$ & $T\to=\frac{S,T(A\to B)}{S,FA, T(A\to B)/S,TB}$&
+                        $F\to=\frac{S,F(A\to B)}{S_C,TA,FB}$&
+                        $F_C\to=\frac{S,F_C(A\to B)}{S_C,TA,F_CB}$\\
+    \hline
+    $\neg$ & $T\neg=\frac{S,T(\neg A)}{S,F_CA}$&
+                        $F\neg=\frac{S,F(\neg A)}{S_C,TA}$&
+                        $F_C\neg=\frac{S,F_C(\neg A)}{S_C,TA}$\\
+    \hline
+  \end{tabular}
+\end{table}
+Il nuovo segno è dato in quanto al semantica del $\neg$ ci dice che, avendo il
+forcing di $\neg A$, $A$ deve rimanere falso in ogni nodo del modello di Kripke
+e quindi è un falso che deve permanere sempre in tutto il tableaux.\\
+$S_C$ è definito come l'insieme $S$ meno l'insieme delle formule segnate con
+$F$ (detto $FC_J$): 
+\[S_C=S-\{FC_j\}\]
+Notiamo, in prima istanza, come da formule $F_C$ otteniamo sempre formule $F_C$
+o $T$, stabilizzando il tableaux.\\
+Nell'implicazione di $F_C$ notiamo ancora però la presenza di $TA$ che
+porterebbe a fare lo stesso ragionamento di replicazione della formula
+dell'implicazione ma questo è uno step successivo di ottimizzazione.\\
+Un tableaux in questo nuovo calcolo è chiuso secondo le regole dei normali
+tableaux ma anche se ho $TA,F_CA$.
+\begin{esempio}
+  Riprendiamo la doppia negazione del terzo escluso con questo nuovo calcolo:
+  \begin{gather*}
+    \frac{F\neg \neg (A\lor \neg A)}{}\\
+    \frac{T\neg(A\lor \neg A)}{}\\
+    \frac{F_C (A\lor\neg A)}{}\\
+    \frac{F_C A, F_C\neg A}{}\\
+    \frac{F_C A, TA}{}
+  \end{gather*}
+  e quindi il tableaux è chiuso, anche senza aver ripetuto il $T\neg$.
+\end{esempio}
+\textbf{$F_C$ è stato proposto da Moscato a Fitting ed è stato accolto nello
+  studio dell'intuizionismo}.\\
+Si è quindi incorporato più semantica nel calcolo infatti:
+\[\Gamma\vDash F_CA \iff \Gamma\vDash \neg A\]
+avendo che la semantica del $\neg$ viene incorporata dal segno $F_C$, avendo che
+$\Gamma$ realizza $F_C A$ sse realizza $\neg A$. Abbiamo fatto quindi un primo
+step di ottimizzazione.
 
-\end{document}  
+\end{document}
+
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare Prolog Morgan
 % LocalWords:  condizionalmente l'algoritmicità tableaux intuizionisticamente
-% LocalWords:  l'istanziazione Kripke contromodello seocndo sottoformule
+% LocalWords:  l'istanziazione Kripke contromodello sottoformule Kolmogorov
+% LocalWords:  Glivenko incorporariamo

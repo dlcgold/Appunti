@@ -1756,11 +1756,103 @@ quindi un \textbf{trattamento ottimale} del $T\neg$ ma manca quello di
 $T\to$. \\
 Moscato, coi vari collaboratori, ha lavorato anni per trovare una
 soluzione soddisfacente, quindi un calcolo corretto e completo, che rimuovesse
-anche la ripetizione del $T\to$.
-%40.50
+anche la ripetizione del $T\to$. Si sono quindi chiesti se, a livello
+proposizionale, esistesse una soluzione al problema. Si arriverà a dire che c'è
+una soluzione a livello proposizionale ma non a livello predicativo (il
+$T\forall$ richiede sempre e comunque la ripetizione) e
+nemmeno a livello di logica classica (lato predicativo si ha ripetizione sia per
+$T\forall$ che per $T\exists$). Nella logica classica, lato proposizionale, vale
+quindi la regola di Chruch-Rosser e quindi non sarà mai necessario ripetere una
+formula mentre in logica intuizionistica questo non vale e quindi bisogna
+pensare a delle strategie per evitarlo. Il calcolo puro di Fitting prevede per
+forza ripetizioni per $\neg$ e $T\to$ ma in questo nuovo calcolo con $F_C$ ho
+solo ripetizioni per $T\to$.\\ 
+Presentiamo quindi un ulteriore calcolo che rimuova anche questa ripetizione.\\
+Che nuovo calcolo proviene da un'idea di Dikov, che aveva ragionato sulla
+deduzione naturale e sul calcolo dei sequenti di Gentzen. Dikov aveva studiato
+cosa succede a livello di deduzione naturale quando si assumono nuovamente certe
+formule, costruendo un calcolo in cui non succede. Moscato e Miglioli, studiando
+il lavoro di Dikov, hanno cercati di applicare le stesse regole al calcolo a
+tableaux ottimizzato. \\
+L'idea è di studiare in modo approfondito come è fatto l'antecedente
+dell'implicazione e non dare una sola regola per il $T\to$ ma dare tante regole
+a seconda della forma dell'antecedente dell'implicazione.\\
+Si va quindi ad analizzare la formula del tipo:
+\[T\,\, A\to B\]
+Si studia l'antecedente $A$. Si hanno quindi vari casi:
+\begin{itemize}
+  \item $A$ è atomica o negata, che indico con $AN$ (per dire $A$ e Negata)
+  \item $A$ è una disgiunzione, quindi del tipo $A=C\lor D$
+  \item $A$ è una congiunzione, quindi del tipo $A=C\land D$
+  \item $A$ è un'implicazione, quindi del tipo $A\to B$
+\end{itemize}
+Si da quindi una regola ad hoc per ciascuna tipologia di antecedente. Si hanno
+quindi quattro formule.\\
+Facciamo qualche considerazione preliminare. In primis si nota come il calcolo
+venga ancora più complicato, complicando il lavoro di un prover, anche se questo
+è trascurabile dal punto di vista computazionale. Una seconda osservazione è che
+non si riesce a trovare un modo per importare nel calcolo la semantica
+dell'implicazione, come per il caso di $T\neg$, che importava la semantica della
+negazione intuizionistica nel calcolo. Questa infatti è un'idea più
+\textit{sintattica} e sostituisce una formula con un suo equivalente
+intuizionista, che abbia nell'antecedente una complessità implicazionale sempre
+più bassa, fino ad arrivare a formule atomiche o negate per poter applicare la
+regola di base, avendo che la regola per le atomiche e le negate non prevede
+ripetizioni di formule. Si ha quindi una ``trasformazione di formule''. Si
+ottiene un calcolo privo di ripetizioni,\textit{ anche se può darsi che esista
+  una soluzione più semantica e meno sintattica del problema di questo tipo di
+  calcolo, magari cercando un nuovo segno ad hoc}. \\
+Vediamo quindi queste 4 regole che sostituiscono la precedente regola per
+$T\to$: 
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    & $\mathbf{T\to}$\\
+    \hline
+    $Ant=A$ \textit{o} $Ant=\neg A$ & $\frac{S,TA\to B}{S,FA/S,TB}T\to AN$\\
+    \hline
+    $Ant=A\land B $ & $\frac{S,T(A\land B)\to C}{S,T(A\to(B\to C))}T\to \land$\\
+    \hline
+    $Ant=A\lor B$ & $\frac{S,T(A\lor B)\to C}{S,TA\to C, TB\to C}T\to \lor$\\
+    \hline
+    $Ant =A\to B$ & $\frac{S,T(A\to B)\to C}{S, FA\to B, TB\to C/S, TC}T\to \to$\\
+    \hline
+  \end{tabular}
+\end{table}
+Si nota che la complessità logica di $B$ non ha importanza. In tutti i casi si
+ottengono complessità implicazionali minori, avendo antecedenti sempre meno
+complessi logicamente nella risultante rispetto alla premessa.\\
+Questo nuovo calcolo, con questa nuova regola per $T\to$ è \textbf{corretto,
+  completo e senza ripetizioni}.\\
+A livello di prover questo risultato permette di non dover creare liste
+aggiuntive di formule da ripetere (considerando che Fitting nemmeno limitava la
+cosa a $T\neg $ e $T\to$).
+\begin{esempio}
+  Studiamo:
+  \[\vdash_{INT} ((\neg A\lor \neg \neg A)\to A)\to A\]
+  \begin{gather*}
+    \frac{F ((\neg A\lor \neg \neg A)\to A)\to A}{}F\to\\
+    \frac{T(\neg A\lor \neg \neg A)\to A, FA}{}T\to\lor\\ 
+    \frac{T\neg A\to A, T\neg\neg A\to A,FA}{}T\to AN\\
+    \frac{T\neg A\to A,, F\neg\neg A, FA/T\neg A\to A, TA,FA}{}F\neg\mbox{(chiude
+      branch destro)}\\ 
+    \frac{T\neg A\to A,T\neg A}{}T\neg\\
+    \frac{T\neg A\to A,F_C A}{}T\to AN\\
+    \frac{F\neg A, F_CA/TA,F_CA}{}F\neg\mbox{(chiude branch destro)}\\
+    TA, F_CA
+  \end{gather*}
+  Avendo che il tableaux chiude, senza ripetizioni.\\
+  Si nota che avendo $T\neg A\to A, T\neg\neg A\to A,FA$ si osserva che è
+  prodotto da un antecedente in $\lor$ con due negate. SI hanno quindi ora due
+  antecedenti entrambi con due negate, sotto $T$, che mi riportano alla regola
+  per il $T\to$ delle atomiche e delle negate.
+\end{esempio}
+Dimostreremo che questo calcolo è corretto e completo.\\
+Il prover PTP è basato su questo calcolo con ulteriori strategie di
+ottimizzazione. 
 \end{document}
 
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare Prolog Morgan
 % LocalWords:  condizionalmente l'algoritmicità tableaux intuizionisticamente
 % LocalWords:  l'istanziazione Kripke contromodello sottoformule Kolmogorov sse
-% LocalWords:  Glivenko incorporariamo
+% LocalWords:  Glivenko incorporariamo sequenti  implicazionale implicazionali

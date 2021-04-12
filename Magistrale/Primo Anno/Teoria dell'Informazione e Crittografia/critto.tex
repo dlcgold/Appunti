@@ -3221,6 +3221,274 @@ entrata e simbolo in uscita:
 Per queste probabilità usiamo una matrice $M$ con $q$ righe, una per ogni
 simbolo di A, e $s$ colonne, una per ogni simbolo di $B$, con:
 \[M_{ij}=P(b_j|a_i)\]
+Quindi un canale è:
+\[C=(A,B,rumore)\]
+con
+\begin{itemize}
+  \item $A$ alfabeto dei simboli $a_i$ che entrano nel canale, di cardinalità
+  $q$ 
+  \item $B$ alfabeto dei simboli $b_i$ che escono dal canale, che possono anche
+  essere di cardinalità maggiore a quelli che entrano, avendo cardinalità $s$
+  \item $rumore$, che data una certa $P$ si ha che ogni simbolo di input ha
+  una probabilità di diventare un simbolo in output. Sono probabilità
+  condizionate, $P(b_j|a_i)$. Si ha quindi una matrice con una riga per ogni
+  $a_i$ e una colonna per ogni $b_j$ con queste probabilità condizionate come
+  elementi. Quindi con $rumore$ si intende tale matrice
+\end{itemize}
+Studiamo meglio la matrice. Diciamo che entra il simbolo $a_i$ e abbiamo che il
+canale ``non dimentica nulla'', quindi deve uscire un simbolo $b_j$ (che per di
+più esce solo se qualcosa è entrato nel canale). Si ha quindi che:
+\[\sum_{j=1}^s P(b_j|a_i)=1,\forall i\]
+avendo quindi a che fare con una \textbf{matrice stocastica}. Sulle colonne non
+succede in quanto potrei avere un simbolo che esce solo se è entrato un simbolo
+preciso, non esaurendo tutte le possibilità (???).\\
+L'utente ha i simboli $a_i$ e decide come inserirli nel canale ciascuno con una
+certa $P(a_i)$, avendo la distribuzione di probabilità:
+\[\{P(a_i)\}_{i=1}^q\]
+Dobbiamo quindi calcolare $P(b_j)$. Per uscire $b_j$ si ha che o entra un
+simbolo $a_1$ che viene trasformato in $b_j$, con $P(b_j|a_1)$ oppure un $a_2$,
+con $P(b_j| a_2)$, e così via, fino a $a_q$, con $P(b_j| a_q)$. Se moltiplico
+queste probabilità condizionate per la probabilità che ci sia in input il
+simbolo e sommo tali termini ottengo tutti i modi possibili in cui può uscire
+$b_j$:
+\[P(b_j)=\sum_{i=1}^q P(a_i)\cdot P(b_j|a_i),\,\,\forall j\]
+E, prese tutte le equazioni per ogni $j$, si parla di \textbf{equazioni di
+  canale}, che ci dicono la distribuzione di probabilità in uscita, se sommo il
+valore per tutti i $j$ ottengo 1:
+\[\sum_{j=1}^s p(b_j)=1\]
+Le probabilità $P(b_j|a_i)$, contenute nella matrice di canale, sono
+\textbf{probabilità in avanti}, ponendosi dal punto di vista del mittente. Posso
+studiare anche le $P(a_i|b_j)$, ponendosi dal 
+punto di vista del ricevente che si chiede, dato un output, cosa è entrato nel
+canale, avendo \textbf{probabilità all'indietro}. Queste due probabilità
+sono legate dal teorema di Bayes, che sviluppo tramite le equazioni di canale:
+\[P(a_i|b_j)=\frac{P(b_j|a_i)p(a_i)}{b_j}=\frac{P(b_j|a_i)p(a_i)}{\sum_{i=1}^q
+    P(a_i)\cdot P(b_j|a_i)},\forall i,j\]
+Ma quindi alla fine ho la frazione tra un solo termine e tutti i termini ma ci
+garantisce anche deve essere stato inserito un $a_i$ per avere un $b_j$.
+\section{Canali particolari}
+Si hanno due canali particolari, ``estremi'':
+\begin{enumerate}
+  \item \textbf{canale senza rumore}, dove inserito un simbolo di esce
+  sempre lo stesso simbolo. Ho sempre che un input comporta uno e un solo
+  output, sempre. Potrebbe essere che i due alfabeti sono comunque diversi non
+  avendo per forza lo stesso simbolo (entra $c$ ed esce $c$) ma potrei avere un
+  altro simbolo (se entra $c$ esce $v$) ma questo deve accadere sempre, avendo
+  determinismo. Lato equazioni di canale si ha che la probabilità di uscita di 
+  un $b_j$ è la stessa che ha il corrispettivo $a_i$ di essere in input. Nella
+  matrice di canale quindi ho un solo $1$ per riga, che corrisponde al $b_j$ che
+  esce, e 0 altrimenti. Resta comunque una matrice stocastica, anche se ho un
+  solo 1 per ogni riga
+  \item \textbf{canale completamente rumoroso}, dove inserito un simbolo $a_i$
+  può uscire un $b_j$ qualsiasi che non dipende da $a_i$. Il canale dimentica
+  $a_i$ e spara a caso un $b_j$. Nella matrice di canale, stocastica, in ogni
+  riga si ha una 
+  distribuzione uniforme, avendo ogni valore pari a $\frac{1}{s}$
+\end{enumerate}
+\textit{Questi canali sono casi estremi teorici, non è possibile
+  costruirli}. Per forza c'è rumore in natura e quindi il primo è
+impossibile, anche se ci si può avvicinare. Il secondo farebbe comodo per
+generare numeri casuali ma un canale 
+così privo di determinismo non è costruibile, anche se usando il \textbf{rumore
+  di fondo dell'universo} o i \textbf{tempi di decadimento} forniscono risultati
+quasi prossimi.
+\subsection{Canale Binario Simmetrico}
+Un altro canale particolare è il \textbf{canale binario simmetrico
+  (\textit{CBS})}. Un CBS è un canale binario in entrata, ovvero che ha due soli
+simboli in input, $a=0$ e $a=1$, e binario in uscita, $b=0$ o $b=1$. Entra un
+bit ed esce un bit. Dato 0 può uscire 1 o 0 e dato 1 può uscire 0 o 1. Si hanno
+quindi:
+\begin{itemize}
+  \item $P_{0,0}= P(b=0|a=0)$
+  \item $P_{0,1}=P(b=0|a=1)$
+  \item $P_{1,0}=P(b=1|a=0)$
+  \item $P_{1,1}=P(b=1|a=1)$
+\end{itemize}
+Ho quindi una matrice del tipo, con $a$ sulle righe e $b$ sulle colonne:
+\[\left[
+  \begin{matrix}
+    P_{0,0} & P_{0,1}\\
+    P_{1,0} & P_{1,1}
+  \end{matrix}
+  \right]
+\]
+Avendo una matrice simmetrica, che si comporta uguale indipendentemente dal bit
+di ingresso. Se entra 0 ed esce 0 o entra 1 ed esce 1 abbiamo una trasmissione
+corretta, altrimenti abbiamo un errore di trasmissione. Simmetrico significa che
+la probabilità di una trasmissione corretta è uguale nei due casi, la chiamo
+$P$, e quella di 
+avere una trasmissione errata è uguale nei due casi, la chiamo $Q$. La matrice
+diventa quindi:
+\[\left[
+  \begin{matrix}
+    P & Q\\
+    Q & P
+  \end{matrix}
+  \right]
+\]
+Dato che, quando inserisco 0, o ricevo 0 o 1 (vale anche avendo 1 in input)
+allora, avendo comunque la matrice stocastica: 
+\[P+Q=1\]
+e quindi:
+\[Q=1-P\]
+Ma allora:
+\[\left[
+  \begin{matrix}
+    P & 1-P\\
+    1-P & P
+  \end{matrix}
+  \right]
+\]
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1.2]{img/cbs.pdf}
+  \caption{Rappresentazione di un canale binario simmetrico}
+  \label{fig:cbs}
+\end{figure}
+Mi basta quindi solo il valore di $P$ per avere tutte le informazioni di un
+CBS. \\
+In un CBS ho quindi due simboli possibili in input e quindi, per praticità
+chiamo: 
+\[p(a=0)=p\]
+\[p(a=1)=1-p\]
+Ho quindi, lato equazioni di canale, che:
+\[p(b=0)=p\cdot P+(1-p)\cdot (1-P)\]
+\[p(b=1)=p\cdot (1-P)+ (1-p)\cdot P\]
+Se avessi $P=1$ e $Q=0$ (ma anche $Q=1$ e $P=0$, avendo che sempre si ha
+deterministicamente il cambio di bit) avrei un \textbf{CBS senza
+  rumore}. Se avessi $P=\frac{1}{2}$ e $Q=\frac{1}{2}$ avrei un \textbf{CBS
+  completamente rumoroso}.
+Vedo anche le probabilità all'indietro, calcolabili con tutto quello di cui
+abbiamo appena discusso:
+\[P(a=0|b=0)=\frac{P(b=0|a=0)\cdot P(a=0)}{p(b=0)}=\frac{P\cdot p}{p\cdot
+    P+(1-p)\cdot (1-P)}\]
+Vediamo quindi i due casi particolari (facilmente verificabili sostituendo):
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=0|b=0)=1\]
+  \item CBS completamente rumoroso:
+  \[P(a=0|b=0)=p\]
+\end{itemize}
+\[P(a=1|b=0)=\frac{P(b=0|a=1)\cdot P(a=1)}{p(b=0)}=\frac{(1-P)\cdot
+    (1-p)}{p\cdot P+(1-p)\cdot (1-P)}\]
+Vediamo quindi i due casi particolari:
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=1|b=0)=0\]
+  \item CBS completamente rumoroso:
+  \[P(a=1|b=0)=1-p\]
+\end{itemize}
+\[P(a=0|b=1)=\frac{P(b=1|a=0)\cdot P(a=0)}{p(b=1)}=\frac{(1-P)\cdot p}{p\cdot
+    (1-P)+ (1-p)\cdot P}\]  
+Vediamo quindi i due casi particolari:
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=1|b=0)=0\]
+  \item CBS completamente rumoroso:
+  \[P(a=1|b=0)=1-p\]
+\end{itemize}
+\[P(a=1|b=1)=\frac{P(b=1|a=1)\cdot P(a=1)}{p(b=1)}=\frac{P\cdot
+    (1-p)}{p\cdot (1-P)+ (1-p)\cdot P}\]
+Vediamo quindi i due casi particolari:
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=1|b=1=1\]
+  \item CBS completamente rumoroso:
+  \[P(a=1|b=1)=p\]
+\end{itemize}
+\begin{esempio}
+  Supponendo di avere un CBS con $P=\frac{9}{10}$, avendo che 9 volte su 10 il
+  bit 
+  arriva corretto. Si ha quindi $Q=\frac{1}{10}$, avendo progettato un ``buon
+  canale'', anche se, senza sapere $p(a_i)$, il massimo che posso fare è
+  supporli 
+  uniformi. L'utente però potrebbe non usarlo per probabilità uniforme, ad
+  esempio 
+  qui suppongo un utente che inserisce secondo:
+  \[P(a=0)=p=\frac{19}{20}\]
+  \[P(a=1)=1-p=\frac{1}{20}\]
+  Il ricevente vede uscire $b=0$ e vuole sapere se è entrato $a=0$:
+  \[P(a=0|b=0)=\frac{171}{172}\]
+  che sembra ragionevole. Si ha anche, ovviamente:
+  \[P(a=1|b=0)=\frac{1}{172}\]
+  Avendo che:
+  \[P(a=0|b=0)>P(a=1|b=0)\]
+  Si ha poi:
+  \[P(a=0|b=1)=\frac{19}{28}\]
+  \[P(a=1|b=1)=\frac{9}{28}\]
+  Avendo che:
+  \[P(a=0|b=1)>P(a=1|b=1)\]
+  Ma allora se vede $b=1$ dice che comunque è più probabile $a=0$, non capendo
+  quando sia entrato $a=1$.
+\end{esempio}
+Nell'esempio si è visto che le probabilità dipendono comunque dall'uso
+dell'utente, che sceglie le $p(a_i)$, che se scelte male portano a situazioni
+strane come quelle dell'esempio. Nell'esempio si è creato un bias che porta
+sempre a scegliere $a=0$,avendo che $p(a=0)>>p(a=1)$. Questo succede in quanto,
+guardando le equazioni sopra descritte, si ha, con questa scelta, $p>P$ e $p>Q$
+(avendo indicato $p(a=0)$ con $p$).
+\section{Entropie del Canale}
+Dato un canale con $a_i\in A$ in input e $b_j\in B$ in output, con le varie
+probabilità associate. Normalmente ho la sorgente $A$ di $q$ simboli, dove i
+vari $P(a_i)$ sono una distribuzione di probabilità. Mettendosi 
+nei panni di un osservatore che vede solo l'output si ha una ``sorgente'' $B$,
+di $s$ simboli, dove i vari $P(b_j)$ sono una distribuzione di probabilità. La
+vedo come sorgente perché il canale è una \textit{black box}, se invece potessi
+vedere dentro vedrei che $B$ non sarebbe una sorgente, con le probabilità
+$P(b_j)$ che non sono native ma derivate da quelle dei simboli $a_i$ e dalle
+$P(b_j|a_i)$, tramite le equazioni di canale. \\
+Si hanno molte entropie.\\
+Posso dare l'entropia della sorgente $A$:
+\[H_r(A)=\sum_{i=1}^q P(a_i)\cdot \log_r\frac{1}{P(a_i)}\]
+Vedo $B$ come sorgente e quindi:
+\[H_r(B)=\sum_{j=1}^s P(b_j)\cdot \log_r\frac{1}{P(b_j)}\]
+Ho anche, ponendomi dal punto di chi vede sia $A$ che $B$, la quantità di
+informazione media emessa dalla sorgente in input dato un simbolo in output:
+\[H_r(A|b_j)=\sum_{i=1}^q P(a_i|b_j)\cdot \log_r\frac{1}{P(a_i|b_j)}\]
+Questa è una sorta di \textbf{entropia tecnica} che serve a calcolare quella di
+$A$ dato $B$:
+\[H_r(A|B)=\sum_{j=1}^s P(b_j)\cdot H_r(A|b_j)\]
+\[=\sum_{j=1}^s\sum_{i=1}^q P(b_j)\cdot p(a_i|b_j)\cdot
+  \log_r\frac{1}{P(a_i|b_j)}\cdot \log_r\frac{1}{P(b_j)}\]
+\[=\sum_{j=1}^s\sum_{i=1}^q P(a_i,b_j)\cdot \log_r\frac{1}{P(a_i|b_j)}\]
+Questa è detta \textbf{equivocazione} e studia la quantità di informazione media
+sull'input avendo in uscita un qualsiasi simbolo di $B$, essendo dal punto di
+vista del mittente (\textbf{risentire}).\\
+Rompendo quella sorta di simmetria nella formula dell'entropia (tra il $P$
+e il denominatore della frazione).\\
+Un'altra entropia interessante è:
+\[H_r(B|a_i)=\sum_{j=1}^s P(b_j|a_i)\cdot \log_r\frac{1}{P(b_j|a_i)}\]
+Questa serve per l'altra entropia famosa che è:
+\[H_r(B|A)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j|a_i)}\]
+Anche questa è detta \textbf{equivocazione} ed è la quantità di informazione
+media sull'output avendo inserito un qualsiasi simbolo di $A$ nel canale,
+essendo dal punto di vista del ricevente (\textbf{risentire}).
+Infine ho anche l'entropia congiunta:
+\[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j,a_i)}\]
+Dove sono nel punto di vista di un osservatore esterno che vede input, canale e
+output. \\
+Suppongo che $A$ e $B$ siano indipendenti, ovvero che il canale è completamente
+rumoroso. Ma allora:
+\[P(a_i,b_j)=P(a_i)\cdot P(b_j)\]
+Ma allora.
+\[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\log_r\frac{1}{P(a_i)\cdot P(b_j)}\]
+\[=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\cdot \left[\log_r\frac{1}{P(a_i)}+\log_r\frac{1}{P(b_j)}\right]\]
+\[=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\cdot \log_r\frac{1}{P(a_i)}+\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\cdot \log_r\frac{1}{P(b_j)}\]
+Posso scambiare le sommatorie e portare fuori le cose che non dipendono più
+dalle singole sommatorie, ottenendo:
+\[=\sum_{j=1}^sp(b_j)\sum_{i=1}^qp(a_i)\cdot
+  \log_r\frac{1}{P(a_i)}+\sum_{i=1}^qp(a_i)\sum_{j=1}^sp(b_j)\cdot
+  \log_r\frac{1}{P(b_j)}\]
+\[=H_r(A)\sum_{j=1}^sP(b_j)+H_r(B)\sum_{i=1}^qP(A_i)=H_r(A)+H_r(B)\]
+Avendo che le due sommatorie fanno 1.\\
+E quindi se sono indipendenti la quantità di informazione congiunta è la somma
+delle due singole quantità di informazione, avendo che la quantità di
+informazione è additiva. \\
+\textbf{Risentire se $H_r(A,B)$ ha un nome}.
 \end{document} 
 % LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero
-% LocalWords:  Pseudocodice
+% LocalWords:  Pseudocodice bias equivocazione

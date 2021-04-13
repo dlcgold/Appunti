@@ -1835,7 +1835,7 @@ cosa a $T\neg $ e $T\to$).
     \frac{F ((\neg A\lor \neg \neg A)\to A)\to A}{}F\to\\
     \frac{T(\neg A\lor \neg \neg A)\to A, FA}{}T\to\lor\\ 
     \frac{T\neg A\to A, T\neg\neg A\to A,FA}{}T\to AN\\
-    \frac{T\neg A\to A,, F\neg\neg A, FA/T\neg A\to A, TA,FA}{}F\neg\mbox{(chiude
+    \frac{T\neg A\to A, F\neg\neg A, FA/T\neg A\to A, TA,FA}{}F\neg\mbox{(chiude
       branch destro)}\\ 
     \frac{T\neg A\to A,T\neg A}{}T\neg\\
     \frac{T\neg A\to A,F_C A}{}T\to AN\\
@@ -1844,16 +1844,319 @@ cosa a $T\neg $ e $T\to$).
   \end{gather*}
   Avendo che il tableaux chiude, senza ripetizioni.\\
   Si nota che avendo $T\neg A\to A, T\neg\neg A\to A,FA$ si osserva che è
-  prodotto da un antecedente in $\lor$ con due negate. SI hanno quindi ora due
+  prodotto da un antecedente in $\lor$ con due negate. Si hanno quindi ora due
   antecedenti entrambi con due negate, sotto $T$, che mi riportano alla regola
   per il $T\to$ delle atomiche e delle negate.
 \end{esempio}
 Dimostreremo che questo calcolo è corretto e completo.\\
 Il prover PTP è basato su questo calcolo con ulteriori strategie di
-ottimizzazione. 
+ottimizzazione. \\
+Possiamo quindi vedere la dimostrazione del teorema di Kolmogorov-Glivenko, che
+riscriviamo per comodità, tramite il calcolo a tableaux con $F_C$ e la non
+ripetizione di $T\neg$ e $T\to$.
+\begin{teorema}[Teorema di Kolmogorov-Glivenko]
+  Se una formula $A$ è dimostrabile in logica classica allora e solo allora è
+  dimostrabile in logica intuizionistica la doppia negazione di tale formula, a
+  livello proposizionale. Formalmente si ha quindi:
+  \[\vdash_{CL} A \iff \vdash_{INT}\neg\neg A\]
+  Quindi tutte le tesi classiche sono dimostrabili, se doppiamente negate, in
+  logica intuizionistica.
+\end{teorema}
+\begin{proof}
+  Per fare la dimostrazione si introduce una nuova regola:
+  \[\frac{S, TA\to B}{S,F_CA/S_C, TB}\overline{T\to}\]
+  che chiamiamo appunto $T\to$ soprassegnato. Questa regola è corretta dal punto
+  di vista del calcolo intuizionistica e possiamo usarla quando vogliamo. La sua
+  peculiarità rispetto all'originale $T\to$ è che nel branch a sinistra ho $F_C
+  A$ quindi non si avrà mai il taglio della stessa applicando regole
+  intuizionistiche. Nel branch di destra si ha $TB$ che già non verrebbe mai
+  tagliata ama, per correttezza e non per completezza, si restringe $S$ a
+  $S_C$.\\
+  Ricordiamo che la vecchia regola era, dove si ripeteva la formula a causa di
+  $FA$ nel branch di sinistra e non si restringeva $S$ in quello di destra:
+  \[\frac{S, TA\to B}{S,FA, TA\to B/S, TB}T\to\]
+  La $\overline{T\to}$ è una versione corretta ma non completa di $T\to$. L'uso
+  della prima quindi comporta un calcolo corretto ma non completo, mentre la
+  seconda sia corretto che completo.\\
+  Ora a noi basta avere una formula corretta, cosa che rende possibile il
+  poterla applicare ogni volta che voglio.\\
+  Parto quindi dal tableaux intuizionista di $\neg\neg A$:
+  \begin{gather*}
+    \frac{F\neg\neg A}{}F\neg\\
+    \frac{T\neg A}{F_C A}T\neg
+  \end{gather*}
+  Avendo che da questo momento in poi il tableaux intuizionista diventa
+  equivalente a quello classico, con solo i segni $T$ e $F_C$. Dobbiamo
+  dimostrarlo per casi, a seconda della natura di $A$:
+  \begin{itemize}
+    \item $A$ è una formula atomica quindi se chiude classicamente $F_CA$ chiude
+    anche intuizionisticamente
+    \item $A$ è del tipo $B\lor C$, avendo che $F_C (B\lor C)$ produce/deduce
+    $F_CB,F_CC$
+    \item $A$ è del tipo $B\land C$, avendo che $F_C (B\land C)$ produce/deduce
+    $F_CB/F_CC$
+    \item $A$ è del tipo $\neg B$, avendo che $F_C \neg B$ produce/deduce $TB$
+    \item $A$ è del tipo $B\to C$, avendo che $F_C (B\to C)$ produce/deduce
+    $TB,F_CC$
+  \end{itemize}
+  Analizzo l'ultimo caso, avendo $TB,F_CC$. Questo è l'unico caso in cui potrei
+  avere 
+  ancora formule che vengono tagliate con le regole intuizionistiche, in caso di
+  implicazione ma posso evitare la cosa. Infatti, se $TB$ fosse anch'essa
+  un'implicazione, potrei usare il $\overline{T\to}$ e ottenere formule che non
+  verranno mai tagliate dall'applicazione di regole intuizionistiche, avendo che
+  il tableaux classico e quello intuizionistico coincidono. Ne segue che se
+  quello classico chiude allora chiude anche quello intuizionistico. Il trucco
+  sta nel $F_CA$ nel branch sinistro del risultante della regola del
+  $\overline{T\to}$, vale a dire rafforzare, scrivendo $F_C$ invece di $F$
+  della'antecedente dell'implicazione e quindi ottenendo da una formula certa,
+  $TA\to B$ due formule certe, una per branch, $F_CA$ e $TB$. Per questo logica
+  classica e logica intuizionistica qui coincidono. Da un $T$ prodotto da un
+  $F_C$ vengono quindi fuori solo formule certe con al nuova regola del
+  $\overline{T\to}$. \\
+  Si è arrivati a tutto questo discorso dicendo che bisogna chiudere il tableaux
+  per $F_CA$ e da quel punto in poi il tableaux classico e quello intuizionista
+  coincidono. Qualsiasi sia il tipo di $A$ (specificando nel caso
+  dell'implicazione l'uso di $\overline{T\to}$) ottengo qualcosa che non è più
+  ``tagliabile'' usando regole intuizionistiche e quindi, partendo da $F\neg
+  \neg A$ e arrivando ad $F_CA$, anche qualora $A$ non sia atomica, arrivo ad
+  un punto in cui le due logiche coincidono, \textbf{dimostrando il teorema},
+  non avendo più regole intuizionistiche che possono tagliare.\\
+  Si arriva a dire che, in questa situazione, l'$S$ classico e l'$S_C$
+  intuizionistico coincidono.\\
+  \emph{Essendo corretta la regola del $\overline{T\to}$ la posso usare
+    nella dimostrazione del teorema. La regola non è completa perché esistono
+    tesi intuizionistiche, dimostrabili intuizionisticamente, che non possono
+    essere dimostrate con usando regola, che porterebbe ad un tableaux che non
+    chiude}. 
+\end{proof}
+\section{Logica Intuizionistica Predicativa}
+Per parlare di logica predicativa intuizionistica abbiamo bisogno di specificare
+il suo \textbf{alfabeto}, formato da:
+\begin{enumerate}
+  \item un insieme di \textbf{variabili individuali} che indichiamo con $x,y,z$
+  etc$\ldots$ 
+  \item un insieme di \textbf{costanti individuali}, detti anche
+  \textbf{parametri} in certi contesti, che indichiamo con $a,b,c$ etc$\ldots$ 
+  \item un insieme di \textbf{funzioni}, con la loro arietà (che ricordiamo
+  essere  il numero degli argomenti o operandi che richiede), che indichiamo con
+  $f,g,h$ etc$\ldots$  
+  \item un insieme di \textbf{predicati}, con la loro arietà, che indichiamo con
+  $P,Q,R$ etc$\ldots$  
+  \item un insieme di \textbf{costanti logiche proposizionali} $\neg, \land,
+  \lor, \to$
+  \item un insieme di \textbf{quantificatori}, ovvero quello
+  \textbf{esistenziale} $\exists$ e quello \textbf{universale} $\forall$ 
+  \item un insieme di \textbf{simboli ausiliari}, come, ad esempio, ``(''  e
+  ``)'' 
+\end{enumerate}
+Gli insiemi 1,5,6 e 7 sono generali per tutti i linguaggi intuizionistici. I
+punti 2,3 e 4 sono detti \textbf{tipo di similarità} o \textbf{segnatura} dello
+specifico linguaggio. Specificando quindi costanti individuali, funzioni e
+predicati vado a specificare un particolare \textit{linguaggio del primo
+  ordine}.\\
+Rispetto all'alfabeto per il linguaggio del primo ordine della logica classica
+non si riscontrano differenze con quello intuizionistico, i due alfabeti
+coincidono (come del resto coincidevano anche gli alfabeti dei linguaggi
+proposizionali). \\
+Anche le altre definizioni, ovvero quelle di \textbf{termine} e
+di \textbf{formula ben formata}, coincidono tra logica predicativa classica e
+logica predicativa intuizionistica.
+\begin{definizione}
+  Definisco \textbf{termine}, in logica predicativa intuizionistica. Si ha che:
+  \begin{enumerate}
+    \item ogni costante individuale è un termine
+    \item ogni variabile individuale è un termine
+    \item se $t_1,\ldots, t_n$ sono termini e $f$ è una funzione di arietà $n$
+    allora $f(t_1,\ldots, t_n)$ è un termine  
+  \end{enumerate}
+  Si ha che 1 e 2 sono i \textbf{casi base} mentre 3 è la \textbf{clausola
+    induttiva}.
+\end{definizione}
+In un parallelo con il mondo della programmazione posso pensare ad un
+\textbf{tipo}, ad esempio \texttt{int}. Ho che:
+\begin{center}
+  \texttt{x+1}
+\end{center}
+è una funzione binaria che somma ad una variabile $x$, che suppongo di tipo
+\texttt{int}, una costante $1$, comunque di tipo \texttt{int}.\\
+Si ha che, in programmazione, \texttt{x+1} è un'\textbf{espressione}, che è
+appunto in programmazione il corrispettivo di \textbf{termine} nella logica.\\
+Ogni linguaggio di programmazione ha una sua sintassi, definita tramite
+\textbf{carte sintattiche}, esempio in figura \ref{fig:st}, usate per definire
+una grammatica deterministica in un linguaggio di programmazione.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1.3]{img/st.pdf}
+  \caption{Esempio di carta sintattica in C, per un identificatore. Si legge
+    ``un identificatore C 
+    \textit{id} comincia sempre con una lettera alfabetica \textit{lett},
+    seguita da una lettera alfabetica \textit{lett} o da una cifra
+    \textit{digit}, il tutto iterato''. A esempio \texttt{A10} è un
+    identificatore, \texttt{1AB} no.} 
+  \label{fig:st}
+\end{figure}
+Quindi dal punto di vista della carta sintattica un'espressione è:
+\begin{itemize}
+  \item una costante
+  \item una variabile
+  \item un simbolo di funzione applicato a $n$ espressioni se il simbolo di
+  funzione ha arietà $n$
+\end{itemize}
+Torniamo a parlare di logica predicativa.
+\begin{definizione}
+  Definiamo \textbf{termine chiuso} come un termine che non contiene variabili.
+\end{definizione}
+\begin{esempio}
+  Ad esempio:
+  \begin{itemize}
+    \item $f(x,1)$, con $f$ di arietà 2, è un termine ma non è un termine
+    chiuso, avendo $x$, che è una variabile, come argomento
+    \item $g(4,7)$, con $g$ di arietà 2, è un termine ed è un termine chiuso,
+    avendo solo costanti come argomento
+    \item $g(f(x,2),4)$, con $g$ ed $f$ di arietà 2, è un termine, avendo una
+    funzione ed una costante come parametri ed entrambi sono termini. Non è però
+    un termine chiuso dato che $f(x,2)$ non è un termine chiuso
+  \end{itemize}
+\end{esempio}
+\begin{definizione}
+  Definiamo le \textbf{formule ben formate} del primo ordine. Si ha che:
+  \begin{enumerate}
+    \item se $P$ è un \textbf{predicato}, di arietà $n$ (cosa che potremmo
+    indicare con $P^n$) e
+    $t_1,\ldots, t_n$ sono \textbf{termini}, allora $P(t_1,\ldots, t_n)\in
+    FBF$. $P(t_1,\ldots, t_n)$ è detta \textbf{formula atomica}
+    \item se $\mathcal{A},\mathcal{B}\in FBF$ allora:
+    \begin{itemize}
+      \item $\neg \mathcal{A}\in FBF$
+      \item $\mathcal{A}\land \mathcal{B}\in FBF$
+      \item $\mathcal{A}\lor \mathcal{B}\in FBF$
+      \item $\mathcal{A}\to \mathcal{B}\in FBF$
+    \end{itemize}
+    Si noti che $\mathcal{A}$ e $\mathcal{B}$, scritte così in corsivo per
+    evidenziare questo aspetto, non fanno parte del linguaggio
+    appena definito, non sono termini etc$\ldots$ ma sono \textbf{meta-variabili
+      che variano su formule ben formate}, ovvero sono simboli di arbitrarie
+    formule ben formate
+    \item se $x$ è una \textbf{variabile individuale} e $P$ è un
+    \textbf{predicato} del linguaggio, allora: 
+    \begin{itemize}
+      \item $\forall xP(x)\in FBF$
+      \item $\exists xP(x)\in FBF$
+    \end{itemize}
+    Quindi i due quantificatori possono quantificare solo su variabili
+    individuali (a livello di logica predicativa, ovvero di logica del primo
+    ordine, una cosa del tipo $\forall P(P(x))$ non è ammessa)
+  \end{enumerate}
+\end{definizione}
+Fin qui si potrebbe dire ``nulla di nuovo'', in quanto tutto quello che è appena
+stato detto vale in logica intuizionistica come in logica classica. In realtà
+qualche differenza potrei già farla. A livello di logica classica proposizionale
+potrei usare un insieme minimale di operatori con solo $\neg$ e $\lor$ mentre in
+logica intuizionistica non potrei. \\
+Dal punto di vista dei quantificatori in
+logica classica potrei definire $\forall$ come $\neg\exists\neg$ e $\exists$
+come $\neg\forall\neg$, quindi me ne basterebbe uno dei due. In logica
+intuizionistica questo non vale e i due quantificatori sono del tutto
+indipendenti e non definibili, non valendo l'equivalenza classica.\\
+Tra le due logiche quindi non si ha una differenza sintattica (al più che in
+logica classica potrei togliere qualche connettore e un quantificatore) ma si ha
+una differenza semantica (che spiega perché in logica intuizionistica non posso
+trascurare connettivi e quantificatori).\\
+Si avranno \textbf{modelli di Kripke} per la logica predicativa intuizionistica.
+\begin{definizione}
+  Si definisce \textbf{variabile libera} una variabile non legata ad un
+  quantificatore. 
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{formula ben formata chiusa} quando ogni variabile della FBF
+  compare nell'ambito di un quantificatore o esistenziale o universale. In altri
+  termini una FBF è chiusa se non contiene variabili libere.\\
+  Una FBF non chiusa si dice anche \textbf{FBF aperta}.
+\end{definizione}
+\begin{esempio}
+  Ad esempio:
+  \begin{itemize}
+    \item $\forall x\exists yP(x,y)$ è una FBF chiusa
+    \item $\forall x(P(x, y)\land Q(x))$ è una FBF ma non è una FBF chiusa a
+    causa di $y$ 
+    \item $\forall x(Q(x)\land \exists y(P(x,y)))$ è una FBF chiusa
+     \item $\forall xQ(x)\land \exists y(P(x,y))$ è una FBF ma non è una FBF
+     chiusa perché la $x$ del secondo termine dell'and non ha più un
+     quantificatore (bisogna guardare le parentesi)
+  \end{itemize}
+\end{esempio}
+\textit{Tendenzialmente studieremo formule ben formate chiuse} (in quanto
+vedremo che ogni FBF chiusa è $\top$ e $\bot$ fissata un'interpretazione, che
+dobbiamo ancora definire per la logica intuizionistica, mentre
+una FBF aperta, per essere valutata, richiede una esemplificazione /
+un'istanziazione della \textit{variabile libera}).
+\subsection{Deduzione Naturale Predicativa}
+Passiamo ora alla deduzione naturale in ottica logica predicativa.\\
+Vediamo quindi l'estensione delle regole della deduzione naturale al caso
+predicativo. A livello predicativo in realtà le regole sono le stesse della
+logica classica in quanto basta la regola dell'eliminazione del $\neg$ a livello
+proposizionale per caratterizzare anche la logica intuizionistica predicativa.\\
+Anche in questo caso si hanno le regole di eliminazione e le regole di
+introduzione, dato un predicato $P$ e $a$ costante:
+\begin{table}[H]
+  \Large
+  \centering
+  \begin{tabular}{c|c|c}
+    quantificatore & introduzione & eliminazione\\
+    \hline
+    $\exists$ & $\frac{P(a)}{\exists xP(x)}i\exists$
+                                  &$\frac{\stackrel{\pi}{\exists xP(x}),
+                                    \stackrel{
+                                    \stackrel{\cancel{P(a)}}{\pi_1}}{C}}{C}
+                                    e\exists$\\
+    \hline
+    $\forall$ & $\frac{\stackrel{\pi}{P(x)}}{\forall xP(x)}i\forall$
+                                  &$\frac{\forall xP(x)}{P(a)}e\forall$\\
+  \end{tabular}
+\end{table}
+Per l'introduzione di $\forall$ non faccio ipotesi sul valore della costante $a$
+e se ho una dimostrazione che porta a $P(a)$, dove non faccio appunto ipotesi su
+$a$, allora posso introdurre il $\forall$. Mi serve quindi una dimostrazione di
+$P(a)$ con $a$ non fissato. Si ha che $a$ in questo caso è quindi una sorta di
+\textit{parametro} (questo vale anche nell'eliminazione del $\forall$, mentre
+nell'introduzione di $\exists$ è una costante specifica, in quanto basta averne
+una). Ad esempio posso dire che d ``pari 4'' posso dedurre che ``esiste un x
+che è pari'' ma non che ``tutti gli x sono pari'', in quanto l'$a$
+dell'introduzione del $\forall$ non deve essere specificato ma deve provenire da
+una dimostrazione di $P(a)$ in cui $a $ non è mai stato particolarizzato.\\  
+In merito all'eliminazione di $\exists$ si suppone di aver ottenuto $\exists
+xP(x)$ tramite una dimostrazione $\pi$. Si assume quindi $P(x)$ dove $a$ non
+deve essere mai occorso in nessun punto di $\pi$ e non dove occorrere in nessun
+punto di $C$ che si ottiene tramite $\pi_1$. In tal caso posso eliminare
+$\exists$ e ottenere $C$, che è indipendente dal valore di $a$ in $P(a)$. Ad
+esempio posso dire ``esiste un numero primo e pari'', assumo un $Pari(a)$, e
+deduco un $C$ che non contiene $a$, ad esempio $C=2$, allora posso eliminare
+$\exists$ e concludere con 2 come risultante. Il punto è che a priori, da un
+esiste, non so quale sia il termine esistente ma se faccio tutto il ragionamento
+sopra posso dire che $C$ è tale termine e andare avanti nella dimostrazione.\\
+Le \textit{regole critiche} sono l'introduzione di $\forall$, che è pesante come
+significato dovendo dire che vale per ogni, e l'eliminazione dell'esiste, che è
+pesante come significato in quanto dal dire che esiste qualcosa si estrae quel
+qualcosa, arrivando ad un $C\in FBF$. Le altre due regole sono più
+``leggere''.\\
+Con queste quattro regole si ha un \textbf{calcolo corretto e completo} per la
+logica classica se si ha l'eliminazione del $\neg$ e per la logica
+intuizionistica se non si ha tale regola. Quindi questo calcolo, che ricordiamo
+essere di Prawitz è molto flessibile e modulare rispetto alle varie logiche.\\
+Tutte le altre regole proposizionali si usano come già visto.\\
+La nozione di dimostrazione in deduzione naturale è invariata. Se scrivo
+$\vdash_{INT}A$ intendo dire che è dimostrabile una formula predicativa $A$ in
+logica intuizionistica, esistendo una sequenza finita di applicazioni di regole
+di deduzione naturale predicativa intuizionistica che termina con la formula
+$A$. Se ho assunzioni che non voglio scaricare posso dare la nozione più
+generale di dimostrazione di una formula predicativa $A$ a partire da un insieme
+di assunzioni $\Gamma$:
+\[\Gamma\vdash_{INT} A\]
 \end{document}
 
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare Prolog Morgan
 % LocalWords:  condizionalmente l'algoritmicità tableaux intuizionisticamente
 % LocalWords:  l'istanziazione Kripke contromodello sottoformule Kolmogorov sse
 % LocalWords:  Glivenko incorporariamo sequenti  implicazionale implicazionali
+% LocalWords:  branch arietà un'istanziazione

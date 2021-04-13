@@ -3042,6 +3042,7 @@ tipo, con la derivata che si annulla in $\frac{p}{2}$:
       coordinates {(0.5,0)(0.5,1)};
     \end{axis}
   \end{tikzpicture}
+  \label{fig:ber}
 \end{figure}
 in questo caso $p=1$ sarebbe escluso ma lo completo dicendo che vale 0 in $p=1$
 tramite una sostituzione. Stesso discorso per $p=0$. \\
@@ -3602,12 +3603,236 @@ che
 la quantità di informazione trasmissibile dal canale non dipenda dalla scelta
 dell'utente, la \textit{capacità del canale} non deve dipendere da $P(a_i)$.
 \begin{definizione}
-  Si definisce, informalmente, la capacità del canale $C$ come la massima
+  Si definisce, informalmente, la \textbf{capacità del canale} $C$ come la
+  massima 
   quantità di informazione trasmissibile dal canale (ovvero la mutua
   informazione del sistema) al variare di tutte le
   possibili $P(a_i)$: 
-  \[C=\max_{P(a_i)}I(A;B)\]
+  \[C=\max_{P(a_i)}\,I(A;B)\]
 \end{definizione}
+Questa definizione è corretta matematicamente ma non aiuta dal punto di vista
+pratico, dovendo calcolare tutte le:
+\[I(A;B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{P(a_i,b_j)}{P(a_i)\cdot
+    P(b_j)}\]
+al variare dei $P(a_i)$.\\
+Si sono quindi ricercate delle \textit{restrizioni} ragionevoli.\\
+La principale di queste deriva dal fatto che:
+\[I(A;B)=H_r(B)-H_r(B|A)\]
+Ma allora:
+\[I(A;B)=H_r(B)-\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j|a_i)}\]
+\[=H_r(B)-\sum_{i=1}^q\sum_{j=1}^sp(a_i)\cdot
+  P(b_j|a_i)\log_r\frac{1}{P(b_j|a_i)}\]
+\[H_r(B)\sum_{i=1}^q p(a_i)\cdot\sum_{j=1}^s
+  P(b_j|a_i)\log_r\frac{1}{P(b_j|a_i)}\]
+Quindi nella matrice di canale mi fisso su una riga, per $a_i$, e calcolo coi
+valori della riga, variando per $b_j$.\\
+Si è quindi pensato ad un \textbf{canale uniforme}, dove gli elementi di ogni
+riga della matrice sono sempre gli stessi, al più di una permutazione. Ogni riga
+è quindi una permutazione della prima riga. Posso ovviamente avere righe uguali.
+Con un canale uniforme chiamo:
+\[w=\sum_{j=1}^sP(b_j|a_i)\log_r\frac{1}{P(b_j|a_i)}\]
+per una certa riga e quindi, per un canale uniforme:
+\[I(A;B)=H_r(B)-\sum_{i=1}^q p(a_i)\cdot w\]
+Ma $w$ non dipende da $i$:
+\[I(A;B)=H_r(B)-w\cdot \sum_{i=1}^q p(a_i)\]
+Ma quindi, avendo $\sum_{i=1}^q p(a_i)=1$:
+\[I(A;B)=H_r(B)-w\]
+Fare:
+\[C=\max_{P(a_i)}\,I(A;B)\]
+equivale quindi a:
+\[C=\max_{P(a_i)}\,\{H_r(B)-w\}\]
+ma $w$ è costante:
+\[C=\max_{P(a_i)}\,\{H_r(B)\}-w\]
+Vediamo se esistono tali canali uniformi.\\
+Torniamo al CBS. Guardando la matrice vedo che la seconda riga è una
+permutazione della prima e quindi il CBS è un canale uniforme.\\
+Prendiamo ora l'n-esima estensione di un CBS, $CBS^n$, per $n\geq 1,
+n\in\mathbb{N}$. In un $CBS^n$ ho n copie del CBS che trasmettono un bit con una
+certa probabilità di trasmissione corretta, uguale per tutte. Con un $CBS^n$
+posso trasmettere un pacchetto di $n$ bit, dove ogni bit ha la stessa
+probabilità di trasmissione corretta $P$ ed errata $Q=1-P$. Ogni bit è
+trasmesso indipendentemente dagli altri, un errore su un bit non influisce sulla
+trasmissione degli altri. Questo ci riporta la \textbf{rumore bianco}, infatti
+$CBS^n$ è il canale che si usa nel modello del canale bianco. La matrice di
+$CBS^n$, per un certo $n$, è uniforme, avendo quindi un canale uniforme.\\
+Abbiamo quindi già due canali uniformi: CBS e $CBS^n$. Ha senso quindi studiare
+tali canali uniformi.\\
+Calcolo ora la mutua informazione e la capacità del CBS.\\
+Parto calcolando $w$ e scelgo di usare la prima riga, $[P\,\,\,Q]$:
+\[w=P\log_2\frac{1}{P}+Q\log_2\frac{1}{Q}\]
+e quindi, essendo $Q=1-P$:
+\[w=P\log_2\frac{1}{P}+(1-P)\log_2\frac{1}{1-P}\]
+oppure, avendo $P=1-Q$:
+\[w=(1-Q)\log_2\frac{1}{1-Q}+Q\log_2\frac{1}{Q}\]
+Ricordo che, vedere anche la figura \ref{fig:ber}:
+\[H_2(p)=p\log_2\frac{1}{p}+(1-p)\log_2\frac{1}{1-p}\]
+Ma allora, avendo qui $P=p$:
+\begin{itemize}
+  \item $w=H_2(P)$
+  \item $w=H_2(Q)$
+\end{itemize}
+E mi basta sapere o $P$ o $Q$ avendo che sono legati. Per un CBS però $P$ è un
+numero e basta, e anche $Q$ quindi:
+\[C=\max \{H_2(B)-h_2(P)\}=\max \{H_2(B)\}-h_2(P)\]
+\[C=\max \{H_2(B)-h_2(Q)\}=\max \{H_2(B)\}-h_2(Q)\]
+In un BBS la distribuzione in input dipende solo da $p$, ricordando la figura
+\ref{fig:cbs}, e quindi: 
+\[C=\max_p \{H_2(B)\}-h_2(P)\]
+\[C=\max_p \{H_2(B)\}-h_2(Q)\]
+Si ha che $B$ corrisponde all'output, ovvero la sorgente che vede il
+destinatario ed è comunque Bernoulliana e quindi è anche lei come la figura
+\ref{fig:ber}. Se chiamo $x$ la possibilità che esca 0 e $1-x$ che esca 1. Posso
+operare però solo su $p$ e il massimo di $h_2(B)$ è $\frac{x}{2}$ ma allora, per
+le equazioni di canale:
+\[x=p\cdot P+(1-p)\cdot (1-P)\]
+\[=p\cdot P+1-P-p+p\cdot P\]
+\[=1-P-p+2\cdot p\cdot P\]
+\[=1-P-p\cdot (1-2\cdot P)\]
+Cerco un $p$ che dia $x=\frac{1}{2}$:
+\[\frac{1}{2}=x\]
+\[=p(1-2\cdot P)=\frac{1}{2}-P=\frac{1-2\cdot P}{2}\]
+Ma allora, dividendo il primo e l'ultimo termine:
+\[p=\frac{1}{2}\]
+Ma ho supposto:
+\[1-\cdot P\neq 0\to P\neq \frac{1}{2}\]
+che è ragionevole perché sarebbe un canale completamente rumoroso. Assumo quindi
+un CBS non completamente rumoroso.\\
+Posso quindi dire che:
+\[C=1-H_2(P)\]
+\[C=1-H_2(Q)\]
+In quanto il valore massimo dell'entropia della Bernoulliana è 1 e la si ottiene
+quando la probabilità di uscita vale $\frac{1}{2}$, che vale quando anche la
+probabilità di inserire un valore è $\frac{1}{2}$ (??? risentire ultimi 15m
+lezione 2 13 aprile).\\
+Passando a $CBS^n$ ho che ogni singolo CBS è uguale e che la quantità di
+informazione è additiva. Si ha quindi la capacità di un $CBS^n$:
+\[C=n\cdot \left(1-H_2(P)\right)\]
+\[C=n\cdot \left(1-H_2(Q)\right)\]
+\section{Secondo Teorema di Shannon}
+\textbf{La dimostrazione del teorema non viene fatta a lezione}.\\
+Questo teorema è forndamentale nella teoria dell'informazione.\\
+Con questo teorema si usa praticamente tutto quanto spiegato in questo
+capitolo.\\
+Si useranno alcuni passaggi matematici.\\
+In primis la seguente maggiorazione, avendo $H(\cdot)$ funzione entropia per una
+sorgente Bernoulliana: 
+\[\sum_{k=0}^{\lambda \cdot n}\leq 2^{n\cdot
+    H(\lambda)},\,\,\,0<\lambda<\frac{1}{2},\, \lambda\cdot n\in \mathbb{N}\]
+Si ha poi il seguente teorema:
+\begin{teorema}[Legge Debole dei Grandi Numeri]
+  Date $x_1,\ldots X_n$ variabili casuali indipendenti, con stessa
+  distribuzione, media $\mu$ e varianza $\sigma^2$ si ha che $\forall
+  \varepsilon>0$ piccolo a piacere e $\forall\delta>0$, $\exists n_0$ tale che,
+  $\forall n> n_0$:
+  \[P\left(\left| \frac{1}{n}\sum_{i=1}^n X_i-\mu\right|\leq
+      \varepsilon\right)\geq 1-\delta\]
+  Ovvero, detto altrimenti:
+  \[P\left(\left| \frac{1}{n}\sum_{i=1}^n X_i-\mu\right|>
+      \varepsilon\right)<\delta\]
+  Avendo che la media dei valori $X_i$ può essere portata, con alte probabilità,
+  vicino quanto si vuole a $\mu$, che altro non è che il valore atteso. Si dice
+  infatti che la media di tali valori dista da $\mu$ per un $\varepsilon>0$
+  piccolo a piacere.
+\end{teorema}
+Ogni bit inviato forma l'insieme delle variabili casuali che descrivono i
+risultati dei nostri $n$ ``esperimenti'' indipendenti e uguali. per il teorema
+posso portare il valore medio di tale sequenza di esperimenti vicino al $\mu$ di
+ogni esperimento (non con certezza ma con probabilità prossima quanto si vuole a
+1).\\
+Ci si aspetta quindi un errore medio pari a $n\cdot Q$ nella spedizione di $n$
+cifre da un $CBS^n$ ma per tale teorema lo porteremo prossimo quanto si vuole a
+$Q$, a patto di avere $n$ grande (spedendo quindi grandi sequenze di bit).\\
+Il secondo teorema di Shannon, a differenza del primo, riguarda i \textbf{canali
+  rumorosi}. 
+\begin{teorema}[Secondo Teorema di Shannon]
+  Dato un canale rumoroso, con una certa capacità $C$, è possibile trasmettere
+  informazioni avvicinandosi arbitrariamente alla capacità del canale e
+  contemporaneamente mantenendo arbitrariamente bassa la probabilità d'errore,
+  ovvero la probabilità che il ricevente sbagli a decodificare. Si mantiene
+  quindi l'affidabilità del canale, appunto la probabilità di ricevere
+  correttamente i messaggi, prossima a 1.
+\end{teorema}
+\textbf{Su elearning dettagli della dimostrazione. Quanto detto in seguito è
+  solo qualche commento non richiesto all'orale}.\\
+La struttura della dimostrazione parte da un a definizione:
+\begin{definizione}
+  Definiamo \textbf{regola di decisione} come una funzione che usa il
+  decodificatore per capire quale simbolo è stato spedito a partire dal simbolo
+  ricevuto:
+  \[d:B\to A\]
+\end{definizione}
+Si da per scontato che possa avvenire un errore. Si ha una matrice con le
+probabilità all'indietro che mi dice le probabilità di avere un $a_i$ avendo
+ricevuto $b_j$. Le colonne di tale matrici sommano 1 e hanno appunto le
+\textbf{probabilità all'indietro} $P(b_j|a_i)$ e si usa una \textbf{regola di
+  massima verosomiglianza}. Potrei anche avere equiprobabilità studiando tali
+regole che quindi non sono uniche. \\
+Si parla poi di \textbf{probabilità d'errore}, ovvero la probabilità che il
+ricevente sbagli a decodificare, ovvero ricevuto $b_j$ non si capisca il giusto
+$a_i$. \\
+Il teorema poi si dimostra usando $CBS^n$ e assumendo rumore bianco, ma anche
+per altri tipi di canale, che comportano conti più complessi.\\
+Si suppone $Q<\frac{1}{2}$ anche perché se no avrei o un canale completamente
+rumoroso, con $=$, o che ``sbaglia'' più di metà delle volte ma quindi, essendo
+Bernoulliano, ha comunque $Q<\frac{1}{2}$.\\
+Con $A$ assumo solo i messaggi validi:
+\[A\subset\{0,1\}\]
+Mentre $B$ sono tutti i possibili:
+\[B\subseteq\{0,1\}\]
+Inoltre, per il $CBS^n$:
+\[P(a_i)=\frac{1}{m}\]
+e quindi:
+\[I(a_i)=\log_2\frac{1}{\frac{1}{n}}=\log_2 m\]
+E si ha poi:
+\[n\cdot C=n\cdot (1-H_2(Q))\]
+Per il teorema, dato $\varepsilon_1>0$:
+\[I(a_i)=\log_2 n=n\cdot (C-\varepsilon_1)\]
+\[=n\cdot C-n\cdot \varepsilon_1\]
+che dipende da $n$. Ma allora:
+\[m=2^{n\cdot(C-\varepsilon_1)}=\frac{2^{n\cdot C}}{2^{n\cdot\varepsilon_1}}\]
+Si scelgono poi casualmente i messaggi.\\
+Ipotizzo una sfera per la correzione di raggio, in fase di invio per $a_i$,
+per $\varepsilon_2>0$: 
+\[r=n\cdot Q+\varepsilon_2\]
+in modo che il destinatario, che anche lui ha una sfera per la correzione
+d'errore e sceglie il simbolo più vicino al centro, che è il più probabile, che
+equivale ad usare la massima verosimiglianza. Qualora però tale simbolo non
+fosse univoco si avrebbe errore, avendo errore nella decisione (che è l'errore
+della probabilità d'errore). Nemmeno provo a valutare altri simboli
+equidistanti. Si calcola quindi la probabilità di commettere tale errore e si
+continua con il ragionamento del teorema.\\
+Shannon fa quindi una media di tutti i messaggi validi, ovvero su tutte le
+codifiche casuali, facendo poi vari ragionamenti geometrici e applicando i due
+costrutti matematici posti ad inizio sezione e la cosiddetta
+\textbf{equazione di Fano}.\\
+Si cerca di dimostrare anche \textbf{l'inverso del secondo teorema di Shannon},
+mettendo nel canale più informazione di quella che è trasmissibile dal
+canale. Si arriva a dire che, forzando il canale, la probabilità di errore non
+può arrivare a 0, restando ad un valore comunque positivo, sbagliando quindi a
+decodificare.\\ 
+Il secondo teorema comunque ci dice che esiste il codice ma non ci dice come è
+fatto ma si è 
+visto che usando la codifica casuale spesso si ottiene qualcosa di
+funzionante. \textbf{Ha comunque più valenza teorica che pratica}.
+\chapter{Crittografia}
+Lo scopo della \textbf{crittografia} è quello di memorizzare, trasmettere ed
+elaborare informazioni, in presenza di agenti ostili, che voglio leggere e
+modificare tali informazioni. La crittografia non è la \textbf{steganografia},
+che consiste nel nascondere un messaggio dentro dati multimediali, occupandosi
+quindi di impronte digitali etc$\ldots$\\
+Con al crittografia non nascondo l'esistenza del messaggio ma lo codifico in
+modo che un esterno non possa farci nulla. Tendenzialmente basta la
+crittografia. \\
+La crittografia è quindi una codifica, che si aggiunge alla codifica di
+sorgente e alla codifica di canale, che limita la comprensione del contenuto al
+mittente e al destinatario.\\
+Ormai la crittografia è una scienza che comprende tante tematiche. Si hanno
+quindi sia questioni di complessità computazionale, per cifrare e decifrare
+(mittente e ricevente deve metterci pochissimo mentre gli altri migliaia di
+anni). Si frutta quindi la \textbf{teoria dei numeri} e l'\textbf{algebra}, con
+monoidi, campi, anelli etc$\ldots$.\\
+Partiamo con qualche accenno storico per capire il discorso.\\
+I \textbf{cifrari storici}
 \end{document} 
-% LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero
+% LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi
 % LocalWords:  Pseudocodice bias equivocazione

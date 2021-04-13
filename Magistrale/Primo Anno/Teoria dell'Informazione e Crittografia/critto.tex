@@ -3454,8 +3454,8 @@ $A$ dato $B$:
 Questa è detta \textbf{equivocazione} e studia la quantità di informazione media
 sull'input avendo in uscita un qualsiasi simbolo di $B$, essendo dal punto di
 vista del ricevente che studia la quanittà di informazione immessa nel canale.\\
-Rompendo quella sorta di simmetria nella formula dell'entropia (tra il $P$
-e il denominatore della frazione).\\
+Si noti che si rompe quella sorta di simmetria nella formula dell'entropia (tra
+il $P$ e il denominatore della frazione).\\
 Un'altra entropia interessante è:
 \[H_r(B|a_i)=\sum_{j=1}^s P(b_j|a_i)\cdot \log_r\frac{1}{P(b_j|a_i)}\]
 Questa serve per l'altra entropia famosa che è:
@@ -3467,12 +3467,13 @@ canale.
 Infine ho anche l'entropia congiunta:
 \[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j,a_i)}\]
 Dove sono nel punto di vista di un osservatore esterno che vede input, canale e
-output. \\
-Suppongo che $A$ e $B$ siano indipendenti, ovvero che il canale è completamente
-rumoroso. Ma allora:
+output, qualunque sia il simbolo che entri nel canale e qualunque sia quello che
+esca dal canale. \\
+Suppongo che $A$ e $B$ siano indipendenti, ovvero che il canale è
+\textit{completamente rumoroso}. Ma allora: 
 \[P(a_i,b_j)=P(a_i)\cdot P(b_j)\]
-Ma allora.
-\[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+E sostituendo:
+\[H_r(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
   P(b_j)\log_r\frac{1}{P(a_i)\cdot P(b_j)}\]
 \[=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
   P(b_j)\cdot \left[\log_r\frac{1}{P(a_i)}+\log_r\frac{1}{P(b_j)}\right]\]
@@ -3480,15 +3481,133 @@ Ma allora.
   P(b_j)\cdot \log_r\frac{1}{P(a_i)}+\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
   P(b_j)\cdot \log_r\frac{1}{P(b_j)}\]
 Posso scambiare le sommatorie e portare fuori le cose che non dipendono più
-dalle singole sommatorie, ottenendo:
+dalle singole sommatorie, isolando ciò che riguarda $A$ e ciò che riguarda $B$,
+ottenendo: 
 \[=\sum_{j=1}^sp(b_j)\sum_{i=1}^qp(a_i)\cdot
   \log_r\frac{1}{P(a_i)}+\sum_{i=1}^qp(a_i)\sum_{j=1}^sp(b_j)\cdot
   \log_r\frac{1}{P(b_j)}\]
 \[=H_r(A)\sum_{j=1}^sP(b_j)+H_r(B)\sum_{i=1}^qP(A_i)=H_r(A)+H_r(B)\]
+Quindi:
+\[H_r(A,B)=H_r(A)+H_r(B)\]
+
 Avendo che le due sommatorie fanno 1.\\
 E quindi se sono indipendenti la quantità di informazione congiunta è la somma
 delle due singole quantità di informazione, avendo che la quantità di
-informazione è additiva.
+informazione è additiva.\\
+Si cerca una relazione tra la quantità di informazione in output e quella in
+input, ipotizzando che un po' vada persa nel canale causi rumore. Sicuramente al
+più in output avrò la stessa quantità di informazione. \\
+Normalmente non si ha un canale completamente rumoroso quindi il simbolo in
+output dipende da quello in input, avendo $A$ e $B$ non indipendenti ma si ha:
+\[P(a_i,b_j)=P(a_i)\cdot P(b_j|a_i)\]
+usando le probabilità in avanti che ho già a disposizione. Si ottiene quindi:
+\[H_r(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\left[\frac{1}{P(a_i)}\cdot
+    \frac{1}{P(b_j|a_i)}\right]\]
+\[=\sum_{i=1}^q\sum_{j=1}^s
+  P(a_i,b_j)\log_r\frac{1}{P(a_i)}+\sum_{i=1}^q\sum_{j=1}^s
+  P(a_i,b_j)\log_r\frac{1}{P(b_j|a_i)}\]
+Per la proprietà marginale so che:
+\[\sum_{j=1}^s P(a_i,b_j)=P(a_i)\]
+So anche che la seconda somma è l'equivocazione.\\
+Ma allora:
+\[H_r(A,B)=\sum_{i=1}^s P(a_i)\cdot \log\frac{1}{P(a_i)}+H_r(B|A)\]
+Quindi in generale si ha, avendo che il primo termine della somma è l'entropia
+di $A$:
+\[H_r(A,B)=H_r(A)+H_r(B|A)\]
+In caso fossero indipendenti avrei:
+\[H_r(B|A)=H_r(B)\]
+Ritrovando anche, qualora $A$ e $B$ fossero indipendenti:
+\[H_r(A,B)=H_r(A)+H_r(B)\]
+\subsection{Mutua Informazione}
+\begin{definizione}
+  Definiamo \textbf{mutua informazione} come la differenza di quantità di
+  informazione data dal conoscere o non conoscere il simbolo in output dal
+  canale:
+  \[I(a_i;b_j)=\log_r \frac{1}{P(a_i)}-\log_r\frac{1}{P(a_i|b_j)}\]
+  Ma quindi, per le proprietà dei logaritmi:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i|b_j)}{P(a_i)}\]
+  Moltiplico sopra e sotto per $P(b_j)$:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i|b_j)\cdot P(b_j)}{P(a_i)\cdot P(b_j)}\]
+  ma allora:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i,b_j)}{P(a_i)\cdot P(b_j)}\]
+  E quindi:
+  \[I(a_i;b_j)=\log_r\frac{P(b_j|a_i)\cdot P(a_i)}{P(a_i)\cdot P(b_j)}\]
+  e infine:
+  \[I(a_i;b_j)=\log_r\frac{P(b_j|a_i)}{P(b_j)}=I(b_j;a_i)\]
+  Avendo che la mutua informazione quindi non dipende dall'ordine.\\
+  Se considero il caso particolare in cui $a_i$ e $b_j$ sono indipendenti allora:
+  \[P(a_i,b_j)=P(a_i)\cdot P(b_j)\]
+  Allora:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i)\cdot P(b_j)}{P(a_i)\cdot P(b_j)}=0\]
+  \textbf{Per ora si parla di un solo simbolo in input e uno solo in output}.\\
+  Estendo la definizione alle medie:
+  \[I(A;b_j)=\sum_{i=1}^q P(a_i|b_j)\cdot I(a_i;b_j)\]
+  \[=\sum_{i=1}^q P(a_i|b_j)\cdot\log_r\frac{P(a_i|b_j)}{P(a_i)}\]
+  E poi, per $B$:
+  \[I(a_i;B)=\sum_{j=1}^s P(a_i|b_j)\cdot I(a_i;b_j)\]
+  \[=\sum_{i=1}^q P(b_j|a_i)\cdot\log_r\frac{P(b_j|a_i)}{P(b_j)}\]
+  e, come ultimo, la \textbf{mutua informazione del sistema}:
+  \[I(A;B)=\sum_{i=1}^q P(a_i) I(a_i;B)\]
+  \[=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{P(a_i,b_j)}{P(a_i)\cdot
+      P(b_j)}=I(B;A)\]
+\end{definizione}
+\begin{teorema}
+  Si può dimostrare che:
+  \begin{itemize}
+    \item $I(A;B)\geq 0$, per Gibbs
+    \item $I(A;B)=0$ sse $A$ e $B$ sono indipendenti
+    \item $I(A;B)=I(B;A)$
+  \end{itemize}
+\end{teorema}
+La quantità di informazione trasmessa nel canale, per una distribuzione $P(a_i)$
+fissata è proprio la mutua informazione del sistema. Infatti, tralasciando la
+$r$ dell'entropia in quanto irrilevante:
+\[I(A;B)=H(A)+H(B)-H(A,B)\]
+e si sa che:
+\[I(A;B)=H(A)+H(B)-H(A,B)\geq 0\]
+Inoltre sappiamo che:
+\[H_r(A,B)=H_r(A)+H_r(B|A)\]
+\[H_r(A,B)=H_r(B)+H_r(A|B)\]
+Uso una delle due per sostituire:
+\[I(A;B)=H(A)-H(A|B)\geq 0\]
+oppure:
+\[I(A;B)=H(B)-H(B|A)\geq 0\]
+Ma so quindi che (l'entropia è comunque $\geq 0$):
+\[0\leq H(A|B)\leq H(A)\]
+e che:
+\[0\leq H(B|A)\leq H(B)\]
+Scopro quindi che:
+\[H(A,B)\leq H(A)+H(B)\]
+e vale l'uguaglianza sse $A$ e $B$ sono indipendenti, avendo un canale
+completamente rumoroso.\\
+Tra tutte queste formule abbiamo come importanti:
+\[I(A;B)=H(A)-H(A|B)\geq 0\]
+che ci dice che la mutua informazione del sistema corrisponde a quella trasmessa
+meno l'equivocazione, che altro non è che la quantità di informazione persa
+causa rumore (\textit{non si dimostra la cosa}). Avere $I(A;B)\geq 0$ è data dal
+fatto che il rumore non mi può mandare in negativo, ``togliendo più
+dell'informazione presente''.\\
+L'altra formula essenziale:
+\[H(A,B)\leq H(A)+H(B)\]
+Avendo che al più la massima informazione è la somma di quella di $A$ e di
+quella di $B$, valore massimo che si ottiene solo se sono indipendenti. Negli
+altri casi si ha l'intervento del rumore, vedendo uscire meno quantità di
+informazione di quella entrata.
+\subsection{Capacità del Canale}
+Abbiamo detto che la quantità di informazione trasmessa nel canale, per una
+distribuzione $P(a_i)$ fissata è proprio la mutua informazione del sistema. Ma
+sappiamo che una scelta errata della distribuzione comporta cose inaspettate ed
+errate. Si vuole evitare che l'utente faccia scelte inopportune e si vorrebbe
+che 
+la quantità di informazione trasmissibile dal canale non dipenda dalla scelta
+dell'utente, la \textit{capacità del canale} non deve dipendere da $P(a_i)$.
+\begin{definizione}
+  Si definisce, informalmente, la capacità del canale $C$ come la massima
+  quantità di informazione trasmissibile dal canale (ovvero la mutua
+  informazione del sistema) al variare di tutte le
+  possibili $P(a_i)$: 
+  \[C=\max_{P(a_i)}I(A;B)\]
+\end{definizione}
 \end{document} 
 % LocalWords:  clock burst Hamming codeword errario sottoalberi sottoalbero
 % LocalWords:  Pseudocodice bias equivocazione

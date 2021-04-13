@@ -2412,8 +2412,225 @@ Ogni record ha 9 campi:
   Gli attributi \textit{gene\_id} e \textit{transcript\_id} sono attributi
   obbligatori 
 \end{enumerate}
+\chapter{Strutture di Indicizzazione}
+Le strutture di indicizzazione permettono varie cose nello studio del genoma,
+dall'assembly, all'individuazione di match, MEMs etc$\ldots$, anche in ambito
+pan-genomica. Tra le strutture principali abbiamo:
+\begin{itemize}
+  \item suffix tree
+  \item suffix array
+  \item LCP
+  \item BWT
+\end{itemize}
+e le studieremo sia in ottica genomica che pan-genomica.\\
+Con $T[i;j]$ abbiamo la sottostringa da $i$ a $j$ (incluso) e con $T[i:]$ il
+suffisso che inizia in $i$.
+\section{Caso Genomico}
+\subsection{Suffix Tree}
+È una delle prime strutture create, è molto efficiente e permette di risolvere
+tanti problemi in tempo lineare ma ha lo svantaggio dell'occupazione di
+memoria, memorizzando in modo ridondante. Non va quindi bene applicato
+direttamente a genomi e dati NGS. Volendo può essere simulato tramite SA, LCP e
+altre strutture.
+\begin{definizione}
+  Dato un testo $T$ di $n$ caratteri un suffix tree è un albero radicato con:
+  \begin{itemize}
+    \item $n$ foglie etichettate da 1 a $n$
+    \item ogni nodo interno ha almeno 2 figli
+    \item ogni arco è etichettato da una sottostringa di $T$
+    \item non esistono due archi uscenti da un nodo con lo stesso carattere
+    iniziale per l'etichetta
+    \item la concatenazione delle etichette dalla radice alla foglia $i$
+    è $T[i:]$ 
+  \end{itemize}
+  \textup{Anche ogni etichetta di arco che porta ad una foglia è un suffisso},
+  da qui il discorso delle ripetizioni e della ridondanza di informazione.
+\end{definizione}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.5]{img/st.png}
+  \caption{Esempio di suffix tree per la stringa "xabxac"}
+\end{figure}
+\begin{teorema}
+  Il ST di $T$ esiste sse nessun suffisso occorre come prefisso di qualche altro
+  suffisso, in quanto avrei un nodo interno con figli che iniziano con lo stesso
+  carattere come primo carattere delle sottostringhe e per evitare la cosa
+  otterrei nodi con singoli figli. 
+\end{teorema}
+Per risolvere il problema si usano testi \$ terminati, con \$ che è il carattere
+minore di tutti lessicograficamente.\\
+Si hanno tre algoritmi lineari per la costruzione, in $O(n)$:
+\begin{itemize}
+  \item \textbf{algoritmo di Weiner}
+  \item \textbf{algoritmo di McCreight's}, efficiente in memoria
+  \item \textbf{algoritmo di Hukkonen}, online
+\end{itemize}
+\begin{definizione}
+  Dato un nodo $w$ definisco la \textbf{path label} $L_w$ come la concatenazione
+  delle etichette dalla root a $w$. Se $w$ è una foglia $i$ allora la path label
+  è il suffisso $T[i:]$
+\end{definizione}
+\begin{definizione}
+  Dato un nodo $w$ definisco la \textbf{string depth} come la lunghezza della
+  path label $L_w$
+\end{definizione}
+\begin{definizione}
+  Definisco \textbf{dummy node} come un falso nodo che separa in due l'etichetta
+  di un arco $(w,w')$ in due stringhe $l_1$ e $l_2$. La sua path label è
+  $L_wL_1$. È un nodo a metà di un arco.
+\end{definizione}
+\begin{teorema}
+  Due nodi diversi non possono avere la stessa path label.
+\end{teorema}
+\begin{teorema}
+  Dato un nodo interno $w$, le $k$ foglie del sottoalbero radicato in $w$ danno
+  le posizioni di inizio dei $k$ suffissi che condividono $L_w$ come prefisso.
+\end{teorema}
+\begin{teorema}
+  Dato un dummy node $d$ che separa $(w,w')$  le $k$ foglie del sottoalbero
+  radicato in $w$ danno 
+  le posizioni di inizio dei $k$ suffissi che condividono $L_wL_1$, ovvero la
+  path label di $d$, come prefisso. 
+\end{teorema}
+Per il pattern matching, con pattern $P$ lungo $m$ e testo $T$ lungo $n$, con ST
+si ha una soluzione in tempo: 
+\[O(n+m+k)\]
+avendo:
+\begin{itemize}
+  \item costruzione di ST in $O(n)$
+  \item ricerca delle $k$ occorrenze in $O(m+k)$, cercando in $O(m)$ ò'unico
+  nodo $w$ che ha path label pari a $P$ e visito in $O(k)$ il sottoalbero
+  radicato in $w$ elencando le $k$ foglie
+\end{itemize}
+In quanto si sa ha che:
+\begin{itemize}
+  \item se $P$ occorre $k$ volte allora $P$ è prefisso di $k$ suffissi di $T$
+  \item se $P$ è prefisso di $k$ suffissi di $T$ allora $P$ è la path label di
+  un nodo $w$, anche dummy, che è unico
+  \item le $k$ foglie del sottoalbero radicato in $w$, che può essere dummy,
+  danno le posizioni di 
+  inizio delle $k$ occorrenze di $P$ su $T$
+\end{itemize}
+Se $P$ non occorre non trovo il $w$ e mi fermo.\\
+Avendo alfabeto $\Sigma$ finito la ricerca dell'arco uscente da un certo nodo la
+cui etichetta inizia con un certo carattere è in tempo costante con la giusta
+implementazione.\\
+\textbf{Su slide esempio di pattern matching}.
+\section{Suffix Array}
+\textbf{Riprendere teoria da appunti di Teoria della Computazione}.\\
+Il SA è nato come struttura ausiliaria di un ST. Si ricorda che la costruzione è
+in $O(n)$ e il pattern matching è in $O(m\log n)$.\\
+Si usa spesso il suffix array inverso $SA^{-1}$, è definito in modo tale che in
+posizione $j$ ho l'indice $i$ sse $T[j:]$ è l'i-esimo suffisso nell'ordinamento
+lessicografico dei suffissi di $T$:
+\[SA^{-1}[j]=i \iff SA[i]=j\]
+In tempo lineare posso costruire il SA dal ST, visitando in profondità, in
+$O(n)$, il ST seguendo l'ordine lessicografico delle etichette degli archi
+uscenti da un dato nodo, scelgo sempre l'arco con etichetta ``minore''. Ogni
+volta che arrivo ad una voglia aggiungo l'etichetta della foglia al SA, in
+ordine. Ne segue che il primissimo è ovviamente sempre \$ e quindi il primo
+indice del SA è ovviamente il suffisso nullo.\\
+\textbf{Esempio su slide}.\\
+\subsection{Longest Common Prefix}
+Passiamo ora all'\textbf{LCP} è stato introdotto come struttura ausiliaria per
+il SA.
+\begin{definizione}
+  Dato un testo $T$ dollaro terminato, l'LCP è un array lungo $n$ tale che
+  $LCP[i]=l$ sse $l$ è la lunghezza del più lungo prefisso comune tra $T[S[i]:]$
+  e $T[S[i-1]:]$. In altri termini è la lunghezza del più lungo prefisso comune
+  dei suffissi corrispondenti a $S[i]$ e $S[i-1]$.\\
+  SI assume $LCP[1]=-1$
+\end{definizione}
+L'algoritmo di Kasai lo costruisce a partire da $SA$ in tempo lineare.\\
+SA e LCP permettono il pattern matching in $O(m+\log n)$, migliorando il
+$O(m\log n)$ del solo SA. Questo è permesso dal fatto che con LCP il confronto
+del pattern non torna mai indietro. \\
+Quindi $lcp(i,j)$ è la \textbf{LCP-funcion} è computa lunghezza del più lungo
+prefisso comune tra $T[S[i]:]$ e $T[S[j]:]$. Assumendo $i<j$ si ha che
+$lcp(i,j)$ è il minimo tra i valori di LCP compresi tra $LCP[i+1]$ e $LCP[j]$
+quindi, usando la \textbf{range minimum query} (cerco il valore minimo tra
+$LCP[i+1]$ e $LCP[j]$): 
+\[lcp(i,j)=RMQ(LCP, i+1,j)\]
+\textbf{Esempio su slide}.
+\begin{definizione}
+  Definiamo \textbf{lcp-interval} di valore $l$ come l'intervallo di
+  posizioni $[i,j]$ tale che:
+  \begin{itemize}
+    \item $i< j$
+    \item $LCP[i]<l$
+    \item $LCP[j+1]<l$
+    \item $LCP[k]\geq l, i+1\leq j\leq j$
+    \item $LCP[j]=l$ per almeno un $k\in[i+1,j]$, tale $k$ è detto
+    $l$-index 
+  \end{itemize}
+  L'lcp-interval $[i,j]$ è anche detto $l$-interval, detto anche
+  $l$-$[i,j]$. \\
+  Il valore $l$ di un lcp-interval $[i,j]$ è uguale a:
+  \[RMQ(LCP, i+1,j)\]
+  Il valore $l$ è la lunghezza del più lungo prefisso comune tra i
+  suffissi di $T$ che iniziano in posizione $S[i], S[i+1], \ldots, S[j]$, che
+  viene denotato con $\omega$.\\
+  Dato $l=0$ si ha che:
+  \[0\mbox{-}[1,n]\]
+  è lo 0-interval che ha come $\omega$ il prefisso nullo.
+\end{definizione}
+\textbf{Esempio su slide}.\\
+\begin{definizione}
+  Definisco $l'$-interval $[g,d]$ con prefisso $\omega'$ come \textbf{embdedded}
+  in $l$-interval $[i,j]$, con prefisso $\omega$ sse;
+  \[i\leq g<d\leq j\]
+  Quindi $[i,j]$ racchiude $[g,d]$.\\
+  In tal caso si ha:
+  \[l'>l\]
+  e $\omega$ è prefisso di $\omega'$.
+\end{definizione}
+\textbf{Esempio su slide}.
+\begin{definizione}
+  Si dice che $l'$-$[g,d]$ è figlio di $l$-$[i,j]$ sse non esiste un altro
+  lcp-interval che racchiude $[g,d]$ e che a sua volta è racchiuso in $[i,j]$.\\
+  Per trovare i figli di $l$-$[i,j]$:
+  \begin{itemize}
+    \item identifico gli $l$-indici $i_1,\ldots i_k$, dal più piccolo al più
+    grande
+    \item il primo figlio è $[i,i_1-1]$, il secondo $[i,i_2-1]$ e etc$\ldots$
+    fino a $[i_k,j]$, scartando però quelli di ampiezza 1
+    \item il valore $l$ di ogni figlio $[g,d]$ è dato da:
+    \[RMQ(LCP, g+1,d)\]
+  \end{itemize}
+\end{definizione}
+\begin{definizione}
+  Definisco \textbf{lcp-interval tree} come un albero radicato $(V,A)$ tale che:
+  \begin{itemize}
+    \item $V$ è l'insieme degli lcp-interval
+    \item $A$ è l'insieme di tutte le relazioni parent-child
+    \item la radice corrisponde a $0$-$[1,n]$
+  \end{itemize}
+\end{definizione}
+\textbf{Esempio su slide}.\\
+Grazie a tutte queste nozioni possiamo legare SA e ST. Se prendo un ST e
+nascondo foglie e archi in esse entranti ottengo una struttura uguale a quella
+dell'lcp-interval tree, stessa topologia. Esiste un nodo $l$-$[i,j]$ con
+prefisso $\omega$ nell'lcp-interval tree sse si ha un nodo nel ST con path label
+$\omega$. \\
+Con SA, SA inverso, LCP  posso simulare un attraversamento del ST, anche senza
+lcp-interval tree esplicito tramite \textit{enhanced SA}, senza mi serve anche
+il lcp-interval tree.
+\subsection{BWT e FM-Index}
+\textbf{Riprendere teoria da appunti di Teoria della Computazione}.\\
+Posso avere Q-intervalli che sono lcp-interval ma non tutti, visto che scarto
+gli lcp-interval di ampiezza 1. Quando si ha la corrispondenza ho $Q=\omega$.\\
+Dato il Q-intervallo $[b,e]$ (quindi con intervallo chiuso, non come a teoria
+della computazione) ho la backward extension per $\sigma$:
+ho che:
+\[b'=C(\sigma)+Occ(\sigma,b)+1\]
+\[e'=C(\sigma)+Occ(\sigma,e+1)\]
+Se $e'<b'$ allora il $\sigma Q$-interval non esiste.\\
+Se ho un Q-intervallo $[b,e]$ che sulla BWT contiene \$ allora esso caratterizza
+una stringa $Q$ che è prefisso di $T$.
+\section{Caso Pan-Genomico}
+
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
 % LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
-% LocalWords:  feature semiglobale
+% LocalWords:  feature semiglobale sottoalbero

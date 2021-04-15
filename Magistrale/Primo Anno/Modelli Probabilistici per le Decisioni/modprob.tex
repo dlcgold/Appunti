@@ -856,6 +856,236 @@ In definitiva concludiamo che:
     tramite la computazione di 
     somme di prodotti di probabilità condizionali della rete}
 \end{center}
+Vedremo sia algoritmi esatti che approssimati, tramite campionamento, per
+l'inferenza.\\
+\section{Inferenza esatta}
+Per fare inferenza esatta sfruttiamo l'equazione:
+\[P(X|E=e)=\alpha\cdot P(X,E=e)=\alpha\cdot \sum_y P(X,E=e, Y=y)\]
+sfruttando la fattorizzazione, che fornisce un'espressione in termini di CPT per
+effettuare il calcolo.\\
+\textbf{Esempio su slide}.\\
+Nel caso peggiore, dovendo marginalizzare tutte le variabili, ho un algoritmo,
+per una rete di $n$ variabili booleane, di complessità:
+\[O(n\cdot 2^n)\]
+ma a seconda dei casi posso effettuare delle ottimizzazioni, estraendo elementi
+costanti dalle sommatorie generate usando la chain rule (\textbf{guardare sempre
+  esempio su slide}).\\
+Per ogni sommatoria che si crea poi eseguo l'\textbf{algoritmo di enumerazione},
+vedendo l'algoritmo come una sorta di struttura ad albero. Si richiede quindi di
+iterare su tutte le possibili realizzazioni congiunte delle variabili
+coinvolte. \\
+Con queste ottimizzazioni si arriva a:
+\[O(2^n)\]
+Un miglioramento comunque non sufficiente.\\
+Studiando l'albero di computazione si notano ripetizioni di computazione quando
+si effettua l'algoritmo di enumerazione, che consiste nella valutazione
+ricorsiva di tale albero. Si memorizzano quindi le operazioni già fatte per non
+doverle ripetere, ad esempio tramite \textbf{l'algoritmo di eliminazione
+  variabili}. Questo algoritmo valuta da destra a sinistra, ovvero bottom-up, le
+espressioni e memorizza i risultati intermedi mentre la marginalizzazione viene
+effettuata solo per le porzioni di espressione che dipendono dalla variabile
+stessa. \\
+Tale algoritmo si basa sul fatto che ogni variabile che non sia predecessore di
+una variabile in studio o di una variabile con evidenza è irrilevante nello
+studio 
+della query. Si rimuovono quindi dall'albero le variabili inutili, ovvero quelle
+oggetto della query e quelle con evidenza. \\
+L'ordine di eliminazione influisce sulla complessità temporale complessiva. Con
+reti molto complesse magari non binarie, il problema resta di elevata
+complessità e non ci si può aspettare di poter fare inferenza esatta su tali
+reti. \\
+Con le reti Bayesiane si nota che è possibile fare, a seconda della query,
+calcolo parallelo. Si ragiona comunque solitamente per campionamenti, generando
+configurazioni possibili della rete tramite le distribuzioni della CPT e
+calcolano la frequenza in cui una certa variabile assume un certo valore date le
+evidenze. Per farlo bisogna generare numeri pseudocasuali.
+\section{Numeri Pseudocasuali}
+Innanzitutto su un numero singolo non possiamo dire nulla in merito alla sua
+casualità. Se uno dice 3 non posso inferire nulla sulla sua casualità.\\
+Una lista di numeri può apparire casuale ma potrebbe non esserlo.
+\begin{definizione}
+  una \textbf{sequenza di numeri pseudo casuali} è una sequenza di realizzazioni
+  di 
+  variabili aleatorie indipendenti e identicamente distribuite.\\
+  Tali numeri sembrano impredicibili e senza regolarità. ``Sembrano'' perché
+  comunque dietro si ha un meccanismo di calcolo.
+\end{definizione}
+Il lancio dei dadi è un metodo manuale valido, completamente causale al più di
+trucchi, ma richiede troppo tempo. Esistono anche 
+device specifici per farlo ma si hanno altri problemi, si preferisce quindi un
+calcolatore che genera le stesse sequenze, in modo pseudocasuale.\\
+Serve un \textbf{seme di generazione}, avendo che con un seme genero sempre la
+stessa sequenza e questo è importante per poter valutare due sistemi in base
+agli stessi scenari, rigenerando sempre la stessa sequenza. Questa è la
+\textbf{proprietà di riproducibilità}.\\
+I numeri causali generati devono avere una serie di proprietà statistiche,
+devono sembrare impredicibili ma:
+\begin{itemize}
+  \item la distribuzione deve essere, o perlomeno simulare, una distribuzione
+  uniforme, 
+  verificabile all'aumentare dei 
+  numeri generati tramite il calcolo della media (che deve essere a metà del
+  range nel quale si hanno numeri generati, se range $[0,9]$ voglio media $4.5$)
+  \item devo avere indipendenza statistica
+  \item devo avere riproducibilità di valori
+  \item non devo avere ripetitività su un prefissato periodo abbastanza lungo,
+  se avessi periodi troppo brevi potrei fare predizione
+\end{itemize}
+Il seme, se non specificato, viene scelto via hardware, tipo il clock attuale
+della cpu etc$\ldots$\\
+La routine che genera numeri pseudocasuali di default genera una distribuzione
+uniforme su $[0,1]$ deve:
+\begin{itemize}
+  \item essere veloce
+  \item avere periodi di ripetizioni lunghe
+  \item non presentare lunghi gap tra la generazione di due numeri, nella
+  discretizzazione di variabili continue, avendo uniformità
+  \item essere replicabile
+ \item generare sequenze con proprietà statistiche simili a quelle reali
+\end{itemize}
+Uno dei primi algoritmi è stato quello di Von Neumann, detto \textbf{middle
+  square}, che genera un numero con 10 cifre. Si parte da un numero, il seed, si
+eleva al 
+quadrato e si prendono le 10 cifre centrali, che saranno il prossimo numero. In
+realtà è molto pseudocasuale avendo che ogni numero dipende dal precedente ma
+sembra causale e si hanno casi di numeri che comportano facilmente la
+riconoscibilità di tale pattern o che addirittura generano un loop, tornando al
+seme dopo poche generazioni.  \\
+Nel tempo si sono quindi di studiati vari parametri iniziali dell'algoritmo. \\
+Un primo metodo, detto \textbf{moltiplicative congruential method
+  (\textit{MCM})}, prevede: 
+\[x_n=a\cdot x_{n-1},\,\,\,0\leq x_n\leq m\]
+con $a$ e $m$ interi scelti e un $x_0$ seed. La scelta di $m$ deve essere tale
+per avere cicli molto ampi e quindi $m$ è solitamente molto grande, nonché primo
+(cosa capita empiristicamente). Sono state studiate varie combinazioni di $m$ e
+$a$, come $m=2^{31}-1$ e $a=7^5$ o $m=2^{35}-31$ e $a=5^5$. Siu ha che $m$ deve
+portare ad avere pochi gap.\\
+Si ha poi il \textbf{linear conrguential method (\textit{LCM})}, che prevede:
+\[x_n=(a\cdot x_{n-1}+c)\bmod m\]
+con anche $c$ scelto opportunamente. Si ha che:
+\begin{itemize}
+  \item $a,c\geq 0$
+  \item $m>x_0,c,a$
+\end{itemize}
+Però ci servono variabili aleatorie uniformi in $[0,1]$ quindi devo fare, per
+LCM: 
+\[u_n=\frac{x_n}{m}\]
+Con LCM si ha ciclo pari a $m$ e si generano numeri discretizzati e quindi serve
+un $m$ molto grande (ma anche qui si hanno scelte di parametri ``sfortunate'',
+che comportano cicli brevi).\\
+Un ciclo normalmente deve tendere al numero intero massimo rappresentabile, ma
+dipende dai casi.\\
+Aumentare $m$ riduce periodicità e generazione di numeri razionali. Solitamente
+$m\geq 10^9$, per ottenere un sottoinsieme denso in $[0,1]$. Solitamente $m$ è
+quindi il massimo intero rappresentabile.\\
+Il \textbf{generatore di Learmouth-Lewis} prevede:
+\begin{itemize}
+  \item $c=0$
+  \item $a=75$
+  \item $m=2^{31}-1$
+\end{itemize}
+Che è uno dei più usati ma si hanno molti altri generatori.\\
+A partire dai numeri tra 0 e 1 posso passare a distribuzioni arbitrarie.\\
+\subsection{Generazione di Distribuzione Generica}
+Partiamo ora da una sequenza di numeri pseudocasuali $U(0,1)$. Si hanno varie
+tecniche per la generazione di una distribuzione generica:
+\begin{itemize}
+  \item \textbf{tecnica di trasformazione inversa}
+  \item \textbf{metodo di accettazione rifiuto}
+  \item \textbf{metodo di composizione}
+\end{itemize}
+In generale si vuole utilizzare poche volta la routine di generazione di numeri
+random. \\
+Ricordiamo due concetti:
+\begin{itemize}
+  \item \textbf{funzione di densità} che prevede:
+  \[P(x=x_1)=0\]
+  e:
+  \[P(x_1-\varepsilon\leq X\leq
+    x_1+\varepsilon)=\int_{x_1-\varepsilon}^{x_1+\varepsilon} f_X(x)\dd{x}\]
+  \item \textbf{distribuzione cumulativa}, che prevede;
+  \[F_X(x)=p(X\leq x)=\int_{-\infty}^x f_X(y)\dd{y}\]
+\end{itemize}
+\subsubsection{Trasformazione Inversa}
+Vogliamo ora generare una variabile aleatoria $X$ con funzione di densità di
+probabilità:
+\[f_X(x)\]
+Si hanno quindi vari step:
+\begin{enumerate}
+  \item si calcola la funzione di distribuzione di probabilità o funzione
+  cumulativa di probabilità:
+  \[F_X(x)=\int_{-\infty}^Xf_X(\tau)\dd{\tau}\]
+  che, qualora sia possibile calcolarla in forma chiusa, è continua, monotona,
+  crescente e compresa tra 0 e 1, avendo $F_X(x)=p(X\leq x)$
+  \item si pone:
+  \[u=F_X(x)\]
+  con $u$ numero random $(u-U(0,1)$
+  \item si risolve:
+  \[X=F_X^{-1}(u)\]
+  ottenendo che la variabile aleatoria $X$ è distribuita secondo $f_X(x)(X\sim
+  f_X(x))$ 
+\end{enumerate}
+Vediamo quindi qualche caso particolare.\\
+Supponiamo di voler costruire una successione di numeri pseudocasuali come
+osservazioni dalla \textbf{distribuzione esponenziale} ovvero con funzione di
+distribuzione:
+\[F(x)=1-e^{\lambda\cdot x}\]
+Ho quindi:
+\[U=F(x)=1-e^{\lambda\cdot x}\implies 1-U=e^{\lambda\cdot x}\]
+e quindi:
+\[\ln(1-U)=\ln(e^{\lambda\cdot x})\implies \ln(1-U)=-\lambda\cdot x\]
+e quindi:
+\[x=-\frac{\ln(1-U)}{\lambda}\]
+e quindi:
+\[x=F^{-1}(U)=-\frac{\ln(1-U)}{\lambda}\]
+e se $U$ è una variabile aleatoria con distribuzione uniforme su $[0,1)$ ho che
+$x$ è una variabile aleatoria con distribuzione esponenziale con media
+$\frac{1}{\lambda}$. Da una successione di numeri pseudocasuali uniformi ottengo
+una successione di numeri pseudocasuali con distribuzione esponenziale. \\
+Inoltre se $U$ è in [0,1) lo è anche $1-U$ e quindi sostituisco $(1-U)$ con $U$
+nella formula, anche se questo cambiamento potrebbe indurre un cambiamento nella
+correlazione delle variabili $X$ generate. \\
+Quindi la routine di generazione di $X$ con funzione di densità di probabilità
+esponenziale chiama una sola volta per ogni $X$ la routine di generazione di
+numeri casuali $R$. Si ha, per la routine di $X$, quindi lo stesso ciclo di tale
+routine $R$ e gap crescenti per 
+$X$ crescente. Se la routine è replicabile lo è anche quella per $X$. Se la
+routine di generazione è ideale lo è anche quella di $X$.\\
+Posso estendere il metodo a distribuzioni discrete, con $X$ \textbf{variabile
+  aleatoria discreta}. \\
+Suppongo $X$ con valori $x_1,x_2,\ldots$ con:
+\[x_1<x_2<\ldots\]
+Data $U$ variabile uniformemente distribuita in $[0,1)$ si ha che:
+\[X(U)=\max\{x_i|\,U\in[F(x_i-1)-F(x_i)]\}\]
+Si ha quindi, avendo $P(X=i)=p_i$:
+\begin{itemize}
+  \item \textbf{funzione di densità}:
+  \[\sum_{i=\infty}^\infty P(X=i)=1\]
+  \item \textbf{Distribuzione cumulativa}:
+  \[F_X(x)=P(X\leq x)=\sum_{i=-\infty}^xP(X=i)\]
+\end{itemize}
+In generale si ha che:
+\[P(X=x_j)=p_j,\,\,\,j=0,1,\ldots, n\]
+con:
+\[\sum_{j=0}^np_j=1\]
+e ho:
+\begin{itemize}
+  \item $x_0$ se $u\leq p_0$
+  \item $x_1$ se $p_0\leq \leq p_0+p_1$
+  \item $\cdots$
+  \item $x_j$ se $\sum_{i=0}^{j-1} p_i\leq u\leq\sum_{i=0}^j$
+  \item $\cdots$
+\end{itemize}
+In base a questo si possono avere procedure più efficienti di altre (???),
+rendendo la ricerca di appartenenza dell'intervallo il più efficiente
+possibile.\\
+Ad esempio, volendo generare una distribuzione discreta uniforme con:
+\begin{itemize}
+  \item $X\varepsilon\{0,1,\ldots,n\}$ (???)
+  \item $p_0=p_1=\cdots p_n=\frac{1}{n+1}$ 
+\end{itemize}
+Ottenendo:
+\[X=\lfloor (n+1)\cdot u\rfloor\]
 \end{document}  
-% LocalWords:  clock  Bayesana machine learning Bayes riscalare
+% LocalWords:  clock  Bayesana machine learning Bayes riscalare discretizzati
 % LocalWords:  condizionalmente

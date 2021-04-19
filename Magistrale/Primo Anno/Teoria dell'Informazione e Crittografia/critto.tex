@@ -3828,11 +3828,206 @@ sorgente e alla codifica di canale, che limita la comprensione del contenuto al
 mittente e al destinatario.\\
 Ormai la crittografia è una scienza che comprende tante tematiche. Si hanno
 quindi sia questioni di complessità computazionale, per cifrare e decifrare
-(mittente e ricevente deve metterci pochissimo mentre gli altri migliaia di
-anni). Si frutta quindi la \textbf{teoria dei numeri} e l'\textbf{algebra}, con
-monoidi, campi, anelli etc$\ldots$.\\
+(mittente e ricevente devono metterci pochissimo a cifrare e decifrare mentre
+gli altri migliaia di anni). Si frutta quindi la \textbf{teoria dei numeri} e
+l'\textbf{algebra}, con monoidi, campi, anelli etc$\ldots$ e la
+\textbf{complessità computazionale}.\\
+Le applicazioni della crittografia variano dallo storage ai DRM, dalle
+criptovalute alla homomophic encryption, ovvero computazione fatta su dati
+cifrati, dal cloud computing alla trasmissione sicura di dati sensibili e al
+secure secret sharing, dove ogni partecipante ha una parte del segreto e servono
+almeno $k$ partecipanti per ricostruirlo, con meno partecipanti non si ha
+nemmeno una vaga idea dello stesso.\\
+Lo schema standard sono \textbf{Alice} e \textbf{Bob} che si scambiano un
+messaggio e \textbf{Eve} che cerca di intercettare il messaggio,
+``origliando''. Alice e Bob comunicano su un canale pubblico. Eve può leggere
+e/o scrivere sul canale, nel caso semplice solo leggere. Mandare il messaggio
+\textit{msg} in 
+chiaro, in plain text, viene sicuramente intercettato. Alice quindi codifica il
+messaggio ma anche così facendo, senza ulteriori specifiche, Bob non sa come
+leggere il messaggio. Bisogna quindi far dipendere la codifica da una chiave $k$
+conosciuta solo da Alice e Bob. Alice calcola il $c$, ciphertext, come il
+risultato della cifratura con $k$ e lo spedisce a Bob. Bob quindi, conoscendo la
+chiave può riottenere il messaggio originale, tramite una funzione
+$msg=D_k(c)$. Eve non sapendo $k$ non può fare nulla: $???=D_?(c)$.
+Per Bob quindi decifrare è facile per Eve quasi impossibile.\\
+In realtà la crittografia, che prevede lo studio e la progettazione di
+crittosistemi sicuri, era chiamata \textbf{criptologia}. La
+\textbf{crittoanalisi} studia invece come ``rompere'' i crittosistemi, portando
+ad uno studio ``evolutivo'' dei sistemi. Quindi sia crittografia che
+crittoanalisi sono importanti, anche perché Eve potrebbe essere la ``parte
+buona'', come la polizia che intercetta i terroristi. Servono quindi entrambi
+gli aspetti.\\
+La criptologia era spesso definita l'unione di crittografia e crittoanalisi.\\
+Parlando dell'\textbf{attaccante} Eve bisogna stabilire delle assunzioni, dando
+un modello. Si ha quindi che:
+\begin{itemize}
+  \item se Eve non può né leggere né scrivere il canale è sicuro. È una
+  situazione non realistica, avendo che normalmente si comunica via radio
+  attraverso l'aria o via cavo
+  \item se Eve può leggere ma non scrivere si hanno solo \textbf{attacchi
+    passivi}, ovvero leggere i messaggi e trarne vantaggio, ed è
+  la situazione più comune. Non si hanno \textbf{impersonificazioni}, ovvero far
+  finta di essere uno dei due estremi della comunicazione, far finta di essere
+  Bob o Alice
+  \item se Eve può scrivere ma non leggere si ha che può disturbare la
+  comunicazione, avendo che ogni canale ha, come visto, una capacità massima e
+  se la superiamo, per il secondo teorema di Shannon, provochiamo errori di
+  decodifica. Eve può quindi cercare di saturare il canale ma non riesce a
+  trarre vantaggio dal messaggio, non potendolo leggere
+  \item se Eve può leggere e scrivere si ha che può fare \textbf{attacchi
+    attivi} e \textbf{impersonificazioni}. È la situazione ovviamente più
+  pericolosa 
+\end{itemize}
+SI ha che:
+\begin{itemize}
+  \item Alice vuole mandare il plaintext $m$
+  \item Alice codifica $m$ tramite una funzione $E(\cdot)$, ottenendo un
+  ciphertext, $c=E(m)$ 
+  \item Alice spedisce $c$
+  \item Bob decodifica $c$ tramite $D(\cdot)$, $m=D(c)$
+\end{itemize}
+Alice e Bob devono quindi accordarsi prima sulle due funzioni, magari, a sua
+volta, in un canale non sicuro. Le due funzioni $E$ e $D$ devono essere
+mantenute segrete. Alice e Bob, più precisamente, si accordano sull'algoritmo di
+cifratura e di conseguenza di decifratura. Già alla fine del 1800 Kerkhoff
+enuncia il suo principio:
+\begin{center}
+  \textit{mantenere segrete le funzioni è difficile mentre mantenere segreta una
+  piccola informazione come la chiave è più semplice.}
+\end{center}
+L'algoritmo quindi può anche essere pubblico ma senza la chiave non te ne fai
+nulla. Inoltre cambiare chiave è più semplice che cambiare algoritmo.\\
+Nella modernità gli algoritmi sono spesso opensource, garantendo ancora più
+sicurezza tramite la community che lavora sull'algoritmo, evidenziando falle e
+problematiche (cosa che garantisce anche una certa visibilità).\\
+Le chiavi sono piccole, ad esempio 128, 192 o 256 bit per AES. Sono quindi più
+facili da tenere nascoste rispetto ad intere procedure.\\
+Se Eve scopre la chiave segreta rompe il crittosistema, e ogni messaggio diventa
+praticamente in chiaro. IN tal caso si parla di \textbf{rotture
+  totali}. Un'altra situazione è che Eve abbia varie copie $c$ (perché ``spia'')
+e $m$ (visto che magari dopo un po' diventa pubblico), venendo a conoscenza
+magari della relazione tra $c$ e $m$, si parla in caso di \textbf{rottura
+  parziale}. Un messaggio cifrato può restare pubblico per un tot di tempo prima
+che il rischio di essere decifrato diventi troppo alto. Questo tempo varia a
+seconda dell'algoritmo, della chiave e dei possibili avversari (se si parla di
+NSA auguri). Un'altra variabile nel discorso è quanto il messaggio deve rimanere
+effettivamente segreto. Si ha inoltre una serie di assunzioni non dimostrate e
+uno potrebbe trovare un modo per risolvere problemi che si credono
+difficili. Un'altro aspetto è la \textbf{legge di Moore}, avendo che le macchine
+con cui si decifra evolvono e si potenziano ogni circa 18 mesi. Si potrebbero
+anche avere nuovi algoritmi etc$\ldots$ e magari un'informazione sicura ora non
+lo sarà tra 100 anni, quando magari si avranno computer quantistici a pieno
+regime (e quindi serviranno altri algoritmi di cifratura). Spesso si usano due
+algoritmi in modo che, a medio termine, se un algoritmo viene rotto si usa
+l'altro. 
+\begin{definizione}
+  Definiamo formalmente un \textbf{crittosistema} come una quintupla:
+  \[(PT,CT,K, E(\cdot), D(\cdot))\]
+  Dove:
+  \begin{enumerate}
+    \item $PT$, spazio dei plaintext, ovvero lo spazio di tutti i possibili
+    testi in chiaro. Solitamente sono stringhe binarie quindi è un insieme
+    $\{0,1\}^*$ o comunque un certo $\Sigma^*$ (nei cifrari storici e basta)
+    \item $CT$, spazio dei ciphertext, mi piacerebbe fosse anch'esso $\{0,1\}^*$
+    \item $K$, spazio delle chiavi, detto \textbf{keyspace}, ovvero i possibili
+    valori che può assumere la chiave segreta. Il keyspace non deve essere
+    troppo piccolo perché l'attaccante potrebbe usare il bruteforce
+    \item funzione di cifratura $E:PT\times K\to CT$
+    \item funzione di decifratura $D:CT\times K\to PT$
+  \end{enumerate}
+  Spesso si indicano $E_k(\cdot)$ anziché $E(\cdot, k)$ ed equivalente per
+  $D$.\\
+  Scegliendo $k\in K$ scelgo una coppia $E_k$ $D_k$. \\
+  Si noti che:
+  \[CT=\cup_{k\in K}E_k(PT)\]
+  Si ha che:
+  \[\forall m\forall k,\,\,D_k(E_k(m))=m\]
+  Anche se non è vero in assoluto. Nei crittosistemi simmetrici si
+  usa la stessa chiave per cifrare e decifrare, anche se in realtà si usa, per
+  decifrare, una chiave \textbf{ottenibile} (e non per forza la stessa)
+  facilmente da quella usata per 
+  cifrare. \emph{Nell'equazione quindi si assume che la chiave sia proprio la
+  stessa}.\\  
+  Si ha che $\forall m$ e $\forall k$ $c=E_k(m)$ deve essere facile da computare
+  ma deve essere (estremamente)
+  difficile trovare $m$ conoscendo solo $c=E_k(m)$. Deve essere facile computare
+  $m$ conoscendo $c$ e $k$ ma deve essere (estremamente) difficile trovare $K$
+  sapendo solo $c=E_k(m)$ e $m$.
+\end{definizione}
+\begin{shaded}
+  Facile e (estremamente) difficile sono in termini di complessità
+  computazionale (computati o meno in tempo polinomiale da una DTM). Per altri
+  modelli uso la \textbf{TM probabilistica} ma mai la NDTM, perché risolve in
+  tempo polinomiale problemi che in pratica non sappiamo realmente risolvere in
+  tempo polinomiale. 
+\end{shaded}
+Una macchina che effettua un attacco bruteforce capisce di aver trovato
+la giusta chiave a seconda di vari aspetti. Dipende da cosa viene cifrato. Ad
+esempio parlando di file lo si capisce guardando i primi byte, i metadati, e
+se sono consistenti con il formato che ci si aspetta si è arrivati alla giusta
+decodifica. Se si parla di un semplice file di testo o si guarda se ci sono
+parole riconoscibili tramite un dizionario o guardare l'entropia del messaggio
+ottenuto, visto che i messaggi in linguaggio naturale sono molto ridondanti,
+avendo quindi ridondanza bassa. Se la decifratura non va a buon fine ottengo un
+risultato pseudo casuale, simile al risultato di una cifratura. L'entropia basta
+anche solo di un pezzo.\\
+Fare i controlli dopo una cifratura non è un grosso problema, sono calcoli
+veloci. Quindi aumentando lo spazio delle chiavi si aumenta la complessità,
+visto che il singolo controllo non è difficile.\\
 Partiamo con qualche accenno storico per capire il discorso.\\
-I \textbf{cifrari storici}
+Tra \textbf{cifrari storici} abbiamo il \textbf{cifrario di Cesare}, che è un
+crittosistema simmetrico molto debole (ma in un periodo dove ben pochi sapevano
+anche solo leggere andava più che bene). Il messaggio, si narra, era scritto
+sulla testa di uno schiavo dopo averlo rasato, aspettando che poi crescessero i
+capelli prima di mandarlo al destinatario. Si hanno:
+\begin{itemize}
+  \item $\Sigma=\{A,B,\ldots, Z\}$
+  \item $PT=CT=\Sigma^*$
+  \item $K=\{1,2,\ldots,25\}$
+  \item ogni lettera è cifrata e decifrata indipendentemente
+\end{itemize}
+Nella cifratura, fissata $k$, si ottiene $c$ avanzando di $k$ posizioni ogni
+lettera nell'alfabeto. Per decifrare si ``torna indietro'' di $k$ posizioni
+sull'alfabeto, eventualmente iniziando da capo, in modo circolare. Per questo
+$k=0$ non ha senso e si parte da $k=1$.\\ 
+Avanzare di 25 posizioni equivale a tornare indietro di una. Il problema è
+quindi il keyspace piccolissimo (e Olivio disse che Cesare usasse sempre
+$k=3$).\\
+Il cifrario di Cesare è un esempio di \textbf{crittosistema per sostituzione
+  monoalfabetica}, in quanto ogni lettera, fissato $k$, è sempre sostituita con
+la stessa (e anche questo è un problema di sicurezza).\\
+Si hanno altre caratteristiche interessanti:
+\begin{itemize}
+  \item decifrare con $k$ equivale a cifrare con $26-k$
+  \item $D_kE_k=E_0D_0$
+  \item posso riordinare passi di cifratura e decifratura ottenere lo stesso
+  risultato 
+\end{itemize}
+Un altro sistema storico è il \textbf{crittosistema di Hill}. In questo caso non
+si ha più sostituzione monoalfabetica e fa uso dell'algebra lineare. Resta
+comunque poco sicuro evidenziando una ``bad practice'', ovvero fa tutto tramite
+operazioni lineari. È un crittosistema simmetrico con la chiave di decifratura
+che è la matrice inversa di quella di cifratura (non uso la stessa chiave
+quindi). Fare l'inversa di una matrice è un \textbf{problema facile} e quindi è
+comunque un crittosistema simmetrico.\\
+Si hanno come chiavi i numeri da 0 a 25 che rappresentano le lettere
+dell'alfabeto. Ogni operazione è fatta in $\bmod\,\,26$. Si sceglie un intero
+$d\geq 2$ e si cifrano blocchi di $d$ lettere. La chiave di cifratura è una
+matrice quadrata $M$, con valori da 0 a 25, tale che, se $\det(M)\neq 0$ allora
+la matrice è invertibile e l'inversa ha valori tra 0 e 25. Ad esempio:
+\[M=\left[
+    \begin{matrix}
+      3 & 3\\
+      2 & 5
+    \end{matrix}
+  \right]\to M^{-1}=\left[
+    \begin{matrix}
+      15 & 17\\
+      20 & 9
+    \end{matrix}
+  \right]
+\]
 \end{document} 
-% LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi
-% LocalWords:  Pseudocodice bias equivocazione
+% LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
+% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace

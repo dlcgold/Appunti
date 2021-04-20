@@ -3976,7 +3976,8 @@ Fare i controlli dopo una cifratura non è un grosso problema, sono calcoli
 veloci. Quindi aumentando lo spazio delle chiavi si aumenta la complessità,
 visto che il singolo controllo non è difficile.
 \section{Cifrari Storici}
-Partiamo con qualche accenno storico per capire il discorso.\\
+Partiamo con qualche accenno storico per capire il discorso.
+\subsection{Cifrario di Cesare}
 Tra \textbf{cifrari storici} abbiamo il \textbf{cifrario di Cesare}, che è un
 crittosistema simmetrico molto debole (ma in un periodo dove ben pochi sapevano
 anche solo leggere andava più che bene). Il messaggio, si narra, era scritto
@@ -4005,6 +4006,7 @@ Si hanno altre caratteristiche interessanti:
   \item posso riordinare passi di cifratura e decifratura ottenere lo stesso
   risultato 
 \end{itemize}
+\subsection{Crittosistema di Hill}
 Un altro sistema storico è il \textbf{crittosistema di Hill}. In questo caso non
 si ha più sostituzione monoalfabetica e fa uso dell'algebra lineare. Resta
 comunque poco sicuro evidenziando una ``bad practice'', ovvero fa tutto tramite
@@ -4013,8 +4015,10 @@ che è la matrice inversa di quella di cifratura (non uso la stessa chiave
 quindi). Fare l'inversa di una matrice è un \textbf{problema facile} e quindi è
 comunque un crittosistema simmetrico.\\
 Si hanno come chiavi i numeri da 0 a 25 che rappresentano le lettere
-dell'alfabeto. Ogni operazione è fatta in $\bmod\,\,26$. Si sceglie un intero
-$d\geq 2$ e si cifrano blocchi di $d$ lettere. La chiave di cifratura è una
+dell'alfabeto (la a è 0 etc$\ldots$). Ogni operazione è fatta in
+$\bmod\,\,26$. Si sceglie un intero 
+$d\geq 2$ e si cifrano blocchi di $d$ lettere. Si cifra un blocco alla volta e
+non una lettera alla volta. La chiave di cifratura è una
 matrice quadrata $M$, con valori da 0 a 25, tale che, se $\det(M)\neq 0$ allora
 la matrice è invertibile e l'inversa ha valori tra 0 e 25. Ad esempio:
 \[M=\left[
@@ -4029,6 +4033,301 @@ la matrice è invertibile e l'inversa ha valori tra 0 e 25. Ad esempio:
     \end{matrix}
   \right]
 \]
-\end{document} 
+Per vedere se la matrice è invertibile si guarda il determinante.\\
+La chiave per decifrare non è quindi la chiave per cifrare ma si ottiene
+facilmente da essa.\\
+I $d$ numeri (che rappresentano le lettere) si mettono un vettore e si sceglie
+quindi la matrice che funge da chiave per cifrare. \\
+Si avrà che $PT=CT$. Divido il testo $m$ in $l$ blocchi $P_i$ di $d$ lettere e
+se la lunghezza di $m$ non è un multiplo di $d$ si aggiungono a $m$ lettere
+fittizie che siano riconoscibili come tali (anche se questa cosa può anche
+aiutare l'attaccante). Si avrà quindi:
+\[m=P_1P_2\ldots P_l\]
+Si ha quindi che ogni blocco viene cifrato a parte:
+\[C_i=M\cdot P_i,\,\,\,\forall i =1,\2,\ldots, l\]
+Moltiplicando la matrice per il vettore ottengo un altro vettore, coi numeri che
+corrispondono le lettere del blocco cifrate.\\
+e infine si concatenano i $C_i$ per ottenere il testo cifrato:
+\[c=C_1C_1\ldots C_l\]
+\begin{esempio}
+  Si ha $m=HELP$ e $d=2$. Come chiavi uso:
+  \[M=\left[
+      \begin{matrix}
+        3 & 3\\
+        2 & 5
+      \end{matrix}
+    \right]\to M^{-1}=\left[
+      \begin{matrix}
+        15 & 17\\
+        20 & 9
+      \end{matrix}
+    \right]
+  \]
+  Si hanno quindi:
+  \[P_1=
+    \left[
+      \begin{matrix}
+        H\\
+        E
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        7\\
+        4
+      \end{matrix}
+    \right]\mbox{ e }
+    P_2=\left[
+      \begin{matrix}
+        L\\
+        P
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        11\\
+        15
+      \end{matrix}
+    \right]
+  \]
+  Ma allora (ricordando le operazioni $\bmod \,\,26$):
+  \[C_1=M\cdot P_1=\left[
+      \begin{matrix}
+        3 & 3\\
+        2 & 5
+      \end{matrix}
+    \right]\cdot\left[
+      \begin{matrix}
+        7\\
+        4
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        7\\
+        8
+      \end{matrix}
+    \right]\left[
+      \begin{matrix}
+        H\\
+        I
+      \end{matrix}
+    \right]\]
+  \[C_2=M\cdot P_2=\left[
+      \begin{matrix}
+        3 & 3\\
+        2 & 5
+      \end{matrix}
+    \right]\cdot\left[
+      \begin{matrix}
+        11\\
+        15
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        0\\
+        19
+      \end{matrix}
+    \right]\left[
+      \begin{matrix}
+        A\\
+        T
+      \end{matrix}
+    \right]\]
+  e quindi:
+  \[c=C_1C_2=HIAT\]
+\end{esempio}
+Vediamo quindi se questo crittosistema è sicuro. Supponiamo che Eve sa o scopre
+quanto valga $d$ (magari provandone tante, non è una cosa costosa
+computazionalmente) ma non sa quanto vale $M$. Suppongo che veda passare $c$ e
+che scopra $m$,
+magari perché dopo un tot di tempo $m$ diventi pubblico o perché ha fatto
+attività di intelligence. A questo punto Eve conosce anche i blocchi e i vettori
+corrispondenti a $m$. Si ha quindi un semplice sistema di equazioni e se è
+fortunata ottenendo una matrice invertibile allora può riottenere la chiave $M$
+tramite semplici operazioni algebriche. Questo attacco è ancora più semplice se
+Eve può scegliere il testo in chiaro, qualora l'algoritmo di cifratura sia
+pubblico. \\
+Se ottiene una matrice non invertibile si ha che ha ottenuto alcuni blocchi
+dipendenti ma comunque potrebbe ricostruire una parte di matrice e, prima o poi,
+magari scoprendo un altro pezzo del testo in chiaro, può scoprire l'intera
+chiave $M$. \\
+Il grosso problema è quindi che la cifratura è un'operazione lineare, essendo
+fatta moltiplicando una matrice per un vettore. Si è quindi visto come un
+crittosistema con operazioni lineari sia da evitare.
+\subsection{Crittosistema di Playfair}
+Nel 1854 si è pensato al \textbf{crittosistema di Playfair} che nella versione
+base prevede addirittura una chiave fissa, ovvero una matrice $\5\times 5$ di
+lettere (non potendo cifrare la $j$ visto che in inglese si hanno 26
+lettere). Il testo è diviso in blocchi di due lettere ma non posso avere blocchi
+con due lettere uguali all'interno.\\
+Si ha che la chiave è:
+\[k=\left[
+    \begin{matrix}
+      s & y & d & w & z\\
+      r & i & p & u & l\\
+      h & c & a & x & f\\
+      t & n & o & g & e\\
+      b & k & m & q & v
+    \end{matrix}
+  \right]\]
+Lo studio viene poi fatto in base a come sono le due lettere nella matrice, se
+nella stessa riga/colonna muovendosi ciclicamente nella riga e nella colonna. Se
+non sono nella stessa riga/colonna si identifica 
+il sottorettangolo con le due lettere come estremi prendendo poi gli altri due
+estremi. La decifratura si fa con le operazioni nell'ordine inverso.\\
+Il problema grave è che la chiave è sempre la stessa. Per costruire altre chiavi
+si parte da una frase, si tolgono le ripetizioni e si completa la sequenza
+ottenuta con le lettere mancanti, in ordine alfabetico. Questo comporta un
+inizio spesso di senso compiuto e una fine composta spesso dalle ultime lettere
+dell'alfabeto (per il modo in cui la matrice viene creata a partire da una
+frase, all'inizio la frase non viene quasi toccata ma alla fine si aggiungono
+le ultime lettere dell'alfabeto, spesso poco frquenti).\\ 
+È un sistema quindi polialfabetico ma le sostituzioni dei blocchi sono sempre le
+stesse.
+\subsection{Cifrario di Vigenère}
+In realtà, nel 1586, fu creato il \textbf{cifrario di Vigenère}, che è stato
+ritenuto sicuro per secoli.\\
+Funziona circa come il cifrario di Cesare ma diventa abbastanza robusto in
+quanto la chiave cambia dopo ogni cifratura di ogni lettera del plain. Per
+cifrare e decifrare si usa una tabella contenente tutte le possibili cifrature
+di Cesare. In altri termini si ha una tabella quadrata di righe e colonne apri
+al numero delle lettere dell'alfabeto. La prima riga è nell'ordine giusto, la
+secondo ruotata di 1 (si parte da ``b'' e si arriva ad ``a ``) e così via.\\
+Come chiave si sceglie una parola che viene ripetuta fino a ottenere la stessa
+lunghezza del testo in chiaro.\\
+Si prende la coppia $(m_i,k_i$) e si usano queste come coordinate (la prima
+colonna e la prima riga sono l'alfabeto in ordine coretto e si usano come
+coordinate) per prendere una lettera dalla tabella sopra costruita. Per
+decifrare si fa l'ordine opposto, partendo da $(c_i, k_i$), sfruttando la
+colonna che inizia con $c_i$ cercando la cella contente $k_i$ per ottenere la
+coordinata sulle righe.\\
+Questo sistema è stato considerato sicuro al 100\% per secoli.\\
+Si ha quindi che la i-esima lettera di $m$ è cifrata con il cifrario Cesare dove
+la chiave è l'i-esima lettera di $k$.
+Se la lunghezza di $k$ è $l$ (prima delle ripetizione) allora la lettera di $m$
+in posizione $i$, $i+l$, $i+2\cdot l$ etc$\ldots$ sono cifrate sempre con lo
+stesso carattere di $k$, quindi con la stessa chiave. Suppongo però di conoscere
+la lunghezza della chiave e scrivo il testo cifrato in una matrice, di $k$
+colonne, in modo che i caratteri cifrati dallo stesso carattere sono sulla
+stessa colonna. Posso quindi fare un'analisi delle frequenze su ogni colonna e
+trovare la chiave di ogni colonna. Si rompe quindi il crittosistema anche se il
+numero di possibili chiavi di per $n$ lettere è $26^n$ (già solo per $n=5$
+parliamo di $26^5=11881376$) essendo quindi un numero abbastanza grande per
+rendere infattibile un bruteforce (a meno di usare un computer, cosa non
+fattibile fino a qualche decennio fa). Bisogna comunque sapere la lunghezza
+della chiave.\\
+Nel 1860 Kasiski dice che se la chiave è lunga $n$ allora potrebbe capitare, se
+$m$ ha certe regolarità, che la stessa parola potrebbe venire cifrata con la
+stessa sequenza di chiavi. Si ottengono così, nel ciphertext, ripetizioni
+lunghe $n$ di lettere (anche se comunque potrebbe essere un caso). Si può quindi
+pensare che la chiave sia lunga quanto un divisore della distanza tra queste
+ripetizioni (e per senso logico si estraggono un paio di valori possibili). SI
+può quindi passare alla'analisi delle frequenze essendo comunque risolto
+facilmente, in certi casi, lo step di trovare la lunghezza della chiave.\\
+Può convenire, in questo caso, fare sovracifrature, ovvero cifrare i testi
+cifrati etc$\ldots$ 
+\subsection{Sicurezza dei Crittosistemi Storici}
+Fino alla prima guerra mondiale anche crittosistemi deboli andavano bene causa
+analfabetismo. Il crittosistema veniva fatto a mano, si cifrava a mano e si
+trasmetteva in qualche modo. Non si potevano quindi fare troppe operazioni,
+dovendo farlo a mano e spesso in guerra. Inoltre essendo fatto da un umano
+doveva essere semplice per ridurre errori umani, che dovevano seguire le
+istruzioni per cifrare.\\
+In tempo di pace, all'inizio del 1900 si sono diffuse macchine meccaniche di
+calcolo (prima enormi e poi sempre più piccole grazie alla corrente
+elettrica). Si è quindi automatizzata la cifratura permettendo crittosistemi
+arbitrariamente complessi (non essendoci più l'umano) con centinaia di
+operazioni anche perché le macchine vengono usate anche per la crittoanalisi.
+Tali macchine vengono create con obiettivi pacifici per usi aziendali (per
+segreti aziendali, per la Borsa etc$\ldots$) e non bellici. Il mondo però
+aziendale ha sdegnato questi macchinari che sono stati ``rispolverati'' in
+ambito bellico, soprattutto durante la seconda guerra mondiale.\\
+Tali macchinari utilizzano dei rotori (in sequenza il precedente al termine fa
+scattare il successivo etc$\ldots$). Ogni rotore è diviso in celle e ogni cella
+contiene una lettera. Ogni rotore effettua una sostituzione monoalfabetica e
+ogni lettera di $m$ è cifrata usando tutti i rotori. Ogni volta che si cifra una
+lettera il 
+rotore più veloce scatta cambiando chiave. Con 26 lettere dopo $26^3$ lettere si
+ripresenta una ripetizione per la stessa lettera, rompendo ogni analisi
+statistica. 
+\section{Crittoanalisi}
+Si possono in generale avere quattro scenari di attacco, in ordine di vantaggio
+crescente per Eve:
+\begin{enumerate}
+  \item Eve conosce solo $x$ e vuole ottenere $m$. È una situazione tanto
+  complicata per l'attaccante quanto rara. Si parla di \textbf{cryptotext only}
+  \item Eve conosce alcune coppie $c_i,m_i$. Eve quindi studia i nuovi $c$ che
+  arrivano e cerca di calcolare il corrispondente $m$. Si parla di \textbf{known
+  plaintext}
+  \item Eve può scegliere i testi in chiaro e computare i corrispondenti
+  $c$. Eve quindi cerca di computare $m$ all'arrivo di un nuovo $c$. Durante la
+  seconda guerra mondiale succedeva quando i tedeschi usavano per un giorno
+  sempre la stessa chiave. È, modernamente, lo
+  scenario classico della crittografia a chiave pubblica e si parla di
+  \textbf{chosen plaintext} 
+  \item Eve può decifrare ogni testo, scelto in modo adattivo, per un certo
+  periodo di tempo. A questo Eve può più facilmente scoprire $m$ all'arrivo di
+  un $c$. Si parla di \textbf{chosen ciphertext} 
+\end{enumerate}
+Si hanno quindi, in una piccola \textit{tassonometria} dei sistemi:
+\begin{itemize}
+  \item crittosistemi a chiave pubblica
+  \item crittosistemi simmetrici che usano due operazioni fondamentali:
+  \begin{enumerate}
+    \item \textbf{trasposizione}, usando la chiave segreta come permutazione,
+    all'aumentare della lunghezza dei blocchi permutati possono essere sicuri ma
+    aumenta anche la complessità di calcolo. Si fa una sorta di
+    anagramma. Questi crittosistemi non sono tendenzialmente sicuri
+    \item \textbf{sostituzione}, come in Cesare. A loro volta si parla di
+    sostituzioni \textbf{monoalfabetiche} o \textbf{polialfabetiche}, avendo che
+    una stessa lettera può essere cifrata in modo diverso. Quest'ultima
+    differenza è comunque molto relativa all'alfabeto in uso (si pensi ad Hill
+    che diventa monoalfabetico nell'alfabeto dei blocchi, un blocco uguale
+    diventa sempre lo stesso altro blocco). Monoalfabetici non sono sicuri ma
+    nemmeno polialfabetici a meno di sostituzioni complesse
+  \end{enumerate}
+  Quindi un crittosistema simmetrico è una applicazione sequenziale di
+  trasposizioni e sostituzioni a seconda di una chiave
+\end{itemize}
+Il crittosistema deve essere sicuro ma anche ``semplice'' da usare per
+l'utente.\\
+In un crittosistema per sostituzione monoalfabetico non si ha sicurezza in
+quanto non si 
+nascondono le proprietà statistiche delle lettere del testo in chiaro in
+linguaggio naturale (in inglese, ad esempio, la lettera ``e'' compare più spesso
+delle altre etc$\ldots$). Mi basterebbe quindi, statisticamente, sfruttare tali
+percentuali, cercando la lettera più frequente nel ciphertext per supporre poi
+che sia la ``e'' etc$\ldots$ Si hanno inoltre coppie (ma anche sulle terne) di
+lettere ad alta frequenza e questo rendere ancora più debole il
+crittosistema. Per tutte queste statistiche si hanno tabelle dedicate. Si può
+cercare di falsare questi dati scrivendo testi su misura (con frasi non
+convenzionali, ovviamente l'assenza di spazi etc$\ldots$) ma è abbastanza
+difficile ottenere un risultato accettabile, se non impossibile (bastano pochi
+tentativi per capire la corrispondenza tra caratteri o tuple di
+caratteri). Questo succede appunto perché anche cambiando la lettera non
+cambiano le frequenze della lingua sottostante (e anche se questa non si conosce
+non sono così tante da rendere difficile andare a tentativi, inoltre lingue
+simili hanno percentuali simili per i caratteri). Si può cercare di rendere
+complicata la lingua usando lingue complesse e poco usate ma anche questa
+operazione è difficile abbia successo (un esempio di uso erano gli americani
+nella seconda guerra mondiale che usavano l'indiano Navajo)\\
+Per risolvere il problema si sono usate varie possibilità. Ad esempio inserire
+lettere extra rispetto al testo per falsare le frequenze, in modo che ogni
+lettera abbia una frequenza simile alle altre.\\
+Una tecnica che funziona molto bene è quella delle \textbf{omofone}. Si
+supponga in uso l'alfabeto inglese. Sappiamo che ``e'' è la lettera più
+frequente. Supponiamo quindi di usare un alfabeto $\Gamma=\{0,\ldots,99\}$ e se
+una lettera appare il 12\% delle volte uso 12 numeri da $\Gamma$ e ogni volta
+che ne vedo una scelgo uno di questi 12 numeri a caso. Si ottiene quindi una
+\textbf{cifratura randomizzata}. La scelta può anche essere fatta con cura per
+appiattire le frequenze delle omofone. Con le omofone la crittoanalisi diventa
+complessa.\\
+Se ogni volta scelgo a caso uno degli omofoni significa che lo stesso testo,
+cifrato due volte in tempi diversi, porta a due ciphertext diversi. Lo stesso
+testo in chiaro ha quindi sempre in ciphertext diverso ma questo non ha problemi
+in fase di decifratura, nel momento in cui conosco le omofone. La decifratura
+resta deterministica ma la cifratura diventa comunque più robusta.\\
+
+\end{document}
+
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
-% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace
+% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple
+% LocalWords:  crittosistemi

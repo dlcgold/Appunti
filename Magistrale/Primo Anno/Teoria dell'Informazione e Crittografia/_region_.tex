@@ -22,6 +22,7 @@
 \usepackage{enumerate}
 \usepackage{physics}
 \usepackage{braket}
+\usepackage{multicol}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -32,6 +33,7 @@
 \usepackage{pdfpages}
 \usepackage{pgfplots}
 \usepackage{algorithm}
+\usepackage{manfnt}
 % \usepackage{algpseudocode}
 \usepackage[cache=false]{minted}
 \usepackage{mathtools}
@@ -501,8 +503,9 @@ Parliamo ora meglio di \textbf{ridondanza}, definendola formalmente.
   viene detto \textbf{eccesso di ridondanza}.
 \end{definizione}
 \begin{definizione}
-  Possiamo \textbf{generalizzare} la definizione di \textbf{ridondanza}:
-  \[R=\frac{msg+check}{msg}\]
+  Possiamo \textbf{generalizzare} la definizione di \textbf{ridondanza},
+  indicando $tot=msg+check$:
+  \[R=\frac{msg+check}{msg}=\frac{tot}{msg}\]
   avendo:
   \begin{itemize}
     \item $msg$ numero di simboli/cifre di messaggio
@@ -1119,36 +1122,3262 @@ In questo caso si ha un triangolo con un cateto di lunghezza $n$, ad esempio
     x&&&&
   \end{tabular}
 \end{table}
-Ho quindi $n$ check digit per un pacchetto contenente $n-1$ cifre di messaggio e
-una check digit. Si ha infatti che le ci cifre di messaggio sono (per la
-formula di Gauss):
+Ho quindi $n$ check digit (\textit{parte in dubbio}). Si ha infatti che le ci
+cifre di messaggio sono (per la \textbf{formula di Gauss}):
 \[msg=\sum_{i=1}^{n-1}i=\frac{(n-1)\cdot n}{2}\]
 (in altre parole il numero di diagonali che ho nella matrice meno uno).\\
-Ho inoltre che:
-\[tot=msg+check=\frac{(n-1)\cdot n}{2}+n\]
+Ho inoltre che il numero di cifre totali è:
+\[tot=msg+check=\frac{(n-1)\cdot n}{2}+n=\frac{n(n+1)}{2}\]
+che altro non è che la sommatoria fatta per calcolare $msg$ ma con un'iterazione
+in più:
+\[tot=msg+check=\sum_{i=1}^{n}i\]
 Le check digit vengono calcolate dal mittente in base alle cifre sulla riga e
-sulla colonna della check digit.\\
+sulla colonna della check digit. Quindi, ad esempio, per calcolare la check
+digit in grassetto di:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccc}
+    $\circ$ & $\circ$ & $\circ$ &$\circ$  & x\\
+    $\circ$ & $\circ$ & $\circ$  & x&\\
+    $\circ$ & $\circ$ & \textbf{x}&&\\
+    $\circ$ &x&&&\\
+    x&&&&
+  \end{tabular}
+\end{table}
+La calcola tramite le cifre di messaggio in verde:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccc}
+    $\circ$ & $\circ$ & ${\color{green}\circ}$ &$\circ$  & x\\
+    $\circ$ & $\circ$ & ${\color{green}\circ}$  & x&\\
+    ${\color{green}\circ}$ & ${\color{green}\circ}$ & \textbf{x}&&\\
+    $\circ$ &x&&&\\
+    x&&&&
+  \end{tabular}
+\end{table}
+Si nota che il bit di parità della prima riga è calcolato solo tramite la prima
+riga mentre il bit di parità dell'ultima riga viene calcolato solo tramite la
+prima colonna.\\
 Il ricevente, per capire dove è il bit errato, verifica in quali check digit è
 coinvolto, che sono due check digit, e incrociando scopro quale sia il simbolo
-errato. Si ha che:
-\[R_\triangle=\frac{\frac{n(n+1)}{2}}{\frac{(n-1)n}{2}}=\frac{n+1}{n-1}=
-  \frac{(n-1+2)}{n-1}=1+\frac{2}{n-1}\]
+errato. Vedendo in pratica si supponga errato il bit in rosso:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccc}
+    $\circ$ & $\circ$ & $\circ$ &$\circ$  & x\\
+    $\circ$ & $\circ$ & {$\color{red}\circ$}  & x&\\
+    $\circ$ & $\circ$ & x&&\\
+    $\circ$ &x&&&\\
+    x&&&&
+  \end{tabular}
+\end{table}
+Esso è coinvolto nelle seguenti cifre di parità in grassetto, calcolate, oltre
+che grazie alla cifra in rosso anche da quelle in verde:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccccc}
+    $\circ$ & $\circ$ &  ${\color{green}\circ}$&  ${\color{green}\circ}$ & x\\
+    ${\color{green}\circ}$ & ${\color{green}\circ}$ & {$\color{red}\circ$}  & \textbf{x}&\\
+    ${\color{green}\circ}$ &  ${\color{green}\circ}$ & \textbf{x}&&\\
+    $\circ$ &x&&&\\
+    x&&&&
+  \end{tabular}
+\end{table}
+Mentre le altre cifre di parità saranno corrette. Il destinatario può quindi
+scoprire quale sia il bit che è stato modificato per poterlo poi correggere.\\
+Passiamo quindi alla ridondanza del codice triangolare.
+Si ha che:
+\[R_\triangle=\frac{tot}{msg}=\frac{\frac{n(n+1)}{2}}{\frac{(n-1)n}{2}}=
+  \frac{n+1}{n-1}= \frac{(n-1+2)}{n-1}=1+\frac{2}{n-1}\]
 Confronto questa ridondanza con quella dei migliori codici rettangolari, ovvero
-quella dei codici quadrati, dove vedo che si ha un termine positivo in più. Si
-ha quindi che:
+quella dei codici quadrati, dove vedo che si ha un termine positivo in più nei
+codici quadrati, ovvero $\frac{1}{(n-1)^2}$, che essendo positivo può solo
+aumentare la ridondanza. Si ha quindi che:
 \[R_\triangle<R_\square\]
-e quindi i codici triangolari sono assolutamente migliori di quelle
-rettangolari, anche delle migliori di quelle rettangolari anche se devo avere un
-messaggio di $n$ cifre che permette l'espressione $\frac{(n-1)\cdot n}{2}$, per
-fare tornare i conti posso comunque aggiungere uno 0, per esempio.
+e quindi i codici triangolari sono migliori di quelli
+rettangolari, anche dei migliori tra quelli rettangolari (quelli quadrati), e
+hanno una sola check digit per riga e una sola per colonna.\\
+L'unico limite per avere un codice triangolare è quello di avere un
+messaggio di $n$ cifre che permette l'espressione $\frac{(n-1)\cdot n}{2}$,
+ovvero che sia rappresentabile da un triangolo (per fare tornare i conti posso
+comunque aggiungere uno 0, per esempio), avendo $n$ lunghezza del cateto. 
 \subsection{Codici cubici}
 Per cercare di abbassare ancora meno la ridondanza cerchiamo la disposizione
 geometrica più conveniente. Si è provato quindi ad aumentare le dimensioni dello
 spazio in cui ci troviamo, pensando ad un cubo, ipotizzando di avere una cifra
 di controllo (posta in basso a destra per il piano) che controlla tutto un piano
-(contando che ho piani per ognuna delle tre dimensioni).
-\textbf{to be continued}
-\end{document} 
-% LocalWords:  clock burst
+(contando che ho piani per ognuna delle tre dimensioni). Si ha quindi un bit di
+parità per ogni piano (che è ciò che rappresenta le cifre di messaggio) con cui
+posso tagliare il cubo. Nel complesso si ha quindi un intero spigolo del cubo
+che rappresenta le check digit che sono rappresentati da i piani in una
+certa direzione. In totale posso sezionare in tre direzioni avendo quindi 3
+spigoli di check digit che ``proteggono'' tutte le cifre di messaggio
+contenute nel cubo (che ha lato $n-1$ più la check digit).\\
+\begin{table}
+  \centering
+  \begin{tabular}{|c|cc|cc|cc|}
+    \hline & \multicolumn{2}{|c|}
+             { Quadrato } & \multicolumn{2}{c|}
+                            { Triangolare } & \multicolumn{2}{c|} { Cubico } \\
+    \hline&messaggio&controllo& messaggio&controllo & messaggio &controllo \\
+    $n$ & $(n-1)^{2}$ & $2 n-1$ & $\frac{n(n-1)}{2}$&$n$&$n^{3}-3 n+2$&$3 n-2$ \\
+    \hline 2 & 1 & 3 & 1 & 2 & 4 & 4 \\
+    3 & 4 & 5 & 3 & 3 & 20 & 7 \\
+    4 & 9 & 7 & 6 & 4 & 54 & 10 \\
+    5 & 16 & 9 & 10 & 5 & 112 & 13 \\
+    6 & 25 & 11 & 15 & 6 & 200 & 16 \\
+    7 & 36 & 13 & 21 & 7 & 324 & 19 \\
+    8 & 49 & 15 & 28 & 8 & 490 & 22 \\
+    9 & 64 & 17 & 36 & 9 & 704 & 25 \\
+    10 & 81 & 19 & 45 & 10 & 972 & 28 \\
+    \hline
+  \end{tabular}
+  \caption{Esempio di tabella di confronto tra codici quadrati, triangolari e
+    cubici} 
+\end{table}
+In maniera approssimata, su circa $n^3$ posizioni si hanno $3(n-1)+1=3n-2$ check
+digit. Si ha quindi che la ridondanza è:
+\[R_{\mbox{\mancube}}=\frac{(n-1)^3+3n-2}{(n-1)^3}=1+\frac{3n-2}{(n-1)^3}
+  \simeq 1+\frac{3}{n^2}\]
+Posso pensare quindi pensare di aumentare ancora le dimensioni, considerando
+cubi a quattro dimensioni (e non mi serve disegnarlo visto che devo solo
+``pensarlo''), avendo: 
+\begin{itemize}
+  \item $(n-1)^4$ cifre di messaggio 
+  \item $4(n-1)+1=4n-3$ check digit
+\end{itemize}
+ottenendo la seguente ridondanza:
+\[R_{\mbox{\mancube  \textit{4-dim}}}=1+\frac{4n-3}{(n-1)^4}\simeq
+  1+\frac{4}{n^3}\]
+(\textit{dove praticamente si è ignorato il $-3$ nella formula della check
+  digit}).\\ 
+Posso pensare di andare quindi in $k$ dimensioni, avendo:
+\begin{itemize}
+  \item $(n-1)^k$ cifre di messaggio 
+  \item $k(n-1)+1=kn-k+1$ check digit
+\end{itemize}
+ottenendo la seguente ridondanza, con $k$ che è fissato e quindi costante:
+\[R_{\mbox{\mancube  \textit{k-dim}}}=1+\frac{kn-k+1}{(n-1)^k}\simeq
+  1+\frac{k}{n^{k-1}}\]
+Possiamo così, facendo crescere $k$ e l'eccesso di ridondanza, ottenere una
+figura sempre migliore.\\
+Ma anche se la ridondanza è sempre migliore vedo che a denominatore dell'eccesso
+di ridondanza $\frac{k}{n^{k-1}}$ trovo un polinomio elevato alla dimensione
+meno uno. Vedremo che nei \textbf{codici di Hamming}, per correggere un errore,
+il \textit{gap} è esponenziale al variare delle dimensioni. Inoltre il
+\textit{codice di Hamming} è \textbf{ottimale}.
+\subsection{Codici di Hamming}
+Hamming si pone di trovare un codice per correggere un errore nel modello del
+rumore bianco, avendo che sia però un \textbf{codice ottimale}, \textit{ovvero
+  che a parità di cifre inviate deve usare il minimo numero di check digit}.
+Ho sempre un pacchetto di $n$ bit che sono di due tipi:
+\begin{enumerate}
+  \item $k$ bit di cifre di messaggio $msg$
+  \item $m$ bit di check digit $check$
+\end{enumerate}
+Per calcolare le check digit usa delle equazioni di controlli di parità, con una
+cifra di messaggio che nel complesso serve a calcolare più di una check digit
+(come nei codici legati alle figure numeriche). Si avranno quindi $m$ equazioni
+di parità del tipo, avendo $c_1,\ldots,c_n$ cifre di parità e $x_i,\cdots x_n$
+cifre di messaggio:
+\[c_i=x_j\oplus x_k\oplus x_w \cdots\]
+Tutte queste equazioni devono essere \textbf{linearmente indipendenti}, in modo
+che ogni check digit abbia informazioni differenti. Supponiamo infatti:
+\[c_1=x_1\oplus x_2\oplus x_5 \oplus x_7\]
+\[c_2=x_5\oplus x_7\oplus x_8 \oplus x_9\]
+Ma in realtà $c_i$ è una della $x_j$ della formula infatti:
+\[c_1\oplus x_1\oplus x_2\oplus x_5 \oplus x_7=0\]
+e quindi:
+\[x_1\oplus x_2\oplus x_5 \oplus x_7=c_1\]
+Scriviamo quindi:
+\[c_1\to x_1\oplus x_2\oplus x_5 \oplus x_7=0\]
+\[c_2\to x_5\oplus x_7\oplus x_8 \oplus x_9=0\]
+In generale le equazioni mi danno 0 se il numero di 1 è pari.\\
+\textbf{In ogni formula si assume di avere una sola cifra di messaggio.}\\
+Faccio poi lo $\oplus$ tra $c_1$ e $c_2$ bit a bit, ottenendo (avendo tipo $x_5$
+da entrambe le parti si semplifica):
+\[c\to x_1\oplus x_2\oplus x_8\oplus x_9=0\]
+Si supponga ora di avere una $c_3=c$ ma avrei uno spreco di fatica in quanto le
+informazioni delle prime due sarebbero uguali alla terza, avendo infatti
+\textit{dipendenza lineare}.\\
+Ricordiamo che:
+\[a_1\vec{v_1}+a_2\vec{v_2},a_1,a_2\in \mathbb{R}, \vec{v_1},\vec{v_2}\in
+  \mathbb{R}^n\]
+con $\mathbb{R}^n$ che è uno \textbf{spazio vettoriale}.\\
+Fare \textbf{combinazioni lineari} in questo caso prevede la somma come il
+$\oplus$. Rappresento le equazioni di parità dell'esempio sopra come un vettore
+di $\{0,1\}^n$:
+\[(1,1,0,0,1,0,1,0,0)\]
+\[(0,0,0,0,1,0,1,1,1)\]
+e facendo lo \textit{xor} (che è la somma $\bmod,\,\,\,2$ bit a bit) ottengo:
+\[(1,1,0,0,0,0,0,1,1)\]
+Si ha ora il prodotto scalare in $\{0,1\}^n$:
+\[0\cdot \vec{v}=\vec{0}\]
+\[1\cdot \vec{v}=\vec{v}\]
+Quindi nel nostro caso:
+\[a_1\vec{v_1}+a_2\vec{v_2},a_1,a_2\in \{0,1\}, \vec{v_1},\vec{v_2}\in
+  \{0,1\}^n\]
+Quindi 0 mi dice di non considerare il vettore e uno di considerarlo, indicando
+il sottoinsieme di elementi da sommare.
+Si ha che $\{0,1\}^n$ rispetto alla somma come definita e al prodotto scalare
+come definito è uno \textbf{spazio vettoriale}.\\
+Quindi, tornando a Hamming, possiamo capire, grazie a questi ragionamenti,
+l'indipendenza lineare tra le equazioni di parità. Con $m$ bit di controllo si
+cerca di capire quante condizioni d'errore si riesce a rappresentare. Con $m$
+cifre di controllo si hanno $2^m$ possibili combinazioni/configurazioni. Ogni
+configurazione mi deve identificare un errore diverso per poter fare anche
+correzione. Mi serve però anche una configurazione che indichi il \textit{non
+  avere errori}. Si ha quindi che si hanno:
+\begin{itemize}
+  \item $2^m-1$ condizioni di errore
+  \item una condizione di non errore
+\end{itemize}
+Gli errori possono avvenire ovunque, anche nelle check digit, ma con al massimo
+un errore (o nella prima posizione o nella seconda etc$\ldots$). SI hanno quindi
+$n$ possibili condizioni d'errore. Si ha quindi che:
+\[2^m\geq n+1\]
+ovvero le configurazioni che posso fare con $m$ cifre di controllo deve
+indicarmi le $n$ possibili condizioni d'errore più una per l'assenza di errore.
+Nel caso dei codici di Hamming ``propriamente detti'' si avrebbe:
+\[2^m= n+1\]
+usando tutte le combinazioni in quanto il $>$ implicherebbe che sto
+``sprecando'' qualche configurazione delle cifre di controllo. \textbf{Non
+  sempre posso usare ``=''}.\\
+Posso quindi capire quante siano le cifre di controllo.
+\begin{esempio}
+  Si supponga di voler spedire $k=4$ cifre di messaggio. Ci chiediamo di
+  calcolare $m$:
+  \[2^m\geq n+1\]
+  ma quindi, avendo $n=m+k$:
+  \[2^m\geq m+k+1\]
+  Mi serve quindi l'$m$ più piccolo possibile che risolva la disequazione con
+  $k=5$: 
+  \[2^m\geq m+5\]
+  Non si ha però una soluzione analitica ma $2^m$ cresce più velocemente di
+  $m+5$ ($m=0$ non ha senso ma lo si mette, si hanno comunque tecniche anche per
+  non partire da 1):
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c}
+      $m$& $2^m$ & $m+5$\\
+      \hline
+      \hline
+      0 & 1 & 5\\
+      1 & 2 & 6\\
+      2 & 4 & 7\\
+      3 & 8 & 8
+    \end{tabular}
+  \end{table}
+  quindi $m=3$ è il più piccolo valore che risolve, risolvendo per di più con
+  $=$ e non $\geq$. Per 4 bit di messaggio mi servono 3 cifre di controllo. Ho
+  quindi $n=7$.
+\end{esempio}
+In generale per correggere un errore devo sapere in che posizione è, sapendo
+l'indice da 1 a $n$ indicante tale posizione nel pacchetto. Il metodo che lo
+calcola può restituire 0, indicante che non si ha errore.\\
+Faccio una tabella con posizione/binario, ad esempio per l'esempio precedente
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    pos& bin \\
+    \hline     
+    1 & 001\\
+    2 & 010\\
+    3 &011\\
+    4&100\\
+    5&101\\
+    6&110\\
+    7&111\\
+    \hline
+    \hline
+    &   $c_3c_2c_1$
+  \end{tabular}
+\end{table}
+Ho che i bit hanno $m$ cifre, e ho $c_3c_2c_1$ (si parte da destra) come le
+cifre di parità ottenute dalle tre colonne di binari.\\
+Ipotizzo un errore in posizione 5. Ho che, mettendo le $x_i$ dove si ha 1:
+\[c_1\to x_1\oplus x_3\oplus x_5 \oplus x_7=0\]
+ma ho problemi con $x_5$, avendo l'equazione pari a 1.\\
+\[c_2\to x_2\oplus x_3\oplus x_6 \oplus x_7=0\]
+dove non ho problemi con $x_5$.\\
+\[c_3\to x_4\oplus x_5\oplus x_6 \oplus x_7=0\]
+ma ho problemi con $x_5$, avendo l'equazione pari a 1.\\
+Si ha quindi che:
+\[c_1\to x_1\oplus x_3\oplus x_5 \oplus x_7=1\]
+\[c_2\to x_2\oplus x_3\oplus x_6 \oplus x_7=0\]
+\[c_3\to x_4\oplus x_5\oplus x_6 \oplus x_7=1\]
+Che quindi mi mostra dopo l'uguale la posizione in cui è avvenuto
+l'errore. I bit letti dal basso verso l'alto sono $101$ e questo è detto
+\textbf{sindrome}, che quindi nei codici di Hamming è la 
+posizione dell'errore in codice binario. \\
+Se la \textit{sindrome} è 0 non ho errori (è come se avessi 000 nella prima riga
+della tabella).\\
+Il ricevente è sistemato ma manca il mittente che deve calcolare gli $m$ bit di
+controllo e spedire. Usando la tecnica di usare nelle equazioni le $x_i$
+relative agli 1 mi genera equazioni linearmente indipendenti. \\
+Manca capire dove
+mettere la check digit. Le cifre di controllo vengono messe nelle posizioni in
+cui si ha un 1 solo, ovvero 001, 010 e 100, in modo che $c_1$ è solo nella prima
+equazione, $c_2$ nella seconda e $c_3$ nella terza, non dovendo risolvere in
+realtà il sistema lineare. Si quindi, nell'esempio sopra:
+\[c_1\oplus x_3\oplus x_5 \oplus x_7=0\]
+\[c_2\oplus x_3\oplus x_6 \oplus x_7=0\]
+\[c_3\oplus x_5\oplus x_6 \oplus x_7=0\]
+ottenendo quindi il pacchetto.
+\[pacchetto = c_1c_2m_1c_3m_2m_3m_4\]
+e quindi:
+\[c_1\oplus m_1\oplus m_2 \oplus m_4=0\]
+\[c_2\oplus m_1\oplus m_3 \oplus m_4=0\]
+\[c_3\oplus m_2\oplus m_3 \oplus m_4=0\]
+ma isolando le $c_i$, sommando da entrambe le parti dell'equazione:
+\[c_1= m_1\oplus m_2 \oplus m_4\]
+\[c_2= m_1\oplus m_3 \oplus m_4\]
+\[c_3= m_2\oplus m_3 \oplus m_4\]
+\textbf{Si noti che le posizioni delle cifre di controllo $c_i$ sono potenze di
+  2 $2^0,2^1,2^2,\ldots$} e all'aumentare delle cifre della grandezza si ha
+crescita logaritmica delle check digit, che quindi controllano un numero
+esponenziale di cifre di messaggio.\\
+\begin{esempio}
+  Scelgo un messaggio di 4 bit:
+  \[msg=1011\]
+  quindi:
+  \[pacchetto=c_1c_21c_3011\]
+  So che, per le formule sopra (ma lo posso vedere anche col discorso di avere
+  periodicità nella tabella di bit, pensando a come li scrivi quando fai le
+  tabelle di verità):
+  \[c_1=0\]
+  \[c_2=1\]
+  \[c_3=0\]
+  quindi:
+  \[pacchetto=0110011\]
+  che viene inviato ma al destinatario arriva:
+  \[pacchetto=0110111\]
+  quindi con il bit in $i=5$ errato. Si rifanno i conti e si ottiene, calcolando
+  la sindrome:
+  \[s_1=1\]
+  verificata vedendo i bit dispari.
+  \[s_2=0\]
+  verificata vedendo a coppie alternate ma saltando il primo bit (che sarebbe la
+  coppia di 0 se avessi 000 in cima alla tabella, torna quindi comodo partire
+  dal fondo della tabella per fare questi ragionamenti).
+  \[s_3=1\]
+  verificata vedendo gli ultimi 4 bit.\\
+  Avendo sindrome $s=s_3s_2s_1=101$ che indica proprio la posizione 5.\\
+  Vediamo invece se arriva:
+  \[pacchetto=0010011\]
+  quindi con il bit in $i=2$ errato (e sarebbe una check digit). Si ha che:
+  \[s_1=0\]
+  \[s_2=1\]
+  \[s_3=0\]
+  Avendo sindrome $s=s_3s_2s_1=010$ che indica proprio la posizione 2.\\
+  Supponiamo ora che arrivi senza errori:
+  \[pacchetto=0110011\]
+  Si ha:
+  \[s_1=0\]
+  \[s_2=0\]
+  \[s_3=0\]
+\end{esempio}
+\textit{I pacchetti di 7 bit che producono sindrome nulla sono quindi
+  $2^{4}=16$, avendo che posso fare $2^4$ modi diversi di avere i 4 bit di
+  messaggio ma ciascuno ha una sola tripla, 000, di check digit che mi dice che
+  il pacchetto è valido}. Generalizzeremo poi questa cosa, ovvero che si hanno:
+\begin{itemize}
+  \item $n$ bit di pacchetto 
+  \item $\log_2 n$ check digit
+  \item $n-\log_2 n$ cifre di messaggio
+  \item $2^{n-\log_2 n}$ combinazioni possibili delle cifre di messaggio per avere
+  un pacchetto senza errori
+\end{itemize}
+Avere due errori rende impossibile capire dove siano, rendendo impossibile la
+correzione.
+\begin{esempio}
+  Riprendendo l'esempio sopra si ipotizzi arrivi:
+  \[pacchetto=0010111\]
+  con errori in 2 e 5.\\
+  Si ha per la sindrome:
+  \[s_1=1\]
+  \[s_2=1\]
+  \[s_3=1\]
+  Si avrebbe posizione in $111$ ovvero 7 (e non è un caso sia 5+2 ma la cosa non
+  ci aiuterebbe a capire dove sia l'errore), a riprova
+  che non si riesce ad identificare due errori. Non solo, si identifica un posto
+  corretto come errato e lo corregge, introducendo un ulteriore errore.
+\end{esempio}
+La probabilità di avere due errori è comunque a $\frac{1}{2^{4096}}$ e quindi è
+0, ``è la stessa probabilità che un tornado assembli i pezzi sparsi di un aereo
+al punto di farlo funzionare''.\\
+I codici di Hamming con $=$ e non $\geq$ sono quelli tali per cui:
+\[n=2^m-1\]
+\textbf{Sul file di esercizi nella pagina del corso esempio con $m=4$ a
+  \textit{pagina 12}, \textit{potrebbe esserci un errore di conto sulla
+    ridondanza}. Guardare anche per spunti teorici}.\\ 
+Studiamo anche la ridondanza. Ricordando $2^m\geq n+1$ e nei codici ``migliori''
+$2^m=n+1$ possiamo dire $2^m\simeq n$ e quindi $m\simeq \log_2 n$ (e con questo
+$m$ posso riscrivere $k= n-\log_2n$). Ne segue che:
+\[R=1+\frac{check}{msg}=1+\frac{m}{k}=1+\frac{\log_2 n}{n-\log_2n}\simeq
+  1+\frac{\log_2n}{n}\]
+(\textit{facendo un'approssimazione molto ``spinta''}).\\
+\textbf{Sul file di esercizi nella pagina del corso esempio con $m=2$ a pagina
+  13, occhio che non è $\frac{2}{3}$ ma $\frac{2}{1}$ nella ridondanza. Guardare
+  anche per spunti teorici (manca la parte di esercizio in se calcolando la
+  sindrome)}.\\ 
+Vediamo quindi l'interpretazione geometrica del codice di Hamming, ricordando
+che $n$ bit entrano nel canale ed escono $n$ bit $\in \{0,1\}^n$. Il messaggio
+$M$ è quindi $M\subseteq \{0,1\}$. Cerchiamo di capire come assegnare che un
+messaggio sia valido o meno.\\
+Posso vedere $\{0,1\}^n$ come uno \textbf{spazio vettoriale} dove i vettori sono
+$\vec{x}=(x_1,x_2,\ldots,x_n), \forall x_i\in\{0,1\}$ ovvero
+$x_i\in\mathbb{Z}_2$. Due vettori in questo spazio, per definizione di spazio
+vettoriale, possono essere sommati. Preso 
+anche $\vec{x}=(y_1,y_2,\ldots,y_n), \forall y_i\in\{0,1\}$ la somma altro non
+è che lo \textit{xor} componente per componente $\vec{x}+\vec{y}=(x_1\oplus y_1,
+x_2\oplus y_2,\ldots)$. \\
+Preso uno scalare $a\in \mathbb{Z}_2$ ho che $a\vec{x}=(ax_1,ax_2\ldots)$ con il
+prodotto scalare che è praticamente l'\textit{and}. Si ha che:
+\[a\vec{x}=
+  \begin{cases}
+    \vec{0} &\mbox{se } a=0\\
+    \vec{x} &\mbox{se } a=1
+  \end{cases}
+\]
+Vediamo i messaggi come \textbf{vertici di un n-cubo} ma non tutti i messaggi
+sono validi. Ci serve un modo per capire quali sono validi per rendere difficile
+che un errore mi porti da un messaggio valido ad un altro.
+\begin{definizione}
+  Definiamo \textbf{distanza di Hamming} come il numero di posizioni in cui due
+  vettori $\vec{x}$, $\vec{y}$ differiscono, cioè per cui $x_1\neq y_i$. Questa
+  è una vera e propria distanza in $\{0,1\}^n$. Tale distanza si indica con:
+  \[d(\vec{x},\vec{y})\]
+  con:
+  \[d:\{0,1\}^n\times\{0,1\}^n\to\mathbb{R}\]
+  Si hanno tre proprietà:
+  \begin{itemize}
+    \item $d(\vec{x},\vec{y})$ sse $\vec{x}=\vec{y}$
+    \item $d(\vec{x},\vec{y})=d(\vec{y},\vec{x})$
+    \item $d(\vec{x},\vec{z})\leq(\vec{x},\vec{y})+d(\vec{y},\vec{z})$,
+    \textbf{diseguaglianza triangolare}
+  \end{itemize}
+  e quindi la \textbf{distanza di Hamming} è una \textbf{metrica} per lo spazio
+  $\{0,1\}^n$.\\
+  Spesso $d(\vec{x},\vec{y})$ si indica con $d_h(\vec{x},\vec{y})$.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{peso di Hamming} come il numero di bit uguali a 1 e lo si
+  indica con:
+  \[w_j(\vec{x})\]
+  Avendo che:
+  \[w_j(\vec{x})=\sum_{i=1}^n x_1=d_h(\vec{x},\vec{0})\]
+\end{definizione}
+\begin{esempio}
+  Prendiamo $n=3$. \\
+  Disegnano supponiamo di avere qualcosa del tipo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/cubeh.pdf}
+  \end{figure}
+  Prendo i vertici $(x_1,x_2,x_3$):
+  \begin{itemize}
+    \item $(0,0,0)$
+    \item $(1,0,0)$
+    \item $(0,1,0)$
+    \item $(0,0,1)$
+    \item $(1,1,0)$
+    \item $(0,1,1)$
+    \item $(1,0,1)$
+    \item $(1,1,1)$
+  \end{itemize}
+  \textit{Questi sono i nostri messaggi}.\\
+  \textbf{Oltre $n=3$ farei lo stesso ma non saprei disegnarlo, avrei $n$
+    lati che partono dall'origine appoggiati agli $n$ assi}.\\
+  Suppongo di spedire $010$ e che si abbia un errore che porti a $110$ e sul
+  cubo si nota che ci ha fatto spostare lungo un lato. \\
+  Suppongo che da $010$ si arrivi a $100$, con due errori, si nota che ho due
+  lati visitati sul cubo.\\
+  Scegliamo quindi come messaggi validi punti che sono abbastanza distanti tra
+  loro. Sicuramente quelli che si ottengono con un solo cambiamento non sono
+  validi, parto quindi dal messaggio valido e impongo che tutti quelli che sono
+  a \textbf{distanza 1} (parlando di \textbf{distanza di Hamming}) sul cubo,
+  ovvero tutti quelli che raggiungo con un solo lato, non siano validi.\\
+  \textbf{Essendo in $\{0,1\}^n$ in realtà esistono solo i vertici del cubo, i
+    lati servono solo per capire meglio.}
+\end{esempio}
+Generalizziamo meglio.\\
+Se ho la distanza di Hamming e varie caratteristiche del codice ho che:
+\begin{itemize}
+  \item se ho due codeword valide che hanno distanza 1 allora il codice ha
+  capacità di \textbf{0 detection e 0 correction} in quanto potrei passare con
+  un solo errore ad un messaggio valido
+  \item se ho due codeword valide che hanno distanza 2 (e non esistono due
+  codeword valide con distanza minore di 2) allora il codice ha
+  capacità di \textbf{1 detection e 0 correction} in potrei avere più codeword
+  valide a distanza di 1 da quella errata e quindi non saprei come fare
+  correzione, non sapendo dove si trovi il bit errato. In ogni caso un errore
+  viene sempre riconosciuto, anche se non può essere corretto. Se ho due errori
+  potrei finire nuovamente in una codeword valida ma si sta assumendo che avendo
+  scelto questo codice si sappia che la probabilità che avvengano due errori sia
+  pressoché nulla. Il\textit{ controllo di parità semplice} è di questo
+  tipologia.
+  \newpage
+  Graficamente avrei 
+  una cosa del tipo, avendo in blu le codeword valide e in rosso quelle non
+  valide: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/circ2.pdf}
+  \end{figure}
+  Notando come non sarei in grado di capire a che codeword valida ricondurmi.
+  \item se ho due codeword valide che hanno distanza 3 (e non esistono due
+  codeword valide con distanza minore di 3) allora il codice ha
+  capacità di \textbf{2 detection e 1 correction}, riuscendo a correggere un
+  errore. Se avessi due errori riconoscerei come codeword valida una a distanza
+  1 da quella errata che però non è quella giusta, introducendo un nuovo
+  errore. I \textit{codici di Hamming} sono di questo tipo. Graficamente avrei
+  una cosa del tipo, avendo in blu le codeword valide e in rosso quelle non
+  valide: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/circ3.pdf}
+  \end{figure}
+  Notando che con un solo errore sarei in grado di capire a che codeword
+  ricondurmi 
+  \item se ho due codeword valide che hanno distanza 4 (e non esistono due
+  codeword valide con distanza minore di 4) allora il codice ha
+  capacità di \textbf{3 detection e 1 correction}, riuscendo a correggere un
+  errore. Se avessi due errori riconoscerei avrei più codeword valide alla
+  stessa distanza. Se avessi tre errori varrebbe quanto detto nel caso di
+  distanza 2
+   \item se ho due codeword valide che hanno distanza 5 (e non esistono due
+  codeword valide con distanza minore di 5) allora il codice ha
+  capacità di \textbf{4 detection e 2 correction}, per gli stessi discorsi fatti
+  avendo distanza 3
+\end{itemize}
+Si nota quindi che al crescere della distanza di Hamming minima tra due codeword
+cresce la capacità di detection e correction.\\
+Possiamo ipotizzare che la codeword valida venga avvolta da una sfera di raggio
+pari a $r$ avendo che $r$ sia tale per cui le sfere di due codeword valide non
+si sovrappongano. Possiamo notare che in base alle osservazioni fatte sopra $r$
+è il valore della capacità di detection. \\
+Una sfera centrata nel punto $\vec{x}$ di raggio $r$ è l'insieme dei punti
+$\vec{y}\in\{0,1\}^n$ tale che la distanza da $\vec{x}$ è minore di $r$, ovvero:
+\[S(\vec{x},r)=\{\vec{y}\in\{0,1\}^n|\,d_h(\vec{x},\vec{y})\leq r\}\]
+\textbf{Si noti che in $\{0,1\}^n$ somma e sottrazione bit a bit portano allo
+  stesso risultato. }\\
+Possiamo dire che:
+\[output=input+errore\]
+dove $errore$ è un vettore rappresentante l'errore (avendo $1$ dove ho
+l'errore). Quindi:
+\[errore = output -input\]
+\begin{esempio}
+  Tornando all'esempio sopra ipotizzo entri $011$ ed esca $111$, avendo quindi
+  $d_h=1$. \\
+  Sommo i due vettori:
+  \[011\oplus 111=100\]
+  Avendo che $100$ è l'errore.
+\end{esempio}
+\begin{esempio}
+  Si vuole costruire un codice che consenta di correggere un errore, per poi
+  confrontarlo con il codice di Hamming.\\
+  Ci servono quindi codeword valide ad almeno distanza 3, prendendo messaggi
+  validi e circondarli di sfere di raggio 1 tali che non si abbiano
+  sovrapposizioni con altre sfere.\\
+  Si ha $\{0,1\}^n$ come spazio vettoriale dove si hanno $2^n$
+  elementi/vettori. \\
+  In generale se prendo il volume dello spazio e lo divido per il volume di una
+  sfera ho il numero di sfere che posso metterci:
+  \[\frac{V_{spazio}}{V_{sfera}}\geq \mbox{numero massimo di sfere}\]
+  Pongo $k$ uguale al numero di bit dei messaggi validi (non pari a $n$ ma
+  prendo quindi una porzione di messaggio rappresentante il messaggio valido, ai
+  quali poi aggiungerei le $m$ check digit).\\
+  Rivedo quindi la formula, sapendo che il volume dello spazio è il numero di
+  vettori di quello spazio, che le sfere abbiano raggio $1$, avendo che hanno
+  volume $n+1$ (il vettore rappresentante originale più un vettore per ogni
+  possibile vettore ottenuto da quello originale con un solo errore, avendo
+  quindi ${{n}\choose{1}}$ più il messaggio valido, ovvero $n+1$): 
+  \[\frac{2^n}{n+1}\geq 2^k\]
+  sapendo che $n=k+m$ si ha che:
+  \[\frac{2^{k+m}}{n+1}\geq 2^k\]
+  \[\frac{2^{k}2^m}{n+1}\geq 2^k\]
+  \[2^m\geq n+1\]
+  Arrivando allo stesso risultato di Hamming.
+\end{esempio}
+Se volessi sfere di raggio maggiore di 1, prendendo per esempio con codeword
+distanti almeno 5 e raggio pari a 2. Avendo raggio pari a 2 avrei il centro
+della sfera, tutti i punti distanti 1, ovvero potendo cambiare due bit $n$, e
+tutti i punti distanti due (avendo due 
+cambiamenti di bit), ovvero:
+\[V_{sfera}=1+n+{{n}\choose{2}}=1+n+\frac{n(n-1)}{2}\]
+\[\frac{2^n}{1+n+\frac{n(n-1)}{2}}\geq 2^k\]
+sapendo che $n=k+m$ si ha che:
+\[\frac{2^{k+m}}{1+n+\frac{n(n-1)}{2}}\geq 2^k\]
+\[\frac{2^{k}2^m}{1+n+\frac{n(n-1)}{2}}\geq 2^k\]
+\[2^m\geq 1+n+\frac{n(n-1)}{2}\]
+Avendo una generica sfera di raggio $r$ avrei:
+\[V_{sfera}=1+n+{{n}\choose{2}}+{{n}\choose{3}}+\cdots+{{n}\choose{r}}=
+  \sum_{k=0}^n{{n}\choose{k}}\] 
+\textit{Nella realtà, con messaggi molto grandi, si usano i cosiddetti
+  \textbf{low density parity codes}, che consiste, per proteggere il pacchetto
+  di $n$ bit, nel trovare il minor numero di equazioni di parità atte a
+  proteggere il messaggio (meno equazioni implica meno circuiti e quindi meno
+  costo). Si procede per euristiche per capire quante e quali.}
+\section{Codifica di Sorgente}
+Finora si è parlato di \textbf{codifica di canale}, passiamo quindi ad
+approfondire la \textbf{codifica di sorgente}, cercando anche in questo caso il
+codice ottimale (con la lunghezza media minima).\\
+Avendo magari una distribuzione non uniforme per la distribuzione dei caratteri
+non ha senso usare una \textbf{codice a blocchi} ma si usa un 
+\textbf{codice a lunghezza variabile} (\textit{riguardare quanto detto nella
+  prima sezione di questi appunti}).\\
+Ci si propone quindi di minimizzare, parlando di codici a lunghezza variabile:
+\[L=\sum_{i=1}^1 p_il_i\]
+Bisogna prima fare un discorso sull'univocità dei codici.
+\begin{esempio}
+  si supponga di avere le seguenti codeword binarie per 4 simboli $s_i$:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 11$
+    \item $s_4\to 00$
+  \end{itemize}
+  Suppongo che il ricevente riceva $0011$. Cerco di capire che sequenza ha
+  ricevuto. Deve calcolare una:
+  \[cod^{-1}:\Gamma^*\to S\]
+  Ma ci sono delle ambiguità. Potrebbe essere;
+  \begin{itemize}
+    \item $s_4s_3$
+    \item $s_1s_1s_3$
+  \end{itemize}
+  Non è quindi in grado di trovare una sequenza di simboli univoca.\\
+  Ne segue che il codice \textbf{non è univocamente decodificabile}.
+\end{esempio}
+Si richiede quindi che la funzione $cod$, quindi il nostro codice, \textbf{deve
+  essere univocamente decodificabile}. \\
+Un algoritmo che riconosce che un codice è univocamente decodificabile non è
+banale.
+\begin{esempio}
+  Si supponga di avere le seguenti codeword binarie per 4 simboli $s_i$:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 011$
+    \item $s_4\to 111$
+  \end{itemize}
+  Si dimostra che questo codice è \textbf{univocamente decodificabile},
+  esistendo un'unica possibile divisione in codeword di ogni stringa che riceve
+  il ricevente.\\
+  Suppongo che il ricevente riceva:
+  \[0111111111\]
+  Ma anche solo all'inizio potrei avere sia $s_1$ che $s_2$ che $s_3$ ma una
+  volta che è finito posso partire dal fondo raggruppando gli $1$ tre a tre e mi
+  accorgo che ho un solo modo:
+  \[0\,\,\,111\,\,\,111\,\,\,111\]
+  \[s_1s_4s_4s_4\]
+  \textbf{Bisogna quindi aspettare la fine della trasmissione}.
+\end{esempio}
+Lato elettronico per fare questa operazione uso un \textbf{contatore
+  elettronico}.\\
+D'altro canto aspettare la fine non è ``comodo'' e si vorrebbe analizzare i
+simboli man mano che arrivano.\\
+Si definiscono quindi due categorie di codici a lunghezza variabile:
+\begin{itemize}
+  \item \textbf{non univocamente decodificabili}
+  \item \textbf{univocamente decodificabili}
+\end{itemize}
+e suddividiamo gli univocamente decodificabili in:
+\begin{itemize}
+  \item \textbf{istantaneo}, dove appena arriva una codeword il ricevente sa che
+  è arrivata completamente e che è unica
+  \item \textbf{non istantaneo}
+\end{itemize}
+\begin{esempio}
+  Trasformiamo l'ultimo esempio in un codice istantaneo. Si hanno:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 011$
+    \item $s_4\to 111$
+  \end{itemize}
+  ma non andrebbero bene (per il problema dell'inizio del messaggio). D'altro
+  canto:
+   \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 10$
+    \item $s_3\to 110$
+    \item $s_4\to 111$
+  \end{itemize}
+  ottenuto con la \textit{reverse} delle stringhe, è un codice istantaneo con
+  codeword di lunghezza pari a quelle precedenti.\\
+  Posso facilmente vedere che qualsiasi cosa arrivi posso capire che codeword è,
+  appena l'intera codeword viene letta. Non devo aspettare l'intero messaggio ma
+  al più due simboli.
+\end{esempio}
+Nell'esempio abbiamo usato gli $0$ come \textit{end of codeword}, infatti questo
+codice è detto \textbf{comma code}, avendo che il decodificatore vede che le
+codeword, tranne l'ultima, terminano per 0. Quindi o arriva uno zero terminando
+la codeword o arrivano 3 uni che terminano il messaggio.\\
+Potrei inoltre vedere la decodifica come un albero di
+decodifica, in quanto ogni volta che arriva un simbolo posso escludere certe
+codeword.
+\newpage
+Vediamo l'esempio relativo all'esempio precedente:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/ct.pdf}
+\end{figure}
+Avendo che ogni cammino dalla radice ad una voglia è una codeword con la
+foglia etichettata con il simbolo relativo alla codeword. Si ha quindi un
+sottoalbero per ogni simbolo di $\Gamma$ (quindi dalla radice escono
+$|\Gamma|$ archi) e da ogni nodo interno esce un numero
+di archi minore o uguale al numero di simboli. Il ricevente sfrutta l'albero di
+decodifica.\\ 
+Posso anche usare l'albero per costruire il codice istantaneo.\\
+Inoltre dato che un codice istantaneo è associato ad un albero di codifica non
+succede mai che una codeword sia prefissa di un'altra (e lo si vede non prendo
+avere due foglie associate a due codeword una prefissa dell'altra).
+\begin{esempio}
+  Vediamo l'albero di decodifica di un codice non istantaneo.\\
+  Si hanno:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 01$
+    \item $s_3\to 011$
+    \item $s_4\to 111$
+  \end{itemize}
+  Si ha:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/ct2.pdf}
+  \end{figure}
+  Avendo foglie che sono prefisse di altre.
+\end{esempio}
+Se devo costruire un codice istantaneo posso quindi usare un \textbf{comma code}
+o costruire un albero di decodifica che sia il più possibile simile ad un albero
+completo.
+\begin{esempio}
+  Si supponga di avere le seguenti codeword binarie per 5 simboli $s_i$:
+  \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 10$
+    \item $s_3\to 110$
+    \item $s_4\to 1110$
+    \item $s_4\to 11110$
+  \end{itemize}
+  Si ha quindi:
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/ct3.pdf}
+  \end{figure}
+  (e si nota come si possa generalizzare l'albero per un comma code).
+\end{esempio}
+\begin{esempio}
+  Avendo l'albero:
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ct4.pdf}
+  \end{figure}
+  Riconosco il codice:
+  \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 10$
+    \item $s_4\to 110$
+    \item $s_5\to 111$
+  \end{itemize}
+  
+\end{esempio}
+\begin{esempio}
+  Avendo il codice 1:
+   \begin{itemize}
+    \item $s_1\to 0$
+    \item $s_2\to 10$
+    \item $s_3\to 110$
+    \item $s_4\to 1110$
+    \item $s_5\to 11110$
+  \end{itemize}
+  e il codice 2:
+   \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 10$
+    \item $s_4\to 110$
+    \item $s_5\to 111$
+  \end{itemize}
+  assegno ad entrambi le probabilità:
+   \begin{itemize}
+    \item $p_1\to 0.9$
+    \item $p_2\to 0.025$
+    \item $p_3\to 0.025$
+    \item $p_4\to 0.025$
+    \item $p_5\to 0.025$
+  \end{itemize}
+  Ho che, per il primo codice:
+  \[L_1=0.9\cdot 1+0.025\cdot 2+0.025\cdot 3+0.025\cdot 4+0.025\cdot 4=1.225\]
+  Avendo che mediamente per rappresentare un simbolo della sorgente mi servono
+  $1.225$ bit.\\
+  Passo al secondo codice:
+  \[L_2=0.9\cdot 2+0.025\cdot 2+0.025\cdot 2+0.025\cdot 3+0.025\cdot 3=2.05\]
+  Avendo che mediamente per rappresentare un simbolo della sorgente mi servono
+  $2.05$ bit.\\
+  Ne segue, avendo $L_1<L_2$, per questa sorgente con queste probabilità è
+  meglio il primo codice, il comma code.\\
+  Se avessi avuto probabilità uniforme ($p_i=0.2$) avrei avuto:
+  \[L_1=2.8\]
+  \[L_2=2.4\]
+  Essendo meglio il secondo codice.
+\end{esempio}
+\begin{definizione}
+  Si definisce \textbf{codice r-ario} un codice con $r$ simboli con cui si
+  ottengono le codeword.\\
+  Un codice che parte da $\Gamma=\{0,1\}$ è un codice binario.
+\end{definizione}
+Ad un certo punto Kraft scopre un teorema che contiene una disuguaglianza che
+fornisce una condizione necessaria e sufficiente affinché esista un codice
+istantaneo con certe lunghezze $l_1,l_2,\ldots,l_n$ date.
+\begin{teorema}[disuguaglianza di Kraft]
+  Si ha che \textbf{esiste} un \textbf{codice istantaneo r-ario} per una
+  sorgente $S$ di $q$ simboli, con codeword di lunghezza $l_1,l_2,\ldots,l_q$,
+  sse: 
+  \[\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1\]
+  In onore di Kraft si ha che:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_i}} \mbox{ e quindi } K\leq 1\]
+  \textbf{Non si sta vedendo come sono fatte le codeword ma solo se può esistere
+    un certo codice istantaneo. Sapendo che esiste poi bisogna costruire le
+    codeword ma il teorema non dice nulla in merito.}\\
+  La condizione necessaria e sufficiente è quindi una caratterizzazione
+  dell'esistenza del codice istantaneo.
+\end{teorema}
+\begin{proof}
+  Dobbiamo dimostrare i due versi del sse:
+  \begin{enumerate}
+    \item per ogni codice istantaneo r-ario di $q$ simboli con lunghezze
+    $l_1,l_2,\ldots,l_q$ si ha che $K\leq 1$
+    \item se $K\leq 1$ allora esiste un codice istantaneo con lunghezze
+    $l_1,l_2,\ldots,l_q$ 
+  \end{enumerate}
+  Dimostriamo la \textbf{prima parte}.\\
+  Prendo il codice e lo rappresento sull'albero di decodifica (dove ogni nodo ha
+  al più $r$ archi uscenti). Ricorsivamente un albero o è vuoto o è un nodo che
+  punta ad altri nodi.\\
+  Parto con $r=2$, avendo codeword binarie su $\{0,1\}$ e di conseguenza alberi
+  binari di decodifica. Procedo quindi con una dimostrazione per induzione sulla
+  profondità dell'albero:
+  \begin{itemize}
+    \item \textbf{base}: profondità pari a 1. Si hanno due casi:
+    \begin{enumerate}
+      \item la radice o punta ad una foglia. In questo caso:
+      \[K=\frac{1}{2^1}=\frac{1}{2}\leq 1\]
+      \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.7]{img/ct6.pdf}
+      \end{figure}
+      \item punta a due foglie (una per ogni simbolo). In questo caso:
+      \[K=\frac{1}{2^1}+\frac{1}{2^1}=1\leq 1\]
+      \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.7]{img/ct5.pdf}
+      \end{figure}
+    \end{enumerate}
+    
+    \item \textbf{passo induttivi}: assunto che il teorema è vero per ogni
+    albero di profondità $n-1$ dimostriamo che il teorema vale anche per gli
+    alberi di profondità $n$. In realtà così non ci va bene in quanto i
+    sottoalberi dovrebbero avere entrambi profondità $n-1$ (cosa non vera come
+    visto negli esempi precedenti, ad esempio ``l'\textit{albero a pettine}''
+    del comma code). Cambiamo quindi dicendo che  assunto che il teorema è vero
+    per ogni albero di profondità $<n$ dimostriamo che il teorema vale anche per
+    gli alberi di profondità $n$.\\
+    Considero i due sottoalberi come alberi a se stanti:
+    \begin{figure}[H]
+      \centering
+      \includegraphics[scale = 0.7]{img/ct7.pdf}
+    \end{figure}
+    Dico che $K_1\leq 1$ per il primo sottoalbero e $K_2\leq 1$ per il secondo
+    sottoalbero. \\
+    Calcolo ora $K$ di tutto l'albero ma devo capire come si rapporta a $K_1$ e
+    $K_2$. Si ha che se attacco il primo sottoalbero alla nuova radice per
+    costruire l'albero globale ho che attacco ad ogni codeword un simbolo, che
+    quindi si allungano di 1:
+    \[\sum_{i=1}^q\frac{1}{r^{l_i+1}}\leq 1\]
+    ma altro non è che:
+    \[\sum_{i=1}^q\frac{1}{r}\cdot\frac{1}{r^{l_i}}\leq 1\]
+    ma allora:
+    \[\frac{1}{r}\cdot\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1=\frac{1}{r}\cdot K_1\]
+    Faccio lo stesso per $K_2$ e quindi, avendo $r=2$:
+    \[K=\frac{1}{2}\cdot K_1+\frac{1}{2}\cdot K_2\]
+    ma sto sommando due quantità $\leq \frac{1}{2}$ (avendo $K_1\leq 1$ e
+    $K_2\leq 1$) e quindi: 
+    \[K\leq 1\]
+  \end{itemize}
+  Qualora si avesse $r>2$ si ha:
+  \begin{itemize}
+    \item \textbf{base}, si hanno alberi r-ari, con
+    $\Gamma=\{0,1,2,\ldots,r-1\}$, di probabilità 1. Tutti questi alberi hanno
+    $s$ foglie e $s-r$ non foglie. Quindi, essendo tutti gli $l_i$ uguali a 1
+    essendo a profondità uno:
+    \[K=\sum \frac{1}{r^{l_1}}=\sum \frac{1}{r}=\frac{s}{r}\leq 1\]
+    $\frac{s}{r}\leq 1$ in quanto $s<r$
+    \item \textbf{passo induttivo} si ha un albero r-ario a profondità $n$ con
+    un certo numero di sottoalberi $s$ e un certo numero di sottoalberi vuoti,
+    di cardinalità $s-r$, a profondità $n-1$. Per tutti i $K_1,K_2,\ldots K_s$
+    ho che $K_i\leq 1$ e quindi ottengo $K$ aggiungendo un simbolo alle codeword 
+    dei sottoalberi non vuoto (quelli vuoti contribuiscono con 0 alla
+    sommatoria): 
+    \[K=\frac{1}{r}K_1+\frac{1}{r}K_2+\cdots+\frac{1}{r}K_s\]
+    Ma per lo stesso ragionamento del caso binario, essendo ogni $K_1<leq 1$ e
+    quindi ogni componente della sommatoria è $\leq \frac{1}{r}$:
+    \[K=\frac{1}{r}K_1+\frac{1}{r}K_2+\cdots+\frac{1}{r}K_s\leq \frac{s}{r}\leq
+      1\] 
+  \end{itemize}
+  Vediamo la \textbf{seconda parte} della dimostrazione.\\
+  Se $K\leq 1$ dobbiamo dimostrare che esiste un codice istantaneo con lunghezze
+  $L_1,\ldots, l_q$.\\
+  Sappiamo che:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1\]
+  Vediamo un esempio per capire come vedere diversamente la diseguaglianza:
+  \begin{esempio}
+    se avessi $r=2$, con quindi codeword binarie, e lunghezze 2,2,3,3,4 (con
+    quindi $q=5$). Si ha che: 
+    \[K=\frac{1}{2^2}+\frac{1}{2^2}+\frac{1}{2^3}+\frac{1}{2^3}+\frac{1}{2^4}\]
+    Ma quindi:
+    \[K=\frac{2}{2^2}+\frac{2}{2^3}+\frac{1}{2^4}\]
+    Avendo ora 2,2,1 come numeratori.
+  \end{esempio}
 
-\message{ !name(critto.tex) !offset(-1154) }
+  Indico con $t_j$ il numero di codeword di lunghezza $j$. Si hanno quindi, per
+  l'esempio precedente:
+  \begin{itemize}
+    \item $t_1=0$
+    \item $t_2=2$
+    \item $t_3=2$
+    \item $t_4=1$
+  \end{itemize}
+  Riscrivo quindi $K$:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_i}}=\sum_{j=1}^l\frac{t_j}{r^{j}}\]
+  con $l=\max\{l_1,\ldots,l_q\}$ (per l'esempio sopra $l=4$).\\
+  Si ha quindi che:
+  \[\sum_{j=1}^l\frac{t_j}{r^{j}}\leq 1\]
+  Ma posso dire che, per arrivare ad isolare i $t_j$ senza alterare la
+  diseguaglianza: 
+  \[r^l\cdot \sum_{j=1}^l\frac{t_j}{r^{j}}\leq 1\cdot r^l\]
+  ma quindi ho che:
+  \[r^l\cdot \sum_{j=1}^lt_j\cdot r^{l-j}\leq 1\cdot r^l\]
+  Si ha che:
+  \[ \sum_{j=1}^lt_j\cdot r^{l-j}= t_1\cdot r^{l-1}+\cdots+t_{l-1}\cdot
+    r+t_l\leq r^l\]
+  Ma quindi:
+  \[t_l\leq r^l- t_1\cdot r^{l-1}-\cdots-t_{l-1}\cdot r\]
+  ma so anche che:
+  \[0\leq t_l\]
+  e quindi:
+  \[0\leq t_l\leq r^l- t_1\cdot r^{l-1}-\cdots-t_{l-1}\cdot r\]
+  e quindi:
+  \[0\leq r^l- t_1\cdot r^{l-1}-\cdots-t_{l-1}\cdot r\]
+  porto quindi $t_{l-1}$ a sinistra e divido per $r$, ottenendo:
+  \[t_{l-1}\leq r^{l-1}-t_1\cdot r^{l-1}-\cdots t_{l-2}\cdot r\]
+  lo faccio per tutti i $t_j$ partendo da $t_{l-2}$ e arrivando a:
+  \[t_2\leq r^2-t_1\cdot r\]
+  sapendo per di più che:
+  \[0\leq t_2\leq r^2-t_1\cdot r\]
+  e poi a:
+  \[0\leq t_1\leq r\]
+  Risalgo quindi partendo dalle codeword più corte. Cerco $t_1$ codeword di
+  lunghezza 1, avendo a disposizione l'alfabeto $\Gamma$ r-ario. Per farlo
+  prendo i primi $t_1$ simboli e dico che sono le stringhe di lunghezza 1. Posso
+  farlo perché $t_1\leq r$ e mi avanzano $r-t_1$ simboli dell'alfabeto.\\
+  Passo alle codeword di lunghezza 2, me ne servono $t_2$. Queste codeword sono
+  due simboli concatenati in modo che il primo simbolo non si stato utilizzato
+  per $t_1$ (altrimenti creerei prefissi), quindi prendo un simbolo dai $r-t_1$
+  simboli dell'alfabeto. Il secondo simbolo posso mettere un qualsiasi simbolo
+  di $\Gamma$, avendo $r$ possibili scelte. In totale ho quindi un numero di
+  combinazioni pari a:
+  \[(r-t_1)\cdot r=r^2-t_1\cdot r\]
+  e ho abbastanza combinazioni avendo che $t_2\leq r^2-t_1\cdot r$ per i conti
+  precedenti. Le codeword le scelgo come voglio, ci sono tantissimi modi
+  possibili.\\  
+  Mi avanzano quindi $r^2-t_1\cdot r-t_2$.\\
+  Creo le codeword di lunghezza 3 dove i primi due simboli non devono essere una
+  combinazione usata per quelle di lunghezza 2, facendo poi gli stessi discorsi
+  fatti sopra. \\
+  Avanzo così per tutte le lunghezze di codeword avendo che posso costruire
+  almeno un codice istantaneo, dimostrando la validità del teorema.
+\end{proof}
+\begin{esempio}
+  Riprendiamo l'esempio di sopra.\\
+  Si ha che: 
+  \[K=\frac{1}{2^2}+\frac{1}{2^2}+\frac{1}{2^3}+\frac{1}{2^3}+\frac{1}{2^4}\]
+  Ma quindi:
+  \[K=\frac{2}{2^2}+\frac{2}{2^3}+\frac{1}{2^4}=\frac{3}{4}+\frac{1}{16}\leq 1\]
+  \newpage
+  Se volessi le codeword costruisco l'albero di decodifica:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ct8.pdf}
+  \end{figure}
+  Avendo:
+   \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 100$
+    \item $s_4\to 101$
+    \item $s_5\to 1100$
+  \end{itemize}
+  Ma vedo che ho nodi interni inutili (tipo i due nodi che portano a $s_5$).
+  Butto via quindi i nodi con un solo ramo in uscita:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/ct9.pdf}
+  \end{figure}
+  ottenendo:
+  \begin{itemize}
+    \item $s_1\to 00$
+    \item $s_2\to 01$
+    \item $s_3\to 100$
+    \item $s_4\to 101$
+    \item $s_5\to 11$
+  \end{itemize}
+  e quindi:
+  \[K=\frac{3}{2^2}+\frac{2}{2^3}=\frac{3}{4}+\frac{1}{4}=1\leq 1\]
+\end{esempio}
+Quindi un nodo interno che solo un figlio mi fa allungare le lunghezze delle
+codeword facendo sommare valori più piccoli. Se ho solo nodi interni con due
+figli si può dimostrare per induzione che $K=1$ (nel caso base ho $K=1$ e in
+quello induttivo vedo che ho $K_i=1$ per ogni sottoalbero, avendo poi che
+$K=\frac{1}{2}K_1+\frac{1}{2}K_2=\frac{1}{2}\cdot 1+\frac{1}{2}\cdot 1= 1$).\\
+Per tutti i codici istantanei vale che $K\leq 1$.
+\subsection{Codici a Blocchi Accorciati}
+Si vuole costruire un codice binario per un certo $q$.
+\begin{esempio}
+  Ipotizzo $r=2$ e
+  $q=5$. Potrei avere tutte le 8 codeword di 3 bit ma ne scelgo solo $5$. Tengo
+  $000,010,100,110,111$, avendo rimosso $001,011,101$. Queste 5 formano un
+  codice a blocchi, istantaneo. Potrebbe non essere efficiente, non avendo
+  $K=1$. Se costruissi l'albero avrei:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/b.pdf}
+  \end{figure}
+  Che ha $K\neq 1$.
+  \newpage
+  Potrei rimuovere archi inutili, ottenendo:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.7]{img/b2.pdf}
+  \end{figure}
+  Ottenendo:
+  \begin{itemize}
+    \item 00
+    \item 01
+    \item 10
+    \item 110
+    \item 111
+  \end{itemize}
+  Che non è più a blocchi ma è istantaneo con $K=1$ (ogni nodo interno ha
+  infatti esattamente due figli).
+\end{esempio}
+Si sta parlando appunto di \textbf{codici a blocchi accorciati}.\\
+\textbf{Su file esercizi esempio con codice non binario}.
+\subsection{Disuguaglianza di McMillan}
+\begin{teorema}[Disuguaglianza di McMillan]
+  Data una sorgente $S=\{s_1,\ldots,s_q\}$ si ha che una condizione necessaria e
+  sufficiente affinché esista un codice r-ario univocamente decodificabile con
+  codeword di lunghezze $l_1,l\dots,l_q$ è che valga:
+  \[K=\sum_{i=1}^q\frac{1}{r^{l_1}}\leq 1\]
+  \textup{Quindi è uguale alla disuguaglianza di Kraft semplicemente sostituendo
+  ``codici istantanei'' con ``codice univocamente decodificabile''.}
+\end{teorema}
+\begin{proof}
+  Anche in questo caso si hanno i due versi della dimostrazione.\\
+  La \textbf{prima parte} è dimostrare che dato un codice r-ario per $S$
+  univocamente decodificabile allora $K\leq 1$ e per tale codice le lunghezze
+  sono $l_1,l\dots,l_q$. Il ``dato'' è in realtà un ``per ogni''.\\
+  Non posso più ragionare sulla profondità dell'albero non avendo più
+  corrispondenza biunivoca con alberi dove le codeword sono le foglie. In questo
+  caso avrei nodi interni che sono codeword, non posso quindi usare la stessa
+  tecnica di dimostrazione.\\
+  Per dimostrarlo prendo $K$ e un numero $n\in\mathbb{N}$, tale che
+  $n>1$. Calcolo $K^n$, avendo:
+  \[K^n=\left(\sum_{i=1}^q\frac{1}{r^{l_1}}\right)^n\]
+  Ottenendo qualcosa di davvero difficile da studiare. Ma posso scrivere:
+  \[K^n=\sum_{t=n}^{n\cdot l}\frac{n_t}{r^{t}}\]
+  indicando con $n_t$ il numero di termini con $t$ (??? risentire) e con
+  $l=\max\{l_1,\ldots,l_q\}$. Si ha che $n_t$ è anche il numero di codeword di
+  lunghezza $t$. Ma dato che il codice è univocamente decodificabile si ha che:
+  \[n_t\leq r^t\]
+  ma allora:
+  \[\frac{n_t}{r^{t}}\leq 1\]
+  Ma allora si può dire, maggiorando, che:
+  \[K^n=\sum_{t=n}^{n\cdot l}\frac{n_t}{r^{t}}\leq \sum_{t=n}^{n\cdot
+      l}1=n\cdot l-n+1=n\cdot l-(n-1)\]
+  Ma $(n-1)>0$ e quindi:
+  \[=n\cdot l-(n-1) < n\cdot l\]
+  E quindi:
+  \[K^n<n\cdot l\]
+  \newpage
+  Questo si risolve graficamente (\textbf{grafico molto approssimato}):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/grap.pdf}
+  \end{figure}
+  Se $K>1$ ad un certo punto la curva supera $n\cdot l$. Per $K<1$ sicuramente
+  ho punti per cui è $<n\cdot l$ e quindi si arriva a dire che:
+  \[K^n<n\cdot l\implies K\leq 1\]
+  dimostrando la tesi.\\
+  
+  La \textbf{seconda parte} è che se $K\leq 1$ allora esiste un codice r-ario
+  per $S$ univocamente decodificabile con lunghezze $l_1,l\dots,l_q$. Per Kraft,
+  avendo $K\leq 1$ esiste un codice istantaneo per $S$, r-ario, con tali
+  lunghezze. Ma \textbf{un codice istantaneo è univocamente decodificabile},
+  avendo quindi dimostrato la tesi.
+\end{proof}
+Ma avendo che i codici univocamente decodificabili sono meno utili di quelli
+istantanei vengono trascurati, considerando che dovrei fare la ``stessa
+fatica''.\\
+Abbiamo visto comunque che non si hanno indicazioni in merito a come fare le
+codeword e abbiamo anche trascurato finora l'uso delle probabilità.
+\subsection{Codici di Huffman}
+I codici di Huffman sono ottimali, ovvero raggiungono il minimo valore possibile
+della lunghezza media $L$:
+\[L=\sum_{i=1}^q p_i\cdot l_i\]
+\begin{teorema}
+  In input abbiamo quindi il codice $S$, con $s_i,\ldots s_q$, con probabilità
+  $p_1,\ldots, p_q$. Il codice di Huffman ci restituisce in output sia le
+  lunghezze $l_i$ che le codeword $\gamma_i$.\\
+  Bisogna prima fare qualche ragionamento.\\
+  Si supponga di avere i simboli in ordine di probabilità, avendo:
+  \[p_1\leq p_2\leq \cdots\leq p_q\]
+  ma quindi si ha che:
+  \[l_1\leq l_2\leq \cdots \leq l_q\]
+  perché altrimenti non avrei il codice ottimale.
+\end{teorema}
+\begin{proof}
+  Si supponga infatti di avere
+  $p_m>p_n$ e $l_m>l_n$. Studio quindi il contributo dei due simboli:
+  \[p_m\cdot l_m+p_n\cdot l_n\]
+  Scambio in modo che $p_m$ riceva la codeword $l_n$:
+  \[p_m\cdot l_n+p_n\cdot l_m\]
+  Faccio la differenza:
+  \[(p_m\cdot l_n+p_n\cdot l_m)-(p_m\cdot l_m+p_n\cdot l_m)\]
+  \[=p_m\cdot (l_n-l_m)-p_n\cdot (l_n-l_m)\]
+  \[=(p_m-p_n)\cdot(l_n-l_m)\]
+  Ma abbiamo che $p_m>p_n$ e quindi $(p_m-p_n)>0$ e per lo stesso ragionamento,
+  avendo $l_m>l_n$, $(l_n-l_m)<0$. Si ha quindi che:
+  \[(p_m\cdot l_n+p_n\cdot l_m)-(p_m\cdot l_m+p_n\cdot l_m)<0\]
+  e quindi:
+  \[p_m\cdot l_n+p_n\cdot l_m<[p_m\cdot l_m+p_n\cdot l_n\]
+  perdendo quindi l'ottimalità del codice. 
+\end{proof}
+Deve quindi valere:
+\[p_1\leq p_2\leq \cdots\leq p_q\]
+e
+\[l_1\leq l_2\leq \cdots \leq l_q\]
+Si ha quindi un algoritmo greedy per ottimizzare la lunghezza media. Non
+sappiamo se si ha un matroide ma si vedrà che tale algoritmo porta
+all'ottimo. Vediamo in primis un esempio.
+\begin{esempio}
+  Vediamo un esempio di questo algoritmo:\\
+  Presa una sorgente con $5$ simboli con le annesse probabilità (sono già
+  ordinati): 
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_2$ con $p_2=0.2$
+    \item $s_3$ con $p_3=0.2$
+    \item $s_4$ con $p_4=0.1$
+    \item $s_5$ con $p_5=0.1$
+  \end{itemize}
+  Si assuma $r=2$.\\
+  Prendo i due simboli meno probabili e li unisco creando un nuovo simbolo
+  ``fittizio'' con probabilità pari alla somma dei due (nel nostro caso quindi
+  $0.1+0.1=0.2$). Si ha quindi, mantenendo sempre l'ordine (metto il simbolo
+  combinato in coda a parità di probabilità):
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_2$ con $p_2=0.2$
+    \item $s_3$ con $p_3=0.2$
+    \item $s_{4,5}$ con $p_{4,5}=0.2$
+  \end{itemize}
+  Avendo ora una nuova sorgente di 4 simboli (quindi ipoteticamente più semplice
+  da codificare di quella da $5$).\\
+  Itero facendo la stessa cosa:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_{3,4,5}$ con $p_{3,4,5}=0.4$
+    \item $s_2$ con $p_2=0.2$
+  \end{itemize}
+  Avendo ora 3 simboli. Proseguo:
+  \begin{itemize}
+    \item $s_{2,3,4,5}$ con $p_{2,3,4,5}=0.6$
+    \item $s_1$ con $p_1=0.4$
+  \end{itemize}
+  Che è facile da codificare, associando 0 e 1 (l'ordine è opzionale):
+  \begin{itemize}
+    \item $s_{2,3,4,5}$ con $p_{2,3,4,5}=0.6$: 0
+    \item $s_1$ con $p_1=0.4$: 1
+  \end{itemize}
+  Costruisco quindi la sorgente a 3 (usando 0 come prefisso di tutti i nuovi):
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_{3,4,5}$ con $p_{3,4,5}=0.4$: 00
+    \item $s_2$ con $p_2=0.2$: 01 (infatti 10 non andrebbe bene avendo 1 come prefisso)
+  \end{itemize}
+  proseguo (usando 00 come prefisso di tutti i nuovi):
+    \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_2$ con $p_2=0.2$: 01
+    \item $s_3$ con $p_3=0.2$: 000
+    \item $s_{4,5}$ con $p_{4,5}=0.2$: 001
+  \end{itemize}
+  termino con lo stesso ragionamento (avendo ora 001 come prefisso):
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_2$ con $p_2=0.2$: 01
+    \item $s_3$ con $p_3=0.2$: 000
+    \item $s_4$ con $p_4=0.1$: 0010
+    \item $s_5$ con $p_5=0.1$: 0011
+  \end{itemize}
+  Che ha:
+  \[L=0.4\cdot 1+0.2\cdot 2+0.2\cdot 3+0.1\cdot 4+0.1\cdot 4 =
+    2.2\frac{bit}{simbolo}\]
+  Se invece metto i nuovi simboli più in alto possibile avrei:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$
+    \item $s_{4,5}$ con $p_{4,5}=0.2$
+    \item $s_2$ con $p_2=0.2$
+    \item $s_3$ con $p_3=0.2$
+  \end{itemize}
+  e quindi:
+
+  \begin{itemize}
+    \item $s_{2,3}$ con $p_{2,3}=0.4$
+    \item $s_1$ con $p_1=0.4$
+    \item $s_{4,5}$ con $p_{4,5}=0.2$
+  \end{itemize}
+  e quindi:
+
+  \begin{itemize}
+    \item $s_{1,4,5}$ con $p_{1,4,5}=0.6$
+    \item $s_{2,3}$ con $p_{2,3}=0.4$
+  \end{itemize}
+  Procedendo come nel caso precedente sopra si avrebbe (\textbf{verificare i
+    passaggi}): 
+   \begin{itemize}
+    \item $s_{1,4,5}$ con $p_{1,4,5}=0.6$: 0
+    \item $s_{2,3}$ con $p_{2,3}=0.4$: 1
+  \end{itemize}
+  e quindi:
+  \begin{itemize}
+    \item $s_{2,3}$ con $p_{2,3}=0.4$: 1
+    \item $s_1$ con $p_1=0.4$: 00
+    \item $s_{4,5}$ con $p_{4,5}=0.2$: 01
+  \end{itemize}
+  e quindi:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 1
+    \item $s_{4,5}$ con $p_{4,5}=0.2$: 01
+    \item $s_2$ con $p_2=0.2$: 000
+    \item $s_3$ con $p_3=0.2$: 001
+  \end{itemize}
+  e infine:
+  \begin{itemize}
+    \item $s_1$ con $p_1=0.4$: 00
+    \item $s_2$ con $p_2=0.2$: 10
+    \item $s_3$ con $p_3=0.2$: 11
+    \item $s_4$ con $p_4=0.1$: 010
+    \item $s_5$ con $p_5=0.1$: 011
+  \end{itemize}
+  Che ha:
+  \[L=0.4\cdot 2+0.2\cdot 2+0.2\cdot 2+0.1\cdot 3+0.1\cdot 3 =
+    2.2\frac{bit}{simbolo}\]
+  che è uguale a prima.
+\end{esempio}
+\textit{Questo algoritmo greedy funziona, producendo l'ottimo, quando
+  sottostante al problema si ha un matroide.}
+\begin{teorema}
+  Si può dimostrare che non cambia nulla, in termini di lunghezza media,
+  mettendo il nuovo simbolo il più in alto/basso possibile, a parità di
+  probabilità.\\
+  Si può anche
+  dimostrare che se metto il simbolo combinato in basso aumenta la varianza tra
+  le codeword (avendo codeword di lunghezza più ``distante'') mentre mettendoli
+  più in alto possibile si diminuisce la varianza. SI ricorda che la varianza è:
+  \[V=\sum_{i=1}^q p_i\cdot (l_i-L)^2\]
+\end{teorema}
+\textbf{Esempi sul file di esercizi}.\\
+\textit{Solitamente comunque si preferisce abbassare la varianza tenendo quindi
+  il nuovo simbolo più in alto possibile.}
+\begin{teorema}
+  Il codice di Huffman è ottimo, avendo la minor lunghezza media. In altri
+  termini produce codici istantanei ottimali.
+\end{teorema}
+\begin{proof}
+  Si procede per assurdo.\\
+  Si ricorda che le lunghezza vengono conosciute solo a fine algoritmo di
+  calcolo.\\ 
+  Supponiamo, data una sorgente $S$ con $q$ simboli $s_1,\ldots,s_q$, con
+  $p_1,\ldots, p_q$, che $l_1,\ldots, l_q$ siano le lunghezze di Huffman, avendo
+  quindi in corrispondenza $L_H$, lunghezza di Huffman, come:
+  \[L_H=\sum_{i=1}^q p_i\cdot l_i\]
+  Se non fosse ottimo avremmo un altro codice con una migliore lunghezza media
+  $L'$, tale che $L'< L_H$. Entrambi sono codici istantanei con associati i due
+  alberi di decodifica. Prendo quindi i due simboli meno probabili (che sono
+  anche i più lunghi) per il codice di Huffman: $s_q$ e $s_{q-1}$. Si potrebbe
+  dimostrare che la lunghezza delle due codeword più lunghe è uguale. Questi due
+  simboli sono presi, a parità di probabilità, in modo che condividano il nodo
+  genitore nell'albero. Si ha che $l_q=l_{q-1}$, condividendo il genitore e non
+  avendo nodi ``sprecati'' nell'albero di decodifica.\\
+  Collasso questi due nodi e il genitore in un solo simbolo fittizio che tiene
+  conto di entrambi i simboli. In pratica faccio uno dei ``passi in avanti''
+  dell'algoritmo sopra specificato per il calcolo dei codici di Huffman. La
+  lunghezza decresce di una certa quantità $x$. Si ha in partenza che
+  $p_{q-1}\cdot l_{q-1}+p_q\cdot l_q=l_q\cdot (p_{q-1}+p_q)$. Il nuovo simbolo
+  avrà:
+  \[(l_q-1)\cdot (p_{q-1}+p_q)=l_q\cdot (p_{q-1}+p_q)- (p_{q-1}+p_q)\]
+  ovvero la stessa quantità di prima meno $(p_{q-1}+p_q)$. Quindi dalla
+  lunghezza media tiro via questa quantità, ovvero $x=(p_{q-1}+p_q)$.\\
+  Se vogliamo minimizzare la lunghezza media il simbolo con $p_i$ più alta ha
+  $l_i$ più bassa (come dimostrato precedentemente).\\
+  Faccio lo stesso ragionamento nell'altro codice (che suppongo per assurdo
+  migliore di quello di Huffman e quindi essendo ottimale vale lo stesso
+  rapporto tra $p_i$ e $l_i$), prendendo $s_q'$ e
+  $s_{q-1}'$ (che sono quelli con probabilità minore, lunghezza maggiore nel
+  secondo codice e lunghezza uguale), fondendoli in un nuovo simbolo
+  fittizio, facendo gli stessi ragionamento fatto per il codice di Huffman.
+  Si ha in partenza che $p_{q-1}\cdot l_{q-1}+p_q\cdot l_q=l_q\cdot
+  (p_{q-1}+p_q)$.  
+  Il nuovo simbolo avrà:
+  \[(l_q-1)\cdot (p_{q-1}+p_q)=l_q\cdot (p_{q-1}+p_q)- (p_{q-1}+p_q)\]
+  La riduzione della lunghezza quindi è la stessa che nel caso di Huffman 
+  $L_H-x$ e $L'-x$.\\ 
+  Si stanno ``collassando'' gli stessi simboli e le lunghezze medie decrescono
+  della stessa quantità.\\
+  Ad un certo punto da entrambe le parti si arriva ad avere due
+  simboli. Nell'albero si avranno quindi la radice e due simboli fittizi. Per il
+  secondo codice si avrà comunque una sorgente con due figli e basta. \\
+  Per Huffman so che ho due codeword di lunghezza 1 (un ramo con 0 e uno con 1)
+  e quindi $L_h=1$ ma sotto questo valore non posso andare, non posso codificare
+  due codeword che mi portino ad una lunghezza media $<1$ per il secondo codice
+  che quindi ha lunghezza media pari a $1$. Si è dimostrato che l'assurdo è
+  impossibile e quindi l'algoritmo di Huffman produce codici ottimali.
+\end{proof}
+\subsubsection{Codici di Huffman r-ari}
+Vediamo ora i codici di Huffman per $r>2$.\\
+\begin{esempio}
+  Vogliamo un codice r-ario con $r=4$ e quindi $\Gamma=\{0,1,2,3\}$ con una
+  sorgente di $q=8$ simboli. Si hanno le seguenti probabilità:
+  \begin{itemize}
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+    \item $p_3=0.15$
+    \item $p_4=0.10$
+    \item $p_5=0.08$
+    \item $p_6=0.05$
+    \item $p_7=0.02$
+  \end{itemize}
+  In questo caso non fondo gli ultimi due simboli ma gli ultimi 4. Al primo
+  passo ottengo:
+  \begin{itemize}
+    \item $p_{4,5,6,7}=0.25$
+    \item $p_0=0.20$
+    \item $p_1=0.28$
+    \item $p_2=0.15$
+    \item $p_3=0.10$
+  \end{itemize}
+  e poi:
+  \begin{itemize}
+    \item $p_{0,1,2,3}=0.75$
+    \item $p_{4,5,6,7}=0.25$
+  \end{itemize}
+  Associo 0 e 1:
+    \begin{itemize}
+    \item $p_{0,1,2,3}=0.75$: 0
+    \item $p_{4,5,6,7}=0.25$: 1 
+  \end{itemize}
+  ricostruisco usando tutti e 4 i simboli:
+    \begin{itemize}
+    \item $p_{4,5,6,7}=0.25$: 1
+    \item $p_0=0.20$: 00
+    \item $p_1=0.28$: 01
+    \item $p_2=0.15$: 02
+    \item $p_3=0.10$: 03
+  \end{itemize}
+  e infine:
+  \begin{itemize}
+    \item $p_0=0.22$: 00
+    \item $p_1=0.20$: 01
+    \item $p_2=0.28$: 02
+    \item $p_3=0.15$: 03
+    \item $p_4=0.10$: 10
+    \item $p_5=0.08$: 11
+    \item $p_6=0.05$: 12
+    \item $p_7=0.02$: 13
+  \end{itemize}
+  \textbf{Ma questo non è ottimale}, infatti potrei dire che $13$ è 2 e che $12$
+  è $3$ che non sono prefissi, per esempio. Questo succede perché nell'ultimo
+  step ho usato solo 0 e 1 e non tutti i simboli possibili della sorgente,
+  perdendo diverse codeword. Voglio quindi arrivare all'ultimo step con
+  esattamente 4 simboli. Per farlo aggiungo simboli fittizi alla sorgente in
+  modo che raccogliendo a botte di $r$ si arrivi alla fine con $r$ simboli.\\
+  Si ha ad esempio:
+  \begin{itemize}
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+    \item $p_3=0.15$
+    \item $p_4=0.10$
+    \item $p_5=0.08$
+    \item $p_6=0.05$
+    \item $p_7=0.02$
+    \item $p_8=0$
+    \item $p_9=0$
+  \end{itemize}
+  Al primo passo ottengo:
+  \begin{itemize}
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+    \item $p_3=0.15$
+    \item $p_4=0.10$
+    \item $p_5=0.08$
+    \item $p_{6,7,8,9}=0.07$
+  \end{itemize}
+  e poi:
+  \begin{itemize}
+    \item $p_{3,4,5,6,7,8,9}=0.40$
+    \item $p_0=0.22$
+    \item $p_1=0.20$
+    \item $p_2=0.28$
+  \end{itemize}
+  associo quindi i simboli:
+   \begin{itemize}
+    \item $p_{3,4,5,6,7,8,9}=0.40$: 0
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2
+    \item $p_2=0.28$: 3
+  \end{itemize}
+  avendo:
+  \begin{itemize}
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2
+    \item $p_2=0.28$: 3
+    \item $p_3=0.15$: 00
+    \item $p_4=0.10$: 01
+    \item $p_5=0.08$: 02
+    \item $p_{6,7,8,9}=0.07$: 03
+  \end{itemize}
+  e quindi:
+  \begin{itemize}
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2 
+    \item $p_2=0.28$: 3
+    \item $p_3=0.15$: 00
+    \item $p_4=0.10$: 01
+    \item $p_5=0.08$: 02
+    \item $p_6=0.05$: 030
+    \item $p_7=0.02$: 031
+    \item $p_8=0$: 032
+    \item $p_9=0$: 033
+  \end{itemize}
+  Ma le ultime due non mi servono:
+  \begin{itemize}
+    \item $p_0=0.22$: 1
+    \item $p_1=0.20$: 2 
+    \item $p_2=0.28$: 3
+    \item $p_3=0.15$: 00
+    \item $p_4=0.10$: 01
+    \item $p_5=0.08$: 02
+    \item $p_6=0.05$: 030
+    \item $p_7=0.02$: 031
+  \end{itemize}
+  \textbf{Che è ottimale}.\\
+  Si può calcolare che:
+  \[L=1.47\,\,\,simboli\,\,\, quaternari\]
+\end{esempio}
+Si dimostra che si ottengono con questo processo codici ottimali e si dimostra
+in modo analogo al caso binario con $r=2$ (avendo che si ragiona non con due
+figli ma con $r$ figli).\\
+Capiamo meglio quanti simboli fittizi con probabilità nulla vanno aggiunti.
+Avendo $q$ simboli mi serve un numero, che sia il minore possibile, $q'$ di
+simboli tale che $q'\geq q$. Devo quindi aggiungere $q'-q$ simboli fittizi con
+probabilità 0. In ogni passo tolgo $r$ simboli e ne aggiungo 1, quindi ne tolgo
+$r-1$. Partendo da $q'$ diventano poi $q'-(r-1)$ e poi $q'-(r-1)-(r-1)$ e così
+via. Alla fine voglio che ne restino $r$. Partendo dal fondo ho $r+(r-1)$ poi
+$(r+2\cdot (r-1))$ etc$\ldots$ Si ha quindi che, per un certo $k$:
+\[q'=k\cdot(r-1)+r\]
+Ma posso togliere il numero $K$ di passi:
+\[q'=(k+1)\cdot (r-1)+1\to q' \equiv 1\bmod (r-1)\]
+Quindi devo trovare il più piccolo $q'\geq q$ tale che $q'$ è congruo a $1\bmod
+(r-1)$. Al massimo dovrò mettere $r-1$ simboli fittizi.
+\begin{shaded}
+  Si ricorda che:
+  \[a\equiv b\bmod n\iff \exists z\in\mathbb{Z}\mbox{ t.c. }a-b=z\cdot n\]
+\end{shaded}
+\begin{esempio}
+  Nell'esempio sopra avevamo $q=8$ e $r=4$. Mi serve $q'\geq 8$ tale che $q'$ è
+  congruo a $1\bmod 3$. I primi numeri congrui a $1\bmod 3$ sono:
+  \[\{1,4,7,10\}\]
+  e il più piccolo $\geq 8$ è 10 e quindi $q'=10$ e quindi $q'-q=2$. 
+\end{esempio}
+\textbf{Per $r=2$ facendo i conti si vede che arrivo sempre ad avere sempre e
+  solo due simboli nell'ultimo passaggio}.\\
+Si nota che posso codificare le cifre quaternarie tramite quelle binarie, $0\to
+00$, $1\to 01$, $2\to 10$ e $3\to 11$, passando da uno a due simboli,
+raddoppiando quindi anche le lunghezze delle codeword e il doppio della
+lunghezza media, raggiungendo però un codice non ottimale (applicando
+direttamente l'algoritmo di Huffman con $r=2$ si può dimostrare si ottiene un
+codice migliore, avendo codeword di lunghezza due e tre e non due e quattro).\\
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{Huffman}{$S=\{s_1,s_2,\ldots,s_n\},\,\,\, F$}
+    \State $Q\gets \emptyset$
+    \State \textit{inserire tutti gli} $s_i$ \textit{in} $Q$
+    \For{$i\gets 1$ \textbf{to} $|S|$}
+    \State \textit{alloca un nodo} $n$
+    \State $left[n]\gets x\gets\mbox{extract\_min(Q)}$
+    \State $right[n]\gets y\gets \mbox{extract\_min(Q)}$
+    \State $F(n)\gets F(x)+F(z)$
+    \State $Q.insert(n)$
+    \EndFor
+    \EndFunction
+  \end{algorithmic}
+  \caption{Pseudocodice dell'algoritmo di Huffman, con $S$ insieme dei simboli,
+  $F$ che associa una frequenza ad ogni simbolo, $Q$ coda di priorità. Il codice
+  non è stato trattato in aula ma mi sembrava interessante averlo.}
+\end{algorithm}
+Finora le sorgenti funzionavano che ad ogni colpo di clock uscisse un simbolo,
+con probabilità associata, ignorando quanto successo prima. Si ha quindi che
+queste sorgenti sono \textbf{memoryless}. 
+\begin{definizione}
+  Definiamo una \textbf{sorgente con memoria}.\\
+  SU supponga di avere una memoria di ordine $j$. Si ha che il simbolo $s_i$
+  esce con probabilità:
+  \[p(s_i|s_{i1},s_{i2},\ldots,s_{ij})\]
+  in pratica la probabilità di un simbolo è condizionata dai $j$ simboli usciti
+  precedentemente. Questa è una sorgente con memoria.\\
+  Il loro studio avviene tramite \textbf{processi di Markov} e
+  \textbf{matrici}.\\
+  Si cerca una distribuzione di probabilità, espressa tramite vettore, $\pi$
+  tale che $\pi=M\pi$, con $M$ matrice. Si vuole quindi che ciascun simbolo esce
+  con la probabilità indicata nel vettore $\pi$ in modo che sia un \textbf{punto
+    fisso} (???). \\
+  \textbf{\textit{Spiegazione superficiale in quanto al tematica non viene
+      approfondita.}} 
+\end{definizione}
+L'algoritmo di Huffman si può adattare alle sorgenti con memoria.
+\section{L'informazione}
+Si ha sempre una sorgente $S$ senza memoria con i simboli $s_i$ a cui sono
+associate le probabilità $p_i$. Cerchiamo di capire quanta informazione ci dà un
+simbolo:
+\[I(s_i)=?\]
+L'informazione dipende soprattutto dal destinatario, da quanto è in grado di
+comprendere tale informazione. Cambiare ricevente cambia tale valore.\\
+Si arriverà a capire quanto si può comprimere un messaggio tramite la quantità
+di informazione ma studiando solo dal punto di vista del messaggio ignorando il
+ricevente.\\
+Studiamo il rapporto tra $p_i$ e $I(s_i)$. Shannon dice che eventi più rari
+forniscono una maggior quantità di informazione, essendo inversamente
+proporzionale: 
+\[I(s_i)=\frac{1}{p_i}\]
+Si vuole anche che da due sottosistemi che producono due quantità di
+informazioni $I(A)$ e $I(B)$ si possa ottenere l'informazione totale del
+sistema $C$. Si vuole che valga l'additività:
+\[I(C)=I(A)+I(B)\]
+In realtà possiamo dire che che $I$ prende in input la probabilità stessa,
+avendo:
+\[I(p_i)=\frac{1}{p_i}\]
+Se ho a che fare con due eventi indipendenti ho che:
+\[I(p_i\cdot p_j)=\frac{1}{p_i\cdot p_j}\]
+ma ho che $[I(p_i)=\frac{1}{p_i}$ e $I(p_j)=\frac{1}{p_j}$ e quindi vorrei:
+\[I(p_i\cdot p_j)=\frac{1}{p_i\cdot
+    p_j}=\frac{1}{p_i}+\frac{1}{p_j}=\frac{p_i+p_j}{p_i\cdot p_j}\neq
+  \frac{1}{p_i\cdot p_j}\]
+e quindi non va bene.\\
+Ma l'additività la hanno potenze e logaritmi, quindi si dice che:
+\[I(p_i)=\log_2\frac{1}{p_i}\]
+Ma quindi:
+\[I(p_i\cdot p_j)=\log_2\frac{1}{p_i\cdot
+    p_j}=\log_2\left(\frac{1}{p_i}\cdot\frac{1}{p_j}\right)=
+  \log_2\frac{1}{p_i}+\log_2\frac{1}{p_j}=I(p_i)+I(p_j)\]
+Dal punto di vista assiomatico chiediamo che la quantità di informazione goda di
+queste proprietà, avendo $I:[0,1]\to\mathbb{R}_0^+$:
+\begin{itemize}
+  \item $I(p)>0$
+  \item $I(p_1\cdot p_2)=I(p_1)+I(p_2)$ se gli eventi sono indipendenti, valendo
+  l'additività 
+  \item $I(p)$ è una funzione continua, per non avere situazioni scomode
+\end{itemize}
+Già solo con queste proprietà se ne ricavano altre:
+\begin{itemize}
+  \item $I(P^n)=n\cdot I(p),\forall n\in \mathbb{N}$ e si potrebbe dimostrare
+  per induzione. $I(P^1)=1\cdot I(P)$ e \[I(p^n)=I(p^{n-1}\cdot
+    p)=I(P^{n-1})+I(p)=I(p)+(n-1)\cdot I(p)=n\cdot I(p)\]
+  \item $y=p^n\to p=y^{\frac{1}{n}}$ e quindi:
+  \[I(y)=I(p^n)=n\cdot I(p)=n\cdot I(y^{\frac{1}{n}})\]
+  e quindi:
+  \[I(y^{\frac{1}{n}})=\frac{1}{n}I(y)\]
+  \item $I(y^\frac{m}{n})= I((y^{\frac{1}{n}})^m)=m\cdot
+  I(y^{\frac{1}{m}})=\frac{m}{n}I(y)$ 
+\end{itemize}
+\begin{teorema}
+  La funzione $I(p_i)$ è unica, ovvero è l'unica funzione che soddisfa le prime
+  tre proprietà. 
+\end{teorema}
+\begin{proof}
+  Ipotizzo che esista $g$ tale che $g(p^n)=n\cdot g(p)$. Si ha che $I(p)=c\cdot
+  \log_2\frac{1}{p}$ per un certo $c$ costante. Si ha che, avendo $I(p^n)=c\cdot
+  \log_2\frac{1}{p^n}$:
+  \[g(p^n)-c\log_2\frac{1}{p^n}=n\cdot[g(p)-c\cdot \log_2 \frac{1}{p}]\]
+  pongo, per un certo $p_0\neq 0,1$:
+  \[c=\frac{g(p_0)}{\log_2\frac{1}{p_0}}\]
+  in modo da ottenere, sostituendo, con $p=p_0$, ignorando traslazioni delle
+  funzioni nel grafico
+  \[g(p^n)-c\log_2\frac{1}{p^n}=n\cdot[g(p)-c\cdot \log_2 \frac{1}{p}]=0\]
+  infatti:
+  \[g(p_0)=I(p_0)\]
+  Si ha che:
+  \[\forall z\exists n\mbox{ t.c. }z=p_0^n\]
+  Allora:
+  \[g(z)-c\cdot \log_2\frac{1}{z}=0\implies g(z)=c\cdot\log_2\frac{1}{z}=I(z)\]
+  dimostrando che:
+  \[g(z)=I(z)\]
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{img/grap2.pdf}
+    \includegraphics[scale = 0.6]{img/grap3.pdf}
+    \caption{Grafici usati nella dimostrazione \textbf{da capire come}}
+  \end{figure}
+\end{proof}
+L'unità di misura dell'informazione varia a seconda della base del logaritmo.\\
+Si ha che $\log_2$ è l'unità di misura se ho a che fare con i bit (anche se
+all'inizio 0 e 1 erano detti \textit{binit}) Misuro quindi in \textit{bit}. \\
+Se ho $\log_e=\ln$ misuro in \textit{nat}.\\
+Se ho $\log_{10}$ misuro in \textit{Hartley}.\\
+La sorgente $s$ quindi emette il simbolo $s_i$ con $p_i$ e produce una quantità
+di informazione pari a:
+\[I(p_i)=\log_2\frac{1}{p_i}\]
+e questo per ogni simbolo.\\
+Si ha anche la quantità di informazione media della sorgente, facendo la media
+pesata con le probabilità. Questa è detta \textbf{entropia} $H$:
+\[H(S)=\sum_{i=1}^qp_i\cdot I(p_i)=\sum_{i=1}^qp_i\cdot \log_2\frac{1}{p_i}\]
+spesso si usa $H_b$ con $b$ pari alla base del logaritmo, quindi:
+\[H_2(S)=\sum_{i=1}^qp_i\cdot I(p_i)=\sum_{i=1}^qp_i\cdot \log_2\frac{1}{p_i}\]
+Con $H_2$ funzione che ha in input tutte le probabilità:
+\[H(p_1,\ldots,p_q)\]
+che per praticità indichiamo con, per $S$ sorgente:
+\[H(S)\]
+Un altro modo di indicarla è (spesso per motivi tipografici):
+\[H_2(S)=-\sum_{i=1}^qp_i\cdot \log_2{p_i}\]
+Sempre dietro $H$ si ha uno scopo tipografico, non si usa $E$ in quanto sarebbe
+ambiguo con \textit{energia}. Si è pensato ad usare la $\eta$ ma era comunque
+scomodo da usare in documenti dattiloscritti, prima che Knuth arrivasse con \TeX
+e \LaTeX.\\
+La storia dietro il nome ``entropia'' era stato anche trattato con Von Neumann,
+in quanto Shannon temeva fosse un termine errato, vedendo che fosse simile
+all'entropia della termodinamica ma non essendo sicuro della cosa.\\
+Vediamo un \textit{esperimento mentale}, detto \textbf{esperimento del
+  diavoletto di Maxwell}, per dimostrare come l'entropia di Shannon e quella
+della termodinamica siano effettivamente collegate tra loro. Si immagina di
+avere un contenitore da cui non può uscire nulla e nemmeno in cui può entrare
+nulla. Tale contenitore contiene un gas con una certa quantità di calore. Tale
+contenitore è diviso in due con a metà uno sportello che si apre e chiude. Il
+gas è formato da molecole che si muovono e si scontrano tra loro e contro le
+pareti. Il calore è legato alla velocità di queste molecole. Lo sportello è
+azionato da un ''diavoletto'' che riesce a vedere le particelle e di misurarne
+la velocità. Quando vede una particella veloce la manda da una parte del
+contenitore se lenta dall'altra (aprendo e chiudendo lo sportello), dividendo
+così particelle lente e veloci nelle due sezioni del contenitore. Dopo un po' di
+tempo tutte le particelle veloci sono da una parte e le lente dall'altra, avendo
+una metà più calda (dove sono quelle veloci) e uno più freddo. Il diavoletto ha
+quindi lavorato per andare contro il secondo principio della termodinamica, che
+imporrebbe un miscuglio uniforme tra particelle lenti e veloci. Ma questo
+principio sarebbe inviolabile quindi siamo di fronte ad un paradosso. La
+soluzione al paradosso è il rapporto tra le due entropie, quella di Shannon
+della teoria dell'informazione e quella della termodinamica. Il diavoletto
+ha lavorato contro il secondo principio della termodinamica ma per capire se una
+particella è veloce ne ha fatto una misurazione e ne ha ricavato un'informazione
+sulla misura. Tale misurazione è il risultato di un evento statistico, a seconda
+della particella ho velocità alta/bassa etc$\ldots$ con una certa probabilità. A
+tali probabilità si associa l'entropia di Shannon e facendo i conti si scopre
+che comunque il sistema è chiuso e che il diavoletto non sta facendo un lavoro
+impossibile (i dettagli del discorso non vengono trattati).\\
+Quindi la sorgente, ad ogni colpo di clock, emette un simbolo con una certa
+quantità di informazione. \\
+Un altro modo per vedere che l'entropia è una sorta di media è prendere la
+sorgente $S$ e considerare messaggi di lunghezza $n$. Voglio avere $n\cdot p_i$
+volte $s_i$, avendo: 
+\[P=p_1^{n\cdot p_1}\cdot p_1^{n\cdot p_2}\cdot \ldots \cdot p_q^{n\cdot
+    p_q}=(p_1^{p_1}\cdots p_q^{p_q})^n\]
+ma allora:
+\[\log_\frac{1}{P}=log_2\left[\frac{1}{p_1^{p_1}\cdots
+      p_q^{p_q}}\right]=n\sum_{i=1}^q\log_2\left(\frac{1}{p_i}\right)^{p_1}=n\cdot
+  \sum_{i=1}^qp_i\log_2\frac{1}{p_1}=n\cdot H_2(S)\]
+\subsection{Robustezza codici di Huffman}
+Sia data una sorgente $S$ con simboli $s_i$ e probabilità $p_i$ (potrei anche
+non sapere che simboli emette la sorgente $S$, come se fosse una \textit{black
+  box}). Le probabilità in realtà non si conoscono. Si supponga di 
+poter osservare solo i simboli emessi dalla sorgente senza sapere nulla di come
+è fatta. Non conosco quindi le probabilità vere ma posso solo stimarle. Chiamo
+$p_i'$ tali stime. Ci si chiede quanto cambia la lunghezza media del codice
+istantaneo applicando Huffman con le $p_i'$. Si ha quindi:
+\[L'=\sum_{i=1}^q p_i'l_i\]
+anziché:
+\[L=\sum_{i=1}^q p_il_i\]
+Cercando di capire quanto si discostano $L$ e $L'$.\\
+Presi gli errori $e_i$ commessi per stimare $p_i'$ ho che:
+\[p_i'=p_i+e_i\]
+Si segnala che $e_i$ può essere positivo, negativo o nullo.\\
+Sia $p_1,\ldots, p_q$ che $p_1',\ldots, p_q'$ sono distribuzioni di probabilità
+e quindi $\sum_{i=1}^q p_i=1$.\\
+Quindi:
+\[\sum_ip_i'=\sum_i (p_i+e_i)=\sum_{i=1}^q p_i+\sum_{i=1}^q +e_i=1+\sum_{i=1}^q
+  +e_i=1\] 
+dato che $\sum_ip_i'=1$. Ne segue quindi per forza vale che:
+\[\sum_i e_i=0\]
+e quindi la media degli errori è:
+\[\frac{1}{q}\sum_{i=1}^q e_i=0\]
+e che la varianza degli errori vale
+\[\sigma^2=\frac{1}{q}\sum_{i=1}^q e_i^2\]
+Per la lunghezza media ho che:
+\[L'=\sum_{i=1}^q p_i'\cdot l_i=\sum_{i=1}^q p_i\cdot l_i=\sum_{i=1}^q e_i\cdot
+  l_i=L+\sum_{i=1}^q e_i\cdot l_i\]
+Quindi la variazione tra le lunghezze medie ottenute con Huffman usando $p_i'$ e
+$P_i$ è:
+\[\sum_{i=1}^q e_i\cdot l_i\]
+Voglio quindi minimizzare $\sum_{i=1}^q e_i\cdot l_i$. Cerchiamo quindi gli
+$e_1,\ldots e_q$ tali per cui la funzione:
+\[f(e_1,\ldots e_q)=\sum_{i=1}^q e_i\cdot l_i\]
+è minima.\\
+Cerco quindi i punti stazionari tramite le derivate parziali rispetto alle
+variabili $e_i$ per poi porle a 0. Vogliamo che la media dei valori assunti da
+$e_i$ si nulla e che la varianza $\sigma^2$ assuma un valore fissato imponendo i
+seguenti vincoli:
+\[\frac{1}{q}\sum_{i=1}^q e_i=0\implies \sum_{i=1}^q e_i=0\]
+e:
+\[\frac{1}{q}\sum_{i=1}^q e_i^2-\sigma^2 =0\]
+Per risolvere questo problema di ottimizzazione vincolata utilizziamo i
+\textbf{moltiplicatori di Lagrange}. Abbiamo due vincoli e quindi usiamo due
+moltiplicatori: $\mu$ e $\lambda$:
+La funzione u cui calcolare i punti stazionari diventa:
+\[\mathcal{L}(e_1,\ldots,e_q)=\sum_{i=1}^qe_il_i-\lambda\sum_{i=1}^q
+  e_i-\mu\left(\sum_{i=1}^q e_i^2-\sigma^2\right)\] 
+Calcolo quindi le derivate parziali rispetto a $e_i$ e le pongo nulle:
+\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
+e sommando queste equazioni ho:
+\[\sum_{i=1}^q l_i-\lambda q-\frac{2\mu}{q}\sum_{i=1}^q e_i=0\]
+e avendo che $\sum_{i=1}^qe_i=0$ ottengo:
+\[\sum_{i=1}^q l_i-\lambda q=0\]
+e quindi:
+\[\lambda=\frac{1}{q}\sum_{i=1}^q l_i\]
+Cerchiamo quindi il valore di $\mu$.
+Ricordando che:
+\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
+sommo le equazioni moltiplicando la prima per $e_1$, la seconda per $e_2 $
+etc$\ldots$:
+\[\sum_{i=1}^q e_il_i-\lambda \sum_{i=1}^q e_i-\frac{2\mu}{q}\sum_{i=1}^q e_i^2=0\]
+e avendo che $\sum_{i=1}^qe_i=0$ ottengo:
+\[\sum_{i=1}^q e_il_i-2\mu\sigma^2=0\]
+da cui:
+\[\mu=\frac{1}{2\sigma^2}\sum_{i=1}^qe_il_i\]
+Ricordando che:
+\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
+sommo le equazioni moltiplicando la prima per $l_1$, la seconda per $l_2 $
+etc$\ldots$:
+\[\sum_{i=1}^q l_i^2-\lambda \sum_{i=1}^q l_i-\frac{2\mu}{q}\sum_{i=1}^q
+  e_il_i=0\]
+Sostituisco $\lambda$ e $\mu$:
+\[\sum_{i=1}^q l_i^2- \frac{1}{q}\left(\sum_{i=1}^q l_i\right)^2-
+  \frac{1}{2q\sigma^2}\left(\sum_{i=1}^qe_il_i\right)^2=0\]
+Ma allora:
+\[\left(\sum_{i=1}^qe_il_i\right)^2=\sigma^2\left[q\sum_{i=1}^q
+    l_i^2-\left(\sum_{i=1}^q
+      l_i\right)^2\right]=\]
+\[\sigma^2q^2\left[\frac{1}{q}\sum_{i=1}^q
+    l_i^2-\left(\frac{1}{q}\sum_{i=1}^q l_i\right)^2\right]=\sigma^2q^2\cdot v\]
+con $v$ varianza delle $l_i$.\\
+Dato che $q^2$ e $\sigma^2$ sono fissate bbiamo trovato che il quadrato della
+variazione tra le lunghezze medie, ovvero il quadrato di $f(e_1,\ldots,e_q)$ che
+volevamo minimizzare, è direttamente proporzionale alle lunghezze delle
+codeword. Quindi si minimizza mettendo in alto il nuovo simbolo in quanto si
+minimizza la varianza rendendo più \textbf{robusto} il codice, ovvero meno
+sensibile ad errori sulle probabilità (perlomeno ragionando in ottica di
+lunghezza media).\\
+Quando esce il simbolo $s_i$ abbiamo quindi $I(p_i)=\log_r \frac{1}{p_i}$, con
+tipicamente $r=2$, misurando la quantità di informazione in bit.\\
+Studiamo ora proprietà di $H_2(S)$, che può essere studiata come una
+funzione. Si nota in primis che $p=0$ è escluso (avendo una discontinuità del
+terzo tipo) e $p=1$ incluso. Avendo:
+\[H_2(S)=\sum_{i=1}^q p_i\log_2\frac{1}{p_i}=H_2(p_1,\ldots, p_q)\]
+che graficamente è:
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[axis lines = left, xlabel=$p$, ylabel=$p\log_2\frac{1}{p}$,
+      xmin=0,xmax=1, ymax=0.7, samples=300] 
+      \addplot[black, ultra thick, domain=0:1,] {x*log2(1/x)};
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
+Ma questo è scomodo quindi riscrivo $\frac{1}{p}$ in modo che anche l'origine
+sia inclusa. \\
+Sappiamo quindi che:
+\[H_S(S)\geq 0\]
+e vale 0 sse $H_2(p_1,\ldots, p_q)=0$ e quindi una certa $p_i=0$ e quindi tutte
+le altre $p_j$ sono anch'esse nulle.
+Cerchiamo ora il massimo.\\
+Usiamo la \textbf{disuguaglianza di Gibbs}.
+\begin{teorema}[Disuguaglianza di Gibbs]
+  Disegnano il logaritmo naturale (anche se vale per ogni base) e
+  una retta $r$ che è tangente alla funzione in $1$:
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[axis lines = left, samples=300, ymin=-4] 
+        \addplot[black, ultra thick,] {ln(x)};
+        \addplot[blue, ultra thick,] {x-1};
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+  Si scopre quindi che:
+  \[\ln (x)\leq x-1\]
+  e vale l'uguaglianza sse $x=1$.\\
+  Prendo quindi due distribuzioni $x_1,\ldots, x_q$ e $y_1,\ldots, y_q$. La
+  disuguaglianza afferma che:
+  \[\sum_{i=1}^q x_i\log_2\left(\frac{y_i}{x_i}\right)\leq 0\]
+\end{teorema}
+\begin{proof}
+  Dimostriamo questa disuguaglianza. Ho che, tramite cambio base:
+  \[\sum_{i=1}^q
+    x_i\log_2\left(\frac{y_i}{x_i}\right)=\frac{1}{\log_2}\sum_{i=1}^q
+    x_i\ln\left(\frac{y_i}{x_i}\right)\leq \frac{1}{\log_2}\sum_{i=1}^q
+    x_i\left(\frac{y_i}{x_i}-1\right)=\frac{1}{\ln 2}\sum_{i=1}^q y_i-x_i\]
+  \[=\frac{1}{\ln 2}\left(\sum_{i=1}^q y_i-\sum_{i=1}^q x_i\right)=\frac{1}{\ln
+      2}(1-1)=0\]
+  e quindi vale la disuguaglianza di Gibbs.\\
+  L'unica volta che abbiamo maggiorato abbiamo usato $\ln x\leq x-1$ che ci
+  dice che vale $0$ sse  $x=1$ e quindi vale l'uguaglianza sse
+  $\frac{y_i}{x_i}=1$, quindi se le due distribuzioni coincidono, con
+  $x_i=y_i,\forall i$.
+\end{proof}
+Cerco quindi il massimo dell'entropia. Dimostro che:
+\[\max H_2(p_1,\ldots, p_q)=\log_2 p\]
+Per farlo uso Gibbs:
+\[H_2(S)-\log_2 q=\left(\sum_{i=1}^q p_i\log_2\frac{1}{p_i}\right)-log_2 q\]
+ma voglio includere tutto nella sommatoria, lo moltiplico per una sommatoria che
+fa 1:
+\[=\left(\sum_{i=1}^q p_i\log_2\frac{1}{p_i}\right)-log_2 sum_{i=1}^qp_i\]
+ora lo posso includere
+\[=\sum_{i=1}^q p_i\log_2\frac{1}{p_i}- sum_{i=1}^qp_i log_2\]
+e quindi:
+\[\sum_{i=1}^qlog_2\frac{1}{p_i}-log_2 q\]
+e quindi:
+\[=\sum_{i=1}^q p_i\log_2\frac{1}{p_i\cdot q}=\sum_{i=1}^q
+  p_i\log_2\frac{\frac{1}{q}}{p_i}\]
+Dove posso riconoscere Gibbs, con $\frac{1}{q}$ che è una distribuzione
+uniforme e $p_i$ è l'altra distribuzione. Quindi:
+\[H_2(S)-\log_2 q=\frac{1}{\ln 2}\sum_{i=1}^q\leq 0\]
+possiamo dire che:
+\[H_2(S)\leq \log_2 q\]
+Inoltre vale 0 sse $p_i=\frac{1}{q},\forall i$, quindi se ho una distribuzione è
+uniforme, con quindi $\log_2 q$ come massimo.\\
+Un'applicazione di questo calcolo è la relazione tra entropia e lunghezza media
+di un codice e quindi con la codifica di sorgente.\\
+Si prende una sorgente con $q$ simboli $s_i$, con probabilità $p_i$. Si supponga
+di avere codeword $l_i$ per un codice istantaneo. Ho la disuguaglianza di Kraft,
+con $K\leq 1$:
+\[K=\sum_{i=1}\frac{r^{l_i}}\leq 1\]
+Definisco, $\forall i\in\{1,\ldots, q\}$:
+\[Q_i=\frac{r^{-l_i}}{K}\]
+I vari $Q_i$ sono $\in[0,1]$ e quindi le posso considerare singolarmente come
+probabilità. Vedo che:
+\[\sum_{i=1}^q Q_i=\sum_i \frac{r^{-l_i}}{K} = \frac{1}{K}\sum_i
+  r^{-l_i}=\frac{1}{K}K =1\]
+e quindi sono una distribuzione di probabilità.\\
+Uso quindi Gibbs:
+\[\sum_{i=1}^q p_i\log_2\frac{Q_i}{p_i}\leq 0\]
+Ho che, spezzando il logaritmo:
+\[\sum_{i=1}^q p_i\log_2\frac{Q_i}{p_i}=\sum_{i=1}^qp_i\left(
+  \log_2\frac{1}{p_i}-\log_2\frac{1}{Q_i}\right)\]
+\[=H_2(S)-\sum_{i=1}^qp_i\log_2\frac{1}{Q_i}\leq 0\]
+Ma quindi:
+\[H_2(S)\leq  \sum_{i=1}^qp_i\log_2\frac{1}{Q_i}=\sum_{i=1}^qp_i\log_2
+  \frac{K}{r^{-l_i}}=\sum_{i=1}^qp_i\left(\log_2K - \log_2 r^{-l_i}\right)\]
+\[=\log_2 K\sum_{i=1}^qp_i+\sum_{i=1}^qp_i l_i\log_2 r\]
+\[
+  =\log_2 K+\log_2 r\sum_{i=1}^qp_i l_i\log_2 r=\log_2 K+L(log_2 r)\leq L\log_2
+  r\]
+in quanto $\log_2 K\leq 0$ (essendo $K\leq 1$ per Kraft).\\
+Quindi:
+\[H(S)\leq L\log_2 r\]
+E $\log_2 r$ è una costante che fa cambiare la base del logaritmo:
+\[\frac{H_2(S)}{log_2 r}\leq L\]
+ma quindi:
+\[H_r(S)\leq L\]
+Quindi partendo da una sorgente in cui si ipotizza un codice istantaneo possiamo
+dire che la lunghezza media deve essere maggiore uguale dell'entropia della
+sorgente su base r-aria, dove $r$ è il numero di simboli dell'alfabeto di
+codifica. Il fatto che la lunghezza media non può essere minore dell'entropia
+(quindi della quantità media di informazione)
+si può interpretare dicendo che la quantità media di informazione associata al
+messaggio è quella che non posso rappresentare in modo più compatto, mi da un
+limite. La sorgente quindi, ogni volta che emette un simbolo, emette mediamente
+una certa quantità di9 informazione e quindi ogni messaggio ha una quantità di
+informazione che è la somma di quelle di ciascun simbolo. La quantità di
+informazione del messaggio è quella che non posso rappresentare in maniera più
+compatta con un codice istantaneo. Ho una sorta di limite e se codificassi con
+una lunghezza media più bassa perderei informazione. Posso vedere il codice
+istantaneo come una compressione dei dati senza perdita di informazione, a meno
+di ulteriori compressioni.\\
+\textit{Se avessi sorgenti con memoria avrei che si avrebbero vincoli che
+  abbassano l'entropia.} \\
+Immagino ora una sorgente con due simboli $s_1$ e $s_2$, con $p_1+p_2=1$ e
+quindi $p_1=1-p_2$ e quindi mi basta la probabilità di uno solo dei due simboli
+che chiamo $p$. Posso dire che:
+\[H_2(S)=p\log_2\frac{1}{p}+(1-p)\log_2\frac{1}{1-p}\]
+Questa tipologia di sorgente è una \textbf{sorgente Bernoulliana} che è del
+tipo, con la derivata che si annulla in $\frac{p}{2}$:
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[axis lines = left, xlabel=$p$,
+      ylabel=$p\log_2\frac{1}{p}+(1-p)\log_2\frac{1}{1-p}$,,xmin=-0.1,xmax=1.1,
+      ymax=1.1, samples=600] 
+      \addplot[black, ultra thick, domain=0:1,]
+      {x*log2(1/x)+(1-x)*log2(1/(1-x))};
+      \addplot[thick,dashed,blue,]
+      coordinates {(0.5,0)(0.5,1)};
+    \end{axis}
+  \end{tikzpicture}
+  \label{fig:ber}
+\end{figure}
+in questo caso $p=1$ sarebbe escluso ma lo completo dicendo che vale 0 in $p=1$
+tramite una sostituzione. Stesso discorso per $p=0$. \\
+Il valore massimo è appunto $p=\frac{1}{2}$ e quindi si ha che:
+\[H_2\left(\frac{1}{2}\right)=1\]
+Si vuole rappresentare la sequenza di simboli in modo efficiente, ovvero con
+lunghezza media minima. Vogliamo quindi la rappresentazione più compatta
+possibile, pensando al codice istantaneo dal punto di vista della compressione
+senza perdita di informazione, avendo che il ricevente può risalire alla
+sequenza di simboli inviata e compressa.\\
+Parlando di codifica di sorgente si ha un simbolo per ogni colpo di
+clock. Possiamo pensare ad un codice istantaneo per comprimere le sequenze di
+simboli emesse dalla sorgente, compressione senza perdita di informazione,
+\textbf{compressione lossless} con il
+ricevente che riceve e capisce perfettamente la sequenza di partenza. La
+compressione dipende dalla ridondanza.
+\textit{Si hanno altri tipi di compressione, \textbf{lossy}, vedisi MP3 o MPEG,
+  dove la compressione ha perdita di informazione.}\\
+Un metodo di compressione ottimale comprime fino a raggiungere l'entropia della
+sorgente, non lasciando nulla di ``inutile'', garantendo però la
+ricostruzione. Con compressione si ha un codice istantaneo e dobbiamo dire al
+destinatario quale sia l'albero di decodifica. \\
+Grazie a McMillan sappiamo che la disuguaglianza di Kraft vale anche per i
+codici univocamente decodificabili. Tutto quanto detto tramite Gibbs riottengo
+ancora:
+\[H_r(S)\leq L\]
+che quindi vale per tutti i codici univocamente decodificabili.\\
+\section{Codifica di Shannon-Fano}
+Shannon e Fano si chiedono se la quantità di informazione r-aria, con quindi
+alfabeto r-ario, è minore uguale
+della lunghezza del simbolo, avendo sempre simboli $s_i$, con $p_i$ e $l_i$:
+\[\log_r\frac{1}{p_i}\leq l_i\]
+Vogliamo che $l_i$ sia il più piccolo ovvero l'unico compreso in:
+\[\log_r \frac{1}{p_i}\leq l_i< \log_r\frac{1}{p_i}+1\]
+Questo intervallo ha ampiezza 1 e contiene un solo intero.\\
+Calcolo gli $l_i$ in modo che rispettino questo principio. Tali lunghezze sono
+le \textbf{lunghezze di Shannon-Fano}.\\
+Ragioniamo sulle lunghezze e vediamo se si ha un codice istantaneo con quelle
+lunghezze. 
+Facendo:
+\[r^{\log_r \frac{1}{p_i}}\leq r^{ l_i}< r^{\log_r\frac{1}{p_i}+1}\]
+ma allora:
+\[ \frac{1}{p_i}\leq r^{l_i}< r^{\log_r\frac{1}{p_i}}r\]
+che è:
+\[ \frac{1}{p_i}\leq r^{l_i}< \frac{1}{p_i}r\]
+Faccio il reciproco:
+\[p_i\geq \frac{1}{r^{l-i}}> \frac{p_i}{r}\]
+Ora sommo tutti questi $l_i$:
+\[\sum_{i=1}^qp_i\geq \sum_{i=1}^q\frac{1}{r^{l-i}}>\sum_{i=1}^q \frac{p_i}{r}\]
+ma quindi è:
+\[1\geq K> \frac{1}{r}\]
+Anche se in realtà mi basta la prima parte:
+\[1\geq K\]
+\textbf{Si ha quindi un codice istantaneo con le lunghezze di
+  Shannon-Fano}. Potrei dire lo stesso per un codice univocamente decodificabile
+ma conviene ovviamente un codice istantaneo.\\
+Passo ad ``ottimizzare'' le singole lunghezze e non la media delle stesse.\\
+Ci si chiede ora se si ottiene una lunghezza media ottimale, ``sfidando''
+Huffman, che solo all'ultimo ottiene le codeword che ottimizzano la lunghezza
+media, facendo un ragionamento che comprende tutte le probabilità facendo la
+scelta migliore per l'intera sorgente.  \\
+Con la codifica di Shannon-Fano si ha che ogni lunghezza dipende dalla singola
+probabilità e sfrutta un algoritmo più performante di quello di Huffman ma si
+ottiene un \textbf{codice non ottimale} e vedremo di quanto ci si discosta. Per
+ottenere le codeword poi parto dalle lunghezze di Shannon-Fano e ragiono sugli
+alberi di decodifica, costruendone uno per scegliere le codeword. Ci si può
+anche chiedere quali sono le lunghezze che consentono di dare un nome univoco a
+ciascun evento che si possa verificare, astraendo dalle sorgenti e arrivando al
+nocciolo dell'essenza dell'informazione. \\
+Ripartiamo dalle lunghezze di Shannon-Fano:
+\[\log_r \frac{1}{p_i}\leq l_i< \log_r\frac{1}{p_i}+1\]
+Voglio ottenere dei limiti per la lunghezza media, ricordando che:
+\[L=\sum_{i=1}^q p_il_i\]
+ricostruisco quindi la disequazione delle lunghezze per ottenere i limiti della
+lunghezza media.\\
+Moltiplico per $p_i$:
+\[p_i\log_r \frac{1}{p_i}\leq p_il_i<p_i \log_r\frac{1}{p_i}+p_i\]
+e sommo tutto:
+\[\sum_{i=1}^qp_i\log_r \frac{1}{p_i}\leq \sum_{i=1}^qp_il_i<\sum_{i=1}^qp_i
+  \log_r\frac{1}{p_i}+\sum_{i=1}^q p_i\] 
+Ma è:
+\[H_r(S)\leq L< H_r(S)+1\]
+Avendo ottenuto i limiti superiore e inferiore (anche se quello inferiore già si
+sapeva, visto che $H_r(S)\leq L$ valeva per tutti i codici univocamente
+decodificabili e per quelli istantanei). I codici di Huffman hanno lunghezza
+media minore, essendo ottimali, di quelli di Shannon-Fano. Vedo quindi che
+Shannon-Fano dista di 1 dall'ottimo ma non sempre è così buono. Vediamo un
+esempio con due simboli:
+\[p_1=1-\frac{1}{2^j}\mbox{ e }p_2=\frac{1}{2^j}\]
+per $j\geq 2$ fissato.\\
+Si ha che il secondo simbolo esce raramente.\\
+Calcolo le lunghezze di Shannon-Fano:
+\[\log_2\frac{1}{p_2}\leq l_2\to \log_2 2^j\leq l_2\to l_2=j\]
+\[\log_2\frac{1}{p_1}\leq l_2\to\log_2\frac{2^j}{2^j-1}\leq\log_2\left( 1+ l_2\to
+    \frac{1}{2^j-1}\right)\leq l_2\to 1\leq l_1\to l_1=1\]
+Si noti che Huffman darebbe lunghezza 1 ad entrambe mentre Shannon-Fano 1 e $j$
+e quindi sono ben lontane da essere ottime, anche se la lunghezza media dista al
+più 1 da quella ottima (questo per l'intervento nel conto delle probabilità di
+uscita dei simboli). Posso comunque poi accorciare gli alberi con nodi interni
+inutili, soprattutto con alfabeto binario. Quindi pur non essendo ottimo è
+comunque accettabile.\\ 
+Possiamo dire che si ha una tendenza verso l'ottimo con la codifica di
+Shannon-Fano.
+\begin{definizione}
+  %mettere figura
+  Definisco l'n-sima estensione $S^n$ di una sorgente $S$, con $n\geq 1, n\in
+  \mathbb{N}$, Per $n=1$ l'estensione coincide con $n$. Per $n>1$ immagino di
+  avere $n$ copie della sorgente che lavorano in parallelo in modo sincrono,
+  quindi con un colpo di clock unico per tutte. La prima sorgente emette
+  $s_{i1}$, la seconda $s_i2$ e l'ultima $s_{in}$. L'n-esima estensione
+  considera questi $s_{ij}$ come un vettore, considerando le $n$ copie come una
+  singola sorgente $S^n$ che ha come alfabeto i simboli $\sigma_1,
+  \ldots,\sigma_m$, con $\sigma_i=\{s_{i1},\ldots, s_{in}\}$, dove ogni $s_i$ è
+  lungo $j$ e quindi $m=q^n$. \\
+  Ho che:
+  \[Prob[\sigma_i]=p_{i1}\cdot p_{i2}\cdot \ldots p_{in}\]
+  Questa probabilità e $q^n$ sono due problematiche, più è grande l'estensione e
+  più simboli si dovrà costruire (con limiti anche macchina). Se ho probabilità
+  piccole come $p_{ij}$ moltiplicandoli diventano ancora più piccoli.\\
+  Si ha quindi un codice istantaneo con $q^n$ simboli che sono n-uple di simboli
+  della sorgente di partenza, che in ogni $\sigma_i$ possono essere
+  mescolati. \\
+  Ogni singolo $S$ ha un $H_r(S)$ quindi si ha che, valendo l'additività per
+  l'entropia: 
+  \[H_r(S^n)=n\cdot H_r(S)\]
+  
+\end{definizione}
+\begin{teorema}[Primo teorema di Shannon, noiseless coding theorem]
+  Avendo:
+  \[H_r(S)\leq L< H_r(S)+1\]
+  Si ha che vale qualunque sia la sorgente e qualunque sia il codice
+  istantaneo.\\
+  In particolare, per $n\geq 1$ vale anche per l'n-esima estensione:
+  \[H_r(S^n)\leq L_n< H_r(S^n)+1\]
+  Con $L_n$ lunghezza media del codice per $S^n$. Si ha quindi che:
+  \[n\cdot H_r(S)\leq L_n< n\cdot H_r(S)+1\]
+  Divido per $n$, ottenendo la formula del \textbf{primo teorema di Shannon}:
+  \[H_r(S)\leq \frac{L_n}{n}< H_r(S)+\frac{1}{n}\]
+  Si era partiti quindi da un intervallo di ampiezza 1 per arrivare ad uno di
+  ampiezza $\frac{1}{n}$, avendo lo stesso estremo di partenza mentre l'estremo
+  di fine muta, in modo tale che l'ampiezza dell'intervallo decresce
+  all'aumentare di $n$.
+  Al crescere di $n$ quindi tale quantità viene schiacciata verso l'ottimo (a
+  mo' dei 
+  \textit{due carabinieri}).\\
+  D'altro canto $\frac{L_n}{n}$ è la lunghezza media di un codice istantaneo che
+  codifica la sorgente $S_n$, che ha come simboli elle n-uple. La codeword
+  codifica tutta l'n-upla e tutte le codeword hanno lunghezza media $L_n$ e
+  quindi in media servono $L_n$ bit, nel caso binario, per rappresentare la
+  n-upla. Ogni singola componente della n-upla ha quindi lunghezza
+  $\frac{L_n}{n}$. 
+  So che, avendo $\sigma_i=\{s_{i1},\ldots, s_{in}\}$,
+  ogni $s_{ij}$ ha lunghezza media $\frac{L_n}{n}$. Quindi ha senso
+  confrontare 
+  $H_r(S)\leq \frac{L_n}{n}< H_r(S)+\frac{1}{n}$ con $H_r(S)\leq L<
+  H_r(S)+1$. Confrontando quindi, tramite la formula del primo teorema di
+  Shannon, si giunge a dire che se al posto di codificare la 
+  sorgente codifico le n-esime estensioni della sorgente per $n$ crescente
+  allora ottengo una codifica per l'n-esima estensione che è migliore di quella
+  che avevo codificando i singoli simboli della sorgente. È migliore perché ho
+  un intervallo per la lunghezza media di ampiezza $\frac{1}{n}$, che quindi al
+  crescere di $n$ diventa sempre più piccolo, tendendo all'ottimo.\\
+  Il teorema ha validità teorica e interesse storico ma in pratica dovrei
+  costruire $S^n$, con tanti 
+  simboli dei quali alcuni potrebbero avere probabilità talmente bassa da essere
+  difficile da rappresentare a livello macchina.
+\end{teorema}
+\section{Canali di Comunicazione}
+Prima di parlare del \textbf{secondo teorema di Shannon} dobbiamo approfondire
+il canale, in forma di modello matematico. \\
+In input al canale ho simboli di un alfabeto $A$, ovvero
+$a_1,a_2,\ldots,a_q$. Dal canale escono simboli di un alfabeto $B$
+potenzialmente diverso, $b_1,\ldots, b_s$. Il rumore può cambiare un simbolo e
+quindi il canale viene modellato con probabilità condizionate tra simbolo in
+entrata e simbolo in uscita:
+\[P(b_j|a_i)\]
+Per queste probabilità usiamo una matrice $M$ con $q$ righe, una per ogni
+simbolo di A, e $s$ colonne, una per ogni simbolo di $B$, con:
+\[M_{ij}=P(b_j|a_i)\]
+Quindi un canale è:
+\[C=(A,B,rumore)\]
+con
+\begin{itemize}
+  \item $A$ alfabeto dei simboli $a_i$ che entrano nel canale, di cardinalità
+  $q$ 
+  \item $B$ alfabeto dei simboli $b_i$ che escono dal canale, che possono anche
+  essere di cardinalità maggiore a quelli che entrano, avendo cardinalità $s$
+  \item $rumore$, che data una certa $P$ si ha che ogni simbolo di input ha
+  una probabilità di diventare un simbolo in output. Sono probabilità
+  condizionate, $P(b_j|a_i)$. Si ha quindi una matrice con una riga per ogni
+  $a_i$ e una colonna per ogni $b_j$ con queste probabilità condizionate come
+  elementi. Quindi con $rumore$ si intende tale matrice
+\end{itemize}
+Studiamo meglio la matrice. Diciamo che entra il simbolo $a_i$ e abbiamo che il
+canale ``non dimentica nulla'', quindi deve uscire un simbolo $b_j$ (che per di
+più esce solo se qualcosa è entrato nel canale). Si ha quindi che:
+\[\sum_{j=1}^s P(b_j|a_i)=1,\forall i\]
+avendo quindi a che fare con una \textbf{matrice stocastica}. Sulle colonne non
+succede in quanto potrei avere un simbolo che esce solo se è entrato un simbolo
+preciso, non esaurendo tutte le possibilità (???).\\
+L'utente ha i simboli $a_i$ e decide come inserirli nel canale ciascuno con una
+certa $P(a_i)$, avendo la distribuzione di probabilità:
+\[\{P(a_i)\}_{i=1}^q\]
+Dobbiamo quindi calcolare $P(b_j)$. Per uscire $b_j$ si ha che o entra un
+simbolo $a_1$ che viene trasformato in $b_j$, con $P(b_j|a_1)$ oppure un $a_2$,
+con $P(b_j| a_2)$, e così via, fino a $a_q$, con $P(b_j| a_q)$. Se moltiplico
+queste probabilità condizionate per la probabilità che ci sia in input il
+simbolo e sommo tali termini ottengo tutti i modi possibili in cui può uscire
+$b_j$:
+\[P(b_j)=\sum_{i=1}^q P(a_i)\cdot P(b_j|a_i),\,\,\forall j\]
+E, prese tutte le equazioni per ogni $j$, si parla di \textbf{equazioni di
+  canale}, che ci dicono la distribuzione di probabilità in uscita, se sommo il
+valore per tutti i $j$ ottengo 1:
+\[\sum_{j=1}^s p(b_j)=1\]
+Le probabilità $P(b_j|a_i)$, contenute nella matrice di canale, sono
+\textbf{probabilità in avanti}, ponendosi dal punto di vista del mittente. Posso
+studiare anche le $P(a_i|b_j)$, ponendosi dal 
+punto di vista del ricevente che si chiede, dato un output, cosa è entrato nel
+canale, avendo \textbf{probabilità all'indietro}. Queste due probabilità
+sono legate dal teorema di Bayes, che sviluppo tramite le equazioni di canale:
+\[P(a_i|b_j)=\frac{P(b_j|a_i)p(a_i)}{b_j}=\frac{P(b_j|a_i)p(a_i)}{\sum_{i=1}^q
+    P(a_i)\cdot P(b_j|a_i)},\forall i,j\]
+Ma quindi alla fine ho la frazione tra un solo termine e tutti i termini ma ci
+garantisce anche deve essere stato inserito un $a_i$ per avere un $b_j$.
+\subsection{Canali particolari}
+Si hanno due canali particolari, ``estremi'':
+\begin{enumerate}
+  \item \textbf{canale senza rumore}, dove inserito un simbolo di esce
+  sempre lo stesso simbolo. Ho sempre che un input comporta uno e un solo
+  output, sempre. Potrebbe essere che i due alfabeti sono comunque diversi non
+  avendo per forza lo stesso simbolo (entra $c$ ed esce $c$) ma potrei avere un
+  altro simbolo (se entra $c$ esce $v$) ma questo deve accadere sempre, avendo
+  determinismo. Lato equazioni di canale si ha che la probabilità di uscita di 
+  un $b_j$ è la stessa che ha il corrispettivo $a_i$ di essere in input. Nella
+  matrice di canale quindi ho un solo $1$ per riga, che corrisponde al $b_j$ che
+  esce, e 0 altrimenti. Resta comunque una matrice stocastica, anche se ho un
+  solo 1 per ogni riga
+  \item \textbf{canale completamente rumoroso}, dove inserito un simbolo $a_i$
+  può uscire un $b_j$ qualsiasi che non dipende da $a_i$. Il canale dimentica
+  $a_i$ e spara a caso un $b_j$. Nella matrice di canale, stocastica, in ogni
+  riga si ha una 
+  distribuzione uniforme, avendo ogni valore pari a $\frac{1}{s}$
+\end{enumerate}
+\textit{Questi canali sono casi estremi teorici, non è possibile
+  costruirli}. Per forza c'è rumore in natura e quindi il primo è
+impossibile, anche se ci si può avvicinare. Il secondo farebbe comodo per
+generare numeri casuali ma un canale 
+così privo di determinismo non è costruibile, anche se usando il \textbf{rumore
+  di fondo dell'universo} o i \textbf{tempi di decadimento} forniscono risultati
+quasi prossimi.
+\subsection{Canale Binario Simmetrico}
+Un altro canale particolare è il \textbf{canale binario simmetrico
+  (\textit{CBS})}. Un CBS è un canale binario in entrata, ovvero che ha due soli
+simboli in input, $a=0$ e $a=1$, e binario in uscita, $b=0$ o $b=1$. Entra un
+bit ed esce un bit. Dato 0 può uscire 1 o 0 e dato 1 può uscire 0 o 1. Si hanno
+quindi:
+\begin{itemize}
+  \item $P_{0,0}= P(b=0|a=0)$
+  \item $P_{0,1}=P(b=0|a=1)$
+  \item $P_{1,0}=P(b=1|a=0)$
+  \item $P_{1,1}=P(b=1|a=1)$
+\end{itemize}
+Ho quindi una matrice del tipo, con $a$ sulle righe e $b$ sulle colonne:
+\[\left[
+  \begin{matrix}
+    P_{0,0} & P_{0,1}\\
+    P_{1,0} & P_{1,1}
+  \end{matrix}
+  \right]
+\]
+Avendo una matrice simmetrica, che si comporta uguale indipendentemente dal bit
+di ingresso. Se entra 0 ed esce 0 o entra 1 ed esce 1 abbiamo una trasmissione
+corretta, altrimenti abbiamo un errore di trasmissione. Simmetrico significa che
+la probabilità di una trasmissione corretta è uguale nei due casi, la chiamo
+$P$, e quella di 
+avere una trasmissione errata è uguale nei due casi, la chiamo $Q$. La matrice
+diventa quindi:
+\[\left[
+  \begin{matrix}
+    P & Q\\
+    Q & P
+  \end{matrix}
+  \right]
+\]
+Dato che, quando inserisco 0, o ricevo 0 o 1 (vale anche avendo 1 in input)
+allora, avendo comunque la matrice stocastica: 
+\[P+Q=1\]
+e quindi:
+\[Q=1-P\]
+Ma allora:
+\[\left[
+  \begin{matrix}
+    P & 1-P\\
+    1-P & P
+  \end{matrix}
+  \right]
+\]
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1.2]{img/cbs.pdf}
+  \caption{Rappresentazione di un canale binario simmetrico}
+  \label{fig:cbs}
+\end{figure}
+Mi basta quindi solo il valore di $P$ per avere tutte le informazioni di un
+CBS. \\
+In un CBS ho quindi due simboli possibili in input e quindi, per praticità
+chiamo: 
+\[p(a=0)=p\]
+\[p(a=1)=1-p\]
+Ho quindi, lato equazioni di canale, che:
+\[p(b=0)=p\cdot P+(1-p)\cdot (1-P)\]
+\[p(b=1)=p\cdot (1-P)+ (1-p)\cdot P\]
+Se avessi $P=1$ e $Q=0$ (ma anche $Q=1$ e $P=0$, avendo che sempre si ha
+deterministicamente il cambio di bit) avrei un \textbf{CBS senza
+  rumore}. Se avessi $P=\frac{1}{2}$ e $Q=\frac{1}{2}$ avrei un \textbf{CBS
+  completamente rumoroso}.
+Vedo anche le probabilità all'indietro, calcolabili con tutto quello di cui
+abbiamo appena discusso:
+\[P(a=0|b=0)=\frac{P(b=0|a=0)\cdot P(a=0)}{p(b=0)}=\frac{P\cdot p}{p\cdot
+    P+(1-p)\cdot (1-P)}\]
+Vediamo quindi i due casi particolari (facilmente verificabili sostituendo):
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=0|b=0)=1\]
+  \item CBS completamente rumoroso:
+  \[P(a=0|b=0)=p\]
+\end{itemize}
+\[P(a=1|b=0)=\frac{P(b=0|a=1)\cdot P(a=1)}{p(b=0)}=\frac{(1-P)\cdot
+    (1-p)}{p\cdot P+(1-p)\cdot (1-P)}\]
+Vediamo quindi i due casi particolari:
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=1|b=0)=0\]
+  \item CBS completamente rumoroso:
+  \[P(a=1|b=0)=1-p\]
+\end{itemize}
+\[P(a=0|b=1)=\frac{P(b=1|a=0)\cdot P(a=0)}{p(b=1)}=\frac{(1-P)\cdot p}{p\cdot
+    (1-P)+ (1-p)\cdot P}\]  
+Vediamo quindi i due casi particolari:
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=1|b=0)=0\]
+  \item CBS completamente rumoroso:
+  \[P(a=1|b=0)=1-p\]
+\end{itemize}
+\[P(a=1|b=1)=\frac{P(b=1|a=1)\cdot P(a=1)}{p(b=1)}=\frac{P\cdot
+    (1-p)}{p\cdot (1-P)+ (1-p)\cdot P}\]
+Vediamo quindi i due casi particolari:
+\begin{itemize}
+  \item CBS senza rumore:
+  \[P(a=1|b=1=1\]
+  \item CBS completamente rumoroso:
+  \[P(a=1|b=1)=p\]
+\end{itemize}
+\begin{esempio}
+  Supponendo di avere un CBS con $P=\frac{9}{10}$, avendo che 9 volte su 10 il
+  bit 
+  arriva corretto. Si ha quindi $Q=\frac{1}{10}$, avendo progettato un ``buon
+  canale'', anche se, senza sapere $p(a_i)$, il massimo che posso fare è
+  supporli 
+  uniformi. L'utente però potrebbe non usarlo per probabilità uniforme, ad
+  esempio 
+  qui suppongo un utente che inserisce secondo:
+  \[P(a=0)=p=\frac{19}{20}\]
+  \[P(a=1)=1-p=\frac{1}{20}\]
+  Il ricevente vede uscire $b=0$ e vuole sapere se è entrato $a=0$:
+  \[P(a=0|b=0)=\frac{171}{172}\]
+  che sembra ragionevole. Si ha anche, ovviamente:
+  \[P(a=1|b=0)=\frac{1}{172}\]
+  Avendo che:
+  \[P(a=0|b=0)>P(a=1|b=0)\]
+  Si ha poi:
+  \[P(a=0|b=1)=\frac{19}{28}\]
+  \[P(a=1|b=1)=\frac{9}{28}\]
+  Avendo che:
+  \[P(a=0|b=1)>P(a=1|b=1)\]
+  Ma allora se vede $b=1$ dice che comunque è più probabile $a=0$, non capendo
+  quando sia entrato $a=1$.
+\end{esempio}
+Nell'esempio si è visto che le probabilità dipendono comunque dall'uso
+dell'utente, che sceglie le $p(a_i)$, che se scelte male portano a situazioni
+strane come quelle dell'esempio. Nell'esempio si è creato un bias che porta
+sempre a scegliere $a=0$,avendo che $p(a=0)>>p(a=1)$. Questo succede in quanto,
+guardando le equazioni sopra descritte, si ha, con questa scelta, $p>P$ e $p>Q$
+(avendo indicato $p(a=0)$ con $p$).
+\subsection{Entropie del Canale}
+Dato un canale con $a_i\in A$ in input e $b_j\in B$ in output, con le varie
+probabilità associate. Normalmente ho la sorgente $A$ di $q$ simboli, dove i
+vari $P(a_i)$ sono una distribuzione di probabilità. Mettendosi 
+nei panni di un osservatore che vede solo l'output si ha una ``sorgente'' $B$,
+di $s$ simboli, dove i vari $P(b_j)$ sono una distribuzione di probabilità. La
+vedo come sorgente perché il canale è una \textit{black box}, se invece potessi
+vedere dentro vedrei che $B$ non sarebbe una sorgente, con le probabilità
+$P(b_j)$ che non sono native ma derivate da quelle dei simboli $a_i$ e dalle
+$P(b_j|a_i)$, tramite le equazioni di canale. \\
+Si hanno molte entropie.\\
+Posso dare l'entropia della sorgente $A$:
+\[H_r(A)=\sum_{i=1}^q P(a_i)\cdot \log_r\frac{1}{P(a_i)}\]
+Vedo $B$ come sorgente e quindi:
+\[H_r(B)=\sum_{j=1}^s P(b_j)\cdot \log_r\frac{1}{P(b_j)}\]
+Ho anche, ponendomi dal punto di chi vede sia $A$ che $B$, la quantità di
+informazione media emessa dalla sorgente in input dato un simbolo in output:
+\[H_r(A|b_j)=\sum_{i=1}^q P(a_i|b_j)\cdot \log_r\frac{1}{P(a_i|b_j)}\]
+Questa è una sorta di \textbf{entropia tecnica} che serve a calcolare quella di
+$A$ dato $B$:
+\[H_r(A|B)=\sum_{j=1}^s P(b_j)\cdot H_r(A|b_j)\]
+\[=\sum_{j=1}^s\sum_{i=1}^q P(b_j)\cdot p(a_i|b_j)\cdot
+  \log_r\frac{1}{P(a_i|b_j)}\cdot \log_r\frac{1}{P(b_j)}\]
+\[=\sum_{j=1}^s\sum_{i=1}^q P(a_i,b_j)\cdot \log_r\frac{1}{P(a_i|b_j)}\]
+Questa è detta \textbf{equivocazione} e studia la quantità di informazione media
+sull'input avendo in uscita un qualsiasi simbolo di $B$, essendo dal punto di
+vista del ricevente che studia la quanittà di informazione immessa nel canale.\\
+Si noti che si rompe quella sorta di simmetria nella formula dell'entropia (tra
+il $P$ e il denominatore della frazione).\\
+Un'altra entropia interessante è:
+\[H_r(B|a_i)=\sum_{j=1}^s P(b_j|a_i)\cdot \log_r\frac{1}{P(b_j|a_i)}\]
+Questa serve per l'altra entropia famosa che è:
+\[H_r(B|A)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j|a_i)}\]
+Anche questa è detta \textbf{equivocazione} ed è la quantità di informazione
+media sull'output avendo inserito un qualsiasi simbolo di $A$ nel canale,
+essendo dal punto di vista del mittente che inserisce un simbolo qualsiasi nel
+canale. 
+Infine ho anche l'entropia congiunta:
+\[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j,a_i)}\]
+Dove sono nel punto di vista di un osservatore esterno che vede input, canale e
+output, qualunque sia il simbolo che entri nel canale e qualunque sia quello che
+esca dal canale. \\
+Suppongo che $A$ e $B$ siano indipendenti, ovvero che il canale è
+\textit{completamente rumoroso}. Ma allora: 
+\[P(a_i,b_j)=P(a_i)\cdot P(b_j)\]
+E sostituendo:
+\[H_r(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\log_r\frac{1}{P(a_i)\cdot P(b_j)}\]
+\[=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\cdot \left[\log_r\frac{1}{P(a_i)}+\log_r\frac{1}{P(b_j)}\right]\]
+\[=\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\cdot \log_r\frac{1}{P(a_i)}+\sum_{i=1}^q\sum_{j=1}^s P(a_i)\cdot
+  P(b_j)\cdot \log_r\frac{1}{P(b_j)}\]
+Posso scambiare le sommatorie e portare fuori le cose che non dipendono più
+dalle singole sommatorie, isolando ciò che riguarda $A$ e ciò che riguarda $B$,
+ottenendo: 
+\[=\sum_{j=1}^sp(b_j)\sum_{i=1}^qp(a_i)\cdot
+  \log_r\frac{1}{P(a_i)}+\sum_{i=1}^qp(a_i)\sum_{j=1}^sp(b_j)\cdot
+  \log_r\frac{1}{P(b_j)}\]
+\[=H_r(A)\sum_{j=1}^sP(b_j)+H_r(B)\sum_{i=1}^qP(A_i)=H_r(A)+H_r(B)\]
+Quindi:
+\[H_r(A,B)=H_r(A)+H_r(B)\]
+
+Avendo che le due sommatorie fanno 1.\\
+E quindi se sono indipendenti la quantità di informazione congiunta è la somma
+delle due singole quantità di informazione, avendo che la quantità di
+informazione è additiva.\\
+Si cerca una relazione tra la quantità di informazione in output e quella in
+input, ipotizzando che un po' vada persa nel canale causi rumore. Sicuramente al
+più in output avrò la stessa quantità di informazione. \\
+Normalmente non si ha un canale completamente rumoroso quindi il simbolo in
+output dipende da quello in input, avendo $A$ e $B$ non indipendenti ma si ha:
+\[P(a_i,b_j)=P(a_i)\cdot P(b_j|a_i)\]
+usando le probabilità in avanti che ho già a disposizione. Si ottiene quindi:
+\[H_r(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\left[\frac{1}{P(a_i)}\cdot
+    \frac{1}{P(b_j|a_i)}\right]\]
+\[=\sum_{i=1}^q\sum_{j=1}^s
+  P(a_i,b_j)\log_r\frac{1}{P(a_i)}+\sum_{i=1}^q\sum_{j=1}^s
+  P(a_i,b_j)\log_r\frac{1}{P(b_j|a_i)}\]
+Per la proprietà marginale so che:
+\[\sum_{j=1}^s P(a_i,b_j)=P(a_i)\]
+So anche che la seconda somma è l'equivocazione.\\
+Ma allora:
+\[H_r(A,B)=\sum_{i=1}^s P(a_i)\cdot \log\frac{1}{P(a_i)}+H_r(B|A)\]
+Quindi in generale si ha, avendo che il primo termine della somma è l'entropia
+di $A$:
+\[H_r(A,B)=H_r(A)+H_r(B|A)\]
+In caso fossero indipendenti avrei:
+\[H_r(B|A)=H_r(B)\]
+Ritrovando anche, qualora $A$ e $B$ fossero indipendenti:
+\[H_r(A,B)=H_r(A)+H_r(B)\]
+\subsection{Mutua Informazione}
+\begin{definizione}
+  Definiamo \textbf{mutua informazione} come la differenza di quantità di
+  informazione data dal conoscere o non conoscere il simbolo in output dal
+  canale:
+  \[I(a_i;b_j)=\log_r \frac{1}{P(a_i)}-\log_r\frac{1}{P(a_i|b_j)}\]
+  Ma quindi, per le proprietà dei logaritmi:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i|b_j)}{P(a_i)}\]
+  Moltiplico sopra e sotto per $P(b_j)$:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i|b_j)\cdot P(b_j)}{P(a_i)\cdot P(b_j)}\]
+  ma allora:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i,b_j)}{P(a_i)\cdot P(b_j)}\]
+  E quindi:
+  \[I(a_i;b_j)=\log_r\frac{P(b_j|a_i)\cdot P(a_i)}{P(a_i)\cdot P(b_j)}\]
+  e infine:
+  \[I(a_i;b_j)=\log_r\frac{P(b_j|a_i)}{P(b_j)}=I(b_j;a_i)\]
+  Avendo che la mutua informazione quindi non dipende dall'ordine.\\
+  Se considero il caso particolare in cui $a_i$ e $b_j$ sono indipendenti allora:
+  \[P(a_i,b_j)=P(a_i)\cdot P(b_j)\]
+  Allora:
+  \[I(a_i;b_j)=\log_r\frac{P(a_i)\cdot P(b_j)}{P(a_i)\cdot P(b_j)}=0\]
+  \textbf{Per ora si parla di un solo simbolo in input e uno solo in output}.\\
+  Estendo la definizione alle medie:
+  \[I(A;b_j)=\sum_{i=1}^q P(a_i|b_j)\cdot I(a_i;b_j)\]
+  \[=\sum_{i=1}^q P(a_i|b_j)\cdot\log_r\frac{P(a_i|b_j)}{P(a_i)}\]
+  E poi, per $B$:
+  \[I(a_i;B)=\sum_{j=1}^s P(a_i|b_j)\cdot I(a_i;b_j)\]
+  \[=\sum_{i=1}^q P(b_j|a_i)\cdot\log_r\frac{P(b_j|a_i)}{P(b_j)}\]
+  e, come ultimo, la \textbf{mutua informazione del sistema}:
+  \[I(A;B)=\sum_{i=1}^q P(a_i) I(a_i;B)\]
+  \[=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{P(a_i,b_j)}{P(a_i)\cdot
+      P(b_j)}=I(B;A)\]
+\end{definizione}
+\begin{teorema}
+  Si può dimostrare che:
+  \begin{itemize}
+    \item $I(A;B)\geq 0$, per Gibbs
+    \item $I(A;B)=0$ sse $A$ e $B$ sono indipendenti
+    \item $I(A;B)=I(B;A)$
+  \end{itemize}
+\end{teorema}
+La quantità di informazione trasmessa nel canale, per una distribuzione $P(a_i)$
+fissata è proprio la mutua informazione del sistema. Infatti, tralasciando la
+$r$ dell'entropia in quanto irrilevante:
+\[I(A;B)=H(A)+H(B)-H(A,B)\]
+e si sa che:
+\[I(A;B)=H(A)+H(B)-H(A,B)\geq 0\]
+Inoltre sappiamo che:
+\[H_r(A,B)=H_r(A)+H_r(B|A)\]
+\[H_r(A,B)=H_r(B)+H_r(A|B)\]
+Uso una delle due per sostituire:
+\[I(A;B)=H(A)-H(A|B)\geq 0\]
+oppure:
+\[I(A;B)=H(B)-H(B|A)\geq 0\]
+Ma so quindi che (l'entropia è comunque $\geq 0$):
+\[0\leq H(A|B)\leq H(A)\]
+e che:
+\[0\leq H(B|A)\leq H(B)\]
+Scopro quindi che:
+\[H(A,B)\leq H(A)+H(B)\]
+e vale l'uguaglianza sse $A$ e $B$ sono indipendenti, avendo un canale
+completamente rumoroso.\\
+Tra tutte queste formule abbiamo come importanti:
+\[I(A;B)=H(A)-H(A|B)\geq 0\]
+che ci dice che la mutua informazione del sistema corrisponde a quella trasmessa
+meno l'equivocazione, che altro non è che la quantità di informazione persa
+causa rumore (\textit{non si dimostra la cosa}). Avere $I(A;B)\geq 0$ è data dal
+fatto che il rumore non mi può mandare in negativo, ``togliendo più
+dell'informazione presente''.\\
+L'altra formula essenziale:
+\[H(A,B)\leq H(A)+H(B)\]
+Avendo che al più la massima informazione è la somma di quella di $A$ e di
+quella di $B$, valore massimo che si ottiene solo se sono indipendenti. Negli
+altri casi si ha l'intervento del rumore, vedendo uscire meno quantità di
+informazione di quella entrata.
+\subsection{Capacità del Canale}
+Abbiamo detto che la quantità di informazione trasmessa nel canale, per una
+distribuzione $P(a_i)$ fissata è proprio la mutua informazione del sistema. Ma
+sappiamo che una scelta errata della distribuzione comporta cose inaspettate ed
+errate. Si vuole evitare che l'utente faccia scelte inopportune e si vorrebbe
+che 
+la quantità di informazione trasmissibile dal canale non dipenda dalla scelta
+dell'utente, la \textit{capacità del canale} non deve dipendere da $P(a_i)$.
+\begin{definizione}
+  Si definisce, informalmente, la \textbf{capacità del canale} $C$ come la
+  massima 
+  quantità di informazione trasmissibile dal canale (ovvero la mutua
+  informazione del sistema) al variare di tutte le
+  possibili $P(a_i)$: 
+  \[C=\max_{P(a_i)}\,I(A;B)\]
+\end{definizione}
+Questa definizione è corretta matematicamente ma non aiuta dal punto di vista
+pratico, dovendo calcolare tutte le:
+\[I(A;B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{P(a_i,b_j)}{P(a_i)\cdot
+    P(b_j)}\]
+al variare dei $P(a_i)$.\\
+Si sono quindi ricercate delle \textit{restrizioni} ragionevoli.\\
+La principale di queste deriva dal fatto che:
+\[I(A;B)=H_r(B)-H_r(B|A)\]
+Ma allora:
+\[I(A;B)=H_r(B)-\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j|a_i)}\]
+\[=H_r(B)-\sum_{i=1}^q\sum_{j=1}^sp(a_i)\cdot
+  P(b_j|a_i)\log_r\frac{1}{P(b_j|a_i)}\]
+\[H_r(B)\sum_{i=1}^q p(a_i)\cdot\sum_{j=1}^s
+  P(b_j|a_i)\log_r\frac{1}{P(b_j|a_i)}\]
+Quindi nella matrice di canale mi fisso su una riga, per $a_i$, e calcolo coi
+valori della riga, variando per $b_j$.\\
+Si è quindi pensato ad un \textbf{canale uniforme}, dove gli elementi di ogni
+riga della matrice sono sempre gli stessi, al più di una permutazione. Ogni riga
+è quindi una permutazione della prima riga. Posso ovviamente avere righe uguali.
+Con un canale uniforme chiamo:
+\[w=\sum_{j=1}^sP(b_j|a_i)\log_r\frac{1}{P(b_j|a_i)}\]
+per una certa riga e quindi, per un canale uniforme:
+\[I(A;B)=H_r(B)-\sum_{i=1}^q p(a_i)\cdot w\]
+Ma $w$ non dipende da $i$:
+\[I(A;B)=H_r(B)-w\cdot \sum_{i=1}^q p(a_i)\]
+Ma quindi, avendo $\sum_{i=1}^q p(a_i)=1$:
+\[I(A;B)=H_r(B)-w\]
+Fare:
+\[C=\max_{P(a_i)}\,I(A;B)\]
+equivale quindi a:
+\[C=\max_{P(a_i)}\,\{H_r(B)-w\}\]
+ma $w$ è costante:
+\[C=\max_{P(a_i)}\,\{H_r(B)\}-w\]
+Vediamo se esistono tali canali uniformi.\\
+Torniamo al CBS. Guardando la matrice vedo che la seconda riga è una
+permutazione della prima e quindi il CBS è un canale uniforme.\\
+Prendiamo ora l'n-esima estensione di un CBS, $CBS^n$, per $n\geq 1,
+n\in\mathbb{N}$. In un $CBS^n$ ho n copie del CBS che trasmettono un bit con una
+certa probabilità di trasmissione corretta, uguale per tutte. Con un $CBS^n$
+posso trasmettere un pacchetto di $n$ bit, dove ogni bit ha la stessa
+probabilità di trasmissione corretta $P$ ed errata $Q=1-P$. Ogni bit è
+trasmesso indipendentemente dagli altri, un errore su un bit non influisce sulla
+trasmissione degli altri. Questo ci riporta la \textbf{rumore bianco}, infatti
+$CBS^n$ è il canale che si usa nel modello del canale bianco. La matrice di
+$CBS^n$, per un certo $n$, è uniforme, avendo quindi un canale uniforme.\\
+Abbiamo quindi già due canali uniformi: CBS e $CBS^n$. Ha senso quindi studiare
+tali canali uniformi.\\
+Calcolo ora la mutua informazione e la capacità del CBS.\\
+Parto calcolando $w$ e scelgo di usare la prima riga, $[P\,\,\,Q]$:
+\[w=P\log_2\frac{1}{P}+Q\log_2\frac{1}{Q}\]
+e quindi, essendo $Q=1-P$:
+\[w=P\log_2\frac{1}{P}+(1-P)\log_2\frac{1}{1-P}\]
+oppure, avendo $P=1-Q$:
+\[w=(1-Q)\log_2\frac{1}{1-Q}+Q\log_2\frac{1}{Q}\]
+Ricordo che, vedere anche la figura \ref{fig:ber}:
+\[H_2(p)=p\log_2\frac{1}{p}+(1-p)\log_2\frac{1}{1-p}\]
+Ma allora, avendo qui $P=p$:
+\begin{itemize}
+  \item $w=H_2(P)$
+  \item $w=H_2(Q)$
+\end{itemize}
+E mi basta sapere o $P$ o $Q$ avendo che sono legati. Per un CBS però $P$ è un
+numero e basta, e anche $Q$ quindi:
+\[C=\max \{H_2(B)-h_2(P)\}=\max \{H_2(B)\}-h_2(P)\]
+\[C=\max \{H_2(B)-h_2(Q)\}=\max \{H_2(B)\}-h_2(Q)\]
+In un BBS la distribuzione in input dipende solo da $p$, ricordando la figura
+\ref{fig:cbs}, e quindi: 
+\[C=\max_p \{H_2(B)\}-h_2(P)\]
+\[C=\max_p \{H_2(B)\}-h_2(Q)\]
+Si ha che $B$ corrisponde all'output, ovvero la sorgente che vede il
+destinatario ed è comunque Bernoulliana e quindi è anche lei come la figura
+\ref{fig:ber}. Se chiamo $x$ la possibilità che esca 0 e $1-x$ che esca 1. Posso
+operare però solo su $p$ e il massimo di $h_2(B)$ è $\frac{x}{2}$ ma allora, per
+le equazioni di canale:
+\[x=p\cdot P+(1-p)\cdot (1-P)\]
+\[=p\cdot P+1-P-p+p\cdot P\]
+\[=1-P-p+2\cdot p\cdot P\]
+\[=1-P-p\cdot (1-2\cdot P)\]
+Cerco un $p$ che dia $x=\frac{1}{2}$:
+\[\frac{1}{2}=x\]
+\[=p(1-2\cdot P)=\frac{1}{2}-P=\frac{1-2\cdot P}{2}\]
+Ma allora, dividendo il primo e l'ultimo termine:
+\[p=\frac{1}{2}\]
+Ma ho supposto:
+\[1-\cdot P\neq 0\to P\neq \frac{1}{2}\]
+che è ragionevole perché sarebbe un canale completamente rumoroso. Assumo quindi
+un CBS non completamente rumoroso.\\
+Posso quindi dire che:
+\[C=1-H_2(P)\]
+\[C=1-H_2(Q)\]
+In quanto il valore massimo dell'entropia della Bernoulliana è 1 e la si ottiene
+quando la probabilità di uscita vale $\frac{1}{2}$, che vale quando anche la
+probabilità di inserire un valore è $\frac{1}{2}$ (??? risentire ultimi 15m
+lezione 2 13 aprile).\\
+Passando a $CBS^n$ ho che ogni singolo CBS è uguale e che la quantità di
+informazione è additiva. Si ha quindi la capacità di un $CBS^n$:
+\[C=n\cdot \left(1-H_2(P)\right)\]
+\[C=n\cdot \left(1-H_2(Q)\right)\]
+\section{Secondo Teorema di Shannon}
+\textbf{La dimostrazione del teorema non viene fatta a lezione}.\\
+Questo teorema è forndamentale nella teoria dell'informazione.\\
+Con questo teorema si usa praticamente tutto quanto spiegato in questo
+capitolo.\\
+Si useranno alcuni passaggi matematici.\\
+In primis la seguente maggiorazione, avendo $H(\cdot)$ funzione entropia per una
+sorgente Bernoulliana: 
+\[\sum_{k=0}^{\lambda \cdot n}\leq 2^{n\cdot
+    H(\lambda)},\,\,\,0<\lambda<\frac{1}{2},\, \lambda\cdot n\in \mathbb{N}\]
+Si ha poi il seguente teorema:
+\begin{teorema}[Legge Debole dei Grandi Numeri]
+  Date $x_1,\ldots X_n$ variabili casuali indipendenti, con stessa
+  distribuzione, media $\mu$ e varianza $\sigma^2$ si ha che $\forall
+  \varepsilon>0$ piccolo a piacere e $\forall\delta>0$, $\exists n_0$ tale che,
+  $\forall n> n_0$:
+  \[P\left(\left| \frac{1}{n}\sum_{i=1}^n X_i-\mu\right|\leq
+      \varepsilon\right)\geq 1-\delta\]
+  Ovvero, detto altrimenti:
+  \[P\left(\left| \frac{1}{n}\sum_{i=1}^n X_i-\mu\right|>
+      \varepsilon\right)<\delta\]
+  Avendo che la media dei valori $X_i$ può essere portata, con alte probabilità,
+  vicino quanto si vuole a $\mu$, che altro non è che il valore atteso. Si dice
+  infatti che la media di tali valori dista da $\mu$ per un $\varepsilon>0$
+  piccolo a piacere.
+\end{teorema}
+Ogni bit inviato forma l'insieme delle variabili casuali che descrivono i
+risultati dei nostri $n$ ``esperimenti'' indipendenti e uguali. per il teorema
+posso portare il valore medio di tale sequenza di esperimenti vicino al $\mu$ di
+ogni esperimento (non con certezza ma con probabilità prossima quanto si vuole a
+1).\\
+Ci si aspetta quindi un errore medio pari a $n\cdot Q$ nella spedizione di $n$
+cifre da un $CBS^n$ ma per tale teorema lo porteremo prossimo quanto si vuole a
+$Q$, a patto di avere $n$ grande (spedendo quindi grandi sequenze di bit).\\
+Il secondo teorema di Shannon, a differenza del primo, riguarda i \textbf{canali
+  rumorosi}. 
+\begin{teorema}[Secondo Teorema di Shannon]
+  Dato un canale rumoroso, con una certa capacità $C$, è possibile trasmettere
+  informazioni avvicinandosi arbitrariamente alla capacità del canale e
+  contemporaneamente mantenendo arbitrariamente bassa la probabilità d'errore,
+  ovvero la probabilità che il ricevente sbagli a decodificare. Si mantiene
+  quindi l'affidabilità del canale, appunto la probabilità di ricevere
+  correttamente i messaggi, prossima a 1.
+\end{teorema}
+\textbf{Su elearning dettagli della dimostrazione. Quanto detto in seguito è
+  solo qualche commento non richiesto all'orale}.\\
+La struttura della dimostrazione parte da un a definizione:
+\begin{definizione}
+  Definiamo \textbf{regola di decisione} come una funzione che usa il
+  decodificatore per capire quale simbolo è stato spedito a partire dal simbolo
+  ricevuto:
+  \[d:B\to A\]
+\end{definizione}
+Si da per scontato che possa avvenire un errore. Si ha una matrice con le
+probabilità all'indietro che mi dice le probabilità di avere un $a_i$ avendo
+ricevuto $b_j$. Le colonne di tale matrici sommano 1 e hanno appunto le
+\textbf{probabilità all'indietro} $P(b_j|a_i)$ e si usa una \textbf{regola di
+  massima verosomiglianza}. Potrei anche avere equiprobabilità studiando tali
+regole che quindi non sono uniche. \\
+Si parla poi di \textbf{probabilità d'errore}, ovvero la probabilità che il
+ricevente sbagli a decodificare, ovvero ricevuto $b_j$ non si capisca il giusto
+$a_i$. \\
+Il teorema poi si dimostra usando $CBS^n$ e assumendo rumore bianco, ma anche
+per altri tipi di canale, che comportano conti più complessi.\\
+Si suppone $Q<\frac{1}{2}$ anche perché se no avrei o un canale completamente
+rumoroso, con $=$, o che ``sbaglia'' più di metà delle volte ma quindi, essendo
+Bernoulliano, ha comunque $Q<\frac{1}{2}$.\\
+Con $A$ assumo solo i messaggi validi:
+\[A\subset\{0,1\}\]
+Mentre $B$ sono tutti i possibili:
+\[B\subseteq\{0,1\}\]
+Inoltre, per il $CBS^n$:
+\[P(a_i)=\frac{1}{m}\]
+e quindi:
+\[I(a_i)=\log_2\frac{1}{\frac{1}{n}}=\log_2 m\]
+E si ha poi:
+\[n\cdot C=n\cdot (1-H_2(Q))\]
+Per il teorema, dato $\varepsilon_1>0$:
+\[I(a_i)=\log_2 n=n\cdot (C-\varepsilon_1)\]
+\[=n\cdot C-n\cdot \varepsilon_1\]
+che dipende da $n$. Ma allora:
+\[m=2^{n\cdot(C-\varepsilon_1)}=\frac{2^{n\cdot C}}{2^{n\cdot\varepsilon_1}}\]
+Si scelgono poi casualmente i messaggi.\\
+Ipotizzo una sfera per la correzione di raggio, in fase di invio per $a_i$,
+per $\varepsilon_2>0$: 
+\[r=n\cdot Q+\varepsilon_2\]
+in modo che il destinatario, che anche lui ha una sfera per la correzione
+d'errore e sceglie il simbolo più vicino al centro, che è il più probabile, che
+equivale ad usare la massima verosimiglianza. Qualora però tale simbolo non
+fosse univoco si avrebbe errore, avendo errore nella decisione (che è l'errore
+della probabilità d'errore). Nemmeno provo a valutare altri simboli
+equidistanti. Si calcola quindi la probabilità di commettere tale errore e si
+continua con il ragionamento del teorema.\\
+Shannon fa quindi una media di tutti i messaggi validi, ovvero su tutte le
+codifiche casuali, facendo poi vari ragionamenti geometrici e applicando i due
+costrutti matematici posti ad inizio sezione e la cosiddetta
+\textbf{equazione di Fano}.\\
+Si cerca di dimostrare anche \textbf{l'inverso del secondo teorema di Shannon},
+mettendo nel canale più informazione di quella che è trasmissibile dal
+canale. Si arriva a dire che, forzando il canale, la probabilità di errore non
+può arrivare a 0, restando ad un valore comunque positivo, sbagliando quindi a
+decodificare.\\ 
+Il secondo teorema comunque ci dice che esiste il codice ma non ci dice come è
+fatto ma si è 
+visto che usando la codifica casuale spesso si ottiene qualcosa di
+funzionante. \textbf{Ha comunque più valenza teorica che pratica}.
+\chapter{Crittografia}
+Lo scopo della \textbf{crittografia} è quello di memorizzare, trasmettere ed
+elaborare informazioni, in presenza di agenti ostili, che voglio leggere e
+modificare tali informazioni. La crittografia non è la \textbf{steganografia},
+che consiste nel nascondere un messaggio dentro dati multimediali, occupandosi
+quindi di impronte digitali etc$\ldots$\\
+Con al crittografia non nascondo l'esistenza del messaggio ma lo codifico in
+modo che un esterno non possa farci nulla. Tendenzialmente basta la
+crittografia. \\
+La crittografia è quindi una codifica, che si aggiunge alla codifica di
+sorgente e alla codifica di canale, che limita la comprensione del contenuto al
+mittente e al destinatario.\\
+Ormai la crittografia è una scienza che comprende tante tematiche. Si hanno
+quindi sia questioni di complessità computazionale, per cifrare e decifrare
+(mittente e ricevente devono metterci pochissimo a cifrare e decifrare mentre
+gli altri migliaia di anni). Si frutta quindi la \textbf{teoria dei numeri} e
+l'\textbf{algebra}, con monoidi, campi, anelli etc$\ldots$ e la
+\textbf{complessità computazionale}.\\
+Le applicazioni della crittografia variano dallo storage ai DRM, dalle
+criptovalute alla homomophic encryption, ovvero computazione fatta su dati
+cifrati, dal cloud computing alla trasmissione sicura di dati sensibili e al
+secure secret sharing, dove ogni partecipante ha una parte del segreto e servono
+almeno $k$ partecipanti per ricostruirlo, con meno partecipanti non si ha
+nemmeno una vaga idea dello stesso.\\
+Lo schema standard sono \textbf{Alice} e \textbf{Bob} che si scambiano un
+messaggio e \textbf{Eve} che cerca di intercettare il messaggio,
+``origliando''. Alice e Bob comunicano su un canale pubblico. Eve può leggere
+e/o scrivere sul canale, nel caso semplice solo leggere. Mandare il messaggio
+\textit{msg} in 
+chiaro, in plain text, viene sicuramente intercettato. Alice quindi codifica il
+messaggio ma anche così facendo, senza ulteriori specifiche, Bob non sa come
+leggere il messaggio. Bisogna quindi far dipendere la codifica da una chiave $k$
+conosciuta solo da Alice e Bob. Alice calcola il $c$, ciphertext, come il
+risultato della cifratura con $k$ e lo spedisce a Bob. Bob quindi, conoscendo la
+chiave può riottenere il messaggio originale, tramite una funzione
+$msg=D_k(c)$. Eve non sapendo $k$ non può fare nulla: $???=D_?(c)$.
+Per Bob quindi decifrare è facile per Eve quasi impossibile.\\
+In realtà la crittografia, che prevede lo studio e la progettazione di
+crittosistemi sicuri, era chiamata \textbf{criptologia}. La
+\textbf{crittoanalisi} studia invece come ``rompere'' i crittosistemi, portando
+ad uno studio ``evolutivo'' dei sistemi. Quindi sia crittografia che
+crittoanalisi sono importanti, anche perché Eve potrebbe essere la ``parte
+buona'', come la polizia che intercetta i terroristi. Servono quindi entrambi
+gli aspetti.\\
+La criptologia era spesso definita l'unione di crittografia e crittoanalisi.\\
+Parlando dell'\textbf{attaccante} Eve bisogna stabilire delle assunzioni, dando
+un modello. Si ha quindi che:
+\begin{itemize}
+  \item se Eve non può né leggere né scrivere il canale è sicuro. È una
+  situazione non realistica, avendo che normalmente si comunica via radio
+  attraverso l'aria o via cavo
+  \item se Eve può leggere ma non scrivere si hanno solo \textbf{attacchi
+    passivi}, ovvero leggere i messaggi e trarne vantaggio, ed è
+  la situazione più comune. Non si hanno \textbf{impersonificazioni}, ovvero far
+  finta di essere uno dei due estremi della comunicazione, far finta di essere
+  Bob o Alice
+  \item se Eve può scrivere ma non leggere si ha che può disturbare la
+  comunicazione, avendo che ogni canale ha, come visto, una capacità massima e
+  se la superiamo, per il secondo teorema di Shannon, provochiamo errori di
+  decodifica. Eve può quindi cercare di saturare il canale ma non riesce a
+  trarre vantaggio dal messaggio, non potendolo leggere
+  \item se Eve può leggere e scrivere si ha che può fare \textbf{attacchi
+    attivi} e \textbf{impersonificazioni}. È la situazione ovviamente più
+  pericolosa 
+\end{itemize}
+SI ha che:
+\begin{itemize}
+  \item Alice vuole mandare il plaintext $m$
+  \item Alice codifica $m$ tramite una funzione $E(\cdot)$, ottenendo un
+  ciphertext, $c=E(m)$ 
+  \item Alice spedisce $c$
+  \item Bob decodifica $c$ tramite $D(\cdot)$, $m=D(c)$
+\end{itemize}
+Alice e Bob devono quindi accordarsi prima sulle due funzioni, magari, a sua
+volta, in un canale non sicuro. Le due funzioni $E$ e $D$ devono essere
+mantenute segrete. Alice e Bob, più precisamente, si accordano sull'algoritmo di
+cifratura e di conseguenza di decifratura. Già alla fine del 1800 Kerkhoff
+enuncia il suo principio:
+\begin{center}
+  \textit{mantenere segrete le funzioni è difficile mentre mantenere segreta una
+  piccola informazione come la chiave è più semplice.}
+\end{center}
+L'algoritmo quindi può anche essere pubblico ma senza la chiave non te ne fai
+nulla. Inoltre cambiare chiave è più semplice che cambiare algoritmo.\\
+Nella modernità gli algoritmi sono spesso opensource, garantendo ancora più
+sicurezza tramite la community che lavora sull'algoritmo, evidenziando falle e
+problematiche (cosa che garantisce anche una certa visibilità).\\
+Le chiavi sono piccole, ad esempio 128, 192 o 256 bit per AES. Sono quindi più
+facili da tenere nascoste rispetto ad intere procedure.\\
+Se Eve scopre la chiave segreta rompe il crittosistema, e ogni messaggio diventa
+praticamente in chiaro. IN tal caso si parla di \textbf{rotture
+  totali}. Un'altra situazione è che Eve abbia varie copie $c$ (perché ``spia'')
+e $m$ (visto che magari dopo un po' diventa pubblico), venendo a conoscenza
+magari della relazione tra $c$ e $m$, si parla in caso di \textbf{rottura
+  parziale}. Un messaggio cifrato può restare pubblico per un tot di tempo prima
+che il rischio di essere decifrato diventi troppo alto. Questo tempo varia a
+seconda dell'algoritmo, della chiave e dei possibili avversari (se si parla di
+NSA auguri). Un'altra variabile nel discorso è quanto il messaggio deve rimanere
+effettivamente segreto. Si ha inoltre una serie di assunzioni non dimostrate e
+uno potrebbe trovare un modo per risolvere problemi che si credono
+difficili. Un'altro aspetto è la \textbf{legge di Moore}, avendo che le macchine
+con cui si decifra evolvono e si potenziano ogni circa 18 mesi. Si potrebbero
+anche avere nuovi algoritmi etc$\ldots$ e magari un'informazione sicura ora non
+lo sarà tra 100 anni, quando magari si avranno computer quantistici a pieno
+regime (e quindi serviranno altri algoritmi di cifratura). Spesso si usano due
+algoritmi in modo che, a medio termine, se un algoritmo viene rotto si usa
+l'altro. 
+\begin{definizione}
+  Definiamo formalmente un \textbf{crittosistema} come una quintupla:
+  \[(PT,CT,K, E(\cdot), D(\cdot))\]
+  Dove:
+  \begin{enumerate}
+    \item $PT$, spazio dei plaintext, ovvero lo spazio di tutti i possibili
+    testi in chiaro. Solitamente sono stringhe binarie quindi è un insieme
+    $\{0,1\}^*$ o comunque un certo $\Sigma^*$ (nei cifrari storici e basta)
+    \item $CT$, spazio dei ciphertext, mi piacerebbe fosse anch'esso $\{0,1\}^*$
+    \item $K$, spazio delle chiavi, detto \textbf{keyspace}, ovvero i possibili
+    valori che può assumere la chiave segreta. Il keyspace non deve essere
+    troppo piccolo perché l'attaccante potrebbe usare il bruteforce
+    \item funzione di cifratura $E:PT\times K\to CT$
+    \item funzione di decifratura $D:CT\times K\to PT$
+  \end{enumerate}
+  Spesso si indicano $E_k(\cdot)$ anziché $E(\cdot, k)$ ed equivalente per
+  $D$.\\
+  Scegliendo $k\in K$ scelgo una coppia $E_k$ $D_k$. \\
+  Si noti che:
+  \[CT=\cup_{k\in K}E_k(PT)\]
+  Si ha che:
+  \[\forall m\forall k,\,\,D_k(E_k(m))=m\]
+  Anche se non è vero in assoluto. Nei crittosistemi simmetrici si
+  usa la stessa chiave per cifrare e decifrare, anche se in realtà si usa, per
+  decifrare, una chiave \textbf{ottenibile} (e non per forza la stessa)
+  facilmente da quella usata per 
+  cifrare. \emph{Nell'equazione quindi si assume che la chiave sia proprio la
+  stessa}.\\  
+  Si ha che $\forall m$ e $\forall k$ $c=E_k(m)$ deve essere facile da computare
+  ma deve essere (estremamente)
+  difficile trovare $m$ conoscendo solo $c=E_k(m)$. Deve essere facile computare
+  $m$ conoscendo $c$ e $k$ ma deve essere (estremamente) difficile trovare $K$
+  sapendo solo $c=E_k(m)$ e $m$.
+\end{definizione}
+\begin{shaded}
+  Facile e (estremamente) difficile sono in termini di complessità
+  computazionale (computati o meno in tempo polinomiale da una DTM). Per altri
+  modelli uso la \textbf{TM probabilistica} ma mai la NDTM, perché risolve in
+  tempo polinomiale problemi che in pratica non sappiamo realmente risolvere in
+  tempo polinomiale. 
+\end{shaded}
+Una macchina che effettua un attacco bruteforce capisce di aver trovato
+la giusta chiave a seconda di vari aspetti. Dipende da cosa viene cifrato. Ad
+esempio parlando di file lo si capisce guardando i primi byte, i metadati, e
+se sono consistenti con il formato che ci si aspetta si è arrivati alla giusta
+decodifica. Se si parla di un semplice file di testo o si guarda se ci sono
+parole riconoscibili tramite un dizionario o guardare l'entropia del messaggio
+ottenuto, visto che i messaggi in linguaggio naturale sono molto ridondanti,
+avendo quindi ridondanza bassa. Se la decifratura non va a buon fine ottengo un
+risultato pseudo casuale, simile al risultato di una cifratura. L'entropia basta
+anche solo di un pezzo.\\
+Fare i controlli dopo una cifratura non è un grosso problema, sono calcoli
+veloci. Quindi aumentando lo spazio delle chiavi si aumenta la complessità,
+visto che il singolo controllo non è difficile.
+\section{Cifrari Storici}
+Partiamo con qualche accenno storico per capire il discorso.
+\subsection{Cifrario di Cesare}
+Tra \textbf{cifrari storici} abbiamo il \textbf{cifrario di Cesare}, che è un
+crittosistema simmetrico molto debole (ma in un periodo dove ben pochi sapevano
+anche solo leggere andava più che bene). Il messaggio, si narra, era scritto
+sulla testa di uno schiavo dopo averlo rasato, aspettando che poi crescessero i
+capelli prima di mandarlo al destinatario. Si hanno:
+\begin{itemize}
+  \item $\Sigma=\{A,B,\ldots, Z\}$
+  \item $PT=CT=\Sigma^*$
+  \item $K=\{1,2,\ldots,25\}$
+  \item ogni lettera è cifrata e decifrata indipendentemente
+\end{itemize}
+Nella cifratura, fissata $k$, si ottiene $c$ avanzando di $k$ posizioni ogni
+lettera nell'alfabeto. Per decifrare si ``torna indietro'' di $k$ posizioni
+sull'alfabeto, eventualmente iniziando da capo, in modo circolare. Per questo
+$k=0$ non ha senso e si parte da $k=1$.\\ 
+Avanzare di 25 posizioni equivale a tornare indietro di una. Il problema è
+quindi il keyspace piccolissimo (e Olivio disse che Cesare usasse sempre
+$k=3$).\\
+Il cifrario di Cesare è un esempio di \textbf{crittosistema per sostituzione
+  monoalfabetica}, in quanto ogni lettera, fissato $k$, è sempre sostituita con
+la stessa (e anche questo è un problema di sicurezza).\\
+Si hanno altre caratteristiche interessanti:
+\begin{itemize}
+  \item decifrare con $k$ equivale a cifrare con $26-k$
+  \item $D_kE_k=E_0D_0$
+  \item posso riordinare passi di cifratura e decifratura ottenere lo stesso
+  risultato 
+\end{itemize}
+\subsection{Crittosistema di Hill}
+Un altro sistema storico è il \textbf{crittosistema di Hill}. In questo caso non
+si ha più sostituzione monoalfabetica e fa uso dell'algebra lineare. Resta
+comunque poco sicuro evidenziando una ``bad practice'', ovvero fa tutto tramite
+operazioni lineari. È un crittosistema simmetrico con la chiave di decifratura
+che è la matrice inversa di quella di cifratura (non uso la stessa chiave
+quindi). Fare l'inversa di una matrice è un \textbf{problema facile} e quindi è
+comunque un crittosistema simmetrico.\\
+Si hanno come chiavi i numeri da 0 a 25 che rappresentano le lettere
+dell'alfabeto (la a è 0 etc$\ldots$). Ogni operazione è fatta in
+$\bmod\,\,26$. Si sceglie un intero 
+$d\geq 2$ e si cifrano blocchi di $d$ lettere. Si cifra un blocco alla volta e
+non una lettera alla volta. La chiave di cifratura è una
+matrice quadrata $M$, con valori da 0 a 25, tale che, se $\det(M)\neq 0$ allora
+la matrice è invertibile e l'inversa ha valori tra 0 e 25. Ad esempio:
+\[M=\left[
+    \begin{matrix}
+      3 & 3\\
+      2 & 5
+    \end{matrix}
+  \right]\to M^{-1}=\left[
+    \begin{matrix}
+      15 & 17\\
+      20 & 9
+    \end{matrix}
+  \right]
+\]
+Per vedere se la matrice è invertibile si guarda il determinante.\\
+La chiave per decifrare non è quindi la chiave per cifrare ma si ottiene
+facilmente da essa.\\
+I $d$ numeri (che rappresentano le lettere) si mettono un vettore e si sceglie
+quindi la matrice che funge da chiave per cifrare. \\
+Si avrà che $PT=CT$. Divido il testo $m$ in $l$ blocchi $P_i$ di $d$ lettere e
+se la lunghezza di $m$ non è un multiplo di $d$ si aggiungono a $m$ lettere
+fittizie che siano riconoscibili come tali (anche se questa cosa può anche
+aiutare l'attaccante). Si avrà quindi:
+\[m=P_1P_2\ldots P_l\]
+Si ha quindi che ogni blocco viene cifrato a parte:
+\[C_i=M\cdot P_i,\,\,\,\forall i =1,2,\ldots, l\]
+Moltiplicando la matrice per il vettore ottengo un altro vettore, coi numeri che
+corrispondono le lettere del blocco cifrate.\\
+e infine si concatenano i $C_i$ per ottenere il testo cifrato:
+\[c=C_1C_1\ldots C_l\]
+\begin{esempio}
+  Si ha $m=HELP$ e $d=2$. Come chiavi uso:
+  \[M=\left[
+      \begin{matrix}
+        3 & 3\\
+        2 & 5
+      \end{matrix}
+    \right]\to M^{-1}=\left[
+      \begin{matrix}
+        15 & 17\\
+        20 & 9
+      \end{matrix}
+    \right]
+  \]
+  Si hanno quindi:
+  \[P_1=
+    \left[
+      \begin{matrix}
+        H\\
+        E
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        7\\
+        4
+      \end{matrix}
+    \right]\mbox{ e }
+    P_2=\left[
+      \begin{matrix}
+        L\\
+        P
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        11\\
+        15
+      \end{matrix}
+    \right]
+  \]
+  Ma allora (ricordando le operazioni $\bmod \,\,26$):
+  \[C_1=M\cdot P_1=\left[
+      \begin{matrix}
+        3 & 3\\
+        2 & 5
+      \end{matrix}
+    \right]\cdot\left[
+      \begin{matrix}
+        7\\
+        4
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        7\\
+        8
+      \end{matrix}
+    \right]\left[
+      \begin{matrix}
+        H\\
+        I
+      \end{matrix}
+    \right]\]
+  \[C_2=M\cdot P_2=\left[
+      \begin{matrix}
+        3 & 3\\
+        2 & 5
+      \end{matrix}
+    \right]\cdot\left[
+      \begin{matrix}
+        11\\
+        15
+      \end{matrix}
+    \right]=\left[
+      \begin{matrix}
+        0\\
+        19
+      \end{matrix}
+    \right]\left[
+      \begin{matrix}
+        A\\
+        T
+      \end{matrix}
+    \right]\]
+  e quindi:
+  \[c=C_1C_2=HIAT\]
+\end{esempio}
+Vediamo quindi se questo crittosistema è sicuro. Supponiamo che Eve sa o scopre
+quanto valga $d$ (magari provandone tante, non è una cosa costosa
+computazionalmente) ma non sa quanto vale $M$. Suppongo che veda passare $c$ e
+che scopra $m$,
+magari perché dopo un tot di tempo $m$ diventi pubblico o perché ha fatto
+attività di intelligence. A questo punto Eve conosce anche i blocchi e i vettori
+corrispondenti a $m$. Si ha quindi un semplice sistema di equazioni e se è
+fortunata ottenendo una matrice invertibile allora può riottenere la chiave $M$
+tramite semplici operazioni algebriche. Questo attacco è ancora più semplice se
+Eve può scegliere il testo in chiaro, qualora l'algoritmo di cifratura sia
+pubblico. \\
+Se ottiene una matrice non invertibile si ha che ha ottenuto alcuni blocchi
+dipendenti ma comunque potrebbe ricostruire una parte di matrice e, prima o poi,
+magari scoprendo un altro pezzo del testo in chiaro, può scoprire l'intera
+chiave $M$. \\
+Il grosso problema è quindi che la cifratura è un'operazione lineare, essendo
+fatta moltiplicando una matrice per un vettore. Si è quindi visto come un
+crittosistema con operazioni lineari sia da evitare.
+\subsection{Crittosistema di Playfair}
+Nel 1854 si è pensato al \textbf{crittosistema di Playfair} che nella versione
+base prevede addirittura una chiave fissa, ovvero una matrice $5\times 5$ di
+lettere (non potendo cifrare la $j$ visto che in inglese si hanno 26
+lettere). Il testo è diviso in blocchi di due lettere ma non posso avere blocchi
+con due lettere uguali all'interno.\\
+Si ha che la chiave è:
+\[k=\left[
+    \begin{matrix}
+      s & y & d & w & z\\
+      r & i & p & u & l\\
+      h & c & a & x & f\\
+      t & n & o & g & e\\
+      b & k & m & q & v
+    \end{matrix}
+  \right]\]
+Lo studio viene poi fatto in base a come sono le due lettere nella matrice, se
+nella stessa riga/colonna muovendosi ciclicamente nella riga e nella colonna. Se
+non sono nella stessa riga/colonna si identifica 
+il sottorettangolo con le due lettere come estremi prendendo poi gli altri due
+estremi. La decifratura si fa con le operazioni nell'ordine inverso.\\
+Il problema grave è che la chiave è sempre la stessa. Per costruire altre chiavi
+si parte da una frase, si tolgono le ripetizioni e si completa la sequenza
+ottenuta con le lettere mancanti, in ordine alfabetico. Questo comporta un
+inizio spesso di senso compiuto e una fine composta spesso dalle ultime lettere
+dell'alfabeto (per il modo in cui la matrice viene creata a partire da una
+frase, all'inizio la frase non viene quasi toccata ma alla fine si aggiungono
+le ultime lettere dell'alfabeto, spesso poco frequenti).\\
+\begin{esempio}
+  Parto da:
+  \begin{center}
+    \textit{course on cryptography}
+  \end{center}
+  rimuovo le ripetizioni:
+  \begin{center}
+    \textit{coursenyptgah}
+  \end{center}
+  completo con le lettere mancanti tranne ``j'':
+  \begin{center}
+    \textit{coursenyptgahbdfiklmqvwxz}
+  \end{center}
+  Avrei la matrice:
+  \[k=\left[
+    \begin{matrix}
+      c & o & u & r & s\\
+      e & n & y & p & t\\
+      g & a & h & b & d\\
+      f & i & k & l & m\\
+      q & v & q & z & z
+    \end{matrix}
+  \right]
+\]
+Ottenendo qualcosa di facile da analizzare.
+\end{esempio}
+È un sistema quindi polialfabetico ma le sostituzioni dei blocchi sono sempre le
+stesse.
+\subsection{Cifrario di Vigenère}
+In realtà, nel 1586, fu creato il \textbf{cifrario di Vigenère}, che è stato
+ritenuto sicuro per secoli.\\
+Funziona circa come il cifrario di Cesare ma diventa abbastanza robusto in
+quanto la chiave cambia dopo ogni cifratura di ogni lettera del plain. Per
+cifrare e decifrare si usa una tabella contenente tutte le possibili cifrature
+di Cesare. In altri termini si ha una tabella quadrata di righe e colonne apri
+al numero delle lettere dell'alfabeto. La prima riga è nell'ordine giusto, la
+secondo ruotata di 1 (si parte da ``b'' e si arriva ad ``a ``) e così via.\\
+Come chiave si sceglie una parola che viene ripetuta fino a ottenere la stessa
+lunghezza del testo in chiaro.\\
+Si prende la coppia $(m_i,k_i$) e si usano queste come coordinate (la prima
+colonna e la prima riga sono l'alfabeto in ordine coretto e si usano come
+coordinate) per prendere una lettera dalla tabella sopra costruita. Per
+decifrare si fa l'ordine opposto, partendo da $(c_i, k_i$), sfruttando la
+colonna che inizia con $c_i$ cercando la cella contente $k_i$ per ottenere la
+coordinata sulle righe.\\
+Questo sistema è stato considerato sicuro al 100\% per secoli.\\
+Si ha quindi che la i-esima lettera di $m$ è cifrata con il cifrario Cesare dove
+la chiave è l'i-esima lettera di $k$.
+Se la lunghezza di $k$ è $l$ (prima delle ripetizione) allora la lettera di $m$
+in posizione $i$, $i+l$, $i+2\cdot l$ etc$\ldots$ sono cifrate sempre con lo
+stesso carattere di $k$, quindi con la stessa chiave. Suppongo però di conoscere
+la lunghezza della chiave e scrivo il testo cifrato in una matrice, di $k$
+colonne, in modo che i caratteri cifrati dallo stesso carattere sono sulla
+stessa colonna. Posso quindi fare un'analisi delle frequenze su ogni colonna e
+trovare la chiave di ogni colonna. Si rompe quindi il crittosistema anche se il
+numero di possibili chiavi di per $n$ lettere è $26^n$ (già solo per $n=5$
+parliamo di $26^5=11881376$) essendo quindi un numero abbastanza grande per
+rendere infattibile un bruteforce (a meno di usare un computer, cosa non
+fattibile fino a qualche decennio fa). Bisogna comunque sapere la lunghezza
+della chiave.\\
+Nel 1860 Kasiski dice che se la chiave è lunga $n$ allora potrebbe capitare, se
+$m$ ha certe regolarità, che la stessa parola potrebbe venire cifrata con la
+stessa sequenza di chiavi. Si ottengono così, nel ciphertext, ripetizioni
+lunghe $n$ di lettere (anche se comunque potrebbe essere un caso). Si può quindi
+pensare che la chiave sia lunga quanto un divisore della distanza tra queste
+ripetizioni (e per senso logico si estraggono un paio di valori possibili). SI
+può quindi passare alla'analisi delle frequenze essendo comunque risolto
+facilmente, in certi casi, lo step di trovare la lunghezza della chiave.\\
+Può convenire, in questo caso, fare sovracifrature, ovvero cifrare i testi
+cifrati etc$\ldots$ 
+\subsection{Sicurezza dei Crittosistemi Storici}
+Fino alla prima guerra mondiale anche crittosistemi deboli andavano bene causa
+analfabetismo. Il crittosistema veniva fatto a mano, si cifrava a mano e si
+trasmetteva in qualche modo. Non si potevano quindi fare troppe operazioni,
+dovendo farlo a mano e spesso in guerra. Inoltre essendo fatto da un umano
+doveva essere semplice per ridurre errori umani, che dovevano seguire le
+istruzioni per cifrare.\\
+In tempo di pace, all'inizio del 1900 si sono diffuse macchine meccaniche di
+calcolo (prima enormi e poi sempre più piccole grazie alla corrente
+elettrica). Si è quindi automatizzata la cifratura permettendo crittosistemi
+arbitrariamente complessi (non essendoci più l'umano) con centinaia di
+operazioni anche perché le macchine vengono usate anche per la crittoanalisi.
+Tali macchine vengono create con obiettivi pacifici per usi aziendali (per
+segreti aziendali, per la Borsa etc$\ldots$) e non bellici. Il mondo però
+aziendale ha sdegnato questi macchinari che sono stati ``rispolverati'' in
+ambito bellico, soprattutto durante la seconda guerra mondiale.\\
+Tali macchinari utilizzano dei rotori (in sequenza il precedente al termine fa
+scattare il successivo etc$\ldots$). Ogni rotore è diviso in celle e ogni cella
+contiene una lettera. Ogni rotore effettua una sostituzione monoalfabetica e
+ogni lettera di $m$ è cifrata usando tutti i rotori. La chiave è rappresentata
+quindi dalla posizione dei rotori. Ogni volta che si cifra una
+lettera il rotore più veloce scatta cambiando chiave. Con 26 lettere dopo $26^3$
+lettere si ripresenta una ripetizione per la stessa lettera, rompendo ogni
+analisi statistica. Il metodo per inserire il messaggio deve comunque essere
+semplice. Si deve anche avere un modo comodo per vedere il messaggio cifrato.\\
+Si passa quindi da macchine meccaniche a macchine elettro-meccaniche, con
+collegamenti elettrici (26, uno per lettera) nei rotori, avendo che ogni rotore
+implementa una permutazione fissata, cambiando sempre una lettera in
+un'altra. Ad ogni rotazione cambia la coppia di lettere, ogni volta si ha quindi
+una permutazione diversa.\\
+\textbf{Immagini utili su slide}.\\
+Si fa quindi una sostituzione polialfabetica con chiavi lunghissime, avendo che
+la chiave iniziale è la posizione causale dei rotori all'inizio, da cui si
+ottengono le varie chiavi derivate, dopo $26^n$ posizioni per $n$ rotori. Ogni
+analisi statistica è destinata a fallire.\\
+La \textbf{macchina Enigma} è ancora più complessa. Grande poco più di una
+macchina da scrivere ha gli stessi tasti, in modo che si possa inserire
+facilmente $m$. Si hanno di base 4 rotori, con per di più possibilità di
+cambiarli con altri rotori. Si sceglieva la posizione iniziale dei rotori e dopo
+ogni lettera si accendeva una lampadina corrispondente alla lettera
+cifrata. Faceva parte della chiave iniziale anche uno \textbf{scambiatore}, che
+costituiva una ulteriore permutazione fissa ().
+
+
+\section{Crittoanalisi}
+Si possono in generale avere quattro scenari di attacco, in ordine di vantaggio
+crescente per Eve:
+\begin{enumerate}
+  \item Eve conosce solo $x$ e vuole ottenere $m$. È una situazione tanto
+  complicata per l'attaccante quanto rara. Si parla di \textbf{cryptotext only}
+  \item Eve conosce alcune coppie $c_i,m_i$. Eve quindi studia i nuovi $c$ che
+  arrivano e cerca di calcolare il corrispondente $m$. Si parla di \textbf{known
+  plaintext}
+  \item Eve può scegliere i testi in chiaro e computare i corrispondenti
+  $c$. Eve quindi cerca di computare $m$ all'arrivo di un nuovo $c$. Durante la
+  seconda guerra mondiale succedeva quando i tedeschi usavano per un giorno
+  sempre la stessa chiave. È, modernamente, lo
+  scenario classico della crittografia a chiave pubblica e si parla di
+  \textbf{chosen plaintext} 
+  \item Eve può decifrare ogni testo, scelto in modo adattivo, per un certo
+  periodo di tempo. A questo Eve può più facilmente scoprire $m$ all'arrivo di
+  un $c$. Si parla di \textbf{chosen ciphertext} 
+\end{enumerate}
+Si hanno quindi, in una piccola \textit{tassonometria} dei sistemi:
+\begin{itemize}
+  \item crittosistemi a chiave pubblica
+  \item crittosistemi simmetrici che usano due operazioni fondamentali:
+  \begin{enumerate}
+    \item \textbf{trasposizione}, usando la chiave segreta come permutazione,
+    all'aumentare della lunghezza dei blocchi permutati possono essere sicuri ma
+    aumenta anche la complessità di calcolo. Si fa una sorta di
+    anagramma. Questi crittosistemi non sono tendenzialmente sicuri
+    \item \textbf{sostituzione}, come in Cesare. A loro volta si parla di
+    sostituzioni \textbf{monoalfabetiche} o \textbf{polialfabetiche}, avendo che
+    una stessa lettera può essere cifrata in modo diverso. Quest'ultima
+    differenza è comunque molto relativa all'alfabeto in uso (si pensi ad Hill
+    che diventa monoalfabetico nell'alfabeto dei blocchi, un blocco uguale
+    diventa sempre lo stesso altro blocco). Monoalfabetici non sono sicuri ma
+    nemmeno polialfabetici a meno di sostituzioni complesse
+  \end{enumerate}
+  Quindi un crittosistema simmetrico è una applicazione sequenziale di
+  trasposizioni e sostituzioni a seconda di una chiave
+\end{itemize}
+Il crittosistema deve essere sicuro ma anche ``semplice'' da usare per
+l'utente.\\
+In un crittosistema per sostituzione monoalfabetico non si ha sicurezza in
+quanto non si 
+nascondono le proprietà statistiche delle lettere del testo in chiaro in
+linguaggio naturale (in inglese, ad esempio, la lettera ``e'' compare più spesso
+delle altre etc$\ldots$). Mi basterebbe quindi, statisticamente, sfruttare tali
+percentuali, cercando la lettera più frequente nel ciphertext per supporre poi
+che sia la ``e'' etc$\ldots$ Si hanno inoltre coppie (ma anche sulle terne) di
+lettere ad alta frequenza e questo rendere ancora più debole il
+crittosistema. Per tutte queste statistiche si hanno tabelle dedicate. Si può
+cercare di falsare questi dati scrivendo testi su misura (con frasi non
+convenzionali, ovviamente l'assenza di spazi etc$\ldots$) ma è abbastanza
+difficile ottenere un risultato accettabile, se non impossibile (bastano pochi
+tentativi per capire la corrispondenza tra caratteri o tuple di
+caratteri). Questo succede appunto perché anche cambiando la lettera non
+cambiano le frequenze della lingua sottostante (e anche se questa non si conosce
+non sono così tante da rendere difficile andare a tentativi, inoltre lingue
+simili hanno percentuali simili per i caratteri). Si può cercare di rendere
+complicata la lingua usando lingue complesse e poco usate ma anche questa
+operazione è difficile abbia successo (un esempio di uso erano gli americani
+nella seconda guerra mondiale che usavano l'indiano Navajo)\\
+Per risolvere il problema si sono usate varie possibilità. Ad esempio inserire
+lettere extra rispetto al testo per falsare le frequenze, in modo che ogni
+lettera abbia una frequenza simile alle altre.\\
+Una tecnica che funziona molto bene è quella delle \textbf{omofone}. Si
+supponga in uso l'alfabeto inglese. Sappiamo che ``e'' è la lettera più
+frequente. Supponiamo quindi di usare un alfabeto $\Gamma=\{0,\ldots,99\}$ e se
+una lettera appare il 12\% delle volte uso 12 numeri da $\Gamma$ e ogni volta
+che ne vedo una scelgo uno di questi 12 numeri a caso. Si ottiene quindi una
+\textbf{cifratura randomizzata}. La scelta può anche essere fatta con cura per
+appiattire le frequenze delle omofone. Con le omofone la crittoanalisi diventa
+complessa.\\
+Se ogni volta scelgo a caso uno degli omofoni significa che lo stesso testo,
+cifrato due volte in tempi diversi, porta a due ciphertext diversi. Lo stesso
+testo in chiaro ha quindi sempre in ciphertext diverso ma questo non ha problemi
+in fase di decifratura, nel momento in cui conosco le omofone. La decifratura
+resta deterministica ma la cifratura diventa comunque più robusta.\\
+
+\end{document}
+
+% LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
+% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple
+% LocalWords:  crittosistemi
+\message{ !name(critto.tex) !offset(-4383) }

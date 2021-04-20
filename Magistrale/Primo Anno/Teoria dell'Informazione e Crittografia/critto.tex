@@ -4044,7 +4044,7 @@ fittizie che siano riconoscibili come tali (anche se questa cosa può anche
 aiutare l'attaccante). Si avrà quindi:
 \[m=P_1P_2\ldots P_l\]
 Si ha quindi che ogni blocco viene cifrato a parte:
-\[C_i=M\cdot P_i,\,\,\,\forall i =1,\2,\ldots, l\]
+\[C_i=M\cdot P_i,\,\,\,\forall i =1,2,\ldots, l\]
 Moltiplicando la matrice per il vettore ottengo un altro vettore, coi numeri che
 corrispondono le lettere del blocco cifrate.\\
 e infine si concatenano i $C_i$ per ottenere il testo cifrato:
@@ -4154,7 +4154,7 @@ fatta moltiplicando una matrice per un vettore. Si è quindi visto come un
 crittosistema con operazioni lineari sia da evitare.
 \subsection{Crittosistema di Playfair}
 Nel 1854 si è pensato al \textbf{crittosistema di Playfair} che nella versione
-base prevede addirittura una chiave fissa, ovvero una matrice $\5\times 5$ di
+base prevede addirittura una chiave fissa, ovvero una matrice $5\times 5$ di
 lettere (non potendo cifrare la $j$ visto che in inglese si hanno 26
 lettere). Il testo è diviso in blocchi di due lettere ma non posso avere blocchi
 con due lettere uguali all'interno.\\
@@ -4179,7 +4179,33 @@ ottenuta con le lettere mancanti, in ordine alfabetico. Questo comporta un
 inizio spesso di senso compiuto e una fine composta spesso dalle ultime lettere
 dell'alfabeto (per il modo in cui la matrice viene creata a partire da una
 frase, all'inizio la frase non viene quasi toccata ma alla fine si aggiungono
-le ultime lettere dell'alfabeto, spesso poco frquenti).\\ 
+le ultime lettere dell'alfabeto, spesso poco frequenti).\\
+\begin{esempio}
+  Parto da:
+  \begin{center}
+    \textit{course on cryptography}
+  \end{center}
+  rimuovo le ripetizioni:
+  \begin{center}
+    \textit{coursenyptgah}
+  \end{center}
+  completo con le lettere mancanti tranne ``j'':
+  \begin{center}
+    \textit{coursenyptgahbdfiklmqvwxz}
+  \end{center}
+  Avrei la matrice:
+  \[k=\left[
+    \begin{matrix}
+      c & o & u & r & s\\
+      e & n & y & p & t\\
+      g & a & h & b & d\\
+      f & i & k & l & m\\
+      q & v & q & x & z
+    \end{matrix}
+  \right]
+\]
+Ottenendo qualcosa di facile da analizzare.
+\end{esempio}
 È un sistema quindi polialfabetico ma le sostituzioni dei blocchi sono sempre le
 stesse.
 \subsection{Cifrario di Vigenère}
@@ -4243,12 +4269,49 @@ ambito bellico, soprattutto durante la seconda guerra mondiale.\\
 Tali macchinari utilizzano dei rotori (in sequenza il precedente al termine fa
 scattare il successivo etc$\ldots$). Ogni rotore è diviso in celle e ogni cella
 contiene una lettera. Ogni rotore effettua una sostituzione monoalfabetica e
-ogni lettera di $m$ è cifrata usando tutti i rotori. Ogni volta che si cifra una
-lettera il 
-rotore più veloce scatta cambiando chiave. Con 26 lettere dopo $26^3$ lettere si
-ripresenta una ripetizione per la stessa lettera, rompendo ogni analisi
-statistica. 
-\section{Crittoanalisi}
+ogni lettera di $m$ è cifrata usando tutti i rotori. La chiave è rappresentata
+quindi dalla posizione dei rotori. Ogni volta che si cifra una
+lettera il rotore più veloce scatta cambiando chiave. Con 26 lettere dopo $26^3$
+lettere si ripresenta una ripetizione per la stessa lettera, rompendo ogni
+analisi statistica. Il metodo per inserire il messaggio deve comunque essere
+semplice. Si deve anche avere un modo comodo per vedere il messaggio cifrato.\\
+Si passa quindi da macchine meccaniche a macchine elettro-meccaniche, con
+collegamenti elettrici (26, uno per lettera) nei rotori, avendo che ogni rotore
+implementa una permutazione fissata, cambiando sempre una lettera in
+un'altra. Ad ogni rotazione cambia la coppia di lettere, ogni volta si ha quindi
+una permutazione diversa.\\
+\textbf{Immagini utili su slide}.\\
+Si fa quindi una sostituzione polialfabetica con chiavi lunghissime, avendo che
+la chiave iniziale è la posizione causale dei rotori all'inizio, da cui si
+ottengono le varie chiavi derivate, dopo $26^n$ posizioni per $n$ rotori. Ogni
+analisi statistica è destinata a fallire.\\
+La \textbf{macchina Enigma} è ancora più complessa. Grande poco più di una
+macchina da scrivere ha gli stessi tasti, in modo che si possa inserire
+facilmente $m$. Si hanno di base 3 rotori (ma poi sono aumentati), con per di
+più possibilità di 
+cambiarli con altri rotori. Si sceglieva la posizione iniziale dei rotori e dopo
+ogni lettera si accendeva una lampadina corrispondente alla lettera
+cifrata. Faceva parte della chiave iniziale anche uno \textbf{scambiatore}, che
+costituiva una ulteriore permutazione fissa (\textbf{immagini su slide}). La
+cifratura faceva inoltre due giri sui rotori. La
+macchina andava a batteria e durava un'intera giornata. \\
+Decifrare a mano era letteralmente impossibile. I polacchi hanno iniziato per
+primi a lavorare a come funzionassero le macchine Enigma per capire come
+intercettare i nazisti. Anche gli inglesi le hanno studiate, capendo come
+annullare l'effetto degli scambiatori, che per di più obbligavano una lettera a
+non essere mai cifrata con se stessa.\\
+Non si poteva comunque lavorare a mano e quindi Alan Turing costruì i macchinari
+per decifrare. Tali macchinari erano delle \textbf{bombe logiche} e facevano
+attacchi bruteforce (facendo molto casino a livello di rumore sonoro per di
+più) tentando più chiavi in contemporanea, sapendo testo in chiaro e testo
+cifrato. Se la chiave non andava bene scattava alla seguente producendo appunto
+un suono simile al ticchettio di una bomba.\\
+In merito si torna al discorso di quanto tempo può restare cifrato un messaggio
+e avendo dietro gli Alleati che pagavano per costruire macchine per decifrare
+tale tempo era alla fine poco.\\
+C'era anche il macchinario detto \textbf{Colossus}, con la stessa potenza di un
+Pentium 4, dedicato solo a studiare il keyspace.
+\subsection{Crittoanalisi per Crittosistemi Storici}
 Si possono in generale avere quattro scenari di attacco, in ordine di vantaggio
 crescente per Eve:
 \begin{enumerate}
@@ -4324,8 +4387,67 @@ Se ogni volta scelgo a caso uno degli omofoni significa che lo stesso testo,
 cifrato due volte in tempi diversi, porta a due ciphertext diversi. Lo stesso
 testo in chiaro ha quindi sempre in ciphertext diverso ma questo non ha problemi
 in fase di decifratura, nel momento in cui conosco le omofone. La decifratura
-resta deterministica ma la cifratura diventa comunque più robusta.\\
-
+resta deterministica ma la cifratura diventa comunque più robusta.
+\section{Crittosistemi Standard}
+Nei tempi moderni, in ambito bancario, si è cercato ad un modo sicuro per
+trasportare tra banche i registri con le cifre rappresentati i soldi. Ovviamente
+tali registri devono essere sicuri.\\
+Fino agli anni settanta ogni banca usava il proprio crittosistema, venduti da
+aziende con annesso hardware. Se due banche dovevano comunicare dovevano
+scegliere lo stesso.\\
+Si inizia a pensare ad un crittosistema standard buono per usi civili, come
+quelli bancari, ma anche non così buono per fini militari. Parte una ``gara''
+per fare questo crittosistema standard. Negli USA c'era IBM che nel 1977
+sviluppa \textbf{DES}, grazie ad un gruppo di ricerca tra cui
+Faistel. All'inizio il crittosistema creato fu \textbf{Lucifer}, che venne però
+considerato eccessivo, rallentando inutilmente onerosi i calcoli per l'hardware
+dell'epoca (oltre alla volontà di indebolirlo per scopi civili da parte del
+governo). L'NSA aveva avuto da dire anche sulle \textbf{s-box} di DES, ovvero le
+parti 
+non lineari, in quanto a conoscenza di sistemi non pubblici in grado di
+romperle. DES usa chiavi a 56 bit, che a breve sarebbero diventate poche.\\
+Si fa quindi una nuova ``gara'' che viene vinta da Daeman e Rijmen che creano
+\textbf{AES}, con chiave da 128, 192 e 256 bit. AES verrà rotto dai computer
+quantistici, è solo questione di tempo. Abbandoneremo quindi molti crittosistemi
+attuali ma se ne hanno altri che resistono ai computer quantistici.
+\subsection{DES}
+\textbf{Non chiesti all'orale i dettagli, su slide ci sono le matrici e le
+  varie tabelle}.\\
+La chiave è lunga 56 bit avendo quindi un keyspace di $2^{56}$, che ora come ora
+sono pochi. Questi 56 bit hanno un bit di parità ogni 7, in modo che ogni byte
+sia dispari, che è un pasticcio inutile. Sono quindi 56 bit più 8 di parità, che
+sono dipendenti.\\
+DES fa iterazioni con una \textit{round function} su blocchi di 64 bit di $m$
+per ottenere un $c$ di 54 bit. Ad ogni iterazione usa una chiave derivata
+diversa calcolata dai 56 bit della chiave iniziale. Si ha che il calcolo delle
+chiavi derivate è:
+\begin{itemize}
+  \item si riceve il pacchetto di 64 bit di $m$
+  \item applico la permutazione iniziale, accedendo ai singoli bit della chiave
+  e ai singoli bit di $m$
+  \item le prime 4 righe le chiamo $c_0$ e sono 28 bit e le altre quattro $D_0$
+  \item calcolo da $C_{n-1}$ e $D_{n-1}$, per $1\leq n\leq 16$, i $C_n$ e i
+  $D_n$, applicando due rotazioni a sinistra verso $C_{n-1}$ e $D_{n-1}$
+  (\textbf{esempio su slide})
+  \item si fa una \textbf{selezione permutata} per $C_n$ e $D_n$ per $1\leq
+  n\leq 16$, chiamando $K_n$ il risultato. Ogni $K_i$ ha 48 bit
+\end{itemize}
+Per la cifratura:
+\begin{itemize}
+  \item si divide $m$ in blocchi di 64 bit che viene cifrato separatamente. Ogni
+  blocco cifrato lo chiamo $w$
+  \item a partire da $w$ si applica una permutazione iniziale, chiamando $l_0$ e
+  $R_0$ le prime e le seconde 4 righe (ciascuno è di 32 bit), avendo che
+  $w=L_0R_0$ 
+  \item calcolo da $L_{n-1}$ e $R_{n-1}$, per $1\leq n\leq 16$, i $L_n$ e i
+  $R_n$ tramite:
+  \[L_n=R_{n-1}\]
+  \[R_n=L_{n-1}\oplus f(R_{n_1},K_n)\]
+ % con $f$ che è la \textbf{round function}
+  \item $c$ si ottiene applicando l'inversa della permutazione iniziale per
+  $R_{16}L_{16}$ 
+\end{itemize}
+\textbf{to be continued}
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve

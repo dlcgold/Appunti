@@ -2014,6 +2014,97 @@ Bisogna capire come calcolare la distanza tra cluster.
   tempo identico su tutti i cammini. È una forzatura della realtà in quanto
   normalmente l'orologio molecolare dovrebbe tenere traccia del tempo reale.
 \end{definizione}
+UPGMA costruisce una filogenesi con radice. Si hanno punti nello spazio e in
+modo iterativo si raggruppano i cluster.\\
+Si ha quindi:
+\begin{itemize}
+\item \textbf{input}: una matrice $D$ $n\times n$ con l'insieme delle specie
+  $S=\{s_1,\ldots s_n\}$, con all'interno le distanze tra due specie, ovvero
+  il numero di mutazioni necessarie per passare da una specie all'altra.
+  Nella matrice $D$ ho quindi le $n$ specie che identificano righe e colonne.
+  La matrice è ovviamente simmetrica. Per capire il numero di mutazioni si usa
+  l'allineamento globale usando apposite matrici di punteggio. Tramite queste
+  distanze si ricostruisce l'evoluzione.
+\item \textbf{output:} un albero filogenetico $T$ le cui foglie sono le specie
+  (che in questo caso sono rappresentate come sequenze) e l'albero è tale che
+  $\forall s_i,s_j\in S$ si ha che $D(s_i, s_j)=d_T(s_i,s_j)$, ovvero è uguale
+  alla distanza stimata nell'albero. Si dice che $T$ è consistente con la
+  matrice $D$
+\end{itemize}
+Vediamo quindi come fare un algoritmo per ottenere $T$ da $D$. È un algoritmo
+base di \textbf{neighbor joining}.\\
+Si ha un'iterazione di passi:
+\begin{enumerate}
+\item tra tutte le coppie di specie della matrice $D$ scelgo la coppia $x,y$
+  tale che $D(x,y)$ è la minima
+\item aggiungo $x$ e $y$ all'albero $T$ collegandole con un nodo padre che
+  rappresenta $\{x,y\}$
+\item si assegna agli archi che collegano le due specie al nodo $\{x,y\}$ dei
+  pesi pari a $\frac{D(x,y)}{2}$
+\item aggiorno $D$:
+  \begin{itemize}
+  \item sostituisco $x$ e $y$ con $\{x,y\}$
+  \item preso un nodo $z$ si ha che $D(z,\{x,y\})=D(z,x)-D(x,\{x,y\})$
+  \item chiamo questa nuova $D$ come $D'$, si noti che sarà di dimensioni minori
+  \end{itemize}
+\item ripeto dal passo 1
+\end{enumerate}
+\textbf{Non tutte le matrici ammettono un albero} (questo a causa della
+semplicità della formula dell'algoritmo) perché devono valere certe
+condizioni. La matrice deve essere \textbf{ultrametrica}. Per rendere una
+matrice una valida in caso posso modificare i costi, normalizzando la matrice
+delle distanze.\\
+Nei metodi basati su distanze la matrice in input deve avere distanze
+consistenti con la costruzione dell'albero. Qualora non lo fosse si devono
+normalizzare in qualche modo le distanze.\\
+Per UMGMA si avrebbe invece una formula più complessa che non viene
+approfondita.\\
+Latro score abbiamo ad esempio la \textbf{matrice Jukes-Cantor}, che assume
+eguale tasso
+di mutazione, che confronta singoli nucleotidi (usando pesi negativi per la
+diagonale principale dove non si hanno mutazioni). D'altro canto si ha che ogni
+altra mutazione è egualmente probabile.\\
+Si ha anche il \textbf{modello Kimura} usato per le proteine, che da un peso
+diverso a
+transizioni e trasversioni (dove una purina diventa una piramidina), avendo
+quindi score diversi a seconda della coppia di basi. Questo modello considera
+la chimica del DNA.
+\subsection{Metodi Basati su Caratteri}
+Il modello discreto basato su caratteri è importante per diversi aspetti.
+La storia evolutiva è basata anche su caratteri discreti e non solo su distanze.
+La presenza di caratteristiche è un aspetto generale e ha importanza nella
+ricostruzione della filogenesi tumorale, tramite la \textbf{infinite site
+  assumption}, per la quale si ritiene che una volta acquisita una mutazione
+resta per sempre, ottenendo la \textbf{filogenesi perfetta}. \\
+Le mutazioni puntuali però spesso improvvisamente spariscono
+non potendo più usare l'assunzione. Si procede quindi a costruire l'albero
+evolutivo tramite caratteristiche comuni delle varie specie. Quando compare
+un carattere discreto in un nodo non viene più perso e tutte le specie
+sottostanti hanno quella caratteristica. Ogni carattere appare una volta sola
+nell'albero. \\
+Bisogna tradurre l'albero in una matrice le colonne sono etichettate dalle
+caratteristiche e le righe dalle specie. Si ha che $a_{ij}=1$ se la specie $i$
+ha la caratteristica $j$, 0 altrimenti.\\
+Gusfield trovò un algoritmo lineare per costruire tale albero.\\
+Tra gli scopi dell'algoritmo si ha lo studio di genotipi e aplotipi, essendo
+tra l'altro l'uomo un organismo diploide. Gli organismi diploidi hanno due copie
+di ogni cromosoma con piccole differenze. Il problema fondamentale è che
+sequenziando non ho modo di capire se un mismatch sia dovuto al fatto che
+ho le due sequenze materne e paterne.
+\\
+L'uomo è anche biallelico, avendo che le opzioni per una certa posizione, sono
+due, che si indicano con 0 e 1. Si ha che 0 è l'allele dominante e 1 è detto
+allele di minoranza o allele recessivo. Se su due aplotipi ho valori diversi
+si parla di eterozigosi rispetto un certo allele.\\
+La radice di un albero dove 0 rappresenta l'assenza di allele non si ha alcuna
+mutazione.\\
+Si ha quindi il seguente problema:
+\begin{itemize}
+\item \textbf{input}: una matrice di aplotipi su $\{0,1,*\}$
+\item \textbf{output}: una matrice binaria di aplotipi che risolve i genotipi
+  in $M$ e ammette una filogenesi perfetta
+\end{itemize}
+\textbf{Ultima lezione da rivedere interamente}
 
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero
@@ -2744,7 +2835,7 @@ Se $e'<b'$ allora il $\sigma Q$-interval non esiste.\\
 Se ho un Q-intervallo $[b,e]$ che sulla BWT contiene \$ allora esso caratterizza
 una stringa $Q$ che è prefisso di $T$.
 \section{Caso Pan-Genomico}
-
+\
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap

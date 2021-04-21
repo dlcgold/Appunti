@@ -2104,7 +2104,173 @@ Si ha quindi il seguente problema:
 \item \textbf{output}: una matrice binaria di aplotipi che risolve i genotipi
   in $M$ e ammette una filogenesi perfetta
 \end{itemize}
-\textbf{Ultima lezione da rivedere interamente}
+\textbf{Ultima lezione da rivedere interamente}.\\
+Riassumendo il problema fondamentale è quello della ricostruzione
+dell'evoluzione tenuto conto che essa è legata a eventi, ovvero mutazioni, di
+tipo nucleotidico (che studiamo con l'allineamento globale) e di tipo genomico
+(che vedremo essere studiate tramite riarrangiamenti, con trasposizioni,
+inversioni, duplicazione genica etc$\ldots$), anche a livello di cromosomi.\\
+L'evoluzione è legata a questi eventi che comportano speciazione.\\
+Si hanno quindi metodi basati su distanze, caratteri e parsimonia.\\
+SI usa il DNA mitocondriale perché è quello che si ``porta dietro'' la storia
+delle specie, essendo quello meno modificato nel corso della storia. Si usa
+anche quello nucleare. Spesso si hanno problemi di \textbf{riconciliazione}
+dell'evoluzione, infatti prendendo geni diversi delle stesse specie ottengo
+alberi evolutivi diversi e quindi si vuole appunto ``riconciliare'' tali alberi,
+ottenendo l'\textbf{agreement} di essi. Anche metodi computazionali diversi
+producono alberi diversi e non si può sapere facilmente quale sia
+giusto. Ricostruire l'albero della vita è comunque un tempo di spazio e tempo
+computazionale. \\
+In generale gli alberi evolutivi sono utilizzati nell'analisi delle
+sequenze. Quando si fa allineamento, specialmente multiplo, si avvale anche
+dell'albero filogenetico per comparare le sequenze. Nella matrice di
+allineamento multiplo il costo di una colonna è legato al costo degli archi in
+un albero evolutivo, che quindi è usato per stimare l'allineamento. Un esempio
+pratico è l'analisi del SARS-CoV2 dove si fanno le analisi in termini di
+mutazioni, associando alle sequenze dei cluster che seguono un'evoluzione nel
+tempo. \\
+L'evoluzione non riguarda solo le specie ma anche l'inferenza di aplotipi da
+genotipi e anche l'evoluzione tumorale. Anche nel caso dei tumori ho alberi
+diversi a seconda del metodo ma in questo caso anche i nodi interni sono
+etichettati, a differenza dell'albero filogenetico per le specie.
+
+\subsection{Metodi Basati su Parsimonia}
+In questi metodi su ha che l'ipotesi più veritiera è quella che minimizza gli
+eventi, ovvero con il \textbf{rasoio di Occam}. Questo metodo si applica anche
+in altri contesti in quanto la natura è in se ``parsimoniosa''. Si assume in
+questo metodo che ciascuna specie è specificata dai caratteri o stati di
+attributi. Un albero di massima parsimonia ha come foglie gli tali stati di
+attributi delle specie e
+i nodi interni sono etichettati con i cambiamenti di stato, che, in tutto
+l'albero, sono minimizzati.
+Nel dettaglio un \textbf{carattere} è ad esempio un fenotipo, ovvero un certo
+attributo visibile, ma anche una certa informazione genomica (tramite ad esempio
+lo studio degli SNPs). Questi ultimi sono anche detti \textbf{caratteri
+  genomici}. Con il termine \textbf{WGS (\textit{whole genome scale})} si
+indicano caratteri e attributi che sono ottenuti da lavori a larga scala. WGS
+fornisce vari caratteri o 
+attributi, come indicazioni sui geni, combinazioni proteiche, SNP, studio di
+esoni e introni etc$\ldots$.\\
+La scelta dei caratteri influenza l'albero. I caratteri possono essere binari
+con 0 assenza e 1 presenza, usando quindi un vettore binario per gli stati.\\
+Si ha la \textbf{parsimonia di Dollo}, dove si ha un solo passaggio da 0 a 1 ma
+tanti passaggi da 1 a 0 per un certo carattere $c$. Quindi dati $c_i$ caratteri
+ho un albero che presenta l'etichetta $c_i$ una e una sola volta. Una volta
+comparso un carattere comunque può sparire. Le foglie sono quindi gli stati
+finali, ovvero le specie attuali, e i nodi interni degli stati che poi sono
+cambiati. Si hanno quindi:
+\begin{itemize}
+  \item \textbf{input:} le foglie
+  \item \textbf{output:} l'albero
+\end{itemize}
+Nel modello \textbf{Camin-Sokal} si ha invece che un carattere viene guadagnato
+ma non perso, ho quindi che $c$ può passare da 0 a 1 quante volte si
+vuole. Posso quindi avere più archi etichettati con un certo $c_i$. Questo
+modello non si può usare per le assunzioni fatte con gli alberi tumorali. Questo
+modello ammette che due specie possano acquisire in modo indipendentemente una
+caratteristica. 
+\subsubsection{Filogenesi Perfetta Binaria}
+Combinando, ovvero facendo l'intersezione, i modelli di Dollo e Camin-Sokal
+ottengo la \textbf{filogenesi 
+  perfetta binaria}, dove posso avere una sola volta il cambiamento da 0 a 1 e
+mai i cambiamenti da 1 a 0. Un carattere etichetta quindi un solo arco
+dell'albero e una volta guadagnato non è mai perso. Ho quindi un \textbf{gain} e
+\textbf{no loss}. Tale modello è risolvibile in tempo lineare mentre i due
+problemi di partenza sono \textbf{NP-complete}.\\
+Per la filogenesi binaria perfetta si ha:
+\begin{itemize}
+  \item \textbf{input:} una matrice binaria $n\times m$, con $n$ specie, sulle
+  righe $s_i$, e $m$, sulle colonne $c_i$
+  caratteri
+  \item si crea un albero dove ogni nodo $x$ è etichettato da un
+  vettore lungo $m$, detto $l_x$, dove $l_x[j]$ è lo stato del carattere
+  $c_j$. La radice è etichettata con un vettore di $m$ zeri. Se sono in
+  $(0,0,0)$, ipotizzando tre caratteri, e passo con un arco etichettato con
+  $c_i$ ad un altro nodo esso sarà etichettato con $(1,0,0)$.
+  Per ogni carattere $c_j$ esiste esattamente un arco $e$ etichettato
+  $c_j$ con $c_j$ che rappresenta il cambiamento $0\to 1$. Ciascuna riga della
+  matrice etichetta esattamente una foglia dell'albero
+  \item \textbf{output:} l'albero, se esiste
+\end{itemize}
+Se faccio, nell'albero di filogenesi perfetta, in un cammino da radice a foglia
+incontro solo i cambiamenti di stato che portano ad ottenere la foglia.\\
+La matrice in input potrebbe non permettere la costruzione dell'albero, per le
+condizioni imposte. Ad esempio:
+\[\left[
+    \begin{matrix}
+      1 & 0\\
+      0 & 1\\
+      1 & 1
+    \end{matrix}
+  \right]
+\]
+è una \textbf{matrice proibita}.\\
+La filogenesi perfetta è una \textbf{dollo 0}, ovvero non posso perdere
+caratteri. \\
+Posso avere una \textbf{dollo k} dove il carattere può essere perso
+$k$ volte.\\
+Il calcolo della \textbf{dollo 0} è lineare per l'algortimo di Gusfield e ogni
+foglia sottostante un nodo dove si è acquisito un carattere contiene quel
+carattere. \\ 
+La \textbf{dollo 1} si pensa sia comunque polinomiale e si usa nella filogenesi
+tumorale.\\
+La \textbf{dollo k}, per $k\geq 2$ è NP-complete con però algoritmi
+parametrici.\\
+La matrice proibita la posso rappresentare assumendo la loss del carattere.\\
+Capiamo quando una matrice binaria ammette filogenesi perfetta.
+\begin{teorema}
+  Una matrice binaria ammette filogenesi perfetta se non contiene la matrice
+  proibita.
+\end{teorema}
+Ma possiamo dirlo diversamente.
+\begin{definizione}
+  Definiamo:
+  \[O_j=\{i|\,M_{ij}=1\}\]
+  come l'insieme di tutte le specie $i$ con il carattere $j$.
+\end{definizione}
+\begin{definizione}
+  Una collezione di insiemi $O_1,\ldots O_n$ è detta \textbf{laminare} se per
+  $\forall i,j$, con $1\leq i$ e $j\leq n$, o $O_i$ e $O_j$ sono disgiunti o
+  un insieme include l'altro.
+\end{definizione}
+\begin{teorema}
+  Una matrice binaria è una filogenesi perfetta sse la collezione delle colonne
+  di $M$ è laminare.
+\end{teorema}
+Quindi studio le colonne delle matrici. Per ogni coppia di colonne o gli
+insiemi, rappresentati dai vettori colonna, sono disgiunti o uno contiene
+l'altro. \\
+La laminarità corrisponde alla non esistenza della matrice proibita. Infatti,
+prendendo la matrice, $(0,1,1)$ e $(1,0,1)$ sono disgiunti ma nessuno dei due
+contiene l'altro.
+\begin{teorema}
+  La laminarità è una condizione necessaria e sufficiente per la costruzione
+  dell'albero. 
+\end{teorema}
+Potrei quindi confrontare ogni colonna della matrice, in $O(n\cdot m^2)$ ma si
+può fare di meglio, avendo che la lettura di una matrice è in $O(n\cdot m)$.\\ 
+Per vedere se una matrice è laminare, per Gusfield:
+\begin{itemize}
+  \item si riordinano le colonne per numero di 1 non crescenti (la prima colonna
+  è quella con più 1 e l'ultima quella con meno). Questo porta vantaggi anche
+  per l'albero in quanto il primo carattere, quello della prima colonna nella
+  matrice riordinata, è quello che probabilmente è in cima all'albero. Chiamo
+  $M$ tale matrice
+  \item si costruisce una matrice ausiliaria quando si legge $M$. In questa
+  nuova matrice $L$, quando si legge $M$, si memorizza per ogni posizione di
+  $M$ che è a 1 dove si trova a sinistra di quella posizione il primo 1 (che tra
+  i vari 1 a sinistra è quindi quello più destra). Qualora tale 1 non esistesse
+  (sto leggendo il primo 1 di una riga) si mette -1 in $L$. Se si legge 0 in $M$
+  metto 0 in $L$. \\
+  Qualora si faccia la matrice ausiliaria di una matrice proibita si ha che
+  nelle colonne si ottengono colonne con valori non nulli diversi (ho quindi -1
+  e 1)
+  \item eseguo il vero e proprio test, ovvero, per ogni colonna della matrice
+  ausiliaria, verifico di avere solo valori uguali non nulli in quanto
+  significherebbe 
+\end{itemize}
+
+
 
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero

@@ -4424,32 +4424,202 @@ chiavi derivate è:
 \begin{itemize}
   \item si riceve il pacchetto di 64 bit di $m$
   \item applico la permutazione iniziale, accedendo ai singoli bit della chiave
-  e ai singoli bit di $m$
+  e ai singoli bit di $m$. La permutazione è una matrice $8\times 8$
   \item le prime 4 righe le chiamo $c_0$ e sono 28 bit e le altre quattro $D_0$
   \item calcolo da $C_{n-1}$ e $D_{n-1}$, per $1\leq n\leq 16$, i $C_n$ e i
   $D_n$, applicando due rotazioni a sinistra verso $C_{n-1}$ e $D_{n-1}$
   (\textbf{esempio su slide})
   \item si fa una \textbf{selezione permutata} per $C_n$ e $D_n$ per $1\leq
-  n\leq 16$, chiamando $K_n$ il risultato. Ogni $K_i$ ha 48 bit
+  n\leq 16$, chiamando $K_n$ il risultato. Si hanno quindi 16 chiavi
+  derivate. Ogni $K_i$ ha 48 bit
 \end{itemize}
-Per la cifratura:
+Per la cifratura (che si ricorda avere chiave di 56 bit):
 \begin{itemize}
   \item si divide $m$ in blocchi di 64 bit che viene cifrato separatamente. Ogni
   blocco cifrato lo chiamo $w$
-  \item a partire da $w$ si applica una permutazione iniziale, chiamando $l_0$ e
+  \item a partire da $w$ si applica una permutazione iniziale, ovvero una
+  matrice $8\times 8$, chiamando $l_0$ e
   $R_0$ le prime e le seconde 4 righe (ciascuno è di 32 bit), avendo che
-  $w=L_0R_0$ 
+  $w=L_0R_0$. Si usano i nomi $L$ e $R$ perché sono a sinistra e destra della
+  struttura di Faistel
   \item calcolo da $L_{n-1}$ e $R_{n-1}$, per $1\leq n\leq 16$, i $L_n$ e i
   $R_n$ tramite:
   \[L_n=R_{n-1}\]
   \[R_n=L_{n-1}\oplus f(R_{n_1},K_n)\]
- % con $f$ che è la \textbf{round function}
-  \item $c$ si ottiene applicando l'inversa della permutazione iniziale per
-  $R_{16}L_{16}$ 
+  Questi due conti sono detti \textbf{round function} si usa, nel secondo, una
+  chiave derivata. La funzione $f$ prende in input un input di 32 bit e uno, la
+  chiave, di 48 bit e restituisce un risultato a 32 bit
+  \item $c$ si ottiene applicando l'inversa della permutazione iniziale al
+  blocco $R_{16}L_{16}$ 
 \end{itemize}
-\textbf{to be continued}
+Quindi la cifratura è un'iterazione in cui si applicano le permutazioni usando i
+vari principi di confusione etc$\ldots$ di Shannon.\\
+Si ha quindi una \textbf{cifratura a blocchi}.\\
+La cifratura era computazionalmente pensata per essere fatta su hardware
+specifico. \\
+Si noti che la permutazione iniziale della fase di cifratura non aggiunge alcuna
+sicurezza al crittosistema, in quanto la tabella della permutazione iniziale
+è fissa (\textbf{tabella presente nelle slide}). In AES vedremo che si userà la
+chiave anche per la prima e l'ultima permutazione.\\
+Per decifrare:
+\begin{itemize}
+  \item preso $c$, di 64 bit, si applica la permutazione iniziale ottenendo
+  $L_{16}R_{16}$
+  \item si ricostruiscono $L_0$ e $R_0$, iterativamente tramite:
+  \[R_{n-1}=L_n\]
+  \[L_{n-1}=R_n\oplus f(L_n,k_n)\]
+  per risalire la struttura di Faistel. Queste due equazioni sono l'inversa
+  della round function. Le $K_n$ ovviamente le applico a partire
+  dalla 16 fino alla 0.\\
+  Chiamo $w'=L_0R_0$
+  \item applicando $w'$ all'inversa della permutazione iniziale si ottiene $w$
+\end{itemize}
+Vediamo ora meglio al funzione $f$. Si ha:
+\begin{itemize}
+  \item \textbf{input:} un blocco $L_n$ di 32 bit e una chiave/blocco di 48 bit
+  $K_n$ 
+  \item \textbf{output:} un blocco di 32 bit
+\end{itemize}
+Si procede così:
+\begin{itemize}
+  \item si prende $L_n$ e lo si espande a 48 bit usando come permutazione una
+  matrice $8\times 6$ con numeri ripetuti
+  \item questo blocco è un xor bit a bit con $K_n$. Chiavo $B$ il risultato, di
+  48 bit
+  \item divido $B$ in 8 blocchi di 6 bit. Ogni blocco viene risotto a 4 bit,
+  $B'$  usando una tabella s-box $s_i$. Per $B_1$ produco $B_1'$ con $s_1$
+  etc$\ldots$. Tali $s_i$ sono fisse. Per fare ciò si prendono il primo e
+  l'ultimo bit di $B$, che quindi insieme sono un $x\in\{0,1,2,3\}$. I 4 bit
+  centrali sono un numero $y\in\{0,\ldots,15\}$. Si ha che $x$ e $y$ sono riga e
+  colonna che useremo in $s_i$. Quindi $B_i'$ è il numero espresso in binario
+  del valore contenuto in $s_i$ alla riga $x$ e la colonna $y$.\\
+  \textbf{Esempio su slide}.\\
+  A tale $b'$ si applica un'ulteriore permutazione prima di restituire il
+  risultato 
+\end{itemize}
+Quest'ultima parte è la parte \textit{non lineare}, in quanto si usano matrici
+di sostituzione (le s-box), dove le sostituzioni non sono lineari. Le s-box sono
+fisse e sono la parte cruciale. Inizialmente IBM aveva proposto alcune tabelle
+ma l'NSA, a cui IBM ha chiesto consulenza, ha fatto sostituire tali tabelle,
+senza che l'NSA disse il perché. Si temeva che ci fosse dell'interesse un questa
+modifica, viste le modalità della stessa, ma in realtà si è scoperto che NSA non
+aveva secondi fini. Quelle nuove tabelle non erano \textit{backdoor} ed erano
+più sicure nei confronti di nuovi attacchi, la crittoanalisi lineare e la
+crittoanalisi differenziale, rispetto alle tabelle iniziali (probabilmente l'NSA
+già lo sapeva, 20 anni prima). Ovviamente sono tutte supposizioni.\\
+Vediamo quindi le proprietà del DES. \\
+Tra i pro:
+\begin{itemize}
+  \item è veloce usando hardware dedicato per prendere i singoli bit. Le
+  operazioni sono veloci e le matrici sono fissate (cosa che permette un accesso
+  ancora più veloce). Si usano addirittura delle \textbf{lookup table}, fissate,
+  con tutti i valori pre-calcolabili
+  \item la crittoanalisi di crittosistemi deve lavorare su sistemi non lineari
+  complessi, risoluzione dei quali tendenzialmente è un problema NP-complete. Si
+  è provato a che a semplificare tutte le equazioni ma non si sono raggiunti
+  risultati  
+  \item grazie a NSA il DES resiste a crittoanalisi lineare e differenziale
+\end{itemize}
+Tra i contro, motivi per i quali non è più sicuro:
+\begin{itemize}
+  \item la chiave è lunga solo 56 bit
+  \item si può costruire hardware specifico che lavori sul keyspace di $2^{56}$
+  bit. Tali macchine sono dette \textit{DES Cracking Machine}. Tale
+  macchina parallela, con 1800 processori, trovava nel 1998 la chiave in circa
+  due giorni. Ai giorni nostri si ha addirittura hardware programmabile a
+  livello consumer 
+  \item l'hardware dedicato a rompere DES, secondo diverse stime, non era così
+  costoso, a fine anni '70 
+  era sui 20 milioni di dollari, a fine anni '90 comunque 250000
+  dollari (a causa della legge di Moore). Rompere il crittosistema non costava
+  più dei guadagni in caso di rottura in diversi casi  
+\end{itemize}
+A fine anni '90 si è capito che DES non andasse più bene. A metà anni '90 parte
+una competizione per cambiare sistema ma questa richiede anni. Nel frattempo si
+è usato \textbf{triple-DES (\textit{3DES})} come alternativa a DES. In 3DES si
+usano due chiavi $k_1$ e $k_2$ da 56 bit ciascuna e si procede così:
+\begin{itemize}
+  \item si cifra $w$ con $k_1$, ottenendo $c_1$
+  \item si decifra $c_1$ con $k_2$ ottenendo $c_1$
+  \item si cifra $c_2$ con $k_1$, ottenendo $c$
+\end{itemize}
+Usando quindi la \textbf{cifratura EDE
+  (\textit{encryption-decryption-encryption})}. \\
+Questo sistema è compatibile con l'hardware certificato per DES. Quindi
+certificare 3DES non era complicato, dovendo chiamare DES 3 volte con due
+chiavi.\\ 
+Per 3DES c'era anche la versione con 3 chiavi.
+\subsection{AES}
+Nella competizione i sistemi non open non furono accettati, questo perché gli
+esperti devono studiarne la sicurezza.\\
+La competizione fu vinta da Rijndael (letto come se fosse ``rain doll''), un
+sistema creato da 
+due Belgi, Daeman e Rijmen (da qui il nome del sistema). Rijndael è quindi il
+nuovo standard, detto \textbf{AES}, a partire dal 2002.\\
+Il sistema cifra blocchi da 128 bit e si hanno chiavi tipicamente di 128, 192 e
+256 bit (AES-128, AES-192, AES-256). Si potrebbero usare altre chiavi.\\
+A differenza di DES lavora su byte e non sui bit essendo quindi più efficiente e
+in grado di lavorare su più tipologie di hardware, di vario
+prezzo. L'implementazione software è molto semplice. Nello standard sono
+descritti i tradeoff tra dimensione della memoria e efficienza dell'algoritmo,
+usando anche qui delle lookup table.\\
+\textbf{Studiamo solo AES-128} ma le altre versioni sono quasi identiche, al più
+della generazione delle chiavi derivate e il numero di iterazioni durante la
+cifratura.\\ 
+L'algoritmo non accede ai singoli bit e organizza i 16 byte in una matrice
+$4\times 4$ da leggere per colonne.\\
+All'inizio la matrice contiene i 16 byte di $w$ (prima colonna da $w_0$ a $w_3$,
+seconda da $w_4$ a $w_7$ etc$\ldots$) e alla fine quelli di $c$. Tale matrice è
+detta \textbf{matrice di stato}.\\
+Le chiavi derivate vengono chiamate \textbf{round key}.
+In generale, per la cifratura:
+\begin{itemize}
+  \item si prende $w$ e li si mette nella matrice di stato
+  \item si fa uno xor tra la matrice di stato e la round key
+  \item si fanno 9 round in cui:
+  \begin{itemize}
+    \item si fa la sostituzione dei byte della matrice di stato con una s-box,
+    operazione detta \textit{SubBytes}. È l'unica parte non lineare ed è
+    veramente ``ridotta all'osso''. È una trasformazione invertibile e si opera
+    su ogni byte della matrice e si sostituisce ogni byte con sempre la stessa
+    s-box, fissata nello standard. Tale s-box è una matrice $16\times 16$ che
+    permette sostituzioni di bytes. Tale s-box è facilmente calcolabile, infatti
+    preso il byte b la sostituzione è in realtà un semplice conto. Se $b\neq 0$
+    metto $b=b^{-1}$. Quindi il risultato è $A\cdot b+c$, con $A$ matrice
+    fissata di bit. Ma questa è una operazione lineare. La parte non lineare è
+    in $b=b^{-1}$. Posso rappresentare il byte $b=b_7\ldots b_0$ come vettore di
+    bit, come per 
+    $A\cdot b+c$, ma anche come $GF(2^8)$, ovvero un \textbf{campo di Galois},
+    quindi come un polinomio in $x$, dove i $b_i$ sono i coefficienti ($b_0$ è
+    il termine noto). Fare l'inverso è trovare il polinomio che moltiplicato per
+    quello che rappresenta $b$ da come risultato 00000001. Tutto questo avviene
+    ``modulo'' un polinomio fissato irriducibile. Si divide il polinomio in
+    analisi per quello fissato e si ottiene un quoziente e un resto. Tale
+    resto è un polinomio di grado inferiore a quello di quello fissato. Si usa
+    quindi un polinomio fissato di grado 8. \\
+    (\textbf{Ultima parte molto ???})
+    \item si ruotano le righe, operazione detta \textit{ShiftRows}. In questa
+    operazione si ruotano verso a sinistra le righe della matrice. Si ruota di
+    $i$ posizioni, per la i-esima riga (quindi la prima resta uguale, avendo
+    $i=0$) 
+    \item si fanno operazioni sulle colonne, operazioni dette
+    \textit{MixColumns}. In questa operazione si mettono i byte della colonna e
+    si moltiplicano per una matrice $4\times 4$ fissata. Il risultato è la nuova
+    colonna. Tale conto è facile con hardware a 32 bit e in caso di hardware
+    inferiore bisogna iterare più volte il conto 
+    \item si applica la \textit{addRoundKey}, ovvero lo xor bitwise con la
+    chiave derivata, come per DES. Su una macchina a 32 bit lo xor viene facile
+    in 4 mosse, facendo lo xor di 4 byte per volta. Se si hanno meno bit devo
+    farlo in più mosse.   
+  \end{itemize}
+  \item si fa un ultimo round senza \textit{MixColumns}
+  \item lo stato ora raggiunto è $c$
+\end{itemize}
+\textit{In generale, nei vari passaggi, quando si parla di moltiplicazioni si ha
+  che esse sono fatte sui bytes. Quando si parla di somme si parla di xor}.\\
+
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
-% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple
-% LocalWords:  crittosistemi
+% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
+% LocalWords:  crittosistemi Faistel function

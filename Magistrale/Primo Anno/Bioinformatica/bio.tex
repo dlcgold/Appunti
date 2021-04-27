@@ -2257,7 +2257,9 @@ prendendo la matrice, $(0,1,1)$ e $(1,0,1)$ sono disgiunti ma nessuno dei due
 contiene l'altro.
 \begin{teorema}
   La laminarità è una condizione necessaria e sufficiente per la costruzione
-  dell'albero. 
+  dell'albero. \\
+  L'albero di filogenesi perfetta sse la matrice in input non contiene la
+  matrice proibita. 
 \end{teorema}
 Potrei quindi confrontare ogni colonna della matrice, in $O(n\cdot m^2)$ ma si
 può fare di meglio, avendo che la lettura di una matrice è in $O(n\cdot m)$.\\ 
@@ -2281,7 +2283,106 @@ Per vedere se una matrice è laminare, per Gusfield:
   ausiliaria, verifico di avere solo valori uguali non nulli in quanto
   significherebbe 
 \end{itemize}
+L'algoritmo per la costruzione dell'albero ha quindi tempo $O(n\cdot m)$ (che è
+anche il tempo per costruire la matrice d'appoggio per il test di laminarità). 
+Si ha quindi un algoritmo molto performante e decidere se esso esiste.\\
+L'algoritmo lavora su ogni riga della matrice ripartendo ogni volta dal
+source e aggiungendo gli archi ogni volta che ho un 1 nella matrice,
+etichettandoli con il carattere necessario.
+\newpage
+Si ha quindi l'algoritmo:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{CreatePerfectPhylogeny}{$M'$}
+    \State \textit{create root of tree $T$}
+    \For {$i=1$ \textbf{to} $n$}
+    \State $curr\gets root$
+    \For {$j=1$ \textbf{to} $m$}
+    \If {$M_{ij}==1$}
+    \If {\textit{already exist edge $(curr, u)$ labeled $C_j$}}
+    \State $curr\gets u$
+    \Else
+    \State \textit{create u}
+    \State \textit{create edge $(curr, u)$ labeled $C_j$}
+    \State $curr\gets u$
+    \EndIf
+    \EndIf
+    \EndFor
+    \State \textit{label curr as $S_i$}
+    \EndFor
+    \For {\textit{each node $u$ except $root$}}
+    \State \textit{Create as many links to $u$ species labeling $u$}
+    \EndFor
+    \State \textbf{return} $T$
+    \EndFunction
+  \end{algorithmic}
+  \caption{algoritmo di creazione albero di filogenesi a partire da matrice
+  laminare già ordinata}
+\end{algorithm}
 
+Le applicazioni dell'algoritmo sono l'inferenza di aplotipi da genotipi e
+l'applicazione agli alberi tumorali.
+\subsection{I Tumori}
+Un \textbf{clone} è una famiglia di cellule con un antenato comune con una certa
+mutazione. 
+In generale un \textbf{tumore} si crea a causa di un accumulo di mutazioni ed è
+un agglomerato di \textbf{cloni cancerogeni}, è quindi un misto di cellule
+cancerogene e sane.\\
+Diversi cloni formano diverse parti del tumore. \\
+All'inizio si ha una sola cellula mutata da cui scaturisce tutta l'evoluzione
+tumorale, dove si accumulano altre mutazioni. Si formano quindi vari cloni con
+anche le nuove mutazioni, seguendo le regole della filogenesi perfetta, coi
+nuovi cloni come foglie dell'albero.\\
+Tramite chemioterapia si uccidono tali cloni ma tipicamente qualche clone
+sopravvive, che a sua volta fa partire una nuova evoluzione tumorale.\\
+Le mutazione che si accuulano sono dette \textit{somatic} e sono diverse da
+quelle \textit{germline}, che sono quelle ereditate di genitori. Le mutazioni
+somatic sono acquisite dal singolo individuo nel corso della sua
+esistenza. Anche il corpo stesso cerca comunque di ``aggiustarsi'' limitando la
+diffusione di tali cellule.\\
+Si hanno quindi varie sezioni del tumore caratterizzate da diverse mutazioni. Un
+misto di cloni viene chiamato \textbf{sample}. Un sample viene rappresentato
+come un insieme contenente cerchi con all'interno le varie mutazioni. Un cerchio
+senza pallini interni indica l'assenza di mutazioni.\\
+Quando si sequenzia un genoma tumorale non so quale frammento sto guardando ma
+posso contare la frequenza delle basi per un certo pezzo per capire la frequenza
+di una mutazione. Per farlo confronto il pezzo di genoma con la reference di un
+pezzo sano. Questa frequenza è detta \textbf{VAF (variant allele frequency)}.\\
+Si costruisce quindi la VAF matrix che useremo poi per la filogenesi
+perfetta. La matrice ci dice la frequenza delle mutazioni avendo come caratteri
+le varie mutazioni. Le righe sono invece i \textbf{sample}, che in se sono
+collezioni di read prese da un campione tumorale. La matrice contiene quindi la
+frequenza di una mutazione in un certo sample, avendo quindi valori tra 0 e
+1. Da questo dobbiamo arrivare a costruire l'albero, ricostruendo l'ordine con
+cui sono avvenute le mutazioni. Quando si misura la frequenza devo anche
+considerare il fatto che l'organismo è diploide, dovendo contare tutto
+doppio. Per ora trascuriamo la cosa.\\
+Una volta ottenuta la matrice VAF devo capire come sono formato i vari cloni nei
+vari sample, stabilendo anche un ordine evolutivo delle mutazioni.\\
+Dalla matrice VAF si costruisce una matrice di filogenesi perfetta e da qui
+l'albero, che avrà come foglie i vari cloni ma non solo. Anche i nodi interni
+sono etichettati come cloni, eventualmente come una foglia se essa è ottenuta da
+quel nodo interno con un arco non etichettato. I cloni, quando sono generati,
+rimangono tutti.\\ 
+Con i tumori ci interessa infatti sapere tutta l'evoluzione tumorale.\\
+Per ogni riga della matrice ho quindi una foglia con quelle mutazioni, posso
+comunque chiamarle specie.\\
+Si crea anche una \textbf{matrice di utilizzo} che ci dice quanti cloni usano
+una determinata mutazione, che si usa per costruire il disegno di sample e
+cloni. Si costruisce con i sample sulla riga e le specie (che sarebbero le righe
+della matrice di filogenesi) sulle colonne e ci dice
+la frequenza assoluta di un clone in un certo sample. SI ha quindi l'ultizzo dei
+cloni nei vari sample. \\
+Si ha che:
+\[VAF=\frac{1}{2}UB\]
+con $B$ matrice di filogenesi e $U$ matrice di utilizzo. La divisione per 2 è
+dovuta sempre al discorso dell'essere diploide.\\
+La numerosità del clone è legata alla frequenza della matrice VAF, avendo che
+già ci ice una storia evolutiva e circa ci dice la forma dell'albero. \\
+Si può quindi costruire l'albero direttamente dalla matrice VAF, dovendo
+inferire $B$ e $U$ per ottenere la matrice VAF. Si usano metodi di
+programmazione lineare o tramite euristiche, cercando di indovinare matrici $B$
+e $U$ valide.
 
 
 \chapter{I dati in Bioinformatica}

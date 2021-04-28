@@ -2375,19 +2375,173 @@ la frequenza assoluta di un clone in un certo sample. Si ha quindi l'utilizzo
 dei cloni nei vari sample. \\
 Si ha che:
 \[VAF=\frac{1}{2}UB\]
-con $B$ matrice di filogenesi e $U$ matrice di utilizzo. La divisione per 2 è
-dovuta sempre al discorso dell'essere diploide.\\
+con $B$ matrice di filogenesi e $U$ (\textit{Usage}) matrice di utilizzo. La
+divisione per 2 è dovuta sempre al discorso dell'essere diploide.\\
 La numerosità del clone è legata alla frequenza della matrice VAF, avendo che
 già ci ice una storia evolutiva e circa ci dice la forma dell'albero. \\
 Si può quindi costruire l'albero direttamente dalla matrice VAF, dovendo
 inferire $B$ e $U$ per ottenere la matrice VAF. Si usano metodi di
 programmazione lineare o tramite euristiche, cercando di indovinare matrici $B$
-e $U$ valide.\\
+e $U$ valide per ottenere la matrice di frequenze VAF.\\
 Non sempre comunque il modello della filogenesi perfetta riflette l'evoluzione
 tumorale, potrei non avere un modello Dollo, avendo mutazioni che spariscono
 (quindi con una Dollo 1) o una mutazione che etichetta più di un arco.\\
-La filogenesi perfetta è comunque un'ottimo modello di base.
-
+La filogenesi perfetta è comunque un'ottimo modello di base per ottenere,
+appunto \textbf{l'albero dei cloni}.
+\subsection{Assemblaggio di Aplotipi}
+L'\textbf{assemblaggio di aplotipi} è un problema prettamente computazionale.\\
+L'uomo è diploide quindi abbiamo due insiemi di cromosomi, uno dal padre e uno
+dalla madre. Si hanno 23 coppie di cromosomi e quindi ogni coppia è costruita da
+due aplotipi, ovvero da due sequenze che costituiscono l'aplotipo. Un aplotipo è
+quindi una sequenza nucleotidica e ogni posizione è detta locus. Il valore di un
+locus è un allele specifico. L'uomo è biallelico potendo avere due alleli per
+locus, se studio contemporaneamente i due aplotipi, dicendo che si sta studiando
+il genotipo, che è appunto la coppia di alleli di un locus.\\
+Le posizioni in cui si hanno due alleli identici sono omozigote, altrimenti son
+o eterozigote. Anche in questo caso si ricollega il discorso fatto tempo fa
+sugli SNPs, che sono appunto le differenze di aplotipi.\\
+Su 150 basi di una lettura di Illumina posso avere anche solo uno o due SNPs.\\
+A livello informatico per l'aplotipo, come coppia di cromosomi, usiamo un
+vettore binario, con 0 per l'allele di maggioranza e 1 per quello di
+minoranza. \\
+I siti/locus umani sono biallelici, potendo avere due alleli possibili. Le
+piante sono addirittura poliploidi. Avendo i due aplotipi ho che il genotipo è
+quindi un vettore di coppie di valori binari.\\
+Per ogni cromosoma abbiamo due copie.
+\begin{teorema}[Legge Di Mendel]
+  Per ogni cromosoma su hanno due coppie, una ereditata dalla madre e una dal
+  padre. 
+\end{teorema}
+A questo si aggiungono le \textbf{ricombinazioni nell'ereditarietà} (per la
+quale magari un genitore portatore sano non fa ereditare la malattia al figlio).
+In questo caso un figlio prende un pezzo del primo cromosoma e un pezzo del
+secondo per un certo genitore. Quindi non eredita uno dei due cromosomi di un
+certo genitore ma un mix di entrambi i cromosomi di quel genitore, ereditando
+quindi anche dai nonni.
+Con questo discorso si va oltre la mera legge di Mendel avendo un mescolamento
+degli aplotipi. \\
+Avere la coppia di array binari rappresentanti gli aplotipi permette di vedere
+omozigosi e eterozigosi, qualora si abbiano o meno 1/0 da entrambe le parti. Due
+0/1 li rappresento spesso con un solo 0/1, dicendo che è homo0 o homo1, mentre
+la differenza con *.  \\
+Tendenzialmente gli SNPs sono posizioni eterozigote, in quanto è dove si ha un
+allele di minoranza su uno degli aplotipi.\\
+Gli SNPs e gli aplotipi sono la vera informazione interessante e quindi bisogna
+ricostruire gli aplotipi in quanto una costruzione sperimentale non è fattibile
+e quindi bisogna procedere in modo computazionale, anche in modo statistico o
+combinatorio. Bisogna inferire gli aplotipi, cercando di indovinarli in quanto
+nessuno può dire che sia corretto se non tramite studio sperimentale costoso. \\
+Si fa sequenziamento anche per questo motivo. Si generano le read di lettura dei
+cromosomi, si prende il reference e si allineano le read al reference studiano
+le differenze. Le read sono quindi bipartite, tramite SNPs comuni, per
+ricostruire gli aplotipi. Si fa quindi un'operazione di cluster. In tutto questo
+però abbiamo comunque gli errori di 
+sequenziamento, anche se su short read con Illumina essi sono davvero
+pochi. Quando si sequenzia, si ricorda, non si sa se si sta analizzando la parte
+ereditata dal padre o dalla madre del cromosoma.\\ 
+Se non avessi errori di sequenziamento avrei un algoritmo polinomiale ma con gli
+errori si passa ad un problema di ottimizzazione. Tramite i siti eterozigoti con
+l'allineamento con il reference si vedono le differenze. In alcune read corte
+posso avere due SNPs per ogni read.\\
+Dall'allineamento si ottiene una matrice binaria detta \textbf{fragment matrix},
+con le read come righe e le posizioni SNPs come colonne. Il contenuto è 0/1 a
+seconda di avere un sito eterozigota o meno. Tramite la matrice posso fare il
+bi-partizionamento in tempo polinomiale, trovando conflitti, ovvero valori
+diversi a parità di posizione. La presenza di errori di
+sequenziamento porta però a incoerenze. La matrice binaria è creata dopo aver
+già fatto pulizia di errori di sequenziamento ma potrebbe non bastare. A questo
+punto posso pensare di eliminare le righe della matrice binaria che creano
+problemi ma non sempre è così semplice, dovendo capire cosa va bene e cosa
+no. Si ha quindi un problema NP-Complete, che è stato però parametrizzato. Si
+parla quindi di \textbf{Minimum Fragment Removal (\textit{MFR})}.\\
+Un'altra soluzione è rimuovere le colonne con gli SNPs problematici, parlando
+quindi di \textbf{Minimum SNP Removal (\textit{MSR})}. Anche questo è un
+problema NP-Completo.\\
+Si procede in realtà con la \textbf{Minumum Error Correction (\textit{MEC})},
+correggendo le entry errate, che si individuano errate studiando le
+colonne. Ogni coppia di colonna o le due colonne sono uguale o le colonne sono
+complementari, altrimenti ho ambiguità che impediscono la bipartizione. Da
+questo discorso si eliminano eventuali gaps, di cui non ho interesse. Quindi le
+colonne devono essere uguali o complementari al più dei gap in una delle due
+colonne. Si dice che le colonne devono essere \textbf{a coppie concordanti}.\\  
+Con MEC si prende in input la fragment matrix e si cerca il numero minimo di
+correzioni per permettere la disambiguazione. Si ha anche \textbf{wMEC}, che
+assegna 
+un peso ad ogni elemento in modo da minimizzare il peso totale di correzione me
+migliorare l'accuratezza. Anche MEC è NP-Complete ma si ha che si possono
+applicare euristiche per il discorso di studio di colonne concordanti (cosa
+verificabile in tempo quadratico). MEC ha anche un buon algoritmo parametrico,
+con $k$ pari al numero di righe, che è tendenzialmente piccolo visto che si
+hanno anche 5 read, per coverage pari a 5.\\
+Si hanno altre varianti di MEC, al variare dei tipi di gap (senza, con, con
+holes etc$\ldots$).\\
+Si ha anche la versione $K-cMEC$ dove si hanno al più $k$ correzioni per
+colonna. Questa versione si presta molto alla programmazione dinamica. 
+Dopo aver partizionato le read bisogna anche assemblare (quindi pensare di
+correggere con gap in MEC è comunque qualcosa che andrebbe evitato, meglio
+correggerla per migliorare l'assemblaggio).
+\subsection{Inferenza di Aplotipi tramite Filogenesi Perfetta}
+Si estrae per le posizioni di interesse il genotipo, ricostruito
+dall'allineamento. A partire dal genotipo faccio inferenza per capire
+gli aplotipi. In questo contesto entra in gioco nuovamente la filogenesi
+perfetta.\\
+Come detto ``risolvere il genotipo'' è un problema prettamente computazionale.\\
+In input si prende un elenco di genotipi. Si ha quindi una matrice con i
+genotipi come righe e le posizioni degli SNPs come colonne. Si hanno tre valori
+nella matrice:
+\begin{itemize}
+  \item 0 per (0,0)
+  \item 1 per (1,1)
+  \item * per (0,1) e (1,0)
+\end{itemize}
+Presa questa matrice si vuole costruire una matrice binaria di aplotipi che
+risolve i genotipi, ovvero si cerca le coppie di aplotipi che permettono il
+genotipo, e che ammette un albero di filogenesi. Le coppie (1,0) e (0,1) sono
+diverse ma entrambe rappresentate con * quindi possono vere più combinazioni di
+aplotipi che risolvono il genotipo.
+\begin{definizione}
+  Formalmente un genotipo $g$ è risolto dalla coppia di aplotipi $\langle
+  h_1,h_2\rangle$ sse:
+  \[\forall i, (g[i]=h_1[i]=h_2[i])\lor (h_1[i]\neq h_2[i]\land g[i]=*)\]
+  le due parti dell'or distinguono quindi omozigoti ed eterozigoti.
+\end{definizione}
+Potrei avere comunque una matrice in input che causa * comporta l'impossibilità
+di avere filogenesi, avendo la matrice proibita che rende la matrice incoerente
+con l'evoluzione:
+\[\left[
+  \begin{matrix}
+    * & 1\\
+    1 & *\\
+    1 & 1
+  \end{matrix}\right]
+\]
+Vediamo un caso buono, con 3 genotipi:
+\[\left[
+  \begin{matrix}
+    * & *\\
+    1 & 0\\
+    1 & 1
+  \end{matrix}\right]
+\]
+Che posso risolvere con $h_1=0\,\,\,0$ e $h_2=1\,\,\,1$, come \textbf{unica
+soluzione}. Si ottiene quindi la matrice di filogenesi:
+\[\left[
+  \begin{matrix}
+    0 & 0\\
+    1 & 1\\
+    1 & 0\\
+    1 & 0\\
+    1 & 1\\
+    1 & 1
+  \end{matrix}\right]
+\]
+con 6 aplotipi per i 3 genotipi (i primi 2 aplotipi, $h_1$ e $h_2$, i secondi
+due e gli ultimi due, che sono uguali non avendo *).\\
+Da questa posso costruite una matrice di filogenesi.\\
+Se la soluzione è unica allora è valida. In assenza di ricombinazioni, che sono
+detti blocchi, si ha un modello coerente con la filogenesi perfetta.\\
+Per ottenere la matrici di aplotipi da quella di genotipi in modo che si abbia
+un albero di filogenesi è un problema che si risolve in tempo lineare.
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero
 \textbf{DNA} (figura \ref{fig:dna}) e \textbf{RNA}, intese come molecole
@@ -3122,4 +3276,4 @@ una stringa $Q$ che è prefisso di $T$.
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
 % LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
-% LocalWords:  feature semiglobale sottoalbero
+% LocalWords:  feature semiglobale sottoalbero l'aplotipo

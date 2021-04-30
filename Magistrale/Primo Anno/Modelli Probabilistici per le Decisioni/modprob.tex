@@ -1271,6 +1271,225 @@ $mb(X_i)$. Il campionamento si basa sul fatto che:
 avendo che la probabilità di una variabile casuale dato il suo Markov Blanket è
 proporzionale alla probabilità della variabile dati i genitori moltiplicata la
 probabilità di ogni suo figlio, dati i rispettivi genitori.
+\chapter{Markov Chains}
+Aggiungiamo la componente temporale al ragionamento probabilistico. Si aggiunge
+quindi incertezza sui cambiamenti dell'ambiente nel corso del tempo, assente
+nello studio delle reti Bayesiane. Si vuole prendere decisioni in un ambiente
+che evolve nel tempo, avendo un \textbf{ambiente dinamico}.\\
+Per descrivere questo mondo mutevole si usano variabili casuali, descritte da
+uno stato in ogni istante temporale. La relazione tra variabili casuali in
+istanti diversi di tempo descrivono l'evoluzione dello stato. Uno stato al tempo
+$t$ dipende da quello al tempo $t-x$.\\
+Si passa quindi da \textbf{modelli statici}, come le reti Bayesiane, dove il
+valore delle variabili non cambia nel tempo, a \textbf{modelli dinamici} dove il
+valore delle variabili cambia nel tempo e lo stato corrente dipende da quelli
+passati, dipende dalla \textit{storia}. Il \textbf{processo di cambiamento} è
+descritto da una serie di \textit{time slice}, ciascuno con un insieme di
+variabili causali.
+\begin{definizione}
+  Definiamo un \textbf{processo stocastico} come:
+  \[\{X(t), t\in T\}\]
+  come un insieme di variabili casuali $X(t),\forall t$ dove ogni variabile
+  evolve nel tempo. L'insieme $T$ di indici e lo spazio $X$ possono essere
+  continui o discreti.\\
+  Si hanno:
+  \begin{itemize}
+    \item processi stocastici a tempo continuo, $X(t),t>0$
+    \item processi stocastici a tempo discreto, $X(t), t=0,1,\ldots,n$
+    \item processi stocastici a stati continui
+    \item processi stocastici a stati discreti
+  \end{itemize}
+  $X(t)$ è quindi il valore dello stato del sistema al tempo $t$, essendo il
+  valore di una variabile causale che descrive tale stato.
+\end{definizione}
+Il processo stocastico più semplice è detto \textbf{random walk}, usate anche
+per campionare grafi complessi. In questo caso si ha tempo discreto e spazio
+degli stati discreto. Si ha:
+\[X_t=X_{t-i}+\varepsilon_t,\,\,\,t=1,2,3,\ldots\]
+con $\varepsilon_t$ elemento casuale. In questo caso $i$ è fisso e solitamente
+vale 1. Ad esempio potrei avere:
+\[\varepsilon_t=\{-1,1\}\]
+con:
+\[P(\varepsilon_t=-1)=P(\varepsilon_t=1)=\frac{1}{2}\]
+Usando, ad esempio, $P>\frac{1}{2}$ ottengo una \textbf{random walk con drift},
+avendo scelte spesso ``in salita''.\\
+Potrei avere $\varepsilon_t$ con valori continui, magari in una normale
+standard, $\varepsilon_t\approx N(0,1)$. In tal caso lo spazio degli stati
+diventa continuo anche se il tempo resta discreto.\\
+Un altro processo stocastico è il \textbf{processo autoregressivo del primo
+  ordine (\textit{first order autoregressive process})}, dato dall'equazione:
+\[X_t=aX_{t-i}+b+\varepsilon_t\]
+con $a$ e $b$ constanti e $-1<a<1$. In questo caso $i$ è fisso e solitamente
+vale 1. Si ha che $\varepsilon_t\approx N(0,1)$.\\
+\textbf{Esempi su slide}.
+\section{Processi Markoviani}
+Una proprietà importante dei processi stocastici è la \textbf{proprietà
+  Markoviana}.
+\begin{definizione}
+  La \textbf{proprietà Markoviana} assicura che la distribuzione di probabilità
+  per tutti i possibili valori futuri del processo dipende solo dal valore
+  corrente e non dai valori passati o da altre informazioni correnti. Ovvero:
+  \[P(x_{t+1}=i_{t+1}|X_t=i_i, X_{t-1}=i_{t-1},\ldots,
+    X_0=i_0)=P(X_{t+1}=i_{t+1}|X_t=i_t)\] 
+\end{definizione}
+\begin{definizione}
+  I processi stocastici che soddisfano la \textbf{proprietà Markoviana} sono
+  detti, equivalentemente, \textbf{processi di Markov}, \textbf{processi
+    Markoviani}, o \textbf{processi con assenza di memoria}. 
+\end{definizione}
+\begin{definizione}
+  Un processo stocastico a tempi discreti è detto \textbf{catena di Markov} se,
+  per $t=1,2,3,\ldots$ e per tutti gli stati vale:
+  \[P(x_{t+1}=j|X_t=i, X_{t-1}=i_{t-1},\ldots,
+    X_0=i_0)=P(X_{t+1}=j|X_t=i)\]
+  Se:
+  \[P(X_0=i)=q_i\]
+  si ha che la distribuzione di probabilità iniziale è:
+  \[q=[q_1,\ldots, q_i,\ldots, q_n]\]
+  che dice come è distribuito lo stato iniziale della carena di Markov.
+\end{definizione}
+\begin{definizione}
+  Se la probabilità di un certo evento è indipendente dal tempo $t$ si ha una
+  \textbf{catena di Markov stazionaria}, avendo:
+  \[P(X_{t+1}=j|X_t=i)=p_{ij}\]
+  Con $p_{ij}$ che è la probabilità che al tempo $t+1$ il sistema sarà nello
+  stato $j$ essendo nello stato $i$ al tempo $t$.\\
+  Questa è la \textbf{proprietà di stazionarietà} e semplifica lo studio dei
+  modelli. 
+  \textbf{Stazionario quindi non significa statico, avendo comunque
+    un'evoluzione basata sul tempo}.\\
+  Un modello non stazionario, preso in parti più piccole, per diversi periodi di
+  tempo, può essere studiato come una serie di modelli stazionari,
+  semplificando lo studio. \\
+  Si ha quindi che $p_{ij}$ rappresenta la probabilità di raggiungere uno stato
+  $j$ partendo da uno stato $i$ della catena, avendo quindi una matrice di
+  probabilità $P$, con valori positivi e righe che sommano a 1:
+  \[p_{ij}\geq 0\]
+  \[\sum_{j=0}^n p_{ij}=1\]
+  La markov chain è quindi rappresentata da tale matrice $P$, detta
+  \textbf{matrice di transazione (a un passo)}.
+\end{definizione}
+Ovviamente la matrice di rappresentazione posso rappresentarla come grafo.
+In tale grafo ogni nodo rappresenta uno
+stato e l'arco $(i,j)$, con quindi $i$ e $j$ stati, rappresenta la probabilità
+di transizione $p_{ij}$.
+\begin{definizione}
+  Per una markov chain si hanno, per descrivere una variabile casuale:
+  \begin{itemize}
+    \item insieme degli stati $\{S_1,\ldots S_n\}$ che sono i valori che può
+    assumere la variabile casuali
+    \item probabilità di transizione di stati dallo stato $i$ a quello $j$, data
+    da $p_{ij}=P(X_{t+1}=S_j|X_t=S_i)$
+    \item la distribuzione iniziale degli stati, avendo stato iniziale $0$, data
+    da $\pi_i=P[X_0=S_i]$ 
+  \end{itemize}
+\end{definizione}
+\textbf{Esempio su slide}.\\
+Se una catena di Markov in uno stato $i$ al tempo $m$ si può calcolare la
+probabilità che dopo $n$ passi sia nello stato $j$ tramite:
+\[P(X_{m+1}=j|X_m=i)=P(X_n=j|X_0=i)=p_{ij}(n)\]
+Con $p_{ij}(n)$ che dice la probabilità di passare da $i$ a $j$ in $n$ passi. Ne
+segue che, per due passi:
+\[p_{ij}(2)=\sum_{k=1}^n p_{ik}\cdot p_{ki}\]
+avendo il prodotto scalare tra la riga $i$ e la colonna $j$.\\
+Il caso generale è che:
+\[p_{ij}(n)=\mbox{ij-esimo elemento di } P^n\]
+\textbf{Esempio su slide}.\\
+\begin{teorema}
+  La risoluzione della probabilità di transizione a $n$ passi:
+  \[P_{ij}^n=P\{X_{n+k}=j|X_k=i\},n,i,j\geq 0\]
+  si risolve con le \textbf{equazioni di Chapman-Kolmogorov}:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P_{ik}^n\cdot P_{kj}^m,\forall n,m\geq 0\mbox{
+      e } i,j\geq 0\]
+  Avendo che:
+  \[P(n+m)=P(n)\cdot P(m)\]
+\end{teorema}
+\begin{proof}
+  % mettere dimostrazione
+  Si ha che:
+  \[P_{ij}^{n+m}=P\{X_{n+m}=j|X_0=i\}\]
+  ma allora:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P\{X_{n+m}=j,X_n=k|X_0=i\}\]
+  e quindi:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P\{X_{n+m}=j|X_n=k,X_0=i\}\cdot
+    P\{X_n=k|X_0=i\}\]
+  concludendo che:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P_{ik}^n\cdot P_{kj}^m\]
+\end{proof}
+\begin{teorema}
+  La probabilità di essere in uno stato $j$ al tempo $n$, non conoscendo la
+  catena di Markov al tempo 0 è:
+  \[\sum_i q_i\cdot p_{ij}(n)\cdot(\mbox{colonna j di }p^n)\]
+\end{teorema}
+\begin{definizione}
+  Uno stato $j$ è \textbf{raggiungibile} dallo stato $i$ se per qualche $n$ si
+  ha un cammino da $i$ a $j$:
+  \[P_{ij}=n>0\]
+\end{definizione}
+\begin{definizione}
+  Due stati \textbf{comunicano} se uno stato è raggiungibile dall'altro e
+  viceversa. Ogni stato comunica con se stesso e si ha la proprietà transitiva.
+\end{definizione}
+\begin{definizione}
+  Una catena di Markov è detta \textbf{irriducibile} se tutti i suoi stati sono
+  comunicanti fra loro 
+\end{definizione}
+\begin{definizione}
+  Un insieme di stati $S$ in una catena di Markov è un insiemechiuso se nessuno
+  stato fuori $S$ è raggiungibile dagli stati in $S$. 
+\end{definizione}
+\begin{definizione}
+  Uno stato $i$ \textbf{assorbente} se $P_{ii}=1$. Tale stato rappresenta un
+  \textbf{deadlock}.
+\end{definizione}
+\begin{definizione}
+  Uno stato $i$ è \textbf{transiente} se esiste $j$ raggiungibile da $i$ ma non
+  vale il viceversa. Si ha che:
+  \[\sum_{n=1}^\infty P_{ii}^n<\infty\]
+  Uno stato non transiente è detto \textbf{ricorrente}, avendo:
+  \[\sum_{n=1}^\infty P_{ii}^n=\infty\]
+\end{definizione}
+\begin{teorema}
+  Se lo stato $i$ è ricorrente e $j$ comunica con $i$ allora $j$ è ricorrente,
+  in quanto la ricorrenza è una \textbf{proprietà di classe}.\\
+  Anche essere transiente è una proprietà di classe,
+\end{teorema}
+\begin{definizione}
+  Una catena di Markov è \textbf{finita} sse il numero di stati è finito.
+\end{definizione}
+\begin{teorema}
+  Tutti gli stati di una catena di Markov finita irriducibile sono ricorrenti.
+\end{teorema}
+\begin{definizione}
+  Uno stato $i$ è \textbf{periodico}, con periodo $k>1$ se $k$ è il più piccolo
+  numero tale che tutti i cammini che dallo stato $i$ tornano ad $i$ hanno una
+  lunghezza multipla di $k$.\\
+  Uno stato non periodico è detto \textbf{aperiodico}.
+\end{definizione}
+\begin{definizione}
+  Si definisce catena di Markov \textbf{ergodica} se tutti gli stati in una
+  catena sono ricorrenti, aperiodici e comunicano l’uno con l’altro.\\
+  Una catena di Markov ergodica permette di raggiunger una distribuzione di
+  equilibrio ed è usata anche negli algoritmi di \textbf{page rank}.
+\end{definizione}
+\begin{teorema}
+  Data una matrice di probabilità $P$ per una catena ergodica di $N$ stati. Si
+  ha che:
+  \[\lim_{t\to+\infty} P_{ij}(t)=\pi_j\]
+  dipendendo quindi solo dallo stato d'arrivo. Per $t$ abbastanza grande si
+  arriva quindi ad uno stato di equilibrio, avendo che:
+  \[\pi=\pi\cdot P,\,\,\,\pi=[\pi_1,\ldots,\pi_n]\]
+  avendo stazionarietà, avendo un vettore di distribuzione di equilibrio.\\
+  Questo è alla base dell'algoritmo di page rank.\\
+  In altri termini aumentando $n$ si ha che $P_{ij}(n)$ non cambia da un certo
+  punto in poi, $\forall i,j$.\\
+  Per trovare il vettore di probabilità stazionarie risolvo quindi il sistema
+  dato dai vari $\pi_i$ (prendo le colonne di $P$ come coefficienti e $p_i$ come
+  variabili) aggiungendo anche la condizione che $\sum_i \pi_i=1$ (cosa che
+  permette di usare un'equazione in meno). Il vettore dei $\pi_i$ risultante è
+  il vettore di probabilità stazionarie.
+\end{teorema}
+\textbf{Esempio su slide}.\\
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare discretizzati
-% LocalWords:  condizionalmente
+% LocalWords:  condizionalmente Markoviani Markov

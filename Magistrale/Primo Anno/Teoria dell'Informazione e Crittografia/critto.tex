@@ -4900,7 +4900,8 @@ lato hardware.
 \subsubsection{Crittoanalisi Lineare}
 La \textbf{crittoanalisi lineare} si basa sull'idea di approssimare la
 trasformazione da $m$ a $c$ attraverso una funzione lineare. Si ha quindi
-un'approssimazione parlando di base di funzioni non lineari. Si cercano relazioni
+un'approssimazione parlando di base di funzioni non lineari. Si cercano
+relazioni 
 statistiche tra bit di $m$ e $u^j$, livello che precede le ultime applicazioni
 di s-box. Si procede a ternativi con lo xor ottenendo combinazioni di bit
 candidati per l'ultimo livello, vedendo se poi vale la relazione statistica. Si
@@ -4922,10 +4923,291 @@ crittosistemi e non la loro matematica. Sono detti \textbf{side channel attack}.
 Si hanno anche i \textbf{timing attack} basati sul fatto che cifrare e decifrare
 richiede tempo diverso per diversi input. Oppure attaccando sensori al circuito
 per vedere quanta corrente serve per lavorare sui vari input. Nel 1999 si è
-trovato con un timing attack il peso di Hamming sul DES.\\
-\textbf{To be continued}
+trovato con un timing attack il peso di Hamming sul DES. Ci sono stati timing
+attack in grado di capire i vari pesi.\\ Si ha anche un attacco
+di crittoanalisi lineare cercando di costruire buone approssimazioni per
+ottenere infine l'ultima chiave. Studiando l'hardware crittografico durante il
+funzionamento del sistema si possono inoltre aggiungere rumori etc$\ldots$,
+magari anche scoprendo debolezze.\\
+Bisogna quindi approfondire le s-box, la parte non lineare dei crittosistemi
+visti. Per DES erano fatte a mano.\\
+Ci sono in generale 3 modi, dal più vecchio che nuovo:
+\begin{itemize}
+  \item prendere s-box grandi e più grandi sono meglio è. Tali s-box vengono poi
+  scelte a caso. Questa soluzione è molto grezza
+  \item scegliere s-box a caso ma facendo test statistici tenendo le
+  migliori. Soluzione migliore ma non ancora soddisfacente
+  \item usare criteri matematici, come misure di non linearità, disuguaglianze
+  per non linearità etc$\ldots$ Questi teoremi mitigano molti degli attacchi
+  citati. AES usa questi criteri, con il discorso della \textit{wide trail
+    strategy} 
+\end{itemize}
+Parlando dei \textbf{cifrari a flusso} si ha che vengono usati quando si hanno
+tantissimi dati da cifrare, come ad esempio flussi video. La decifratura deve
+avvenire su device mainstream poco potenti, come magari una TV.\\
+La cifratura deve essere quindi ``leggera'' e si cifra ogni bit/byte facendo lo
+xor con la chiave derivata, prodotta da un generatore di numeri casuali
+,\textbf{Pseudo-Random Number Generator (\textit{PRNG})}). Il PRNG produce la
+chiave derivata, di un bit/byte, che viene appunto poi usata in xor con il
+plaintext.\\
+I crittosistemi a flusso sono molto più performanti di quelli a blocchi e sono
+più brevi da scrivere in codice ma come contro non si possono usare le stesse
+chiave, in quanto la stessa chiave porta allo stesso messaggio cifrato,
+indebolendo il sistema, creando relazioni tra testi in chiaro e cifrati. In
+generale la sicurezza è data dalla qualità del PRNG. In generale:
+\begin{itemize}
+  \item la keystream deve avere un grande periodo, per rendere difficile la
+  crittoanalisi. Per questo si riusano ``mix'' degli stati interni etc$\ldots$
+  \item la keystream deve approssimare al meglio possibile una sequenza
+  randomica, per non provare ad approssimare One Time Pad
+  \item la chiave/seed del PRNG deve essere lunga almeno 128bit per evitare
+  attacchi bruteforce
+\end{itemize}
+Il seed è condiviso da Alice e Bob, in quanto a parità di seed si ha
+determinismo.\\  
+Un cifrario a blocchi in modalità OFB si comporta come un cifrario a flusso.\\
+\subsubsection{Linear Feedback Shift Registers}
+Un tema importante sono i \textbf{registri a scorrimento}, \textbf{Linear
+  Feedback Shift Registers (\textit{LFSR})}.\\
+Sono stati creati per creare un keystream in modo più veloce di quello di un
+cifrario a blocchi.\\
+Bisogna generare un keystream $z_1,z_2,\ldots$, potenzialmente infinito ma non
+periodico. Si parte da $n$ bit $k_i$. L'idea è quella di fare delle operazioni
+xor con $k_1$ e $k_2$, da prendere a seconda di una certa maschera (se ho
+associato 0 non lo considero se 1 si), per generare
+gli altri $k_i$. Nel dettaglio:
+\begin{itemize}
+  \item è dato l'alfabeto $L=\{0,1\}$ ed è dato $c_0,\ldots
+  c_{m-1}\in\mathbb{Z}_2$, con $m$ costante
+  \item si parte con una sequenze $k_1,\ldots k_m$
+  \item si pone $z_i=k_i,\,\,\,\forall i\in\{1,2,\ldots,m\}$ 
+  \item $\forall i\geq 1$ si calcola $z_{i+m}$ usando la ricorrenza lineare di
+  grado $m$, avendo che $z_{i+m}$ dipende dagli $m$ termini precedenti:
+  \[z_{i+m}=\sum_{j=0}^{m-1}c_jZ_{i+j}\bmod\,\,2=\bigoplus_{j=0}^{m-1}(c_j\land
+    z_{i+j})\] 
+\end{itemize}
+Si ha che scegliere $(k_1,\ldots,k_m)$ tutti uguali a 0 comporta la creazione di
+sequenze di soli 0 quindi bisogna evitarlo.\\
+Con $m=4$, ad esempio, posso produrre periodo 15, poco, e quindi il discorso del
+periodo va approfondito, scegliendo $(c_0,\ldots,c_{m-1})$ in modo che ogni scelta
+di $(k_1,\ldots,k_m)$ abbai periodo lungo.\\
+\textbf{Esempio su slide}.\\
+Si nota, dal punto di vista della sicurezza, l'uso di equazioni lineare per
+generare il keystream con LFSR, che quindi vengono usati solo come parte di
+tool più complessi. \\
+Per la linearità si supponga che Eve conosca $2m$ chiavi derivate, $z_1,\ldots
+z_{2m}$ e che conosca $m$. Può capire come sono state calcolate le chiavi della
+seconda metà:
+\[(z_{m+1},z_{m+2},\ldots, z_{2m})=(c_0,c_1,\ldots,c_{m-1})\cdot
+  \left[
+    \begin{matrix}
+      z_1 & z_2 &\cdots &z_m\\
+      z_2 & z_3 &\cdots &z_{m+1}\\
+      \vdots & \vdots &\ddots &\vdots\\
+      z_m & z_{m+1} &\cdots &z_{2m-1}
+    \end{matrix}
+  \right]
+\]
+e se la matrice fosse invertibile risalirei a $(c_0,c_1,\ldots,c_{m-1})$ e
+purtroppo ``by design'', per costruzione, tale matrice è sempre invertibile. SI
+fa quindi:
+\[(c_0,c_1,\ldots,c_{m-1})=(z_{m+1},z_{m+2},\ldots, z_{2m})\cdot
+  \left[
+    \begin{matrix}
+      z_1 & z_2 &\cdots &z_m\\
+      z_2 & z_3 &\cdots &z_{m+1}\\
+      \vdots & \vdots &\ddots &\vdots\\
+      z_m & z_{m+1} &\cdots &z_{2m-1}
+    \end{matrix}
+  \right]^{-1}
+\]
+\subsubsection{RC4}
+\textbf{RC4} è il cifrario a flusso più sicuro pensato. Creato nel 1987, uno dei
+primi, dalla RSA. All'inizio però tale cifrario è stato mantenuto segreto. È
+stato pubblicato in modo anonimo nel 1994 tramite \textit{reverse
+  engineering}.\\
+RC4 è usato in \textbf{SSL/TSL} (\textit{Secure Sockets Layer / Transport Layer
+  Security}), usati nello standard della comunicazione web. È stato usato anche
+in \textbf{WEP} (\textit{Wired Equivalent Privacy}), usato nello standard 802.11
+(\textit{wireless LANs}).\\
+Come funzionamento si ha la cifratura di un byte alla volta tramite permutazioni
+casuali, ottenendo un periodo di keystream di $10^{100}$. Mediamente richiede
+8-16 operazioni macchina per produrre ogni byte di $c$.\\
+Si usa uno stato $S$ di 256 byte, che, in ogni momento, contiene le
+permutazioni. Si usa una chiave $k$, lunga da 1 a 256 bytes, per inizializzare
+$S$. Tale chiave non viene poi più usata.\\
+Vediamo l'inizializzazione:
+\begin{itemize}
+  \item si mettono in $S$ i numeri da 0 a 255
+  \item si crea un vettore temporaneo $T$ con i numeri da 0 a 255
+  \item si ripete $k$ in $T$ tutte le volte necessarie a riempire $T$ (una sola
+  se $k$ è di 256 bytes). Quindi si ha:
+  \begin{algorithmic}
+    \For {$i=0$ \textbf{to} $255$}
+    \State $S[i]\gets i$
+    \State $T[i]\gets k[i\bmod keylength]$
+    \EndFor
+  \end{algorithmic}
+  \item si scambia ogni posizione di $S$ con una posizione determinata da $T$,
+  tramite una funzione \texttt{swap}. Si ha quindi:
+  \begin{algorithmic}
+    \State $j\gets 0$
+    \For {$i=0$ \textbf{to} $255$}
+    \State $j\gets (j+S[i]+T[i])\bmod\,\,256$
+    \State $swap(S[i],S[j])$
+    \EndFor
+  \end{algorithmic}
+\end{itemize}
+L'inizializzazione sono quindi due piccoli cicli for.\\
+Una volta generato $S$ si passa a generare il keystream:
+\begin{itemize}
+  \item si parte da $S[0]$ per arrivare a $S[255]$. Una volta finito si riparte
+  da capo (cosa ottenuta tramite il modulo)
+  \item ad ogni iterazione l'elemento $S[i]$ è scambiato, tramite una funzione
+  \texttt{swap}, con un altro $S[j]$, con $j$ che dipende dallo stato
+  corrente. Questo aggiunge pseudocasualità
+  \item si sommano, modulo 256, $S[i]$ e $S[j]$ per ottenere la posizione $t$,
+  facendo quindi accesso indiretto,
+  dell'elemento $z$ generato, con $z$ byte di chiave derivata
+\end{itemize}
+Anche per la generazione del keystream si ha quindi un codice piccolo, avendo un
+ciclo infinito che dura fino a che serve cifrare i bytes.  
+\newpage
+Per il keystream si ha quindi:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \State $i\gets 0$
+    \State $j\gets 0$
+    \While {$\top$}
+    \State $i\gets (i+1)\bmod\,\,256$
+    \State $j\gets (j+S[i])\bmod\,\,256$
+    \State $swap(S[i],S[j])$
+    \State $t\gets (S[i]+S[j])\bmod\,\,256$
+    \State $z=S[t]$
+    \EndWhile
+  \end{algorithmic}
+  \caption{Calcolo keystream con RC4}
+\end{algorithm}
+La cifratura e la decifratura sono semplici:
+\[c_i=m_i\oplus z\]
+\[m_i=c_i\oplus z\]
+Nonostante questo non si conoscono ancora attacchi efficaci data una chiave
+lunga abbastanza, almeno 128 bit.\\
+L'attacco fatto a WEP nel 2001 dipendeva da come era stato implementato RC4 in
+WEP e non dall'algoritmo in sé.
+\subsection{Sicurezza di Shannon}
+Si è usato spesso lo xor bit a bit che garantisce sicurezza ma Shannon si è
+chiesto se il calcolo della chiave fosse questione di pura potenza di calcolo.
+Shannon si chiede se esistono crittosistemi sicuri \textbf{incondizionatamente},
+ovvero a priori rispetto all'hardware disponibile dall'attaccante. Vediamo
+quindi l'analisi di Shannon.\\
+Si parte dal solito schema con Alice che comunica con Bob, tramite un canale, e
+con Eve che ``ascolta''. Formalmente si ha:
+\begin{itemize}
+  \item $X$ una variabile casuale con valori nell'insieme dei plaintext $PT$
+  \item $Y$ una variabile casuale con valori nell'insieme dei testi cifrati $CT$
+  \item Alice sceglie, casualmente, $x\in PT$, la cifra e ottiene $y\in
+  CT$. Tale $y$ viene spedito a Bob. Eve vede $y$ che per lei è totalmente
+  casuale
+  \item si assume che Alice sceglie $x$ in modo uniforme, per semplicità
+  \item Eve conosce la distribuzione di probabilità su $X$, ovvero conosce
+  $P(X=x)$ 
+  \item se Eve legge $y$ può anche conoscere $P(X=x|Y=y)$ (aumenta la
+  possibilità di avere alcuni testi in chiaro etc$\ldots$)
+\end{itemize}
+Shannon dice che il crittosistema è sicuro incondizionatamente se Eve,
+osservando $y$, non impara nulla sulla distribuzione di probabilità dei testi in
+chiaro, ovvero se:
+\[P(X=x)=P(X=x|Y=y)\]
+Ma questo implica che l'entropia di $X$ è uguale ell'equivocazione:
+\[H(X)=X(X|Y)\]
+Ma quindi la mutua informazione di sistema è:
+\[I(X;Y)=0\]
+e quindi $X$ e $Y$ sono \textbf{indipendenti} e Eve non ottiene alcuna
+informazione da $y$. Eve vede solo rumore.\\
+Ma per essere indipendenti significa che il canale è completamente rumoroso e
+$y$ è scelto a caso senza partire da $x$ e quindi sembra assurdo parlando di
+crittosistemi. \\
+Shannon ha invece continuato lo studio e scopre che esiste un crittosistema
+teorico completamente sicuro anche se con un'approssimazione pratica molto
+efficace nota dal 1918, ovvero il \textbf{cifrario di Vernam}. La nuova versione
+di tale cifrario viene chiamata \textbf{One Time Pad}, avendo che il
+``taccuino'', traducendo Pad, contiene il keystream (e sia Alice che Bob devono
+avere tale ``taccuino'' e questo è un problema). La chiave non va riutilizzata,
+da qui one Time.\\
+Alice cifra con la chiave del suo taccuino e Bob decifra di conseguenza,
+entrambi distruggendo le pagine del taccuino con le chiavi usate.\\
+La differenza tra One Time Pad e il cifrario di Vernam è che, in quest'ultimo,
+non si usa una chiave usa e getta ma si può ripetere dopo un periodo molto
+lungo. L'analisi quindi non è più impossibile ma molto difficile, è una buona
+approssimazione. \\
+In One Time Pad, si prende la chiave $k$ e si fa lo xor bit a bit. Il più sicuro
+di tutti fa un'operazione lineare banale:
+\[E_k(x)=x\oplus k\]
+\[D_k(y)=y\oplus k\]
+Il trucco è che la chiave $k$, lunga quanto il messaggio $m$, è davvero casuale
+e non pseudocasuale (in Vernam 
+ovviamente non è possibile la cosa ma la ripetizione dopo un lungo periodo è una
+buona approssimazione). \\
+Servono tanti bit casuali quanti la lunghezza del messaggio. La produzione di
+tali bit, in due copie, una per Alice e una per Bob, è estremamente
+dispendiosa.\\
+Ovviamente prima Alice e Bob devono essersi accordati in modo sicuro sul
+``taccuino'' e anche questo può essere complesso. 
+\begin{teorema}
+  Tale crittosistema è incondizionatamente sicuro.
+\end{teorema}
+\begin{proof}
+  Si assumono PT e CT su alfabeti binari.\\
+  Si ha la proprietà tale per cui:
+  \[\forall x, \forall y\,\,\, \exists k \mbox{ unico t.c. } E_k(x)=y\]
+  quindi dati $x$ e $y$ si ha una sola $k$ valida.
+  Si ha anche la proprietà che:
+  \[\forall y, \forall k\,\,\, \exists x \mbox{ t.c. } E_k(x)=y\]
+  quindi sapendo solo $y$ posso solo sapere che tale messaggio cifrato può
+  derivate da un qualunque $x$, scegliendo $k$ in modo appropriato.\\
+  \textbf{Si ha quindi che è incondizionatamente sicuro non sapendo come
+    scegliere}.\\ 
+  Il tutto salta se la chiave è più corta. Si assume:
+  \[|k|<|x|=|y|\]
+  nel dettaglio:
+  \[|k|=|x|-1=n-1\]
+  Avendo $|k|<|x|$ dobbiamo usare nuovamente alcune bit di $k$.\\
+  Quando Eve non ha ancora visto $c$ sa che Alice può scegliere qualunque $x$
+  con probabilità $P(X=x)=\frac{1}{2^n}$, avendo che, osservato $y$, Eve si
+  chiede i valori di $k$ usati per ottenere $x$ e vede che tali valori di $k$
+  sono al più $2^{n-1}$. Quindi si ha:
+  \[P(X=x|Y=y)=\frac{1}{2^{n-1}}\neq P(X=x)\]
+  venendo meno la definizione di sicurezza incondizionata.
+\end{proof}
+
+In One Time Pad non si ha un seed di generazione quindi mentre in Vernam
+serve.\\
+One Time Pad è stato davvero usato tra Casa Bianca e Cremlino durante la Guerra
+Fredda.\\
+In ogni caso One Time Pad necessita di una quantità di chiavi molto grande, che
+vanno scambiate prima in modo protetto. One Time Pad si usa solo con canali con
+larghezza di banda molto bassa, quando la sicurezza e la privacy sono la prima
+preoccupazione.
+\subsection{Numeri Pseudocasuali}
+Si è visto come molti algoritmi si basano su bit casuali. \\
+Sorgenti casuali sono ``rare'' in natura e produrre hardware dedicato è
+costoso.\\
+Si usano quindi generatori pseudocasuali, i già citati PRNG, che partono da un
+seed iniziale, causale e più piccolo possibile, per generare numeri che sembrano
+casuali ad un osservatore esterno, che non sa nemmeno dire se una sequenza è
+causale o pseudocasuale. Nessun algoritmo, eseguibile in tempo polinomiale sui
+una TM deterministica, può capire se una sequenza è causale o pseudocasuale in
+tempo polinomiale. Non si ha quindi una soluzione ``facile'' e la cosa non è in
+dubbio. L'attaccante però potrebbe avere una \textbf{TM probabilistica}, che può
+spesso risolvere problemi ``difficili'', semplificando la soluzione del
+problema. \\
+Dobbiamo quindi generare sequenze di bit pseudocasuali indistinguibili da quella
+casuali avendo a disposizione una TM probabilistica.
+\textbf{to be continued}
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
-% LocalWords:  crittosistemi Feistel function crittosistema
+% LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
+% LocalWords:  Shannon

@@ -3159,7 +3159,7 @@ Avendo alfabeto $\Sigma$ finito la ricerca dell'arco uscente da un certo nodo la
 cui etichetta inizia con un certo carattere è in tempo costante con la giusta
 implementazione.\\
 \textbf{Su slide esempio di pattern matching}.
-\section{Suffix Array}
+\subsection{Suffix Array}
 \textbf{Riprendere teoria da appunti di Teoria della Computazione}.\\
 Il SA è nato come struttura ausiliaria di un ST. Si ricorda che la costruzione è
 in $O(n)$ e il pattern matching è in $O(m\log n)$.\\
@@ -3271,9 +3271,234 @@ Se $e'<b'$ allora il $\sigma Q$-interval non esiste.\\
 Se ho un Q-intervallo $[b,e]$ che sulla BWT contiene \$ allora esso caratterizza
 una stringa $Q$ che è prefisso di $T$.
 \section{Caso Pan-Genomico}
-\
+Si passa ora dal singolo testo ad una \textbf{collezione di testi}. Tranne il
+suffix tree si vedranno le varie strutture di indicizzazione nell'ottica di
+riconoscere overlap all'interno di collezione di read (che appunto è una
+collezione di testi). Ci si basa quindi su un \textbf{overlap graph}.
+\subsection{Suffix Tree}
+\begin{definizione}
+  Si definisce \textbf{Generalized Suffix Tree (\textit{GST})}, costruito su un
+  set di $h$ testi $T_j$ $\$_j$-terminati (ogni testo ha il suo dollaro), come
+  un albero radicato tale per cui: 
+  \begin{itemize}
+    \item per ogni suffisso $T_j[i:]$ esiste una foglia etichettata $(i,j)$,
+    aggiunge quindi l'indice del testo all'etichetta. Si avranno $n$ foglie con
+    $n$ somma delle lunghezze dei testi
+    \item ogni arco è etichettato da una sottostringa di un testo e non si hanno
+    due archi uscenti dallo stesso nodo con lo stesso carattere
+    \item la concatenazione delle etichette dalla radice alla foglia $(i,j)$ è
+    uguale a $T_j[i:]$
+  \end{itemize}
+\end{definizione}
+\textbf{Esempio su slide}.\\
+Un GST si può costruire in $O(n)$, con $n$ somma delle lunghezze dei testi. Per
+farlo semplicemente concateno i vari testi in un solo $T$, ognuno con il loro
+dollaro finale. A questo punto costruisco il ST come al solito, in tempo lineare
+sulla lunghezza del testo. Non si è arrivato alla fine però, non avendo ancora
+il GST come definito. Bisogna sistemare le etichettature delle foglie, in quanto
+allo stato attuale abbiamo solo l'indice del suffisso e non il testo di
+provenienza (visto che si è partiti da un testo unico).\\
+Si parte dal caso semplice con 2 testi, $T=T_1T_2$, e una posizione $p$ sul
+testo unificato. Ho che $\exists i$ tale che:
+\begin{itemize}
+  \item se $p$ cade in $T_1$ si ha che $T[p:]=T_1[i:]T_2$
+  \item se $p$ cade in $T_2$ si ha che $T[p:]=T_2[i:]$, essendo $T_2$ l'ultimo
+  testo della concatenazione (notando che ovviamente $I$ non coincide con $p$)
+\end{itemize}
+Si ha che l'arco entrante nella foglia $p$ di ST avrà etichetta:
+\begin{itemize}
+  \item $sT_2$, con $s$ suffisso di $T_1[i:]$ se $T[p:]=T_1[i:]T_2$, ovvero il
+  suffisso rappresentato da $p$ è rappresentato da un percorso radice foglia e
+  quindi l'ultimo arco del cammino è etichettato da un suffisso del suffisso di
+  $T_1$ che inizia in $i$ seguito da $T_2$, avendo che $T$ contiene separatori
+  unici, i vari $\$_j$. Sostituisco quindi con $s$ l'etichetta $sT_2$ dell'arco
+  entrante in $p$ (tengo la parte che cade in $T_1$ del suffisso, fermandomi
+  grazie al $\$_1$) e trasformo la
+  foglia $p$ in $(i,1)$
+  \item $s$, con $s$ suffisso di $T_2[i:]$ se $T[p:]=T_2[i:]$, essendo l'ultimo
+  testo ho già $s$ come etichetta dell'arco entrante nella foglia $p$, che viene
+  etichettata come $(i,2)$. Questo caso è una generalizzazione del primo caso,
+  semplicemente dopo $s$ si ha $\varepsilon$
+\end{itemize}
+Il ST è quindi uguale al GST dal punto di vista topologico ma cambiano le
+etichette delle foglie, questo grazie ai $\$_j$, unici e che separano i vari
+$T_j$.\\
+Generalizziamo ora ad $h$ testi.\\
+In ST ogni foglia è ora etichettata da una posizione $p$ su $T$ che si riferisce
+a $T[p:]$ tale che:
+\begin{itemize}
+  \item esiste un indice $i$ e uno $j$ per cui
+  $T[p:]=T_j[i:]T_{j+1}T_{j+2}\ldots T_h$
+  \item l'arco entrante in $p$ ha etichetta $sT_{j+1}T_{j+2}\ldots T_h$ con $s$
+  suffisso di $T_j[i:]$
+\end{itemize}
+Quindi per trasformare ST di $T$ nel GST dei vari $T_j$ si procede per ogni
+foglia $p$:
+\begin{itemize}
+  \item si individua il testo per cui l'etichetta dell'arco entrante nella
+  foglia $p$ sia $sT_{j+1}T_{j+2}\ldots T_h$ con $s$ suffisso di $T_j$
+  \item si rimuove la parte di etichetta a destra del primo $\$_j$ incontrato a
+  sinistra, lasciando quindi solo $s$
+  \item si sostituisce l'etichetta di $p$ con $(i,j)$
+\end{itemize}
+Come per ST si hanno varie osservazioni anche per il GST:
+\begin{itemize}
+  \item dato un \textit{dummy} $w$, le $k$ foglie del suo sottoalbero danno le
+  $k$ occorrenze della sua \textit{path label} $L_w$ dei testi
+  \item dato un \textit{dummy} $w$, se il suo sottoalbero ha due foglie $(.,j)$
+  e $(.,j')$, $j\neq j'$, allora la \textit{path label} $L_w$ è sottostringa
+  comune a $T_j$ e $T_{j'}$
+\end{itemize}
+Queste due osservazioni ci permettono di calcolare la \textit{longest common
+  substring} tra $T_1$ e $T_2$, di lunghezza $n_1$ e $n_2$, in $O(n_1+n_2)$:
+\begin{itemize}
+  \item si costruisce il GST in $O(n_1+n_2)$
+  \item si visita il il GST in $O(n_1+n_2)$ e si etichetta ogni nodo interno $w$
+  con:
+  \begin{itemize}
+    \item 1, se il suo subtree ha solo foglie di tipo (.,1), avendo che la path
+    label $L_w$ occorre solo in $T_1$
+    \item 2, se il suo subtree ha solo foglie di tipo (.,2), avendo che la path
+    label $L_w$ occorre solo in $T_2$ 
+    \item 0, se il suo subtree ha foglie di tipo (.,1) e (.,2), avendo che la
+    path label $L_w$ occorre in entrambi i testi
+  \end{itemize}
+  \item si trova il nodo interno $w$, etichettato con $0$, di massima profondità
+  di string. $L_w$ è la \textit{longest common substring}
+\end{itemize}
+\subsection{Suffix Array}
+\begin{definizione}
+  Dati $h$ testi $ T_1,  T_2,  \ldots, T_h$ ($\$$-terminati, stavolta senza $\$$
+  diversi) di lunghezza totale $n$, il
+  \textbf{Generalized Suffix  Array (\textit{GSA})} è un array $S$ lungo $n$,
+  tale che $S[i] = (p,j)$ se e solo se $T_j[p:]$ è l’i-esimo suffisso
+  nell’ordinamento lessicografico di tutti i suffissi dei testi.  \\
+  Per avere un solo $\$$ si assume che il suffisso $s\$$ di $T_i$ è minore del
+  suffisso $s\$$ di $T_j$ se $i<j$, potendo ordinare suffissi uguali.
+\end{definizione}
+\subsection{Longest Common Prefix}
+\begin{definizione}
+  Dati $h$ testi $ T_1,  T_2,  \ldots, T_h$ ($\$$-terminati, stavolta senza $\$$
+  diversi) di lunghezza totale $n$, il \textbf{Generalized LCP Array} è un array
+  LCP lungo $n$ tale che $LCP[i]=l$ sse il più lungo prefisso comune tra
+  l'i-esimo e l'(i-1)-esimo suffisso, nell'ordinamento lessicografico, ha $l$
+  caratteri. \\
+  l'LCP array non tiene conto del carattere $\$$.
+\end{definizione}
+\subsection{BWT e FM-Index}
+\begin{definizione}
+  Dati $h$ testi $ T_1,  T_2,  \ldots, T_h$ ($\$$-terminati, stavolta senza $\$$
+  diversi) di lunghezza totale $n$, la  \textbf{Generalized  BWT} è un array $B$
+  lungo $n$, tale che $B[i] = Tj[p-1]$, se e solo se $S[i] = (p,j)$.
+\end{definizione}
+Tutto il resto resta invariato nell'estensione ad una collezione di testi,
+ovvero: 
+\begin{itemize}
+  \item $C$ e $Occ$ di FM-Index
+  \item LF function
+  \item Q-interval e backward extension di un Q-interval
+  \item pattern matching
+\end{itemize}
+\subsection{Overlap tra Testi}
+\begin{definizione}
+  Dati due testi $T_i$ e $T_j$ si ha che $Q$ è un \textbf{overlap} se $Q$ è
+  suffisso di $T_i$ e prefisso di $T_j$. Il $\$$ viene escluso.
+\end{definizione}
+\begin{definizione}
+  Dati $h$ testi $ T_1,  T_2,  \ldots, T_h$ si ha che $Q$ è un loro
+  \textbf{overlap} se esistono due sottoinsiemi $T_s$ e $T_p$ tali che, per ogni
+  coppia $(T_i, T_j)$ del prodotto cartesiano $T_s\times T_p$:
+  \begin{itemize}
+    \item $T_i$ ha $Q$ come suffisso, escluso $\$$
+    \item $T_j$ ha $Q$ come prefisso
+  \end{itemize}
+  L'overlap è quindi una stringa in comune tra un gruppo di testi che ha $Q$
+  come prefisso e un altro gruppo di testi che ha $Q$ come suffisso, escluso
+  $\$$. 
+\end{definizione}
+%$
+\textbf{Si assume che nessun testo è sottostringa di alcun altro testo, si ha
+  che il set di input è \textit{substring-free}}. Qualora non lo sia si fa un
+preprocessing veloce\\
+\textbf{Esempi su slide}.\\
+Data questa definizione bisogna parlare di Q-interval e delle sue eventuali
+caratteristiche.
+\begin{definizione}
+  Data la stringa $Q$, overlap di $h$ testi, allora si ha che il Q-interval
+  $[b,e]$, detto \textbf{overlap interval}, ha queste caratteristiche:
+  \begin{itemize}
+    \item ha ampiezza almeno due (un overlap deve occorrere almeno in due testi)
+    \item contiene un sottointervallo proprio $[B,e_m]$ dove i suffissi sono
+    esattamente $Q\$$, avendo che gli indici dei testi letti dal SA in $[b,e_m]$
+    sono quelli relativi ai testi che, eslcuso il terminatore, hanno $Q$ come
+    prefisso, ovvero i testi in $T_s$
+    \item contiene almeno una posizione $i$ tra $e_m+1$ ed $e$ dove $B[i]=\$$ e
+    quindi gli indici dei testi letti dal SA in $[e_m+1,e]$ sono quelli dei
+    testi che  hanno $Q$ come suffisso, ovvero i testi in $T_p$
+  \end{itemize}
+  Questo è possibile per la premessa del \textit{substring-free set}, in quanto:
+  \begin{itemize}
+    \item $B[b,e_m]$ non contiene caratteri $\$$
+    \item il numero di  $\$$ in $B[b,e]$ è uguale al numero di $\$$ in
+    $[e_m+1,e]$ 
+  \end{itemize}
+\end{definizione}
+Dato il Q-interval $[b,e]$ di cui si sa la lunghezza di $Q$ ma non $Q$ si può
+verificare se è un overlap-interval:
+\begin{itemize}
+  \item cerco la prima posizione $p$, tale che $p\geq b$, tale per cui la
+  lunghezza del suffisso, $\$$ escluso è diverso da $|Q|$
+  \item se $p>b$ allora la posizione finale del sottointervallo $[b,e_m]$ è
+  $e_m=p-1$ e la scansione prosegue fino a $e$, posizione finale, cercando
+  simboli $\$$ nella BWT $B$
+  \item se in $B[e_m+1,e]$ si trova almeno un $\$$ allora $[b,e]$ è un overlap
+  interval 
+\end{itemize}
+Si noti che $T_s$ e $T_p$ si possono calcolare da SA durante la scansione.\\
+\textbf{Esempi su slide}.\\
+Vediamo quindi un algoritmo di riconoscimento overlap in un insieme di testi:
+\begin{enumerate}
+  \item costruisco SA e BWT della collezione di testi
+  \item parto da $\varepsilon$-interval e lo aggiungo ad una coda $C$ insieme
+  alla lunghezza 0 di $\varepsilon$
+  \item estraggo da $C$ un intervallo $[b,e]$ con la sua lunghezza $L$ e,
+  $\forall \sigma\in\Sigma$:
+  \begin{itemize}
+    \item effettuo la backward extension di $[b,e]$ in $[b',e']$
+    \item se $[b',e']$ ha almeno ampiezza due verifico se è un overlap interval
+    e aggiungo $[b',e']$ nella coda $C$, insieme alla sua lunghezza data da
+    $L+1$ 
+    \item se $C$ non è vuota eseguo di nuovo 3)
+  \end{itemize}
+\end{enumerate}
+Questo algoritmo è esponenziale e inutilizzabile in ambito genomico ma usando
+anche LCP si ottiene un algoritmo lineare in quanto $LCP[i] > LCP[i-1]$ implica
+che: 
+\begin{itemize}
+  \item $i-1$ è la posizione di inizio di un numero $LCP[i]-LCP[i-1]$
+  di Q-interval, di ampiezza almeno due, relativi alle lunghezze
+  $LCP[i-1]+1, LCP[i-1]+2, \ldots,LCP[i]$ per la stringa $Q$ 
+  \item tali intervalli sono l'uno contenuto nell'altro, a partire da quello con
+  lunghezza di $Q$ maggiore, ovvero $LCP[i]$
+  \item solo l'intervallo relativo a $|Q|=LCP[i]$ può essere un overlap interval
+\end{itemize}
+Quindi $(i-1)$ può essere l'inizio di un Q-interval che è \textbf{overlap
+  interval} tale per cui $|Q|=LCP[i]$ mentre gli altri che iniziano con $(i-1)$
+con lunghezze di $Q$ inferiori a $LCP[i]$ hanno sicuramente una posizione di
+fine che è maggiore (o uguale) a quella del candidato \textbf{overlap
+  interval}.\\
+D'altro canto $LCP[i] < LCP[i-1]$ implica che:
+\begin{itemize}
+  \item $i-1$ è la posizione di fine di un numero $LCP[i-1]-LCP[i]$
+  di Q-interval, di ampiezza almeno due, relativi alle lunghezze
+  $LCP[i]+1, LCP[i]+2, \ldots,LCP[i-1]$ per la stringa $Q$ 
+  \item tali intervalli sono l'uno contenuto nell'altro, a partire da quello con
+  lunghezza di $Q$ maggiore, ovvero $LCP[i-1]$
+  \item $i-1$ può essere la fine di un overlap interval 
+\end{itemize}
+\textbf{Esempio su slide}.
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
-% LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap
+% LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap ST
 % LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
 % LocalWords:  feature semiglobale sottoalbero l'aplotipo

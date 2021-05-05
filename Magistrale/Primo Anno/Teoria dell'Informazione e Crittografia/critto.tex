@@ -5469,9 +5469,250 @@ Bisogna capire in pratica che $f$ funzione/permutazione one-way
 scegliere (avendo poi che $B$ dipende da essa). Questa scelta è molto complessa
 e per di più non è nemmeno mai stato 
 dimostrato che esistano tali funzioni ma si hanno diverse candidate ma non si ha
-ancora la dimostrazione matematica.
-\chapter{Ripasso Algebra \&co.}
-Vengono qui elencati alcuni concetti utili di algebra usati nella paarte di
+ancora la dimostrazione matematica.\\
+Vediamo quindi un caso speciale, una particolare costruzione, di Blum e
+Micali.\\ 
+Dato $g$ un generatore, fissato un numero primo $p$, di $\mathbb{Z}_p^*$, che è
+sempre un \textbf{gruppo ciclico} (che quindi ha un generatore), e
+$y=g^z\bmod\,p$ si ha che il bit più 
+significativo dell'input $z$, ovvero $msb(z)$, è un predicato hard-core per la
+\textbf{esponenziazione modulare} (è questo che hanno dimostrato Blum e Micali)
+e quindi possiamo costruire un PRNG dalla 
+esponenziazione modulare (che sarebbe nel dettaglio $y=g^z\bmod\,p$):
+\[H(z)=g^z\bmod\,p||msb(z)\]
+Si ha che $g^z\bmod\,p$ non solo è una funzione one-way ma anche una
+permutazione one-way, permettendo di riottenere gli elementi di
+$\mathbb{Z}_p^*$ in un ordine diverso, un ordine imprevedibile. È una tipica
+permutazione usata in crittografia.\\
+Ovviamente essendo $g$ un generatore di $\mathbb{Z}_p^*$ si ha che
+$g\in\mathbb{Z}_p^*$.\\
+Calcolare $g^z\bmod\,p$ può essere fatto in modo efficiente tramite
+l'algoritmo \textbf{square and multiply} mentre calcolare $z$ partendo da $y$,
+$g$ e $p$ è molto difficile, non avendo algoritmi polinomiali rispetto alla
+dimensione dei valori in memoria, il numero di bit necessari per rappresentare
+$\mathbb{Z}_p^*$, che è il più \textbf{grosso gruppo moltiplicativo} contenuto
+in $\mathbb{Z}_p$. Si ricorda che gli elementi in $\mathbb{Z}_p^*$ possono 
+assumere valore tra 1 e $p-1$, non 0, che non ha un inverso essendo un gruppo
+moltiplicativo. Possiamo quindi dire che la dimensione dei valori in memoria è
+$\log_2 p$, ovvero il numero di bit necessari a rappresentare $p$. Riuscire a
+calcolare $z$ partendo da $y$, $g$ e $p$ è molto difficile e tale problema è
+detto \textbf{problema del logaritmo discreto}, avendo che calcolare $z$
+corrisponde a calcolare $\log_g y$ in un campo finito (da qui discreto). Non si
+hanno neanche algoritmi probabilistici per il problema del logaritmo discreto ma
+non si ha alcuna dimostrazione che non esista un algoritmo polinomiale. In base
+a questa assunzione di complessità sul calcolo del logaritmo discreto si tratta
+l'esponenziazione modulare come una funzione one-way.\\ 
+Si conoscono pochissime altre funzioni candidate one-way, ancora meno che siano
+permutazioni one-way, dovendo poi dimostrare che un certo bit sia hard-core bit
+per tale funzione/permutazione.\\
+Si ha però un teorema che viene in aiuto in questa situazione, un metodo
+generale per calcolare, in modo semplice anche se la dimostrazione è molto
+complessa, degli predicati hard-core associati a permutazioni one-way.\\ 
+Serve prima una definizione
+\begin{definizione}
+  Prese due sequenze di $n$ bit $x=(x_1,\ldots,x_n)$ e $y=(y_1,\ldots,y_n)$ si
+  ha che il prodotto interno modulo 2 tra le sequenze, $\langle x,y\rangle$, è
+  definito tramite: 
+  \[\langle x,y\rangle=^{def}\sum_{i=1}^n
+    x_iy_i\bmod\,2=\bigoplus_{i=1}^n(x_i\land y_i)\]
+  Era stato già visto coi \emph{registri a scorrimento}.
+\end{definizione}
+\begin{teorema}[Teorema di Goldreich–Levin]
+  Data $f(x)$ una permutazione one-way sull'input $x$ possiamo estendere la
+  permutazione ad una funzione $g$ di due argomenti, $x$ e $y$, concatenando $y$
+  al valore di $f(x)$: 
+  \[g(x,y)=f(x)||y\]
+  avendo $|x|=|y|=n$.\\
+  Una volta fatto questo si ha che la funzione, che è un predicato, $B(x,y)$
+  definita: 
+  \[B(x,y)=^{def}\langle x,y\rangle\]
+  è, sempre, un predicato hard-core della funzione $g$, estensione di una
+  qualunque permutazione one-way $f$. Si noti che $g$ ottenuta come appena detto
+  è a sua volta una permutazione one-way.
+\end{teorema}
+\textit{Interessante che Levin sia lo stesso che, in contemporanea a Cook e in
+  modo indipendente, scoprì la NP-completezza}. \\
+Partendo quindi da una qualsiasi permutazione one-way $f$ ho perlomeno risolto
+il problema di trovare il predicato hard-core.\\
+Quindi, per il teorema di Goldreich–Levin, avendo a disposizione una
+permutazione one-way su $\{0,1\}^n$ posso costruire il PRNG, che allunga di 1 il
+numero di bit in ingresso:
+\[H:\{0,1\}^{2n}\to \{0,1\}^{2n+1}\]
+avendo:
+\[H(x,y)=g(x,y)||B(x,y)=f(x)||y||\langle x,y\rangle\]
+L'unico svantaggio è che il numero di bit di ingresso deve essere pari ma tutte
+le funzioni booleane usate in crittografia hanno un numero pari di bit. Questo
+problema è quindi trascurabile. Usando poi la costruzione iterativa vista
+precedentemente posso costruire un PRNG $G$, con output lungo quanto voglio,
+partendo da $H$.
+\subsubsection{Dimostrazione di un PRNG}
+Questa costruzione è dimostrata funzionare ed è sorretta da teoremi che non
+vedremo. \\
+Supponiamo ora di avere un algoritmo $G$ che si sospetta essere un PRNG e
+vogliamo dimostrare che lo sia effettivamente. \\
+Possiamo sottoporre il test ad una batteria infinita di test ma ovviamente non
+possono essere infiniti in quanto non potrei dimostrare che li supera
+tutti. Anche in questo caso si ha un teorema che ci salva, ad opera, nel 1985,
+di Andrew Chi-Chih Yao, che anche lui, come spesso per chi studia problemi di
+crittografia, arriva dal mondo dello studio della complessità
+computazionale. Yao ha provato l'esistenza di un \textbf{test universale}, che
+libera dall'onere di calcolare le infinite relazioni statistiche in infiniti
+test.\\
+Partiamo con una definizione.
+\begin{definizione}
+  Dato $G:\{0,1\}^k\to\{0,1\}^{l(k)}$ si ha che $G$ è \textbf{impredicibile}
+  sse, $\forall i\in\{1,2,\ldots,l(k)\}$, $\forall p(\cdot)$ polinomio e
+  $\forall A\in PPT$ algoritmo, dell'avversario, probabilistico eseguito su una
+  PTM, $\exists 
+  k_{A,p}$ tale che, $\forall k\geq k_{A,p}$ (avendo quindi una definizione
+  asintotica): 
+  {\small{\[P[x\gets\{0,1\}^k;(\sigma_1,\ldots,\sigma_{l(k)})=
+        G(x);\hat{\sigma}_i\gets
+        A(\sigma_1,\ldots,\sigma_{i-1}):\sigma_i=\hat{\sigma}_i]\leq   
+        \frac{1}{2}+\frac{1}{p(k)}\]}}
+  Quindi si estrae una sequenza casuale $x$ di $k$ bit che viene data in input a
+  $G$, candidato generatore che allunga a $l(k)$. Per ogni bit diamo in input
+  all'avversario i primi $i-1$ bit prodotti e si studia se $A$ è in grado di
+  individuare il bit successivo. La probabilità di azzeccare tale bit, se si ha
+  che $G$ è valido come PRNG, non deve essere significamene più grande di
+  $\frac{1}{2}$, ovvero della scelta causale avendo 2 scelte per il bit, o 0 o
+  1. La probabilità deve essere quindi minore uguale di $\frac{1}{2}$ più una
+  quantità che tende a 0 al crescere di $k$, anche se non troppo velocemente,
+  tendendo a 0 come l'inverso di un polinomio qualunque. Tutto questo deve
+  valere per ogni algoritmo $A$ dell'attaccante.\\
+  Informalmente $G$ è impredicibile sse il problema di ``indovinare'' l'i-esimo
+  bit della sequenza dati i primi $i-1$ bit è un problema computazionalmente
+  intrattabile, dove ``indovinare'' significa ``indovinare significativamente
+  meglio rispetto al semplice lancio di una moneta''.
+\end{definizione}
+\begin{teorema}[Teorema di Yao]
+  L'algoritmo $G$ è un PRNG sse $G$ è impredicibile.\\
+  In letteratura questo test universale è anche detto \textbf{next bit test}.
+\end{teorema}
+\subsubsection{Cifratura Ciclica}
+Finora però è stata vista la teoria, passiamo a vedere come si genera realmente
+una sequenza casuale di bit.\\
+Nel 1982 Meyer e Matyas proposero uno schema che si basa sull'uso di un
+crittosistema simmetrico, in cui si fissa una \textbf{master key} che è il seme
+casuale, e si usa il testo in chiaro come ``contatore''. Si cifra ciclicamente
+ogni elemento con la chiave e si generano ogni volta nuovi bit, in una sequenza
+imprevedibile che supera il next bit test. In pratica, come visualizzabile in
+figura \ref{fig:prng}:
+\begin{itemize}
+  \item si parte dal seed/master key che produce una sequenza di chiavi derivate
+  \item si usa un contatore con periodo $\bmod n$
+  \item il valore del contatore è usato o come chiave o come plaintext in un
+  crittosistema simmetrico 
+  \item ogni volta che si usa il crittosistema simmetrico si incrementa il
+  contatore
+\end{itemize}
+\textit{Per rafforzare ulteriormente questo schema possiamo usare una sequenza
+  di input più complicata}. 
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/prng.pdf}
+  \caption{Schema di Meyer e Matyas}
+  \label{fig:prng}
+\end{figure}
+Anche la modalità operativa OFB di un crittosistema simmetrico può essere usata
+per generare un keystream che è considerabile come l'output di un algoritmo
+PRNG.\\
+\subsubsection{ANSI X9.17}
+Vediamo ora uno dei più conosciuti PRNG conosciuti in crittografia, ovvero
+\textbf{ANSI X9.17}, che è appunto diventato standard e piene usato in PGP.\\
+ANSI X9.17 usa 3DES ma è generalizzabile ad altro crittosistemi.\\
+In input si hanno 2 elementi:
+\begin{itemize}
+  \item $DT_i$, una rappresentazione a 64bit della data e dell'ora correnti. È
+  aggiornato in ogni blocco pseudocasuale generato 
+  \item $V_i$, un seed a 64bit
+\end{itemize}
+Come chiavi si hanno $K_1$ e $K_2$, entrambe di 64bit, anche se DES usa solo
+56bit (scartando i bit di parità). Le chiavi sono usate nei 
+tre moduli con 3DES, usato in modalità EDE (nell'ordine usando $K_1$, $K_2$,
+$K_1$): 
+\[encryption – decryption – encryption\]
+\newpage
+Si hanno quindi due output:
+\begin{itemize}
+  \item $R_i$, che è un blocco causale di 64bit
+  \item $V_{i+1}$ che è il valore aggiornato del seed
+\end{itemize}
+Si ha uno schema del tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/ansi.pdf}
+\end{figure}
+Si nota che:
+\[R_i=EDE_{K_1,K_2}(V_i\oplus EDE_{K_1,K_2}(DT_i))\]
+\[V_{i+1}=EDE_{K_1,K_2}(R_i\oplus EDE_{K_1,K_2}(DT_i))\]
+Usando 3DES si può quindi che si usa una chiave di 112bit e che che si usano in
+totale 9 DES per cifrare e decifrare, con $DT_i$ e $V_i$ che cambiano dopo la
+produzione di ogni singolo valore di output. Usando 9 DES, quindi 9 cifrature,
+non si hanno performance particolarmente elevate, un generatore di qualità
+inferiore potrebbe essere più ufficiente. Usando 9 DES ANSI X9.17 è praticamente
+inviolabile, serve una quantità incredibile di informazioni per comprometterlo,
+anche perché la crittoanalisi sul singolo DES è comunque difficile, e
+anche se Eve venisse a sapere $R_i$ non riesce a capire il valore successivo. 
+\subsubsection{BBS Generator}
+\textbf{Questo generatore viene giusto accennato a lezione}.\\
+Nel 1986 è stato poi proposto il \textbf{Blum, Blum and Shub (\textit{BBS})
+  generator}, dai nomi dei tre crittografi che lo hanno studiato. \\
+Questo generatore sfrutta i numeri primi.\\
+Si prendano $p$ e $q$, primi e grandi tali che:
+\[p\equiv q\equiv 3\bmod\, 4\]
+quindi facendo il resto della divisione di entrambi i numeri primi per 4 viene
+3.\\ 
+Sia $n=p\cdot q$ e $s$ casuale tale che $GCD(s,n)=1$, quindi invertibile modulo
+$n$. Si ha quindi che $s$ non è multiplo di $p$ o $q$.\\
+Si genera quindi una sequenza di bit $B_1,B_2,\ldots$ secondo il seguente
+algoritmo:
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{BBS}{$s,p,q$}
+    \State $n\gets p\cdot q$
+    \State $X_0\gets s^2\bmod\,n$
+    \State $i\gets 1$
+    \While {$\top$}
+    \State $X_i\gets X_{i-1}^2\bmod \,n$
+    \State $B_i=X_i\bmod\,2$
+    \EndWhile
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo del Blum, Blum and Shub generator}
+\end{algorithm}
+Avendo che $B_i=X_i\bmod\,2$ equivale a $B_i\gets lsb(X_i)$.\\
+Si noti che $X_0$ è un valore in $\mathbb{Z}_n$, compreso tra 2 e $n-1$.\\
+La sicurezza si basa sulla difficoltà di fattorizzazione, anch'essa comunque non
+ancora dimostrata e si può provare che BBS supera il next bit test, non
+esistendo un algoritmo polinomiale che dati i primi $k$ bit della sequenza di
+output, $B_i,\ldots,B_k$ sia in grado di indovinare il $k+1$ bit, $B_{k+1}$, con
+probabilità significativamente maggiore di $\frac{1}{2}$.
+\section{Crittosistemi a Chiave Pubblica}
+Vediamo ora i \textbf{crittosistemi a chiave pubblica (\textit{Public-Key
+    Cryptsystems})}.\\
+Questi crittosistemi nascono nel 1975 da un problema dei crittosistemi
+simmetrici: Alice e Bob devono conoscere la stessa chiave segreta $k$. \\
+La svolta nel 1975 è che l'agreement della chiave viene fatto su un canale
+pubblico, con paper pubblicato nel 1976.\\
+Nel 1977 nasce RSA, dalle menti di Ronald Rivest, Adi Shamir e Leonard
+Adleman, il crittosistema a chiave pubblica più famoso e usato, con 
+paper pubblicato nel 1978.\\
+Il problema finora riscontrato, con Alice e Bob che devono conoscere la stessa
+chiave segreta $k$, si materializza qualora non sia possibile usare un canale
+sicuro per scambiarsi la chiave, cosa abbastanza comune. \\
+Per tutta la seconda metà degli anni sessanta si è studiata la complessità
+computazionale, studiando quanto sono complicate le operazioni che vengono
+svolte algoritmicamente, nascendo concetti come NP-completezza etc$\ldots$,
+raccolti nel 1978 nel famoso testo di Garey e Johnson. Si studia quindi come
+alcune operazioni siano facili se si conosce una certa informazione segreta e
+difficili altrimenti (le funzioni one-way diventano facili da invertire se si
+conosce tale informazione). Ma resta il problema di Alice e Bob che devono
+scambiarsi tale informazione segreta.\\
+\textbf{To be continued}
+
+\chapter{Ripasso Algebra \& co.}
+Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.
 \begin{definizione}
   Un \textbf{gruppo} $G$, indicato con:
@@ -5758,7 +5999,7 @@ a\in\mathbb{Z}_n$ si ha che $GCD(a,n)=1$ sse $\exists p$ primo e $\exists k\geq
 Possiamo quindi avere l'\textbf{algoritmo di Euclide esteso} che, dato
 $b\in \mathbb{Z}_n$, se $GCD(b,m)=1$ riesce a calcolare $b^{-1}\in\mathbb{Z}$ in
 modo molto efficiente.\\
-\textbf{Su slide bozze di pseudocodice}.\\
+\textbf{Su slide bozze di pseudocodice non verificato}.\\
 Si ha anche un modo per calcolare altro, oltre $b^{-1}\in\mathbb{Z}$. Tale
 versione si applica al caso più generale per cui $GCD(a,b)=r$ e si basa sulla
 \textbf{identità di Bezout} che enuncia, dato $r=GCD(a,b)$, che esistono sempre
@@ -5768,12 +6009,12 @@ cui:
 e l'algoritmo esteso con questa identità calcola, a partire da $a$ e $b$, la
 tripla $r,s,t$.\\
 Si ha che $s$ e $t$ sono i coefficienti di una combinazione lineare di $a$ e $b$
-che da il valore di $r=GCD(a,b)$
-\textbf{Su slide bozze di pseudocodice}.\\
+che da il valore di $r=GCD(a,b)$.\\
+\textbf{Su slide bozze di pseudocodice non verificato}.
 
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
 % LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
-% LocalWords:  Shannon
+% LocalWords:  Shannon esponenziazione algoritmicamente

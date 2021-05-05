@@ -2982,7 +2982,7 @@ di un codice e quindi con la codifica di sorgente.\\
 Si prende una sorgente con $q$ simboli $s_i$, con probabilità $p_i$. Si supponga
 di avere codeword $l_i$ per un codice istantaneo. Ho la disuguaglianza di Kraft,
 con $K\leq 1$:
-\[K=\sum_{i=1}\frac{r^{l_i}}\leq 1\]
+\[K=\sum_{i=1}^q\frac{1}{r^{l_i}}\leq 1\]
 Definisco, $\forall i\in\{1,\ldots, q\}$:
 \[Q_i=\frac{r^{-l_i}}{K}\]
 I vari $Q_i$ sono $\in[0,1]$ e quindi le posso considerare singolarmente come
@@ -4203,7 +4203,7 @@ le ultime lettere dell'alfabeto, spesso poco frequenti).\\
       e & n & y & p & t\\
       g & a & h & b & d\\
       f & i & k & l & m\\
-      q & v & q & z & z
+      q & v & q & x & z
     \end{matrix}
   \right]
 \]
@@ -4290,14 +4290,31 @@ ottengono le varie chiavi derivate, dopo $26^n$ posizioni per $n$ rotori. Ogni
 analisi statistica è destinata a fallire.\\
 La \textbf{macchina Enigma} è ancora più complessa. Grande poco più di una
 macchina da scrivere ha gli stessi tasti, in modo che si possa inserire
-facilmente $m$. Si hanno di base 4 rotori, con per di più possibilità di
+facilmente $m$. Si hanno di base 3 rotori (ma poi sono aumentati), con per di
+più possibilità di 
 cambiarli con altri rotori. Si sceglieva la posizione iniziale dei rotori e dopo
 ogni lettera si accendeva una lampadina corrispondente alla lettera
 cifrata. Faceva parte della chiave iniziale anche uno \textbf{scambiatore}, che
-costituiva una ulteriore permutazione fissa ().
-
-
-\section{Crittoanalisi}
+costituiva una ulteriore permutazione fissa (\textbf{immagini su slide}). La
+cifratura faceva inoltre due giri sui rotori. La
+macchina andava a batteria e durava un'intera giornata. \\
+Decifrare a mano era letteralmente impossibile. I polacchi hanno iniziato per
+primi a lavorare a come funzionassero le macchine Enigma per capire come
+intercettare i nazisti. Anche gli inglesi le hanno studiate, capendo come
+annullare l'effetto degli scambiatori, che per di più obbligavano una lettera a
+non essere mai cifrata con se stessa.\\
+Non si poteva comunque lavorare a mano e quindi Alan Turing costruì i macchinari
+per decifrare. Tali macchinari erano delle \textbf{bombe logiche} e facevano
+attacchi bruteforce (facendo molto casino a livello di rumore sonoro per di
+più) tentando più chiavi in contemporanea, sapendo testo in chiaro e testo
+cifrato. Se la chiave non andava bene scattava alla seguente producendo appunto
+un suono simile al ticchettio di una bomba.\\
+In merito si torna al discorso di quanto tempo può restare cifrato un messaggio
+e avendo dietro gli Alleati che pagavano per costruire macchine per decifrare
+tale tempo era alla fine poco.\\
+C'era anche il macchinario detto \textbf{Colossus}, con la stessa potenza di un
+Pentium 4, dedicato solo a studiare il keyspace.
+\subsection{Crittoanalisi per Crittosistemi Storici}
 Si possono in generale avere quattro scenari di attacco, in ordine di vantaggio
 crescente per Eve:
 \begin{enumerate}
@@ -4373,11 +4390,1217 @@ Se ogni volta scelgo a caso uno degli omofoni significa che lo stesso testo,
 cifrato due volte in tempi diversi, porta a due ciphertext diversi. Lo stesso
 testo in chiaro ha quindi sempre in ciphertext diverso ma questo non ha problemi
 in fase di decifratura, nel momento in cui conosco le omofone. La decifratura
-resta deterministica ma la cifratura diventa comunque più robusta.\\
+resta deterministica ma la cifratura diventa comunque più robusta.
+\section{Crittosistemi Standard}
+Nei tempi moderni, in ambito bancario, si è cercato ad un modo sicuro per
+trasportare tra banche i registri con le cifre rappresentati i soldi. Ovviamente
+tali registri devono essere sicuri.\\
+Fino agli anni settanta ogni banca usava il proprio crittosistema, venduti da
+aziende con annesso hardware. Se due banche dovevano comunicare dovevano
+scegliere lo stesso.\\
+Si inizia a pensare ad un crittosistema standard buono per usi civili, come
+quelli bancari, ma anche non così buono per fini militari. Parte una ``gara''
+per fare questo crittosistema standard. Negli USA c'era IBM che nel 1977
+sviluppa \textbf{DES}, grazie ad un gruppo di ricerca tra cui
+Feistel. All'inizio il crittosistema creato fu \textbf{Lucifer}, che venne però
+considerato eccessivo, rallentando inutilmente onerosi i calcoli per l'hardware
+dell'epoca (oltre alla volontà di indebolirlo per scopi civili da parte del
+governo). L'NSA aveva avuto da dire anche sulle \textbf{s-box} di DES, ovvero le
+parti 
+non lineari, in quanto a conoscenza di sistemi non pubblici in grado di
+romperle. DES usa chiavi a 56 bit, che a breve sarebbero diventate poche.\\
+Si fa quindi una nuova ``gara'' che viene vinta da Daeman e Rijmen che creano
+\textbf{AES}, con chiave da 128, 192 e 256 bit. AES verrà rotto dai computer
+quantistici, è solo questione di tempo. Abbandoneremo quindi molti crittosistemi
+attuali ma se ne hanno altri che resistono ai computer quantistici.
+\subsection{DES}
+\textbf{Non chiesti all'orale i dettagli, su slide ci sono le matrici e le
+  varie tabelle}.\\
+La chiave è lunga 56 bit avendo quindi un keyspace di $2^{56}$, che ora come ora
+sono pochi. Questi 56 bit hanno un bit di parità ogni 7, in modo che ogni byte
+sia dispari, che è un pasticcio inutile. Sono quindi 56 bit più 8 di parità, che
+sono dipendenti.\\
+DES fa iterazioni con una \textit{round function} su blocchi di 64 bit di $m$
+per ottenere un $c$ di 54 bit. Ad ogni iterazione usa una chiave derivata
+diversa calcolata dai 56 bit della chiave iniziale. Si ha che il calcolo delle
+chiavi derivate è:
+\begin{itemize}
+  \item si riceve il pacchetto di 64 bit di $m$
+  \item applico la permutazione iniziale, accedendo ai singoli bit della chiave
+  e ai singoli bit di $m$. La permutazione è una matrice $8\times 8$
+  \item le prime 4 righe le chiamo $c_0$ e sono 28 bit e le altre quattro $D_0$
+  \item calcolo da $C_{n-1}$ e $D_{n-1}$, per $1\leq n\leq 16$, i $C_n$ e i
+  $D_n$, applicando due rotazioni a sinistra verso $C_{n-1}$ e $D_{n-1}$
+  (\textbf{esempio su slide})
+  \item si fa una \textbf{selezione permutata} per $C_n$ e $D_n$ per $1\leq
+  n\leq 16$, chiamando $K_n$ il risultato. Si hanno quindi 16 chiavi
+  derivate. Ogni $K_i$ ha 48 bit
+\end{itemize}
+Per la cifratura (che si ricorda avere chiave di 56 bit):
+\begin{itemize}
+  \item si divide $m$ in blocchi di 64 bit che viene cifrato separatamente. Ogni
+  blocco cifrato lo chiamo $w$
+  \item a partire da $w$ si applica una permutazione iniziale, ovvero una
+  matrice $8\times 8$, chiamando $l_0$ e
+  $R_0$ le prime e le seconde 4 righe (ciascuno è di 32 bit), avendo che
+  $w=L_0R_0$. Si usano i nomi $L$ e $R$ perché sono a sinistra e destra della
+  struttura di Feistel
+  \item calcolo da $L_{n-1}$ e $R_{n-1}$, per $1\leq n\leq 16$, i $L_n$ e i
+  $R_n$ tramite:
+  \[L_n=R_{n-1}\]
+  \[R_n=L_{n-1}\oplus f(R_{n_1},K_n)\]
+  Questi due conti sono detti \textbf{round function} si usa, nel secondo, una
+  chiave derivata. La funzione $f$ prende in input un input di 32 bit e uno, la
+  chiave, di 48 bit e restituisce un risultato a 32 bit
+  \item $c$ si ottiene applicando l'inversa della permutazione iniziale al
+  blocco $R_{16}L_{16}$ 
+\end{itemize}
+Quindi la cifratura è un'iterazione in cui si applicano le permutazioni usando i
+vari principi di confusione etc$\ldots$ di Shannon.\\
+Si ha quindi una \textbf{cifratura a blocchi}.\\
+La cifratura era computazionalmente pensata per essere fatta su hardware
+specifico. \\
+Si noti che la permutazione iniziale della fase di cifratura non aggiunge alcuna
+sicurezza al crittosistema, in quanto la tabella della permutazione iniziale
+è fissa (\textbf{tabella presente nelle slide}). In AES vedremo che si userà la
+chiave anche per la prima e l'ultima permutazione.\\
+Per decifrare:
+\begin{itemize}
+  \item preso $c$, di 64 bit, si applica la permutazione iniziale ottenendo
+  $L_{16}R_{16}$
+  \item si ricostruiscono $L_0$ e $R_0$, iterativamente tramite:
+  \[R_{n-1}=L_n\]
+  \[L_{n-1}=R_n\oplus f(L_n,k_n)\]
+  per risalire la struttura di Feistel. Queste due equazioni sono l'inversa
+  della round function. Le $K_n$ ovviamente le applico a partire
+  dalla 16 fino alla 0.\\
+  Chiamo $w'=L_0R_0$
+  \item applicando $w'$ all'inversa della permutazione iniziale si ottiene $w$
+\end{itemize}
+Vediamo ora meglio al funzione $f$. Si ha:
+\begin{itemize}
+  \item \textbf{input:} un blocco $L_n$ di 32 bit e una chiave/blocco di 48 bit
+  $K_n$ 
+  \item \textbf{output:} un blocco di 32 bit
+\end{itemize}
+Si procede così:
+\begin{itemize}
+  \item si prende $L_n$ e lo si espande a 48 bit usando come permutazione una
+  matrice $8\times 6$ con numeri ripetuti
+  \item questo blocco è un xor bit a bit con $K_n$. Chiavo $B$ il risultato, di
+  48 bit
+  \item divido $B$ in 8 blocchi di 6 bit. Ogni blocco viene risotto a 4 bit,
+  $B'$  usando una tabella s-box $s_i$. Per $B_1$ produco $B_1'$ con $s_1$
+  etc$\ldots$. Tali $s_i$ sono fisse. Per fare ciò si prendono il primo e
+  l'ultimo bit di $B$, che quindi insieme sono un $x\in\{0,1,2,3\}$. I 4 bit
+  centrali sono un numero $y\in\{0,\ldots,15\}$. Si ha che $x$ e $y$ sono riga e
+  colonna che useremo in $s_i$. Quindi $B_i'$ è il numero espresso in binario
+  del valore contenuto in $s_i$ alla riga $x$ e la colonna $y$.\\
+  \textbf{Esempio su slide}.\\
+  A tale $b'$ si applica un'ulteriore permutazione prima di restituire il
+  risultato 
+\end{itemize}
+Quest'ultima parte è la parte \textit{non lineare}, in quanto si usano matrici
+di sostituzione (le s-box), dove le sostituzioni non sono lineari. Le s-box sono
+fisse e sono la parte cruciale. Inizialmente IBM aveva proposto alcune tabelle
+ma l'NSA, a cui IBM ha chiesto consulenza, ha fatto sostituire tali tabelle,
+senza che l'NSA disse il perché. Si temeva che ci fosse dell'interesse un questa
+modifica, viste le modalità della stessa, ma in realtà si è scoperto che NSA non
+aveva secondi fini. Quelle nuove tabelle non erano \textit{backdoor} ed erano
+più sicure nei confronti di nuovi attacchi, la crittoanalisi lineare e la
+crittoanalisi differenziale, rispetto alle tabelle iniziali (probabilmente l'NSA
+già lo sapeva, 20 anni prima). Ovviamente sono tutte supposizioni.\\
+Vediamo quindi le proprietà del DES. \\
+Tra i pro:
+\begin{itemize}
+  \item è veloce usando hardware dedicato per prendere i singoli bit. Le
+  operazioni sono veloci e le matrici sono fissate (cosa che permette un accesso
+  ancora più veloce). Si usano addirittura delle \textbf{lookup table}, fissate,
+  con tutti i valori pre-calcolabili
+  \item la crittoanalisi di crittosistemi deve lavorare su sistemi non lineari
+  complessi, risoluzione dei quali tendenzialmente è un problema NP-complete. Si
+  è provato a che a semplificare tutte le equazioni ma non si sono raggiunti
+  risultati  
+  \item grazie a NSA il DES resiste a crittoanalisi lineare e differenziale
+\end{itemize}
+Tra i contro, motivi per i quali non è più sicuro:
+\begin{itemize}
+  \item la chiave è lunga solo 56 bit
+  \item si può costruire hardware specifico che lavori sul keyspace di $2^{56}$
+  bit. Tali macchine sono dette \textit{DES Cracking Machine}. Tale
+  macchina parallela, con 1800 processori, trovava nel 1998 la chiave in circa
+  due giorni. Ai giorni nostri si ha addirittura hardware programmabile a
+  livello consumer 
+  \item l'hardware dedicato a rompere DES, secondo diverse stime, non era così
+  costoso, a fine anni '70 
+  era sui 20 milioni di dollari, a fine anni '90 comunque 250000
+  dollari (a causa della legge di Moore). Rompere il crittosistema non costava
+  più dei guadagni in caso di rottura in diversi casi  
+\end{itemize}
+A fine anni '90 si è capito che DES non andasse più bene. A metà anni '90 parte
+una competizione per cambiare sistema ma questa richiede anni. Nel frattempo si
+è usato \textbf{triple-DES (\textit{3DES})} come alternativa a DES. In 3DES si
+usano due chiavi $k_1$ e $k_2$ da 56 bit ciascuna e si procede così:
+\begin{itemize}
+  \item si cifra $w$ con $k_1$, ottenendo $c_1$
+  \item si decifra $c_1$ con $k_2$ ottenendo $c_1$
+  \item si cifra $c_2$ con $k_1$, ottenendo $c$
+\end{itemize}
+Usando quindi la \textbf{cifratura EDE
+  (\textit{encryption-decryption-encryption})}. \\
+Questo sistema è compatibile con l'hardware certificato per DES. Quindi
+certificare 3DES non era complicato, dovendo chiamare DES 3 volte con due
+chiavi.\\ 
+Per 3DES c'era anche la versione con 3 chiavi.
+\subsection{AES}
+Nella competizione i sistemi non open non furono accettati, questo perché gli
+esperti devono studiarne la sicurezza.\\
+La competizione fu vinta da Rijndael (letto come se fosse ``rain doll''), un
+sistema creato da 
+due Belgi, Daeman e Rijmen (da qui il nome del sistema). Rijndael è quindi il
+nuovo standard, detto \textbf{AES}, a partire dal 2002.\\
+Il sistema cifra blocchi da 128 bit e si hanno chiavi tipicamente di 128, 192 e
+256 bit (AES-128, AES-192, AES-256). Si potrebbero usare altre chiavi.\\
+A differenza di DES lavora su byte e non sui bit essendo quindi più efficiente e
+in grado di lavorare su più tipologie di hardware, di vario
+prezzo. L'implementazione software è molto semplice. Nello standard sono
+descritti i tradeoff tra dimensione della memoria e efficienza dell'algoritmo,
+usando anche qui delle lookup table.\\
+\textbf{Studiamo solo AES-128} ma le altre versioni sono quasi identiche, al più
+della generazione delle chiavi derivate e il numero di iterazioni durante la
+cifratura.\\ 
+L'algoritmo non accede ai singoli bit e organizza i 16 byte in una matrice
+$4\times 4$ da leggere per colonne.\\
+All'inizio la matrice contiene i 16 byte di $w$ (prima colonna da $w_0$ a $w_3$,
+seconda da $w_4$ a $w_7$ etc$\ldots$) e alla fine quelli di $c$. Tale matrice è
+detta \textbf{matrice di stato}.\\
+Le chiavi derivate vengono chiamate \textbf{round key}.
+In generale, per la cifratura:
+\begin{itemize}
+  \item si prende $w$ e li si mette nella matrice di stato
+  \item si fa uno xor tra la matrice di stato e la round key
+  \item si fanno 9 round in cui:
+  \begin{itemize}
+    \item si fa la sostituzione dei byte della matrice di stato con una s-box,
+    operazione detta \textit{SubBytes}. È l'unica parte non lineare ed è
+    veramente ``ridotta all'osso''. È una trasformazione invertibile e si opera
+    su ogni byte della matrice e si sostituisce ogni byte con sempre la stessa
+    s-box, fissata nello standard. Tale s-box è una matrice $16\times 16$ che
+    permette sostituzioni di bytes. Tale s-box è facilmente calcolabile, infatti
+    preso il byte b la sostituzione è in realtà un semplice conto. Se $b\neq 0$
+    metto $b=b^{-1}$. Quindi il risultato è $A\cdot b+c$, con $A$ matrice
+    fissata di bit. Ma questa è una operazione lineare. La parte non lineare è
+    in $b=b^{-1}$. Posso rappresentare il byte $b=b_7\ldots b_0$ come vettore di
+    bit, come per 
+    $A\cdot b+c$, ma anche come $GF(2^8)$, ovvero un \textbf{campo di Galois},
+    quindi come un polinomio in $x$, dove i $b_i$ sono i coefficienti ($b_0$ è
+    il termine noto). Fare l'inverso è trovare il polinomio che moltiplicato per
+    quello che rappresenta $b$ da come risultato 00000001. Tutto questo avviene
+    ``modulo'' un polinomio fissato irriducibile. Si divide il polinomio in
+    analisi per quello fissato e si ottiene un quoziente e un resto. Tale
+    resto è un polinomio di grado inferiore a quello di quello fissato. Si usa
+    quindi un polinomio fissato di grado 8. In pratica volendo potrei fare i
+    conti anziché usare la s-box ma questo ha pochissimi casi d'uso
+    \item si ruotano le righe, operazione detta \textit{ShiftRows}. In questa
+    operazione si ruotano verso a sinistra le righe della matrice. Si ruota di
+    $i$ posizioni per la i-esima riga (quindi la prima resta uguale, avendo
+    $i=0$) 
+    \item si fanno operazioni sulle colonne, operazioni dette
+    \textit{MixColumns}. In questa operazione si mettono i byte della colonna e
+    si moltiplicano per una matrice $4\times 4$, fissata anch'essa nello
+    standard. Il risultato è la nuova 
+    colonna. Tale conto è facile con hardware a 32 bit e in caso di hardware
+    inferiore bisogna iterare più volte il conto 
+    \item si applica la \textit{addRoundKey}, ovvero lo xor bitwise con la
+    chiave derivata, come per DES. Su una macchina a 32 bit lo xor viene facile
+    in 4 mosse, facendo lo xor di 4 byte per volta. Se si hanno meno bit devo
+    farlo in più mosse.   
+  \end{itemize}
+  \item si fa un ultimo round senza \textit{MixColumns}
+  \item lo stato ora raggiunto è $c$
+\end{itemize}
+\textit{In generale, nei vari passaggi, quando si parla di moltiplicazioni si ha
+  che esse sono fatte sui bytes. Quando si parla di somme si parla di
+  xor. Lavorando con $GF(2^8)$ si ha infatti a che fare con un campo, con somma
+  e prodotto.}.\\
+Passiamo alla generazione delle chiavi derivate.\\
+Per AES-128 dobbiamo generare 11 chiavi, avendo ``11 step'' di esecuzione. Ogni
+chiave è di 16 byte. L'algoritmo è pensato per architetture a 32 bit quindi con
+word da 4 byte ma ovviamente può essere fatto con architetture di bit inferiori,
+ripensando il calcolo. 11 chiavi da word di 4 byte comportano che servono 44
+byte che vengono salvati in un array $w[0..43]$. In input l'algoritmo prende la
+chiave da 16 bytes e la mette nell'array $key[0..15]$. Si usa poi un array di
+costanti $Rcon$ che presenta un certa regolarità (\textbf{vedere slide}).\\
+In generale si ha (\textbf{pseudocodice su slide}):
+\begin{itemize}
+  \item un ciclo for che calcolo da $w[0]$ a $w[3]$. Le prime 4 word
+  corrispondono alla chiave
+  \item un ciclo per gli altri valori di $w$. Gli altri valori di $w$ si
+  calcolano a partire dal precedente in modo lineare con uno xor. La parte non
+  lineare viene ottenuta dal fatto che una volta su 4 si fa una piccola
+  modifica, facendo una rotazione a sinistra (di una posizione tramite
+  \texttt{RotWord}) e facendo una sostituzione
+\end{itemize}
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{GenerateKey}{$key, Rcon$}
+    \For {$i=0$ \textbf{to} $3$}
+    \State $w[i]=(key[4i],key[4i+1],key[4i+2],key[4i+3])$
+    \EndFor
+    \For {$i=4$ \textbf{to} $43$}
+    \State $temp=w[i-1]$
+    \If{$i\equiv 0(\bmod \,\,4)$}
+    \State $temp=SubWord(RotWord(temp))\oplus Rcon\left[\frac{i}{4}\right]$
+    \EndIf
+    \State $w[i]=w[i-4]\oplus temp$
+    \EndFor
+    \State \textbf{return} $(w[0],\ldots, w[43])$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di generazione delle chiavi derivate}
+\end{algorithm}
 
+Passiamo quindi alla decifratura.\\
+In questa fase si applicano all'inverso delle operazioni della cifratura,
+eseguite anche in ordine inverso. Si hanno quindi, in ordine:
+\begin{itemize}
+  \item lo stato iniziale è il testo cifrato
+  \item si fa una \texttt{AddRoundKey}
+  \item da round che va da 9 a 1 si fanno:
+  \begin{itemize}
+    \item \texttt{InvShiftRows}, che ruota a destra di $i$ posizioni per
+    l'i-esima riga (che in realtà è uguale a fare ulteriori rotazioni a
+    sinistra) 
+    \item \texttt{InvSubBytes}, che usa l'inversa della trasformazione
+    \texttt{SubBytes}, che nella realtà si riduce all'uso dell'inversa della
+    s-box presente nello standard
+    \item \texttt{AddRoundKey}, che è l'inversa di se stessa facendo lo xor bit
+    a bit (per cui non ho una \texttt{InvAddRoundKey})
+    \item \texttt{InvMixColumns}, che è l'inverso del mapping fatto da
+    \texttt{MixColumn}, moltiplicando per l'inversa della matrice standard usata
+    nell'operazione standard 
+  \end{itemize}
+  \item si eseguono ancora una volta \texttt{InvShiftRows}, \texttt{InvSubBytes}
+  e \texttt{AddRoundKey}
+  \item si pone $w$ come lo stato raggiunto 
+\end{itemize}
+Fino ad ora AES ha resistito a tutti gli attacchi noti. Versioni ridotte di AES
+sono state rotte ma lo standard no. Questo nonostante la s-box sia l'unica parte
+non lineare. In AES si adotta la \textbf{wide trail strategy} come fondamento
+teorico, dove si dispongono sotto diagramma le operazioni fatte, e si ha che
+servirebbero troppi tentativi per fare crittoanalisi lineare o differenziale su
+AES (???). Quindi nonostante la minima parte lineare è resistente a tali
+attacchi.  \\
+\subsection{Modi di Operazioni}
+I primi \textbf{modi di operazioni} sono stati descritti per la prima volta con
+DES ma possono essere applicati a tutti i cifrari.\\
+Lo scenario è che si ha una
+sequenza di testi in chiaro $m_1,m_2,\ldots$, una chiave iniziale $k$ e una
+sequenza di testi cifrati da produrre $c_1,c_2,\ldots$. Si hanno vari modi per
+farlo:
+\begin{itemize}
+  \item \textbf{ECB}, che deriva dal nome \textit{Electronic CodeBook} che è il
+  modo più veloce e meno sicuro. Si prende $m_1$ e lo si cifra in $c_1$ con $k$,
+  poi prendo $m_2$ e lo cifro con $k$ e così via. Uso sempre la stessa chiave
+  cifrando in modo indipendente. Se il canale è rumoroso tale indipendenza
+  consente di perdere solo i blocchi cifrati mandati durante la fase di rumore e
+  non gli altri, essendo indipendenti. Un altro aspetto positivo e che posso
+  cifrare in parallelo. Di contro se cifro lo stesso messaggio in chiaro con la
+  stessa chiave mi esce sempre lo stesso testo cifrato e questo è un grave
+  limite se si devono cifrare molte copie dello stesso messaggio. Uso $E_k$ per
+  cifrare e $D_k$ per decifrare
+  \item \textbf{CBC}, che deriva da \textit{Cipher Block Chaining}, dove il
+  testo in chiaro 
+  $m_1$ viene disturbato da un certo $c_0$ scelto a priori. Prodotto $c_1$ esso
+  sarà usato per ``disturbare'', tramite uno xor, la cifratura di $m_2$ e così
+  via. Per ognuno si usa 
+  comunque la stessa $k$:
+  \[c_1=E_k(c_0\oplus m_1)\]
+  \[c_2=E_k(c_1\oplus m_2)\]
+  \[\ldots\]
+  Nel dettaglio per $c_0$ si usa un valore di inizializzazione che non è
+  considerato parte della chiave e sarebbe meglio cambiasse ad ogni
+  cifratura. Alice e Bob devono accordarsi anche su $c_0$. \\
+  CBC è molto più sicuro di ECB. Provare tutte le combinazioni per risalire al
+  risultato dello xor è troppo complesso, rendendo sicuro il sistema. Un difetto
+  di CBC, ma in generale di tutti i sistemi che fanno chaining, è che se il
+  ricevente si perde un blocco cifrato causa rumore si perde ogni cifratura
+  successiva, visto che la decifratura parte da $c_0$ e $c_1$ per $m_1$ per poi
+  andare a catena su tutti gli altri (usando $c_1$ e $c_2$ per $m_2$
+  etc$\ldots$). CBC va usato quindi su canali affidabili ed è solo ad uso
+  seriale e non parallelo. Uso $E_k$ per
+  cifrare e $D_k$ per decifrare
+  \item \textbf{OFB}, che deriva da \textit{Output FeedBack}, sfrutta l'idea per
+  cui l'output è abbastanza causale da poter essere usato come numero
+  pseudocasuale. Si semplifica al massimo il processo di cifratura, decidendo in
+  modo causale quali bit negare usando lo xor e ottenendo il testo cifrato:
+  \[c_i=(m_i\oplus z_i)\]
+  con $z_i$ ``chiave'' di un keystream, dove:
+  \[z_i=E_k(z_{i-1})\]
+  In pratica le $z_i$ sono circa dei numeri pseudocasuali.\\
+  Come vantaggio si ha che lo xor è implementata in ogni processore e la parte
+  più pesante è la generazione del keystream (cosa che può essere fatto però
+  prima di quando servono, generandone un po' a priori). Sarebbe meglio non
+  riusare le stesse chiavi più volte (anche perché scoperta $z_i$ si potrebbe
+  risalire a tutti i $z_i$ successivi). Il vantaggio è che il rumore rovina solo
+  una singola decifratura visto che dipende solo da $z_i$, essendo il keystream
+  quello che non deve essere perso (keystream che si ha in locale). Si usa
+  quindi in canali molto rumorose (sonde spaziali etc$\ldots$). Questo
+  metodo è comunque poco usato e tra i problemi si ha la perdita di
+  sincronizzazione tra Alice e Bob sulla chiave $z_i$ da usare, cosa che
+  comporta seri problemi. Si ha però l'attacco \textit{bit flipping} dove Eve
+  altera il messaggio cifrato, danneggiando la decifratura che si basa sullo
+  xor, danneggiando in pratica anche il testo in chiaro. Si noti
+  che non si usa $D_k$
+  \item \textbf{CFB}, che deriva da \textit{Cipher FeedBack}, dove si uniscono
+  OFB e CBC. Si ha quindi:
+  \[z_i=E_k(c_{i-1})\]
+  \[c_i=m_i\oplus z_i\]
+  Con $c_0$ scelto a priori.\\
+  Avendo che le chiavi del keystream vengono calcolate dal messaggio cifrato
+  precedente. Nella decifratura si procede al contrario partendo da $c_0$ e
+  $c_i$ per $m_1$ etc$\ldots$. Si hanno quindi i contro del chaining visti
+  sopra in caso di rumore mentre come pro si ha che l'ultimo blocco può essere
+  usato come verifica che il messaggio non sia alternato, visto che dipende da
+  tutti i precedenti, verificando l'integrità usandolo come \textit{Message
+    Authentication Code}.\\
+  Si hanno anche varianti come \textbf{s-bit CFB} dove si ha anche una rotazione
+  di $s$ bit, solitamente $s=8$ pari 1 byte (pensandolo quasi come un cifrario a
+  blocchi) dopo l'uso di $E_k$. Anche CFB e varianti sono poco usati e
+  funzionano solo in modo seriale e non parallelo. Si noti
+  che non si usa $D_k$
+  \item \textbf{CTR}, che deriva da \textit{Counter Mode}. Proposto per il DES
+  si basa sull'idea che si genera un keystream usando un contatore,
+  inizializzato a $cont_0$:
+  \[z_i=E_k(cont_0+i)\]
+  Per poi fare:
+  \[c_i=m_i\oplus z_i\]
+  Anche qui per decifrare si usano $c_i$ e la chiave incrementata di $i$ per
+  $m_i$.\\ 
+  Anche qui si ha il problema di OFB non dovendo perdere la sincronizzazione sul
+  valore del contatore. CTR poò essere usato in parallelo. Si noti che non si
+  usa $D_k$ 
+\end{itemize}
+Si segnala che se un crittosistema funziona bene posso usare l'output come
+generatore di numeri pseudocasuali, grazie alle operazioni svolte per ottenere
+il testo cifrato.\\
+Tutti questi sistemi usano un crittosistema come \textit{black bo}.\\
+\subsection{Cifrari a Blocchi e a Flusso}
+Per ora si sono visti ai \textbf{cifrari a blocco}, DES e AES, dove si divide
+$m$ in blocchi (dovendo in caso aggiungere caratteri fittizi per avere la
+costruzione di blocchi, facendo padding,
+con valori pseudocasuali ma riconoscibili) e si cifra ogni blocco.\\
+Coi \textbf{cifrari a flusso} si lavora sulla cifratura di grandi dati, bit a
+bit o byte a byte. Serve quindi qualcosa di semplice per cifrare e decifrare e
+la cosa spesso si traduce col fare un semplice xor. Si ha quindi una semplice
+cifratura con xor mentre lo sforzo computazionale è nella costruzione della
+chiave generata. Due esempi di cifrari a flusso sono \textbf{Vigenere} e
+\textbf{One time Pad}. Un discorso del genere è simile a quello fatto con OFB
+(che però usava un cifrario a blocchi), che quindi può essere visto come
+cifrario a flusso.\\
+I cifrari a blocchi sono comunque più usati e sono ispirati alle \textbf{reti di
+permutazione e sostituzione (\textit{Substitution-Permutation Networks, SPN})}
+che applicano i principi di confusione e diffusione di Shannon (che ha
+teorizzato le SNP). La struttura i Feistel possono essere viste come una
+variante delle SNP.
+\subsubsection{Principi di Confusione e Diffusione}
+I \textbf{principi di confusione e diffusione} di Shannon sono stati introdotti
+negli anni '40 con lo scopo di rendere l'analisi statistica dei testi cifrati
+molto complessa, rendendoli non correlati al testo in chiaro. \\
+Con la \textbf{diffusione} la struttura statistica del testo cifratura viene
+distribuita 
+su tutto il testo, in modo che ogni simbolo ha effetto su molti simboli. Ogni
+simbolo è quindi determinato da molti simboli. Questa si ottiene con una
+permutazione seguita da una funzione non lineare.\\
+La \textbf{confusione} comporta che modifiche del testo in chiaro e della chiave
+dovrebbero portare a modifiche imprevedibili al testo cifrato. Questa cosa si
+ottiene con una sostituzione complessa (le s-box). \\
+Questi principi si applicano ad ogni round e si applicano in modo incrementale
+all'output ottenuto allo step prima, ottenendo un \textbf{effetto valanga}. Alla
+fine si ottiene una correlazione minima e un piccolo cambiamento di $m$ o $k$
+produce modifiche significative in $c$ (per questo posso pensare ad un
+crittosistema come un generatore di numeri pseudocasuali). \\
+\subsubsection{SNP}
+Si hanno due permutazioni, avendo che $w$ e $c$ sono di $l\cdot m$ bits:
+\begin{itemize}
+  \item $\pi_S:\{0,1\}^l\to\{0,1\}^l$, sono le sostituzioni con le s-box
+  praticamente 
+  \item $\pi_P:\{1,\ldots, l\cdot m\}\to\{1,\ldots, l\cdot m\}^l$
+\end{itemize}
+Si ha che $w$ può essere visto come una concatenazione di $m$ blocchi
+$w_{(0)}||\ldots || w_{(m)}$, ciascuno di $l$ bits. Data una chiave $k\in
+\{0,1\}^{l\cdot m}$ si calcolano le chiavi derivate:
+\[k^1,k^2,\ldots, k^{N_r+1}\]
+Calcolo quindi una chiave in più del numero dei round $N_r$.\\
+Avendo che la rete fa $N_r$ rounds, dove in ognuno, tranne l'ultimo, si fanno
+$m$ sostituzioni, dopo aver fatto lo xor con la chiave derivata, con $\pi_S$ e
+una permutazione con $\pi_P$. Il tutto complica la vita dell'attaccante anche se
+si evitano complicazioni non necessarie. Applicare come prima e ultima
+operazione lo xor, come si vede nello pseudocodice, è detto \textbf{whitening}.
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{SNP}{$w, \pi_S, \pi_P, (k^1,k^2,\ldots, k^{N_r+1})$}
+    \State $w^0=w$
+    \For {$r=1$ \textbf{to} $N_r-1$}
+    \State $u^r\gets w^{r-1}\oplus k^r$
+    \EndFor
+    \For {$i=1$ \textbf{to} $m$}
+    \State $v_{(i)}^r=\pi_S(u^r_{(i)})$
+    \State $w^r=(v^r_{\pi_P(1)},\ldots v^r_{\pi_P(l\cdot m)})$
+    \EndFor
+    \State $u^{N_r}=w^{N_r-1}\oplus k^{N_r}$
+    \For {$i=1$ \textbf{to} $m$}
+    \State $v_{(i)}^{N_r}=\pi_S(u^{N_r}_{(i)})$
+    \EndFor
+    \State $c=v^{N_r}\oplus k^{N_r+1}$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo per calcolo cifratura con SNP}
+\end{algorithm}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.45]{img/snp.jpg}
+  \caption{Schema di una SNP. Fino al blocco $k^2$ escluso si ha il
+    primo e unico round.}
+  \label{fig:spn}
+\end{figure}
+\subsubsection{Struttura di Feistel}
+Possiamo quindi parlare della \textbf{struttura di Feistel}.\\
+Feistel cercava una cifratura ovviamente reversibile. Si usa un \textbf{decoder}
+da $n$ a $2^n$ bit e poi un \textbf{encoder} da $2^n$ a $n$ bit, per cifrare il
+testo in 
+chiaro di $n$ bit. Tra il decoder e l'encoder si ha una 
+struttura/permutazione che permette una sostituzione monoalfabetica di $2^n$
+simboli, ovviamente questa non è fisicamente realizzabile con un circuito
+elettronico.\\  
+Si spezza quindi la permutazione in blocchi realizzabili in hardware che può
+essere usato in serie o parallelo, con un'idea simile ad una SNP. Feistel per
+approssimare la cifratura usa quindi piccoli moduli, alternando sostituzioni e
+permutazioni come detto da Shannon.\\
+Si prende quindi un testo in chiaro $m$, di $2\cdot w$ bit, e la chiave $k$, da
+cui genero le $k^i$, con $i\in[1,n]$, chiavi derivate. Divido $m$ in $L_0$ e
+$R_0$ che poi vengono trasformati in $L_iR_i$, con $i\in[1,n]$ (si noti la
+natura del DES).\\
+Si ha quindi la sostituzione, con $F$ round function come nel DES (o meglio
+quella del DES è come questa):
+\[L_i=L_{i-1}\oplus F(R_{i-1}, k^i)\]
+per poi la permutazione:
+\[L_i=R_{i-1}\]
+\[R_i=L_{i-1}\oplus F(R_{i-1}, k^i)\]
+Dopo tutti i round si cancella l'effetto dell'ultima permutazione che non
+aggiunge sicurezza (in alternativa tale round può essere modificato). Si ottiene
+infine $c$\\
+La struttura di Feistel comporta che è più sicuro, ma più lento, all'aumentare
+della grandezza di chiavi, blocchi, numero di round o all'aumentare della
+complessità di $F$ o del sistema di generazione di chiavi derivate
+etc$\ldots$.\\
+La sfida non è solo la sicurezza ma anche l'efficienza. \\
+Per decifrare con la struttura di Feistel applico al contrario le inverse delle
+operazioni di cifratura. Il diagramma di una struttura di Feisel è simmetrico
+(per questo annullo l'ultima operazione in fase di cifratura) tra cifratura  e
+decifratura (al più dell'ordine dell'uso delle chiavi). Questa simmetria aiuta
+lato hardware.
+\subsubsection{Crittoanalisi Lineare}
+La \textbf{crittoanalisi lineare} si basa sull'idea di approssimare la
+trasformazione da $m$ a $c$ attraverso una funzione lineare. Si ha quindi
+un'approssimazione parlando di base di funzioni non lineari. Si cercano
+relazioni 
+statistiche tra bit di $m$ e $u^j$, livello che precede le ultime applicazioni
+di s-box. Si procede a ternativi con lo xor ottenendo combinazioni di bit
+candidati per l'ultimo livello, vedendo se poi vale la relazione statistica. Si
+cercano quindi di indovinare alcuni bit della chiave di partenza ``risalendo''
+sulla SNP. Servono tanti tentativi, tante coppie $(c,m)$ etc$\ldots$.\\
+Si applicano teoremi per eventi indipendenti a eventi dipendenti.\\
+\textbf{Risentire questa parte (ultimi 10 minuti lezione 27 aprile)}.\\
+Cambiare la chiave di cifratura spesso riduce le chance di questo attacco.\\
+Possiamo quindi parlare della sicurezza del DES. \\
+Coppersmith, nel 1994, studiando le s.box di DES disse: \textit{nessun
+  bit di 
+output di nessuna s-box dovrebbe essere troppo vicino all'output di una funzione
+lineare. In particolare, se selezioniamo qualsiasi bit di uscita e qualsiasi
+sottoinsieme dei sei bit di ingresso, la frazione di ingressi per cui questo bit
+di uscita è uguale a xor di questi bit di ingresso non dovrebbe essere vicina a
+0 o 1, ma piuttosto dovrebbe essere vicina a $\frac{1}{2}$}.\\
+Si hanno anche tipi di attacchi che riguardano le implementazioni dei
+crittosistemi e non la loro matematica. Sono detti \textbf{side channel attack}.
+Si hanno anche i \textbf{timing attack} basati sul fatto che cifrare e decifrare
+richiede tempo diverso per diversi input. Oppure attaccando sensori al circuito
+per vedere quanta corrente serve per lavorare sui vari input. Nel 1999 si è
+trovato con un timing attack il peso di Hamming sul DES. Ci sono stati timing
+attack in grado di capire i vari pesi.\\ Si ha anche un attacco
+di crittoanalisi lineare cercando di costruire buone approssimazioni per
+ottenere infine l'ultima chiave. Studiando l'hardware crittografico durante il
+funzionamento del sistema si possono inoltre aggiungere rumori etc$\ldots$,
+magari anche scoprendo debolezze.\\
+Bisogna quindi approfondire le s-box, la parte non lineare dei crittosistemi
+visti. Per DES erano fatte a mano.\\
+Ci sono in generale 3 modi, dal più vecchio che nuovo:
+\begin{itemize}
+  \item prendere s-box grandi e più grandi sono meglio è. Tali s-box vengono poi
+  scelte a caso. Questa soluzione è molto grezza
+  \item scegliere s-box a caso ma facendo test statistici tenendo le
+  migliori. Soluzione migliore ma non ancora soddisfacente
+  \item usare criteri matematici, come misure di non linearità, disuguaglianze
+  per non linearità etc$\ldots$ Questi teoremi mitigano molti degli attacchi
+  citati. AES usa questi criteri, con il discorso della \textit{wide trail
+    strategy} 
+\end{itemize}
+Parlando dei \textbf{cifrari a flusso} si ha che vengono usati quando si hanno
+tantissimi dati da cifrare, come ad esempio flussi video. La decifratura deve
+avvenire su device mainstream poco potenti, come magari una TV.\\
+La cifratura deve essere quindi ``leggera'' e si cifra ogni bit/byte facendo lo
+xor con la chiave derivata, prodotta da un generatore di numeri casuali
+,\textbf{Pseudo-Random Number Generator (\textit{PRNG})}). Il PRNG produce la
+chiave derivata, di un bit/byte, che viene appunto poi usata in xor con il
+plaintext.\\
+I crittosistemi a flusso sono molto più performanti di quelli a blocchi e sono
+più brevi da scrivere in codice ma come contro non si possono usare le stesse
+chiave, in quanto la stessa chiave porta allo stesso messaggio cifrato,
+indebolendo il sistema, creando relazioni tra testi in chiaro e cifrati. In
+generale la sicurezza è data dalla qualità del PRNG. In generale:
+\begin{itemize}
+  \item la keystream deve avere un grande periodo, per rendere difficile la
+  crittoanalisi. Per questo si riusano ``mix'' degli stati interni etc$\ldots$
+  \item la keystream deve approssimare al meglio possibile una sequenza
+  randomica, per non provare ad approssimare One Time Pad
+  \item la chiave/seed del PRNG deve essere lunga almeno 128bit per evitare
+  attacchi bruteforce
+\end{itemize}
+Il seed è condiviso da Alice e Bob, in quanto a parità di seed si ha
+determinismo.\\  
+Un cifrario a blocchi in modalità OFB si comporta come un cifrario a flusso.\\
+\subsubsection{Linear Feedback Shift Registers}
+Un tema importante sono i \textbf{registri a scorrimento}, \textbf{Linear
+  Feedback Shift Registers (\textit{LFSR})}.\\
+Sono stati creati per creare un keystream in modo più veloce di quello di un
+cifrario a blocchi.\\
+Bisogna generare un keystream $z_1,z_2,\ldots$, potenzialmente infinito ma non
+periodico. Si parte da $n$ bit $k_i$. L'idea è quella di fare delle operazioni
+xor con $k_1$ e $k_2$, da prendere a seconda di una certa maschera (se ho
+associato 0 non lo considero se 1 si), per generare
+gli altri $k_i$. Nel dettaglio:
+\begin{itemize}
+  \item è dato l'alfabeto $L=\{0,1\}$ ed è dato $c_0,\ldots
+  c_{m-1}\in\mathbb{Z}_2$, con $m$ costante
+  \item si parte con una sequenze $k_1,\ldots k_m$
+  \item si pone $z_i=k_i,\,\,\,\forall i\in\{1,2,\ldots,m\}$ 
+  \item $\forall i\geq 1$ si calcola $z_{i+m}$ usando la ricorrenza lineare di
+  grado $m$, avendo che $z_{i+m}$ dipende dagli $m$ termini precedenti:
+  \[z_{i+m}=\sum_{j=0}^{m-1}c_jZ_{i+j}\bmod\,\,2=\bigoplus_{j=0}^{m-1}(c_j\land
+    z_{i+j})\] 
+\end{itemize}
+Si ha che scegliere $(k_1,\ldots,k_m)$ tutti uguali a 0 comporta la creazione di
+sequenze di soli 0 quindi bisogna evitarlo.\\
+Con $m=4$, ad esempio, posso produrre periodo 15, poco, e quindi il discorso del
+periodo va approfondito, scegliendo $(c_0,\ldots,c_{m-1})$ in modo che ogni scelta
+di $(k_1,\ldots,k_m)$ abbai periodo lungo.\\
+\textbf{Esempio su slide}.\\
+Si nota, dal punto di vista della sicurezza, l'uso di equazioni lineare per
+generare il keystream con LFSR, che quindi vengono usati solo come parte di
+tool più complessi. \\
+Per la linearità si supponga che Eve conosca $2m$ chiavi derivate, $z_1,\ldots
+z_{2m}$ e che conosca $m$. Può capire come sono state calcolate le chiavi della
+seconda metà:
+\[(z_{m+1},z_{m+2},\ldots, z_{2m})=(c_0,c_1,\ldots,c_{m-1})\cdot
+  \left[
+    \begin{matrix}
+      z_1 & z_2 &\cdots &z_m\\
+      z_2 & z_3 &\cdots &z_{m+1}\\
+      \vdots & \vdots &\ddots &\vdots\\
+      z_m & z_{m+1} &\cdots &z_{2m-1}
+    \end{matrix}
+  \right]
+\]
+e se la matrice fosse invertibile risalirei a $(c_0,c_1,\ldots,c_{m-1})$ e
+purtroppo ``by design'', per costruzione, tale matrice è sempre invertibile. SI
+fa quindi:
+\[(c_0,c_1,\ldots,c_{m-1})=(z_{m+1},z_{m+2},\ldots, z_{2m})\cdot
+  \left[
+    \begin{matrix}
+      z_1 & z_2 &\cdots &z_m\\
+      z_2 & z_3 &\cdots &z_{m+1}\\
+      \vdots & \vdots &\ddots &\vdots\\
+      z_m & z_{m+1} &\cdots &z_{2m-1}
+    \end{matrix}
+  \right]^{-1}
+\]
+\subsubsection{RC4}
+\textbf{RC4} è il cifrario a flusso più sicuro pensato. Creato nel 1987, uno dei
+primi, dalla RSA. All'inizio però tale cifrario è stato mantenuto segreto. È
+stato pubblicato in modo anonimo nel 1994 tramite \textit{reverse
+  engineering}.\\
+RC4 è usato in \textbf{SSL/TSL} (\textit{Secure Sockets Layer / Transport Layer
+  Security}), usati nello standard della comunicazione web. È stato usato anche
+in \textbf{WEP} (\textit{Wired Equivalent Privacy}), usato nello standard 802.11
+(\textit{wireless LANs}).\\
+Come funzionamento si ha la cifratura di un byte alla volta tramite permutazioni
+casuali, ottenendo un periodo di keystream di $10^{100}$. Mediamente richiede
+8-16 operazioni macchina per produrre ogni byte di $c$.\\
+Si usa uno stato $S$ di 256 byte, che, in ogni momento, contiene le
+permutazioni. Si usa una chiave $k$, lunga da 1 a 256 bytes, per inizializzare
+$S$. Tale chiave non viene poi più usata.\\
+Vediamo l'inizializzazione:
+\begin{itemize}
+  \item si mettono in $S$ i numeri da 0 a 255
+  \item si crea un vettore temporaneo $T$ con i numeri da 0 a 255
+  \item si ripete $k$ in $T$ tutte le volte necessarie a riempire $T$ (una sola
+  se $k$ è di 256 bytes). Quindi si ha:
+  \begin{algorithmic}
+    \For {$i=0$ \textbf{to} $255$}
+    \State $S[i]\gets i$
+    \State $T[i]\gets k[i\bmod keylength]$
+    \EndFor
+  \end{algorithmic}
+  \item si scambia ogni posizione di $S$ con una posizione determinata da $T$,
+  tramite una funzione \texttt{swap}. Si ha quindi:
+  \begin{algorithmic}
+    \State $j\gets 0$
+    \For {$i=0$ \textbf{to} $255$}
+    \State $j\gets (j+S[i]+T[i])\bmod\,\,256$
+    \State $swap(S[i],S[j])$
+    \EndFor
+  \end{algorithmic}
+\end{itemize}
+L'inizializzazione sono quindi due piccoli cicli for.\\
+Una volta generato $S$ si passa a generare il keystream:
+\begin{itemize}
+  \item si parte da $S[0]$ per arrivare a $S[255]$. Una volta finito si riparte
+  da capo (cosa ottenuta tramite il modulo)
+  \item ad ogni iterazione l'elemento $S[i]$ è scambiato, tramite una funzione
+  \texttt{swap}, con un altro $S[j]$, con $j$ che dipende dallo stato
+  corrente. Questo aggiunge pseudocasualità
+  \item si sommano, modulo 256, $S[i]$ e $S[j]$ per ottenere la posizione $t$,
+  facendo quindi accesso indiretto,
+  dell'elemento $z$ generato, con $z$ byte di chiave derivata
+\end{itemize}
+Anche per la generazione del keystream si ha quindi un codice piccolo, avendo un
+ciclo infinito che dura fino a che serve cifrare i bytes.  
+\newpage
+Per il keystream si ha quindi:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \State $i\gets 0$
+    \State $j\gets 0$
+    \While {$\top$}
+    \State $i\gets (i+1)\bmod\,\,256$
+    \State $j\gets (j+S[i])\bmod\,\,256$
+    \State $swap(S[i],S[j])$
+    \State $t\gets (S[i]+S[j])\bmod\,\,256$
+    \State $z=S[t]$
+    \EndWhile
+  \end{algorithmic}
+  \caption{Calcolo keystream con RC4}
+\end{algorithm}
+La cifratura e la decifratura sono semplici:
+\[c_i=m_i\oplus z\]
+\[m_i=c_i\oplus z\]
+Nonostante questo non si conoscono ancora attacchi efficaci data una chiave
+lunga abbastanza, almeno 128 bit.\\
+L'attacco fatto a WEP nel 2001 dipendeva da come era stato implementato RC4 in
+WEP e non dall'algoritmo in sé.
+\subsection{Sicurezza di Shannon}
+Si è usato spesso lo xor bit a bit che garantisce sicurezza ma Shannon si è
+chiesto se il calcolo della chiave fosse questione di pura potenza di calcolo.
+Shannon si chiede se esistono crittosistemi sicuri \textbf{incondizionatamente},
+ovvero a priori rispetto all'hardware disponibile dall'attaccante. Vediamo
+quindi l'analisi di Shannon.\\
+Si parte dal solito schema con Alice che comunica con Bob, tramite un canale, e
+con Eve che ``ascolta''. Formalmente si ha:
+\begin{itemize}
+  \item $X$ una variabile casuale con valori nell'insieme dei plaintext $PT$
+  \item $Y$ una variabile casuale con valori nell'insieme dei testi cifrati $CT$
+  \item Alice sceglie, casualmente, $x\in PT$, la cifra e ottiene $y\in
+  CT$. Tale $y$ viene spedito a Bob. Eve vede $y$ che per lei è totalmente
+  casuale
+  \item si assume che Alice sceglie $x$ in modo uniforme, per semplicità
+  \item Eve conosce la distribuzione di probabilità su $X$, ovvero conosce
+  $P(X=x)$ 
+  \item se Eve legge $y$ può anche conoscere $P(X=x|Y=y)$ (aumenta la
+  possibilità di avere alcuni testi in chiaro etc$\ldots$)
+\end{itemize}
+Shannon dice che il crittosistema è sicuro incondizionatamente se Eve,
+osservando $y$, non impara nulla sulla distribuzione di probabilità dei testi in
+chiaro, ovvero se:
+\[P(X=x)=P(X=x|Y=y)\]
+Ma questo implica che l'entropia di $X$ è uguale ell'equivocazione:
+\[H(X)=X(X|Y)\]
+Ma quindi la mutua informazione di sistema è:
+\[I(X;Y)=0\]
+e quindi $X$ e $Y$ sono \textbf{indipendenti} e Eve non ottiene alcuna
+informazione da $y$. Eve vede solo rumore.\\
+Ma per essere indipendenti significa che il canale è completamente rumoroso e
+$y$ è scelto a caso senza partire da $x$ e quindi sembra assurdo parlando di
+crittosistemi. \\
+Shannon ha invece continuato lo studio e scopre che esiste un crittosistema
+teorico completamente sicuro anche se con un'approssimazione pratica molto
+efficace nota dal 1918, ovvero il \textbf{cifrario di Vernam}. La nuova versione
+di tale cifrario viene chiamata \textbf{One Time Pad}, avendo che il
+``taccuino'', traducendo Pad, contiene il keystream (e sia Alice che Bob devono
+avere tale ``taccuino'' e questo è un problema). La chiave non va riutilizzata,
+da qui one Time.\\
+Alice cifra con la chiave del suo taccuino e Bob decifra di conseguenza,
+entrambi distruggendo le pagine del taccuino con le chiavi usate.\\
+La differenza tra One Time Pad e il cifrario di Vernam è che, in quest'ultimo,
+non si usa una chiave usa e getta ma si può ripetere dopo un periodo molto
+lungo. L'analisi quindi non è più impossibile ma molto difficile, è una buona
+approssimazione. \\
+In One Time Pad, si prende la chiave $k$ e si fa lo xor bit a bit. Il più sicuro
+di tutti fa un'operazione lineare banale:
+\[E_k(x)=x\oplus k\]
+\[D_k(y)=y\oplus k\]
+Il trucco è che la chiave $k$, lunga quanto il messaggio $m$, è davvero casuale
+e non pseudocasuale (in Vernam 
+ovviamente non è possibile la cosa ma la ripetizione dopo un lungo periodo è una
+buona approssimazione). \\
+Servono tanti bit casuali quanti la lunghezza del messaggio. La produzione di
+tali bit, in due copie, una per Alice e una per Bob, è estremamente
+dispendiosa.\\
+Ovviamente prima Alice e Bob devono essersi accordati in modo sicuro sul
+``taccuino'' e anche questo può essere complesso. 
+\begin{teorema}
+  Tale crittosistema è incondizionatamente sicuro.
+\end{teorema}
+\begin{proof}
+  Si assumono PT e CT su alfabeti binari.\\
+  Si ha la proprietà tale per cui:
+  \[\forall x, \forall y\,\,\, \exists k \mbox{ unico t.c. } E_k(x)=y\]
+  quindi dati $x$ e $y$ si ha una sola $k$ valida.
+  Si ha anche la proprietà che:
+  \[\forall y, \forall k\,\,\, \exists x \mbox{ t.c. } E_k(x)=y\]
+  quindi sapendo solo $y$ posso solo sapere che tale messaggio cifrato può
+  derivate da un qualunque $x$, scegliendo $k$ in modo appropriato.\\
+  \textbf{Si ha quindi che è incondizionatamente sicuro non sapendo come
+    scegliere}.\\ 
+  Il tutto salta se la chiave è più corta. Si assume:
+  \[|k|<|x|=|y|\]
+  nel dettaglio:
+  \[|k|=|x|-1=n-1\]
+  Avendo $|k|<|x|$ dobbiamo usare nuovamente alcune bit di $k$.\\
+  Quando Eve non ha ancora visto $c$ sa che Alice può scegliere qualunque $x$
+  con probabilità $P(X=x)=\frac{1}{2^n}$, avendo che, osservato $y$, Eve si
+  chiede i valori di $k$ usati per ottenere $x$ e vede che tali valori di $k$
+  sono al più $2^{n-1}$. Quindi si ha:
+  \[P(X=x|Y=y)=\frac{1}{2^{n-1}}\neq P(X=x)\]
+  venendo meno la definizione di sicurezza incondizionata.
+\end{proof}
+
+In One Time Pad non si ha un seed di generazione quindi mentre in Vernam
+serve.\\
+One Time Pad è stato davvero usato tra Casa Bianca e Cremlino durante la Guerra
+Fredda.\\
+In ogni caso One Time Pad necessita di una quantità di chiavi molto grande, che
+vanno scambiate prima in modo protetto. One Time Pad si usa solo con canali con
+larghezza di banda molto bassa, quando la sicurezza e la privacy sono la prima
+preoccupazione.
+\subsection{Numeri Pseudocasuali}
+Si è visto come molti algoritmi si basano su bit casuali. \\
+Sorgenti casuali sono ``rare'' in natura e produrre hardware dedicato è
+costoso.\\
+Si usano quindi generatori pseudocasuali, i già citati PRNG, che partono da un
+seed iniziale, causale e più piccolo possibile, per generare numeri che sembrano
+casuali ad un osservatore esterno, che non sa nemmeno dire se una sequenza è
+causale o pseudocasuale. Nessun algoritmo, eseguibile in tempo polinomiale sui
+una TM deterministica, può capire se una sequenza è causale o pseudocasuale in
+tempo polinomiale. Non si ha quindi una soluzione ``facile'' e la cosa non è in
+dubbio. L'attaccante però potrebbe avere una \textbf{TM probabilistica}, che può
+spesso risolvere problemi ``difficili'', semplificando la soluzione del
+problema. \\
+Dobbiamo quindi generare sequenze di bit pseudocasuali indistinguibili da quella
+casuali avendo a disposizione una TM probabilistica.\\
+Il seed lo si vuole il più corto possibile ma poi si genera una sequenza di bit
+più lunga, parlando di ``allungare il seed'', anche se comunque si tratta solo
+di una serie di conti a partire dal seed, unica fonte di casualità.
+\begin{definizione}
+  Definiamo il concetto di \textbf{indistinguibilità}, dal punto di vista
+  computazionale, come il fatto che l'osservatore non ha abbastanza potenza
+  computazionale per capire se la stringa in analisi sia casuale o meno. \\
+  La perfezione si raggiungerebbe qualora il problema di distinguere o meno una
+  sequenza causale fosse un problema intrattabile, non essendoci un algoritmo
+  efficiente, ovvero polinomiale su una TM, dedicato.
+\end{definizione}
+La potenza computazionale dell'avversario comunque non è per forza limitata,
+come detto, a macchine deterministiche ma potrebbe usare anche approcci
+probabilistici.
+\begin{definizione}
+  Una \textbf{Probabilistic Turing Machine (PTM)} è una TM tale che,
+  nell'applicazione della funzione di transizione tra stati, si hanno più stati
+  possibili prossimi, come nelle NDTM, però la scelta cade solo su uno in modo
+  casuale. Si ha quindi una sorta di secondo nastro con bit casuali,
+  inizializzato all'inizio della computazione ogni volta in modo indipendente
+  dalle precedenti computazioni, che mi dice quale stato successivo scegliere.
+\end{definizione}
+Per molti problemi non si sa se esiste un algoritmo deterministico polinomiale
+ma potrebbe esserci un algoritmo probabilistico con probabilità d'errore minore
+di $\frac{1}{2}$ e quindi basta fare più esecuzioni in parallelo (ma anche in
+serie a seconda dell'hardware), esecuzioni che sono indipendenti tra loro per
+il concetto di PTM. Ogni esecuzione a sua volta avrà probabilità d'errore minore
+di $\frac{1}{2}$. La probabilità che tutte restituiscano una risposta sbagliata
+si ottiene moltiplicando le varie probabilità, essendo tutte le esecuzioni
+indipendenti, ottenendo che è minore di $\frac{1}{2^n}$, con $n$ numero di
+esecuzioni. Possiamo dire che $\frac{1}{2^n}$ è una quantità davvero piccola
+come probabilità, anche con $n$ non troppo grande (si ricordi la citazione per
+cui $\frac{1}{2^{4096}}$ è stata definita come la probabilità che un tornado
+ricostruisca un aereo distrutto in un campo e che 4096 computazioni non sono
+così tante).\\
+Si è discusso, nel tempo, del fatto anche un'azione naturale che sembra causale
+lo è solo per i limiti dell'osservatore.\\
+Nell'aspetto microscopico della natura, parlando di \textbf{meccanica
+  quantistica}, dove la casualità gioca un ruolo essenziale, con una particella
+che, nel momento in cui si trova nel mondo quantistico ha uno su infiniti stati
+mentre nel mondo macroscopico uno su due. Si ha quindi che \textit{decade} negli
+stati classici 0 e 1. Ogni volta che faccio un'osservazione si decade ad uno
+stato classico e questo non è eliminabile, avendo che la \textbf{casualità}
+esista effettivamente in natura.\\
+Supponiamo quindi Eve abbia un PTM con, ovviamente, algoritmi probabilistici.
+\begin{definizione}
+  Un \textbf{PRNG} è un algoritmo, che può essere eseguito in tempo polinomiale
+  su una TM deterministica, che calcola una funzione:
+  \[G:\{0,1\}^k\to\{0,1\}^{l(k)},\,\,\,l(k)>k\]
+  con $k$ numero di bit input.\\
+  La funzione è tale che:
+  \begin{itemize}
+    \item per ogni algoritmo $D\in PPT$, dove $D$ sta per
+    \textbf{distinguisher} e $PPT$ per \textbf{Polynomial Probabilistic Time},
+    eseguito dall'attaccante. Tale algoritmo restituisce 
+    0 se pensa che la sequenza non sia casuale, 1 altrimenti. Questi algoritmi
+    possono essere eseguiti in tempo polinomiale su una PTM. Esistono in realtà
+    classi di complessità per le PTM ma non si approfondiscono in questo
+    contesto
+    \item per tutti i polinomi $p(\cdot)$
+    \item per tutti gli interi $k$ sufficientemente grandi. Si ragiona quindi in
+    modo asintotico e più grande è $k$ meglio è
+  \end{itemize}
+  si ha, usando $\gets$ per dire ``preso a caso'' e chiamando:
+  \begin{itemize}
+    \item $\alpha=P[ x \gets \{0,1\}^k ; r \gets G(x) : D(r) = 1]$, avendo la
+    probabilità, preso a caso $x$, sequenza di $k$ bit veramente causale, dato
+    in pasto $x$ a $G$ che produce in output $l(k)$ bit assegnati a $r$, che a
+    sua volta viene dato in pasto al \textbf{distinguisher} che restituisce 1,
+    riconoscendo $r$ come sequenza casuale (sbagliando non essendo causale ma
+    generata da $G$)
+    \item $\beta=P[ r \gets \{0,1\}^{l(k)} ;  D(r) = 1]]$, avendo la probabilità
+    che, preso a caso $r$, sequenza di $l(k)$ bit veramente causale, dato in
+    pasto tale $r$ al \textbf{distinguisher} $D$ che, in tempo probabilistico
+    polinomiale, restituisce 1, riconoscendo $r$ come sequenza casuale
+    (azzeccando, essendo $r$ davvero casuale)
+  \end{itemize}
+  si ha:
+  \[|\alpha-\beta|<\frac{1}{p(k)}\]
+  quindi la distanza tra le distribuzioni di probabilità è minore di un
+  $\frac{1}{p(k)}$, con $k$ però che cresce, avendo che $p(k)$ è in realtà una
+  successione, con $p(\cdot)$ polinomio positivo che assume valori crescenti e
+  quindi $\frac{1}{p(k)}$ decresce al crescere di $k$. Al crescere di $k$ la
+  distanza tra le due probabilità va a 0 con velocità pari all'inverso del
+  polinomio $p(k)$ (quindi non velocemente come con un esponenziale, fattore che
+  porterebbe a dover ``chiedere troppo'' al PRNG, dovendo creare sequenze
+  pseudocasuali davvero molto causali). Se il PRNG riesce a portare a poco
+  quella differenza significa che abbiamo un buon algoritmo. Se le due
+  probabilità sono distanti 0 si ha che il \textbf{distinguisher} non è in grado
+  di capire se si ha a che fare con una sequenza casuale o meno, dando la stessa
+  risposta sia sulla sequenza generata da $G$ che su quella davvero casuale.\\
+  La distanza tra le due probabilità è quindi la ``capacità di barare'' di $G$,
+  la capacità di ingannare qualunque \textbf{distinguisher} $D$.
+\end{definizione}
+\subsubsection{Linear Congruential Generator}
+Vediamo quindi un esempio di PRNG, ovvero il \textbf{Linear Congruential
+  Generator (\textit{LCG})}, usato per tanti anni ma ormai riconosciuto come non
+ adatto all'uso in applicazioni etc$\ldots$ mentre non ha mai trovato,
+ fortunatamente, spazio in crittografia. \\
+Proposto nel 1951 da Lehmer è formato solo da equazioni lineari.
+\begin{definizione}
+  Definiamo formalmente il LCG.\\
+  Presi accuratamente tre interi $a$, $b$ e $m$ tali che:
+  \[0\leq a,\,\,\,\,b< m\]
+  dato un seed intero $s$ tale che:
+  \[0\leq s< m\]
+  si ha il LCG definito come il sistema di equazioni:
+  \[
+    \begin{cases}
+      x_0=s\\
+      x_i=(ax_{i-1}+b)\bmod\,\,m,\,\,\,\,\forall i\geq 1
+    \end{cases}
+  \]
+   La scelta di $a$, $b$ e $m$ è critica per trovare una sequenza non facile da
+  predire. \\
+  Questo generatore non allunga la sequenza di bit input ma non è il problema
+  più grave. Il vero problema è che nella sequenza generata si hanno relazioni
+  lineari e quindi se Eve trova quattro valori $x_0,x_1,x_2, x_3$, prodotti dal
+  PRNG, può calcolare $a$, $b$ e $m$, risolvendo il seguente sistema:
+  \[
+    \begin{cases}
+      x_1\equiv(ax_{0}+b)\bmod\,\,m\\
+      x_2\equiv(ax_{1}+b)\bmod\,\,m\\
+      x_3\equiv(ax_{2}+b)\bmod\,\,m
+    \end{cases}
+  \]
+  Immaginando di plottare i valori di questo generatore come punti
+  tridimensionali, si nota che si dispongono come piani, mostrando la linearità
+  e quindi la conseguente debolezza. 
+\end{definizione}
+\subsubsection{Costruzione di un PRNG}
+La definizione di PRNG non ci dice però come teoricamente dovrebbe essere un
+buon generatore ma non ci dice come calcolarlo effettivamente. Si sono create
+quindi varie batterie di test per testare i generatori di numeri casuali, anche
+definiti dal NIST(National Institute of Standard and Technology) degli USA. Tra
+i test si può vedere quanti zeri e uni ci sono nella sequenza di bit generata,
+che devono essere circa uniformemente distribuiti. Un altro test è vedere 00,
+01, 10 e 11 anch'essi dovrebbero essere circa uniformemente distribuiti e così
+via aumentando le cifre. Un altro test è plottare tramite coordinate di punti e
+vedere che si deve avere una distribuzione dei punti uniforme (e si hanno vari
+test simili riempiendo un rettangolo o la superficie di una sfera). Si verifica
+non ci siano pattern ripetuti. I vari test appena detti vengono anche fatti
+prendendo, ad esempio, un bit ogni due etc$\ldots$. Si hanno potenzialmente
+infiniti test (e quindi bisogna sceglierne una parte). \\
+Il problema è quindi costruire una funzione $G$ tale che:
+\[G:\{0,1\}^k\to\{0,1\}^{l(k)},\,\,\,l(k)>k\]
+Tale funzione deve essere tale che allunga l'input, pur soddisfacendo i vincoli
+dati in definizione.\\
+Il primo problema pratico è capire quanto deve essere più lungo l'output. Un
+secondo problema è capire se bisogna fare una funzione diversa per ogni valore
+possibile di $l(k)$. In merito al secondo problema fortunatamente non dobbiamo,
+in quanto, se si ha un PRNG $H$ che allunga di 1 e soddisfa tutti i vincoli
+della definizione:
+\[H:\{0,1\}^k\to\{0,1\}^{k+1}\]
+possiamo costruire un altro $G$, del tipo:
+\[G:\{0,1\}^k\to\{0,1\}^{l(k)},\,\,\,l(k)>k\]
+La costruzione avviene in modo iterativo. Preso l'input $x_0$, di $k$ bit, lo si
+allunga di quanto si vuole, dandolo in pasto a $G$. Avendo che anche $H$, che
+allunga di 1, prende
+in input una sequenza di $k$ bit (e quindi posso dargli in pasto $x_0$) si ha:
+\begin{itemize}
+  \item $x_1\sigma_1=H(x_0)$, avendo che $\sigma_1$ è un singolo bit
+  \item $x_2\sigma_2=H(x_1)$, avendo che $\sigma_2$ è un singolo bit
+  \item $\ldots$
+  \item $x_{l(k)}\sigma_{l(k)}=H(x_{l(k)-1})$, avendo che $\sigma_{l(k)}$ è un
+  singolo bit  
+\end{itemize}
+Avendo quindi:
+\[x_i\in\{0,1\}^k\mbox{ e }\sigma_i\in\{0,1\},\,\,\,\forall i\in\{1,2,\ldots,
+  l(k)\}\]
+In output di $G$ si tiene quindi:
+\[(\sigma_1,\sigma_2,\ldots, \sigma_{l(k)})\]
+avendo quindi l'output allungato a $l(k)$ bit.\\
+Questa costruzione è garantita formalmente e matematicamente da un teorema (che
+non viene visto).\\
+Ma dobbiamo capire come costruire $H$. Vediamo una costruzione interessante di
+$H$, dove si usano le \textbf{funzioni one-way}, ovvero funzioni a ``senso
+unico''. Una funzione one-way, che poi verranno meglio definite, in modo
+informale è definibile come una funzione $f$ facile da calcolare ma
+difficilissima da invertire, è un problema computazionalmente intrattabile,
+essendo praticamente una \textit{permutazione}. Le
+\textbf{funzioni di hash} sono one-way.\\
+Quindi data $f$ one-way e $y$, che è detta \textit{impronta}, è difficile
+calcolare $x$ tale che: 
+\[f(x)=y\]
+Un caso particolare di funzione one-way è una \textbf{funzione biunivoca}, che
+presi $n$ bit in input restituiscono una sorta di permutazione di in output,
+producendo un'altra sequenza di $n$ bit.\\
+Se si ha che la funzione non è una permutazione, avendo magari dominio più
+grande del codominio (come nelle funzioni hash) allora posso avere più $x$ che
+produrrebbero $y$ tramite $f(x)$. Con una funzione one-way è difficile trovare
+anche uno solo di questi $x$.\\
+Un altro concetto necessario al calcolo di $H$ è quello di \textbf{hard-core
+  bit}. \\
+Se una funzione è difficile da invertire, essendo difficile calcolare $x$ tale
+che $f(x)=y$, allora sarà difficile trovare i bit che compongono $x$. Magari non
+sempre tutti i bit di $x$ sono difficili da trovare, per esempio il bit meno
+significativo potrebbe essere facile da trovare. I bit difficili da calcolare,
+che ovviamente non possono essere nessuno, sono detti appunto \textbf{hard-core
+  bit}. \\
+Si hanno quindi funzioni one-way e almeno alcuni bit dell'input che sono
+hard-core. \\
+Vediamo quanti possono essere tali hard-code bit. Non può essere di certo uno
+solo, perché costruirei due input, con i due valori possibili di quel bit, e
+calcolo la $f$ e vedo per quale dei due ottengo l'output giusto capendo quindi
+quale valore assume quel bit (che non è quindi hard-core). Stesso discorso se si
+suppone siano solo 2, avendo 4 possibili input.\\
+Non posso quindi avere un numero \textbf{piccolo e costante} di bit hard-core.\\
+Nemmeno un numero logaritmico sulla lunghezza dell'input andrebbe bene in
+quanto si potrebbe usare il brute-force. Dato quindi $x\in\{0,1\}^n$ i bit
+hard-core devono essere più di $\log_2n$, ad esempio $\frac{n}{4}$, altrimenti
+possiamo prima calcolare il valore di tutti gli altri bit e poi provare tutte le
+possibili combinazioni dell'hard-core fino a quando non troviamo la combinazione
+corretta. Una quantità maggiore di $\log_2n$ significa una quantità lineare (o
+funzioni particolari tra quelle logaritmiche e quelle lineari), come appunto
+$\frac{n}{4}$, ma non più di 
+lineare avendo che su $n$ bit posso al più avere $n$ hard-core bit. In pratica
+si ha una certa frazione degli $n$ bit in input.\\
+Bisogna introdurre un'altra definizione, quella di \textbf{predicato hard-core}.
+\begin{definizione}
+  Si definisce \textbf{predicato hard-core} un predicato $B$ che prende in input
+  l'input della funzione e dice qual'è il valore di un hard-core bit.\\
+  Il predicato è facile da calcolare in quanto conosce l'input.\\
+  Quindi, data $f:\{0,1\}^n\to\{0,1\}^n$ funzione one-way (in particolare una
+  permutazione one-way) che
+  quindi prende $n$ bit in input e restituisce $n$ bit in output,il
+  predicato $B$, calcolabile in tempo polinomiale da una TM deterministica, è: 
+  \[B:\{0,1\}^n\to\{0,1\}\]
+  che quindi prende $n$ bit in input e restituisce 1 bit.\\
+  $B$ è un predicato hard-core per $f$ (un predicato) se:
+  \[\forall \mbox{ algoritmo}\in PPT\land\forall\mbox{ polinomio }p(\cdot)
+    \mbox{ si ha che }\exists n_{A,p} \mbox{ t.c}\]
+  \[\forall n\geq n_{A,p},P[x\gets \{0,1\}^n ; b \gets A( f ( x)) : b = B(
+    x)]\leq\frac{1}{2}+\frac{1}{p(n)}\] 
+  Avendo quindi che per ogni algoritmo $A$ eseguibile dall'avversario su una PTM
+  e per ogni polinomio $p$ esiste un numero $n_{A,p}$ (dipendente da $A$ e $p$)
+  tale per cui per tutti gli $n$ maggiori di quella soglia, avendo quindi un
+  discorso asintotico, vale che si ha una probabilità che è minore di
+  $\frac{1}{2}$ sommata ad una quantità che tende a 0 velocemente quanto
+  l'inverso di un qualunque polinomio passato (quindi non troppo
+  velocemente). Nel dettaglio si parla della probabilità per cui, presa a caso
+  una sequenza $x$ di $n$ bit, calcolata in modo facile computazionalmente
+  $f(x)$, si assegna a $b$ il valore di tale calcolo di $f(x)$ dato in pasto
+  all'algoritmo $A$ dell'avversario. La probabilità che $b$ sia davvero il
+  risultato del predicato hard-core, ovvero $B(x)$, deve essere minore di
+  $\frac{1}{2}+\frac{1}{p(n)}$. L'$\frac{1}{2}$ c'è in quanto si ha a che fare
+  con un evento bernoulliano, avendo due risposte possibili, e quindi
+  l'avversario deve azzeccare con probabilità che non supera $\frac{1}{2}$ per
+  più di una quantità che tende a 0. In altri termini non può azzeccare con
+  probabilità maggior di quella che avrebbe andando a caso, avendo solo due
+  alternative. Quindi se $\frac{1}{p(n)}$ non tende a 0 significa che qualcosa
+  si è capito in merito a come calcolare $b$. 
+\end{definizione}
+Avendo definito $f$ one-way e $B$ predicato hard-core, possiamo costruire il
+PRNG $H$, con $H:\{0,1\}^k\to\{0,1\}^{k+1}$, in questo modo:
+\[H(x)=f(x)||B(x)\]
+avendo che $x$ e $f(x)$ sono di $k$ bit mentre $B(x)$ di un bit. La simbologia
+$||$ indica la concatenazione e quindi $H(x)$ ha $k+1$ bit. Quindi aggiungo un
+bit difficile da calcolare per l'attaccante ad una sequenza difficile da
+invertire. L'output di $H$ è quindi difficile da predire (e la cosa è sostenuta
+da un teorema che non vediamo).\\
+Bisogna capire in pratica che $f$ funzione/permutazione one-way
+scegliere (avendo poi che $B$ dipende da essa). Questa scelta è molto complessa
+e per di più non è nemmeno mai stato 
+dimostrato che esistano tali funzioni ma si hanno diverse candidate ma non si ha
+ancora la dimostrazione matematica.
+\newpage
+Vediamo qualche base algebrica utile prima di proseguire.
+\begin{shaded}
+  \begin{definizione}
+    Un \textbf{gruppo} $G$, indicato con:
+    \[(G,\bullet)\]
+    è una \textbf{struttura algebrica} composta da:
+    \begin{enumerate}
+      \item un insieme $G$ di elementi
+      \item un'operazione binaria $\bullet:G\times G\to G$
+    \end{enumerate}
+    L'operazione binaria deve essere tale che si rispettino le seguenti
+    proprietà: 
+    \begin{itemize}
+      \item \textbf{chiusura}: se si hanno $a,b\in G$ allora $a\bullet b\in G$
+      \item \textbf{associatività}: $\forall a,b,c\in G$ si ha che $(a\bullet
+      b) \bullet c= a\bullet (b\bullet c)$
+      \item \textbf{esistenza dell'identità}: $\exists e\in G$ tale che
+      $\forall a \in G$ \\si ha $a\bullet e = e \bullet a = a $
+      \item \textbf{esistenza dell'inverso}: $\forall a\in G$\\ $\exists a'\in
+      G$ tale che $a\bullet a'=a'\bullet a=e$
+    \end{itemize}
+  \end{definizione}
+  In crittografia mediamente si hanno due operazioni, somma e prodotto.
+  \begin{teorema}
+    Se ho un gruppo basato sulla somma ho un gruppo \textbf{isomorfo} basato sul
+    prodotto e viceversa. Questo per la definizione data di gruppo, con
+    relazioni tra coppie di elementi dell'insieme.
+  \end{teorema}
+  Come operazione di un gruppo posso avere anche cose più particolari come la
+  composizione di permutazioni.\\
+  In crittografia si usano \textbf{gruppi finiti}, anche se abbastanza grandi,
+  sufficientemente grandi da non poter osservare tutte le relazioni tra coppie
+  di elementi di $G$, permettendo appunto funzioni one-way (per invertire
+  servirebbe una sorta di visione globale).
+  \begin{definizione}
+    Si definisce \textbf{ordine del gruppo} $G$ come il numero di elementi di
+    $G$. 
+  \end{definizione}
+  \begin{definizione}
+    Un gruppo $G$ è detto \textbf{commutativo}, o \textbf{abeliano}, se:
+    \[\forall a,b\in G \mbox{ vale }a\bullet b= b\bullet a\]
+  \end{definizione}
+  Come notazione si ha:
+  \begin{itemize}
+    \item se usiamo la notazione additiva $(G, +, 0)$, l'inverso di $a$ è
+    indicato da $–a$  
+    \item se usiamo la notazione moltiplicativa $(G, \cdot, 1)$, l'inverso di
+    $a$ è indicato da $a^{-1}$ 
+  \end{itemize}
+  \begin{definizione}
+    Dato un gruppo moltiplicativo $(G, \cdot, 1)$ si definisce così
+    l'\textbf{esponenziazione}:
+    \[\forall g\in G\mbox{ e }\forall n\in \mathbb{N}\]
+    si ha:
+    \[
+      \begin{cases}
+        g^0=1\\
+        g^n=g\cdot g^{n-1}
+      \end{cases}
+    \]
+    è quindi una definizione ricorsiva sull'esponente, avendo come caso base
+    $g^0$ che produce l'identità.
+  \end{definizione}
+  \begin{definizione}
+    Un gruppo $G$ è detto \textbf{ciclico} se $\exists g\in G$ tale che:
+    \[\forall a \in G \,\,\exists n\in \mathbb{N}\mbox{ t.c. }a=g^n\]
+    ovvero esiste almeno un $g$ (il loro numero cresce ad aumentare dell'ordine
+    di $G$), detto \textbf{generatore} di $G$, tale che $g^n=a$, ovvero tutti
+    gli elementi del gruppo sono espressi da $g^n$, per un certo
+    $n\in\mathbb{N}$. Essendo il gruppo finito ad un certo punto l'esponente
+    raggiunge un valore massimo e quindi incrementandolo si riparte dall'$n$ più
+    piccolo per ottenere dopo un po' tutti gli $a\in G$.
+  \end{definizione}
+  \begin{teorema}
+    Un gruppo ciclico è sempre abeliano per le proprietà delle potenze.
+  \end{teorema}
+  \begin{definizione}
+    Un \textbf{anello} $R$, indicato con:
+    \[(R, +,\cdot)\]
+    è una struttura algebrica composta da:
+    \begin{enumerate}
+      \item un insieme $R$ di elementi
+      \item un'operazione binaria $+:R\times R\to R$ detta \textbf{somma}
+      \item un'operazione binaria $\cdot:R\times R\to R$ detta \textbf{prodotto}
+    \end{enumerate}
+    avendo soddisfatte le seguenti proprietà:
+    \begin{itemize}
+      \item $(R,+)$, nel dettaglio $(R,+,0)$ è un gruppo abeliano
+      \item \textbf{chiusura del prodotto}: se si hanno $a,b\in R$ allora si ha
+      $a\cdot b\in R$
+      \item \textbf{associatività del prodotto}: $\forall a,b,c\in R$\\
+      si ha che $(a\cdot b)\cdot c= a\cdot (b\cdot c)$ 
+      \item \textbf{distributività}: $\forall a,b,c\in R$\\
+      si ha che $a \cdot(b + c)= a \cdot b + a \cdot c$\\
+      e si ha che $(a + b)\cdot c = a \cdot c + b \cdot c$
+    \end{itemize}
+    Posso indicare l'anello $R$ anche con:
+    \[(R, +,\cdot,0,1)\]
+  \end{definizione}
+  \begin{definizione}
+    Un anello $R$ è detto \textbf{commutativo}, o \textbf{abeliano}, se:
+    \[\forall a,b\in R\mbox{ vale }a\cdot b=b\cdot a\]
+  \end{definizione}
+  \begin{definizione}
+    Un \textbf{dominio integrale} è definito come un anello commutativo $R$ che
+    soddisfa le seguenti proprietà:
+    \begin{itemize}
+      \item \textbf{identità per il prodotto}: $\exists 1\in R$ tale che\\
+      $\forall a in R,\,\,\,a\cdot 1=\\cdot a=a$
+      \item \textbf{assenza di divisori dello zero}: se si hanno $a,b\in R$ e
+      $a\cdot b=0$ allora o $a=0$ o $b=0$
+    \end{itemize}
+  \end{definizione}
+  \begin{definizione}
+    Un \textbf{campo} $F$, indicato con:
+    \[(F, +,\cdot)\]
+    è un 
+
+
+     Posso indicare il campo $F$ anche con:
+    \[(F, +,\cdot,0,1)\]
+  \end{definizione}
+\end{shaded}
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
-% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple
-% LocalWords:  crittosistemi
-\message{ !name(critto.tex) !offset(-4383) }
+% LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
+% LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
+% LocalWords:  Shannon
+\message{ !name(critto.tex) !offset(-5606) }

@@ -5203,8 +5203,443 @@ dubbio. L'attaccante però potrebbe avere una \textbf{TM probabilistica}, che pu
 spesso risolvere problemi ``difficili'', semplificando la soluzione del
 problema. \\
 Dobbiamo quindi generare sequenze di bit pseudocasuali indistinguibili da quella
-casuali avendo a disposizione una TM probabilistica.
-\textbf{to be continued}
+casuali avendo a disposizione una TM probabilistica.\\
+Il seed lo si vuole il più corto possibile ma poi si genera una sequenza di bit
+più lunga, parlando di ``allungare il seed'', anche se comunque si tratta solo
+di una serie di conti a partire dal seed, unica fonte di casualità.
+\begin{definizione}
+  Definiamo il concetto di \textbf{indistinguibilità}, dal punto di vista
+  computazionale, come il fatto che l'osservatore non ha abbastanza potenza
+  computazionale per capire se la stringa in analisi sia casuale o meno. \\
+  La perfezione si raggiungerebbe qualora il problema di distinguere o meno una
+  sequenza causale fosse un problema intrattabile, non essendoci un algoritmo
+  efficiente, ovvero polinomiale su una TM, dedicato.
+\end{definizione}
+La potenza computazionale dell'avversario comunque non è per forza limitata,
+come detto, a macchine deterministiche ma potrebbe usare anche approcci
+probabilistici.
+\begin{definizione}
+  Una \textbf{Probabilistic Turing Machine (PTM)} è una TM tale che,
+  nell'applicazione della funzione di transizione tra stati, si hanno più stati
+  possibili prossimi, come nelle NDTM, però la scelta cade solo su uno in modo
+  casuale. Si ha quindi una sorta di secondo nastro con bit casuali,
+  inizializzato all'inizio della computazione ogni volta in modo indipendente
+  dalle precedenti computazioni, che mi dice quale stato successivo scegliere.
+\end{definizione}
+Per molti problemi non si sa se esiste un algoritmo deterministico polinomiale
+ma potrebbe esserci un algoritmo probabilistico con probabilità d'errore minore
+di $\frac{1}{2}$ e quindi basta fare più esecuzioni in parallelo (ma anche in
+serie a seconda dell'hardware), esecuzioni che sono indipendenti tra loro per
+il concetto di PTM. Ogni esecuzione a sua volta avrà probabilità d'errore minore
+di $\frac{1}{2}$. La probabilità che tutte restituiscano una risposta sbagliata
+si ottiene moltiplicando le varie probabilità, essendo tutte le esecuzioni
+indipendenti, ottenendo che è minore di $\frac{1}{2^n}$, con $n$ numero di
+esecuzioni. Possiamo dire che $\frac{1}{2^n}$ è una quantità davvero piccola
+come probabilità, anche con $n$ non troppo grande (si ricordi la citazione per
+cui $\frac{1}{2^{4096}}$ è stata definita come la probabilità che un tornado
+ricostruisca un aereo distrutto in un campo e che 4096 computazioni non sono
+così tante).\\
+Si è discusso, nel tempo, del fatto anche un'azione naturale che sembra causale
+lo è solo per i limiti dell'osservatore.\\
+Nell'aspetto microscopico della natura, parlando di \textbf{meccanica
+  quantistica}, dove la casualità gioca un ruolo essenziale, con una particella
+che, nel momento in cui si trova nel mondo quantistico ha uno su infiniti stati
+mentre nel mondo macroscopico uno su due. Si ha quindi che \textit{decade} negli
+stati classici 0 e 1. Ogni volta che faccio un'osservazione si decade ad uno
+stato classico e questo non è eliminabile, avendo che la \textbf{casualità}
+esista effettivamente in natura.\\
+Supponiamo quindi Eve abbia un PTM con, ovviamente, algoritmi probabilistici.
+\begin{definizione}
+  Un \textbf{PRNG} è un algoritmo, che può essere eseguito in tempo polinomiale
+  su una TM deterministica, che calcola una funzione:
+  \[G:\{0,1\}^k\to\{0,1\}^{l(k)},\,\,\,l(k)>k\]
+  con $k$ numero di bit input.\\
+  La funzione è tale che:
+  \begin{itemize}
+    \item per ogni algoritmo $D\in PPT$, dove $D$ sta per
+    \textbf{distinguisher} e $PPT$ per \textbf{Polynomial Probabilistic Time},
+    eseguito dall'attaccante. Tale algoritmo restituisce 
+    0 se pensa che la sequenza non sia casuale, 1 altrimenti. Questi algoritmi
+    possono essere eseguiti in tempo polinomiale su una PTM. Esistono in realtà
+    classi di complessità per le PTM ma non si approfondiscono in questo
+    contesto
+    \item per tutti i polinomi $p(\cdot)$
+    \item per tutti gli interi $k$ sufficientemente grandi. Si ragiona quindi in
+    modo asintotico e più grande è $k$ meglio è
+  \end{itemize}
+  si ha, usando $\gets$ per dire ``preso a caso'' e chiamando:
+  \begin{itemize}
+    \item $\alpha=P[ x \gets \{0,1\}^k ; r \gets G(x) : D(r) = 1]$, avendo la
+    probabilità, preso a caso $x$, sequenza di $k$ bit veramente causale, dato
+    in pasto $x$ a $G$ che produce in output $l(k)$ bit assegnati a $r$, che a
+    sua volta viene dato in pasto al \textbf{distinguisher} che restituisce 1,
+    riconoscendo $r$ come sequenza casuale (sbagliando non essendo causale ma
+    generata da $G$)
+    \item $\beta=P[ r \gets \{0,1\}^{l(k)} ;  D(r) = 1]]$, avendo la probabilità
+    che, preso a caso $r$, sequenza di $l(k)$ bit veramente causale, dato in
+    pasto tale $r$ al \textbf{distinguisher} $D$ che, in tempo probabilistico
+    polinomiale, restituisce 1, riconoscendo $r$ come sequenza casuale
+    (azzeccando, essendo $r$ davvero casuale)
+  \end{itemize}
+  si ha:
+  \[|\alpha-\beta|<\frac{1}{p(k)}\]
+  quindi la distanza tra le distribuzioni di probabilità è minore di un
+  $\frac{1}{p(k)}$, con $k$ però che cresce, avendo che $p(k)$ è in realtà una
+  successione, con $p(\cdot)$ polinomio positivo che assume valori crescenti e
+  quindi $\frac{1}{p(k)}$ decresce al crescere di $k$. Al crescere di $k$ la
+  distanza tra le due probabilità va a 0 con velocità pari all'inverso del
+  polinomio $p(k)$ (quindi non velocemente come con un esponenziale, fattore che
+  porterebbe a dover ``chiedere troppo'' al PRNG, dovendo creare sequenze
+  pseudocasuali davvero molto causali). Se il PRNG riesce a portare a poco
+  quella differenza significa che abbiamo un buon algoritmo. Se le due
+  probabilità sono distanti 0 si ha che il \textbf{distinguisher} non è in grado
+  di capire se si ha a che fare con una sequenza casuale o meno, dando la stessa
+  risposta sia sulla sequenza generata da $G$ che su quella davvero casuale.\\
+  La distanza tra le due probabilità è quindi la ``capacità di barare'' di $G$,
+  la capacità di ingannare qualunque \textbf{distinguisher} $D$.
+\end{definizione}
+\subsubsection{Linear Congruential Generator}
+Vediamo quindi un esempio di PRNG, ovvero il \textbf{Linear Congruential
+  Generator (\textit{LCG})}, usato per tanti anni ma ormai riconosciuto come non
+ adatto all'uso in applicazioni etc$\ldots$ mentre non ha mai trovato,
+ fortunatamente, spazio in crittografia. \\
+Proposto nel 1951 da Lehmer è formato solo da equazioni lineari.
+\begin{definizione}
+  Definiamo formalmente il LCG.\\
+  Presi accuratamente tre interi $a$, $b$ e $m$ tali che:
+  \[0\leq a,\,\,\,\,b< m\]
+  dato un seed intero $s$ tale che:
+  \[0\leq s< m\]
+  si ha il LCG definito come il sistema di equazioni:
+  \[
+    \begin{cases}
+      x_0=s\\
+      x_i=(ax_{i-1}+b)\bmod\,\,m,\,\,\,\,\forall i\geq 1
+    \end{cases}
+  \]
+   La scelta di $a$, $b$ e $m$ è critica per trovare una sequenza non facile da
+  predire. \\
+  Questo generatore non allunga la sequenza di bit input ma non è il problema
+  più grave. Il vero problema è che nella sequenza generata si hanno relazioni
+  lineari e quindi se Eve trova quattro valori $x_0,x_1,x_2, x_3$, prodotti dal
+  PRNG, può calcolare $a$, $b$ e $m$, risolvendo il seguente sistema:
+  \[
+    \begin{cases}
+      x_1\equiv(ax_{0}+b)\bmod\,\,m\\
+      x_2\equiv(ax_{1}+b)\bmod\,\,m\\
+      x_3\equiv(ax_{2}+b)\bmod\,\,m
+    \end{cases}
+  \]
+  Immaginando di plottare i valori di questo generatore come punti
+  tridimensionali, si nota che si dispongono come piani, mostrando la linearità
+  e quindi la conseguente debolezza. 
+\end{definizione}
+\subsubsection{Costruzione di un PRNG}
+La definizione di PRNG non ci dice però come teoricamente dovrebbe essere un
+buon generatore ma non ci dice come calcolarlo effettivamente. Si sono create
+quindi varie batterie di test per testare i generatori di numeri casuali, anche
+definiti dal NIST(National Institute of Standard and Technology) degli USA. Tra
+i test si può vedere quanti zeri e uni ci sono nella sequenza di bit generata,
+che devono essere circa uniformemente distribuiti. Un altro test è vedere 00,
+01, 10 e 11 anch'essi dovrebbero essere circa uniformemente distribuiti e così
+via aumentando le cifre. Un altro test è plottare tramite coordinate di punti e
+vedere che si deve avere una distribuzione dei punti uniforme (e si hanno vari
+test simili riempiendo un rettangolo o la superficie di una sfera). Si verifica
+non ci siano pattern ripetuti. I vari test appena detti vengono anche fatti
+prendendo, ad esempio, un bit ogni due etc$\ldots$. Si hanno potenzialmente
+infiniti test (e quindi bisogna sceglierne una parte). \\
+Il problema è quindi costruire una funzione $G$ tale che:
+\[G:\{0,1\}^k\to\{0,1\}^{l(k)},\,\,\,l(k)>k\]
+Tale funzione deve essere tale che allunga l'input, pur soddisfacendo i vincoli
+dati in definizione.\\
+Il primo problema pratico è capire quanto deve essere più lungo l'output. Un
+secondo problema è capire se bisogna fare una funzione diversa per ogni valore
+possibile di $l(k)$. In merito al secondo problema fortunatamente non dobbiamo,
+in quanto, se si ha un PRNG $H$ che allunga di 1 e soddisfa tutti i vincoli
+della definizione:
+\[H:\{0,1\}^k\to\{0,1\}^{k+1}\]
+possiamo costruire un altro $G$, del tipo:
+\[G:\{0,1\}^k\to\{0,1\}^{l(k)},\,\,\,l(k)>k\]
+La costruzione avviene in modo iterativo. Preso l'input $x_0$, di $k$ bit, lo si
+allunga di quanto si vuole, dandolo in pasto a $G$. Avendo che anche $H$, che
+allunga di 1, prende
+in input una sequenza di $k$ bit (e quindi posso dargli in pasto $x_0$) si ha:
+\begin{itemize}
+  \item $x_1\sigma_1=H(x_0)$, avendo che $\sigma_1$ è un singolo bit
+  \item $x_2\sigma_2=H(x_1)$, avendo che $\sigma_2$ è un singolo bit
+  \item $\ldots$
+  \item $x_{l(k)}\sigma_{l(k)}=H(x_{l(k)-1})$, avendo che $\sigma_{l(k)}$ è un
+  singolo bit  
+\end{itemize}
+Avendo quindi:
+\[x_i\in\{0,1\}^k\mbox{ e }\sigma_i\in\{0,1\},\,\,\,\forall i\in\{1,2,\ldots,
+  l(k)\}\]
+In output di $G$ si tiene quindi:
+\[(\sigma_1,\sigma_2,\ldots, \sigma_{l(k)})\]
+avendo quindi l'output allungato a $l(k)$ bit.\\
+Questa costruzione è garantita formalmente e matematicamente da un teorema (che
+non viene visto).\\
+Ma dobbiamo capire come costruire $H$. Vediamo una costruzione interessante di
+$H$, dove si usano le \textbf{funzioni one-way}, ovvero funzioni a ``senso
+unico''. Una funzione one-way, che poi verranno meglio definite, in modo
+informale è definibile come una funzione $f$ facile da calcolare ma
+difficilissima da invertire, è un problema computazionalmente intrattabile,
+essendo praticamente una \textit{permutazione}. Le
+\textbf{funzioni di hash} sono one-way.\\
+Quindi data $f$ one-way e $y$, che è detta \textit{impronta}, è difficile
+calcolare $x$ tale che: 
+\[f(x)=y\]
+Un caso particolare di funzione one-way è una \textbf{funzione biunivoca}, che
+presi $n$ bit in input restituiscono una sorta di permutazione di in output,
+producendo un'altra sequenza di $n$ bit.\\
+Se si ha che la funzione non è una permutazione, avendo magari dominio più
+grande del codominio (come nelle funzioni hash) allora posso avere più $x$ che
+produrrebbero $y$ tramite $f(x)$. Con una funzione one-way è difficile trovare
+anche uno solo di questi $x$.\\
+Un altro concetto necessario al calcolo di $H$ è quello di \textbf{hard-core
+  bit}. \\
+Se una funzione è difficile da invertire, essendo difficile calcolare $x$ tale
+che $f(x)=y$, allora sarà difficile trovare i bit che compongono $x$. Magari non
+sempre tutti i bit di $x$ sono difficili da trovare, per esempio il bit meno
+significativo potrebbe essere facile da trovare. I bit difficili da calcolare,
+che ovviamente non possono essere nessuno, sono detti appunto \textbf{hard-core
+  bit}. \\
+Si hanno quindi funzioni one-way e almeno alcuni bit dell'input che sono
+hard-core. \\
+Vediamo quanti possono essere tali hard-code bit. Non può essere di certo uno
+solo, perché costruirei due input, con i due valori possibili di quel bit, e
+calcolo la $f$ e vedo per quale dei due ottengo l'output giusto capendo quindi
+quale valore assume quel bit (che non è quindi hard-core). Stesso discorso se si
+suppone siano solo 2, avendo 4 possibili input.\\
+Non posso quindi avere un numero \textbf{piccolo e costante} di bit hard-core.\\
+Nemmeno un numero logaritmico sulla lunghezza dell'input andrebbe bene in
+quanto si potrebbe usare il brute-force. Dato quindi $x\in\{0,1\}^n$ i bit
+hard-core devono essere più di $\log_2n$, ad esempio $\frac{n}{4}$, altrimenti
+possiamo prima calcolare il valore di tutti gli altri bit e poi provare tutte le
+possibili combinazioni dell'hard-core fino a quando non troviamo la combinazione
+corretta. Una quantità maggiore di $\log_2n$ significa una quantità lineare (o
+funzioni particolari tra quelle logaritmiche e quelle lineari), come appunto
+$\frac{n}{4}$, ma non più di 
+lineare avendo che su $n$ bit posso al più avere $n$ hard-core bit. In pratica
+si ha una certa frazione degli $n$ bit in input.\\
+Bisogna introdurre un'altra definizione, quella di \textbf{predicato hard-core}.
+\begin{definizione}
+  Si definisce \textbf{predicato hard-core} un predicato $B$ che prende in input
+  l'input della funzione e dice qual'è il valore di un hard-core bit.\\
+  Il predicato è facile da calcolare in quanto conosce l'input.\\
+  Quindi, data $f:\{0,1\}^n\to\{0,1\}^n$ funzione one-way (in particolare una
+  permutazione one-way) che
+  quindi prende $n$ bit in input e restituisce $n$ bit in output,il
+  predicato $B$, calcolabile in tempo polinomiale da una TM deterministica, è: 
+  \[B:\{0,1\}^n\to\{0,1\}\]
+  che quindi prende $n$ bit in input e restituisce 1 bit.\\
+  $B$ è un predicato hard-core per $f$ (un predicato) se:
+  \[\forall \mbox{ algoritmo}\in PPT\land\forall\mbox{ polinomio }p(\cdot)
+    \mbox{ si ha che }\exists n_{A,p} \mbox{ t.c}\]
+  \[\forall n\geq n_{A,p},P[x\gets \{0,1\}^n ; b \gets A( f ( x)) : b = B(
+    x)]\leq\frac{1}{2}+\frac{1}{p(n)}\] 
+  Avendo quindi che per ogni algoritmo $A$ eseguibile dall'avversario su una PTM
+  e per ogni polinomio $p$ esiste un numero $n_{A,p}$ (dipendente da $A$ e $p$)
+  tale per cui per tutti gli $n$ maggiori di quella soglia, avendo quindi un
+  discorso asintotico, vale che si ha una probabilità che è minore di
+  $\frac{1}{2}$ sommata ad una quantità che tende a 0 velocemente quanto
+  l'inverso di un qualunque polinomio passato (quindi non troppo
+  velocemente). Nel dettaglio si parla della probabilità per cui, presa a caso
+  una sequenza $x$ di $n$ bit, calcolata in modo facile computazionalmente
+  $f(x)$, si assegna a $b$ il valore di tale calcolo di $f(x)$ dato in pasto
+  all'algoritmo $A$ dell'avversario. La probabilità che $b$ sia davvero il
+  risultato del predicato hard-core, ovvero $B(x)$, deve essere minore di
+  $\frac{1}{2}+\frac{1}{p(n)}$. L'$\frac{1}{2}$ c'è in quanto si ha a che fare
+  con un evento bernoulliano, avendo due risposte possibili, e quindi
+  l'avversario deve azzeccare con probabilità che non supera $\frac{1}{2}$ per
+  più di una quantità che tende a 0. In altri termini non può azzeccare con
+  probabilità maggior di quella che avrebbe andando a caso, avendo solo due
+  alternative. Quindi se $\frac{1}{p(n)}$ non tende a 0 significa che qualcosa
+  si è capito in merito a come calcolare $b$. 
+\end{definizione}
+Avendo definito $f$ one-way e $B$ predicato hard-core, possiamo costruire il
+PRNG $H$, con $H:\{0,1\}^k\to\{0,1\}^{k+1}$, in questo modo:
+\[H(x)=f(x)||B(x)\]
+avendo che $x$ e $f(x)$ sono di $k$ bit mentre $B(x)$ di un bit. La simbologia
+$||$ indica la concatenazione e quindi $H(x)$ ha $k+1$ bit. Quindi aggiungo un
+bit difficile da calcolare per l'attaccante ad una sequenza difficile da
+invertire. L'output di $H$ è quindi difficile da predire (e la cosa è sostenuta
+da un teorema che non vediamo).\\
+Bisogna capire in pratica che $f$ funzione/permutazione one-way
+scegliere (avendo poi che $B$ dipende da essa). Questa scelta è molto complessa
+e per di più non è nemmeno mai stato 
+dimostrato che esistano tali funzioni ma si hanno diverse candidate ma non si ha
+ancora la dimostrazione matematica.
+\newpage
+Vediamo qualche base algebrica utile prima di proseguire.
+\begin{shaded}
+  \begin{definizione}
+    Un \textbf{gruppo} $G$, indicato con:
+    \[(G,\bullet)\]
+    è una \textbf{struttura algebrica} composta da:
+    \begin{enumerate}
+      \item un insieme $G$ di elementi
+      \item un'operazione binaria $\bullet:G\times G\to G$
+    \end{enumerate}
+    L'operazione binaria deve essere tale che si rispettino le seguenti
+    proprietà: 
+    \begin{itemize}
+      \item \textbf{chiusura}: se si hanno $a,b\in G$ allora $a\bullet b\in G$
+      \item \textbf{associatività}: $\forall a,b,c\in G$ si ha che $(a\bullet
+      b) \bullet c= a\bullet (b\bullet c)$
+      \item \textbf{esistenza dell'identità}: $\exists e\in G$ tale che
+      $\forall a \in G$ \\si ha $a\bullet e = e \bullet a = a $
+      \item \textbf{esistenza dell'inverso}: $\forall a\in G$\\ $\exists a'\in
+      G$ tale che $a\bullet a'=a'\bullet a=e$
+    \end{itemize}
+  \end{definizione}
+  In crittografia mediamente si hanno due operazioni, somma e prodotto.
+  \begin{teorema}
+    Se ho un gruppo basato sulla somma ho un gruppo \textbf{isomorfo} basato sul
+    prodotto e viceversa. Questo per la definizione data di gruppo, con
+    relazioni tra coppie di elementi dell'insieme.
+  \end{teorema}
+  Come operazione di un gruppo posso avere anche cose più particolari come la
+  composizione di permutazioni.\\
+  In crittografia si usano \textbf{gruppi finiti}, anche se abbastanza grandi,
+  sufficientemente grandi da non poter osservare tutte le relazioni tra coppie
+  di elementi di $G$, permettendo appunto funzioni one-way (per invertire
+  servirebbe una sorta di visione globale).
+  \begin{definizione}
+    Si definisce \textbf{ordine del gruppo} $G$ come il numero di elementi di
+    $G$. 
+  \end{definizione}
+  \begin{definizione}
+    Un gruppo $G$ è detto \textbf{commutativo}, o \textbf{abeliano}, se:
+    \[\forall a,b\in G \mbox{ vale }a\bullet b= b\bullet a\]
+  \end{definizione}
+  Come notazione si ha:
+  \begin{itemize}
+    \item se usiamo la notazione additiva $(G, +, 0)$, l'inverso di $a$ è
+    indicato da $–a$  
+    \item se usiamo la notazione moltiplicativa $(G, \cdot, 1)$, l'inverso di
+    $a$ è indicato da $a^{-1}$ 
+  \end{itemize}
+  \begin{definizione}
+    Dato un gruppo moltiplicativo $(G, \cdot, 1)$ si definisce così
+    l'\textbf{esponenziazione}:
+    \[\forall g\in G\mbox{ e }\forall n\in \mathbb{N}\]
+    si ha:
+    \[
+      \begin{cases}
+        g^0=1\\
+        g^n=g\cdot g^{n-1}
+      \end{cases}
+    \]
+    è quindi una definizione ricorsiva sull'esponente, avendo come caso base
+    $g^0$ che produce l'identità.
+  \end{definizione}
+  \begin{definizione}
+    Un gruppo $G$ è detto \textbf{ciclico} se $\exists g\in G$ tale che:
+    \[\forall a \in G \,\,\exists n\in \mathbb{N}\mbox{ t.c. }a=g^n\]
+    ovvero esiste almeno un $g$ (il loro numero cresce ad aumentare dell'ordine
+    di $G$), detto \textbf{generatore} di $G$, tale che $g^n=a$, ovvero tutti
+    gli elementi del gruppo sono espressi da $g^n$, per un certo
+    $n\in\mathbb{N}$. Essendo il gruppo finito ad un certo punto l'esponente
+    raggiunge un valore massimo e quindi incrementandolo si riparte dall'$n$ più
+    piccolo per ottenere dopo un po' tutti gli $a\in G$.
+  \end{definizione}
+  \begin{teorema}
+    Un gruppo ciclico è sempre abeliano per le proprietà delle potenze.
+  \end{teorema}
+  \begin{definizione}
+    Un \textbf{anello} $R$, indicato con:
+    \[(R, +,\cdot)\]
+    è una struttura algebrica composta da:
+    \begin{enumerate}
+      \item un insieme $R$ di elementi
+      \item un'operazione binaria $+:R\times R\to R$ detta \textbf{somma}
+      \item un'operazione binaria $\cdot:R\times R\to R$ detta \textbf{prodotto}
+    \end{enumerate}
+    avendo soddisfatte le seguenti proprietà:
+    \begin{itemize}
+      \item $(R,+)$, nel dettaglio $(R,+,0)$ è un gruppo abeliano
+      \item \textbf{chiusura del prodotto}: se si hanno $a,b\in R$ allora si ha
+      $a\cdot b\in R$
+      \item \textbf{associatività del prodotto}: $\forall a,b,c\in R$\\
+      si ha che $(a\cdot b)\cdot c= a\cdot (b\cdot c)$ 
+      \item \textbf{distributività}: $\forall a,b,c\in R$\\
+      si ha che $a \cdot(b + c)= a \cdot b + a \cdot c$\\
+      e si ha che $(a + b)\cdot c = a \cdot c + b \cdot c$
+    \end{itemize}
+    Posso indicare l'anello $R$ anche con:
+    \[(R, +,\cdot,0,1)\]
+  \end{definizione}
+  \begin{definizione}
+    Un anello $R$ è detto \textbf{commutativo}, o \textbf{abeliano}, se:
+    \[\forall a,b\in R\mbox{ vale }a\cdot b=b\cdot a\]
+  \end{definizione}
+  \begin{definizione}
+    Un \textbf{dominio integrale} è definito come un anello commutativo $R$ che
+    soddisfa le seguenti proprietà:
+    \begin{itemize}
+      \item \textbf{identità per il prodotto}: $\exists 1\in R$ tale che\\
+      $\forall a in R,\,\,\,a\cdot 1=\\cdot a=a$
+      \item \textbf{assenza di divisori dello zero}: se si hanno $a,b\in R$ e
+      $a\cdot b=0$ allora o $a=0$ o $b=0$
+    \end{itemize}
+  \end{definizione}
+  \begin{definizione}
+    Un \textbf{campo} $F$, indicato con:
+    \[(F, +,\cdot)\]
+    è un \textbf{dominio integrale} che soddisfa la proprietà per cui ogni
+    elemento ha un inverso moltiplicativo:
+    \[\forall a\in F, a\neq 0, \exists a^{-1}\in F\mbox{ t.c. } a\cdot
+      a^{-1}=a^{-1}\cdot a = 1\]
+    Posso indicare il campo $F$ anche con:
+    \[(F, +,\cdot,0,1)\]
+  \end{definizione}
+  In crittografia si usano spesso i campi, e serve definire le altre operazioni
+  classiche.
+  \begin{definizione}
+    Dato un campo $F$ si definisce così la \textbf{sottrazione}:
+    \[\forall a,b\in F,\,\,\, a-b=a+(-b)\]
+  \end{definizione}
+  \begin{definizione}
+    Dato un campo $F$ si definisce così la \textbf{divisione}:
+    \[\forall a,b\in F,\,\,\, \frac{a}{b}=a\cdot b^{-1}\]
+  \end{definizione}
+  \begin{definizione}
+    Dato un intero positivo $n$ possiamo parlare di \textbf{aritmetica
+      modulare}. \\
+    Ogni $a\in\mathbb{Z}$ quando diviso per $n$ produce un \textbf{quoziente}
+    $q$ e un \textbf{resto/residuo} $r$ tali che:
+    \[a = qn + r\]
+    \[0\leq r<n\]
+    \[q=\left\lfloor\frac{a}{n}\right\rfloor\]
+    Questo calcolo è realizzabile in modo efficiente dal punto di vista
+    computazionale.\\
+    Si ha che:
+    \[a\bmod \,n\]
+    è il resto della divisione tra $a$ e $n$.
+  \end{definizione}
+  \begin{definizione}
+    Dati $a,b\in\mathbb{Z}$, con $b\neq 0$, si dice che $b$ divide $a$, indicato
+    con  $b|a$ se $\exists m\in \mathbb{Z}$ tale che $a=mb$.
+  \end{definizione}
+  Posso quindi definire delle \textbf{classi} di numeri tutte con lo stesso
+  resto.
+  \begin{definizione}
+    Due interi $a$ e $b$ sono detti \textbf{congrui modulo $n$} se $a\bmod\,
+    n=b\bmod\, n$ e si scrive:
+    \[a\equiv b\,\,\bmod\,n\]
+    L'operazione $\bmod$ ha diverse proprietà:
+    \begin{itemize}
+      \item $a\equiv b\,\,\bmod\,n$ sse $n|(a-b)$
+      \item $a\equiv b\,\,\bmod\,n$ sse $b\equiv a\,\,\bmod\,n$
+      \item $a\equiv b\,\,\bmod\,n$ e $b\equiv c\,\,\bmod\,n$ implicano $a\equiv
+      c\,\,\bmod\,n$ 
+    \end{itemize}
+    Si ha quindi una \textbf{relazione di congruenza}.
+  \end{definizione}
+  Si ha quindi che $\bmod \,n$ mappa $\mathbb{Z}$ in $\mathbb{Z}$
+  %30.18 parte 2
+\end{shaded}
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve

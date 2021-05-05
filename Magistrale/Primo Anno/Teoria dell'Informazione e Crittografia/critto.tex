@@ -5470,7 +5470,7 @@ scegliere (avendo poi che $B$ dipende da essa). Questa scelta è molto complessa
 e per di più non è nemmeno mai stato 
 dimostrato che esistano tali funzioni ma si hanno diverse candidate ma non si ha
 ancora la dimostrazione matematica.
-\chapter{Ripasso Algebra}
+\chapter{Ripasso Algebra \&co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella paarte di
 crittografia.
 \begin{definizione}
@@ -5637,8 +5637,140 @@ resto.
   \end{itemize}
   Si ha quindi una \textbf{relazione di congruenza}.
 \end{definizione}
-Si ha quindi che $\bmod \,n$ mappa $\mathbb{Z}$ in $\mathbb{Z}$
-% 30.18 parte 2
+Si ha quindi che $\bmod \,n$ mappa $\mathbb{Z}$ in
+$\mathbb{Z}_n=\{0,1,\ldots,n-1\}$ che è etto \textbf{insieme delle classi di
+  resto modulo $n$}.\\
+Si hanno quindi le seguenti proprietà:
+\begin{itemize}
+  \item $[(a \bmod\,n)+ (b\bmod\,n)]modn = (a + b)\bmod\, n$
+  \item $[(a \bmod\,n)- (b\bmod\,n)]modn = (a - b)\bmod\, n$
+  \item $[(a \bmod\,n)\cdot (b\bmod\,n)]modn = (a \cdot b)\bmod\, n$
+\end{itemize}
+da cui definire somma, sottrazione e prodotto in $\mathbb{Z}_n$.
+\begin{definizione}
+  Si definisce l'\textbf{esponenziazione modulare}, sulle classi di resti, come:
+  \[
+    \begin{cases}
+      (a\bmod \,n)^0=1\\
+      (a\bmod \,n)^k = a^k\bmod\,n
+    \end{cases}
+  \]
+  anche se ci sono (e si vedranno) modi più efficienti per calcolare la cosa.
+\end{definizione}
+Si ha quindi che gli elementi di $\mathbb{Z}_n$ sono le classi resto
+$[0]_n,[1]_n,\ldots [n-1]_n$ con:
+\[[r]_n=\{a\in\mathbb{Z}|a\equiv r\,\bmod\,n \}\]
+Si noti che un $\mathbb{Z}_n$ \textbf{non sempre è un campo}, esistendo i
+divisori dello 0, ma \textbf{sempre è un anello}. Rispetto alla somma si ha
+sempre l'inverso ma non è detto per il prodotto. 
+\begin{definizione}
+  Si definiscono le regole di semplificazione in $\mathbb{Z}_n$:
+  \begin{itemize}
+    \item se $(a+b)\equiv (a+c)\bmod\,n$ allora $b\equiv c\bmod\,n$, potendo
+    aggiungere $-a$ ad entrambi in membri
+    \item se $ab\equiv bc\bmod\,n$ e $GCD(a,n)=1$, con GCD \textit{greatest
+      common divisor}, allora $b\equiv c\bmod\,n$, potendo
+    moltiplicare $a^{-1}$ ad entrambi in membri
+    \item dato $a\in\mathbb{Z}_n$ esiste $a^{-1}\in\mathbb{Z}_n$ sse
+    $GCD(a,n)=1$. Questa proprietà è importante in quanto, essendo
+    $\mathbb{Z}_n$ un anello ci si chiede se esiste l'inverso di un valore $a$
+    ed esso esiste sse il massimo comun divisore tra $a$ e $n$ fa 1, questo
+    perché se si deve costruire un inverso $x$ devo risolvere un'equazione del
+    tipo: 
+    \[ax\equiv 1\bmod\,n\]
+    e quindi esiste soluzione sse $GCD(a,n)$ divide 1 e quindi sse $GCD(a,n)=1$
+  \end{itemize}
+\end{definizione}
+Per calcolare il \textit{greatest common divisor} si usa l'\textbf{algoritmo di
+  Euclide}.\\
+Dati $a,b$ due interi positivi si vuole calcolare $GCD(a,b)$. Si noti che:
+\begin{itemize}
+  \item $GCD(a,b)=GCD(-a,b)=GCD(a,-b)=GCD(a,-b)$ e quindi ci basta calcolare
+  $GCD(a,b)$ assumendo gli input positivi
+  \item l'algoritmo sfrutta il la proprietà per cui:
+  \[GCD(a,b)=GCD(b,a\bmod b)\]
+  avendo, per definizione:
+  \[GCD(a,0)=a\]
+\end{itemize}
+Si ha quindi l'algoritmo, avendo $a,b$ interi tali che $a>b>0$:
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{Euclid}{$a$,$b$}
+    \While {$b\neq 0$}
+    \State $r\gets a\bmod b$
+    \State $a\gets b$
+    \State $b\gets r$ 
+    \EndWhile
+    \State \textbf{return} $a$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di Euclide}
+\end{algorithm}
+Tale algoritmo può essere verificato \textbf{totalmente}, ovvero termina per
+ogni input.
+\begin{teorema}
+  Tutti i \textbf{campi finiti} hanno ordine $p^n$, con $p$ \textbf{numero
+    primo} e $n\geq 1$ intero.
+\end{teorema}
+\begin{teorema}
+  Si ha che $\mathbb{Z}_n$ è un \textbf{campo} sse $n=p^m$, con $p$
+  \textbf{numero primo} e $n\geq 1$ intero. Quindi i campi finiti sono solo e
+  solamente tutti i vari $\mathbb{Z}_{p^n}$.\\
+  $\mathbb{Z}_{p^n}$ è spesso indicato con $GF(p^n)$, se $n\geq 2$ e $GF(p)$,
+  se $n=1$, dove $GF$ sta per \textbf{Galois Field}. Per quanto detto $GF$
+  quindi è anche usato per indicare i campi finiti.\\
+  $\mathbb{Z}_2$ è il più piccolo campo finito e si ha che:
+  \begin{itemize}
+    \item la somma è lo xor
+    \item il prodotto è l'and
+    \item possiamo prima trasformare le formule booleane in equazioni
+    aritmetiche, semplificarle e poi trasformarle di nuovo in formule booleane  
+  \end{itemize}
+\end{teorema}
+Le operazioni tra $GF(p)$ e $GF(p^n)$ sono fatte in maniera diversa. Le
+operazioni di somma sono, nel primo caso, somme di valori $\bmod\,\,p$ ed
+equivalentemente per il prodotto, anch'essa $\bmod\,\,p$. Per $GF(p^n)$ gli
+elementi sono visti di solito come vettori di $n$ elementi, con ogni elemento
+tra 0 e $p-1$. In questo caso la somma diventa somma tra vettori, componente per
+componente, sempre $\bmod\,\,p$ (se $p=2$, avendo quindi bit, faccio lo
+xor). Per il prodotto si ha che gli elementi di $GF(p^n)$ si rappresentano come
+polinomi. Si fa quindi il prodotto tra polinomi. Si sceglie quindi un polinomio
+irriducibile e si divide il risultato del prodotto per tale polinomio (una
+scelta diversa di tale polinomio comporta una diversa rappresentazione di
+$GF(p^n)$, alcune più efficienti/opportune e altre meno) e si calcola il resto
+della divisione. Tale resto è il risultato del prodotto di due elementi in
+$GF(p^n)$. \\
+Parlando di $GF(p)$ si ha che, dato $a\in\mathbb{Z}_p$ allora $\exists
+a^{-1}\in\mathbb{Z}_n$ sse $GCD(a,p)=1$.\\
+Essendo campi finiti ogni elemento non nulla ha inverso e quindi $\forall
+a\in\mathbb{Z}_n$ si ha che $GCD(a,n)=1$ sse $\exists p$ primo e $\exists k\geq
+1$ tali che $n=p^k$.
+\begin{teorema}
+  Se, preso $p$ primo, $\mathbb{Z}_p$ e $w\in\mathbb{Z}_p$, moltiplico tutti gli
+  elementi di $\mathbb{Z}_p$ per $w$ ottengo una permutazione di
+  $\mathbb{Z}_p$.\\
+  Tale permutazione non è purtroppo one-way.
+\end{teorema}
+\begin{definizione}
+  Si definisce la \textbf{semplificazione} in $\mathbb{Z}_p$ avendo che, se vale
+  $ab\equiv ac\bmod\,p$ allora vale $b\equiv c\bmod\,p$
+\end{definizione}
+Possiamo quindi avere l'\textbf{algoritmo di Euclide esteso} che, dato
+$b\in \mathbb{Z}_n$, se $GCD(b,m)=1$ riesce a calcolare $b^{-1}\in\mathbb{Z}$ in
+modo molto efficiente.\\
+\textbf{Su slide bozze di pseudocodice}.\\
+Si ha anche un modo per calcolare altro, oltre $b^{-1}\in\mathbb{Z}$. Tale
+versione si applica al caso più generale per cui $GCD(a,b)=r$ e si basa sulla
+\textbf{identità di Bezout} che enuncia, dato $r=GCD(a,b)$, che esistono sempre
+due numeri interi $s$ e $t$ (che possono anche avere segno opposto) tali per
+cui:
+\[r=sa+tb\]
+e l'algoritmo esteso con questa identità calcola, a partire da $a$ e $b$, la
+tripla $r,s,t$.\\
+Si ha che $s$ e $t$ sono i coefficienti di una combinazione lineare di $a$ e $b$
+che da il valore di $r=GCD(a,b)$
+\textbf{Su slide bozze di pseudocodice}.\\
+
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve

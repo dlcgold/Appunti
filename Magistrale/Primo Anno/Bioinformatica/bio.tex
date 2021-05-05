@@ -2542,6 +2542,284 @@ Se la soluzione è unica allora è valida. In assenza di ricombinazioni, che son
 detti blocchi, si ha un modello coerente con la filogenesi perfetta.\\
 Per ottenere la matrici di aplotipi da quella di genotipi in modo che si abbia
 un albero di filogenesi è un problema che si risolve in tempo lineare.
+\subsection{Formalizzazione Problemi Bioinformatici}
+Uno dei punti chiave della bioinformatica è impostare il problema dal punto di
+vista computazionale. Bisogna passare da un problema biologico ad uno
+algoritmico. \\
+Parliamo sempre di aplotipizzazione, \textit{haplotyping}, e
+genotipizzazione, \textit{genotyping}.\\
+I vertebrati in generale sono diploidi, avendo che si hanno due copie di ogni
+cromosoma che sono appunto gli aplotipi. Le differenze delle due copie sono
+comunque piccole e sono rappresentate dagli SNPs, avendo che in un certo locus
+si hanno due possibili nucleotidi, potendo quindi indicare la cosa in modo
+binario, 0 per l'allele di maggioranza e 1 per quello di minoranza.\\
+Vediamo varie problematiche
+\begin{esempio}
+  Vediamo il problema dell'inferenza di aplotipi da genotipi, il
+  \textbf{phasing}.\\ 
+  Dati i genotipi di una popolazione vogliamo ottenere gli aplotipi della
+  popolazione o di un singolo individuo.\\
+  In merito all'aplotipo diciamo che l'aplotipo $h$ è un vettore binario
+  su alfabeto $\{0,1\}$, avendo quindi $(h_1,\ldots h_m)\in\{0,1\}^m$ con $h_i$
+  che è lo SNP del locus $i$. Nell'aplotipo non ho quindi tutto il cromosoma ma
+  solo quel 10\% di differenze circa nella popolazione, ho solo i locus con
+  problemi, tralasciando le parti uguali dei cromosomi che si stanno
+  confrontando. \\
+  Il genotipo invece è un vettore $g=(g_1,\ldots,g_m)\in \{0,1,2\}^m$, avendo 0
+  per omozigosi sull'allele di maggioranza, 1 di minoranza e 2 per
+  l'eterozigosi (nelle definizioni sopra si era usato * al posto di 2). \\
+  Dato un vettore di genotipi presi da $n$ individui $G_I$, con associato ad
+  ogni individuo il rispettivo genotipo (avendo ricostruito il suo DNA vedendo
+  cosa succede negli SNPs, avendo quindi 0, 1, 2). Magari ho fatto la
+  genotipizzazione degli SNP solo di un cromosoma e prendo un insieme di SNPs
+  $S=\{s_1,\ldots,s_m\}$. \\
+  Rappresentiamo $G_I$ come una matrice. Si ha quindi:
+  \begin{itemize}
+    \item \textbf{input}: matrice $G_i$ di genotipi
+    \item \textbf{output}: matrice $M_H$ di aplotipi che spiega $G_I$
+  \end{itemize}
+  Non so quanti aplotipi si avranno quindi dico che saranno $l$. \\
+  Si vuole che:
+  \[\forall g_i\in G_I\,\,\,\exists (h_{i1},h_{i2})\mbox{ t.c. risolvono } g_i\]
+  $G_i$ ha quindi $n$ righe con $g_i$ che è la riga $i$. $M_H$ ha $l$ righe. \\
+  Mi aspetto che $l\geq n$ e si vuole il minimo numero di aplotipi distinti che
+  spiega $G_I$ e questo è un problema NP-complete. Ma sappiamo anche che $l\geq
+  2n$ e quindi $n\leq l \leq 2n$, potendo riutilizzare lo stesso aplotipo per
+  più genotipi. Quest'ultima è la \textbf{regola di Clark}, che ha definito una
+  regola iterativa per il phasing di un gruppo di genotipi. Vediamo il
+  procedimento. Si hanno 3 genotipi, ad esempio:
+  \[g_1=(0,2,0,0)\]
+  \[g_2=(2,0,0,2)\]
+  \[g_3=(1,2,2,1)\]
+  e si supponga di conoscere già un aplotipo per il primo genotipo, ad esempio:
+  \[h_{11}=(0,1,0,0)\]
+  e in automatico si ha anche l'altro aplotipo del primo genotipo:
+  \[h_{12}=(0,0,0,0)\]
+  A questo punto vedo se questi aplotipi risolvono altri genotipi. Vedo quindi
+  quali aplotipi noti risolvono già i genotipi, ottenendo in caso nuovi
+  aplotipi.\\
+  Avendo $h_{12}$ so che posso applicarlo anche a $g_2$, ottenendo
+  automaticamente il terzo
+  mancante per poter risolvere $g_2$, insieme ad $h_{12}$, ovvero
+  $h_{22}=(1,0,0,1)$. Inoltre $h_{22}$ 
+  può spiegare $g_3$ e posso ottenere anche il quarto mancante per risolvere
+  $g_3$ insieme a $h_{22}$, ovvero $h_{32}=(1,1,1,1)$.\\
+  Si sono ottenuti tutti gli aplotipi distinti:
+  \begin{enumerate}
+    \item $h_{11}=(0,1,0,0)$
+    \item $h_{12}=(0,0,0,0)$
+    \item $h_{22}=(1,0,0,1)$
+    \item $h_{32}=(1,1,1,1)$
+  \end{enumerate}
+  Avendo che 4 aplotipi spiegano 3 genotipi, avendo $3\leq 4 \leq 6$, avendo
+  $n=3$.\\ 
+  La regola di Clark è esponenziale. \\
+  Si hanno altre regole per il phasing, come si è visto ad esempio con la
+  filogenesi perfetta. Con la filogenesi perfetta, grazie alla soluzione di
+  Gusfield nel 1994, si ha la seguente formulazione:
+  \begin{itemize}
+    \item \textbf{input}: matrice $G_I$ di $n$ genotipi, con $m$ SNPs (che sono
+    le colonne), avendo
+    quindi una matrice $n\times m$
+    \item \textbf{output}: matrice di lunghezza $2n$ di aplotipi $M_h$ tale che:
+    \[\forall g_i\in G_I\exists \,\,\, (h_{i1},h_{i2})\mbox{
+        t.c. risolvono } g_i,\] avendo il vincolo che $M_H$ ammetta filogenesi
+    perfetta (altrimenti restituisco errore). Si ha il vincolo che gli SNPs
+    seguono il vincolo della filogenesi perfetta
+  \end{itemize}
+  Il problema del phasing con filogenesi perfetta è polinomiale. All'inizio la
+  soluzione quadratica (tramite \textbf{graph realization}) per poi arrivare ad
+  una soluzione lineare.  \\
+  Il problema del \textbf{graph realization} ha:
+  \begin{itemize}
+    \item \textbf{input}: una lista di insiemi su lettere (ciascuno con
+    all'interno basi azotate)
+    \item \textbf{output}: un albero etichettato con le lettere (nel nostro caso
+    le basi azotate) tale che ciascun insieme in input rappresenti un cammino
+    dell'albero 
+  \end{itemize}
+  Ad esempio con:
+  \[\{A,C\},\{A,C,G\},\{C,G,T\}\]
+  mi basterebbe un albero coi nodi in sequenza:
+  \[A\to C\to G\to T\]
+  Questo problema ha soluzione polinomiale.\\
+  Per il phasing si usa anche la \textbf{legge di Mendel} quando si ha a
+  disposizione il \textbf{pedigree}, avendo il \textbf{trio} (ovvero la
+  rappresentazione di padre, madre e un figlio, coi rispettivi genotipi).
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/trio.pdf}
+    \caption{Esempio di trio, con quadrati per i maschi e cerchi per le femmine,
+    si ha quindi un figlio maschio}
+  \end{figure}
+  Quindi:
+  \begin{itemize}
+    \item \textbf{input}: il trio, $g_f$, $g_m$ e $g_c$
+    \item \textbf{output}: le tre coppie di aplotipi del trio calcolati con la
+    legge di Mendel, escludendo però le ricombinazioni (altrimenti il problema
+    diventa troppo complesso)
+  \end{itemize}
+  Il problema di determinare gli SNP dal trio è importante per patologie
+  ereditarie come la leucemia o comunque in altri discorsi in cui centra
+  l'ereditarietà, anche per esempio per la selezione di specie d'allevamento
+  etc$\ldots$\\
+  Si hanno ad esempio:
+  \[g_f=(2,2,1,1)\]
+  \[g_m=(1,1,0,0)\]
+  \[g_c=(1,1,2,2)\]
+  Vediamo quindi di inferire i genotipi.\\
+  Per il padre ho:
+  \[h_{f1}=(0,1,1,1)\]
+  \[h_{f2}=(1,0,1,1)\]
+  Per la madre:
+  \[h_{m1}=(1,1,0,0)\]
+  \[h_{m2}=(1,1,0,0)\]
+  Il figlio e vedo che $g_c=(1,1,2,2)$ comporta:
+  \[h_{c1}=(1,1,1,1)\]
+  \[h_{c2}=(1,1,0,0)\]
+  Ma questo non è coerente col padre, nel dettaglio non è coerente $h_{c1}$. Ma
+  per il padre potrei avere anche:
+  \[h_{f1}=(1,1,1,1)\]
+  \[h_{f2}=(0,0,1,1)\]
+  e in questo caso:
+  \[h_{c1}=(1,1,1,1)\]
+  \[h_{c2}=(1,1,0,0)\]
+  sono consistenti.\\
+  \textbf{La soluzione è quindi unica} e il problema ha soluzione in tempo
+  polinomiale. Questo problema, quello di assegnare i valori agli aplotipi sulla
+  base dei genotipi, posso vederlo come il problema di \textbf{2SAT}, che è
+  appunto polinomiale e per il quale si hanno risolutori veloci. Quindi il
+  phasing, in assenza di ricombinazioni è polinomiale. \\
+  In alternativa potrei usare la \textbf{programmazione lineare/intera} (come in
+  \textit{ricerca operativa}).
+\end{esempio}
+\newpage
+\begin{esempio}
+  Vediamo il problema dell'assemblaggio, ovvero come ricostruire gli aplotipi. È
+  il problema del \textbf{fragment haplotype assembly}.\\
+  Dal punto di vista biologico si ha appunto il problema di assemblare aplotipi
+  da dati di sequenziamento, ovvero dalle read. Per semplicità si parte da
+  \textbf{read allineate}. Si ha quindi il \textbf{reference}, espresso da una
+  sequenza, con gli alleli di maggioranza in tutta la popolazione umana, più
+  varianti,gli SNP della popolazione, in un file VCF. Un esempio di reference è
+  l'\textbf{NA128}, depositato nelle varie banche dati. L'obiettivo sarebbe
+  arrivare ad un \textbf{gold standard}, ovvero una sequenza che rappresenterà
+  tutti gli alleli da maggioranza con in aggiunta tutte le variazioni possibili
+  della popolazione (per ora si sta studiando la popolazione degli Askenasi, con
+  il progetto GIAB). L'idea è quindi di avere una sequenza più le variazioni,
+  per un dato indice $i$, della popolazione. \\
+  Si prende l'individuo singolo $I$ con le read relative e tali read vengono
+  allineate al reference, per cui \textbf{read allineate}, estraendo i frammenti
+  allineati degli SNPs. Si produce quindi, da ogni read, una riga della matrice
+  dei frammenti, con 1 e 0 in presenza di SNPs per dire se l'allele è di
+  maggioranza o minoranza. \\
+  Si hanno quindi:
+  \begin{itemize}
+    \item \textbf{input}: dati $F=\{f_1,\ldots,f_n\}$ frammenti per $m$ SNPs si
+    ha in input quindi la SNP matrix, $n\times m$, su alfabeto $\{0,1,-\}$
+    \item \textbf{output}: due aplotipi consistenti con i frammenti
+  \end{itemize}
+  Ad esempio, presi 4 frammenti, potrei avere come input:
+  \[
+    \left[
+      \begin{matrix}
+        - & 0 & 1 & 1 &-\\
+        1 & 0 & 0 & - &-\\
+        1 & 0 & 1 & - &-\\
+        - & 0 & 1 & 1 &-
+      \end{matrix}
+    \right]
+  \]
+  Si parla prima di un altro problema, ovvero quello di \textbf{aplotipizzazione
+    di un singolo individuo}, detta \textbf{error free}, avendo:
+  \begin{itemize}
+    \item \textbf{input}: matrice $M_F$ di frammenti senza errori, error-free,
+    $n\times m$
+    \item \textbf{output}: partizione di $F$ in due insiemi $H_1$ e $H_2$, che
+    rappresentano i due aplotipi, tale che il \textbf{conflitto tra frammenti}
+    esiste solo tra due aplotipi differenti. All'interno di $H_1$ non ho
+    conflitti tra i frammenti, idem all'interno di $H_2$
+  \end{itemize}
+  Si definisce che $f$ e $f'$ sono in
+  conflitto se $f\in H_1$ e $f'\in H_2$ e quindi sse $\exists i, \,\,1\leq
+  i\leq n$ tale che:
+  \[f[i]\neq f'[i]\]
+  quindi uno è 0 e l'altro è 1. Basta quindi una sola posizione.\\
+  Preso l'esempio sopra, con in ordine $f_1$, $f_2$, $f_3$ e $f_4$, con
+  matrice error-free essendo tutto consistente:
+  \[
+    \left[
+      \begin{matrix}
+        - & 0 & 1 & 1 &-\\
+        1 & 0 & 0 & - &-\\
+        1 & 0 & 1 & - &-\\
+        - & 0 & 1 & 1 &-
+      \end{matrix}
+    \right]
+  \]
+  so che sono in conflitto:
+  \[(f_1,f_2), (f_2,f_3), (f_2,f_4)\]
+  Avendo quindi:
+  \[H_1=\{f_1,f_3,f_4\}\]
+  \[H_2=\{f_2\}\]
+  Dobbiamo rappresentare il conflitto, nel caso error-free, riducendolo ad un
+  problema su grafo. Tale grafo ha $V=F$, quindi come vertici i frammenti, e
+  come archi, non orientati, si ha che:
+  \[(f,f')\in E \iff f\mbox{ in conflitto con } f'\]
+  Si crea quindi un grafo bipartito $G_F$. Il problema si riduce quindi a capire se un
+  grafo è bipartito.\\
+  Per l'esempio si avrebbe $G_F$:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{img/gp.pdf}
+  \end{figure}
+  Decidere che è un grafo è bipartito mi genera $H_1$ e $H_2$ e ci sono già
+  algoritmi polinomiali in merito. Un grafo per non essere bipartito basta
+  verificare che non ci siano cicli semplici dispari.\\
+  Aggiungiamo ora gli errori e quindi bisogna applicare la correzione nella
+  matrice dei frammenti. Si usa \textbf{K-MEC} che è prevede il minimo numero di
+  correzioni per colonna facendo al più $K$ correzioni per colonna nella
+  matrice dei frammenti tale che esista $H_1$, $H_2$ come bipartizione.\\
+  Vediamo un esempio:
+  \[
+    \left[
+      \begin{matrix}
+        - & 1 & 0 & 0 & -\\
+        - & 0 & 1 & 1 & 1\\
+        - & 0 & 0 & 0 & -
+      \end{matrix}
+    \right]
+  \]
+  Avendo i conflitti:
+  \[\{(f_1,f_2),(f_1,f_3),(f_2,f_3)\}\]
+  non potendo bipartire. Applico K-MEC e modifico la terza riga della seconda
+  colonna:
+   \[
+    \left[
+      \begin{matrix}
+        - & 1 & 0 & 0 & -\\
+        - & 0 & 1 & 1 & 1\\
+        - & \mathbf{1} & 0 & 0 & -
+      \end{matrix}
+    \right]
+  \]
+  facendo quindi una sola correzione, ottenendo una matrice su cui poter fare
+  bipartizione. \\
+  Il problema K-MEC (\textit{Minimum Error Correction}) si risolve con
+  programmazione dinamica. \\ 
+  K-MEC contiene la sottostruttura ottima, ovvero presa una matrice con colonne
+  da 1 a $i+1$ se rimuovo l'ultima colonna ho comunque la soluzione ottima.\\
+  Si ha quindi:
+  \begin{itemize}
+    \item \textbf{input}: $M_F$ matrice dei frammenti non error-free e $k\geq n$
+    di correzioni per colonna massime
+    \item \textbf{output}: matrice $M'_F$ ottenuta da $M_F$ tramite il minimo
+    numero di flip (con al più $k$ correzioni per colonna) tale che sia
+    error-free, ammettendo quindi bipartizione
+  \end{itemize}
+  Si ha una soluzione parametrica.
+\end{esempio}
+
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero
 \textbf{DNA} (figura \ref{fig:dna}) e \textbf{RNA}, intese come molecole
@@ -3501,4 +3779,5 @@ D'altro canto $LCP[i] < LCP[i-1]$ implica che:
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap ST
 % LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
-% LocalWords:  feature semiglobale sottoalbero l'aplotipo
+% LocalWords:  feature semiglobale sottoalbero l'aplotipo aplotipizzazione
+% LocalWords:  genotipizzazione sottostruttura

@@ -5823,9 +5823,79 @@ comunicata a Bob ma tale informazione viene rimescolata nella trasmissione.
     quanto detto nel secondo punto
   \end{itemize}
 \end{definizione}
+Sin ricorda che queste funzioni one-way non si ha certezza che esistano, non si
+riesce a dimostrare la loro esistenza. Se si avesse $P=NP$ sicuramente tali
+funzioni non esisterebbero (perché si risolverebbe polinomialmente lo studio di
+tutti i possibili alberi di computazione della NDTM per trovare
+l'inversa). D'altro canto se si dimostrasse l'esistenza di anche 
+solo una funzione one-way si avrebbe $P\neq NP$, questa è la
+\textbf{contronominale} (e non l'inversa) dell'affermazione precedente. Da
+questa affermazione si coglie il problema di capire se esiste una funzione
+one-way. Si potrebbe comunque avere 
+$P\neq NP$ senza avere che esista alcuna funzione one-way, avendo comunque che
+invertire una funzione one-way deve essere ``quasi sempre''
+difficile. Quest'ultima è l'\textbf{inversa} della prima affermazione.\\
+In crittografia si lavora inoltre su permutazioni one-way su $\{0,1\}^n$.\\
+\textbf{Dato che non si sa se $P\neq NP$ o $P=NP$ si assume che esista almeno
+  una funzione one-way}.\\
+Un esempio di probabile funzione one-way è l'\textbf{esponenziazione modulare},
+solitamente modulo $p$, con $p$ numero primo. Si considera il campo
+$\mathbb{Z}_p$ e il gruppo moltiplicativo, il più grosso contenuto in
+$\mathbb{Z}_p$, $\mathbb{Z}^*_p=\{1,2,\ldots, p-1\}$.  Si ha che
+$\mathbb{Z}^*_p$ è un gruppo ciclico:
+\[\exists g\in \mathbb{Z}^*_p \mbox{ t.c. } \mathbb{Z}^*_p=\{g^0,g^1,\ldots
+  g^{p-2}\}\]
+(avendo che ho $p-1$ elementi ma l'esponente parte da 0 si ha che l'esponente
+massimo è $p-2$). \textbf{Gli elementi calcolati tramite $g^i$ si ottengono in
+  ordine permutato}, cosa che rende il problema intrattabile da invertire.\\ 
+L'esponenziazione modulare è quindi una funzione:
+\[f:mathbb{N}\to \mathbb{Z}^*_p\]
+definito come:
+\[f(z)=g^z\bmod\,\,p\]
+\textbf{Ogni esponenziazione modulare produce una permutazione one-way degli
+  elementi di $\mathbb{Z}^*_p$}.
+\begin{esempio}
+  Vediamo un esempio.
+  Si ha che $\mathbb{Z}_5=\{0,1,2,3,4\}$ e quindi:
+  \[\mathbb{Z}^*_5=\{1,2,3,4\}\]
+  Si ha che $2$ è un generatore di $\mathbb{Z}^*_5$:
+  \[\mathbb{Z}^*_5=\{2^0,2^1,2^2,2^3\}=\{1,2,4,3\}\]
+  e quindi:
+  \[f(z)=2^z\bmod\,\,5\]
+  Nell'esempio si è usato $p=5$ mentre in crittografia solitamente $p$ è un
+  numero primo rappresentabile da almeno 1024 bit, quindi non piccolo.
+\end{esempio}
+Data $x$ si calcola $g^x\bmod\,\,p$ in tempo polinomiale e si assume $0\leq
+x\leq p-2$ (per la ``rotazione'' del modulo). Fare $\bmod\,\,p$ rende difficile
+invertire. \\ 
+La grandezza dell'input è il numero di bit necessari a rappresentare
+$\mathbb{Z}^*_p$, quindi:
+\[n=\log_2p\]
+Potrei pensare di fare, avendo $x_{n-1},\ldots, x_1, x_0$ come la
+rappresentazione binaria di $x$:
+\[x=\sum_{j=0}^{n-1}x_j2^j\]
+Avrei una cosa del tipo:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{ModExp}{$p,g,x$}
+    \State $result\gets 1$
+    \While {$x>0$}
+    \State $result \gets result \cdot g\bmod\,\,p$
+    \State $x\gets x-1$
+    \EndWhile
+    \State \textbf{return} $result$ 
+    \EndFunction
+  \end{algorithmic}
+  \caption{Primo tentativo non efficiente di calcolo esponenziazione modulare}
+\end{algorithm}
+In pratica avrei che $result$ contiene:
+\[g^0,g^2,\ldots,g^x\bmod\,\,p\]
+Ma avrei un numero di iterazioni esponenziale rispetto a $n$:
+\[x\cong 2^n\]
 \chapter{Ripasso Algebra \& co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.
+\section{Algebra}
 \begin{definizione}
   Un \textbf{gruppo} $G$, indicato con:
   \[(G,\bullet)\]
@@ -6123,10 +6193,32 @@ tripla $r,s,t$.\\
 Si ha che $s$ e $t$ sono i coefficienti di una combinazione lineare di $a$ e $b$
 che da il valore di $r=GCD(a,b)$.\\
 \textbf{Su slide bozze di pseudocodice non verificato}.
-
+\section{Probabilistic TM}
+La \textbf{Probabilistic Turing Machine} è un modello intermedio tra la DTM e la
+NDTM. Studiando l'albero di computazione, simile a quello delle NDTM, si associa
+ad ogni ramo una certa probabilità e ad ogni passo del calcolo, la macchina
+sceglie la configurazione successiva in base alle probabilità assegnate (mentre
+nelle NDTM si andava in tutte le configurazioni successive
+contemporaneamente). \\
+Spesso quindi gli algoritmi probabilistici si comportano bene.\\
+Si hanno quindi varie classi di complessità:
+\begin{itemize}
+  \item \textbf{RP}, dove si accetta l'input se e solo se almeno la metà delle
+  foglie lo accetta 
+  \item \textbf{BPP}, dove la probabilità di sbagliare è delimitata da una
+  costante  
+  \item \textbf{ZPP}, dove se il calcolo si
+  interrompe, la risposta è corretta; tuttavia, esiste una probabilità maggiore
+  di 0 che l'algoritmo non si fermi  
+\end{itemize}
+Per molti problemi esistono semplici algoritmi probabilistici, a volte più
+complessi. \\
+In crittografia si assume che la potenza di calcolo di Eve sia quella di una
+PTM, solitamente di classe BPP.
 \end{document}
 
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
 % LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
 % LocalWords:  Shannon esponenziazione algoritmicamente impersonificando
+% LocalWords:  Probabilistic polinomialmente

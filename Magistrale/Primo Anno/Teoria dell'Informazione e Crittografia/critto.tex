@@ -5708,9 +5708,121 @@ raccolti nel 1978 nel famoso testo di Garey e Johnson. Si studia quindi come
 alcune operazioni siano facili se si conosce una certa informazione segreta e
 difficili altrimenti (le funzioni one-way diventano facili da invertire se si
 conosce tale informazione). Ma resta il problema di Alice e Bob che devono
-scambiarsi tale informazione segreta.\\
-\textbf{To be continued}
-
+scambiarsi tale informazione segreta, cosa che viene fatta su un canale pubblico
+dove Eve ascolta.\\
+Si trova anche un modo per gestire efficientemente le chiavi, nel caso in cui
+Alice debba comunicare con più persone.\\
+L'idea dietro la crittografia a chiave pubblica, idea del 1976/1977 di Diffie e
+Hellman, è usare algoritmi diversi per 
+cifrare e decifrare, con quello per decifrare che resta segreto mentre quello
+per cifrare resta pubblico, si rende pubblica la chiave di
+cifratura. L'attaccante è quindi in una posizione di vantaggio rispetto ai
+crittosistemi simmetrici, tutti possono cifrare il messaggio ma solo il
+destinatario può decifrarlo. \\
+Per capire meglio l'idea (e i problemi) vediamo un'analogia. Si supponga che
+Alice voglia mandare un messaggio a Bob. Tale messaggio viene mandato
+fisicamente, tramite una scatola chiusa a chiave. Alice dice a Bob che le deve
+mandare il messaggio e Bob manda la cassetta di sicurezza, con il lucchetto
+aperto di cui solo lui ha la chiave. Alice scrive il messaggio, lo mette nella
+cassetta e chiude il lucchetto, che ora solo Bob può riaprire, e lo rispedisce a
+Bob. Il problema è che Eve può intercettare la scatola aperta e sostituirla,
+impersonificando sia Alice che Bob a seconda del punto di vista. Eve potrebbe
+fare quello che vuole con la scatola sostituita, sostituendo il messaggio per
+Bob. Questo è un problema non risolto. \\
+Alice non può essere sicura che il lucchetto quindi sia di Bob e quindi usa
+anche un suo lucchetto (e non quello di Bob) ma a questo punto sia Eve che Bob
+non possono più aprire. Bob quindi chiude anche il suo lucchetto e la rimanda ad
+Alice che toglie il suo e lo rimanda a Bob, che toglie il suo e legge il
+messaggio. Quindi sembra che basti mandare più volte il messaggio per risolvere
+il problema, complicando il protocollo di trasmissione, ma Eve può comunque
+inserirsi, rimandando a Alice la scatola con entrambi i lucchetti (col secondo
+suo e non di Bob), facendo una cosa simile anche con Bob per non destare
+sospetti. Se Bob ha sospetti deve comunicarlo ad Alice. Eve sta facendo
+l'attacco \textbf{man in the middle}. \\ 
+Formalizziamo quindi meglio il problema.\\
+Bob sceglie 2 algoritmi/chiavi (gli algoritmi dipendono unicamente dalla chiave
+quindi posso usare i due termini in modo indistinto):
+\begin{itemize}
+  \item $E_B$ per cifrare
+  \item $D_B$ per decifrare
+\end{itemize}
+tali che, ovviamente:
+\[\forall m\in PT,\,\,D_B(E_B(m))=m\]
+e devono essere tali per cui deve essere intrattabile ottenere $D_B$ da $E_B$.\\
+Bob rende pubblico $E_B$ e tiene segreto $D_B$.\\
+Se Alice vuole spedire $m$ a Bob calcola $E_N(m)$, l'algoritmo è pubblico, e lo
+manda a Bob, che calcola $D_B(E_B(m))=m$. Se Eve intercetta $E_N(m)$ deve
+risolvere un problema intrattabile per ottenere $B_B$. Il problema è che Alice,
+se parte di una grande comunità di utenti, deve conoscere tutti gli algoritmi di
+cifratura e questo è impraticabile, anche perché in caso di sospetti Bob
+comunica la cosa ad Alice.\\
+Per risolvere il problema sia Alice che Bob hanno i propri algoritmi
+\begin{itemize}
+  \item $E_A,E_B$ per cifrare
+  \item $D_A,D_B$ per decifrare
+\end{itemize}
+tali che \textbf{commutino} gli algoritmi di cifratura e decifratura:
+\[\forall m\in PT,\,\,E_A(E_B(m))=E_B(E_A(m))\]
+\[\forall m\in PT,\,\,D_A(D_B(m))=D_B(D_A(m))\]
+Ora non è necessario mettere pubblici i due $E$ ma bisogna tenere 
+segreti i due $D$.\\
+Alice infatti calcola $E_A(m)$ e lo manda a Bob che calcola $E_B(E_A(m))$ e
+manda il risultato ad alice che calcola $D_A(E_B(E_A(m)))$ e rimanda il
+risultato a Bob. Bob quindi calcola $D_B(D_A(E_B(E_A(m))))$ ma questo è uguale a
+$D_A(D_B(E_B(E_A(m))))$ che equivale a $D_A(E_A(m))$ che equivale a $m$
+($D_i(E_i(x))$ praticamente si semplificano).\\
+Alice quindi usa solo $E_A$ e $D_A$ e in caso di sospetto gli basta cambiare
+questa coppia.\\
+Anche in questo caso Alice seleziona un elemento di una famiglia di coppie di
+algoritmi di cifratura/decifratura, scegliendo una \textbf{chiave pubblica}
+$k_{p_A}$ e la conseguente \textbf{chiave privata} $k_{s_A}$. Ovviamente si ha
+che:
+\begin{itemize}
+  \item $\forall m\in PT,\,\,\,D_{k_{s_A}}(E_{k_{p_A}}(m))=m$
+  \item è intrattabile ottenere $k_{s_A}$ da $k_{p_A}$
+  \item in generale, l'uso previsto deve essere facile, mentre tutti gli usi
+  imprevisti devono essere molto difficili  
+\end{itemize}
+Guardando le due versioni del protocollo viste sopra (la prima è quella con il
+singolo invio e la seconda è quella con il doppio invio):
+\begin{itemize}
+  \item nella prima versione $k_{p_A}$ deve essere pubblica
+  \item nella seconda versione $k_{p_A}$ può essere pubblica
+\end{itemize}
+In entrambe $k_{s_A}$ deve essere segreta.\\
+Il canale che abbiamo descritto è criptato ma non autenticato. Bisogna capire,
+quando Alice riceve la chiave pubblica di Bob, come può essere sicura di non
+aver ricevuto invece la chiave di Eve.\\
+Bisogna ora capire come implementare gli algoritmi di cifratura e decifratura,
+le ``scatole segrete'' e
+come generare le coppie di chiavi, quella pubblica e quella segreta.\\
+Per la prima domanda si usano funzioni one-way, $f:\mathbb{N}\to\mathbb{N}$,
+come già descritto precedentemente. Alice calcola praticamente $f(m)$ ma diventa
+difficile anche per Bob, non solo per Eve. Si aggiunge quindi che le funzioni
+one-way abbiamo una \textbf{trapdoor}, avendo che tali funzioni sono difficili
+da invertire senza conoscere tale trapdoor e facili altrimenti. Bob quindi può
+calcolare $x$ tale che $f(x)=y$. Tale informazione segreta deve essere
+comunicata a Bob ma tale informazione viene rimescolata nella trasmissione.
+\begin{definizione}
+  Si ha che $f$, $f:\mathbb{N}\to\mathbb{N}$, è one-way se:
+  \begin{itemize}
+    \item $f$ può essere calcolata in tempo polinomiale da una macchina di
+    Turing deterministica (cioè, è facile da calcolare)  
+    \item esistono due polinomi, rispetto a $n$ numero di bit necessari a
+    rappresentare l'input $x$, $p(\cdot)$ e $q(\cdot)$ tali che:
+    \[p(|x|)\leq |f(x)|\leq q(|x|)\]
+    avendo che l'output di $f$ non deve essere corto (il valore assoluto qui
+    indica la lunghezza). 
+    \item per ogni algoritmo $A$ dell'avversario, eseguito in tempo polinomiale
+    su una PTM, e per ogni polinomio $p(\cdot)$ esiste un numero naturale
+    $n_{A,p}$ si ha lo schema, detto \textbf{negligible trascurable} (\textit{lo
+      sono anche tutti gli schemi simili già visti}):
+    \[\forall n\geq n_{A,p}\,\,\,P[x\gets\{0,1\}^n; x'\gets A(f(x)):
+      f(x)=f(x')]\leq \frac{1}{p(n)}\]
+    Il calcolo è difficile per la $f$ non perché l'input è troppo corto, per
+    quanto detto nel secondo punto
+  \end{itemize}
+\end{definizione}
 \chapter{Ripasso Algebra \& co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.
@@ -6017,4 +6129,4 @@ che da il valore di $r=GCD(a,b)$.\\
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
 % LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
-% LocalWords:  Shannon esponenziazione algoritmicamente
+% LocalWords:  Shannon esponenziazione algoritmicamente impersonificando

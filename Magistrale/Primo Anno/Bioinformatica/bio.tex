@@ -2819,6 +2819,115 @@ Vediamo varie problematiche
   \end{itemize}
   Si ha una soluzione parametrica.
 \end{esempio}
+\chapter{Indexing dei k-mer}
+Una questione essenziale in bioinformatica è la mole di dati.\\
+Per tenere traccia dei dati si fa un \textit{fully-text-index} del testo $T$,
+avendo una struttura dati atta a tenere in memoria il testo. Su questa struttura
+si fanno query, in merito a posizioni o frequenza di sottostringhe. Le query
+devono essere in tempo sub-lineare rispetto a $n=|T|$. Ad esempio calcolare la
+BWT può essere dispendioso ma le query poi sono sulla dimensione del
+pattern. Alcune query sono addirittura in tempo costante. \\
+Un altro problema è il tradeoff tra tempo e spazio, cercando una struttura
+performante in entrambi i sensi. Si parla di \textbf{next generation
+  computing}.\\
+Sulle strutture dati è comodo avere le due operazioni di \textit{rank} e
+\textit{select}, che per la BWT sono $C$ e $Occ$.\\
+Un tecnica per accedere in tempo costante al testo è l'hashing, tramite
+\textbf{funzione di hash}. Si ha un numero arbitrario di chiavi $k_i$. Le chiavi
+possono essere di vario tipo ma sono tendenzialmente numeriche. Si ha poi una
+funzione $h$ che mappa le chiavi negli ingressi di una tabella, tramite
+$h(k_i)$. Tale tabella hash è a dimensione fissata. La funzione di hash modifica
+la chiave per poter accedere in modo ottimizzato alla tabella. Qualora con due
+chiavi si abbia il tentativo di accesso alla stessa cella della tabella si parla
+di \textbf{collisione} e questo è un problema normalmente. In realtà le
+collisioni sono un vantaggio per grandi moli di dati, trovando somiglianza di
+oggetti qualora collidano nella stessa posizione e questo è d'aiuto in
+bioinformatica (dove il processamento è sulla scala di $10^{13}$, in clustering
+di genomi simili), ma anche in
+ambiti di studio di immagini. Questo sistema di hashing è detto \textbf{local
+  sensitive hashing (\textit{LSH})}.\\
+Si usano i \textbf{q-gram} che sono sottostringhe di di lunghezza $q$, sono
+infatti detti anche \textbf{q-mers}. Si sfrutta LSH per ridurre la dimensione
+del dato, usando collisioni per capire la somiglianza, in termini di distanza di
+Jaccard/Hamming/Edit, processando i \textbf{bucket}, ovvero i contenitori dove
+finiscono elementi con lo stesso hash. Si hanno trilioni di buckets di cui
+hashare gli elementi. Oggetti con lo stesso hash sono molto probabilmente
+simile e quindi serve una funzione di hash che sfrutti questa cosa, in un tempo
+accettabile. Non confronto quindi direttamente gli elementi.  Il singolo costo
+di hash su un elemento è \textbf{costante} quindi il tutto è lineare sul numero
+di elementi. \\
+Le tipiche query sono cercare stringhe simili ad una di query $q$ oppure fare
+clustering dei vari elementi.\\
+Per fare LSH si riassumono le sequenze, o alcune parte, nei cosiddetti
+\textbf{sketch}, che sono rappresentazioni più piccoli. Gli sketch sono usate
+come chiavi di hash e si confrontano le sequenze tramite appunto le
+collisioni. \\
+La tecnica che usa Jaccard è detta MinHash.\\
+La distanza tra due stringhe è detta $d$ mentre la somiglianza $1-d$. La
+distanza di Jaccard tra due insiemi $A$ e $B$ è:
+\[J(A,B)=\frac{A\cap B}{a\cup B}\]
+quindi se $A$ e $B$ sono uguali $J(A,B)=1$.\\
+Una famiglia di funzioni hash è detta \textbf{locality sensitive} se elementi
+simili hanno probabilità alta di portare ad una collisione, avendo la stessa
+funzione di hash.
+\begin{definizione}
+  LSH per una relazione $s()$ di simiglianza è una famiglia $D$ di funzioni hash
+  tale che:
+  \[P_{h\in F}[h(x]=h(y)=s(x,y)\]
+  per ogni coppia $x,y$ nel dominio di $F$.\\
+  Nel dettaglio $s(x,y)$ viene stimata tramite gli sketch di $x$ e $y$:
+  \[sketch(x)=<h_1(x)\ldots h_t(x)\]
+  \[sketch(y)=<h_1(y)\ldots h_t(y)\]
+  con $t$ funzioni hash. SI ha quindi:
+  \[s(x,y)=\frac{\mbox{numero di volte che su ha }h_i(x)=h_i(y)}{t}\]
+  con il numero di collisioni che indica appunto la somiglianza. \\
+  Se uso minHash LSH, che sua Jaccard, ho che:
+  \[P[h(A)=h(B)]=J(A,B)\]
+  Scegliendo a caso la funzioni di hash tramite permutazione $\pi_i$ si ha che:
+  \[h_{\pi_i}(x)=\min\pi_i(x)\]
+  % e quindi una permutazione
+  \textbf{Manca frase da slide}
+\end{definizione}
+\textbf{Esempio su slide per il calcolo della funzione di hash
+  (probabilmente cannati i conti finali)}.\\
+\textit{Dimostrazioni non fatte a lezione}.\\
+Si riesce quindi a confrontare le sequenze tramite hash sui kmer basandosi su un
+certo numero di permutazioni scelte. Rappresento quindi un insieme di kmer
+tramite un sottoinsieme di kmer. Non sempre la somiglianza è comunque indicativa
+e la cosa varia sul $k$ e sull'utilizzo degli stessi.\\
+Tutto questo, lato genomico, è stato studiato nel software \textbf{MASH}, che
+studia il metagenoma. MASH si basa sul prendere genomi da confrontare a coppie,
+si estraggono i kmer e si estraggono i kmer canonici, ovvero quello più piccoli
+lessicograficamente per le due direzioni. SI fissa una dimensioni dello sketch e
+si calcolano i più piccoli hashes su tutti i kmer. La comprensione è
+incredibile, da centinaia di giga a meno di un centinaio di mega. Si fa
+confronto quadratico sugli sketch. Anche in questo caso $k\sim 32$. MASH viene
+anche usato per fare assemblaggio di reads, sempre usando gli sketch. \\
+Questi risultati sono interessanti sia lato tempo che lato spazio.
+\chapter{Bloom Filters}
+Un \textbf{bloom filter} è una seconda variante di struttura dati basata su
+hash. Volendo solo sapere se un elemento ci sia o meno posso in primis togliere
+i valori dalla tabella di hash, tanto se c'è ho il mapping. Ma posso anche
+eliminare le chiavi, mi basta sapere che ci sia la funzione di hashing che, non
+interessandomi di recuperare il valore effettivo. Mi riduco quindi ad un vettore
+binario, con 1 in corrispondenza di dove prima aveva dei valori hash, con
+eventuali collisioni (sempre prima), e 0 altrimenti. Quindi con 1 flaggo i
+bucket dove finirebbe almeno un elemento. La query di esistenza diventa quindi
+solo verificare che ci sia 1 nella posizione calcolata dall'hash. Un bit vector
+inoltre è rappresentabile facilmente in memoria, soprattutto se sparso. Il
+problema è che posso avere falsi positivi se ho collisioni (magari due elementi
+puntano ad una posizione, ne vedo uno e metto 1 ma faccio la query sull'altro)
+ma se ho 0 sicuro non c'è. Una soluzione è usare più funzioni di hash per
+abbassare le chance di falsi positivi, devo avere 1 per tutti i vari
+\textbf{filtri}, i vari bit vector sono detti filtri. Possono inoltre fare un
+bit vector come or di tutti gli altri e usare quello per fare le query, anche
+se resta una stima probabilistica. \\
+Il \textbf{bloom filter} è appunto questo bit vector finale.\\
+In bioinformatica i bloom filter sono un modo efficiente per memorizzare i k-mer
+e farci query sopra per verificare se esistono o meno. Minhash più bloom filter
+più skatch sono un'ottima soluzione. Viene usato ora per memorizzare i VCF del
+COVID.
+
 
 \chapter{I dati in Bioinformatica}
 Dobbiamo introdurre i dati fondamentali della bioinformatica, ovvero

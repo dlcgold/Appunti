@@ -6095,22 +6095,306 @@ Calcolare $\phi(n)$ è facile conoscendo la fattorizzazione di $n$:
 \[\phi(n)=n\prod_{p|n}\left(1-\frac{1}{p}\right)\]
 dove $p$ varia su tutti i primi che dividono $n$. Se non si conosce è difficile
 e quindi rompere RSA equivale a  fattorizzare $n$.
-\textbf{Mancano slide 44 e 45}.\\
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Vediamo qualche altra proprietà di $\phi(n)$. \\
+Dato $k\geq 1$ possiamo dire che:
+\[\phi(p^k)=p^{k-1}(p-1)=p^k-p^{k-1}=p^k\left(1-\frac{1}{p}\right)\]
+Se avessimo $n=m\cdot s$ con $GCD(m,s)=1$ allora $\phi(n)=\phi(m\cdot
+s)=\phi(m)\cdot phi(s)$.\\
+D'altro canto se $n=p\cdot q$, con $p$ e $q$ primi diversi si ha che:
+\[\phi(n)=\phi(p\cdot q)=\phi(p)\cdot \phi(q)=(p-1)\cdot (q-1)\]
+e, se la fattorizzazione è del tipo $n=p_1^{k_1}\ldots p_r^{k_r}$, con $p_i$
+primi distinti e $k_i\geq 1$ per tutti gli $i$ si avrebbe:
+\[\phi(n)=\phi(p_1^{k_1})\cdots
+  \phi(p_r^{k_r})=p_1^{k_1}\left(1-\frac{1}{p_1}\right)\cdots
+  p_r^{k_r}\left(1-\frac{1}{p_r}\right)=n\prod_{i=1}^r
+  \left(1-\frac{1}{p_i}\right)\]
+Quindi se Eve conoscesse solo $\phi(n)$ non solo rompe RSA ma fattorizza anche
+$n$, sapendo:
+\[n=p\cdot q\to \phi(n)=(p-1)\cdot(q-1)=p\cdot q-(p+q)+1=n-(p+q)+1\]
+e quindi può calcolare:
+\[p+q=n-\phi(n)+1\]
+e quindi conoscendo sia la somma che il prodotto di $P$ e $q$ può risolvere:
+\[x^2-(p+1)x+p\cdot q=0\]
+Inoltre $p$ e $q$ non devono essere troppo vicini perché Eve cercherebbe introno
+a $\sqrt{n}$.\\
+Possiamo dire altro. Si assuma senza perdere generalità $p>q$. Se $p$ e $q$
+fossero vicini si avrebbe $\frac{p-q}{2}$ piccolo e poco più grande di
+$\sqrt{n}$. Inoltre si avrebbe la seguente tautologia:
+\[\frac{(p+q)^2}{4}-n=\frac{(p-q)^2}{4}\]
+deducendo che $\frac{(p+q)^2}{4}-n$ è un \textbf{quadrato perfetto} e quindi si
+cercano gli interi $x> \sqrt{n}$ tali che $x^2-n$ è un quadrato perfetto,
+$y^2$.\\
+Si supponga si trovi tale $y^2$, da $x^2-n=y^2$ si deduce:
+\[n=x^2-y^2=(x+y)(x-y)\]
+e quindi:
+\begin{itemize}
+  \item $p=x+y$
+  \item $q=x-y$
+\end{itemize}
+Avendo trovato $q$ e $p$.\\
+Un altro problema è il valore di $\phi(n)$. 
+Si assume $GCD(p-1,q-1)$ largo e si ha, con $LCM$ \textbf{Least Common
+  Multiple}: 
+\[u=LCM(p-1,q-1)=\frac{(p-1)(q-1)}{GCD(p-1,q-1)}=\frac{\phi(n)}{GCD(p-q,q-1)}\]
+avendo che $u$ è piccolo rispetto a $\phi(n)$.\\
+Si noti che potrei usare $d'\equiv e^{-1}\bmod \,\,u$ al posto di $d$ per
+decifrare, questo grazie al \textbf{teorema di Eulero}. Dato che $u$ è piccolo
+però può essere trovato via bruteforce e quindi è meglio che $p-1$ e $q-1$
+abbiano divisori comuni grandi.\\
+Una \textbf{pessima idea}, più relativa all'uso di RSA, è quella di usare lo
+stesso modulo $n$ per un gruppo 
+di utenti, a cui si vuole inviare il plaintext $m$. Ipotizziamo di avere due
+componenti di cifratura $e_1$ ed $e_2$, calcolando quindi due testi cifrati:
+\begin{itemize}
+  \item $c_1=m^{e_1}\bmod \,\,n$
+  \item $c_2=m^{e_2}\bmod \,\,n$
+\end{itemize}
+E qualora si avesse:
+\[GCD(e_1,e_2)=1\]
+Eve userebbe l'\textbf{algoritmo esteso di Euclide} per calcolare $r$ e $s$ tali
+che:
+$r\cdot e_1+s\cdot e_2=1$
+per l'identità di Bezout.\\
+Si può poi calcolare:
+\[c_1^r\cdot c_2^s\equiv m^{r\cdot e_1}\cdot m^{s\cdot e_2}=m\bmod \,\,n\]
+ricordando che Eve vuole proprio trovare $m$. L'attaccante inoltre, sapendo $e$
+e $n$, può calcolare la radice e-esima di $m^e$ per estrarre $m$, ma anche
+questo non si fa in tempo efficiente, non per $e$ generico.\\
+Un'altra \textbf{pessima idea} è usare lo stesso valore di $e$, magari pure
+piccolo, per valori di $n$ diversi. Si ipotizzi infatti di mandare $m$ a tre
+utenti, $A$, $B$ e $C$, con i rispettivi moduli RSA $n_A$, $n_B$ e $n_C$. Si
+ipotizzi $e=3$ (un valore così piccolo magari dipende dal suo uso in un device
+poco potente) e si calcoli:
+\begin{itemize}
+  \item $c_A=m^3\bmod \,\,n_A$
+  \item $c_B=m^3\bmod \,\,n_B$
+  \item $c_C=m^3\bmod \,\,n_C$
+\end{itemize}
+Si deve risolvere quindi un sistema di equazioni.\\
+Se $n_A$, $n_B$ e $n_C$ sono coprimi a coppie Eve usa il \textbf{teorema cinese
+  del resto} e calcola $x$ tale che:
+\[
+  \begin{cases}
+    x\equiv c_A\bmod\,\,n_A\\
+    x\equiv c_B\bmod\,\,n_B\\
+    x\equiv c_C\bmod\,\,n_C  
+  \end{cases}
+\]
+trovando l'unica soluzione $x^*$, compresa tra 0 e $N-1$, con:
+\[N=n_A\cdot n_B\cdot n_C\]
+e avendo che $m^3$ è minore di $n_A$, $n_B$ e $n_C$, con $m^3<N$ si ha che:
+\[x^*=m^3\]
+e quindi Eve può calcolare la radice cubica di $x^*$ per ottenere $m$, come
+indicato nel testo di Koblitz.\\
+Nel testo di Salomaa si ha inoltre il seguente teorema.
+\begin{teorema}
+  Qualsiasi algoritmo che calcola la chiave segreta $d$ può essere convertito in
+  un algoritmo probabilistico per fattorizzare $n$ 
+\end{teorema}
+Avendo prova ulteriore che rompere RSA si riduce a fattorizzare $n$.\\
+\textbf{I vari dettagli sono comunque non da approfondire per l'esame}.
+\subsection{Randomized RSA}
+Si studia ora un modo molto robusto di usare RSA.\\
+Si ipotizzi ora di voler cifrare one bit alla volta usando RSA. Si noti che per
+ogni scelta della chiave pubblica $(n,e)$ si hanno, volendo cifrare un singolo
+bit: 
+\[0^e\equiv 0\bmod\,\,n\]
+\[1^e\equiv 1\bmod\,\,n\]
+che portano ad avere $c=m$ e questo ovviamente non va bene.\\
+Bisogna procedere diversamente. Si mette quindi il bit in un testo in chiaro e
+mettendo altri bit randomici insieme.\\
+Si dimostra che il \textbf{least significant bit (\textit{lsb})} di $m$
+è un hard-core bit per l'esponenziazione modulare $m^e\bmod \,\,n$ e quindi è
+difficile 
+calcolare $lsb(m)$ a partire da  $m^e\bmod \,\,n$ senza conoscere $d$.\\
+L'idea è quindi di mettere il bit di plaintext in $lsb(m)$ e scegliere a caso
+gli altri bit.\\
+Ipotizzando di avere Alice che vuole spedire a Bob $b\in\{0,1\}$:
+\begin{itemize}
+  \item Alice prende la chiave pubblica di Bob, $(n_B,e_B)$
+  \item Alice sceglie un intero a caso $x<\frac{n_B}{2}$, avendo quindi $2\cdot
+  x<n_B$ e quindi si ha l'\textit{lsb} a 0 ma in quella posizione si mette il
+  bit che si vuole cifrare
+  \item Alice manda a Bob $y=(2\cdot x)^{e_B}\bmod\,\,n_B$
+\end{itemize}
+A questo punto:
+\begin{itemize}
+  \item Bob riceve $y$
+  \item Bob calcola $y^{d_B}\bmod\,\,n_B=2\cdot x+b$
+  \item Bob prende l'\textit{lsb} come risultato
+\end{itemize}
+Si osservi che non si sa se gli altri bit di m (in particolare, quanti di essi e
+quali) siano bit hard-core per RSA.\\
+Si ha quindi che per cifrare in modo molto sicuro $m$ si può procedere cifrando
+ogni bit di $m$ con randomized RSA. La crittoanalisi diventa infatti molto
+complessa, a costo di un metodo di cifratura molto inefficiente con $m$ lungo.\\
+Randomized RSA, a causa della sua inefficienza, è un sistema più teorico che
+pratico. 
+\section{Firma Digitale}
+L'idea è che si vorrebbe usare un protocollo crittografico per firmare, come se
+fosse una firma autografa. Dato un documento in formato elettronico si vuole che
+esso sia firmato da Alice e che quindi tale firma sia valida per Bob.
+\begin{definizione}
+  Si definisce uno \textbf{schema di firma digitale} come la quintupla:
+  \[(P,A,K,S,V)\]
+  con:
+  \begin{itemize}
+    \item $P$ insieme di tutti i possibili messaggi che si vuole firmare, di
+    solito stringhe di bit arbitrarie
+    \item $A$ insieme di tutte le possibili firme dei messaggi. La firma di un
+    messaggio è una versione rielaborata dello stesso messaggio
+    \item $K$ insieme di tutte le possibili chiavi
+    \item $S=\{sig:P\times K\to A\}$ famiglia di tutti le funzioni di firma
+    \item $V=\{ver:P\times A\times K\to\{\top,\bot\}\}$ famiglia di tutte le
+    funzioni di verifica
+  \end{itemize}
+  Anche in questo caso scegliendo un a chiave $k\in K$ si selezionano due
+  funzioni:
+  \begin{enumerate}
+    \item $sig_k:P\to A$
+    \item $ver_k:P\times A\to\{\top,\bot\}$
+  \end{enumerate}
+  tali che, $\forall x\in p$ e $\forall y\in A$:
+  \[ver_k(x,y)=\top \iff y=sig_k(x)\]
+  La coppia $(x,y)$ è detta \textbf{messaggio firmato}.
+\end{definizione}
+L'idea che sta al cuore è che la firma deve poterla generare solo chi conosce
+una certa informazione segreta. Solo alice conosce tale informazione e solo
+Alice può aver prodotto la sua firma e la cosa però deve essere verificabile da
+tutti. Praticamente in parallelo coi crittosistemi si ha che la firma è come la
+decifratura, ovvero la parte privata, mentre la verifica come la cifratura,
+ovvero la parte pubblica. Anche se non si sta veramente cifrando e la verifica
+viene fatta infatti avendo a disposizione sia il messaggio che il messaggio
+firmato, non si sta quindi ``nascondendo'' il messaggio.\\  
+È interessante vedere le differenze rispetto ad una vera firma autografa, fatta
+a mano su un foglio. Con al firma digitale:
+\begin{itemize}
+  \item la firma digitale $y$ è separata dal documento elettronico $x$
+  \item la firma non è sempre la stessa, infatti dipende dal documento ed è
+  diversa per documenti diversi  
+\end{itemize}
+La firma digitale autentica il mittente del messaggio quindi solo chi conosce
+una certa informazione segreta può aver prodotto la firma del messaggio. È
+quindi una forma di autenticazione.\\
+Vediamo quindi il procedimento qualora Alice voglia mandare a Bob il messaggio
+$M$ firmato:
+\begin{itemize}
+  \item Alice sceglie una coppia di algoritmi $(sig_k,ver_k)$, il primo privato
+  e il secondo pubblico
+  \item Alice calcola $\sigma=sig_k(m)$
+\end{itemize}
+A questo punto Bob deve verificare la firma di Alice:
+\begin{itemize}
+  \item Bob considera la coppia $(m,\sigma)$
+  \item Bob prende l'algoritmo pubblico $ver_k$
+  \item Bob accetta la firma come valida sse $ver_k(m,\sigma)=\top$
+\end{itemize}
+Bob quindi può solo dire che l'ha firmato Alice, non che lo ha spedito Alice.\\
+Vediamo ora il punto di vista di Eve. Potrebbero esserci due fini per rompere la
+firma digitale:
+\begin{itemize}
+  \item \textbf{rompere lo schema globalmente}, trovando in qualche la chiave
+  $k$ di Alice e quindi la sua funzione $sig_k$. Questo è il fine ideale di Eve
+  \item \textbf{falsificare l'identità}, ovvero, dopo aver osservato una serie
+  di coppie $(x_i,y_i)$, ovvero messaggi con le firme corrispondenti, quando
+  arriva un nuovo messaggio Eve è in grado di produrre una firma valida (valida
+  solo per quel messaggio, o per una classe di messaggi che condividono alcune
+  somiglianze) fingendosi Eve, cosa che ovviamente succede anche con la rottura
+  totale ma in quel caso succede per sempre, mentre qui solo per un messaggio
+  con una certa firma
+\end{itemize}
+Anche la seconda tipologia di attacco, anche se più comunque, è comunque
+difficile. Ovviamente il documento non può essere un PDF o simili, in quanto Eve
+corromperebbe il file ma deve essere una generica sequenza di byte.\\
+Per la firma digitale si può usare qualsiasi crittosistema a chiave pubblica
+come schema per le firme, usandolo ``al contrario'' (sempre con il discorso che
+qui non si sta nascondendo nulla):
+\begin{itemize}
+  \item si firma con la chiave privata e lo può fare solo chi conosce $j$
+  \item si verifica con la chiave pubblica e lo possono fare tutti
+\end{itemize}
+In questo modo, possiamo autenticare il mittente di un messaggio utilizzando
+solo un sistema crittografico a chiave pubblica.\\
+Si hanno quindi due scenari possibili:
+\begin{enumerate}
+  \item Alice vuole mandare il messaggio $m$ firmato ma non cifrato e quindi Eve
+  può leggerlo. Alice ha quindi le solite $E_A$, pubblica, e $D_A$,
+  privata. Calcola quindi $D_A(m)$ per firmare il messaggio e manda il risultato
+  a Bob, che usa $E_A$ (che è pubblico) e controlla che:
+  \[E_A(D_A(m))=m\]
+  Bob accetta quindi la firma sse vale l'uguaglianza
+  \item Alice vuole mandare il messaggio $m$ firmato e cifrato. Questo è il caso
+  più comune. Alice anche qui ha $E_A$ pubblico e $D_A$ segreto ma anche Bob ha
+  $E_B$ pubblico e $D_B$ segreto. Alice calcola quindi $D_A(E_B(m))$ e lo manda
+  a Bob, avendo che $E_B(m)$ è la cifratura che solo Bob può decifrare. Bob in
+  primis ``rimuove'' la firma di Alice tramite $E_A$ e poi decifra con $D_B$,
+  avendo nel complesso:
+  \[D_B(E_A(D_A(E_B(m))))=m\]
+\end{enumerate}
+Il problema è che $E_A$ lo conosce anche Eve che può intercettare il messaggio,
+togliere $D_A$ e mettere la sua firma tramite $D_E$, impersonificando Alice,
+ricordando che il canale non è autenticato (Bob non sa chi spedisce). Questo
+però si risolve facilmente invertendo l'ordine di firma e cifratura. Anziché
+prima cifrare e poi firmare si fa il contrario, facendo:
+\[E_B(D_A(m))\]
+Così solo Bob può estrarre il testo firmato e Eve non può sostituire con al sua
+firma.
+\subsection{Schema di El Gamal}
+Ci sono stati storicamente due problemi nell'uso di crittosistemi a chiave
+pubblica per firmare: 
+\begin{enumerate}
+  \item sono inefficienti
+  \item in passato, negli anni '80, c'era anche il problema politico dell'uso di
+  crittosistemi 
+\end{enumerate}
+Si è creata quindi la necessità di creare algoritmi di firma digitale non
+usabili come algoritmi di cifratura, evitando beghe politiche americane.\\
+Lo \textbf{schema di El Gamal} è uno di questi. Lo schema è del 1985 ma una sua
+modifica, detta \textbf{Digital Signature Algorithm (\textit{DSA})}, è stata poi
+adottata come standard dal NIST.\\
+Questo schema \textbf{non è deterministico} avendo più firme valide per ogni
+messaggio, avendo anche qui un \textbf{random salt}, e la sicurezza è garantita
+dall'assunzione di intrattabilità del logaritmo discreto.\\
+Vediamo il funzionamento (leggermente più complesso, anche se simile al
+crittosistema di El Gamal):
+\begin{itemize}
+  \item si prende un primo $p$
+  \item si prende un generatore $g$ di $\mathbb{Z}_p^*$
+  \item i messaggi che si firmano solo elementi di $\mathbb{Z}_p^*$
+  \item le firme sono coppie $(\gamma,\delta)$, con $\gamma \in\mathbb{Z}_p^*$ e
+  $\delta\in\mathbb{Z}_{p-1}$, avendo la stessa inefficienza del crittosistema
+  di El Gamal avendo che la firma è lunga il doppio del testo da firmare. Si
+  noti che $p-1$ è il $\phi(p)$
+\end{itemize}
+Se alice vuole firmare $m\in\mathbb{Z}_p^*$ (altrimenti bisogna spezzarlo in
+blocchi) genera la sua coppia di chiavi in questo modo:
+\begin{itemize}
+  \item Alice sceglie una chiave segreta $a$, con $0<a<p-1$
+  \item Alice calcola $\beta=g^a\bmod\,\,p$
+  \item la chiave pubblica diventa la tripla $(p,g,\beta)$
+\end{itemize}
+Per firmare $m$ invece:
+\begin{itemize}
+  \item Alice sceglie un random salt $k\in\mathbb{Z}_{p-1}^*$, avendo che deve
+  essere invertibile
+  \item Alice calcola $\gamma=g^k\bmod\,\,p$. nascondendo il random salt, e
+  $\delta=(m-a\cdot \gamma)\cdot k^{-1}\bmod \,\,p-1$
+  \item la coppia $\gamma,\delta)$ è la firma di $m$
+\end{itemize}
+Si noti che da  $\delta=(m-a\cdot \gamma)\cdot k^{-1}\bmod \,\,p-1$ si estrae
+$m$:
+\[m=a\cdot \gamma+k\cdot \delta\bmod \,\,p-1\]
+A questo punto Bob accetta come valida la firma sse, ricordando che $m$ non è
+nascosto: 
+\[\beta^\gamma\cdot gamma\delta\equiv g^{a\cdot \gamma}\cdot
+  g^{k\cdot\delta}\equiv g^m\bmod\,\,p\]
+Questo funzione perché si ha la congruenza $g^{a\cdot \gamma+k\cdot\delta}\equiv
+g^m\bmod \,\,p$ sse: 
+\[a\cdot \gamma+k\cdot \delta\equiv m\bmod,\,p-1\]
+quindi se sono congrui $p-1$, ovvero $\phi(p)$,
+e questo accade solo per $\gamma$ e $\delta$ calcolati come descritto. Bob
+quindi può correttamente accettare o rifiutare una firma.
+\section{Funzioni di Hash}
 \chapter{Ripasso Algebra \& co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.
@@ -6439,5 +6723,5 @@ PTM, solitamente di classe BPP.
 % LocalWords:  clock burst Hamming codeword sottoalberi sottoalbero monoidi Eve
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
 % LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
-% LocalWords:  Shannon esponenziazione algoritmicamente impersonificando
-% LocalWords:  Probabilistic polinomialmente
+% LocalWords:  Shannon esponenziazione algoritmicamente impersonificando Hash
+% LocalWords:  Probabilistic polinomialmente primis Gamal

@@ -5949,7 +5949,7 @@ i due numeri primi.\\
 \textbf{Esempio di RSA-768 su slide}.\\
 L'algoritmo naive prevede la divisione di $N$ per tutti gli interi da 2 a
 $\sqrt{n}$ in tempo:
-\[O(sqrt{n})=O(\sqrt{2^m})=O(2^{\frac{m}{2}})\]
+\[O(\sqrt{n})=O(\sqrt{2^m})=O(2^{\frac{m}{2}})\]
 quindi esponenziale, anche se ovviamente basta trovare o $p$ o $q$.\\
 \subsection{Protocollo Diffie-Hellman}
 Diffie ed Hellman nel 1976 pubblicano un paper su un protocollo molto semplice
@@ -5964,16 +5964,150 @@ perché Eve lo sgamerebbe subito). Si procede così:
 \begin{itemize}
   \item Alice calcola $g^{x_A}\bmod\,\,q$ e lo manda a Bob, ma anche ad Eve
   \item Bob calcola $g^{x_B}\bmod\,\,q$ e lo manda a Alice, ma anche ad Eve
-  \item Alice calcola $(g^{x_B})^{x_A}=g^{x_A\cdot x_B}=k$
-  \item Bob calcola $(g^{x_A})^{x_B}=g^{x_A\cdot x_B}=k$
+  \item Alice calcola $(g^{x_B})^{x_A}=g^{x_A\cdot x_B}=k$, che Eve vede
+  \item Bob calcola $(g^{x_A})^{x_B}=g^{x_A\cdot x_B}=k$, che Eve vede
   \item $k$ è la chiave segreta
 \end{itemize}
+Eve conosce quindi $q$, $g$, $g^{x_A}$ e $g^{x_B}$.\\
 Eve non può conoscere $k$ e per ottenere $x_A$ e $x_B$ da $k$ dovrebbe calcolare
 un logaritmo discreto.\\
 Eve potrebbe calcolare $g^{x_A\cdot x_B}$ partendo da $g^{x_A}$ e $g^{x_B}$ che
 conosce ma questo sembra anche lui un problema intrattabile, detto
 \textbf{problema di Diffie-Hellman}.\\
 \textbf{Esempio su slide}.
+\subsection{Crittosistema di El Gamal}
+El Gamal, nel 1984, propose un crittosistema che si basa sulla difficoltà di
+calcolare $k_s$ da $k_p$ e di ottenere $m$ da $c=E_{k_p}(m)$ per il problema del
+logaritmo discreto.\\
+El Gamal sfruttò questo per porre le basi al sistema delle firme digitali. \\
+Anche qui bisogna vedere come calcolare in primis la coppia di chiavi.
+Si procede così:
+\begin{itemize}
+  \item si sceglie un primo a caso $q$, lavorando su $\mathbb{Z}_q^*$
+  \item si sceglie il generatore $g$
+  \item si sceglie un intero $a$, $0<a<q-1$, e si calcola $g^a\bmod\,\,p$. Si ha
+  che $a$ è la chiave segreta $k_s=a$
+  \item la chiave pubblica è la tripla $k_p=(q,g,g^a)$
+\end{itemize}
+Eve per ottenere $k_s$ da $k_p$ dovrebbe calcolare $\log_g g^a$, ma è
+difficile.\\
+Per cifrare si ha:
+\begin{itemize}
+  \item Alice manda $m\in\mathbb{Z}_q^*$ a Bob. Se $m$ è più lungo di $\log_2 q$
+  bit lo spezza in blocchi 
+  \item Alice prende la chiave pubblica di Bob $k_{p_B}=(q,g,g^a)$
+  \item Alice sceglie un \textbf{random salt}, ovvero un $l$ a caso, $0<l<q-1$
+  per complicare la vita a Eve che avrebbe vita facile se si cifrano sempre
+  messaggi lunghi uguali ma che non lo sono più causa $l$
+  \item Alice calcola $\gamma=g^l\bmod \,\,q$, in modo che Bob sappia estrarre
+  $l$, e $\delta=m\cdot (g^a)^l\bmod\,\,q$, ovvero il messaggio sporcato da $l$
+  \item Alice manda a Bob il testo cifrato $c=(\gamma,\delta)$
+\end{itemize}
+Il testo cifrato è grande il doppio di $m$ e questo può essere un problema di
+efficienza.\\
+Per decifrare Bob usa $k_{s_B}=a$ per ottenere $m$ facendo: 
+\[m=g^{-al}\cdot \delta=\gamma^{-a}\cdot \delta=\gamma^{q-1-a}\cdot \delta\]
+L'ultimo step è possibile per la ciclicità.\\
+Si noti che $a$ è l'unica informazione segreta usata da Bob e che $l$ sparisce
+nei conti.\\ 
+Eve vede passare la chiave pubblica e il testo cifrato, sia $\gamma$ che
+$\delta$. Ma estrarre $l$ è un problema di logaritmo discreto, dovendo estrarre
+$l$ da $g^l$ e calcolare $(g^a)^l$ per poi calcolare $m=\delta\cdot
+(g^{al})^{-l}=\delta\cdot g^{-al}$.\\
+Stesso discorso per calcolare $g^{al}$ da $g^a$ e $g^l$. Quindi anche El Gamal
+si basa sulle stesse assunzioni del protocollo di Diffie-Hullman.\\
+Entrambe le soluzioni sono comunque meno efficienti dei crittosistemi
+simmetrici, che sono anche più robusti dal punto di vista della crittoanalisi,
+non basandosi su assunzioni matematiche non ancora dimostrate,
+anche se richiedono la trasmissione della chiave segreta su un canale privato.
+\subsection{Crittosistemi Ibridi}
+L'unione di crittosistemi a chiave pubblica e simmetrici si usano insieme in
+\textbf{crittosistemi ibridi}, dove magari si scambia la chiave per il
+crittosistema simmetrico tramite la chiave pubblica con Diffie-Hellman.
+\subsection{RSA}
+Vediamo il sistema inventato da Adi Shamir, Ron Rivest e Leonard Adleman, da cui
+\textbf{RSA} che è il più famoso algoritmo a chiave pubblica, pubblicato nel
+1977/1978.\\
+Tale algoritmo si basa sulla difficoltà della fattorizzazione.\\
+Si prendono $p$ e $q$ primi (scelti tramite test di primalità che è
+polinomiale), diversi e circa di 1024 bit ma con valori molto 
+diversi.\\
+Si calcola $n=p\cdot q$ detto \textbf{modulo RSA}. Si calcola quindi il
+\textbf{quoziente di Eulero}:
+\[\phi(n)=\phi(p\cdot q)=\phi(p)\cdot \phi(q)=(p-1)\cdot (q-1)\]
+Avendo che $\phi(n)$ il numero di numeri compresi tra 1 e $n$ che sono coprimi
+con $n$, ovvero i numeri invertibili in modulo $n$. È il numero di elementi più
+piccoli di $n$ che sono coprimi con $n$ (stesso discorso per il calcolo di
+$\phi$ con $p$ e $q$). Mi dice la dimensione di
+$\mathbb{Z_{n}}^*$.
+Si ha che $\phi(n)$ è facile da calcolare conoscendo la fattorizzazione e $p$ e
+$q$ sono co-primi.\\
+Quindi:
+\[\phi(n)=|\{x:1\leq x\leq n\land GCD(x,n)=1\}|\]
+Si sceglie a caso $d$, con $1<d<\phi(n)$, tale che:
+\[GCD(d,\phi(n))=1\]
+Avendo che $d$ è invertibile nell'anello $\mathbb{Z}_{\phi(n)}$.\\
+Uso poi l'\textbf{algoritmo di Euclide esteso} per ottenere $e$ tale che:
+\[e\cdot d\equiv 1\bmod \,\,phi(n)\]
+ovvero:
+\[e\equiv d^{-1}\bmod\,\,\phi(n)\]
+Si ha quindi che:
+\begin{itemize}
+  \item $(n,e)$ è la chiave pubblica
+  \item $d$ è la chiave privata
+\end{itemize}
+Inoltre $p,q,\phi(n)$ devono restare segrete:
+\begin{itemize}
+  \item da $\phi(n)$ con la chiave pubblica ottengo $d\equiv e^{-1}\bmod\phi(n)$
+  \item se conosco $p$ calcolo $q=\frac{n}{p}$ e poi $\phi(n)=(p-1)\cdot (q-1)$
+  e infine $d$
+\end{itemize}
+Infine:
+\begin{itemize}
+  \item per cifrare $m$, che se lungo più di $n$ viene diviso in blocchi, faccio:
+  \[c=m^e\bmod\,\,n\]
+  \item per decifrare $c$ faccio:
+  \[c^d\bmod\,\,n=m\]
+\end{itemize}
+Si usa quindi un'esponenziazione modulare $m^e\bmod\,\,n$ ma qui Eve è
+interessata a $m$, che è la base e non l'esponente. In ogni caso si congiura sia
+una permutazione one-way.\\
+La trapdoor è la chiave $d$ anche se non è molto evidente.\\
+La decifratura funziona perché:
+\[c^d\bmod n\equiv (m^e)^d\equiv m^{e\cdot d}\bmod\,\,n\]
+e dato che $e\cdot d\equiv 1\bmod\phi(n)$ e per definizione di congruenza
+$exists k\in\mathbb{Z}$ tale che:
+\[e\cdot d1+k\cdot\phi(n)\]
+ma scomponendo l'esponente si ha:
+\[c^d\bmod\,\,n\equiv m^{1+k\cdot\phi(n)}\equiv m\cdot (m^{\phi(n)})^k\bmod \,\,n\]
+e per il \textbf{teorema di Fermat} o per il \textbf{teorema di Eulero} si ha
+che $m^{\phi(n)}\equiv 1\bmod \,\,n$ e quindi:
+\[c^d\bmod n\equiv m(1)^k\equiv m\cdot 1 = m\bmod \,\,n\]
+Si ha che:
+\begin{itemize}
+  \item teorema di Fermat è valido solo se $MCD (m, n) = 1$, cioè se $m$ non è
+  un   multiplo di $p$ o $q$ 
+  \item anche se $m$ un multiplo di $p$ o $q$  possiamo provare
+  che la decrittazione funziona correttamente 
+\end{itemize}
+\textbf{Esempio su slide}.\\
+Calcolare $\phi(n)$ è facile conoscendo la fattorizzazione di $n$:
+\[\phi(n)=n\prod_{p|n}\left(1-\frac{1}{p}\right)\]
+dove $p$ varia su tutti i primi che dividono $n$. Se non si conosce è difficile
+e quindi rompere RSA equivale a  fattorizzare $n$.
+\textbf{Mancano slide 44 e 45}.\\
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

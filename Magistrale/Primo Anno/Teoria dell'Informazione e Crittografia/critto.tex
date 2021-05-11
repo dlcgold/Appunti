@@ -5847,7 +5847,8 @@ $\mathbb{Z}^*_p$ è un gruppo ciclico:
   g^{p-2}\}\]
 (avendo che ho $p-1$ elementi ma l'esponente parte da 0 si ha che l'esponente
 massimo è $p-2$). \textbf{Gli elementi calcolati tramite $g^i$ si ottengono in
-  ordine permutato}, cosa che rende il problema intrattabile da invertire.\\ 
+  ordine permutato}, cosa che rende il problema intrattabile da invertire. Si ha
+che $g$ genera i vari valori ciclicamente.\\ 
 L'esponenziazione modulare è quindi una funzione:
 \[f:mathbb{N}\to \mathbb{Z}^*_p\]
 definito come:
@@ -5872,7 +5873,7 @@ La grandezza dell'input è il numero di bit necessari a rappresentare
 $\mathbb{Z}^*_p$, quindi:
 \[n=\log_2p\]
 Potrei pensare di fare, avendo $x_{n-1},\ldots, x_1, x_0$ come la
-rappresentazione binaria di $x$:
+rappresentazione binaria di $x$, rappresentazione del tipo:
 \[x=\sum_{j=0}^{n-1}x_j2^j\]
 Avrei una cosa del tipo:
 \begin{algorithm}[H]
@@ -5890,8 +5891,92 @@ Avrei una cosa del tipo:
 \end{algorithm}
 In pratica avrei che $result$ contiene:
 \[g^0,g^2,\ldots,g^x\bmod\,\,p\]
-Ma avrei un numero di iterazioni esponenziale rispetto a $n$:
+Ma avrei un numero di iterazioni esponenziale rispetto a $n$, infatti si
+avrebbe: 
 \[x\cong 2^n\]
+C'è però un modo per calcolarlo in tempo polinomiale, passando la
+rappresentazione in binario di $x$. Posso fare quindi:
+\[g^x=
+  g^{\sum_{j=0}^{n-1}x_j2^j}=\prod_{j=0}^{n-1}x_j2^j=\prod_{j=0}^{n-1}
+  (g^{2^j})^{x_j}\bmod \,\,p\] 
+Basta quindi calcolare $g^{2^j}$ per i vari $j$, da 0 a -1, e moltiplicarli per
+$x_j=1$ (solo quei conti per cui si ha $x_j=1$ influiscono sul risultato) e
+questo si fa in tempo polinomiale. Questo algoritmo è detto
+\textbf{square-and-multiply}. Ragiono quindi tramite una maschera di bit
+prendendo solo i valori in corrispondenza di 1.\\
+Conviene inoltre salvarsi i $g^{2^j}$. Vediamo lo pseudocodice:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{ModExp}{$p,g,x$}
+    \State $result\gets 1$
+    \For {$j=n-1$ \textbf{to} $0$}
+    \State $result \gets (result \cdot result)\bmod\,\,p$
+    \If{$x_j==1$}
+    \State $result \gets (result \cdot g)\bmod\,\,p$
+    \EndIf
+    \EndFor
+    \State \textbf{return} $result$ 
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo square-and-multiply per esponenziazione modulare}
+\end{algorithm}
+\textbf{Esempio su slide}.\\
+L'operazione inversa è detta \textbf{logaritmo discreto} e non si è ancora
+dimostrato essere facile. Sono dati, per questo problema, un numero primo $p$,
+un generatore $g$ per $\mathbb{Z}_p^*$ e $y\in\mathbb{Z}_p^*$. Si calcola
+$x\in\{0,1,\ldots,p-2\}$ tale che $g^x\equiv y\bmod\,\,p$. Tale calcolo è in
+tempo esponenziale sul numero di bit input, avendo $n=\log_2p$. Elencare tutti
+gli elementi di $\mathbb{Z}_p^*$ richiede quindi tempo $O(p)=O(2^n)$.\\
+Si usa quindi l'esponenziazione modulare per nascondere il messaggio ma serve
+una trapdoor per permettere a Bob di estrarre il messaggio.\\
+Vediamo ora un'altra funzione one-way, il \textbf{prodotto tra due numeri
+  primi}, $n=p\cdot q$, con $p$ e $q$ primi. Ogni numero naturale ammette
+un'unica scomposizione in fattori primi, 
+a meno dell'ordine degli stessi. Il prodotto ovviamente è in tempo polinomiale.
+L'inverso del prodotto $n=p\cdot q$, con $p$ e
+$q$ primi è detto \textbf{fattorizzazione}, che, dato $n$, consiste quindi nel
+capire $p$ e $q$. I numeri sono espressi in binario. La dimensione dell'input di
+questo problema è il numero di bit necessari a rappresentare $n$, $p$ e
+$q$. Diciamo inoltre che si ha un numero $m$ tale che $m=\log_2n$. Diverse
+istanze del problema sono abbastanza difficili, con numeri grandi, almeno 2048
+bit, e che siano appunto prodotto di esattamente due numeri primi, che possono
+essere scelti anche in modo accurato per avere la sicurezza migliore. Tali primi
+devono essere circa della stessa dimensione, 1024 bit ciascuno, ma con valori
+abbastanza diversi per non avere il risultato vicino a $\sqrt{n}$. \\
+Non esiste un algoritmo polinomiale su $n$, per fattorizzare, neanche
+probabilistico. Il numero di bit di $n$ è al più la somma dei bit necessari per
+i due numeri primi.\\
+\textbf{Esempio di RSA-768 su slide}.\\
+L'algoritmo naive prevede la divisione di $N$ per tutti gli interi da 2 a
+$\sqrt{n}$ in tempo:
+\[O(sqrt{n})=O(\sqrt{2^m})=O(2^{\frac{m}{2}})\]
+quindi esponenziale, anche se ovviamente basta trovare o $p$ o $q$.\\
+\subsection{Protocollo Diffie-Hellman}
+Diffie ed Hellman nel 1976 pubblicano un paper su un protocollo molto semplice
+che sua solo canali pubblici.\\
+Alice e Bob scelgono insieme una chiave segreta, avendo quindi un \textbf{key
+  agreement protocol}. Scelgono sul canale pubblico un primo $q$, lavorando su
+$\mathbb{Z}_q^*$. Ovviamente lo sa anche Eve essendo un canale pubblico. Alice e
+Bob scelgono anche il generatore $g$, che sa anche Eve. Alice sceglie a caso
+$x_A$, $0<x_A<q-1$ e lo tiene segreto (non 0 perché Eve lo sgamerebbe
+subito). Anche Bob sceglie a caso $x_A$, $0<x_B<q-1$ e lo tiene segreto (non 0
+perché Eve lo sgamerebbe subito). Si procede così:
+\begin{itemize}
+  \item Alice calcola $g^{x_A}\bmod\,\,q$ e lo manda a Bob, ma anche ad Eve
+  \item Bob calcola $g^{x_B}\bmod\,\,q$ e lo manda a Alice, ma anche ad Eve
+  \item Alice calcola $(g^{x_B})^{x_A}=g^{x_A\cdot x_B}=k$
+  \item Bob calcola $(g^{x_A})^{x_B}=g^{x_A\cdot x_B}=k$
+  \item $k$ è la chiave segreta
+\end{itemize}
+Eve non può conoscere $k$ e per ottenere $x_A$ e $x_B$ da $k$ dovrebbe calcolare
+un logaritmo discreto.\\
+Eve potrebbe calcolare $g^{x_A\cdot x_B}$ partendo da $g^{x_A}$ e $g^{x_B}$ che
+conosce ma questo sembra anche lui un problema intrattabile, detto
+\textbf{problema di Diffie-Hellman}.\\
+\textbf{Esempio su slide}.
+
+
+
 \chapter{Ripasso Algebra \& co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.

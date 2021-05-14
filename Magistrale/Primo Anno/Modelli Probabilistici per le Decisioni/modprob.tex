@@ -1558,10 +1558,10 @@ terminare in uno stato assorbente (da cui si ricorda ``non si esce più'').
   Questa regola è indipendente dalla query e tiene conto del ``web opinion'',
   ovvero l'importanza della pagina.
 \end{teorema}
-\section{Hidden Markov Chain}
+\section{Hidden Markov Models}
 Le catene di Markov sono un modello importante e molto utilizzato.\\
-Un altro modello essenziale è quello \textbf{hidden Markov models}, dove non si
-possono osservare gli stati.\\
+Un altro modello essenziale è quello \textbf{hidden Markov models
+  (\textit{HMM})}, dove non si possono osservare gli stati.\\
 Le reti Bayesiane possono usare le catene di Markov con la peculiarità che
 alcune variabili sono nascoste, per trattare informazioni parziali con
 incertezza. L'uso quindi copre varie tematiche, come \textit{serie storiche},
@@ -1572,10 +1572,95 @@ Si ha quindi un modello dinamico per cui servono:
   come per una rete bayesiana
   \item un insieme $E_t$ di variabili osservabili al tempo $t$
   \item la dipendenza tra le variabili
-  \item l'ipotesi che i cambiamenti siano regolati da un processo stazionario
-  \item l'ipotesi di Markov del primo ordine
+  \item l'ipotesi che i cambiamenti siano regolati da un processo stazionario,
+  la relazione per passare tra $x_t$ e $x_{t+1}$ non cambia nel tempo
+  \item l'ipotesi di Markov del primo ordine, ovvero tutta l'informazione del
+  passato è racchiusa nello stato corrente. In questo modo le CPT restano
+  semplici 
 \end{itemize}
-Si uniscono quindi reti bayesiane che evolvono nel tempo e processo Markoviano. 
+Si uniscono quindi reti bayesiane che evolvono nel tempo e processo
+Markoviano, si ha la componente dinamica. \\
+Si ha quindi, per un processo Markoviano del primo ordine:
+\[P(X_t|X_{0:t-1})=P(X_t|X_{t-1})\]
+Posso anche andare al secondo ordine, dicendo che la storia passata è racchiusa
+negli ultimi due stati e non sono nell'ultimo:
+\[P(X_t|X_{0:t-1})=P(X_t|X_{t-2:t-1})\]
+\begin{definizione}
+  Una \textbf{catena di Markov a stati nascosti} è un processo stocastico a
+  tempo continuo o discreto (faremo solo discreto) caratterizzato da:
+  \begin{itemize}
+    \item un insieme di stati $X_t$
+    \item un insieme di osservazioni $E_t$
+    \item una matrice delle probabilità di transizione con
+    $P(X_t|X_{0:t-1})=P(X_t|X_{t-1})$, avendo un \textbf{modello di
+      transizione}, equivalente della matrice di transizione per le normali
+    catene di Markov
+    \item una matrice delle probabilità di emissione delle osservazioni con
+    $P(E_t|X_{0:t-1},E_{0:t-1})=P(E_T|X_t)$, avendo un \textbf{modello
+      sensoriale}, che da la probabilità di osservare un evento in un certo
+    stato essendo in quel preciso stato
+    \item una matrice delle probabilità iniziali degli strati al tempo 0, ovvero
+    $P(X_0)$ 
+  \end{itemize}
+  Si ha quindi, $\forall t$ finito, la seguente distribuzione congiunta:
+  \[P(X_0, X_1,\ldots,X_t, E_1,\ldots,
+    E_t)=P(X_0)\prod_{i=1}^tP(X_i|X_{i-1})P(E_i|X_i)\]
+  Avendo un elemento aggiuntivo (l'ultimo) rispetto alle semplici catene di
+  Markov. 
+\end{definizione}
+Bisogna fare inferenza sullo stato in cui ci si trova in base alle evidenze.\\
+L'ipotesi di Markov del prim'ordine è comunque tanto utile per contenere la
+complessità quanto forte, in quanto suppone che le variabili di stato contengano
+tutte le informazioni necessarie per caratterizzare la distribuzione
+dell'istante successivo. Per risolvere il problema posso aumentare l'ordine del
+modello (ma anche la complessità, come si è visto sopra per il secondo ordine
+etc$\ldots$) o posso aumentare il numero delle variabili di stato. \\
+Si hanno vari task di inferenza:
+\begin{itemize}
+  \item \textbf{filtraggio}, data una sequenza di osservazioni $E_1,\ldots E_t$
+  mi da la distribuzione di probabilità di $X_t$
+  \item \textbf{previsione}, data una sequenza di osservazioni $E_1,\ldots E_t$
+  probabilità di avere un evento al tempo $t+n$, con $n$ arbitrario
+  \item \textbf{smoothing}, ovvero fare un inferenza su uno stato passato
+  basandosi su tutta la storia fino al tempo attuale
+  \item \textbf{ricerca della spiegazione più probabile}, cercando la sequenza
+  di stati più probabili che porta ad un certo evento
+\end{itemize}
+Si può anche fare \textbf{apprendimento} del modello di transizione o di quello
+sensoriale come sottoprodotto dell'inferenza, tramite
+\textbf{expectation-maximation}. In altri termini fare apprendimento è fare uno
+smoothing completo.
+\section{Filtraggio}
+Il filtraggio è quindi il calcolo della distribuzione a posteriori dello stato
+corrente date tutte le osservazioni $P(X_t|e_{1:t})$, facendo quindi una stima
+ricorsiva basata sulle distribuzioni fino al tempo $t-1$:
+\[P(X_t|e_{1:t})=f(e_t,P(X_{t-1}|e_{1:t-1}))\]
+Se il modello sensoriale fosse deterministico si avrebbe una semplice catena di
+Markov\\
+Il filtraggio è composto da:
+\begin{itemize}
+  \item \textbf{proiezione}
+  \item \textbf{aggiornamento}
+\end{itemize}
+Sapendo il filtraggio al tempo $t$ si cerca quello a $t+1$ e si fa aggiornando
+in base alla nuova prova $e_{t+1}$:
+\[P(X_{t+1}|e_{1:t+1})\]
+divido quindi l'evidenza:
+\[=P(X_{t+1}|e_{1:t},e_{t+1})\]
+applico Bayes:
+\[=\alpha P(e_{t+1}|X_{t+1},e_{1:t})P(X_{t+1}|e_{1:t})\]
+e infine uso la proprietà di Markov dell'evidenza:
+\[=\alpha P(e_{t+1}|X_{t+1})P(X_{t+1}|e_{1:t})\]
+Il secondo termine rappresenta la predizione del prossimo step e il primo
+aggiorna la previsione sulla nuova evidenza. Si condiziona quindi lo stato
+corrente $X_t$ per ottenere il nuovo stato:
+\[P(X_{t+1}|e_{1:t+1})=\alpha
+  P(e_{t+1}|X_{t+1})\sum_{x_t}P(X_{t+1}|x_t,e_{1:t})P(e_t|e_{1:t})\]
+Ma usando la proprietà di Markov si ha:
+\[\alpha
+  P(e_{t+1}|X_{t+1})\sum_{x_t}P(X_{t+1}|x_t)P(e_t|e_{1:t})\]
+Avendo che:
+\[f_{1:t+1}=\alpha forward(f_{1:t};e_{t+1})\]
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare discretizzati
 % LocalWords:  condizionalmente Markoviani Markov

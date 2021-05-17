@@ -6390,11 +6390,334 @@ nascosto:
   g^{k\cdot\delta}\equiv g^m\bmod\,\,p\]
 Questo funzione perché si ha la congruenza $g^{a\cdot \gamma+k\cdot\delta}\equiv
 g^m\bmod \,\,p$ sse: 
-\[a\cdot \gamma+k\cdot \delta\equiv m\bmod,\,p-1\]
+\[a\cdot \gamma+k\cdot \delta\equiv m\bmod\,\,p-1\]
 quindi se sono congrui $p-1$, ovvero $\phi(p)$,
 e questo accade solo per $\gamma$ e $\delta$ calcolati come descritto. Bob
-quindi può correttamente accettare o rifiutare una firma.
+quindi può correttamente accettare o rifiutare una firma.\\
+Eve, per costruire un messaggio e una firma valida per il messaggio, facendo
+\textbf{existential forgery}, senza conoscere $a$ ha varie possibilità:
+\begin{itemize}
+  \item Eve sceglie $\gamma$, avendo $m$ e $\gamma$, e deve calcolare $\delta$,
+  dovendo calcolare il logaritmo discreto $\log_\gamma g^m\beta^{-\gamma}$, che
+  è difficile
+  \item Eve sceglie $\delta$, avendo $m$ e $\delta$, e deve calcolare $\gamma$,
+  tramite $\beta^\gamma\cdot \gamma^\delta\equiv g^m$, dove $\gamma$ è sia una
+  base che un esponente. Anche in questo caso non si conosce un algoritmo
+  polinomiale
+  \item Eve sceglie sia $\gamma$ che $\delta$, volendo calcolare un valore per
+  $m$, cerca quindi un messaggio valido. Anche qui però si ha un logaritmo
+  discreto, avendo $\log_g\beta^\gamma\cdot \gamma^\delta$
+\end{itemize}
+Sembra quindi tutto sicuro ma non è così, infatti c'è un attacco, dove Eve
+calcola $\gamma$, $\delta$ e $m$ insieme: 
+\begin{itemize}
+  \item Eve scrive $\gamma=g^i\cdot \beta^j\bmod\,\,p$, con $0\leq i$, $j\leq
+  p-1$ 
+  \item si calcola la verifica:
+  \[g^m\equiv \beta^\gamma\cdot (g^i\cdot beta^j)^\delta\bmod\,\,p\]
+  ovvero:
+  \[g^{m-i\cdot\delta}\equiv \beta^{\gamma+j\cdot \delta}\bmod\,\,p\]
+  \item si impone $m-i\cdot \delta\equiv 0\bmod\,\,p-1$ e $\gamma+j\cdot
+  \delta\equiv 0\bmod\,\,p-1$, avendo che vale la congruenza
+  \item dati $i$ e $j$, se si ha $GCD(j,p-1)=1$n allora si trovano $m$, $\delta$
+  e $\gamma$ che soddisfino:
+  \[\gamma=g^i\cdot \beta^j\bmod\,\,p\]
+  \[\delta=-\gamma\cdot j^{-1}\bmod\,\,p-1\]
+  \[m=-\gamma\cdot i\cdot j^{-1}\bmod\,\,p-1\]
+  \item si ha che $(\gamma,\delta)$ è una firma valida per $m$
+\end{itemize}
 \section{Funzioni di Hash}
+Si cercano funzioni con input arbitrariamente lungo, output corto e one-way. Si
+produce quindi un codice univoco dell'input, con 
+perdita di informazione per quindi non ``poter tornare indietro''. L'idea è
+quindi quella di firmare questo output, risolvendo i due problemi dello schema
+El Gamal. Si produce un \textbf{fingerprint} dell'input.\\
+Il fingerprint è quindi piccolo e di \textbf{lunghezza fissata}:
+\begin{itemize}
+  \item 128 bit per MD5
+  \item 160 bit per SHA-1
+  \item 256 bit per SHA-256
+\end{itemize}
+Si usano quindi per verificare anche l'integrità di dati trasmessi, avendo un
+\textbf{Message Authentication Code (\textit{MEC})}, avendo che cambiando un
+solo bit dell'input l'output è totalmente diverso.\\
+Si usano anche che vengono usate nella firma digitale, dove anziché firmare $m$
+si firma il fingerprint $h(m)$, avendo una firma piccola e di lunghezza
+fissata.\\
+La sicurezza delle impronte può essere violata tramite l'uso di \textbf{rainbow
+  table}, servizi dove si calcolano continuamente hash salvando le coppie
+messaggio/impronta, fornendo la possibilità di fare query.
+\begin{definizione}
+  Una \textbf{famiglia di funzioni hash} è una quadrupla:
+  \[(X,Y,K,H)\]
+  dove:
+  \begin{itemize}
+    \item $X$ è l'insieme dei possibili messaggi, finito o infinito
+    \item $Y$ è l'insieme dei possibili fingerprint, finito e molto più piccolo
+    di $X$, se finito
+    \item $K$ è l'insieme dei possibili valori 
+    \item $H=\{h_k:X\to Y|k\in K\}$ è l'insieme delle funzioni hash
+  \end{itemize}
+  In realtà essendo l'output piccolo potrei avere delle \textbf{collisioni}. \\
+  Si ha che se $X$ è finito si ha che $|X|\geq |Y|$ o, normalmente, anche
+  $|X|\geq 2\cdot|Y|$ e in tal caso $h:X\to Y$ lavora come una funzione di
+  compressione (anche se non bisogna confonderlo con algoritmi per avere zip
+  etc$\ldots$)  \\ 
+  Quindi le funzioni hash possono dipendere da una chiave, dicendo che sono
+  \textbf{funzioni di hash keyed}, o meno, avendo  \textbf{funzioni di hash
+    unkeyed} (che noi vedremo). 
+\end{definizione}
+Si hanno varie categorie di problemi difficili da risolvere:
+\begin{itemize}
+  \item \textbf{preimage}, con:
+  \begin{itemize}
+    \item \textbf{input}: $h:X\to Y$, one-way, e $y\in Y$
+    \item \textbf{output}: $x\in X$ tale che $h(x)=y$
+  \end{itemize}
+  \item \textbf{second preimage}, con:
+  \begin{itemize}
+    \item \textbf{input}: $h:X\to Y$ e $x\in X$
+    \item \textbf{output}: $x'\in X$ tale che $h(x')=h(x)$ e $x'\neq x$
+  \end{itemize}
+  essendo difficile sostiuire u'impronta con un'altra
+  \item \textbf{collision}, con:
+  \begin{itemize}
+    \item \textbf{input}: $h:X\to Y$
+    \item \textbf{output}: $x,x'\in X$ tale che $h(x')=h(x)$ e $x'\neq x$
+  \end{itemize}
+  ovvero deve essere difficile trovare due messaggi che collidano
+\end{itemize}
+Sono requisiti pesanti, anche se collision è più facile da rompere di second
+preimage, avendo che quest'ultimo è più vincolato, avendo già un $x\in X$. \\
+Si è quindi studiato un algoritmo naive, per qualunque funzione di hash, che
+cerca le collisioni nel modo ovvio. Si hanno due parametri:
+\begin{itemize}
+  \item la definizione della funzione di hash $h$
+  \item il numero $q$ di volte con cui interrogare $h$
+\end{itemize}
+Al crescere di $q$ si trovano quindi più collisioni. È quindi un algoritmo
+probabilistico avendo in primis una scelta casuale di un sottoinsieme di $q$
+messaggi, detto $X_0$. Per ciascun messaggio calcola la fingerprint e lo salva
+in una lista, tramite la quale verifica se si hanno due valori uguali, per due
+messaggi diversi:
+\begin{algorithm}[H]
+  \small
+  \begin{algorithmic}
+    \Function{FindCollision}{$h,q$}
+    \State \textit{choose random }$X_0\subseteq X$, \textit{t.c.} $|X_0|=q$
+    \State $fingerprints\gets [\,\,\,]$
+    \For {\textit{every} $x\in X_0$}
+    \State $y_x\gets h(x)$
+    \If{$y_x\in fingerprints$}
+    \State \textbf{return} $(x,x')$
+    \Else
+    \State $push(fingerprints, y_x)$
+    \EndIf
+    \EndFor
+    \State \textbf{return} $fail$
+    \EndFunction
+  \end{algorithmic}
+  \label{algo:h1}
+  \caption{Pseudocodice dell'algoritmo naive di verifica collisioni hash}
+\end{algorithm}
+La probabilità di successo segue un teorema.
+\begin{teorema}
+  Dato $M=|Y|$ la probabilità di successo è:
+  \[\varepsilon=1-\left(\frac{M-1}{M}\right)\cdot
+    \left(\frac{M-2}{M}\right)\cdots \left(\frac{M-q+1}{M}\right)\]
+\end{teorema}
+\begin{proof}
+  Sia dato $X_0=\{x_1,\ldots, x_1\}$. Allora, per $i$ che va da 1 a $q$, si ha
+  che $E_i$ è l'evento $h(x_i)\not\in\{h(x_1),\ldots h{x_{i-1}}\}$.\\
+  Si ha quindi che $P(E_1)=1$ e che la congiunta di tutti gli $E_i$,
+  indipendenti, è:
+  \[P(E_1\land E_2\land\cdots\land E_q)=\left(\frac{M-1}{M}\right)\cdot
+    \left(\frac{M-2}{M}\right)\cdots \left(\frac{M-q+1}{M}\right)\]
+  che è quindi la probabilità che non ci siano collisioni, avendo che $P(E_1)$
+  è un banale $\cdot 1$ e quindi lo cancello dal prodotto. \\
+  La probabilità di non avere collisioni è quindi:
+  \[P(NoCollision)=\left(1-\frac{1}{M}\right)\cdot
+    \left(1-\frac{2}{M}\right)\cdots\left(1-\frac{q-1}{M}\right)=
+    \prod_{i=1}^{q-1}\left(1-\frac{i}{M}\right)\]
+  Fissato quindi $x\in\mathbb{R}$ piccolo si ha che, per McLaurin:
+  \[1-x\approx e^{-x}\]
+  e quindi:
+  \[P(NoCollision)\approx \prod_{i=1}^{q-1}
+    e^{-\frac{i}{M}}=e^{-\frac{1}{M}\sum_{i=1}^{q-1} i}=e^{-\frac{q\cdot
+        (q-1)}{2\cdot M}}\]
+  con l'ultimo passaggio per la solita formula di Gauss.\\
+  Quindi si ha che:
+  \[P(AtLeastOneCollision)\approx 1-e^{-\frac{q\cdot
+        (q-1)}{2\cdot M}}=\varepsilon\]
+  $\varepsilon$ avendo chiamato così prima tale probabilità.\\
+  Sistemiamo un poco i conti:
+  \[e^{-\frac{q\cdot
+        (q-1)}{2\cdot M}}=1-\varepsilon\]
+  ma allora:
+  \[-\frac{q\cdot
+      (q-1)}{2\cdot M}=\ln(1-\varepsilon)\]
+  e:
+  \[q^2-q=2\cdot M\cdot \ln\frac{1}{1-\varepsilon}\]
+  ignorando $q$ a favore di $q^2$, avendo $q$ molto grande, ottengo $q$ con la
+  radice: 
+  \[q\approx \sqrt{2\cdot M\cdot \ln\frac{1}{1-\varepsilon}}\]
+  che è una relazione che coinvolge numero di query $q$, numero di impronte $m$
+  e probabilità di collisioni $\varepsilon$. Avendo che si ha quante query mi
+  servono per avere una collisione con probabilità $\varepsilon$.\\
+  Solitamente si fissa $\varepsilon=\frac{1}{2}$, ottenendo $q=1.17\cdot
+  \sqrt{M}$. La radice è molto impattante nei conti. Si ha quindi che, ad
+  esempio: 
+  \begin{itemize}
+    \item $Y=\{0,1\}^{40}$ comporta $M=10^6$, e quindi non essendo sicuro
+    \item $Y=\{0,1\}^{128}$ comporta $M=2^{64}$, avendo che è sicuro ma per poco
+    tempo (ed era la scelta di MD5 ed è destinata alla fine del DES )
+    \item $Y=\{0,1\}^{160}$ comporta $M=2^{160}$, che è la scelta minima
+    normalmente accettabile, ovvero il numero di bit del fingerprint di SHA-1
+    (anche se si hanno per lui attacchi specifici) quindi in realtà sarebbe
+    meglio usare SHA-256
+  \end{itemize}
+\end{proof}
+Questo algoritmo porta al cosiddetto \textbf{attacco del compleanno} che deriva
+dal \textbf{paradosso del compleanno}, che non è in realtà un paradosso ma un
+risultato poco intuitivo:
+\begin{center}
+  \textit{Di quante persone abbiamo bisogno in una stanza per avere una
+    probabilità pari a $\frac{1}{2}$ di trovare due persone che hanno lo stesso
+    compleanno, in termini di stesso giorno e stesso mese?} 
+\end{center}
+Si ha quindi la funzione:
+\[Birthday:People\to CalendarDays\]
+Ottenendo, per $M=365$, soli $q\simeq 23$, ovvero sole 23 persone.\\
+La radice quadrata di $M$ è infatti più piccola di quanto ci si aspetta e
+impatta nei conti.\\
+Vediamo quindi come sono costruite le funzioni di hash, tramite le
+\textbf{funzioni di hash iterate}.\\
+Si ha una funzione di compressione, lossy:
+\[compress:\{0,1\}^{m+t}\to\{0,1\}^{m},\,\,t\geq 1\]
+Si ha quindi una tecnica divisa in 3 fasi di calcolo, prendendo un input,
+spezzandolo e mescolandolo (hash significa ``polpettone''):
+\begin{enumerate}
+  \item pre-computazione per preparare l'input, dove data una stringa $x$ in
+  input, tale che $|x|\geq m+t+1$, si costruisce la stringa $t$ tale che
+  $|Y|=0\bmod \,\,t$, lunga quindi un multiplo di $t$. Solitamente si fa
+  aggiungendo caratteri tramite padding, usando $pad(x)$:
+  \[y=x||pad(x)\]
+  Infine $y$ può essere diviso in $r$ blocchi, lungo $t$ bit.\\
+  Questa fase dovrebbe assicurare che $f(x)=y$ sia iniettiva:
+  \[x\neq x'\implies f(x)\neq f(x')\]
+  per evitare ci siano già qui collisioni. L'iniettività è facile da soddisfare,
+  avendo:
+  \[|y|=r\cdot t\geq |x|\]
+  anche se si usa $\geq$ si tende a fare sempre questa operazione
+  \item computazione dove si itera l'uso della compressione. Si parte da un
+  vettore di inizializzazione $IV$, che è una strinha di $m$ bit e si fa
+  \[z_0=IV\]
+  \[z_1=compress(z_0||y_1)\]
+  \[\cdots\]
+  \[z_r=compress(z_{r-1}||y_r) \]
+  con $z_r$ che è l'output
+  \item trasformazione dell'output, opzionale. Data $g:\{0,1\}^m\to\{0,1\}^l$,
+  pubblica, si calcola:
+  \[h(x)=g(z_r)\]
+\end{enumerate}
+Posso formalmente dire che la funzione di hash iterata è costruita tramite:
+\[h:\bigcup_{i=m+t+1}^\infty\{0,1\}^i\to\{0,1\}^l\]
+\subsection{Costruzione di Merkle-Damg{\aa}rd}
+Vediamo quindi un esempio che sui le funzioni di hash iterate. \\
+Con questa costruzione possiamo dimostrare che se la funzione di compressione è
+resistente alle collisioni, anche la funzione hash risultante è resistente alle
+collisioni. \\
+Si assume $|x|=n\geq m+t+1$, con $t\geq 2$, e si divide $x$ in $k$ blocchi,
+lunghi $t-1$ bit ciascuno:
+\[x=x_1||x_2||\cdots ||x_k\]
+e quindi:
+\[|x_k|=t-1-d,\,\,\,0\leq d\leq t-2\land
+  k=\left\lceil\frac{n}{t-1}\right\rceil\]
+e si calcola $h(x)$ tramite:
+\begin{algorithm}[H]
+  \small
+  \begin{algorithmic}
+    \Function{Merkle-Damg{\aa}rd}{$x$}
+    \Comment{$compress:\{0,1\}^{m+t}\to\{0,1\}^m$, con $t\geq 2$}
+    \State $n\gets |x|$
+    \State $k\gets\left\lceil\frac{n}{t-1}\right\rceil$
+    \State $d\gets n-k\cdot (t-1)$
+    \For {$i=1$ \textbf{to} $k-1$}
+    \State $y_1\gets x_i$
+    \EndFor
+    \State $y_k\gets x_k||0^d$
+    \Comment{padding}
+    \State $y_{k+1}\gets(t-1)-$\textit{bit binary representation of $d$}
+    \State $z_1\gets 0^{m+1}||y_1$
+    \State $g_1\gets compress(z_1)$
+    \For {$i=1$ \textbf{to} $k$}
+    \State $z_{i+1}\gets g_i||1||y_{i+1}$
+    \State $g_{i+1}\gets compress(z_{i+1})$
+    \EndFor
+    \State \textbf{return} $g_{k+1}$
+    \Comment{$h(x)\gets g_{k+1}$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Pseudocodice della costtuzione di Merkle-Damg{\aa}rd}
+\end{algorithm}
+\begin{teorema}
+  Se $compress$ è \textbf{collision-resistant} anche $h$ è collision resistant.
+\end{teorema}
+Abbiamo però usato $t\geq 2$ ma vediamo cosa succede se si accorcia con
+$t=1$. Serve però una costruzione diversa e meno efficiente.\\
+Si assume in questo caso $|x|=n\geq m+2$ e:
+\[compress :\{0,1\}^{m+1}\to \{0,1\}^m\]
+Si procede codificando $x$ come $f(x)$ in questo modo:
+\[f(x)=
+  \begin{cases}
+    0&\mbox{se } x=0\\
+    01&\mbox{se } x=1
+  \end{cases}
+\]
+Notando quindi che si allunga molto la stringa.\\
+Infine si calcola $h(x)$ tramite:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{Merkle-Damg{\aa}rd2}{$x$}
+    \State $n\gets |x|$   
+    \State $y\gets 11||f(x_1)||f(x_2)||\cdots||f(x_n)$
+    \State $y=\{y_1,y_2,\ldots, y_k\}$
+    \State $g_1\gets compress(0^m||y_1)$
+    \For {$i=1$ \textbf{to} $k-1$}
+    \State $g_{i+1}\gets compress(g_i||y_{i+1})$
+    \EndFor
+    \State \textbf{return} $g_{k}$
+    \Comment{$h(x)\gets g_{k+1}$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Pseudocodice della costtuzione di Merkle-Damg{\aa}rd per $t=1$}
+\end{algorithm}
+Anche in questo caso si dimostra lo stesso teorema.
+\begin{teorema}
+  Se $compress$ è \textbf{collision-resistant} anche $h$ è collision resistant.
+\end{teorema}
+\subsection{Funzioni Hash Usate}
+La prima funzione di hash proposta fu MD4, proposta da Rivers nel 1990, detta
+debole a causa delle poche iterazioni.\\
+Pochi anni dopo si è quindi proposta una variante con costanti diverse e più
+iterazioni (e quindi più sicura), chiamata MD5. In generale si conoscono tecniche
+per generare collisioni con le funzioni di compressione di MD4 e MD5 ma non
+nelle versioni complete dei due algoritmi. \\
+Nel 1993 il NIST proposte lo standard \textbf{Secure Hash Algorithm
+  (\textit{SHA})}, per il quale servono $2^{61}$ tentativi per generare
+collisioni, essendo quindi più efficiente dell'attacco del compleanno, che
+richiede $2^{80}$ tentativi. \\
+È stata poi prodotta SHA-1, che aumenta la sicurezza di SHA, dando vita alla
+prima famiglia delle funzioni SHA.\\
+Nel 2017 però si è scoperto come generare collisioni su SHA-1 e quindi si è
+spinto sulla seconda famiglia delle SHA, tra cui SHA-224, SHA-256, SHA-384 e
+SHA-512, che erano state proposte nel 2001 dal NIST.\\ 
+Siamo ora alla terza famiglia, SHA-3, con algoritmo \textbf{Keccak} che usa
+le \textbf{sponge function} (che non tratteremo) e non le funzioni hash iterate
+(si noti che Ethereum usa quest'ultima soluzione). SHA-3 è stato ufficializzato
+dal NIST nel 2012 dopo un concorso aperto nel 2007, vinto appunto dall'algoritmo
+Keccak. \\
+\textbf{Risentire ultimi 5 minuti lezione 17 maggio}
 \chapter{Ripasso Algebra \& co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.
@@ -6724,4 +7047,4 @@ PTM, solitamente di classe BPP.
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
 % LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
 % LocalWords:  Shannon esponenziazione algoritmicamente impersonificando Hash
-% LocalWords:  Probabilistic polinomialmente primis Gamal
+% LocalWords:  Probabilistic polinomialmente primis Gamal fingerprint

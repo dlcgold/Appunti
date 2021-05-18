@@ -2952,10 +2952,63 @@ Questo problema è semplice concettualmente ma ha seri limiti prestazionali.
 Tali software usano spesso il parallelismo, tabelle hash, bloom filters, e
 compressione.
 \textbf{Su slide spiegazione su KMC2}.
-
-
-
-
+\chapter{Succint De Bruijn Graph}
+Si vede ora una rappresentazione efficiente dei grafi di De Bruijn tramite
+BWT, ovvero in modo succinto.\\
+I DBG sono, come sappiamo, costruiti su un insieme di k-mer, coi nodi che sono
+prefisso e suffisso dei vari kmer, di lunghezza $k-1$. \\
+Si ha quindi:
+\begin{itemize}
+  \item \textbf{input}: un insieme $S$ di sequenze, da cui si estraggono i k-mer
+  \item \textbf{output}: il DBG
+\end{itemize}
+Se aggiungiamo davanti ad ogni stringa un numero di dollari (che è sempre il
+simbolo più piccolo in ordine lessicografico) pari a $|S|$
+possiamo procedere con l'indicizzazione della struttura. Avremo quindi
+potenzialmente un nodo con soli dollari che è il più piccolo. Potrei però a
+causa del $k$ non avere un nodo di soli dollari. Usiamo nodi univo.
+Gli archi uscenti da un nodo mi
+danno informazione sui k-mer successivi. Vogliamo quindi un modo per sfruttare
+la cosa per rappresentare il grafo in modo succinto in memoria. Useremo quindi
+la BWT che permette anche di navigare nel grafo. L'idea è quindi di
+``decomprimere'' solo la parte di grafo che mi interessa. \\
+Si procede ordinando i (k-1)-mer, dei nodi, però in ordine rovesciato, da destra
+a sinistra. Questa fase si fa in costruzione, durante la quale può servire più
+memoria di quella che poi serve per lo studio del grafo a struttura
+completata. Si da per assunto che i k-mer sono stati già estratti. La BWT questa
+volta rappresenta gli archi uscenti dai nodi (che possono essere più di uno e in
+tal caso vengono messi in ordine lessicografico), riordinati appunto in ordine
+lessicografico da destra a sinistra. Se un nodo non ha archi uscenti metto il
+dollaro. La BWT è quindi lunga almeno quanto $|V|$ ma probabilmente di
+più, essendo lungo $|E|$. Tengo in memoria solo la BWT, che occupa molto meno
+dei k-mer. Posso anche comprimerla. La BWT, che chiamo $w$, ha tutte le
+caratteristiche per ricostruire il grafo a partire dal nodo iniziale (quello di
+soli dollari, per cui serve un $k$ adeguato). \\
+Vediamo quindi come navigare il grafo a partire da $w$. Si sfrutta la solita
+LF-function. Dato un nodo e l'etichetta dell'arco uscente si capisce dove si
+trova il nodo successivo, che sappiamo quale sia come etichetta (aggiungendo
+l'etichetta dell'arco al nodo) ma dobbiamo capire dove sia sulla BWT. Si usano
+quindi C e Occ dell'FM-index sul vettore $w$, sulla BWT. Dal nodo di tutti
+dollari posso far partire la navigazione tramite $w$. Serve anche un vettore
+binario per capire se un nodo ha più archi uscenti, lungo quando $w$. Questo
+vettore contiene 0 dove si ha un nodo che esce con più nodi, e si ha 0 per tutti
+questi archi uscenti (che trovo etichettai in corrispondenza sulla BWT) tranne
+l'ultimo, che ha 1. Se si ha un solo nodo uscente 
+metto 1. Questo vettore binario lo si può chiamare \textit{last}, tale che
+$last[i]=1$ se $i$ rappresenta in $w$ l'ultimo arco uscente, altrimenti metto
+0.\\
+In memoria ho solo bwt e last, per di più compressi. Questa struttura dati
+succinta per i DBG è chiamata \textbf{BOSS}. Quindi dato un simbolo $\sigma$ si
+rank $i$ cerco il corrispondente simbolo $\sigma$ nell'ordinamento ``inverso''
+per capire il prossimo nodo. Si fa quindi il seguente conto partendo da un
+simbolo di $w$ per capire, sempre in ottica di $w$, a che indice passare:
+\[j=C(\sigma)+Occ(\sigma, i)\]
+Quindi l'ordine delle stringhe è rovesciato perché poi dobbiamo basarci
+sull'ultimo carattere del nodo a cui si arriva, per questo sono da destra a
+sinistra, avendo nella BWT il simbolo che precede la stringa che voglio
+ottenere. Si permette quindi di muoversi in modo forward sul grafo, tramite 
+LF-mapping.\\ 
+\textbf{Esempi su slide (senza è tutto un poco confuso).}
 
 
 

@@ -6696,6 +6696,7 @@ Anche in questo caso si dimostra lo stesso teorema.
 \begin{teorema}
   Se $compress$ è \textbf{collision-resistant} anche $h$ è collision resistant.
 \end{teorema}
+\noindent
 Si ottiene quindi una funzione hash del tipo:
 \[h:\bigcup_{i=m+2}^\infty\{0,1\}^i\to\{0,1\}^l\]
 avendo $l=m$.
@@ -6726,16 +6727,289 @@ spinto sulla \textbf{famiglia 2 delle SHA}, tra cui SHA-224, SHA-256, SHA-384 e
 SHA-512 (solitamente usato anche ora), che erano state proposte nel 2001 dal
 NIST. Tutte queste sono funzioni di hash iterate con pochissimi dettagli di
 differenza, numero di iterazioni, numero di registri, costanti di
-inizializzazioni.\\    
+inizializzazioni.\\
+Questa seconda famiglia è stata progettata dall'NSA sulla base di
+Merkle-Damg{\aa}rd. \\
 Siamo ora alla \textbf{famiglia 3 delle SHA}, SHA-3, con algoritmo
-\textbf{Keccak} che usa le \textbf{sponge function} (che non tratteremo) e non
+\textbf{Keccak}, l'unico per ora di questa terza famiglia, che usa le
+\textbf{sponge function} (che non tratteremo ma che si basa su un adattamento
+dinamico dei passi di computazione) e non 
 le funzioni hash iterate (si noti che Ethereum usa quest'ultima
 soluzione). SHA-3 è stato ufficializzato dal NIST nel 2012 dopo un concorso
 aperto nel 2007, vinto appunto dall'algoritmo Keccak. Si hanno, per SHA-3, le
-alternative alle varie SHA-256, SHA-512 etc$\ldots$ della famiglia 2.\\
-\textbf{To be continued}
-
-
+alternative alle varie SHA-256, SHA-512 etc$\ldots$ della famiglia 2.
+\subsection{SHA-1}
+Si hanno fingerprint, dette \textbf{message digest}, di 160 bit e si basa sulle
+funzioni di hash iterate. Lavora poi su word di 32 bit, scelta storica per le
+architetture dell'epoca.\\
+Si basa sulle classiche operazioni bitwise, la somma intera modulo $2^{32}$ e la
+$rotl^s(X)$, ovvero le rotazioni a sinistra di $s$ operazioni con $0\leq s \leq
+31$.\\
+Chiamo $m$ il messaggio di input, con il limite che $|m|\leq 2^{64}-1$, comunque
+sarebbero 2.15 miliardi di gigabyte. Il limite è docuto al padding, in cui si
+inserisce in fondo $l$, la rappresentazione in binario della lunghezza del
+messaggio, in 64 bit (da cui il limite).\\
+In primis si fa il padding:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{SHA-1-Pad}{$m$}
+    \State $d\gets (447-|m|)\bmod\,\,512$
+    \State $l\gets\mbox{ binary rappresentation of }|m|\mbox{ with }|l|=64$
+    \State $y\gets m||1||0^d||l$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di padding di SHA-1}
+\end{algorithm}
+Se $|l|<64$ si aggiungono 0 a sinistra fino anche $|l|=64$.
+. Inoltre si ha che
+$|m||1||0^d|=448\bmod\,\,512$ e $y$ ha lunghezza $0\bmod\,\,512$. L'aggiunta di
+$d$ zeri permette l'aggiunta poi di $l$.\\
+Dopo il padding si divide $y$ in $n$ $M_i$ blocchi lunghi 512 bit.\\
+Si hanno poi 80 funzioni del tipo, con $B$, $C$, $D$, word a 32 bit:
+\[f_i(B,C,D)=
+  \begin{cases}
+    (B\land C)\lor ((\neg B)\land D)&\mbox{ se } 0\leq i\leq 19\\
+    B\oplus C\oplus D&\mbox{ se } 20\leq i\leq 39\\
+    (B\land C)\lor (B\land D)\lor (C\land D)&\mbox{ se } 40\leq i\leq 59\\
+    B\oplus C\oplus D&\mbox{ se } 60\leq i\leq 79
+  \end{cases}
+\]
+Si hanno poi80 costanti $K_i$, del tipo:
+\[K_i=
+  \begin{cases}
+    5A827999&\mbox{ se } 0\leq i\leq 19\\
+    6ED9EBA1&\mbox{ se } 20\leq i\leq 39\\
+    8F1BBCDC&\mbox{ se } 40\leq i\leq 59\\
+    CA62C1D6&\mbox{ se } 60\leq i\leq 79
+  \end{cases}
+\]
+Si hanno 5 registri $H_i$ a 32 bit che conterranno il risultato (come loro
+concatenazioni) e altri 5 registri, $A,V,C,D,E$, ausiliari.\\
+Avendo quindi un algoritmo dove si noti che si hanno molte operazioni lineari.\\
+\begin{algorithm}
+  \begin{algorithmic}
+    \Function{SHA-1}{$m$}
+    \State $y\gets SHA-1-Pad(m)$
+    \State $y\gets M_1||M_2||\cdots M_n$
+    \State \textit{initialize registers} $H_i$
+    \For {$i\gets 1$ \textbf{to} $n$}
+    \State $M_i\gets w_1||w_2||\cdots w_{15}$
+    \For {$t\gets 16$ \textbf{to} $79$}
+    \State $w_t\gets rotl^1(w_{t-3}\oplus w_{t-8}\oplus w_{t-14}\oplus w_{t-16})$
+    \EndFor
+    \State $A\ldots E\gets H_0\ldots H_4$
+    \For {$t\gets 0$ \textbf{to} $79$}
+    \State $temp\gets rotl^5(A)+f_t(B,C,D)+E+w_t+K_t$
+    \State $E\gets D$
+    \State $D\gets C$
+    \State $C\gets rotl^{30}(B)$
+    \State $B\gets A$
+    \State $A\gets temp$
+    \EndFor
+    \State $H_0\gets H_0+A$
+    \State $H_1\gets H_1+B$
+    \State $H_2\gets H_2+C$
+    \State $H_3\gets H_3+D$
+    \State $H_4\gets H_4+E$
+    \EndFor
+    \State \textbf{return} $H_0||H_1||H_2||H_3||H_4$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo SHA-1 (\textit{non richiesto all'orale})}
+\end{algorithm}
+La somiglianza coi crittosistemi simmetrici è evidente, non si ha una chiave
+derivata ma il resto è analogo.\\
+Le implementazioni sono solitamente in $C$ con un certo stato con anche delle
+piccole ottimizzazioni.
+\subsection{MD5}
+In questo caso si ha un fingerprint, detto anche qui \textbf{message digest}, di
+128 bit. MD5 è più sicuro ma più lento di MD4. MD5 è anche lui efficiente su
+macchine a 32 bit. MD5 non è riconosciuto come standard ma è uno ``standard de
+facto''. Usa le stesse operazioni di SHA-1 e si denoti $m\in\{0,1\}^b$ come
+messaggio di input. La lunghezza di $m$, appunto $b$, è arbitraria ma anche qui
+$b\geq 2^{64}-1$ e si considera solo la rappresentazione binaria dei primi 64
+bit più significativi di $b$.\\
+In primis si fa il padding:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{MD5-Pad}{$m$}
+    \State $d\gets (447-|m|)\bmod\,\,512$
+    \State $l\gets\mbox{ binary rappresentation of }b$
+    \State $y\gets m||1||0^d||l$
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo di padding di MD5}
+\end{algorithm}
+Se $|l|<64$ si aggiungono 0 a sinistra fino anche $|l|=64$. Sembra uguale a
+quello di SHA-1 ma in realtà le due word (64bit) che contengono $b$ è
+concatenata in ordine inverso, prima la meno significativa e poi la più
+significativa. Nella singola word inoltre si parte dal byte meno significativo,
+il contrario rispetto a quello che fanno normalmente le architetture senza
+aggiunta di sicurezza. Nel byte invece il bit più significativo viene per
+primo. Per il resto valgono le osservazioni fatte per SHA-1 in merito al
+padding.\\
+Anche qui $y$ può essere un multiplo $N$ di 16 word e $y$ viene diviso in $N$
+blocchi $M_i$.\\
+Anche qui si hanno delle funzioni ma solo 4, con $X,Y,Z$ word a 32 bit:
+\[F(X,Y,Z)=(Z\land Y)\lor (\neg X\land Z)\]
+\[G(X,Y,Z)=(X\land Z)\lor (Y\land\neg  Z)\]
+\[H(X,Y,Z)=X\oplus Y\oplus Z\]
+\[I(X,Y,Z)=Y\oplus (X\land\neg  Z)\]
+Si hanno poi 4 registri a 32 bit che conterranno il risultato finale, $A,B,C,D$
+e 4 registri ausiliari, sempre a 32 bit $AA,BB,CC,DD$.\\
+Si ha poi un array $T[1:64]$ di 64 word tali che:
+\[T[i]=\lceil 4294967296\cdot |\sin(i)|\rceil\]
+con $i$ in radianti.\\
+Si lavora su blocchi di 16 word che vengono besse in un buffer $X[0:15]$.\\
+Ci si basa su 4 ``round'' per ogni blocco da 16 word, dove nei round si hanno
+varie rotazioni. Nei vari round cambia la funzione in uso all'interno. La
+concatenazione finale è $A||B||C||D$ che deve essere stampata dal meno
+significativo al più significativo per avere il risultato.\\
+\textbf{Su slide pseudocodice (ovviamente non da sapere)}.
+\section{DSA}
+Si assuma ora che Alice voglia firmare $m$ con una crittosistema a chiave
+pubblica. Per quanto visto fino ad ora Alice potrebbe usare le funzioni di hash:
+\begin{itemize}
+  \item Alice calcola $h(m)$
+  \item Alice calcola $D_A(h(m))$
+  \item Alice manda a Bob il documento firmato $(m,D_A(h(m)))$
+\end{itemize}
+Bob deve verificare la firma:
+\begin{itemize}
+  \item Bob calcola $x=h(m)$
+  \item Bob calcola $y=E_A(D_A(h(m)))$
+  \item Bob accetta la firma come valida sse $x=y$
+\end{itemize}
+Mentre usando un \textbf{Message Authentication Code (\textit{MAC})} avrei:
+\begin{itemize}
+  \item Alice manda a Bob la coppia $m, h(m)=(x,y)$
+  \item Bob accetta $m$ come valido sse $y=h(x)$, verificando che il messaggio
+  non sia stato alterato
+\end{itemize}
+Inoltre per gestire le password si usano le impronte hash.\\
+Vediamo ora \textbf{Digital Signature Algorithm (\textit{DSA})}, una
+trasformazione pratica di El Gamal, che è lo standard usato.\\
+Proposto nel 1991 dall'NSA e poi diventato standard NIST (che dal 2001 dice di
+usare $L=1024$).\\
+Servono:
+\begin{itemize}
+  \item un numero primo $p$ di $L$ bit, con $512\leq L\leq 1024$, anche se si
+  consiglia 1024, in modo da avere a che fare con il logaritmo discreto
+  lavorando su $\mathbb{Z}_p^*$
+  \item $q$ un primo di 160 bit che divide $p-1$
+  \item $\alpha\in\mathbb{Z}_p^*$ che è una radice q-esima di 1 modulo p. Si ha
+  che l'ordine di $\alpha$ è $q$, avendo $\alpha^q\equiv 1\bmod\,\,p$. Per
+  calcolarlo si prende un generatore $g$ di $\mathbb{Z}_p^*$ e si fa:
+  \[\alpha)g^{\frac{p-1}{q}}\bmod\,\,p\]
+  \item lo spazio dei messaggi $P=\{0,1\}^*$
+  \item lo spazio delle firme $A=\mathbb{Z}_p^*\times \mathbb{Z}_p^*$, con ogni
+  firma lunga 320 bit
+  \item lo spazio delle chiavi
+  $K=\{(p,q,\alpha,\beta):\beta\equiv\alpha^a\bmod\,\,p\}$ con $0\leq a \leq
+  q-1$ 
+  \item la chiave pubblica $(p,q,\alpha,\beta)$
+  \item la chiave privata $a$
+\end{itemize}
+Per firmare $m\in p$ alice sceglie a caso $r$, $1\leq r\leq q-1$ (meglio se
+$2\leq r\leq q-1$), e calcola:
+\[sig_l(m,r)=(\gamma,\delta)\]
+tali che $\gamma$ è il random salt:
+\[\gamma=(a^r\bmod\,\,p)\bmod\,\,q\]
+e che:
+\[\delta=(SHA-1(m)+\alpha\cdot\gamma)\cdot r^{-1}\,\,\bmod q\]
+Se o $\gamma$ o $\delta$ sono uguali a 0 bisogna ricalcolarli entrambi.\\
+Per verificare la firma, ovvero per vedere che $(\gamma,\delta)\in
+\mathbb{Z}_p^*\times \mathbb{Z}_p^*$ è valida per $m\in\{0,1\}^*$ si calcolano:
+\[e_1=SHA-1(m)\cdot \delta^{-1}\bmod\,\,q\]
+\[e_2=\gamma\cdot \delta^{-1}\bmod\,\,q\]
+e si accetta, avendo $ver_k(x,(\gamma,\delta))=\top$ sse:
+\[(\alpha^{e_1}\cdot \beta^{e_2}\bmod\,\,p)\bmod\,\,q=\gamma\]
+Dimostrare che questo criterio è corretto richiede alcuni calcoli
+delicati, modulo $p$ e modulo $q$.
+\section{Public Key Infrastructures}
+Parliamo ora di \textbf{Public Key Infrastructures (\textit{PKI})}.\\
+Un grande problema di crittografia a chiave pubblica è che il canale non è
+autenticato quindi chi riceve un messaggio non può essere sicuro dell'identità
+del mittente e chi invia un messaggio non può essere sicuro dell'identità del
+destinatario. Per mitigare il problema bisogna ``fidarsi di qualcuno'', le
+infrastrutture a chiave pubblica appunto. \\
+Si ha una \textbf{Certification Authority (\textit{CA})} di cui Alice e Bob si
+fidano (se la CA imbrogliasse avrebbe un danno d'immagine e del resto non frega
+nulla alla CA di quello che dicono Bob e Alice). La CA è una \textbf{trust third
+  party (\textit{TTP})}. La CA fornisce a Alice e Bob, sottoscritti alla CA
+tramite identificativi validi come la carta d'identità (dovendo dimostrare la
+propria identità), una coppia di chiavi
+pubbliche e private, mette tutte le chiavi pubbliche in un elenco pubblico,
+disponibile (ad esempio) su internet e quando Alice vuole la chiave pubblica di
+Bob, la cerca nell'elenco pubblico. Il problema è sempre che il canale non è
+autenticato quindi potrebbero esserci problemi nella comunicazione con la CA
+(problema mitigato da vari metodi, software etc$\ldots$).\\
+Nella realtà le CA sono magari i ministeri statali (o in Italia per esempio le
+Poste, controllate dallo stato) o grosse aziende (come TIM) o altri distributori
+certificati (che non hanno interesse a ingannare i clienti ma potrebbe non
+essere sempre così, con magari governi che spiano persone scomode
+etc$\ldots$). \\ 
+Fidarsi è quindi sempre molto delicato. CA e TTP in generale non piacciono in
+crittografia quindi solitamente, quando si fa un nuovo protocollo, si descrive
+come funzionerebbe con una TTP ma anche senza, che è la soluzione più
+difficile. Legato al problema è la tematica del ``denaro digitale'', dovendo
+evitare il \textit{double spending} (e si passa alle tematiche blockchain
+etc$\ldots$).\\   
+Il problema è che la CA diventa il collo di bottiglia delle comunicazioni,
+avendo un \textbf{single point of failure}. Si hanno varie soluzooni:
+\begin{itemize}
+  \item La CA delega e autorizza altre CA e così si forma una gerarchia di CA,
+  ovvero una PKI. Il problema, sopratutto qualora i singoli utenti contattino le
+  CA,è mantenere le informazioni aggiornate ovvero quando
+  un'informazione viene modificata in una CA, la modifica deve propagarsi
+  rapidamente a tutte le altre CA. Questo deve essere veloce, magari in ottica
+  di furto di chiave segreta etc$\ldots$
+  \item una seconda soluzione pè che quando gli utenti sottoscrivono la CA
+  ricevono un certificato, del tipo:
+  \[sig_{CA}(Bob, E_B, initial\,\,\, date, final\,\,\, date)\]
+  con:
+  \begin{itemize}
+    \item qual è la chiave pubblica
+    \item chi è il proprietario della chiave pubblica
+    \item l'intervallo di tempo in cui il certificato è valido 
+    \item informazioni aggiuntive
+  \end{itemize}
+  e per questo si ha il formato standard X.509 usato in TLS/SSL e HTTPS. Quando
+  Alice ha bisogno della chiave pubblica di Bob, Bob può fornirle il certificato
+  che ha ricevuto dalla CA. Il certificato è firmato dalla CA quindi:
+  \begin{itemize}
+    \item la chiave segreta della CA è molto difficile da contraffare
+    \item la chiave pubblica di CA deve essere molto facile da trovare e quando
+    la CA cambia le sue chiavi, deve farlo aggiornare le informazioni ovunque  
+  \end{itemize}
+  Eve dovrebbe costruire un certificato del tipo:
+  \[sig_{CA}(Bob, E_E, initial\,\,\, date, final\,\,\, date)\]
+  Rompendo del tutto la firma digitale della CA
+\end{itemize}
+Se Bob ritiene che la sua chiave segreta sia stata compromessa, può revocare le
+sue chiavi e il certificato e in quel momento la CA inserisce il certificato
+corrispondente in un \textbf{Certificate Revocation List (\textit{CRL})}. Quando
+Alice riceve il certificato da Bob, deve controllare che tale certificato non
+sia nel CRL. Il CRL può essere pubblicato da CA o consegnato a ogni utente, come
+quando aggiorniamo le definizioni dei virus con il nostro software antivirus e
+questo va fatto ogni poco tempo, per non compromettere la sicurezza, ma nemmeno
+troppo spesso per problemi di prestazioni (???).\\
+Un altro modello, per evitare il problema di fiducia nella CA, è il \textbf{Web
+  of Trust}, adottato da PGP, che non richiede un'autorità centrale. L'idea è
+che ogni utente assegna un punteggio alle persone con cui comunica. Il punteggio
+può essere assegnato direttamente, oppure può essere calcolato come una
+combinazione dei punteggi di altri utenti. SI hanno quindi regole per calcolare
+i punteggi:
+\begin{itemize}
+  \item se mi fido di A, che ha un punteggio alto, e A si fida di B, allora il
+  punteggio di B aumenta  
+  \item se mi fido di A e A non si fida di B, il punteggio di B si abbassa 
+  \item di solito, il punteggio di B è calcolato come una combinazione lineare
+  dei punteggi dati da tutte le persone che lo conoscono (e che io conosco)  
+\end{itemize}
+Il problema è quindi il comportamento degli utenti.\\
+\textbf{Nell'ultima lezione sono stati fatti anche \textit{Test di Primalità},
+  non richiesti in esame. Slide su Moodle.}
 \chapter{Ripasso Algebra \& co.}
 Vengono qui elencati alcuni concetti utili di algebra usati nella parte di
 crittografia.
@@ -7065,4 +7339,4 @@ PTM, solitamente di classe BPP.
 % LocalWords:  Pseudocodice bias equivocazione decifratura keyspace tuple DES
 % LocalWords:  crittosistemi Feistel function crittosistema pseudocasualità
 % LocalWords:  Shannon esponenziazione algoritmicamente impersonificando Hash
-% LocalWords:  Probabilistic polinomialmente primis Gamal fingerprint
+% LocalWords:  Probabilistic polinomialmente primis Gamal fingerprint hash

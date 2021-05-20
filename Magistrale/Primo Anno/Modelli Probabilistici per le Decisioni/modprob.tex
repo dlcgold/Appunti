@@ -1630,7 +1630,7 @@ Si può anche fare \textbf{apprendimento} del modello di transizione o di quello
 sensoriale come sottoprodotto dell'inferenza, tramite
 \textbf{expectation-maximation}. In altri termini fare apprendimento è fare uno
 smoothing completo.
-\section{Filtraggio}
+\subsection{Filtraggio}
 Il filtraggio è quindi il calcolo della distribuzione a posteriori dello stato
 corrente date tutte le osservazioni $P(X_t|e_{1:t})$, facendo quindi una stima
 ricorsiva basata sulle distribuzioni fino al tempo $t-1$:
@@ -1661,6 +1661,136 @@ Ma usando la proprietà di Markov si ha:
   P(e_{t+1}|X_{t+1})\sum_{x_t}P(X_{t+1}|x_t)P(e_t|e_{1:t})\]
 Avendo che:
 \[f_{1:t+1}=\alpha forward(f_{1:t};e_{t+1})\]
+\subsection{Predizione}
+La \textbf{predizione} è una sorta di filtraggio senza aggiunta di nuove
+informazioni/osservazioni, prevedendo gli stati futuri:
+\[P(X_{t+k}|e_{1:t})\]
+Maggiore è l'incertezza del tempo di transizione e prima, in termini di tempo di
+mixing/tempo transiente, raggiungerò un punto
+fisso per la previsione, raggiungendo una distribuzione stazionaria, e più
+ignoto sarà il futuro.\\
+\textbf{Esempio su slide}.\\
+Questo algoritmo possiamo pensarlo come un \textbf{mini-forward}, essendo un
+filtraggio senza aggiustamento. Trovare $P(X_t)$ dati $P(X_0)$ e
+$P(X_t|X_{t-1})$ si fa quindi:
+\[P(X_t)=\sum_{x_{t-1}}P(X_t,x_{t-1})=\sum_{x_{t-1}}P(X_t|x_{t-1})P(x_{t-1})\]
+dove:
+\begin{itemize}
+  \item $P(X_t|x_{t-1})$ è conosciuta dal modello di transizione
+  \item $P(x_{t-1})$ è conosciuto da $P(X_0)$ o da simulazioni precedenti
+\end{itemize}
+Per raggiungere lo stato stazionario si fa come con le catene di Markov.
+\subsection{Calcolo della Verosimiglianza}
+La \textbf{verosimiglianza} è la probabilità che un modello abbia generato una
+sequenza di osservazioni data. Questo è utile per confrontare diverse sequenze
+di prove da diversi modelli. È come se avessi un modello di
+classificazione. Indico la sequenza di prove con: 
+\[P(e_{1:t})\]
+Per confrontare i modelli calcolo quindi:
+\[l_{1:t}=P(X_t,e_{1:t})\]
+e:
+\[l_{1:t+1}=forward(l_{1:t};e_{t+1})\]
+avendo anche la probabilità di una sequenza di prove, calcolata in modo
+ricorsivo: 
+\[L_{1:t}=P(e_{1:t})=\sum_{x_t}l_{1:t}(x_t)\]
+\subsection{Smoothing}
+Lo \textbf{smoothing}, detto anche \textbf{regolarizzazione}, è il processo di
+calcolo della distribuzione di stati passati date le osservazioni fino allo
+stato corrente. È il ragionamento del tipo ``col senno di poi''. Si vuole
+calcolare quindi: 
+\[P(X_k|e_{1:t})\mbox{ per } 1\leq k<t\]
+Considero quindi separatamente:
+\begin{itemize}
+  \item le osservazioni fino a $k$
+  \item le osservazioni da $k+1$ a $t$, con ovviamente $t>k$
+\end{itemize}
+Ho quindi:
+\[P(X_k|e_{1:t})=P(X_k|e_{1:k},e_{k+1:t})\]
+Applico quindi Bayes:
+\[P(X_k|e_{1:t})=\alpha P(X_k|e_{1:k})P(,e_{k+1:t}|X_k,e_{1:k})\]
+e per l'indipendenza condizionata:
+\[P(X_k|e_{1:t})=\alpha P(X_k|e_{1:k})P(,e_{k+1:t}|X_k)\]
+ottenendo, con $f_{1:k}$ che consiste nel filtrare in avanti da 1 a $k$, in modo
+quindi forward:
+\[P(X_k|e_{1:t})=\alpha f_{1:k}b_{k+1:t}\]
+Il ``pezzo'' di raccolta prove $b_{k+1:t}$ è detto backward e si calcola con:
+\[P(e_{k+1:t}|X_k)=\sum_{x_{k+1}}P(e_{k+1:t}|X_k,x_{k+1})P(x_{k+1}|X_k)=
+  \sum_{x_{k+1}}P(e_{k+1:t}|x_{k+1})P(x_{k+1}|X_k)\]
+\[\sum_{x_{k+1}}P(e_{k+1},e_{k+2:t}|x_{k+1})P(x_{k+1}|X_k)=
+  \sum_{x_{k+1}}P(e_{k+1}|x_{k+1})P(e_{k+2:t}|x_{k+1})P(x_{k+1}|X_k)\]
+Dove il primo e il terzo termine sono tratte dal modello e quindi li conosco e
+il termine mediano la chiamata ricorsiva.\\
+Nell'esecuzione quindi si memorizzano i risultati del filtraggio forward su
+tutta la sequenza e si esegue la ricorsione all'indietro:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{ForwardBackward}{$ev, priori$}
+    \State $fv[0]\gets priori$
+    \For {$i\gets 1$ \textbf{to}  $n$}
+    \State $fv[i]\gets Forward(fv[i-1], ev[i])$
+    \EndFor
+    \State $b\gets \vec{1}$
+    \For {$i\gets t$ \textbf{downto}  $1$}
+    \State $sv[i]\gets Normalize(fv[i]\cdot b)$
+    \State $b\gets Backward(b, ev[i])$
+    \EndFor
+    \State \textbf{return} $sv$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+con:
+\begin{itemize}
+  \item $ev$ un vettore di dimensione $t$ di valori di prova
+  \item $priori$ distribuzione a priori dello stato iniziale
+  \item $fv$ vettore di messaggi in avanti per i passi da 0 a $t$
+  \item $b$ rappresentazione del messaggio all’indietro, inizialmente $\vec{1}$
+  \item $st$ vettore di stime regolarizzate dei passi da 1 a $t$
+\end{itemize}
+Si ha quindi che lo smoothing ha una complessità spaziale elevata a causa dei
+molti stati e delle lunghe sequenza. Permette però di usare tutta l'informazione
+disponibile e va usato solo quando interessa avere una stima precisa del
+passato.\\
+\textbf{Esempio su slide}.\\
+Una soluzione è il cosiddetto \textbf{smoothing a ritardo fisso} (se ha detto
+bene cosa fosse me lo sono perso).
+\subsection{Sequenza più Probabile}
+Vediamo quindi all'ultimo task, quello della \textbf{sequenza più probabile},
+ovvero data una sequenza di osservazioni vogliamo trovare la sequenza di stati
+che più probabilmente ha generato il mio set di osservazioni:
+\[\operatorname*{argmax}_{x_{1:t}}P(x_{1:t}|e_{1:t})\]
+Supposto che ogni stato possa assumere solo valori binari e che la mia
+sequenza di osservazioni sia lunga $n$ allora si avranno $2^n$ possibili
+sequenze di stati, avendo qualcosa di computazionalmente troppo costoso.\\
+Si ragiona quindi in ottica di algoritmo di ottimizzazione dinamica,
+considerando ogni sequenza come un cammino lungo un grafo, avendo che la
+probabilità di ogni cammino è il prodotto delle probabilità di transizione per
+le probabilità delle osservazioni rilevate ad ogni stato. Si usa
+l'\textbf{algoritmo di Viterbi} che si basa su un'assunzione:
+\begin{center}
+  \textit{esiste una relazione ricorsiva fra i cammini più probabili verso ogni
+    stato $x_{t+1}$ e i cammini più probabili verso ogni stato $x_t$.}
+\end{center}
+Questa relazione ricorsiva è del tipo:
+\[\max_{x_1\ldots x_t}P(x_1,\ldots x_t,X_{t+1}|e_{1:t+1})\]\[=\alpha
+  P(e_{t+1})\max_{x_t}(P(X_{t+1}|x_t)\max_{x_1,\ldots x_{t-1}}P(x_1,\ldots
+x_{t-1},x_t|e_{1:t})\]
+Al termine sarà disponibile la probabilità della sequenza più probabile che
+raggiunge ogni stato finale. Si cerca quindi il cammino più lungo sul grafo.\\
+Vediamo quindi come ottenere la sequenza più probabile al tempo $t$: $m_t$:
+\[m_t[x]=\max_{x_{1:t-1}}P(x_{1:t-1},x)=\max_{x_{1:t-1}}P(x_{1:t-1})P(x|x_{t-1})\]
+\[=\max_{x_{t-1}}P(x_t|x_{t-1})\max_{x_{1:t-2}}P(x_{1:t-1})=
+  \max_{x_{t-1}}P(x_t|x_{t-1})m_{t-1}[x]\]
+Avendo:
+\[m_1[x]=P(x_1)\]
+Per vedere invece la sequenza più probabile di stati date le osservazioni:
+\[x_{1:T}^*=\operatorname*{argmax}_{x_{1:T}}P(x_{1:T}|e_{1:T})\]
+Avendo quindi:
+\[m_t[x_t]=\max_{x_{1:t-1}}P(x_{1:t-1},x_t,e_{1:t})=
+\max_{x_{1:t-1}}P(x_{1:t-1},e_{1:t-1})P(x_t|x_{t-1})P(e_t|x_t)\]
+\[=P(e_t|x_t)\max_{x_{t-1}}P(x_t|x_{t-1})\max_{x_{t-2}}P(x_{1:t-1}|e_{1:t-1})\]
+\[=P(e_t|x_t)\max_{x_{t-1}}P(x_t|x_{t-1})m_{t-1}[x_t-1]\]
+\textbf{Esempi su slide}.\\
+
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare discretizzati
 % LocalWords:  condizionalmente Markoviani Markov

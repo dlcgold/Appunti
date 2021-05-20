@@ -780,7 +780,12 @@ gaussiano. Si ha che la gaussiana lineare ha 2 proprietà:
   sulle variabili continue 
   è \textbf{Gaussiana multivariata}
 \end{enumerate}
-%manca integrale
+Avendo una cosa del tipo $P(c|r,s=\top)$ si avrebbe:
+\[N(a_\top\cdot r+b_\top, \sigma_\top^2)(c)=\frac{1}{\sqrt{2\pi}\cdot
+    \sigma_\top}e^{-\frac{1}{2}\left(\frac{c-(a_\top\cdot
+        r+b_\top)}{\sigma_\top}\right)^2}\]
+dovendo poi fare un discorso analogo per $\bot$. Si ha che $a$ e $b$ sono il
+legame con la regressione lineare.\\
 \textbf{Esempio su slide}.\\
 Anche usando modelli semplici si possono ottenere distribuzioni flessibili e
 interessanti. \\
@@ -815,12 +820,873 @@ e si hanno query del tipo:
 Dato un modello di rete Bayesiana si hanno 4 tipologie di inerenza;
 \begin{itemize}
   \item \textbf{diagnostica}, avendo l'effetto si vuole capire la causa
-  \item \textbf{causale}
-  \item \textbf{intercausale}
-  \item 
+  \item \textbf{causale}, avendo la causa voglio stimare la probabilità degli
+  effetti 
+  \item \textbf{intercausale}, avendo una causa, capire
+  la probabilità un'altra causa di un effetto comune
+  \item \textbf{mista}, avendo sia diagnostica che causale o sia diagnostica che
+  intercausale 
 \end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/inf.pdf}
+  \caption{Tipi di inferenza, in blu l'evidenza e in giallo la variabile $X$}
+\end{figure}
+Avere osservato che uno degli eventi fa divenire meno probabile che un altro si
+sia verificato è il meccanismo di
+\textbf{explaining away}.\\
+Con una rete Bayesiana quindi posso cercare:
+\begin{itemize}
+  \item probabilità condizionata $P(X|e)$
+  \item quale valore massimizza $P(X|e)$, cercando la massima probabilità a
+  posteriori
+  \item quale è la distribuzione di probabilità di $X$ dato $e$ (che è il caso
+  generale) 
+\end{itemize}
+Ogni distribuzione condizionale può essere ottenuta
+tramite un procedimento di somma di opportuni elementi dell’intera distribuzione
+di probabilità congiunta 
+(marginalizzazione). Si ha quindi che:
+\[P(X|E=e)=\alpha\cdot P(X,E=e)=\alpha\cdot \sum_y P(X,E=e, Y=y)\]
+e con la regola di fattorizzazione delle reti Bayesiane:
+\[P(x_1,\ldots,x_n)=\prod_{i=1}^nP(x_i|parents(X_i))\]
+e quindi $P(X,E=e, Y=y)$ nella distribuzione congiunta, possono essere scritti
+sotto 
+forma di prodotti di probabilità condizionali della rete.
+In definitiva concludiamo che:
+\begin{center}
+  \textit{Ad una query è possibile rispondere utilizzando una Rete Bayesiana
+    tramite la computazione di 
+    somme di prodotti di probabilità condizionali della rete}
+\end{center}
+Vedremo sia algoritmi esatti che approssimati, tramite campionamento, per
+l'inferenza.\\
+\section{Inferenza esatta}
+Per fare inferenza esatta sfruttiamo l'equazione:
+\[P(X|E=e)=\alpha\cdot P(X,E=e)=\alpha\cdot \sum_y P(X,E=e, Y=y)\]
+sfruttando la fattorizzazione, che fornisce un'espressione in termini di CPT per
+effettuare il calcolo.\\
+\textbf{Esempio su slide}.\\
+Nel caso peggiore, dovendo marginalizzare tutte le variabili, ho un algoritmo,
+per una rete di $n$ variabili booleane, di complessità:
+\[O(n\cdot 2^n)\]
+ma a seconda dei casi posso effettuare delle ottimizzazioni, estraendo elementi
+costanti dalle sommatorie generate usando la chain rule (\textbf{guardare sempre
+  esempio su slide}).\\
+Per ogni sommatoria che si crea poi eseguo l'\textbf{algoritmo di enumerazione},
+vedendo l'algoritmo come una sorta di struttura ad albero. Si richiede quindi di
+iterare su tutte le possibili realizzazioni congiunte delle variabili
+coinvolte. \\
+Con queste ottimizzazioni si arriva a:
+\[O(2^n)\]
+Un miglioramento comunque non sufficiente.\\
+Studiando l'albero di computazione si notano ripetizioni di computazione quando
+si effettua l'algoritmo di enumerazione, che consiste nella valutazione
+ricorsiva di tale albero. Si memorizzano quindi le operazioni già fatte per non
+doverle ripetere, ad esempio tramite \textbf{l'algoritmo di eliminazione
+  variabili}. Questo algoritmo valuta da destra a sinistra, ovvero bottom-up, le
+espressioni e memorizza i risultati intermedi mentre la marginalizzazione viene
+effettuata solo per le porzioni di espressione che dipendono dalla variabile
+stessa. \\
+Tale algoritmo si basa sul fatto che ogni variabile che non sia predecessore di
+una variabile in studio o di una variabile con evidenza è irrilevante nello
+studio 
+della query. Si rimuovono quindi dall'albero le variabili inutili, ovvero quelle
+oggetto della query e quelle con evidenza. \\
+L'ordine di eliminazione influisce sulla complessità temporale complessiva. Con
+reti molto complesse magari non binarie, il problema resta di elevata
+complessità e non ci si può aspettare di poter fare inferenza esatta su tali
+reti. \\
+Con le reti Bayesiane si nota che è possibile fare, a seconda della query,
+calcolo parallelo. Si ragiona comunque solitamente per campionamenti, generando
+configurazioni possibili della rete tramite le distribuzioni della CPT e
+calcolano la frequenza in cui una certa variabile assume un certo valore date le
+evidenze. Per farlo bisogna generare numeri pseudocasuali.
+\section{Numeri Pseudocasuali}
+Innanzitutto su un numero singolo non possiamo dire nulla in merito alla sua
+casualità. Se uno dice 3 non posso inferire nulla sulla sua casualità.\\
+Una lista di numeri può apparire casuale ma potrebbe non esserlo.
+\begin{definizione}
+  una \textbf{sequenza di numeri pseudo casuali} è una sequenza di realizzazioni
+  di 
+  variabili aleatorie indipendenti e identicamente distribuite.\\
+  Tali numeri sembrano impredicibili e senza regolarità. ``Sembrano'' perché
+  comunque dietro si ha un meccanismo di calcolo.
+\end{definizione}
+Il lancio dei dadi è un metodo manuale valido, completamente causale al più di
+trucchi, ma richiede troppo tempo. Esistono anche 
+device specifici per farlo ma si hanno altri problemi, si preferisce quindi un
+calcolatore che genera le stesse sequenze, in modo pseudocasuale.\\
+Serve un \textbf{seme di generazione}, avendo che con un seme genero sempre la
+stessa sequenza e questo è importante per poter valutare due sistemi in base
+agli stessi scenari, rigenerando sempre la stessa sequenza. Questa è la
+\textbf{proprietà di riproducibilità}.\\
+I numeri causali generati devono avere una serie di proprietà statistiche,
+devono sembrare impredicibili ma:
+\begin{itemize}
+  \item la distribuzione deve essere, o perlomeno simulare, una distribuzione
+  uniforme, 
+  verificabile all'aumentare dei 
+  numeri generati tramite il calcolo della media (che deve essere a metà del
+  range nel quale si hanno numeri generati, se range $[0,9]$ voglio media $4.5$)
+  \item devo avere indipendenza statistica
+  \item devo avere riproducibilità di valori
+  \item non devo avere ripetitività su un prefissato periodo abbastanza lungo,
+  se avessi periodi troppo brevi potrei fare predizione
+\end{itemize}
+Il seme, se non specificato, viene scelto via hardware, tipo il clock attuale
+della cpu etc$\ldots$\\
+La routine che genera numeri pseudocasuali di default genera una distribuzione
+uniforme su $[0,1]$ deve:
+\begin{itemize}
+  \item essere veloce
+  \item avere periodi di ripetizioni lunghe
+  \item non presentare lunghi gap tra la generazione di due numeri, nella
+  discretizzazione di variabili continue, avendo uniformità
+  \item essere replicabile
+ \item generare sequenze con proprietà statistiche simili a quelle reali
+\end{itemize}
+Uno dei primi algoritmi è stato quello di Von Neumann, detto \textbf{middle
+  square}, che genera un numero con 10 cifre. Si parte da un numero, il seed, si
+eleva al 
+quadrato e si prendono le 10 cifre centrali, che saranno il prossimo numero. In
+realtà è molto pseudocasuale avendo che ogni numero dipende dal precedente ma
+sembra causale e si hanno casi di numeri che comportano facilmente la
+riconoscibilità di tale pattern o che addirittura generano un loop, tornando al
+seme dopo poche generazioni.  \\
+Nel tempo si sono quindi di studiati vari parametri iniziali dell'algoritmo. \\
+Un primo metodo, detto \textbf{moltiplicative congruential method
+  (\textit{MCM})}, prevede: 
+\[x_n=a\cdot x_{n-1},\,\,\,0\leq x_n\leq m\]
+con $a$ e $m$ interi scelti e un $x_0$ seed. La scelta di $m$ deve essere tale
+per avere cicli molto ampi e quindi $m$ è solitamente molto grande, nonché primo
+(cosa capita empiristicamente). Sono state studiate varie combinazioni di $m$ e
+$a$, come $m=2^{31}-1$ e $a=7^5$ o $m=2^{35}-31$ e $a=5^5$. Siu ha che $m$ deve
+portare ad avere pochi gap.\\
+Si ha poi il \textbf{linear conrguential method (\textit{LCM})}, che prevede:
+\[x_n=(a\cdot x_{n-1}+c)\bmod m\]
+con anche $c$ scelto opportunamente. Si ha che:
+\begin{itemize}
+  \item $a,c\geq 0$
+  \item $m>x_0,c,a$
+\end{itemize}
+Però ci servono variabili aleatorie uniformi in $[0,1]$ quindi devo fare, per
+LCM: 
+\[u_n=\frac{x_n}{m}\]
+Con LCM si ha ciclo pari a $m$ e si generano numeri discretizzati e quindi serve
+un $m$ molto grande (ma anche qui si hanno scelte di parametri ``sfortunate'',
+che comportano cicli brevi).\\
+Un ciclo normalmente deve tendere al numero intero massimo rappresentabile, ma
+dipende dai casi.\\
+Aumentare $m$ riduce periodicità e generazione di numeri razionali. Solitamente
+$m\geq 10^9$, per ottenere un sottoinsieme denso in $[0,1]$. Solitamente $m$ è
+quindi il massimo intero rappresentabile.\\
+Il \textbf{generatore di Learmouth-Lewis} prevede:
+\begin{itemize}
+  \item $c=0$
+  \item $a=75$
+  \item $m=2^{31}-1$
+\end{itemize}
+Che è uno dei più usati ma si hanno molti altri generatori.\\
+A partire dai numeri tra 0 e 1 posso passare a distribuzioni arbitrarie.\\
+\subsection{Generazione di Distribuzione Generica}
+Partiamo ora da una sequenza di numeri pseudocasuali $U(0,1)$. Si hanno varie
+tecniche per la generazione di una distribuzione generica:
+\begin{itemize}
+  \item \textbf{tecnica di trasformazione inversa}
+  \item \textbf{metodo di accettazione rifiuto}
+  \item \textbf{metodo di composizione}
+\end{itemize}
+In generale si vuole utilizzare poche volta la routine di generazione di numeri
+random. \\
+Ricordiamo due concetti:
+\begin{itemize}
+  \item \textbf{funzione di densità} che prevede:
+  \[P(x=x_1)=0\]
+  e:
+  \[P(x_1-\varepsilon\leq X\leq
+    x_1+\varepsilon)=\int_{x_1-\varepsilon}^{x_1+\varepsilon} f_X(x)\dd{x}\]
+  \item \textbf{distribuzione cumulativa}, che prevede;
+  \[F_X(x)=p(X\leq x)=\int_{-\infty}^x f_X(y)\dd{y}\]
+\end{itemize}
+\subsubsection{Trasformazione Inversa}
+Vogliamo ora generare una variabile aleatoria $X$ con funzione di densità di
+probabilità:
+\[f_X(x)\]
+Si hanno quindi vari step:
+\begin{enumerate}
+  \item si calcola la funzione di distribuzione di probabilità o funzione
+  cumulativa di probabilità:
+  \[F_X(x)=\int_{-\infty}^Xf_X(\tau)\dd{\tau}\]
+  che, qualora sia possibile calcolarla in forma chiusa, è continua, monotona,
+  crescente e compresa tra 0 e 1, avendo $F_X(x)=p(X\leq x)$
+  \item si pone:
+  \[u=F_X(x)\]
+  con $u$ numero random $(u-U(0,1)$
+  \item si risolve:
+  \[X=F_X^{-1}(u)\]
+  ottenendo che la variabile aleatoria $X$ è distribuita secondo $f_X(x)(X\sim
+  f_X(x))$ 
+\end{enumerate}
+Vediamo quindi qualche caso particolare.\\
+Supponiamo di voler costruire una successione di numeri pseudocasuali come
+osservazioni dalla \textbf{distribuzione esponenziale} ovvero con funzione di
+distribuzione:
+\[F(x)=1-e^{\lambda\cdot x}\]
+Ho quindi:
+\[U=F(x)=1-e^{\lambda\cdot x}\implies 1-U=e^{\lambda\cdot x}\]
+e quindi:
+\[\ln(1-U)=\ln(e^{\lambda\cdot x})\implies \ln(1-U)=-\lambda\cdot x\]
+e quindi:
+\[x=-\frac{\ln(1-U)}{\lambda}\]
+e quindi:
+\[x=F^{-1}(U)=-\frac{\ln(1-U)}{\lambda}\]
+e se $U$ è una variabile aleatoria con distribuzione uniforme su $[0,1)$ ho che
+$x$ è una variabile aleatoria con distribuzione esponenziale con media
+$\frac{1}{\lambda}$. Da una successione di numeri pseudocasuali uniformi ottengo
+una successione di numeri pseudocasuali con distribuzione esponenziale. \\
+Inoltre se $U$ è in [0,1) lo è anche $1-U$ e quindi sostituisco $(1-U)$ con $U$
+nella formula, anche se questo cambiamento potrebbe indurre un cambiamento nella
+correlazione delle variabili $X$ generate. \\
+Quindi la routine di generazione di $X$ con funzione di densità di probabilità
+esponenziale chiama una sola volta per ogni $X$ la routine di generazione di
+numeri casuali $R$. Si ha, per la routine di $X$, quindi lo stesso ciclo di tale
+routine $R$ e gap crescenti per 
+$X$ crescente. Se la routine è replicabile lo è anche quella per $X$. Se la
+routine di generazione è ideale lo è anche quella di $X$.\\
+Posso estendere il metodo a distribuzioni discrete, con $X$ \textbf{variabile
+  aleatoria discreta}. \\
+Suppongo $X$ con valori $x_1,x_2,\ldots$ con:
+\[x_1<x_2<\ldots\]
+Data $U$ variabile uniformemente distribuita in $[0,1)$ si ha che:
+\[X(U)=\max\{x_i|\,U\in[F(x_i-1)-F(x_i)]\}\]
+Si ha quindi, avendo $P(X=i)=p_i$:
+\begin{itemize}
+  \item \textbf{funzione di densità}:
+  \[\sum_{i=\infty}^\infty P(X=i)=1\]
+  \item \textbf{Distribuzione cumulativa}:
+  \[F_X(x)=P(X\leq x)=\sum_{i=-\infty}^xP(X=i)\]
+\end{itemize}
+In generale si ha che:
+\[P(X=x_j)=p_j,\,\,\,j=0,1,\ldots, n\]
+con:
+\[\sum_{j=0}^np_j=1\]
+e ho:
+\begin{itemize}
+  \item $x_0$ se $u\leq p_0$
+  \item $x_1$ se $p_0\leq \leq p_0+p_1$
+  \item $\cdots$
+  \item $x_j$ se $\sum_{i=0}^{j-1} p_i\leq u\leq\sum_{i=0}^j$
+  \item $\cdots$
+\end{itemize}
+In base a questo si possono avere procedure più efficienti di altre (???),
+rendendo la ricerca di appartenenza dell'intervallo il più efficiente
+possibile.\\
+Ad esempio, volendo generare una distribuzione discreta uniforme con:
+\begin{itemize}
+  \item $X\varepsilon\{0,1,\ldots,n\}$ (???)
+  \item $p_0=p_1=\cdots p_n=\frac{1}{n+1}$ 
+\end{itemize}
+Ottenendo:
+\[X=\lfloor (n+1)\cdot u\rfloor\]
+\subsection{Metodo Acceptance-Rejection}
+Il metodo precedente si basava sul calcolo di $F^{-1}$ ma non sempre questo è
+possibile in modo efficiente, a seconda della funzione. Si sono stati quindi
+creati altri metodi, più generali, come il 
+\textbf{metodo Acceptance-Rejection}, detto anche \textbf{metodo del rigetto}.\\
+Suppongo una distribuzione definita su $[a,b]$. Suppongo di conoscere la densità
+di probabilità della variabile aleatoria $X$ tale che $f_X(x)$ è su $[a,b]$ e la
+sua immagine è definita sul codominio $[0,c]$. In pratica tale funzione è in un
+rettangolo $[a,b]\times[0,c]$. Si genera quindi un numero in questo rettangolo e
+se cade fuori dalla funzione lo rifiuto, altrimenti lo accetto.\\
+Si generano due sequenze pseudocasuali uniformi tra $[0,1]$ e le chiamo $U_1$ e
+$U_2$. Si generano quindi altre due sequenze uniformi ytramite:
+\[
+  \begin{cases}
+    X=a+(b-a)\cdot U_1\\
+    Y=c\cdot U_2
+  \end{cases}
+\]
+rimappando $[0,1]$ in $[a,b]$ e in $[0,c]$. Quindi ad ogni $(U_1,U_2)$ si ha
+$(X,Y)$ che è nel rettangolo. Se quest'ultima cade nell'area della funzione
+viene accettata e in caso contrario rifiutata, provando una nuova coppia. La
+sequenza di valori ottenuta segue quindi la distribuzione data dalla funzione.\\
+Il metodo è più efficiente quando l'area della funzione copre quasi interamente
+il rettangolo, avendo lo scarto di poche coppie. Si hanno quindi i seguenti
+step per generare una variabile aleatoria $X$, con funzione di densità di
+probabilità $f_X(x)$ su $[a,b]$:
+\begin{itemize}
+  \item si genera una variabile $R$ distribuita in modo uniforme su $[a,b]$,
+  ovvero $U(a,b)$
+  \item si accetta tale valore con probabilità pari a:
+  \[\frac{F_X(R)}{\max F_X(x)}\]
+  in quanto il rettangolo è ``aderente'' alla funzione e la $c$ tende a
+  coincidere con il massimo della funzione. Tale numero è rifiutato con
+  probabilità:
+  \[1-\frac{F_X(R)}{\max F_X(x)}\]
+\end{itemize}
+Dove la funzione è ``bassa'' si scartano più valori.\\
+La routine di generazione di tale variabile aleatoria $X$ quindi:
+\begin{itemize}
+  \item chiama due volte la routine che genera un numero random, una per $R$ e
+  una per capire se accettare e rifiutare
+  \item ciclo e gap dipendono dal prodotto tra questi due numeri casuali ed p
+  replicabile se lo è la routine di generazione del numero casuale
+  \item è da usare solo se non si hanno altri metodi
+\end{itemize}
+\section{Inferenza Approssimata}
+Il poter generare numeri causali serve al campionamento. Se le reti hanno una
+certa struttura posso usare l'inferenza esatta ma in generale è un problema
+NP-hard. SI usa quindi solo su reti singolarmente connesse, dove si ha al più un
+cammino orientato tra coppie di nodi. Tali reti sono dette \textbf{polytree} e
+permettono complessità spaziale e temporale lineare nella dimensione della rete
+(ovvero nel numero di elementi della CPT). Addirittura se il numero di genitori
+di ogni nodo è limitato da una costante si ha tempo lineare nel numero di
+nodi.\\
+Per rispondere a query univariate posso usare la \textbf{eliminazione delle
+  variabili}.\\
+La computazione della probabilità a posteriori per tutte le variabili può essere
+meno efficiente, ad esempio in un polytree si arriva a $O(n^2)$. Per restare in
+$O(n)$ si usano algoritmi di clustering, dove si uniscono nodi per ottenere un
+polytree, dove si può poi usare un metodo efficiente. Purtroppo anche gli
+algoritmi di clustering presentano inferenze NP-hard, per la costruzione delle
+CPT dei cluster.\\
+Per reti multiplamente connesse si usano quindi algoritmi di inferenza
+approssimata, tramite algoritmi \textbf{Monte Carlo}, la cui accuratezza dipende
+dal numero di campioni generati.\\
+Vedremo due metodi:
+\begin{itemize}
+  \item \textbf{direct sampling}
+  \item \textbf{Markov chain sampling}
+\end{itemize}
+\subsection{Direct Sampling}
+In primis bisogna generare campioni secondo una distribuzione di probabilità,
+tramite generazione di numeri pseudocasuali, che è l'idea di base di ogni
+algoritmo di campionamento. \\
+Partiamo dl caso semplice, dove si ha una rete Bayesiana senza variabili con
+evidenza. Si campiona quindi la rete, seguendo l'ordine topologico partendo
+dalla radice e campionando le variabili. La scelta della distribuzione per il
+campionamento è quella che risulta dal condizionamento sui valori del nodo
+genitore. Tale algoritmo è detto \textbf{campiona-Priori}, che ha in input la
+rete e genera/campiona le variabili della rete. Tali campioni simulano la
+distribuzione congiunta della rete. Genero in pratica possibili configurazioni
+della rete. \\
+\textbf{Esempio su slide}.\\
+L'algoritmo genera quindi campioni della distribuzione di probabilità congiunta
+a priori. Chiamo:
+\[S_{CP}(x_1,\ldots,x_n)\]
+come la probabilità che uno specifico evento sia generato tramite l’algoritmo
+Campiona-Priori. Sappiamo poi che:
+\[S_{CP}(x_1,\ldots,x_n)=\prod_{i=1}^nP(x_i|parents(x_i))\]
+in quanto ogni campione dipende solo dai genitori. Questo ricordiamo rappresenta
+la probabilità dell'evento considerato secondo la distribuzione di probabilità
+con giunta della rete, la fattorizzazione. Si ha quindi che:
+\[S_{CP}(x_1,\ldots,x_n)=P(x_1,\ldots,x_n)\]
+rendendo semplice rispondere alla query.\\
+Le risposte, dati $N$ campioni, vengono date tramite conteggio dei campioni. SI
+ha che:
+\[N_{cp}(x_1,\ldots,x_n)\]
+è la frequenza per l'evento $(x_1,\ldots x_n)$ negli $N$ campioni.\\
+Ogni campione da un contributo paritario e ci si aspetta che la frequenza
+convenga al valore atteso in accordo con la distribuzione da cui si estraggono
+gli $N$ campioni:
+\[\lim_{N\to\infty}\frac{N_{cp}(x_1,\ldots,x_n)}{N}
+  =S_{CP}(x_1,\ldots,x_n)=P(x_1,\ldots,x_n)\]
+Campionando in modo indipendente generiamo campioni che rappresentano la
+distribuzione della rete, quindi all'aumentare di $N$ ci si aspetta che un
+evento compaia con la giusta probabilità, anche se comunque è un ``tende'', per
+cui si parla di inferenza approssimata.\\
+Con $\approx$ si indica la probabilità stimata, che diviene esatta per
+$N=\infty$. Tale stima è detta \textbf{consistente}, avendo, per $m\leq n$:
+\[P(x_1,\ldots,x_m)=\frac{N_{PS}(x_1,\ldots,x_m)}{N}\]
+La probabilità di un evento parzialmente specificato viene stimata come la
+frazione dei casi compatibili con l’evento parzialmente specificato sul numero
+di tutti i casi generati tramite campionamento. \\
+Passiamo ora all'avere evidenze nella rete, volendo computare una probabilità
+condizionata del tipo: 
+\[P(X|E=e)\]
+Si usa quindi l'algoritmo di \textbf{campionamento con rigetto}, che usa quello
+\textbf{campiona-priori} per generare campioni sulla distribuzione della rete
+per poi rifiutare i campioni non conformi con l'evidenza $e$. Si ottiene la
+distribuzione relativa solo alla configurazione della rete dove si ha una certa
+evidenza.\\ 
+La stima a posteriori viene ottenuta contando la frequenza per $X=x$
+sull'insieme dei campioni rigettati.\\
+Sia:
+\[\hat{P}(X|E=e)\]
+la stima della distribuzione a posteriori fatta con il campionamento con
+rigetto.\\ 
+Si ha quindi che:
+\[\hat{P}(X|E=e)=\alpha N_{CP}(X,E=e)=\frac{N_{CP}(X,E=e)}{N_{CP}(E=e)}\]
+Sapendo che:
+\[P(x_1,\ldots,x_n)\approx\frac{N_{CP}(x_1,\ldots,x_n)}{N}\]
+Ho che:
+\[\hat{P}(X|E=e)\approx\frac{P(X,E=e)}{P(E=e)}=P(X|E=e)\]
+Avendo che l'algoritmo produce stime consistenti della distribuzione vera,
+tendendo ad essa all'aumentare del numero di campioni non rigettati. La
+deviazione standard dell'errore è proporzionale a, con $N_v$ numero di campioni
+non rigettati:
+\[\frac{1}{\sqrt{N_v}}\]
+Lo svantaggio dell'algoritmo è che butta via troppi campioni, con un tasso di
+rigetto che cresce esponenzialmente con il numero di variabili con
+evidenza. Questo dettaglio rende inutilizzabile l'algoritmo con reti Bayesiane
+reali, molto grosse.\\
+Un'alternativa è l'algoritmo di \textbf{likelihood weighting} che evita di
+generare campioni inutili che verrebbero poi scartati. Tale algoritmo fissa il
+valore dei nodi delle variabili con evidenza, in accordo all'evidenza stessa,
+generando poi i campioni solo per i nodi restanti. Tale algoritmo pesa
+diversamente i vari eventi, col peso che è il likelihood dell'evento associato
+all'evidenza. Questo succede perché alcuni campioni sono più verosimili e altri
+meno e quindi pesano di più nella stima delle probabilità a posteriori. Si
+generano quindi le singole variabili come nel 
+campionamento a priori saltando quelle con evidenza.\\ 
+Si ha quindi che:
+\begin{itemize}
+  \item l'algoritmo usa tutti i campioni generati, essendo quindi più efficiente
+  del campionamento con rigetto
+  \item all'aumentare del numero di nodi con evidenza la performance degrada in
+  quanto molti campioni estratti hanno peso infinitesimale e quindi la stima
+  sarà dipendente da pochissimi campioni con peso comunque piccolo. La stima
+  dipende quindi da pochissimi campioni
+\end{itemize}
+\textbf{Esempio su slide}.
+\subsection{Markov Chain Monte Carlo}
+Passiamo ora all'algoritmo \textbf{Markov Chain Monte Carlo (\textit{MCMC})}.\\
+I metodi precedenti usavano il campionamento diretto mentre altri si basano
+appunto su MCMC, generando una sequenza di campioni uno dipendente
+dall'altro. MCMC non genera ogni veneto partendo da 0 ma tramite modifiche
+causali di un evento che lo precede. \\
+Pensiamo alla rete in un certo stato, identificato tramite l'assegnamento di un
+valore ad ogni nodo, avendo una configurazione. Lo stato successivo è ottenuto
+tramite campionamento di una delle variabili senza evidenza, $X_i$,
+condizionalmente ai valori correnti assunti dalle variabili della Markov Blanket
+di $X_i$.\\
+MCMC si muove casualmente nello spazio degli stati della rete
+campionando una variabile alla volta, escluse le variabili con evidenza che
+rimangono fissate al valore di evidenza.\\
+\textbf{Esempio su slide}.\\
+La giustificazione teorica di MCMC non viene approfondita ma si noti che è
+possibile estrarre un campione dalla distribuzione di una variabile $X_i$, noto
+lo stato delle variabili casuali della Markov Blanket di tale variabile,
+$mb(X_i)$. Il campionamento si basa sul fatto che:
+\[P(x_i|MB(X_I))=\alpha\cdot P(x_i|parents(X_i))\cdot \prod_{Y_i\in
+    children(X_I)}P(y_i|parents (Y_i))\]
+avendo che la probabilità di una variabile casuale dato il suo Markov Blanket è
+proporzionale alla probabilità della variabile dati i genitori moltiplicata la
+probabilità di ogni suo figlio, dati i rispettivi genitori.
+\chapter{Markov Chains}
+Aggiungiamo la componente temporale al ragionamento probabilistico. Si aggiunge
+quindi incertezza sui cambiamenti dell'ambiente nel corso del tempo, assente
+nello studio delle reti Bayesiane. Si vuole prendere decisioni in un ambiente
+che evolve nel tempo, avendo un \textbf{ambiente dinamico}.\\
+Per descrivere questo mondo mutevole si usano variabili casuali, descritte da
+uno stato in ogni istante temporale. La relazione tra variabili casuali in
+istanti diversi di tempo descrivono l'evoluzione dello stato. Uno stato al tempo
+$t$ dipende da quello al tempo $t-x$.\\
+Si passa quindi da \textbf{modelli statici}, come le reti Bayesiane, dove il
+valore delle variabili non cambia nel tempo, a \textbf{modelli dinamici} dove il
+valore delle variabili cambia nel tempo e lo stato corrente dipende da quelli
+passati, dipende dalla \textit{storia}. Il \textbf{processo di cambiamento} è
+descritto da una serie di \textit{time slice}, ciascuno con un insieme di
+variabili causali.
+\begin{definizione}
+  Definiamo un \textbf{processo stocastico} come:
+  \[\{X(t), t\in T\}\]
+  come un insieme di variabili casuali $X(t),\forall t$ dove ogni variabile
+  evolve nel tempo. L'insieme $T$ di indici e lo spazio $X$ possono essere
+  continui o discreti.\\
+  Si hanno:
+  \begin{itemize}
+    \item processi stocastici a tempo continuo, $X(t),t>0$
+    \item processi stocastici a tempo discreto, $X(t), t=0,1,\ldots,n$
+    \item processi stocastici a stati continui
+    \item processi stocastici a stati discreti
+  \end{itemize}
+  $X(t)$ è quindi il valore dello stato del sistema al tempo $t$, essendo il
+  valore di una variabile causale che descrive tale stato.
+\end{definizione}
+Il processo stocastico più semplice è detto \textbf{random walk}, usate anche
+per campionare grafi complessi. In questo caso si ha tempo discreto e spazio
+degli stati discreto. Si ha:
+\[X_t=X_{t-i}+\varepsilon_t,\,\,\,t=1,2,3,\ldots\]
+con $\varepsilon_t$ elemento casuale. In questo caso $i$ è fisso e solitamente
+vale 1. Ad esempio potrei avere:
+\[\varepsilon_t=\{-1,1\}\]
+con:
+\[P(\varepsilon_t=-1)=P(\varepsilon_t=1)=\frac{1}{2}\]
+Usando, ad esempio, $P>\frac{1}{2}$ ottengo una \textbf{random walk con drift},
+avendo scelte spesso ``in salita''.\\
+Potrei avere $\varepsilon_t$ con valori continui, magari in una normale
+standard, $\varepsilon_t\approx N(0,1)$. In tal caso lo spazio degli stati
+diventa continuo anche se il tempo resta discreto.\\
+Un altro processo stocastico è il \textbf{processo autoregressivo del primo
+  ordine (\textit{first order autoregressive process})}, dato dall'equazione:
+\[X_t=aX_{t-i}+b+\varepsilon_t\]
+con $a$ e $b$ constanti e $-1<a<1$. In questo caso $i$ è fisso e solitamente
+vale 1. Si ha che $\varepsilon_t\approx N(0,1)$.\\
+\textbf{Esempi su slide}.
+\section{Processi Markoviani}
+Una proprietà importante dei processi stocastici è la \textbf{proprietà
+  Markoviana}.
+\begin{definizione}
+  La \textbf{proprietà Markoviana} assicura che la distribuzione di probabilità
+  per tutti i possibili valori futuri del processo dipende solo dal valore
+  corrente e non dai valori passati o da altre informazioni correnti. Ovvero:
+  \[P(x_{t+1}=i_{t+1}|X_t=i_i, X_{t-1}=i_{t-1},\ldots,
+    X_0=i_0)=P(X_{t+1}=i_{t+1}|X_t=i_t)\] 
+\end{definizione}
+\begin{definizione}
+  I processi stocastici che soddisfano la \textbf{proprietà Markoviana} sono
+  detti, equivalentemente, \textbf{processi di Markov}, \textbf{processi
+    Markoviani}, o \textbf{processi con assenza di memoria}. 
+\end{definizione}
+\begin{definizione}
+  Un processo stocastico a tempi discreti è detto \textbf{catena di Markov} se,
+  per $t=1,2,3,\ldots$ e per tutti gli stati vale:
+  \[P(x_{t+1}=j|X_t=i, X_{t-1}=i_{t-1},\ldots,
+    X_0=i_0)=P(X_{t+1}=j|X_t=i)\]
+  Se:
+  \[P(X_0=i)=q_i\]
+  si ha che la distribuzione di probabilità iniziale è:
+  \[q=[q_1,\ldots, q_i,\ldots, q_n]\]
+  che dice come è distribuito lo stato iniziale della carena di Markov.
+\end{definizione}
+\begin{definizione}
+  Se la probabilità di un certo evento è indipendente dal tempo $t$ si ha una
+  \textbf{catena di Markov stazionaria}, avendo:
+  \[P(X_{t+1}=j|X_t=i)=p_{ij}\]
+  Con $p_{ij}$ che è la probabilità che al tempo $t+1$ il sistema sarà nello
+  stato $j$ essendo nello stato $i$ al tempo $t$.\\
+  Questa è la \textbf{proprietà di stazionarietà} e semplifica lo studio dei
+  modelli. 
+  \textbf{Stazionario quindi non significa statico, avendo comunque
+    un'evoluzione basata sul tempo}.\\
+  Un modello non stazionario, preso in parti più piccole, per diversi periodi di
+  tempo, può essere studiato come una serie di modelli stazionari,
+  semplificando lo studio. \\
+  Si ha quindi che $p_{ij}$ rappresenta la probabilità di raggiungere uno stato
+  $j$ partendo da uno stato $i$ della catena, avendo quindi una matrice di
+  probabilità $P$, con valori positivi e righe che sommano a 1:
+  \[p_{ij}\geq 0\]
+  \[\sum_{j=0}^n p_{ij}=1\]
+  La markov chain è quindi rappresentata da tale matrice $P$, detta
+  \textbf{matrice di transazione (a un passo)}.
+\end{definizione}
+Ovviamente la matrice di rappresentazione posso rappresentarla come grafo.
+In tale grafo ogni nodo rappresenta uno
+stato e l'arco $(i,j)$, con quindi $i$ e $j$ stati, rappresenta la probabilità
+di transizione $p_{ij}$.
+\begin{definizione}
+  Per una markov chain si hanno, per descrivere una variabile casuale:
+  \begin{itemize}
+    \item insieme degli stati $\{S_1,\ldots S_n\}$ che sono i valori che può
+    assumere la variabile casuali
+    \item probabilità di transizione di stati dallo stato $i$ a quello $j$, data
+    da $p_{ij}=P(X_{t+1}=S_j|X_t=S_i)$
+    \item la distribuzione iniziale degli stati, avendo stato iniziale $0$, data
+    da $\pi_i=P[X_0=S_i]$ 
+  \end{itemize}
+\end{definizione}
+\textbf{Esempio su slide}.\\
+Se una catena di Markov in uno stato $i$ al tempo $m$ si può calcolare la
+probabilità che dopo $n$ passi sia nello stato $j$ tramite:
+\[P(X_{m+1}=j|X_m=i)=P(X_n=j|X_0=i)=p_{ij}(n)\]
+Con $p_{ij}(n)$ che dice la probabilità di passare da $i$ a $j$ in $n$ passi. Ne
+segue che, per due passi:
+\[p_{ij}(2)=\sum_{k=1}^n p_{ik}\cdot p_{ki}\]
+avendo il prodotto scalare tra la riga $i$ e la colonna $j$.\\
+Il caso generale è che:
+\[p_{ij}(n)=\mbox{ij-esimo elemento di } P^n\]
+\textbf{Esempio su slide}.\\
+\begin{teorema}
+  La risoluzione della probabilità di transizione a $n$ passi:
+  \[P_{ij}^n=P\{X_{n+k}=j|X_k=i\},n,i,j\geq 0\]
+  si risolve con le \textbf{equazioni di Chapman-Kolmogorov}:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P_{ik}^n\cdot P_{kj}^m,\forall n,m\geq 0\mbox{
+      e } i,j\geq 0\]
+  Avendo che:
+  \[P(n+m)=P(n)\cdot P(m)\]
+\end{teorema}
+\begin{proof}
+  % mettere dimostrazione
+  Si ha che:
+  \[P_{ij}^{n+m}=P\{X_{n+m}=j|X_0=i\}\]
+  ma allora:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P\{X_{n+m}=j,X_n=k|X_0=i\}\]
+  e quindi:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P\{X_{n+m}=j|X_n=k,X_0=i\}\cdot
+    P\{X_n=k|X_0=i\}\]
+  concludendo che:
+  \[P_{ij}^{n+m}=\sum_{k=0}^\infty P_{ik}^n\cdot P_{kj}^m\]
+\end{proof}
+\begin{teorema}
+  La probabilità di essere in uno stato $j$ al tempo $n$, non conoscendo la
+  catena di Markov al tempo 0 è:
+  \[\sum_i q_i\cdot p_{ij}(n)\cdot(\mbox{colonna j di }p^n)\]
+\end{teorema}
+\begin{definizione}
+  Uno stato $j$ è \textbf{raggiungibile} dallo stato $i$ se per qualche $n$ si
+  ha un cammino da $i$ a $j$:
+  \[P_{ij}=n>0\]
+\end{definizione}
+\begin{definizione}
+  Due stati \textbf{comunicano} se uno stato è raggiungibile dall'altro e
+  viceversa. Ogni stato comunica con se stesso e si ha la proprietà transitiva.
+\end{definizione}
+\begin{definizione}
+  Una catena di Markov è detta \textbf{irriducibile} se tutti i suoi stati sono
+  comunicanti fra loro 
+\end{definizione}
+\begin{definizione}
+  Un insieme di stati $S$ in una catena di Markov è un insiemechiuso se nessuno
+  stato fuori $S$ è raggiungibile dagli stati in $S$. 
+\end{definizione}
+\begin{definizione}
+  Uno stato $i$ \textbf{assorbente} se $P_{ii}=1$. Tale stato rappresenta un
+  \textbf{deadlock}.
+\end{definizione}
+\begin{definizione}
+  Uno stato $i$ è \textbf{transiente} se esiste $j$ raggiungibile da $i$ ma non
+  vale il viceversa. Si ha che:
+  \[\sum_{n=1}^\infty P_{ii}^n<\infty\]
+  Uno stato non transiente è detto \textbf{ricorrente}, avendo:
+  \[\sum_{n=1}^\infty P_{ii}^n=\infty\]
+\end{definizione}
+\begin{teorema}
+  Se lo stato $i$ è ricorrente e $j$ comunica con $i$ allora $j$ è ricorrente,
+  in quanto la ricorrenza è una \textbf{proprietà di classe}.\\
+  Anche essere transiente è una proprietà di classe,
+\end{teorema}
+\begin{definizione}
+  Una catena di Markov è \textbf{finita} sse il numero di stati è finito.
+\end{definizione}
+\begin{teorema}
+  Tutti gli stati di una catena di Markov finita irriducibile sono ricorrenti.
+\end{teorema}
+\begin{definizione}
+  Uno stato $i$ è \textbf{periodico}, con periodo $k>1$ se $k$ è il più piccolo
+  numero tale che tutti i cammini che dallo stato $i$ tornano ad $i$ hanno una
+  lunghezza multipla di $k$.\\
+  Uno stato non periodico è detto \textbf{aperiodico}.
+\end{definizione}
+\begin{definizione}
+  Si definisce catena di Markov \textbf{ergodica} se tutti gli stati in una
+  catena sono ricorrenti, aperiodici e comunicano l’uno con l’altro.\\
+  Una catena di Markov ergodica permette di raggiunger una distribuzione di
+  equilibrio ed è usata anche negli algoritmi di \textbf{page rank}.
+\end{definizione}
+\begin{teorema}
+  Data una matrice di probabilità $P$ per una catena ergodica di $N$ stati. Si
+  ha che:
+  \[\lim_{t\to+\infty} P_{ij}(t)=\pi_j\]
+  dipendendo quindi solo dallo stato d'arrivo. Per $t$ abbastanza grande si
+  arriva quindi ad uno stato di equilibrio, avendo che:
+  \[\pi=\pi\cdot P,\,\,\,\pi=[\pi_1,\ldots,\pi_n]\]
+  avendo stazionarietà, avendo un vettore di distribuzione di equilibrio.\\
+  Questo è alla base dell'algoritmo di page rank.\\
+  In altri termini aumentando $n$ si ha che $P_{ij}(n)$ non cambia da un certo
+  punto in poi, $\forall i,j$.\\
+  Per trovare il vettore di probabilità stazionarie risolvo quindi il sistema
+  dato dai vari $\pi_i$ (prendo le colonne di $P$ come coefficienti e $p_i$ come
+  variabili) aggiungendo anche la condizione che $\sum_i \pi_i=1$ (cosa che
+  permette di usare un'equazione in meno). Il vettore dei $\pi_i$ risultante è
+  il vettore di probabilità stazionarie.
+\end{teorema}
+\textbf{Esempio su slide}.\\
+Il comportamento di una catena di Markov prima di raggiungere una distribuzione
+di equilibrio è detto \textbf{transitorio}, transitando da alcuni stati prima
+dell'equilibrio. \\
+Il numero di transizioni attese prima di raggiungere lo stato $j$, essendo nello
+stato $i$, in una catena ergodica è:
+\[m_{ij}=p_{ij}\cdot(1)+\sum_{k\neq j}p_{ik}\cdot(1+m_{kj})=1+\sum_{k\neq
+    j}p_{ik}\cdot m_{kj}=\frac{1}{\pi_i}\]
+\textbf{Esempio su slide}.
+\begin{definizione}
+  Le catene assorbenti sono catene di Markov nelle quali alcuni stati sono
+  assorbenti, mentre tutti gli altri sono stati transienti.
+\end{definizione}
+Si ha interesse a chiedersi quanti passi intercorrono da una stato transiente
+ad uno assorbente e la probabilità di iniziare con uno stato transiente e
+terminare in uno stato assorbente (da cui si ricorda ``non si esce più'').
+\begin{definizione}
+  Bisogna considerare la \textbf{matrice di transizione} scritta come:
+  \[
+    \left[
+      \begin{matrix}
+        Q & R\\
+        0 & I
+      \end{matrix}
+    \right]
+  \]
+  \newpage
+  con:
+  \begin{itemize}
+    \item $Q$ matrice che rappresenta le relazioni tra stati transienti
+    \item $R$ matrice che rappresenta le transizioni da  statitransienti a stati
+    assorbenti
+    \item $0$ matrice di soli 0
+    \item $I$ matrice identità
+\end{itemize}
+\end{definizione}
+\begin{definizione}
+  Se si è in uno stato transiente $i$ il numero di periodi che si trascorrono
+  in $j$ transiente prima dell'assorbimento nello stato è il $ij$-esimo
+  elemento della matrice $(I-Q)^{-1}$.
+\end{definizione}
+\textbf{Esempio su slide}.
+\begin{definizione}
+    Se si è in uno stato transiente $i$ la probabilità di arrivare ad uno stato
+    assorbente $j$ è il $ij$-esimo elemento della matrice $(I-Q)^{-1}\cdot R$.
+\end{definizione}
+\textbf{Vari esempi su slide, tra cui pagerank}.
+\begin{teorema}
+  Sotto certe condizioni, ovvero:
+  \begin{itemize}
+    \item esiste una distribuzione stazionaria unica $q$ con $q_i>0,\forall i$
+    \item dato $N(i,t)$ il numero di volte che la catena di Markov visita lo
+    stato $i$ in $t$ step
+  \end{itemize}
+  si ha che:
+  \[\lim_{t\to\infty}\frac{N(i,t)}{t}=\pi_i\]
+  Questo teorema è usato nel pagerank. Quindi data una pagina $u$ il pagerank è
+  la probabilità per la catena di Markov:
+  \[pagerank(u)=\frac{p}{n+(1-p)}\sum_{(v,u)\in
+      E}\frac{pagerank(v)}{outdegree(v)}\]
+  con:
+  \begin{itemize}
+    \item $n$ numero totale di nodi del grafo
+    \item $p$ probabilità di fare un ``random jump'', ovvero di capitare per
+    caso nella pagina
+  \end{itemize}
+  Questa regola è indipendente dalla query e tiene conto del ``web opinion'',
+  ovvero l'importanza della pagina.
+\end{teorema}
+\section{Hidden Markov Models}
+Le catene di Markov sono un modello importante e molto utilizzato.\\
+Un altro modello essenziale è quello \textbf{hidden Markov models
+  (\textit{HMM})}, dove non si possono osservare gli stati.\\
+Le reti Bayesiane possono usare le catene di Markov con la peculiarità che
+alcune variabili sono nascoste, per trattare informazioni parziali con
+incertezza. L'uso quindi copre varie tematiche, come \textit{serie storiche},
+\textit{speech to text}, \textit{analisi musicale}, etc$\ldots$ \\
+Si ha quindi un modello dinamico per cui servono:
+\begin{itemize}
+  \item un insieme $X_t$ di variabili di stato non osservabili al tempo $t$,
+  come per una rete bayesiana
+  \item un insieme $E_t$ di variabili osservabili al tempo $t$
+  \item la dipendenza tra le variabili
+  \item l'ipotesi che i cambiamenti siano regolati da un processo stazionario,
+  la relazione per passare tra $x_t$ e $x_{t+1}$ non cambia nel tempo
+  \item l'ipotesi di Markov del primo ordine, ovvero tutta l'informazione del
+  passato è racchiusa nello stato corrente. In questo modo le CPT restano
+  semplici 
+\end{itemize}
+Si uniscono quindi reti bayesiane che evolvono nel tempo e processo
+Markoviano, si ha la componente dinamica. \\
+Si ha quindi, per un processo Markoviano del primo ordine:
+\[P(X_t|X_{0:t-1})=P(X_t|X_{t-1})\]
+Posso anche andare al secondo ordine, dicendo che la storia passata è racchiusa
+negli ultimi due stati e non sono nell'ultimo:
+\[P(X_t|X_{0:t-1})=P(X_t|X_{t-2:t-1})\]
+\begin{definizione}
+  Una \textbf{catena di Markov a stati nascosti} è un processo stocastico a
+  tempo continuo o discreto (faremo solo discreto) caratterizzato da:
+  \begin{itemize}
+    \item un insieme di stati $X_t$
+    \item un insieme di osservazioni $E_t$
+    \item una matrice delle probabilità di transizione con
+    $P(X_t|X_{0:t-1})=P(X_t|X_{t-1})$, avendo un \textbf{modello di
+      transizione}, equivalente della matrice di transizione per le normali
+    catene di Markov
+    \item una matrice delle probabilità di emissione delle osservazioni con
+    $P(E_t|X_{0:t-1},E_{0:t-1})=P(E_T|X_t)$, avendo un \textbf{modello
+      sensoriale}, che da la probabilità di osservare un evento in un certo
+    stato essendo in quel preciso stato
+    \item una matrice delle probabilità iniziali degli strati al tempo 0, ovvero
+    $P(X_0)$ 
+  \end{itemize}
+  Si ha quindi, $\forall t$ finito, la seguente distribuzione congiunta:
+  \[P(X_0, X_1,\ldots,X_t, E_1,\ldots,
+    E_t)=P(X_0)\prod_{i=1}^tP(X_i|X_{i-1})P(E_i|X_i)\]
+  Avendo un elemento aggiuntivo (l'ultimo) rispetto alle semplici catene di
+  Markov. 
+\end{definizione}
+Bisogna fare inferenza sullo stato in cui ci si trova in base alle evidenze.\\
+L'ipotesi di Markov del prim'ordine è comunque tanto utile per contenere la
+complessità quanto forte, in quanto suppone che le variabili di stato contengano
+tutte le informazioni necessarie per caratterizzare la distribuzione
+dell'istante successivo. Per risolvere il problema posso aumentare l'ordine del
+modello (ma anche la complessità, come si è visto sopra per il secondo ordine
+etc$\ldots$) o posso aumentare il numero delle variabili di stato. \\
+Si hanno vari task di inferenza:
+\begin{itemize}
+  \item \textbf{filtraggio}, data una sequenza di osservazioni $E_1,\ldots E_t$
+  mi da la distribuzione di probabilità di $X_t$
+  \item \textbf{previsione}, data una sequenza di osservazioni $E_1,\ldots E_t$
+  probabilità di avere un evento al tempo $t+n$, con $n$ arbitrario
+  \item \textbf{smoothing}, ovvero fare un inferenza su uno stato passato
+  basandosi su tutta la storia fino al tempo attuale
+  \item \textbf{ricerca della spiegazione più probabile}, cercando la sequenza
+  di stati più probabili che porta ad un certo evento
+\end{itemize}
+Si può anche fare \textbf{apprendimento} del modello di transizione o di quello
+sensoriale come sottoprodotto dell'inferenza, tramite
+\textbf{expectation-maximation}. In altri termini fare apprendimento è fare uno
+smoothing completo.
+\section{Filtraggio}
+Il filtraggio è quindi il calcolo della distribuzione a posteriori dello stato
+corrente date tutte le osservazioni $P(X_t|e_{1:t})$, facendo quindi una stima
+ricorsiva basata sulle distribuzioni fino al tempo $t-1$:
+\[P(X_t|e_{1:t})=f(e_t,P(X_{t-1}|e_{1:t-1}))\]
+Se il modello sensoriale fosse deterministico si avrebbe una semplice catena di
+Markov\\
+Il filtraggio è composto da:
+\begin{itemize}
+  \item \textbf{proiezione}
+  \item \textbf{aggiornamento}
+\end{itemize}
+Sapendo il filtraggio al tempo $t$ si cerca quello a $t+1$ e si fa aggiornando
+in base alla nuova prova $e_{t+1}$:
+\[P(X_{t+1}|e_{1:t+1})\]
+divido quindi l'evidenza:
+\[=P(X_{t+1}|e_{1:t},e_{t+1})\]
+applico Bayes:
+\[=\alpha P(e_{t+1}|X_{t+1},e_{1:t})P(X_{t+1}|e_{1:t})\]
+e infine uso la proprietà di Markov dell'evidenza:
+\[=\alpha P(e_{t+1}|X_{t+1})P(X_{t+1}|e_{1:t})\]
+Il secondo termine rappresenta la predizione del prossimo step e il primo
+aggiorna la previsione sulla nuova evidenza. Si condiziona quindi lo stato
+corrente $X_t$ per ottenere il nuovo stato:
+\[P(X_{t+1}|e_{1:t+1})=\alpha
+  P(e_{t+1}|X_{t+1})\sum_{x_t}P(X_{t+1}|x_t,e_{1:t})P(e_t|e_{1:t})\]
+Ma usando la proprietà di Markov si ha:
+\[\alpha
+  P(e_{t+1}|X_{t+1})\sum_{x_t}P(X_{t+1}|x_t)P(e_t|e_{1:t})\]
+Avendo che:
+\[f_{1:t+1}=\alpha forward(f_{1:t};e_{t+1})\]
+\section{Predizione}
+La \textbf{predizione} è una sorta di filtraggio senza aggiunta di nuove
+informazioni/osservazioni, prevedendo gli stati futuri:
+\[P(X_{t+k}|e_{1:t})\]
+Maggiore è l'incertezza del tempo di transizione e prima, in termini di tempo di
+mixing/tempo transiente, raggiungerò un punto
+fisso per la previsione, raggiungendo una distribuzione stazionaria, e più
+ignoto sarà il futuro.\\
+\textbf{Esempio su slide}.\\
+Questo algoritmo possiamo pensarlo come un \textbf{mini-forward}, essendo un
+filtraggio senza aggiustamento. Trovare $P(X_t)$ dati $P(X_0)$ e
+$P(X_t|X_{t-1})$ si fa quindi:
+\[P(X_t)=\sum_{x_{t-1}}P(X_t,x_{t-1})=\sum_{x_{t-1}}P(X_t|x_{t-1})P(x_{t-1})\]
+dove:
+\begin{itemize}
+  \item $P(X_t|x_{t-1})$ è conosciuta dal modello di transizione
+  \item $P(x_{t-1})$ è conosciuto da $P(X_0)$ o da simulazioni precedenti
+\end{itemize}
+Per raggiungere lo stato stazionario si fa come con le catene di Markov.
+\section{Calcolo della Verosimiglianza}
+La 
 \end{document}  
-% LocalWords:  clock  Bayesana machine learning Bayes riscalare
-% LocalWords:  condizionalmente
+% LocalWords:  clock  Bayesana machine learning Bayes riscalare discretizzati
+% LocalWords:  condizionalmente Markoviani Markov
 
-\message{ !name(modprob.tex) !offset(-826) }
+\message{ !name(modprob.tex) !offset(-1692) }

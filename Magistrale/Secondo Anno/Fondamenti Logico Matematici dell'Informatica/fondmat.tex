@@ -3224,7 +3224,7 @@ Vale che:
 \[S_4\subset K_1\subset K_{1.1}\]
 e che:
 \[T\subset S_4\]
-\subsection{Tableaux}
+\subsection{Tableaux per $S_4$}
 Dal punto di vista dei tableaux di Fitting ritroviamo in primis le
 \textbf{T-regole} e le \textbf{F-regole} della logica classica per
 $\land,\lor,\to$ e $\neg$:
@@ -3259,7 +3259,7 @@ caratterizzò solo $\square$, sapendo di poter ricavare da esso $\lozenge$:
     \hline
     \hline
     $\square$ & $\frac{S,T(\square A)}{S,TA}T\square$&
-                        $\frac{S,F(\square A)}{S_\square,A}F\square$\\
+                        $\frac{S,F(\square A)}{S_\square,FA}F\square$\\
     \hline
   \end{tabular}
 \end{table}
@@ -3290,7 +3290,7 @@ so che non possono mancare le formule $T\square$, che devono esserci per forza.
 \end{esempio}
 Il punto è chiave che ``blocca'' l'esempio sopra è la $T\square$, che va a
 demodalizzare $A$. Ma essendo 
-$T\square$ posso ripetere $T(\square A)$, ricordando che il $T\,A$ ottenuto
+$T\square$ posso ripetere $T(\square A)$, ricordando che il $TA$ ottenuto
 deriva da un $T\square$  e quindi quando faccio $F\square$ non devo buttarlo
 di via. Per ottenere questo comportamento quindi ripeto la formula:
 \[\frac{S,T(\square A)}{T(\square A),S,TA}T\square\]
@@ -3310,14 +3310,16 @@ l'operatore $\square$, necessaria per avere un \textbf{calcolo completo}.
     \frac{****T\square(\neg A\land \neg \square\neg A),
     FA,F\square\neg A}{}F\square\\
     \frac{*****T\square(\neg A\land \neg \square\neg A), F\neg A}{}T\square\\
-    \frac{T(\neg A\land \neg \square\neg A), F\neg A}{}T\land\\
+    \frac{******T(\neg A\land \neg \square\neg A), F\neg A}{}T\land\\
     T\neg A, T\neg\square\neg A, F\neg A
   \end{gather*}
   avendo che il tableaux chiude, per la coppia complementare $T\neg A$ e
-  $F\neg A$, avendo ripetuto nel calcolo la formula del $T\square$
-  (anche se, per comodità, solo la prima volta che viene usata e non anche la
-  seconda). 
+  $F\neg A$ (posso appunto fermarmi qui ma in caso lo sviluppo fino alle formule
+  atomiche porterebbe allo stesso risultato), avendo ripetuto nel calcolo la
+  formula del $T\square$ (anche se, per comodità, solo la prima volta che viene
+  usata e non anche la seconda). 
 \end{esempio}
+\subsection{Tableaux ottimizzati per $S_4$}
 Moscato non era soddisfatto comunque della ripetizione e quindi ha sviluppato un
 calcolo a tableaux ottimizzato, corretto e completo, in modo analogo a quanto
 fatto nel caso intuizionista. Purtroppo però nelle logiche modali non è riuscito
@@ -3329,7 +3331,287 @@ delle logiche modali, molto più ``sensibili'' rispetto all'intuizionismo
 rispetto a piccole variazioni semantiche (basti pensare che nell'intuizionismo
 non interessava se $G$ fosse finito o meno, o anche, nel caso proposizionale, se
 avesse stati finiti o meno, mentre nelle logiche modali comporta logiche
-diverse).  
+diverse). \\
+L'idea di Moscato è stato vedere se, esplicitando maggiormente all'interno del
+calcolo per $S_4$ la semantica della necessitazione, si potessero ottenere
+risultati migliori, magari senza ripetizioni (speranza comunque senza compimento
+allo stato attuale, nessuno, nemmeno Dikov e altri, ci è arrivato quindi
+probabilmente esiste un teorema limitativo dedicato). \\
+Il ragionamento di Moscato parte dal fatto che, nei modelli di Kripke per $S_4$,
+la relazione $R$ è riflessiva e transitiva, come nell'intuizionismo. Quindi
+$T\square A$ significa:
+\begin{center}
+  \textit{Se $\square A$ è vero in un nodo $\Gamma$ di un modello di Kripke per
+    $S_4$ allora $A$ deve essere sempre vero in ogni nodo $\Delta$ che è
+    correlato/connesso con $\Gamma$}.
+\end{center}
+Guardando il calcolo a tableaux per Fitting si ha che da $T\square A$ si estrae
+$TA$ ma questo $TA$ indica che $A$ è vero in $\Gamma$ e quindi
+l'informazione che questo $TA$ venga da un $T\square A$ viene persa nel
+tableaux (e abbiamo visto che la soluzione \textit{naive} al problema è fare la
+ripetizione di $T\square A$, che ``sopravvivrebbe'' ad un futuro $F\square$ che
+restringe a $S_\square$). Solo questa regola per di più richiede la
+ripetizione.\\ 
+Moscato quindi istituisce un segno apposta che testimoni che una formula
+provenga da una $T\square$, applicando lo stesso concetto del caso
+intuizionista (anche se si vedrà con risultati meno ottimi). L'aggiunta del
+segno porta comunque a nuove regole a meno efficienza nel calcolo, rispetto a
+quello di Fitting che prevede al più una ripetizione.\\
+Si ha quindi che ogni
+volta che si applica $T\square$ a $T\square A$ si deve garantire che $TA$ sia
+presente in ogni riga del tableaux. Si introduce quindi un segno che
+caratterizzi questo aspetto per evitare la ripetizione di formule $T\square$. Ne
+risulta un calcolo che stabilisce implicitamente quali regole possono richiedere
+tale ripetizione e tale segno è detto $T_C$.
+\begin{definizione}
+  Dato quindi un insieme $S$ di formule segnate coi tre segni:
+  \[S=\{TA_1,\ldots, TA_n,FB_1,\ldots, TB_m,T_CC_1,\ldots, T_CC_k\}\]
+  con il modello di Kripke $K$:
+  \[K=\langle G,R,\vDash\rangle\]
+  Si ha che $S$ è realizzato in $\Gamma$, nodo del modello di Kripke, sse:
+  \begin{itemize}
+    \item $\forall h\in [1,n],\,\,\,\Gamma\vDash A_h$, per le formule quindi
+    segnate $T$
+    \item $\forall i\in [1,m],\,\,\,\Gamma\nvDash B_i$, per le formule quindi
+    segnate $F$
+    \item $\forall j\in [1,k],\,\,\,\Gamma\vDash \square C_j$, per le formule
+    quindi segnate $T_C$
+  \end{itemize}
+  Quindi il segno $T_C$ testimonia che tutte le $C_j$ sono formule necessitate
+  quindi $\Gamma$ deve rendere vere tali necessitazioni. Il segno $T_C$ cattura
+  la semantica del necessario all'interno del calcolo, che ora lavora coi tre
+  segni. 
+\end{definizione}
+Il $C$ quindi sta per \textbf{certe}.\\
+L'introduzione del segno $T_C$ ``scatta'' con il $T\square$ ma vediamo il
+calcolo completo:
+\begin{table}[H]
+  \Large
+  \centering
+  \begin{tabular}{c||c|c}
+    connettivo& T-regola& F-regola\\
+    \hline
+    \hline
+    $\land$ & $\frac{S,T(A\land B)}{S,TA,TB}T\land$&
+                        $\frac{S,F(A\land B)}{S,FA/S,FB}F\land$\\
+    \hline
+    $\lor$ & $\frac{S,T(A\lor B)}{S,TA/S,TB}T\lor$&
+                        $\frac{S,F(A\lor B)}{S,FA,FB}F\lor$\\
+    \hline
+    $\to$ & $\frac{S,T(A\to B)}{S,FA/S,TB}T\to$&
+                        $\frac{S,F(A\to B)}{S,TA,FB}F\to$\\
+    \hline
+    $\neg$ & $\frac{S,T(\neg A)}{S,FA}T\neg$&
+                        $\frac{S,F(\neg A)}{S,TA}F\neg$\\
+    \hline
+    $\square$ & $\frac{S,T(\square A)}{S,T_CA}T\square$&
+                        $\frac{S,F(\square A)}{S_C,FA}F\square$\\
+  \end{tabular}
+\end{table}
+A cui si aggiunge anche, per praticità uso solo l'insieme minimale degli
+operatori: 
+\begin{table}[H]
+  \Large
+  \centering
+  \begin{tabular}{c||c}
+    connettivo& T$_{\mbox{C}}$-regola\\
+    \hline
+    \hline
+    $\land$ & $\frac{S,T_C(A\land B)}{S,T_CA,T_CB}T_C\land$\\
+    \hline
+    $\neg$ & $\frac{S,T_C(\neg A)}{S,FA,T_C(\neg A)}T_C\neg$\\
+    \hline
+    $\square$ & $\frac{S,T_C(\square A)}{S,T_CA}T_C\square$
+  \end{tabular}
+\end{table}
+Avendo che in $S_C$ manteniamo sia le formule $T\square$ che le formule $T_C$ di
+$S$, ovvero:
+\[S_C=\{T\square X|T\square X\in A\}\cup\{T_CY|T_CY\in S\}\]
+Si nota quindi come nelle $T_C$ regole si abbiamo alcune ripetizioni, nel caso
+di $T_C\neg$ e questo non sembra essere evitabile allo stato dell'arte
+attuale, avendo l'introduzione di una formula segnata $F$ e quindi si deve
+testimoniare la provenienza da un $T_C\neg$, ripetendola.\\
+In merito al $T_C\square$ si ha che si ottiene $T_CA$, eliminando una
+necessitazione ma essendo $T_C$ l'esplicitazione del necessario ci si connette
+all'assioma di $S_4$ che permette di compattare le necessitazioni.\\
+In termini di chiusura del tableaux $T_C$ si comporta come $T$.\\
+A livello di $S_4$ non si avrebbe alcun vantaggio nell'introdurre un eventuale
+ulteriore nuovo segno $F_C$.
+\begin{esempio}
+  Rivediamo l'esempio precedente con il nuovo calcolo, dimostrando:
+  \[\vdash_{S_4}\neg\square(\neg A\land \neg \square\neg A)\]
+  Procediamo col calcolo a tableaux:
+  \begin{gather*}
+    \frac{F\neg\square(\neg A\land \neg \square\neg A)}{}F\neg\\
+    \frac{T\square(\neg A\land \neg \square\neg A)}{}T\square\\
+    \frac{T_C(\neg A\land \neg \square\neg A)}{}T_C\land\\
+    \frac{*T_C\neg A, T_C\neg\square\neg A}{}T_C\neg\\
+    \frac{**T_C\neg A, F\square\neg A}{}F\square\\
+    T_C\neg A,F_\neg A
+  \end{gather*}
+  Avendo che il tableaux chiude, per di più anche senza la ripetizione del
+  $T_C\neg$. 
+\end{esempio}
+\noindent
+\textbf{Su slide formula, molto complessa e non trattata in aula, per cui è
+  necessaria la ripetizione di $T_C\neg$.} \\
+In pratica per risolvere una duplicazione, $T\square$, si è aumentata la
+complessità del calcolo pur mantenendo una possibile regola con ripetizione,
+$T_C\neg$. Ma avere esplicitamente un segno che testimonia $T\square$ permette
+di ottimizzare il tutto.
+\subsection{Tableaux ottimizzati per $K_1$}
+Il problema della ripetizione di $T_C\neg$ viene parzialmente risolto in
+$K_1$. Questo viene fatto riprendendo il segno $F_C$ che testimonia la verità di
+$T_C\neg A$, che significa dire che $A$ è falso in ogni nodo accessibile da
+$\Gamma$, con $\Gamma$ che realizza $T_C\neg A$. Quindi il segno $F_C$ mi dice
+che $A$ deve rimanere falsa in tutti gli stati accessibili. Questo posso farlo
+perché $K_1$ è caratterizzato da modelli di Kripke con ordini parziali e stati
+finali, che è esattamente il significato di $F_C A$, ovvero $A$ è falsa in tutti
+gli stati e avendo $K_1$ stati finali a quel punto si comporterà come il falso
+della logica classica e quindi il segno $F_C$ può essere utile.
+\begin{definizione}
+  Dato quindi un insieme $S$ di formule segnate coi quattro segni:
+  \[S=\{TA_1,\ldots, TA_n,FB_1,\ldots, TB_m,T_CC_1,\ldots, T_CC_k,F_CC_1,\ldots,
+    F_CD_l\}\] 
+  con il modello di Kripke $K$, con stati finali:
+  \[K=\langle G,R,\vDash\rangle\]
+  Si ha che $S$ è realizzato in $\Gamma$, nodo del modello di Kripke, sse:
+  \begin{itemize}
+    \item $\forall h\in [1,n],\,\,\,\Gamma\vDash A_h$, per le formule quindi
+    segnate $T$
+    \item $\forall i\in [1,m],\,\,\,\Gamma\nvDash B_i$, per le formule quindi
+    segnate $F$
+    \item $\forall j\in [1,k],\,\,\,\Gamma\vDash \square C_j$, per le formule
+    quindi segnate $T_C$
+    \item $\forall p\in [1,l],\,\,\,\Gamma\vDash \square \neg D_p$, per le
+    formule quindi segnate $F_C$
+  \end{itemize}
+\end{definizione}
+Si noti come ci sia un parallelismo con questa definizione e quella fatta per
+$S_4$. In $K_1$ tutte le formule dimostrabili in $S_4$ sono dimostrabili, visto
+che $K_1$ estende $S_4$. Il calcolo per $K_1$ può essere usato per $S_4$ con le
+opportune restrizioni.\\
+Rispetto a $S_4$ si ha quindi che le T-regole e le F-regole sono identiche
+mentre si hanno:
+\begin{table}[H]
+  \Large
+  \centering
+  \begin{tabular}{c||c|c}
+    connettivo& T$_{\mbox{C}}$-regola&F$_{\mbox{C}}$-regola\\
+    \hline
+    \hline
+    $\land$ & $\frac{S,T_C(A\land B)}{S,T_CA,T_CB}T_C\land$&
+              $\frac{S_C,F_C(A\land B)}{S_C,F_CA/S_C,F_CB}F_C\land -f$\\
+    \hline
+    $\neg$ & $\frac{S,T_C(\neg A)}{S,F_CA}T_C\neg$&
+            $\frac{S,F_C(\neg A)}{S,T_CA}F_C\neg$\\
+    \hline
+    $\square$ & $\frac{S,T_C(\square A)}{S,T_CA}T_C\square$ &
+               $\frac{S,F_C(\square A)}{S_C,F_CA}F_C\square$
+  \end{tabular}
+\end{table}
+Avendo che in $S_C$ manteniamo sia le formule $T\square$ che le formule $T_C$
+che quelle $F_C$ di $S$, ovvero:
+\[S_C=\{T\square X|T\square X\in A\}\cup\{T_CY|T_CY\in S\}\cup
+  \cup\{F_CZ|F_CZ\in S\}\] 
+Dove si nota che non si hanno ripetizioni. Questo calcolo è completo e corretto
+per $K_1$ e completo ma non corretto per $S_4$.\\
+Si noti che per $F_C\land -f$ si è assunto di avere $S_C$ e non $S$, infatti è
+l'$F_C\land$ applicata agli stati finali.\\
+Si ha una \textbf{regola di fining} per passare da $S$ a $S_C$, con $S_C\neq
+\emptyset$, in ottica di applicare $F_C\land -f$:
+\[\frac{S}{S_C}TH,\,\,\,S_C\neq \emptyset\]
+Questa regola è non
+deterministica e posso applicarla in qualsiasi punto del tableaux, al più di non
+avere $S_C$ vuoto. Se però si è
+nella situazione in cui non si può applicare la regola $F_C\land$ diventa:
+\[\frac{S,F_C(A\land B)}{S_C,FA,F_C(A\land B)/S_C,FB,F_C(A\land B)}F_C\land\]
+avendo, si noti, la ripetizione. Tale ripetizione si ha perché si produce un $F$
+prodotto da un $F_C$ che può essere tagliato da $F_\square$ ma quindi devo
+garantire di avere sempre la possibilità di poterla non tagliare.\\
+Si hanno quindi due regole per $F_C\land$, a
+seconda di avere $S$ o $S_C$. La regola di fining e la regola di $F_C\land$ in
+caso di $S$ rendono il calcolo corretto e completo per $K_1$, infatti e non devo
+mai applicare la regola $F_C\land$ in caso di $S$ ho un calcolo senza
+ripetizioni ma non completo, a meno di specificare le due regole. Il calcolo non
+è comunque corretto per $S_4$ che non ha la limitazione di avere stati finali,
+dove il calcolo si comporta come in logica classica.\\
+\textbf{Su slide la dimostrazione dell'assioma caratteristico (in realtà
+  un'altro assioma caratteristico analogo a quello presentato nel corso) di
+  $K_1$, tradotto nel linguaggio minimale.} 
+\subsection{Tableaux ottimizzati per $K_{1.1}$}
+Vediamo anche il calcolo a tableaux ottimizzato, coi 4 segni, per $K_{1.1}$. Si
+ricorda che in $K_{1.1}$, detta anche $S_4Grz$, l'operatore di necessità
+corrisponde all'operatore di dimostrabilità e di verità nell'aritmetica di
+Peano. Si ha quindi:
+\begin{table}[H]
+  \Large
+  \centering
+  \begin{tabular}{c||c|c}
+    connettivo& T-regola& F-regola\\
+    \hline
+    \hline
+    $\land$ & $\frac{S,T(A\land B)}{S,TA,TB}T\land$&
+                        $\frac{S,F(A\land B)}{S,FA/S,FB}F\land$\\
+    \hline
+    $\lor$ & $\frac{S,T(A\lor B)}{S,TA/S,TB}T\lor$&
+                        $\frac{S,F(A\lor B)}{S,FA,FB}F\lor$\\
+    \hline
+    $\to$ & $\frac{S,T(A\to B)}{S,FA/S,TB}T\to$&
+                        $\frac{S,F(A\to B)}{S,TA,FB}F\to$\\
+    \hline
+    $\neg$ & $\frac{S,T(\neg A)}{S,FA}T\neg$&
+                        $\frac{S,F(\neg A)}{S,TA}F\neg$\\
+    \hline
+    $\square$ & $\frac{S,T(\square A)}{S,T_CA}T\square$&
+             $\frac{S,F(\square A)}{S_C,FA,F_C(A\land\neg\square A)}F\square$\\
+  \end{tabular}
+\end{table}
+\begin{table}[H]
+  \Large
+  \centering
+  \begin{tabular}{c||c|c}
+    connettivo& T$_{\mbox{C}}$-regola&F$_{\mbox{C}}$-regola\\
+    \hline
+    \hline
+    $\land$ & $\frac{S,T_C(A\land B)}{S,T_CA,T_CB}T_C\land$&
+              $\frac{S_C,F_C(A\land B)}{S_C,F_CA/S_C,F_CB}F_C\land -f$\\
+    \hline
+    $\neg$ & $\frac{S,T_C(\neg A)}{S,F_CA}T_C\neg$&
+            $\frac{S,F_C(\neg A)}{S,T_CA}F_C\neg$\\
+    \hline
+    $\square$ & $\frac{S,T_C(\square A)}{S,T_CA}T_C\square$ &
+               $\frac{S,F_C(\square A)}{S_C,F_CA}F_C\square$
+  \end{tabular}
+\end{table}
+Avendo sempre:
+\[S_C=\{T\square X|T\square X\in A\}\cup\{T_CY|T_CY\in S\}\cup
+  \cup\{F_CZ|F_CZ\in S\}\]
+Anche qui valgono:
+\[\frac{S}{S_C}TH,\,\,\,S_C\neq \emptyset\]
+e:
+\[\frac{S,F_C(A\land B)}{S_C,FA,F_C(A\land B)/S_C,FB,F_C(A\land B)}F_C\land\]
+Analogamente a quanto visto in $K_1$.\\
+In $K_{1.1}$ non solo si hanno stati finali ma anche un modello di Kripke
+finito, con quindi $G$ finito. La differenza con $K_1$ si riscontra solo in
+$F\square$, dove si deve prendere un pezzo dell'assioma caratteristico di
+$K_{1.1}$ e riportalo sotto segno $F_C$. Con tale aggiunta il calcolo è
+corretto e completo per $K_{1.1}$. Tutte le altre regole di $K_1$ sono mantenute
+in $K_{1.1}$.\\
+Moscato si è chiesto se questa tecnica, quella di aggiungere un pezzo
+dell'assioma caratteristico sotto il segno opportuno, fosse un'euristica per
+trovare calcoli corretti e completi per logiche modali. Sarebbe come mischiare
+un calcolo a tableaux con un calcolo ad assiomi alla Hilbert (anche perché
+effettivamente sono gli assiomi a caratterizzare le logiche modali). Purtroppo
+non ha trovato risposta ma in $K_{1.1}$ funziona. Questo sarebbe un risultato
+straordinario.\\ 
+\textbf{Su slide la dimostrazione dell'assioma caratteristico di
+  $K_{1.1}$, tradotto nel linguaggio minimale.} 
+
+%1.10.12
+
+
+
 \section{Logica $S_5$}
 La \textbf{logica modale} $\mathbf{S_5}$ è formata da:
 \begin{itemize}
@@ -3355,3 +3637,4 @@ E in generale, parlando delle cinque logiche modali fondamentali si ha che:
 % LocalWords:  branch arietà un'istanziazione contromodelli definibilità Kuroda
 % LocalWords:  backtracking Fitting Miglioli vedisi modalizzata Lewis
 % LocalWords:  modalizzare Demodalizzare modalizzate demodalizzare
+% LocalWords:  necessitazione necessitazioni

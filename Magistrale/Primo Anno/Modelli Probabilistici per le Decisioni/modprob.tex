@@ -1789,8 +1789,93 @@ Avendo quindi:
 \max_{x_{1:t-1}}P(x_{1:t-1},e_{1:t-1})P(x_t|x_{t-1})P(e_t|x_t)\]
 \[=P(e_t|x_t)\max_{x_{t-1}}P(x_t|x_{t-1})\max_{x_{t-2}}P(x_{1:t-1}|e_{1:t-1})\]
 \[=P(e_t|x_t)\max_{x_{t-1}}P(x_t|x_{t-1})m_{t-1}[x_t-1]\]
-\textbf{Esempi su slide}.\\
-
+\textbf{Esempi su slide}.
+\chapter{Filtri di Kalman}
+\textbf{Sentire primi 5 minuti}.\\
+Si vuole stimare lo stato i un sistema dinamico partendo da una sequenza di
+osservazioni rumorose. Si hanno:
+\begin{itemize}
+  \item un \textbf{modello di transizione} che descrive la fisica di moto. È la
+  previsione 
+  \item un \textbf{modello sensoriale} che descrive il processo di
+  misurazione. È la correzione della previsione
+\end{itemize}
+Inoltre si il punto chiave di differenza rispetto ad HMM, ovvero \textbf{l
+  sistema è descritto da un insieme di variabili continue}, come posizione e
+velocità (di cui osserviamo solo una certa misurazione). Il modello di
+transizione quindi non è una catena di Markov.\\ 
+Si chiama \textit{filtro} per i due passaggi detti sopra, previsione e
+correzione. Posso usare una rete Bayesiana per rappresentarlo.\\
+Supponiamo che l’intervallo di tempo tra due osservazioni sia $\Delta$ e che la
+velocità tra due istanti temporali sia costante, allora l’aggiornamento della
+posizione avviene tramite la formula:
+\[X_{t+\Delta}=X_t+\dot{X}\Delta\]
+Aggiungendo del rumore gaussiano otteniamo un modello di transizione gaussiano
+lineare, del rumore bianco, si ha:
+\[P(X_{t+\Delta}=x_{t+\Delta}|X_t=x_t,\dot{X}_t=\dot{x}_t)=
+  N(x_t+\dot{x}_t\Delta,\sigma^2)(x_{t+\Delta})\]
+Si ricorda che la gaussiana è unimodale, avendo un solo massimo, avendo che a
+probabilità a posteriori si focalizza attorno al vero stato con poca
+incertezza. \\
+L'idea di base è quindi che le belief siano rappresentate da distribuzioni
+normali multivariate.\\
+Se la distribuzione corrente $P(X_t|e_{1:t})$ è Gaussiana e il modello di
+transizione $P(X_{t+1}|x_{t})$ è lineare, allora la predizione ad un passo sarà
+anch’essa Gaussiana:
+\[P(X_{t+1}|e_{1:t})=\int_{x_t}P(X_{t+1}|x_t)P(x_t|e_{1:t})\dd{x_t}\]
+Si ha quindi l'assunzione che il modello di moto sia lineare gaussiano e che il
+rumore sia anch'esso un modello gaussiano.\\
+Se la predizione $P(X_{t+1}|e_{1:t})$ è Gaussiana e il modello sensoriale
+$P(e_{t+1}|X_{t+1})$ è Gaussiano lineare allora dopo aver aggiornato il modello
+rispetto alla nuova evidenza anche la distribuzione aggiornata, ovvero:
+\[P(X_{t+1}|e_{1:t+1})=\alpha P(e_{t+1}|X_{t+1})P(X_{t+1}|e_{1:t})\]
+è gaussiana lineare.\\
+Ad ogni iterazione garantisco il mantenimento della gaussiana aumentando
+l'efficienza dell'algoritmo, si parla quindi, con queste assunzioni, che il
+filtro di Kalman è un \textbf{filtro ottimo} (anche se nella realtà non si
+possono avere tali assunzioni se non approssimando).\\
+Il filtro si riduce quindi a calcolare ad ogni iterazione media e varianza
+della gaussiana.\\
+L'operatore \textit{forward} per il filtro di Kalman accetta un messaggio in
+avanti gaussiano $f_{1:t}$, specificato da una media $\mu$ e matrice di
+covarianza $\Sigma_{t+1}$. Iniziando da una distribuzione gaussiana iniziale
+$P(X_0)=N(\mu_0,\Sigma_0)$ filtrando con un modello gaussiano lineare otterremo
+ancora una distribuzione statale gaussiana, descrivendo la distribuzione a
+posteriori come una gaussiana con media e varianza. Infatti, se la distribuzione
+non fosse Gaussiana il filtraggio nel continuo o ibrido (discreto e continuo)
+genera distribuzioni dello stato la cui rappresentazione cresce senza limiti col
+tempo (assume forme sempre più complesse). \\
+\textit{Non si vede la teoria matematica dietro}.\\
+\textbf{Esempi su slide con conti non richiesti in esame}.
+Si parla di \textbf{filtro di bayes}, avendo che si calcola la probabilità a
+posteriori di $X_t$ condizionato alle 
+misure e ai ``controlli'' (roba di robotica) fino al tempo $t$. Si richiedono 3
+distribuzioni di probabilità, indicando con $KF$ il filtro di Kalman:
+\begin{enumerate}
+  \item la belief iniziale $P(X_0)$ con $KF$ che assume la distribuzione dello
+  stato iniziale Gaussiana 
+  \item la probabilità della misura $P(Z_t|Z_t)$, con $KF$ che assume la
+  distribuzione di misura gaussiana lineare 
+  \item la probabilità di transizione $P(X_t|X_{t-1})$, con $KF$ che assume il
+  sistema dinamico lineare 
+\end{enumerate}
+In questo caso come detto, il filtro di Kalman è un \textbf{filtro ottimo} ma
+con assunzioni quasi irreali (\textbf{bozza di algoritmo su slide}).\\
+Non sempre si hanno queste assunzioni lineari e in tal caso, con funzioni non
+lineari, si parla di \textbf{Extended Kalman Filter} e in questo caso si calcola
+un'approssimazione gaussiana per la vera belief. Si usano approssimazioni di
+Taylor al primo ordine. \textbf{Materiale su slide super accennato in aula}.\\
+Si hanno anche vari \textbf{filtri non parametrici}, come \textit{histogram
+  filter} (con istogrammi che rassegano a ogni regione che decompone lo spazio
+degli stati una singola probabilità cumulata) e \textit{particles filter}
+(probabilità a posteriori tramite 
+sottoinsiemi), dove non si hanno assunzioni parametriche 
+rigide sulla densità di probabilità a posteriori e vanno bene per rappresentare
+belief multimodali.\\
+L'idea chiave dei particles filter è quello di rappresentare la probabilità a
+posteriori tramite un insieme di campionamenti random dello stato disegnati da
+tale probabilità. Una particle è quindi un'ipotesi su come potrebbe essere lo
+stato al tempo $t$.
 \end{document}  
 % LocalWords:  clock  Bayesana machine learning Bayes riscalare discretizzati
 % LocalWords:  condizionalmente Markoviani Markov

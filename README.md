@@ -46,14 +46,17 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Metodi Formali
 
 ##### I anno Magistrale
-- [x] Architetture Dati (RC)
-- [ ] Bioinformatica
-- [x] Machine Learning (RC)
-- [x] Modelli della Concorrenza (RC)
-- [ ] Modelli Probabilistici per le Decisioni
-- [x] Processo e Sviluppo Software (RC)
-- [x] Teoria della Computazione (RC)
+- [x] Architetture Dati
+- [ ] Bioinformatica (bozza)
+- [x] Machine Learning
+- [x] Modelli della Concorrenza
+- [ ] Modelli Probabilistici per le Decisioni (bozza)
+- [x] Processo e Sviluppo Software
+- [x] Teoria della Computazione
 - [x] Teoria dell'informazione e Crittografia (RC)
+
+##### II anno Magistrale
+- [x] Fondamenti Logico Matematici dell'Informatica
 
 ### Altro
 Suggeriamo queste repository open:

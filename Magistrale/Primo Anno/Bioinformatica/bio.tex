@@ -3967,9 +3967,232 @@ D'altro canto $LCP[i] < LCP[i-1]$ implica che:
   \item $i-1$ può essere la fine di un overlap interval 
 \end{itemize}
 \textbf{Esempio su slide}.
+\chapter{Riarrangiamento Genomico}
+Il \textbf{riarrangiamento genomico} è uno degli effetti comuni nei tumori e
+nelle patologie tumorali ed è un fenomeno molto diverso dalle mutazioni.\\
+Ricordando che il genoma è diviso in cromosomi si ha che essi possono essere:
+\begin{itemize}
+  \item \textbf{lineari}, nel caso eucariote
+  \item \textbf{circolari}, nel caso procariote
+\end{itemize}
+L'insieme di tutti i cromosomi è detto \textbf{cariotipo}.\\
+Le differenze di genoma tra due individui possono essere:
+\begin{itemize}
+  \item \textbf{mutazioni puntuali}, di singoli nucleotidi (come già visto nel
+  corso con indel etc$\ldots$)
+  \item \textbf{riarrangiamenti genomici}, con mutazioni di gruppi di nucleotidi
+\end{itemize}
+Se le mutazioni puntuali avevano come operazioni \textit{inserzione, delezione}
+e \textit{sostituzione} si ha che il riarrangiamento genomico ha le seguenti
+operazioni, che prevedono cambiamenti a livello dei geni (spesso rappresentati
+tramite posizioni numeriche, che fissa un ordine come negli esempi sulle slide):
+\begin{itemize}
+  \item \textbf{inversione}, quando una sequenza di geni cambia ordine e viene
+  totalmente invertita:
+  \[[\mbox{1 2 3 4 5 6 7 8 9}]\to[\mbox{1 2 3 \textbf{6 5 4} 7 8 9}]\]
+  \item \textbf{traslocazione}, quando si scambiano due pezzi genomici tra due
+  cromosomi: 
+  \[[\mbox{1 2 3 4 5 6 7 8 9}]\to[\mbox{1 2 3 4 \textbf{13 14 15}}]\]
+  \[\land\]
+  \[[\mbox{10 11 12 13 14 15}]\to[\mbox{10 11 12 \textbf{5 6 7 8 9}}]\]
+  \item \textbf{fissione}, dove un pezzo cromosoma si spezza in due pezzi
+  \[[\mbox{1 2 3 4 5 6 7 8 9}]\to[\mbox{1 2 3 4}] \land [\mbox{5 6 7 8 9}]\]
+  \item \textbf{fusione}, dove due pezzi di cromosoma si fondono in uno solo
+  \[[\mbox{1 2 3 4}] \land [\mbox{5 6 7 8 9}]\to [\mbox{1 2 3 4 5 6 7 8 9}]\]
+\end{itemize}
+\textit{Fusione} e \textit{fissione} sono l'una il complementare dell'altra.\\
+Sono in ordine di diffusione e gli ultimi due, i più rari, avvengono mediamente
+durante la \textbf{meiosi}.\\
+Il riarrangiamento è spesso scatenato dalle radiazioni (che portano tumori).\\
+Per le mutazioni puntuali si usavano distanza di edit e alberi filogenesi
+perfetta, con assunzione di parsimonia. Vedremo come fare lo stesso nel caso
+dei riarrangiamenti.\\
+Le operazioni di edit possono quindi anche essere di questo tipo, del
+riarrangiamento genomico. \\
+Il riarrangiamento si avvicina al concetto di \textbf{anagramma di una parola}.
+Potrei avere anche tra due specie lo stesso contenuto di geni in posizioni
+diverse o semplicemente in ordine invertito (\textbf{grafici su slide}). Questo
+porta a vedere come tra uomo e topo ci siano molti geni simili magari solo con
+ordine diverso e si cerca di capire quante operazioni di riarrangiamento (quindi
+di edit sui geni) servavano per passare da un genoma all'altro (e sono
+abbastanza pochi in quanto hanno in comune un antenato). Queste differenze
+rappresentano anche la storia evolutiva, anche dei singoli cromosomi, usando i
+riarrangiamenti (\textbf{grafici su slide}).  \\
+A livello biologico l'inversione è stata osservata per la prima volta con
+\\l'\textbf{esperimento diDobzhansky} nella drosofila, a fine anni trenta. È
+stato osservato quindi un cambiamento nell'ordine dei geni. L'esperimento si è
+basato sulla classificazione delle specie di drosofila, tramite un albero
+filogenetico. Si è poi scoperto che l'inversione è data dal fatto che il
+filamento di DNA, coi vari geni, va a formare dei ``nodi'', formando
+eventualmente un'apertura, ricongiungendosi poi con l'ordine invertito dato dal
+fatto che c'era il nodo (\textbf{immagini su slide}). \\
+Vediamo quindi le \textbf{inversioni non segnate} e il cambiamento nell'ordine
+dei geni. Si usa l'operazione binaria:
+\[r(a,b)\]
+con $a$ e $b$ posizione di inizio e fine. I geni tra gli indici $a$ e $b$,
+inclusi, vengono invertiti. \\
+Vediamo quindi il \textbf{problema della distanza di edit per inversioni}, dove
+date due permutazioni si cerca la più corta serie di inversioni per trasformare
+una permutazione nell'altra:
+\begin{itemize}
+  \item \textbf{input}: due permutazioni $\pi$ e $\sigma$
+  \item \textbf{output}: una serie di inversioni $r_1,\ldots, r_t$ che trasforma
+  $\pi$ in $\sigma$ tale che $t$ sia minimo
+\end{itemize}
+Tale $t$ è quindi la \textbf{distanza di edit per inversioni} tra le due
+permutazioni, avendo:
+\[t=d_{rev}(\pi,\sigma)\]
+Non si ha quindi una distanza di edit alla Levenshtein, per
+inserzioni/delezioni/sostituzioni, ma stimata tramite l'inversione di pezzi.\\
+Un problema analogo è quello detto \textbf{problema ordinamento per
+  inversioni}, che data una permutazione cerca la minima serie di inversioni per
+trasformare la permutazione nella \textbf{permutazione identica},
+$(1,2,3,\ldots,n)$: 
+\begin{itemize}
+  \item \textbf{input}: una permutazione $\pi$
+  \item \textbf{output}: una serie di inversioni $r_1,\ldots, r_t$ che trasforma
+  $\pi$ in \\
+  $(1,2,3,\ldots,n)$, la permutazione identica, tale che $t$ sia minimo
+\end{itemize}
+Il legame tra i due problemi si ritrova nel fatto che si prende la permutazione
+$\sigma$ e se si mappano i suoi elementi e si fa una biezione tra gli elementi
+di $\sigma$ e quelli della permutazione identica da questa biezione si ha che
+si ha una forte analogia tra i due problemi (trasformare $\pi$ in $\sigma$ con
+$\sigma$ permutazione identica). Si passa dal primo problema al secondo perché è
+più semplice, l'ordinamento avviene per inversioni.\\
+Per capire il discorso servono alcune definizioni:
+\begin{definizione}
+  Data una permutazione $\pi$, che viene estesa all'inizio con $0$ e alla fine
+  con $\max(\pi)+1$ definisco:
+  \begin{itemize}
+    \item \textbf{adjacency} come una coppia di elementi su due indici
+    consecutivi che sono consecutivi anche come valore, in un qualsiasi ordine
+    \item \textbf{breakpoint} come una coppia di elementi su due indici
+    consecutivi che non sono consecutivi come valore. I breakpoint sono quindi
+    le discontinuità tra "pezzi" di stringa che sono ordinati (crescenti o
+    decrescenti che siano) 
+    \item $b(\pi)$ come il numero di breakpoint in $\pi$
+  \end{itemize}
+\end{definizione}
+\begin{esempio}
+  Dato:
+  \[\pi = [\mbox{5 6 2 1 3 4}]\]
+  lo estendo a $\pi'$:
+  \[\pi' = [\mbox{0 5 6 2 1 3 4 7}]\]
+  e ho che:
+  \begin{itemize}
+    \item le coppie $(5,6), (2,1), (3,4)$ sono adjacency
+    \item le coppie $(0,5), (6,2), (1,3), (4,7)$ sono breakpoint
+    \item $b(\pi)=4$
+  \end{itemize}
+\end{esempio}
+I breakpoint ci dicono dove iniziano/finiscono \textbf{variazioni strutturali},
+ovvero un cambiamento genomico che coinvolge più nucleotidi consecutivi (il
+riarrangiamento, riguardando addirittura geni interi, è una variazione
+strutturale). \\
+La distanza di inversioni è legata ai breakpoint in quanto ciascuna inversione
+elimina al più due breakpoint quindi si ha:
+\[\mbox{distanza di inversioni}\geq \frac{b(\pi)}{2}\]
+\textbf{Esempio su slide}.\\
+Trasformare una permutazione nell'identica ha costo esponenziale, il problema
+del \textbf{sorting by reversal} è infatti un problema NP-complete.\\
+Vediamo ora un algoritmo che consente di approssimare la distanza per inversione
+tramite una 2-approssimazione.
+\begin{definizione}
+  Si definisce uno \textbf{strip} come l'intervallo tra due breakpoint
+  consecutivi in una permutazione.\\
+  Si ha che:
+  \begin{itemize}
+    \item uno strip è \textbf{crescente} se gli elementi dell'intervallo, quindi
+    dello strip, sono crescenti
+    \item uno strip è \textbf{decrescente} se gli elementi dell'intervallo,
+    quindi dello strip, sono decrescenti
+    \item uno strip di un solo elemento è considerabile crescente o decrescente,
+    come si preferisce, tranne due eccezioni:
+    \begin{itemize}
+      \item lo strip $[0]$
+      \item lo strip $[n+1]$
+    \end{itemize}
+  \end{itemize}
+\end{definizione}
+Avendo una 2-approssimazione ho che, con $opt(x)$ ottimo sull'istanza $x$:
+\[A(x)\leq k\cdot opt(x)\implies A(x)\leq 2\cdot opt(x)\]
+È quindi un'euristica con un fattore garantito di approssimazione.\\
+Per il \textbf{sorting by reversal} si avrebbe anche un algoritmo banale
+4-approssimante. \\
+Per l'algoritmo 4-approssimante si hanno due osservazioni:
+\begin{enumerate}
+  \item se una permutazione contiene uno strip decrescente, allora esiste
+  un'inversione che diminuirà il numero di breakpoint. Si ha, per esempio,
+  usando ``|'' per i breakpoint:
+  \[[\mbox{0 1 | \textbf{5 6 7 | 4 3 2} | 8 9
+      10}]\stackrel{r(3,8)}{\implies}[\mbox{0 1 2 3 4 | 7 6 5 | 8 9 10}]\] 
+  Dove si passa da 3 breakpoint a 2
+  \item in caso contrario si crea uno strip decrescente, invertendo uno strip
+  crescente. Il numero di breakpoint può essere ridotto nel passaggio
+  successivo e non in questo. Si ha ad esempio:
+  \[[\mbox{0 1 | 5 6 7 | \textbf{2 3 4} | 8 9
+      10}]\stackrel{r(6,8)}{\implies}[\mbox{0 1 | 5 6 7 | \textbf{4 3 2} | 8 9
+      10}]\]  
+  Arrivando poi alla situazione in cui si applica l'esempio della prima
+  osservazione. 
+\end{enumerate}
+L'algoritmo elimina ogni due step un breakpoint:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{SBRapprox}{$\pi$}
+    \While {$b(\pi)>0$}
+    \If {\textit{$\pi$ has a decreasing strip}}
+    \State \textit{Choose reversal $r$ that minimizes $b(\pi\bullet r)$}
+    \Else
+    \State \textit{Choose a reversal $r$ that flips an increasing strip in
+    $\pi$}
+    \EndIf
+    \State $\pi \gets \pi\bullet r$
+    \State \textbf{return} $\pi$
+    \EndWhile
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo 4-approssimante per \textbf{Breakpoint Reversal Sort
+  (\textit{BRS})}, con $\pi\bullet r$ 
+  che segnala l'applicazione dell'inversione $r$ alla permutazione $\pi$}
+\end{algorithm}
+Considerando di rimuovere uno o due breakpoint, riuscendo ad ordinare
+facendo flip almeno uguali al numero di breakpoints, ottengo una
+2-approssimazione. Nel nostro caso invece si ha una 4-approssimazione infatti:
+\begin{itemize}
+  \item elimina almeno un breakpoint ogni due step, avendo:
+  \[d_{BRS}\leq 2\cdot b(\pi)\,\,step\]
+  \item un algoritmo ottimale elimina al più due breakpoint ogni step, avendo:
+  \[d_{OPT}\geq \frac{b(\pi)}{2}\,\,step\]
+\end{itemize}
+Quindi si ha:
+\[\frac{d_{BRS}}{d_{OPT}}\leq \frac{2\cdot b(p)}{\frac{b(p)}{2}}=4\]
+L'algoritmo può essere migliorato a 2-approssimante tramite passaggi
+sofisticati, basati sul fatto che si può dimostrare che:
+\begin{center}
+  \textit{Se una permutazione ha un strip decrescente (incluso quello di
+    lunghezza 1), allora è sempre possibile diminuire il numero di breakpoint}
+\end{center}
+\textbf{Resto della trattazione sul 2-approssimante su slide, non fatto in
+  aula}. \\
+Parlando invece di \textbf{inversioni segnate} si ha che l'ordine inverso viene
+identificato tramite segno ``-'', ad esempio:
+\[[\mbox{1 2 3 -8 -7 -6 -5 -4 9 10}]\]
+Che nel dettaglio presenta due breakpoint.\\
+Si hanno due tool per il calcolo della distanza segnata o non segnata per
+inversione tra due permutazioni:
+\begin{itemize}
+  \item \textit{GRIMM Web Server}, che è usato proprio per il calcolo della
+  distanza segnata o non segnata per inversione tra due permutazioni
+  \item \textit{Cinteny}, anche lui un web server, che oltre allo studio del
+  riarrangiamento è usato anche per l'identificazione di \textbf{sintenia},
+  ovvero l'associazione di due o più geni in uno stesso cromosoma
+\end{itemize}
 \end{document}  
 % LocalWords:  clock burst bioinformatico bioinformatici aplotipi VCF NP Bruijn
 % LocalWords:  sottostringhe dell'overlap shortest superstring L'overlap ST
 % LocalWords:  superstringa sottostringa Euleriano scafholding sequenziatore
 % LocalWords:  feature semiglobale sottoalbero l'aplotipo aplotipizzazione
-% LocalWords:  genotipizzazione sottostruttura
+% LocalWords:  genotipizzazione sottostruttura Riarrangiamento riarrangiamenti
+% LocalWords:  riarrangiamento breakpoint

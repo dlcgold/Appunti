@@ -4066,7 +4066,7 @@ Si ha quindi che ogni blocco viene cifrato a parte:
 Moltiplicando la matrice per il vettore ottengo un altro vettore, coi numeri che
 corrispondono le lettere del blocco cifrate.\\
 e infine si concatenano i $C_i$ per ottenere il testo cifrato:
-\[c=C_1C_1\ldots C_l\]
+\[c=C_1C_2\ldots C_l\]
 \begin{esempio}
   Si ha $m=HELP$ e $d=2$. Come chiavi uso:
   \[M=\left[
@@ -4187,7 +4187,8 @@ Si ha che la chiave è:
     \end{matrix}
   \right]\]
 Lo studio viene poi fatto in base a come sono le due lettere nella matrice, se
-nella stessa riga/colonna muovendosi ciclicamente nella riga e nella colonna. Se
+nella stessa riga/colonna muovendosi ciclicamente nella riga e nella colonna
+(prendendo le due lettere a destra/sotto). Se
 non sono nella stessa riga/colonna si identifica 
 il sottorettangolo con le due lettere come estremi prendendo poi gli altri due
 estremi. La decifratura si fa con le operazioni nell'ordine inverso.\\
@@ -4333,7 +4334,7 @@ Pentium 4, dedicato solo a studiare il keyspace.
 Si possono in generale avere quattro scenari di attacco, in ordine di vantaggio
 crescente per Eve:
 \begin{enumerate}
-  \item Eve conosce solo $x$ e vuole ottenere $m$. È una situazione tanto
+  \item Eve conosce solo $c$ e vuole ottenere $m$. È una situazione tanto
   complicata per l'attaccante quanto rara. Si parla di \textbf{cryptotext only}
   \item Eve conosce alcune coppie $c_i,m_i$. Eve quindi studia i nuovi $c$ che
   arrivano e cerca di calcolare il corrispondente $m$. Si parla di \textbf{known
@@ -4443,20 +4444,21 @@ chiavi derivate è:
   \item si riceve il pacchetto di 64 bit di $m$
   \item applico la permutazione iniziale, accedendo ai singoli bit della chiave
   e ai singoli bit di $m$. La permutazione è una matrice $8\times 8$
-  \item le prime 4 righe le chiamo $c_0$ e sono 28 bit e le altre quattro $D_0$
+  \item le prime quattro righe le chiamo $C_0$ e sono 28 bit e le altre quattro
+  $D_0$ 
   \item calcolo da $C_{n-1}$ e $D_{n-1}$, per $1\leq n\leq 16$, i $C_n$ e i
-  $D_n$, applicando due rotazioni a sinistra verso $C_{n-1}$ e $D_{n-1}$
+  $D_n$, applicando due rotazioni verso sinistra a $C_{n-1}$ e $D_{n-1}$
   (\textbf{esempio su slide})
   \item si fa una \textbf{selezione permutata} per $C_n$ e $D_n$ per $1\leq
   n\leq 16$, chiamando $K_n$ il risultato. Si hanno quindi 16 chiavi
-  derivate. Ogni $K_i$ ha 48 bit
+  derivate. Ogni $K_i$ ha 48 bit (matrice $8\times 6$)
 \end{itemize}
 Per la cifratura (che si ricorda avere chiave di 56 bit):
 \begin{itemize}
   \item si divide $m$ in blocchi di 64 bit che viene cifrato separatamente. Ogni
   blocco cifrato lo chiamo $w$
   \item a partire da $w$ si applica una permutazione iniziale, ovvero una
-  matrice $8\times 8$, chiamando $l_0$ e
+  matrice $8\times 8$, chiamando $L_0$ e
   $R_0$ le prime e le seconde 4 righe (ciascuno è di 32 bit), avendo che
   $w=L_0R_0$. Si usano i nomi $L$ e $R$ perché sono a sinistra e destra della
   struttura di Feistel
@@ -4464,7 +4466,7 @@ Per la cifratura (che si ricorda avere chiave di 56 bit):
   $R_n$ tramite:
   \[L_n=R_{n-1}\]
   \[R_n=L_{n-1}\oplus f(R_{n_1},K_n)\]
-  Questi due conti sono detti \textbf{round function} si usa, nel secondo, una
+  Questi due conti sono detti \textbf{round function} e si usa, nel secondo, una
   chiave derivata. La funzione $f$ prende in input un input di 32 bit e uno, la
   chiave, di 48 bit e restituisce un risultato a 32 bit
   \item $c$ si ottiene applicando l'inversa della permutazione iniziale al
@@ -4502,10 +4504,10 @@ Si procede così:
 \begin{itemize}
   \item si prende $L_n$ e lo si espande a 48 bit usando come permutazione una
   matrice $8\times 6$ con numeri ripetuti
-  \item questo blocco è un xor bit a bit con $K_n$. Chiamo $B$ il risultato, di
-  48 bit
+  \item su questo blocco si fa uno xor bit a bit con $K_n$. Chiamo $B$ il
+  risultato, di 48 bit
   \item divido $B$ in 8 blocchi di 6 bit. Ogni blocco viene ridotto a 4 bit,
-  $B'$  usando una tabella s-box $s_i$. Per $B_1$ produco $B_1'$ con $s_1$
+  $B'$, usando una tabella s-box $s_i$. Per $B_1$ produco $B_1'$ con $s_1$
   etc$\ldots$. Tali $s_i$ sono fisse. Per fare ciò si prendono il primo e
   l'ultimo bit di $B$, che quindi insieme sono un $x\in\{0,1,2,3\}$. I 4 bit
   centrali sono un numero $y\in\{0,\ldots,15\}$. Si ha che $x$ e $y$ sono riga e
@@ -4557,8 +4559,8 @@ una competizione per cambiare sistema ma questa richiede anni. Nel frattempo si
 è usato \textbf{triple-DES (\textit{3DES})} come alternativa a DES. In 3DES si
 usano due chiavi $k_1$ e $k_2$ da 56 bit ciascuna e si procede così:
 \begin{itemize}
-  \item si cifra $w$ con $k_1$, ottenendo $c_1$
-  \item si decifra $c_1$ con $k_2$ ottenendo $c_1$
+  \item si cifra $w$ (il blocco in chiaro) con $k_1$, ottenendo $c_1$
+  \item si decifra $c_1$ con $k_2$ ottenendo $c_2$
   \item si cifra $c_2$ con $k_1$, ottenendo $c$
 \end{itemize}
 Usando quindi la \textbf{cifratura EDE
@@ -4586,13 +4588,14 @@ della generazione delle chiavi derivate e il numero di iterazioni durante la
 cifratura.\\ 
 L'algoritmo non accede ai singoli bit e organizza i 16 byte in una matrice
 $4\times 4$ da leggere per colonne.\\
-All'inizio la matrice contiene i 16 byte di $w$ (prima colonna da $w_0$ a $w_3$,
+All'inizio la matrice contiene i 16 byte del blocco plaintext $w$ (prima colonna
+da $w_0$ a $w_3$, 
 seconda da $w_4$ a $w_7$ etc$\ldots$) e alla fine quelli di $c$. Tale matrice è
 detta \textbf{matrice di stato}.\\
 Le chiavi derivate vengono chiamate \textbf{round key}.
 In generale, per la cifratura:
 \begin{itemize}
-  \item si prende $w$ e li si mette nella matrice di stato
+  \item si prende $w$ e lo si mette nella matrice di stato
   \item si fa uno xor tra la matrice di stato e la round key
   \item si fanno 9 round in cui:
   \begin{itemize}

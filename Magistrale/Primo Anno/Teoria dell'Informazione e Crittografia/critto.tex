@@ -4819,8 +4819,8 @@ cifrario a flusso.\\
 I cifrari a blocchi sono comunque più usati e sono ispirati alle \textbf{reti di
 permutazione e sostituzione (\textit{Substitution-Permutation Networks, SPN})}
 che applicano i principi di confusione e diffusione di Shannon (che ha
-teorizzato le SNP). La struttura i Feistel possono essere viste come una
-variante delle SNP.
+teorizzato le SPN). La struttura i Feistel possono essere viste come una
+variante delle SPN.
 \subsubsection{Principi di Confusione e Diffusione}
 I \textbf{principi di confusione e diffusione} di Shannon sono stati introdotti
 negli anni '40 con lo scopo di rendere l'analisi statistica dei testi cifrati
@@ -4838,7 +4838,7 @@ all'output ottenuto allo step prima, ottenendo un \textbf{effetto valanga}. Alla
 fine si ottiene una correlazione minima e un piccolo cambiamento di $m$ o $k$
 produce modifiche significative in $c$ (per questo posso pensare ad un
 crittosistema come un generatore di numeri pseudocasuali). \\
-\subsubsection{SNP}
+\subsubsection{SPN}
 Si hanno due permutazioni, avendo che $w$ e $c$ sono di $l\cdot m$ bits:
 \begin{itemize}
   \item $\pi_S:\{0,1\}^l\to\{0,1\}^l$, sono le sostituzioni con le s-box
@@ -4857,14 +4857,14 @@ si evitano complicazioni non necessarie. Applicare come prima e ultima
 operazione lo xor, come si vede nello pseudocodice, è detto \textbf{whitening}.
 \begin{algorithm}
   \begin{algorithmic}
-    \Function{SNP}{$w, \pi_S, \pi_P, (k^1,k^2,\ldots, k^{N_r+1})$}
+    \Function{SPN}{$w, \pi_S, \pi_P, (k^1,k^2,\ldots, k^{N_r+1})$}
     \State $w^0=w$
     \For {$r=1$ \textbf{to} $N_r-1$}
-    \State $u^r\gets w^{r-1}\oplus k^r$
-    \EndFor
+    \State $u^r\gets w^{r-1}\oplus k^r$ 
     \For {$i=1$ \textbf{to} $m$}
     \State $v_{(i)}^r=\pi_S(u^r_{(i)})$
     \State $w^r=(v^r_{\pi_P(1)},\ldots v^r_{\pi_P(l\cdot m)})$
+    \EndFor
     \EndFor
     \State $u^{N_r}=w^{N_r-1}\oplus k^{N_r}$
     \For {$i=1$ \textbf{to} $m$}
@@ -4873,12 +4873,12 @@ operazione lo xor, come si vede nello pseudocodice, è detto \textbf{whitening}.
     \State $c=v^{N_r}\oplus k^{N_r+1}$
     \EndFunction
   \end{algorithmic}
-  \caption{Algoritmo per calcolo cifratura con SNP}
+  \caption{Algoritmo per calcolo cifratura con SPN}
 \end{algorithm}
 \begin{figure}
   \centering
   \includegraphics[scale = 0.45]{img/snp.jpg}
-  \caption{Schema di una SNP. Fino al blocco $k^2$ escluso si ha il
+  \caption{Schema di una SPN. Fino al blocco $k^2$ escluso si ha il
     primo e unico round.}
   \label{fig:spn}
 \end{figure}
@@ -4892,7 +4892,7 @@ struttura/permutazione che permette una sostituzione monoalfabetica di $2^n$
 simboli, ovviamente questa non è fisicamente realizzabile con un circuito
 elettronico.\\  
 Si spezza quindi la permutazione in blocchi realizzabili in hardware che può
-essere usato in serie o parallelo, con un'idea simile ad una SNP. Feistel per
+essere usato in serie o parallelo, con un'idea simile ad una SPN. Feistel per
 approssimare la cifratura usa quindi piccoli moduli, alternando sostituzioni e
 permutazioni come detto da Shannon.\\
 Si prende quindi un testo in chiaro $m$, di $2\cdot w$ bit, e la chiave $k$, da
@@ -4927,7 +4927,7 @@ statistiche tra bit di $m$ e $u^j$, livello che precede le ultime applicazioni
 di s-box. Si procede a tentativi con lo xor ottenendo combinazioni di bit
 candidati per l'ultimo livello, vedendo se poi vale la relazione statistica. Si
 cercano quindi di indovinare alcuni bit della chiave di partenza ``risalendo''
-sulla SNP. Servono tanti tentativi, tante coppie $(c,m)$ etc$\ldots$.\\
+sulla SPN. Servono tanti tentativi, tante coppie $(c,m)$ etc$\ldots$.\\
 Si applicano teoremi per eventi indipendenti a eventi dipendenti.\\
 \textbf{Risentire questa parte (ultimi 10 minuti lezione 27 aprile)}.\\
 Cambiare la chiave di cifratura spesso riduce le chance di questo attacco.\\

@@ -72,6 +72,10 @@
     }
   } 
 \usetikzlibrary{automata,positioning,chains,fit,shapes}
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+  
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -4838,7 +4842,9 @@ all'output ottenuto allo step prima, ottenendo un \textbf{effetto valanga}. Alla
 fine si ottiene una correlazione minima e un piccolo cambiamento di $m$ o $k$
 produce modifiche significative in $c$ (per questo posso pensare ad un
 crittosistema come un generatore di numeri pseudocasuali). \\
-\subsubsection{SPN}
+\subsubsection{Substitution-Permutation Networks}
+Parliamo quindi delle \textbf{Substitution-Permutation Networks
+  (\textit{SPN})}.\\ 
 Si hanno due permutazioni, avendo che $w$ e $c$ sono di $l\cdot m$ bits:
 \begin{itemize}
   \item $\pi_S:\{0,1\}^l\to\{0,1\}^l$, sono le sostituzioni con le s-box
@@ -4968,7 +4974,7 @@ tantissimi dati da cifrare, come ad esempio flussi video. La decifratura deve
 avvenire su device mainstream poco potenti, come magari una TV.\\
 La cifratura deve essere quindi ``leggera'' e si cifra ogni bit/byte facendo lo
 xor con la chiave derivata, prodotta da un generatore di numeri casuali,
-\textbf{Pseudo-Random Number Generator (\textit{PRNG})}). Il PRNG produce la
+\textbf{Pseudo-Random Number Generator (\textit{PRNG})}. Il PRNG produce la
 chiave derivata, di un bit/byte, che viene appunto poi usata in xor con il
 plaintext.\\
 I crittosistemi a flusso sono molto più performanti di quelli a blocchi e sono
@@ -5011,7 +5017,7 @@ Si ha che scegliere $(k_1,\ldots,k_m)$ tutti uguali a 0 comporta la creazione di
 sequenze di soli 0 quindi bisogna evitarlo.\\
 Con $m=4$, ad esempio, posso produrre periodo 15, poco, e quindi il discorso del
 periodo va approfondito, scegliendo $(c_0,\ldots,c_{m-1})$ in modo che ogni scelta
-di $(k_1,\ldots,k_m)$ abbai periodo lungo.\\
+di $(k_1,\ldots,k_m)$ abbia periodo lungo.\\
 \textbf{Esempio su slide}.\\
 Si nota, dal punto di vista della sicurezza, l'uso di equazioni lineare per
 generare il keystream con LFSR, che quindi vengono usati solo come parte di
@@ -5141,14 +5147,15 @@ osservando $y$, non impara nulla sulla distribuzione di probabilità dei testi i
 chiaro, ovvero se:
 \[P(X=x)=P(X=x|Y=y)\]
 Ma questo implica che l'entropia di $X$ è uguale ell'equivocazione:
-\[H(X)=X(X|Y)\]
+\[H(X)=H(X|Y)\]
 Ma quindi la mutua informazione di sistema è:
 \[I(X;Y)=0\]
 e quindi $X$ e $Y$ sono \textbf{indipendenti} e Eve non ottiene alcuna
 informazione da $y$. Eve vede solo rumore.\\
 Ma per essere indipendenti significa che il canale è completamente rumoroso e
 $y$ è scelto a caso senza partire da $x$ e quindi sembra assurdo parlando di
-crittosistemi. \\
+crittosistemi.
+\subsubsection{OneTimePad e Cifrario di Vernam}
 Shannon ha invece continuato lo studio e scopre che esiste un crittosistema
 teorico completamente sicuro anche se con un'approssimazione pratica molto
 efficace nota dal 1918, ovvero il \textbf{cifrario di Vernam}. La nuova versione
@@ -5186,14 +5193,14 @@ Ovviamente prima Alice e Bob devono essersi accordati in modo sicuro sul
   Si ha anche la proprietà che:
   \[\forall y, \forall k\,\,\, \exists x \mbox{ t.c. } E_k(x)=y\]
   quindi sapendo solo $y$ posso solo sapere che tale messaggio cifrato può
-  derivate da un qualunque $x$, scegliendo $k$ in modo appropriato.\\
+  derivare da un qualunque $x$, scegliendo $k$ in modo appropriato.\\
   \textbf{Si ha quindi che è incondizionatamente sicuro non sapendo come
     scegliere}.\\ 
   Il tutto salta se la chiave è più corta. Si assume:
   \[|k|<|x|=|y|\]
   nel dettaglio:
   \[|k|=|x|-1=n-1\]
-  Avendo $|k|<|x|$ dobbiamo usare nuovamente alcune bit di $k$.\\
+  Avendo $|k|<|x|$ dobbiamo usare nuovamente alcuni bit di $k$.\\
   Quando Eve non ha ancora visto $c$ sa che Alice può scegliere qualunque $x$
   con probabilità $P(X=x)=\frac{1}{2^n}$, avendo che, osservato $y$, Eve si
   chiede i valori di $k$ usati per ottenere $x$ e vede che tali valori di $k$
@@ -5410,9 +5417,9 @@ essendo praticamente una \textit{permutazione}. Le
 Quindi data $f$ one-way e $y$, che è detta \textit{impronta}, è difficile
 calcolare $x$ tale che: 
 \[f(x)=y\]
-Un caso particolare di funzione one-way è una \textbf{funzione biunivoca}, che
-presi $n$ bit in input restituiscono una sorta di permutazione di in output,
-producendo un'altra sequenza di $n$ bit.\\
+Un caso particolare di funzione one-way è una \textbf{funzione biunivoca}, che,
+presi $n$ bit in input, restituiscono una sorta di permutazione di quei bit in
+output, producendo un'altra sequenza di $n$ bit.\\
 Se si ha che la funzione non è una permutazione, avendo magari dominio più
 grande del codominio (come nelle funzioni hash) allora posso avere più $x$ che
 produrrebbero $y$ tramite $f(x)$. Con una funzione one-way è difficile trovare
@@ -5455,7 +5462,7 @@ Bisogna introdurre un'altra definizione, quella di \textbf{predicato hard-core}.
   \[B:\{0,1\}^n\to\{0,1\}\]
   che quindi prende $n$ bit in input e restituisce 1 bit.\\
   $B$ è un predicato hard-core per $f$ (un predicato) se:
-  \[\forall \mbox{ algoritmo}\in PPT\land\forall\mbox{ polinomio }p(\cdot)
+  \[\forall \mbox{ algoritmo } A\in PPT\land\forall\mbox{ polinomio }p(\cdot)
     \mbox{ si ha che }\exists n_{A,p} \mbox{ t.c}\]
   \[\forall n\geq n_{A,p},P[x\gets \{0,1\}^n ; b \gets A( f ( x)) : b = B(
     x)]\leq\frac{1}{2}+\frac{1}{p(n)}\] 
@@ -5653,7 +5660,7 @@ Come chiavi si hanno $K_1$ e $K_2$, entrambe di 64bit, anche se DES usa solo
 tre moduli con 3DES, usato in modalità EDE (nell'ordine usando $K_1$, $K_2$,
 $K_1$): 
 \[encryption – decryption – encryption\]
-\newpage
+
 Si hanno quindi due output:
 \begin{itemize}
   \item $R_i$, che è un blocco causale di 64bit
@@ -5771,9 +5778,9 @@ tali che, ovviamente:
 \[\forall m\in PT,\,\,D_B(E_B(m))=m\]
 e devono essere tali per cui deve essere intrattabile ottenere $D_B$ da $E_B$.\\
 Bob rende pubblico $E_B$ e tiene segreto $D_B$.\\
-Se Alice vuole spedire $m$ a Bob calcola $E_N(m)$, l'algoritmo è pubblico, e lo
-manda a Bob, che calcola $D_B(E_B(m))=m$. Se Eve intercetta $E_N(m)$ deve
-risolvere un problema intrattabile per ottenere $B_B$. Il problema è che Alice,
+Se Alice vuole spedire $m$ a Bob calcola $E_B(m)$, l'algoritmo è pubblico, e lo
+manda a Bob, che calcola $D_B(E_B(m))=m$. Se Eve intercetta $E_B(m)$ deve
+risolvere un problema intrattabile per ottenere $D_B$. Il problema è che Alice,
 se parte di una grande comunità di utenti, deve conoscere tutti gli algoritmi di
 cifratura e questo è impraticabile, anche perché in caso di sospetti Bob
 comunica la cosa ad Alice.\\
@@ -5836,15 +5843,15 @@ comunicata a Bob ma tale informazione viene rimescolata nella trasmissione.
     indica la lunghezza). 
     \item per ogni algoritmo $A$ dell'avversario, eseguito in tempo polinomiale
     su una PTM, e per ogni polinomio $p(\cdot)$ esiste un numero naturale
-    $n_{A,p}$ si ha lo schema, detto \textbf{negligible trascurable} (\textit{lo
-      sono anche tutti gli schemi simili già visti}):
+    $n_{A,p}$ che segue lo schema, detto \textbf{negligible trascurable}
+    (\textit{lo sono anche tutti gli schemi simili già visti}):
     \[\forall n\geq n_{A,p}\,\,\,P[x\gets\{0,1\}^n; x'\gets A(f(x)):
       f(x)=f(x')]\leq \frac{1}{p(n)}\]
-    Il calcolo è difficile per la $f$ non perché l'input è troppo corto, per
+    Il calcolo è difficile per la $f$ non perché l'input è troppo corto ma per
     quanto detto nel secondo punto
   \end{itemize}
 \end{definizione}
-Sin ricorda che queste funzioni one-way non si ha certezza che esistano, non si
+Si ricorda che queste funzioni one-way non si ha certezza che esistano, non si
 riesce a dimostrare la loro esistenza. Se si avesse $P=NP$ sicuramente tali
 funzioni non esisterebbero (perché si risolverebbe polinomialmente lo studio di
 tutti i possibili alberi di computazione della NDTM per trovare
@@ -5985,8 +5992,8 @@ perché Eve lo sgamerebbe subito). Si procede così:
 \begin{itemize}
   \item Alice calcola $g^{x_A}\bmod\,\,q$ e lo manda a Bob, ma anche ad Eve
   \item Bob calcola $g^{x_B}\bmod\,\,q$ e lo manda a Alice, ma anche ad Eve
-  \item Alice calcola $(g^{x_B})^{x_A}=g^{x_A\cdot x_B}=k$, che Eve vede
-  \item Bob calcola $(g^{x_A})^{x_B}=g^{x_A\cdot x_B}=k$, che Eve vede
+  \item Alice calcola $(g^{x_B})^{x_A}=g^{x_A\cdot x_B}=k$, che Eve non vede
+  \item Bob calcola $(g^{x_A})^{x_B}=g^{x_A\cdot x_B}=k$, che Eve non vede
   \item $k$ è la chiave segreta
 \end{itemize}
 Eve conosce quindi $q$, $g$, $g^{x_A}$ e $g^{x_B}$.\\

@@ -3514,7 +3514,7 @@ media sull'output avendo inserito un qualsiasi simbolo di $A$ nel canale,
 essendo dal punto di vista del mittente che inserisce un simbolo qualsiasi nel
 canale. 
 Infine ho anche l'entropia congiunta:
-\[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(b_j,a_i)}\]
+\[H_R(A,B)=\sum_{i=1}^q\sum_{j=1}^s P(a_i,b_j)\log_r\frac{1}{P(a_i,b_j)}\]
 Dove sono nel punto di vista di un osservatore esterno che vede input, canale e
 output, qualunque sia il simbolo che entri nel canale e qualunque sia quello che
 esca dal canale. \\
@@ -5118,7 +5118,7 @@ gli altri $k_i$. Nel dettaglio:
   \item si pone $z_i=k_i,\,\,\,\forall i\in\{1,2,\ldots,m\}$ 
   \item $\forall i\geq 1$ si calcola $z_{i+m}$ usando la ricorrenza lineare di
   grado $m$, avendo che $z_{i+m}$ dipende dagli $m$ termini precedenti:
-  \[z_{i+m}=\sum_{j=0}^{m-1}c_jZ_{i+j}\bmod\,\,2=\bigoplus_{j=0}^{m-1}(c_j\land
+  \[z_{i+m}=\sum_{j=0}^{m-1}c_jz_{i+j}\bmod\,\,2=\bigoplus_{j=0}^{m-1}(c_j\land
     z_{i+j})\] 
 \end{itemize}
 Si ha che scegliere $(k_1,\ldots,k_m)$ tutti uguali a 0 comporta la creazione di
@@ -5736,7 +5736,7 @@ imprevedibile che supera il next bit test. In pratica, come visualizzabile in
 figura \ref{fig:prng}:
 \begin{itemize}
   \item si parte dal seed/master key che produce una sequenza di chiavi derivate
-  \item si usa un contatore con periodo $\bmod n$
+  \item si usa un contatore con periodo $\bmod \,n$
   \item il valore del contatore è usato o come chiave o come plaintext in un
   crittosistema simmetrico 
   \item ogni volta che si usa il crittosistema simmetrico si incrementa il
@@ -5909,6 +5909,7 @@ $D_A(D_B(E_B(E_A(m))))$ che equivale a $D_A(E_A(m))$ che equivale a $m$
 ($D_i(E_i(x))$ praticamente si semplificano).\\
 Alice quindi usa solo $E_A$ e $D_A$ e in caso di sospetto gli basta cambiare
 questa coppia.\\
+Vediamo ora come funzione la creazione della coppia di algoritmi.\\
 Anche in questo caso Alice seleziona un elemento di una famiglia di coppie di
 algoritmi di cifratura/decifratura, scegliendo una \textbf{chiave pubblica}
 $k_{p_A}$ e la conseguente \textbf{chiave privata} $k_{s_A}$. Ovviamente si ha
@@ -5947,8 +5948,10 @@ comunicata a Bob ma tale informazione viene rimescolata nella trasmissione.
     \item esistono due polinomi, rispetto a $n$ numero di bit necessari a
     rappresentare l'input $x$, $p(\cdot)$ e $q(\cdot)$ tali che:
     \[p(|x|)\leq |f(x)|\leq q(|x|)\]
-    avendo che l'output di $f$ non deve essere corto (il valore assoluto qui
-    indica la lunghezza). 
+    avendo che l'output di $f$ non deve essere troppo corto (il valore assoluto
+    qui indica la lunghezza) ma nemmeno troppo lungo (in quanto la TM lavora su
+    celle e non bisogna superarne una quantità polinomiale ma non possiamo
+    nemmeno scendere sotto, tipo tempo logaritmico su $|x|$) 
     \item per ogni algoritmo $A$ dell'avversario, eseguito in tempo polinomiale
     su una PTM, e per ogni polinomio $p(\cdot)$ esiste un numero naturale
     $n_{A,p}$ che segue lo schema, detto \textbf{negligible trascurable}
@@ -6026,18 +6029,18 @@ Avrei una cosa del tipo:
   \caption{Primo tentativo non efficiente di calcolo esponenziazione modulare}
 \end{algorithm}
 In pratica avrei che $result$ contiene:
-\[g^0,g^2,\ldots,g^x\bmod\,\,p\]
+\[g^0,g^1,g^2,\ldots,g^x\bmod\,\,p\]
 Ma avrei un numero di iterazioni esponenziale rispetto a $n$, infatti si
 avrebbe: 
 \[x\cong 2^n\]
 C'è però un modo per calcolarlo in tempo polinomiale, passando la
 rappresentazione in binario di $x$. Posso fare quindi:
-\[g^x=
-  g^{\sum_{j=0}^{n-1}x_j2^j}=\prod_{j=0}^{n-1}x_j2^j=\prod_{j=0}^{n-1}
-  (g^{2^j})^{x_j}\bmod \,\,p\] 
-Basta quindi calcolare $g^{2^j}$ per i vari $j$, da 0 a -1, e moltiplicarli per
-$x_j=1$ (solo quei conti per cui si ha $x_j=1$ influiscono sul risultato) e
-questo si fa in tempo polinomiale. Questo algoritmo è detto
+\[f(x)=\left(g^x=
+  g^{\sum_{j=0}^{n-1}x_j2^j}=\prod_{j=0}^{n-1}g^{x_j2^j}=\prod_{j=0}^{n-1}
+  (g^{2^j})^{x_j}\right)\bmod \,\,p\] 
+Basta quindi calcolare $g^{2^j}$ per i vari $j$, da 0 a $n-1$, e moltiplicarli
+se si ha $x_j=1$ (solo quei conti per cui si ha $x_j=1$ influiscono sul
+risultato) e questo si fa in tempo polinomiale. Questo algoritmo è detto
 \textbf{square-and-multiply}. Ragiono quindi tramite una maschera di bit
 prendendo solo i valori in corrispondenza di 1.\\
 Conviene inoltre salvarsi i $g^{2^j}$. Vediamo lo pseudocodice:
@@ -6129,8 +6132,8 @@ Eve per ottenere $k_s$ da $k_p$ dovrebbe calcolare $\log_g g^a$, ma è
 difficile.\\
 Per cifrare si ha:
 \begin{itemize}
-  \item Alice manda $m\in\mathbb{Z}_q^*$ a Bob. Se $m$ è più lungo di $\log_2 q$
-  bit lo spezza in blocchi 
+  \item Alice vuole mandare $m\in\mathbb{Z}_q^*$ a Bob. Se $m$ è più lungo di
+  $\log_2 q$ bit lo spezza in blocchi 
   \item Alice prende la chiave pubblica di Bob $k_{p_B}=(q,g,g^a)$
   \item Alice sceglie un \textbf{random salt}, ovvero un $l$ a caso, $0<l<q-1$
   per complicare la vita a Eve che avrebbe vita facile se si cifrano sempre
@@ -6149,7 +6152,7 @@ nei conti.\\
 Eve vede passare la chiave pubblica e il testo cifrato, sia $\gamma$ che
 $\delta$. Ma estrarre $l$ è un problema di logaritmo discreto, dovendo estrarre
 $l$ da $g^l$ e calcolare $(g^a)^l$ per poi calcolare $m=\delta\cdot
-(g^{al})^{-l}=\delta\cdot g^{-al}$.\\
+(g^{al})^{-1}=\delta\cdot g^{-al}$.\\
 Stesso discorso per calcolare $g^{al}$ da $g^a$ e $g^l$. Quindi anche El Gamal
 si basa sulle stesse assunzioni del protocollo di Diffie-Hellman.\\
 Entrambe le soluzioni sono comunque meno efficienti dei crittosistemi
@@ -6159,7 +6162,9 @@ anche se richiedono la trasmissione della chiave segreta su un canale privato.
 \subsection{Crittosistemi Ibridi}
 L'unione di crittosistemi a chiave pubblica e simmetrici si usano insieme in
 \textbf{crittosistemi ibridi}, dove magari si scambia la chiave per il
-crittosistema simmetrico tramite la chiave pubblica con Diffie-Hellman.
+crittosistema simmetrico tramite un crittosistema a chiave pubblica (o il
+protocollo di Diffie-Hellman), usando il
+crittosistema lento per un tempo molto breve, per inviare solo 100-300 bit.
 \subsection{RSA}
 Vediamo il sistema inventato da Adi Shamir, Ron Rivest e Leonard Adleman,
 \textbf{RSA}, che è il più famoso algoritmo a chiave pubblica, il cui paper è
@@ -6172,7 +6177,9 @@ Si calcola $n=p\cdot q$ detto \textbf{modulo RSA}. Si calcola quindi il
 \textbf{quoziente di Eulero}:
 \[\phi(n)=\phi(p\cdot q)=\phi(p)\cdot \phi(q)=(p-1)\cdot (q-1)\]
 Avendo che $\phi(n)$ è il numero di numeri compresi tra 1 e $n$ che sono coprimi
-con $n$, ovvero i numeri invertibili in modulo $n$. È il numero di elementi più
+con $n$ (non hanno divisori comuni che non siano 1), ovvero i numeri invertibili
+in modulo $n$ (avendo che $y$ è invertibile modulo $n$ se $\exists
+x\in\mathbb{Z}\mbox{ t.c. }xy\equiv 1\bmod\,\,n$). È il numero di elementi più 
 piccoli di $n$ che sono coprimi con $n$ (stesso discorso per il calcolo di
 $\phi$ con $p$ e $q$). Mi dice la dimensione di
 $\mathbb{Z}_{n}^*$.
@@ -6249,7 +6256,7 @@ $n$, sapendo:
 \[n=p\cdot q\to \phi(n)=(p-1)\cdot(q-1)=p\cdot q-(p+q)+1=n-(p+q)+1\]
 e quindi può calcolare:
 \[p+q=n-\phi(n)+1\]
-e quindi conoscendo sia la somma che il prodotto di $P$ e $q$ può risolvere:
+e quindi conoscendo sia la somma che il prodotto di $p$ e $q$ può risolvere:
 \[x^2-(p+1)x+p\cdot q=0\]
 Inoltre $p$ e $q$ non devono essere troppo vicini perché Eve cercherebbe intorno
 a $\sqrt{n}$.\\
@@ -6271,7 +6278,7 @@ Avendo trovato $q$ e $p$.\\
 Un altro problema è il valore di $\phi(n)$. 
 Si assume $GCD(p-1,q-1)$ largo e si ha, con $LCM$ \textbf{Least Common
   Multiple}: 
-\[u=LCM(p-1,q-1)=\frac{(p-1)(q-1)}{GCD(p-1,q-1)}=\frac{\phi(n)}{GCD(p-q,q-1)}\]
+\[u=LCM(p-1,q-1)=\frac{(p-1)(q-1)}{GCD(p-1,q-1)}=\frac{\phi(n)}{GCD(p-1,q-1)}\]
 avendo che $u$ è piccolo rispetto a $\phi(n)$.\\
 Si noti che potrei usare $d'\equiv e^{-1}\bmod \,\,u$ al posto di $d$ per
 decifrare, questo grazie al \textbf{teorema di Eulero}. Dato che $u$ è piccolo

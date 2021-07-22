@@ -2692,6 +2692,96 @@ queste sorgenti sono \textbf{memoryless}.
       approfondita.}} 
 \end{definizione}
 L'algoritmo di Huffman si può adattare alle sorgenti con memoria.
+\subsection{Robustezza codici di Huffman}
+Sia data una sorgente $S$ con simboli $s_i$ e probabilità $p_i$ (potrei anche
+non sapere che simboli emette la sorgente $S$, come se fosse una \textit{black
+  box}). Le probabilità in realtà non si conoscono. Si supponga di 
+poter osservare solo i simboli emessi dalla sorgente senza sapere nulla di come
+è fatta. Non conosco quindi le probabilità vere ma posso solo stimarle. Chiamo
+$p_i'$ tali stime. Ci si chiede quanto cambia la lunghezza media del codice
+istantaneo applicando Huffman con le $p_i'$. Si ha quindi:
+\[L'=\sum_{i=1}^q p_i'l_i\]
+anziché:
+\[L=\sum_{i=1}^q p_il_i\]
+Cercando di capire quanto si discostano $L$ e $L'$.\\
+Presi gli errori $e_i$ commessi per stimare $p_i'$ ho che:
+\[p_i'=p_i+e_i\]
+Si segnala che $e_i$ può essere positivo, negativo o nullo.\\
+Sia $p_1,\ldots, p_q$ che $p_1',\ldots, p_q'$ sono distribuzioni di probabilità
+e quindi sommano a 1.
+Quindi si ha, per i $p_i'$:
+\[\sum_ip_i'=\sum_i (p_i+e_i)=\sum_{i=1}^q p_i+\sum_{i=1}^q e_i=1+\sum_{i=1}^q
+  e_i=1\] 
+dato che $\sum_ip_i'=1$. Ne segue quindi per forza vale che:
+\[\sum_i e_i=0\]
+e quindi la media degli errori è:
+\[\overline{e}=\frac{1}{q}\sum_{i=1}^q e_i=0\]
+e che la varianza degli errori vale
+\[\sigma^2=\frac{1}{q}\sum_{i=1}^q e_i^2\]
+Per la lunghezza media ho che:
+\[L'=\sum_{i=1}^q p_i'\cdot l_i=\sum_{i=1}^q p_i\cdot l_i+\sum_{i=1}^q e_i\cdot
+  l_i=L+\sum_{i=1}^q e_i\cdot l_i\]
+Quindi la variazione tra le lunghezze medie ottenute con Huffman usando $p_i'$ e
+$P_i$ è:
+\[\sum_{i=1}^q e_i\cdot l_i\]
+Voglio quindi minimizzare $\sum_{i=1}^q e_i\cdot l_i$. Cerchiamo quindi gli
+$e_1,\ldots e_q$ tali per cui la funzione:
+\[f(e_1,\ldots e_q)=\sum_{i=1}^q e_i\cdot l_i\]
+è minima.\\
+Cerco quindi i punti stazionari tramite le derivate parziali rispetto alle
+variabili $e_i$ per poi porle a 0. Vogliamo che la media dei valori assunti da
+$e_i$ sia nulla e che la varianza $\sigma^2$ assuma un valore fissato imponendo
+i seguenti vincoli:
+\[\frac{1}{q}\sum_{i=1}^q e_i=0\implies \sum_{i=1}^q e_i=0\]
+e:
+\[\frac{1}{q}\sum_{i=1}^q e_i^2-\sigma^2 =0\]
+Per risolvere questo problema di ottimizzazione vincolata utilizziamo i
+\textbf{moltiplicatori di Lagrange}. Abbiamo due vincoli e quindi usiamo due
+moltiplicatori: $\mu$ e $\lambda$:
+La funzione su cui calcolare i punti stazionari diventa:
+\[\mathcal{L}(e_1,\ldots,e_q)=\sum_{i=1}^qe_il_i-\lambda\sum_{i=1}^q
+  e_i-\mu\left(\sum_{i=1}^q e_i^2-\sigma^2\right)\] 
+Calcolo quindi le derivate parziali rispetto a $e_i$ e le pongo nulle:
+\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
+e sommando queste equazioni ho:
+\[\sum_{i=1}^q l_i-\lambda q-\frac{2\mu}{q}\sum_{i=1}^q e_i=0\]
+e avendo che $\sum_{i=1}^qe_i=0$ ottengo:
+\[\sum_{i=1}^q l_i-\lambda q=0\]
+e quindi:
+\[\lambda=\frac{1}{q}\sum_{i=1}^q l_i\]
+Cerchiamo quindi il valore di $\mu$.
+Ricordando che:
+\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
+sommo le equazioni moltiplicando la prima per $e_1$, la seconda per $e_2 $
+etc$\ldots$:
+\[\sum_{i=1}^q e_il_i-\lambda \sum_{i=1}^q e_i-\frac{2\mu}{q}\sum_{i=1}^q e_i^2=0\]
+e avendo che $\sum_{i=1}^qe_i=0$ ottengo:
+\[\sum_{i=1}^q e_il_i-2\mu\sigma^2=0\]
+da cui:
+\[\mu=\frac{1}{2\sigma^2}\sum_{i=1}^qe_il_i\]
+Ricordando che:
+\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
+sommo le equazioni moltiplicando la prima per $l_1$, la seconda per $l_2 $
+etc$\ldots$:
+\[\sum_{i=1}^q l_i^2-\lambda \sum_{i=1}^q l_i-\frac{2\mu}{q}\sum_{i=1}^q
+  e_il_i=0\]
+Sostituisco $\lambda$ e $\mu$:
+\[\sum_{i=1}^q l_i^2- \frac{1}{q}\left(\sum_{i=1}^q l_i\right)^2-
+  \frac{1}{2q\sigma^2}\left(\sum_{i=1}^qe_il_i\right)^2=0\]
+Ma allora:
+\[\left(\sum_{i=1}^qe_il_i\right)^2=\sigma^2\left[q\sum_{i=1}^q
+    l_i^2-\left(\sum_{i=1}^q
+      l_i\right)^2\right]=\]
+\[\sigma^2q^2\left[\frac{1}{q}\sum_{i=1}^q
+    l_i^2-\left(\frac{1}{q}\sum_{i=1}^q l_i\right)^2\right]=\sigma^2q^2\cdot v\]
+con $v$ varianza delle $l_i$.\\
+Dato che $q^2$ e $\sigma^2$ sono fissate abbiamo trovato che il quadrato della
+variazione tra le lunghezze medie, ovvero il quadrato di $f(e_1,\ldots,e_q)$ che
+volevamo minimizzare, è direttamente proporzionale alle lunghezze delle
+codeword. Quindi si minimizza mettendo in alto il nuovo simbolo in quanto si
+minimizza la varianza rendendo più \textbf{robusto} il codice, ovvero meno
+sensibile ad errori sulle probabilità (perlomeno ragionando in ottica di
+lunghezza media).\\
 \section{L'informazione}
 Si ha sempre una sorgente $S$ senza memoria con i simboli $s_i$ a cui sono
 associate le probabilità $p_i$. Cerchiamo di capire quanta informazione ci dà un
@@ -2849,96 +2939,6 @@ ma allora:
 \[\log_2\frac{1}{P}=log_2\left[\frac{1}{p_1^{p_1}\cdots
       p_q^{p_q}}\right]^n=n\sum_{i=1}^q\log_2\left(\frac{1}{p_i}\right)^{p_i}=n\cdot
   \sum_{i=1}^qp_i\log_2\frac{1}{p_i}=n\cdot H_2(S)\]
-\subsection{Robustezza codici di Huffman}
-Sia data una sorgente $S$ con simboli $s_i$ e probabilità $p_i$ (potrei anche
-non sapere che simboli emette la sorgente $S$, come se fosse una \textit{black
-  box}). Le probabilità in realtà non si conoscono. Si supponga di 
-poter osservare solo i simboli emessi dalla sorgente senza sapere nulla di come
-è fatta. Non conosco quindi le probabilità vere ma posso solo stimarle. Chiamo
-$p_i'$ tali stime. Ci si chiede quanto cambia la lunghezza media del codice
-istantaneo applicando Huffman con le $p_i'$. Si ha quindi:
-\[L'=\sum_{i=1}^q p_i'l_i\]
-anziché:
-\[L=\sum_{i=1}^q p_il_i\]
-Cercando di capire quanto si discostano $L$ e $L'$.\\
-Presi gli errori $e_i$ commessi per stimare $p_i'$ ho che:
-\[p_i'=p_i+e_i\]
-Si segnala che $e_i$ può essere positivo, negativo o nullo.\\
-Sia $p_1,\ldots, p_q$ che $p_1',\ldots, p_q'$ sono distribuzioni di probabilità
-e quindi sommano a 1.
-Quindi si ha, per i $p_i'$:
-\[\sum_ip_i'=\sum_i (p_i+e_i)=\sum_{i=1}^q p_i+\sum_{i=1}^q e_i=1+\sum_{i=1}^q
-  e_i=1\] 
-dato che $\sum_ip_i'=1$. Ne segue quindi per forza vale che:
-\[\sum_i e_i=0\]
-e quindi la media degli errori è:
-\[\overline{e}=\frac{1}{q}\sum_{i=1}^q e_i=0\]
-e che la varianza degli errori vale
-\[\sigma^2=\frac{1}{q}\sum_{i=1}^q e_i^2\]
-Per la lunghezza media ho che:
-\[L'=\sum_{i=1}^q p_i'\cdot l_i=\sum_{i=1}^q p_i\cdot l_i+\sum_{i=1}^q e_i\cdot
-  l_i=L+\sum_{i=1}^q e_i\cdot l_i\]
-Quindi la variazione tra le lunghezze medie ottenute con Huffman usando $p_i'$ e
-$P_i$ è:
-\[\sum_{i=1}^q e_i\cdot l_i\]
-Voglio quindi minimizzare $\sum_{i=1}^q e_i\cdot l_i$. Cerchiamo quindi gli
-$e_1,\ldots e_q$ tali per cui la funzione:
-\[f(e_1,\ldots e_q)=\sum_{i=1}^q e_i\cdot l_i\]
-è minima.\\
-Cerco quindi i punti stazionari tramite le derivate parziali rispetto alle
-variabili $e_i$ per poi porle a 0. Vogliamo che la media dei valori assunti da
-$e_i$ sia nulla e che la varianza $\sigma^2$ assuma un valore fissato imponendo
-i seguenti vincoli:
-\[\frac{1}{q}\sum_{i=1}^q e_i=0\implies \sum_{i=1}^q e_i=0\]
-e:
-\[\frac{1}{q}\sum_{i=1}^q e_i^2-\sigma^2 =0\]
-Per risolvere questo problema di ottimizzazione vincolata utilizziamo i
-\textbf{moltiplicatori di Lagrange}. Abbiamo due vincoli e quindi usiamo due
-moltiplicatori: $\mu$ e $\lambda$:
-La funzione su cui calcolare i punti stazionari diventa:
-\[\mathcal{L}(e_1,\ldots,e_q)=\sum_{i=1}^qe_il_i-\lambda\sum_{i=1}^q
-  e_i-\mu\left(\sum_{i=1}^q e_i^2-\sigma^2\right)\] 
-Calcolo quindi le derivate parziali rispetto a $e_i$ e le pongo nulle:
-\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
-e sommando queste equazioni ho:
-\[\sum_{i=1}^q l_i-\lambda q-\frac{2\mu}{q}\sum_{i=1}^q e_i=0\]
-e avendo che $\sum_{i=1}^qe_i=0$ ottengo:
-\[\sum_{i=1}^q l_i-\lambda q=0\]
-e quindi:
-\[\lambda=\frac{1}{q}\sum_{i=1}^q l_i\]
-Cerchiamo quindi il valore di $\mu$.
-Ricordando che:
-\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
-sommo le equazioni moltiplicando la prima per $e_1$, la seconda per $e_2 $
-etc$\ldots$:
-\[\sum_{i=1}^q e_il_i-\lambda \sum_{i=1}^q e_i-\frac{2\mu}{q}\sum_{i=1}^q e_i^2=0\]
-e avendo che $\sum_{i=1}^qe_i=0$ ottengo:
-\[\sum_{i=1}^q e_il_i-2\mu\sigma^2=0\]
-da cui:
-\[\mu=\frac{1}{2\sigma^2}\sum_{i=1}^qe_il_i\]
-Ricordando che:
-\[\frac{\partial\mathcal{L}}{\partial e_i}=l_i-\lambda-\frac{2\mu}{q}e_i=0\]
-sommo le equazioni moltiplicando la prima per $l_1$, la seconda per $l_2 $
-etc$\ldots$:
-\[\sum_{i=1}^q l_i^2-\lambda \sum_{i=1}^q l_i-\frac{2\mu}{q}\sum_{i=1}^q
-  e_il_i=0\]
-Sostituisco $\lambda$ e $\mu$:
-\[\sum_{i=1}^q l_i^2- \frac{1}{q}\left(\sum_{i=1}^q l_i\right)^2-
-  \frac{1}{2q\sigma^2}\left(\sum_{i=1}^qe_il_i\right)^2=0\]
-Ma allora:
-\[\left(\sum_{i=1}^qe_il_i\right)^2=\sigma^2\left[q\sum_{i=1}^q
-    l_i^2-\left(\sum_{i=1}^q
-      l_i\right)^2\right]=\]
-\[\sigma^2q^2\left[\frac{1}{q}\sum_{i=1}^q
-    l_i^2-\left(\frac{1}{q}\sum_{i=1}^q l_i\right)^2\right]=\sigma^2q^2\cdot v\]
-con $v$ varianza delle $l_i$.\\
-Dato che $q^2$ e $\sigma^2$ sono fissate abbiamo trovato che il quadrato della
-variazione tra le lunghezze medie, ovvero il quadrato di $f(e_1,\ldots,e_q)$ che
-volevamo minimizzare, è direttamente proporzionale alle lunghezze delle
-codeword. Quindi si minimizza mettendo in alto il nuovo simbolo in quanto si
-minimizza la varianza rendendo più \textbf{robusto} il codice, ovvero meno
-sensibile ad errori sulle probabilità (perlomeno ragionando in ottica di
-lunghezza media).\\
 Quando esce il simbolo $s_i$ abbiamo quindi $I(p_i)=\log_r \frac{1}{p_i}$, con
 tipicamente $r=2$, misurando la quantità di informazione in bit.\\
 Studiamo ora proprietà di $H_2(S)$, che può essere studiata come una

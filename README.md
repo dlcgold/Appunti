@@ -53,7 +53,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [ ] Modelli Probabilistici per le Decisioni (bozza)
 - [x] Processo e Sviluppo Software
 - [x] Teoria della Computazione
-- [x] Teoria dell'informazione e Crittografia (RC)
+- [x] Teoria dell'informazione e Crittografia
 
 ##### II anno Magistrale
 - [x] Fondamenti Logico Matematici dell'Informatica

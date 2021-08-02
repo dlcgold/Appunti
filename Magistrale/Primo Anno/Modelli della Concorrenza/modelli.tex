@@ -972,7 +972,7 @@ $\vdash_{ass}$ per l'assegnamento.
       $r$ sarà quindi la precondizione dell'iterazione $W$ che porterà a $z$ che
       sarà precondizione di $D$.\\
       Sapendo che la regola di derivazione per $W$ è:
-      \[\{i\}\mbox{ \textit{W} }\{i\land\neg B\]
+      \[\{i\}\mbox{ \textit{W} }\{i\land\neg B\}\]
       Confronto la tripla con la ``catena'' sopra espressa. Si nota che $r$
       dovrà implicare l'invariante per $W$.
     \end{esempio}
@@ -1220,7 +1220,7 @@ della logica e dell'apparato deduttivo:
 \begin{enumerate}
   \item \textbf{correttezza}, ovvero il fatto che tutto quello che si può
   derivare con l'apparato deduttivo è effettivamente vero, ovvero
-  $vdash\implies\vDash$. Quindi se una tripla è derivabile è anche vera
+  $\vdash\implies\vDash$. Quindi se una tripla è derivabile è anche vera
   \item \textbf{completezza}, ovvero il fatto che l'apparato deduttivo sia in
   grado di derivare tutte le formule vere (ovvero tutte le triple) vere. Si ha
   quindi $\vDash\implies\vdash$
@@ -1275,7 +1275,7 @@ Prendiamo due formule $p$ e $q$ e cerco di capire se è possibile avere
 $m(p)=m(q)$. La risposta è positiva e si parla, in caso, di \textit{equivalenza
   tra formule}. Fissati due stati $\sigma_1$ e $\sigma_2$ mi chiedo se possano
 appartenere allo stesso insieme di formule. In questo caso la risposta è
-negativa, in quanto sei i due stati sono distinti allora ci deve essere almeno
+negativa, in quanto se i due stati sono distinti allora ci deve essere almeno
 una variabile $x$ che ha valore diverso nei due stati ma allora è facile trovare
 una formula che separa i due stati e tale formula potrà essere vera solo in uno
 dei due stati.\\
@@ -1531,8 +1531,8 @@ il linguaggio usato, aggiungendo:
       \textit{C} endwhile}\]
   \item il \textbf{ciclo for}:
   \[\mbox{for(\textit{D; B; F}) \textit{C} endfor} \]
-  sempre convertendolo in un while (\textit{ipotizzo così}):
-   \[\mbox{while \textit{B} do
+  sempre convertendolo in un while:
+   \[\mbox{\textit{D}; while \textit{B} do
       \textit{C; F}  endwhile}\]
   \item \textbf{procedure, metodi e funzioni}
   \item \textbf{array}, anche se solo in lettura se vogliamo applicare la logica
@@ -1852,7 +1852,7 @@ Negli LTS non si ha l'obbligo di avere un insieme finito di stati.
   Act^*$ avendo più azioni sse:
   \begin{itemize}
     \item se $w=\varepsilon$ allora $s\equiv s'$
-    \item se $w=x\cdot x,\,\,a\in Act,\,\,x\in Act^*$ sse:
+    \item se $w=a\cdot x,\,\,a\in Act,\,\,x\in Act^*$ sse:
     \[s\stackrel{a}{\rightarrow} s'' \mbox{ e } s''\stackrel{x}{\rightarrow}
       s'\]
   \end{itemize}
@@ -2249,8 +2249,8 @@ rispetto agli operatori del CCS.\\
   La prima macchina è::
   \[M_1=\overline{coin}\cdot(caffe\cdot M_1+\overline{coin}\cdot tea\cdot M_1)\]
   la seconda:
-  \[M_2=\overline{coin}\cdot(caffe\cdot M_2+\overline{coin}\cdot coin \cdot
-    tes\cdot M_1)\]
+  \[M_2=(\overline{coin}\cdot caffe\cdot M_2)+(\overline{coin}\cdot coin \cdot
+    tea\cdot M_2)\]
   Mi chiedo se:
   \[M_1\stackrel{T}{\sim} M_2\]
   Parto da $M_1$:
@@ -2265,7 +2265,7 @@ rispetto agli operatori del CCS.\\
       \path[->]
       (q_0) edge  node {$\overline{coin}$} (q_1)
       (q_1) edge  node [above]{$\overline{coin}$} (q_2)
-      (q_2) edge  node [above right] {$tes$} (q_0)
+      (q_2) edge  node [above right] {$tea$} (q_0)
       (q_1) edge [bend left= 25] node [above left] {$caffe$} (q_0);
     \end{tikzpicture}
   \end{center}
@@ -2297,7 +2297,7 @@ rispetto agli operatori del CCS.\\
   $\overline{coin}$ (non posso sapere dove va e se vado sul nodo del tea la
   macchina si aspetta un'altra moneta, mentre magari si voleva il caffè). Quindi
   anche se le tracce sono le stesse ma non posso sostituire senza problemi le
-  due macchinette, in qaunto se sostituisco $M_1$ con $M_2$ rischio di andare in
+  due macchinette, in quanto se sostituisco $M_1$ con $M_2$ rischio di andare in
   deadlock.
   \label{coffe}
 \end{esempio}
@@ -2437,7 +2437,7 @@ corrispondenti da entrambe le parti).
 \end{esempio}
 \begin{esempio}
   Siano:
-  \[P_1=a\cdot b\cdot Nil+a\cdot P_1'\]
+  \[P_1=a\cdot b\cdot P_1'+a\cdot P_1'\]
   \[P_1'=b\cdot P_1'\]
   \[Q_1=a\cdot Q_1'\]
   \[Q_1'=b\cdot Q_1'\]
@@ -2476,7 +2476,7 @@ corrispondenti da entrambe le parti).
 \begin{esempio}
   Siano:
   \[P_1=a\cdot b\cdot Nil\]
-  \[P_2=a\cdot \cdot \tau b\cdot Nil\]
+  \[P_2=a\cdot \tau \cdot b\cdot Nil\]
    \begin{center}
     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
       \node[state] (q_0) {$P_1$};  
@@ -2949,7 +2949,7 @@ Facciamo un piccolo ``recap'' della situazione.
 \end{definizione}
 \begin{teorema}
   Si ha che, dati $p,q\in Proc_{CCS}$:
-  \[p\backsimeq q\implies Tracce(p)=tracce(q)\]
+  \[p\backsimeq q\implies Tracce(p)=Tracce(q)\]
   Qui le stesse sequenze di azioni possono essere eseguite su entrambi i
   processi.  
 \end{teorema}

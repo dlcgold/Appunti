@@ -46,17 +46,18 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Metodi Formali
 
 ##### I anno Magistrale
-- [x] Architetture Dati
+- [x] Architetture Dati (obbligatorio)
 - [ ] Bioinformatica (bozza)
-- [x] Machine Learning
-- [x] Modelli della Concorrenza
+- [x] Machine Learning (obbligatorio)
+- [x] Modelli della Concorrenza (obbligatorio)
 - [ ] Modelli Probabilistici per le Decisioni (bozza)
-- [x] Processo e Sviluppo Software
-- [x] Teoria della Computazione
+- [x] Processo e Sviluppo Software (obbligatorio)
+- [x] Teoria della Computazione (obbligatorio)
 - [x] Teoria dell'informazione e Crittografia
 
 ##### II anno Magistrale
 - [x] Fondamenti Logico Matematici dell'Informatica
+- [ ] Data and Computational Biology
 
 ### Altro
 Suggeriamo queste repository open:

@@ -53,11 +53,15 @@ var anno4 = [
     {"title": "Modelli della Concorrenza", "short": "Modelli", "year": "IV", "full": true, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Modelli%20della%20Concorrenza/modelli.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Modelli%20della%20Concorrenza"},
     {"title": "Teoria della Computazione", "short": "Teoria", "year": "IV", "full": true, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Teoria%20della%20Computazione/computazione.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Teoria%20della%20Computazione"},
     {"title": "Processo e Sviluppo del Software", "short": "PSS", "year": "IV", "full": true, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Processo%20e%20Sviluppo%20Software/processo.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Processo%20e%20Sviluppo%20Software"},
-    {"title": "Teoria dell'Informazione e Crittografia", "short": "Critto", "year": "IV", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Teoria%20dell'Informazione%20e%20Crittografia/critto.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Teoria%20dell'Informazione%20e%20Crittografia"},
+    {"title": "Teoria dell'Informazione e Crittografia", "short": "Critto", "year": "IV", "full": true, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Teoria%20dell'Informazione%20e%20Crittografia/critto.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Teoria%20dell'Informazione%20e%20Crittografia"},
     {"title": "Modelli Probabilistici per le Decisioni", "short": "ModProb", "year": "IV", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Modelli%20Probabilistici%20per%20le%20Decisioni/modprob.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Modelli%20Probabilistici%20per%20le%20Decisioni"},
     {"title": "Bioinformatica", "short": "BioInfo", "year": "IV", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Bioinformatica/bio.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Bioinformatica"}
 ]
-var anno5 = []
+var anno5 = [
+    {"title": "Fondamenti Logico Matematici dell'Informatica", "short": "Fondmat", "year": "V", "full": true, "pdf": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Fondamenti%20Logico%20Matematici%20dell'Informatica/fondmat.pdf", "source": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Fondamenti%20Logico%20Matematici%20dell'Informatica"},
+    {"title": "Data and Computational Biology", "short": "compbio", "year": "V", "full": false, "pdf": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Data%20and%20Computational%20Biology/compbio.pdf", "source": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Data%20and%20Computational%20Biology/"},
+    
+]
 
 anno1.forEach(element => {
     document.getElementById("anno1").innerHTML += box(element.title, element.short, element.year, element.full, element.pdf, element.source)

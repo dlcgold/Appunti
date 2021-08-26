@@ -58,8 +58,8 @@ var anno4 = [
     {"title": "Bioinformatica", "short": "BioInfo", "year": "IV", "full": false, "pdf": "https://github.com/dlcgold/Appunti/raw/master/Magistrale/Primo%20Anno/Bioinformatica/bio.pdf", "source": "https://github.com/dlcgold/Appunti/tree/master/Magistrale/Primo%20Anno/Bioinformatica"}
 ]
 var anno5 = [
-    {"title": "Fondamenti Logico Matematici dell'Informatica", "short": "Fondmat", "year": "V", "full": true, "pdf": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Fondamenti%20Logico%20Matematici%20dell'Informatica/fondmat.pdf", "source": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Fondamenti%20Logico%20Matematici%20dell'Informatica"},
-    {"title": "Data and Computational Biology", "short": "compbio", "year": "V", "full": false, "pdf": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Data%20and%20Computational%20Biology/compbio.pdf", "source": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Data%20and%20Computational%20Biology/"},
+    {"title": "Fondamenti Logico Matematici dell'Informatica", "short": "FondMat", "year": "V", "full": true, "pdf": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Fondamenti%20Logico%20Matematici%20dell'Informatica/fondmat.pdf", "source": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Fondamenti%20Logico%20Matematici%20dell'Informatica"},
+    {"title": "Data and Computational Biology", "short": "CompBio", "year": "V", "full": false, "pdf": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Data%20and%20Computational%20Biology/compbio.pdf", "source": "https://github.com/dlcgold/Appunti/blob/master/Magistrale/Secondo%20Anno/Data%20and%20Computational%20Biology/"},
     
 ]
 

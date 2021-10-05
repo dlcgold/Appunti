@@ -649,7 +649,6 @@ L'intero sistema viene modellato con \textit{coppie di equazioni
   quantità di mRNA e maggiore è la produzione fino a che la proteina stessa
   non supera un certo livello di quantità, avendo che ``satura''
 \end{itemize}
-\textbf{Nelle formule forse indici delle proteine sbagliati}.\\
 In ordine si hanno, per i geni:
 \begin{table}[H]
   \centering
@@ -707,6 +706,194 @@ determinati prerequisiti:
     tempo di traduzione. Le scale dei tre grafici sono indicative. I parametri
     sono specificati nel notebook di Mathematica presente nella pagina Moodle.}   
 \end{figure}
+\chapter{Modellazione di Sistemi Biologici}
+Cerchiamo ora di capire come classificare i problemi, come analizzarli e
+comprenderli (anche tramite machine learning) e avere coscienza delle risorse
+online disponibili per la tematica.\\
+Buona parte della ricerca in biologia computazionale ha come obiettivo quello di
+ottenere il passaggio dai risultati di laboratorio alle applicazioni cliniche
+(ed è qualcosa di molto complesso). Per quanto ci sia interesse verso tutte le
+patologie la più interessante e più studiata (soprattutto in questo corso) è il
+\textbf{cancro}. Un esempio di un sistema particolare dove i tumori si
+sviluppano è quello delle cosiddette \textbf{cripte coloniche (\textit{colonic
+    crypts})}, avendo che questo sistema è relativamente semplice da studiare
+dal punto di vista computazionale.\\
+Le \textit{cripte coloniche} si trovano nell'intestino e sono delle sorta di
+``pozzetti'', morfologicamente divisibili in varie aree.
+Alla base delle cripte ci sono delle \textbf{cellule staminali epiteliali}, che
+sono quelle che poi danno luogo ai tessuti dell'epitelio.\\
+\textit{Dal punto di vista matematico tutti gli essere viventi sono di topologia
+isomorfa a dei tubi.}\\
+Tornando al discorso delle cellule staminali si ha che essere si suddividono e,
+man mano che si suddividono tendono a spingere verso l'alto le cellule che si
+trovano ``al di sopra'' di loro. Man mano che tali cellule vengono spinte
+anch'esse tendono a dividersi spingendo le altre cellule verso il \textit{lumen
+  della cripta}. In questo processo di suddivisione queste cellule si
+differenziano e le cellule staminali danno luogo ad una progenie che possiamo,
+dal punto di vista in primis computazionale, rappresentare come un
+\textit{albero}. Si hanno le cellule di tipo diverso, più o meno
+differenziate che continuano a salire verso la superficie dell'epitelio e poi
+tendono a salire su quelli che sono detti i \textit{villi intestinali}. Questo è
+un interessante processo che può essere simulato, tra i vari modi, in modo tale
+che si simuli cosa accade quando le varie differenziazioni non funzionano
+perché, ad esempio, si ha una cellula che ha acquisito una mutazione, mutazioni
+che danno luogo ad una crescita non corretta, ad una \textit{displasia}, che è
+la fase iniziale da cui poi si sviluppano i \textit{tumori del colon}. Si vuole
+quindi fare queste simulazioni e farle in modo il più fedele possibile.\\
+Per capire se una cellula si sta comportando in modo corretto o meno dobbiamo
+misurarne il comportamento. In primis vogliamo misurare due cose, tra le tante:
+\begin{enumerate}
+  \item \textbf{gene expression}
+  \item \textbf{gene alterations}, ovvero le varie mutazioni del genome, le
+  cosiddette le \textit{copy number variations} etc$\ldots$
+\end{enumerate}
+La tecnologia a disposizione per queste tematiche si è molto evoluta ma tra le
+tante tecnologie si segnalano:
+\begin{itemize}
+  \item \textit{microarrays} per l'espressione genica, usati però molti anni fa
+  essendo una delle prime tecnologie per misurare, in modo indiretto ma
+  parallelo, l'espressione dei geni
+  \item \textit{Next Generation Sequencing (NGS)} per praticamente qualsiasi
+  cosa, anche per l'espressione genica, in modo diretto tramite particolari
+  esperimenti (\textbf{nella rec non ho capito il nome di tali
+    esperimenti}). NGS ha avuto molta fama da circa il 2006 in poi, con il
+  monopolio poi di Illumina, anche se di recente si hanno nuove tecnologie che
+  stanno rivoluzionando il settore (che producono read più lunghe)
+\end{itemize}
+Parliamo un secondo dei \textbf{microarrays}.\\
+Questa è una tecnologia non più utilizzata, essendo di inizio anni duemila, che
+però è utile per spiegare come si procede a fare un certo tipo di misure, con
+una tecnologia che è stata poi ripresa da Illumina.\\
+Questo strumento si basa su una griglia a cui sono attaccate delle ``sonde''
+lunghe circa 25 nucleotidi e venivano usati per caratterizzare i geni. Si
+producono infatti segnali luminosi di diversa intensità e diversa lunghezza
+d'onda in una griglia, da cui si può ricavare una griglia numerica che dà
+informazioni in merito alla luce di ogni punto.\\
+I Microarrays sono prodotti da Affymetrix e hanno circa $10^5$ sonde, che
+caratterizzano tutti i geni che interessano. \\
+Si ottiene quindi un'immagine contiene una griglia, dove in ogni punto si
+produce un segnale luminoso di diversa intensità e lunghezza d'onda dalla quale
+si ricava, misurando i segnali luminosi, una \textbf{matrice di espressione},
+dove:
+\begin{itemize}
+  \item le righe sono i geni/trascritti
+  \item le colonne sono misure numeriche
+\end{itemize}
+e si ha, per ogni sonda, quanto e come è luminoso il tal punto nella griglia.\\
+Si prende quindi del DNA, lo si ``denaturalizza'', ovvero lo si sgroviglia, e lo
+si versa direttamente sulla griglia. Il DNA (ma potrebbe essere anche essere
+RNA) viene versato sulla griglia e si ``attacca'', grazie alle sue proprietà
+chimiche, alle sonde (in pratica le parti di DNA/RNA si attaccano alle sonde a
+loro complementari). Il trucco è quello di ``colorare'' i pezzi di DNA e RNA e
+questo si fa usando, come nel caso del Repressilator, delle proteine
+fluorescenti, verdi e rosse, usando quindi processi biochimici per attaccare ai
+pezzi di DNA/RNA queste proteine, che emetteranno fluorescenza una volta colpite
+da un laser. Si può quindi vedere, in ogni punto della griglia, se si ha un
+segnale rosso o uno verde, misurandone l'intensità, ottenendo una misura di
+quanto materiale genico si sia attaccato in ogni punto della griglia.\\
+Vediamo quindi come si utilizza questo tipo di tecnologia per fare delle misure
+di \textit{geni differenzialmente espressi in diverse condizioni}.\\
+Si hanno delle cellule in una certa condizione e altre in un'altra condizione
+(magari, per esempio, una delle due condizione è una crescita in ambiente con
+pochi nutrienti o in un ambiente con temperature estreme, sia alte che basse con
+associati shock termici per le cellule). La prima condizione è normalmente uan
+\textit{condizione standard}, detta \textit{condizione wild-type}, mentre la
+seconda è la condizione che si vuole studiare.\\
+Si hanno due fasi per l'esperimento:
+\begin{enumerate}
+  \item si estrae dalle cellule nelle due condizioni l'RNA, che descrive ciò che
+  le cellule stanno in quel momento esprimendo, quali proteine stanno
+  sintetizzando, etc$\ldots$ Dall'RNA, che nel dettaglio è \textit{mRNA},
+  estraggo il \textit{cDNA}, al quale poi attacco le proteine per la
+  fluorescenza. Si procede quindi con la cosiddetta \textit{ibridazione}, ovvero
+  si prende il materiale genetico con fluorescenza e si immerge il
+  microarrays in questa soluzione, procedendo poi alla scansione con il
+  laser
+  \item nella griglia si ottiene quindi che del materiale genico delle cellule
+  nella prima condizione si attaccano ad alcune sonde mentre quella delle
+  seconda condizione ad altre. In ogni punto della griglia o non si attacca
+  niente (non avendo che le cellule esprimono quanto necessario per quel punto)
+  o si attacca solo l'RNA di una delle due condizioni o si attaccano entrambi.
+  Usando poi i laser per le due fluorescenze si ottiene l'immagine, avendo punti
+  senza luce (nero), alcuni con luce verde, alcuni con luce rossa, a seconda
+  della prevalenza del materiale che viene da una delle due condizioni (se
+  simili si ha una luce tendente al giallo). Una volta prodotta l'immagine si
+  produce l'output numerico delle intensità. 
+\end{enumerate}
+L'esperimento può essere ripetuto più volte, ottenendo una serie di matrici
+numeriche che possono unite in vari modi, ottenendo la \textbf{gene expression
+  data matrix} finale, coi vari \textbf{gene expression levels}, i livelli di
+espressione di ogni gene, ricordando che ogni gene è codificato da più
+sonde. Per ogni gene ho la \textbf{differenza di espressione} tra le due
+condizioni.
+\begin{definizione}
+  Si definiscono due geni come \textbf{differenzialmente espressi} se sono due
+  geni che ho risultano rossi o verdi (???).
+\end{definizione}
+Se tale matrice finale è ottenuta variando solo i tempi e mantenendo 
+fisse le altre condizioni sperimentali si ha che essa rappresenta il
+\textit{time-course of genes expression}.\\
+Sui risultati si può fare \textbf{data mining}, usando tecniche di machine
+learning. \\
+Si vuole fare clustering di geni o sonde che esibiscono un comportamento simile
+dato un insieme di condizioni sperimentali o ambientali. Per farlo si hanno vari
+tool (molti dati disponibili sulla repository NCBI, soprattutto nella
+sotto-repository GEO) ma molti studi richiedono
+una sistemazione finale non banale in merito a ``rumori'' e variazioni di
+protocollo nei laboratori. \\
+Ad esempio, in un esperimento di espressione genica si hanno vari step:
+\begin{enumerate}
+  \item dopo la ``pulizia'' della matrice (tramite controllo qualità) si usano
+  alcune analisi standard, ragionando magari su vari \textit{time points}
+  discreti: 
+  \begin{itemize}
+    \item \textit{clustering}, tramite K-Means, per ogni punto, ottenendo dei
+    vettori che rappresentano il comportamento  di un gene in un certo tempo. Si
+    ottengono cluster di traiettorie. Si raggruppano geni con simile profilo di
+    espressione 
+    \item \textit{enrichment}, che altro non è l'operazione in cui si prendono i
+    dati e gli si associano informazioni, tramite \textit{Gene Ontology (GO)
+      Terms}. La GO è un elenco di nomi con ID unico e oggi come oggi i geni
+    noti sono stati già etichettati coi termini dalla GO. Vengono annotati i
+    termini sovrarappresentati in un cluster. L'etichettatura fa si che quando
+    ho gruppi di geni posso usare tecniche statistiche, come il \textbf{test
+      esatto di Fisher}, per estrarre i termini più rappresentativi, quelli più
+    presenti e descrittivi di un gruppo. In 
+    questo modo, un cluster può essere associato ad alcuni termini
+    ``rappresentativi'', che possono indicare una certa caratterizzazione
+    funzionale e ipotesi di associazioni tra geni e un certo comportamento (se
+    questo non fosse già annotato). Questa tecnica è detta \textbf{associazione
+      a delinquere}, in quanto si ``accusano'' geni di essere associati ad
+    altri, comportandosi in modo simile
+  \end{itemize}
+\end{enumerate}
+\textbf{Su slide, parte 2 a pagina 13, grafici di un esperimento e annessi
+  termini da GO}.\\  
+Vediamo nel dettaglio GO\footnote{\url{www.geneontology.org}}
+che è appunto un \textit{vocabolario
+  controllato/ontologia} che è diventato la chiave per condividere le conoscenze
+biomolecolari, in particolare per i geni e i prodotti genici. È nata negli anni
+novanta a Berkeley mettendo insieme una serie eterogenea di conoscenze
+proveniente da vari ambienti. È nata cercando una nomenclatura standard per la
+genetica della Drosophila. È stata ottenuta con lo sforzo di informatici,
+biologi, filosofi etc$\ldots$ usando, in primis, l'IA simbolica (usata per le
+ontologie, ovvero modi di descrivere in modo simbolico una serie di concetti).\\
+Ogni temrine in GO ha un codice numerico univoco.\\
+Si hanno tre sotto-ontologie, ognuna con una struttura gerarchica a DAG
+(\textbf{su slide immagine di struttura}):
+\begin{enumerate}
+  \item \textbf{MF} (\textit{Molecular Function}), per le attività biochimiche
+  il tipo molecolare
+  \item \textbf{BP} (\textit{Biological Process})
+  \item \textbf{CC} (\textit{Cellular Component})
+\end{enumerate}
+Lato tecnico si ha, sotto GO, un linguaggio logico (stile \textit{Prolog}), con
+un insieme di relazioni, termini e costanti di un linguaggio.\\
+GO non è l'unica ontologia a disposizione, anzi se ne hanno centinaia ma meno
+importanti. GO offre delle API e si hanno tool come \textit{AmiGO} per
+recuperare informazioni.
+% 1.01.37
+\subsection{Next Generation Sequencing (NGS)}
 \end{document}
 
-% LocalWords:  clock 
+% LocalWords:  clock  differenzialmente

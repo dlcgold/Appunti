@@ -1,11 +1,11 @@
 # Appunti
 
-[![Anno in corso](https://img.shields.io/badge/anno%20in%20corso-3%C2%B0-lightgrey.svg)](https://github.com/dlcgold/Appunti)
 [![GitHub stars](https://img.shields.io/github/stars/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/network)
-[![GitHub issues](https://img.shields.io/github/issues/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/issues)
 [![GitHub contributors](https://img.shields.io/github/contributors/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/graphs/contributors)
+[![Liberapay](https://img.shields.io/liberapay/patrons/dlcgold.svg?logo=liberapay)](https://liberapay.com/dlcgold)
 [![GitHub last commit](https://img.shields.io/github/last-commit/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/commits)
+[![GitHub issues](https://img.shields.io/github/issues/dlcgold/Appunti.svg)](https://github.com/dlcgold/Appunti/issues)
 [![License](https://img.shields.io/badge/license-energy%20drink-yellow.svg)](https://github.com/dlcgold/energy_drink-license)
 
 Appunti dei corsi della facoltà di **Informatica** all'_Università degli Studi di Milano - Bicocca_ (**unimib**).

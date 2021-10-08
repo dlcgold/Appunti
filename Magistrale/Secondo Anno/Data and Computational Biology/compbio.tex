@@ -13,6 +13,7 @@
 \usepackage{engrec}
 \usepackage{rotating}
 \usepackage{verbatim}
+\usepackage{chemfig}
 \usepackage[safe,extra]{tipa}
 \usepackage{multirow}
 \usepackage{hyperref}
@@ -35,6 +36,29 @@
 \usepackage[cache=false]{minted}
 \usepackage{mathtools}
 \usepackage[noend]{algpseudocode}
+
+\definesubmol{guanine}{
+  @{hb-gua1}H-[:180](-[:-120]H)
+  -[:120]*6(
+    -N(-@{hb-gua2}H)
+    -(=@{hb-gua3}O)
+    -(*5(-N=-N(-R)-))
+    =-N-
+  )
+}
+
+\definesubmol{cytosine}{
+  @{hb-cyt1}O=[:60]*6(
+    -N(-R)
+    -=-(
+      -N(-[::60]@{hb-cyt3}H)
+      -[::-60]H
+    )
+    =@{hb-cyt2}N-
+  )
+}
+
+
 \newcommand*{\bfrac}[2]{\genfrac{}{}{0pt}{}{#1}{#2}}
 
 \usepackage{tikz}\usetikzlibrary{er}\tikzset{multi  attribute /.style={attribute
@@ -1082,6 +1106,171 @@ Vediamo quindi una breve carrellata di risorse online importanti:
   permette di scaricare in modo semplificato i vari dati relativi a tali tumori
 \end{itemize}
 Ovviamente questa lista è solo introduttiva.
+\chapter{Introduzione ai Prerequisiti}
+Prima di proseguire è bene fare una breve digressione sui modelli delle reazioni
+chimiche al fine di poterne fare simulazioni tramite modelli matematici. Verrà
+quindi fatta una brevissima introduzione di \textbf{biologia molecolare} e di
+\textbf{biochimica}, con la rappresentazione di reazioni chimiche e la loro
+modellazione. Per farlo verrà ripreso l'esempio del Repressilator.\\ 
+In primis conviene riprendere il concetto di \textbf{cooperatività} visto per il
+Repressilator, ovvero il valore rappresentato dal \textbf{coefficiente di Hill}
+$n$, da cui dipende il dominio dell'oscillazione. Per capire cosa sia la
+\textit{cooperatività} abbiamo bisogno di alcune nozioni di biochimica e di come
+le reazioni biochimiche siano state rappresentate nel mondo della computer
+science e della bioinformatica. Per cultura personale si elencano alcuni di
+questi sistemi:
+\begin{itemize}
+  \item \textbf{BioNetGen}, un framework di modellazione \textit{rule-based}
+  \item \textbf{VCell}, un'altra piattaforma di modellazione
+  \item \textbf{COPASI}, un software per la simulazione e l'analisi di reti
+  biochimiche e della loro dinamica
+  \item \textbf{SBML}, un \textit{linguaggio di markup} per modellare processi
+  biologici 
+  \item \textbf{PySB}, una libreria in \textit{Python} per la modellazione di
+  sistemi biologici e biochimici mediante modelli matematici
+\end{itemize}
+\section{Biochimica}
+La \textbf{materia} è studiata in varie forme, tra cui, in \textbf{biochimica},
+quella di \textit{miscele}. Le miscele possono essere:
+\begin{itemize}
+  \item \textbf{omogenee}
+  \item \textbf{soluzioni} con un \textit{solvente} e un \textit{soluto}. Ci
+  sono vari metodi per separare il solvente dal soluto, specialmente metodi
+  fisici/meccanici come usare una centrifuga
+\end{itemize}
+Alcune sostanze non sono però separabili usando semplici tecniche fisiche. Tali
+sostanze sono principalmente di due tipi:
+\begin{itemize}
+  \item \textbf{sostanze pure}, come ad esempio acqua, sale etc$\ldots$ 
+  \item \textbf{composti}, come moltissime sostanze in natura
+\end{itemize}
+Le \textit{sostanze pure} non possono essere separate ulteriormente tramite
+tecniche fisiche ma possono essere modificate da reazioni biochimiche. Una
+\textbf{reazione} coinvolge un certo numero $n$ di \textbf{reagenti} che portano
+ad un certo numero $m$ di \textbf{prodotti}. Le proprietà chimico-fisiche dei
+reagenti possono essere modificate e i prodotti della reazione possono essere
+composti con caratteristiche molto diverse da quelle dei reagenti. Come
+formalismo potremmo avere, 
+indicando con $R_i$ i reagenti e $P_j$ i prodotti:
+\[R_1\oplus R_2\oplus\cdots R_n\implies P_1\oplus P_2\oplus\cdots P_m\]
+Ovviamente i prodotti possono essere separabili o diventare a loro volta
+reagenti. \\
+Ci sono inoltre composti che non possono essere modificati a livello chimico e
+questi sono gli \textbf{elementi}, composti da un certo tipo di
+\textbf{atomo}. Gli atomi sono l'elemento minimo da considerare per parlare di
+reazioni biochimiche a livello cellulare e sono composti, come si sa, da:
+\begin{itemize}
+  \item il \textbf{nucleo}, con \textbf{protoni} e \textbf{neutroni}
+  \item gli \textbf{elettroni}, che si trovano in un'orbitale quantizzato. Ogni
+  orbitale contiene fino a 8 elettroni (tranne il primo che ne contiene massimo
+  solo 2) e quindi si parla di \textit{octet rule}. L'orbitale più esterno è
+  \textit{completo} solo nei cosiddetti \textbf{gas nobili} mentre negli altri è
+  \textit{incompleto}. Il numero di elettroni nell'ultimo orbitale rappresenta
+  la \textbf{valenza dell'atomo}
+\end{itemize}
+La configurazione dell'orbitale più esterno permette agli stessi di legarsi in
+composti. Le \textbf{molecole} sono i composti più piccoli e, se divise,
+cambiano le loro proprietà chimiche. La struttura delle molecole dipende
+dagll'organizzazione degli elettroni dell'ultimo orbitale condivisi dagli atomi.
+Gli atomi con valenza fino a 4, detti \textbf{donors} tendono a donare
+elettroni agli atomi con valenza da 5 a 7, detti \textbf{receptors}, che si dice
+hanno una \textbf{tendenza elettronegativa}. \\
+Uno strumento essenziale in tale ambito è la \textbf{tavola periodica}. La
+tavola periodica ci fornisce informazioni su ogni tipo di elemento conosciuto in
+matura, nonché i nuovi elementi sintetizzabili in esperimenti nucleari.\\
+Si hanno vari modi in cui gli atomi \textit{legano} tra loro:
+\begin{itemize}
+  \item \textbf{legame ionico}, tra atomi con una valenza molto diversa (ad
+  esempio \textit{NaCl}, dove \textit{Na} ha valenza 1 e \textit{Cl} ha valenza
+  7)
+  \item \textbf{legame covalente}, tra atomi con una valenza simile (questo
+  succede spesso con molecole di atomi dello stesso tipo, come $Cl_2$)
+  \item \textbf{legami doppi}, possibili in altre configurazioni (ad esempio
+  Carbonio e ossigeno, entrambi di valenza 4, condividono due coppue di
+  elettroni per formare la $CO_2$)
+\end{itemize}
+Un altro concetto importante è quello di \textbf{polarità}. Le molecole hanno
+una polarità, a seconda dell'elettronegatività di ciascun atomo partecipante e
+della loro configurazione spaziale. Ad esempio:
+\begin{itemize}
+  \item le molecole risultanti dai legami tra $O$ e $H$ tendono ad essere
+  \textit{polari}, poiché l'elettronegatività di $O$ e $H$ è abbastanza diversa 
+  \item le molecole risultanti dai legami tra $C$ e $H$ tendono invece ad essere
+  \textit{non- polare}, poiché l'elettronegatività di $C$ e $H$ è simile 
+\end{itemize}
+Molecole polari tendono ad \textit{attrarsi} mentre quelle non-polari a
+separarsi (ad esempio acqua, polare, e olio non polare). Nel dettaglio, le
+molecola che non si mischiano bene con l'acqua sono dette
+\textbf{idrofobiche}.\\
+Le forze che creanoi legami tra gli atomi sono anche responsabili
+dell'\textit{attrazione} tra atomi e molecole. Tra esse si ha la \textbf{forza
+  elettrostatica} che agisce tra atomi e molecole. Un'altra forza è la
+\textbf{forza di Van der Waals (\textit{vdW})} che, a causa di effetti
+quantistici, attrae le molecole a ``lunghe'' distanze e allontana quelle a
+``corte'' distanze. \\
+Una forza di attrazione intermedia è quella risultante dal cosiddetto
+\textbf{legame a idrogeno}. Legami di questo tipo sono essenziali in biologia
+(basti vedere il DNA e il legame tra le basi azotate, come in figura
+\ref{fig:hyd} e \ref{fig:hyd2}) in quanto il Carbonio è abbastanza
+elettronegativo da essere un \textit{donor} per il \textit{legame a idrogeno}.\\
+\begin{figure}
+  \centering
+  \chemname{\chemfig{!{guanine}}}{Guanina}
+  \qquad
+  \chemname{\chemfig{!{cytosine}}}{Citosina}
+  \chemmove[-,dashed]{\foreach \i in {1,2,3} { \draw (hb-gua\i) -- (hb-cyt\i)
+      ;}} 
+  \caption{I tre legami a idrogeno tra Guanina e Citosina}
+  \label{fig:hyd}
+\end{figure}
+\begin{figure}
+  \centering
+  \chemname{%
+    \chemfig{
+      N*6([:0](-sugar)-(=O)-N(-@{b}H)-(=@{d}O)-(-)=-)
+    }
+  }{Timina}
+  \qquad
+  \chemname{%
+    \chemfig[shift={(-0.5,-1.25)}]{
+      [:90]N*6(-*5(-N(-sugar)-=N-)=-(-@{a}H_2 N)=@{c}N-=)
+    }
+  }{Adenina}
+  \chemmove{%
+    \draw[-,dashed] (a)--(d); 
+    \draw[-,dashed] (c)--(b); 
+  }
+  \caption{I due legami a idrogeno tra Timina e Adenina}
+  \label{fig:hyd2}
+\end{figure}
+\newpage
+\subsection{Biochimica e Metabolismo}
+Abbiamo visto come le reazioni biochimiche modificano le proprietà di vari
+composti. \\
+Una delle reazioni più semplici è quella detta \textbf{dissociazione}. Uno degli
+esempi tipici è il sale, $NaCl$, che dissolve in $Na^{+}$ e $Cl^{-}$ a causa
+della polarità delle molecole dell'acqua. Si noti che questa reazione è
+\textbf{reversibile}.\\
+Un'altra reazione semplice, stavolta \textbf{irreversibile}, che coinvolge più
+composti è la combustione dell'Idrogeno, che potremmo scrivere come:
+\[2H_2+O_2\implies 2H_2O\]
+\textit{Il rapporto quantitativo tra i composti in una reazione è chiamato
+  \textbf{stechiometria della reazione}}.\\
+Per passare dal rapporto espresso con la stechiometria e le unità di misura
+della fisica (come i grammi) e viceversa si introduce una nuova unità di misura:
+\begin{center}
+  \textit{Un grammo di Mercurio, $Hg$, contiene un numero diverso di molecole 
+rispetto ad un grammo di Potassio, $K$.}
+\end{center}
+I chimici quindi, usando la teoria della \textit{fisica statistica}, hanno
+introdotto il concetto di \textbf{mole (\textit{mol})}, definita come la misura
+della \textit{quantità di sostanza}. La mole è definita come la quantità di
+sostanza che contiene esattamente $6,02214076\times 10^{23}$ entità
+fondamentali, essendo questo il valore numerico della costante di Avogadro
+quando espressa in $mol^{-1}$. In altri termini è la quantità di sostanza che
+pesa esattamente il suo peso molecolare (ad esempio una mole di Ossigeno, $O_2$,
+pesa circa $32g$ mentre una di Idrogeno, $H_2$, circa $2g$).
+% slide 33 blocco 3
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile

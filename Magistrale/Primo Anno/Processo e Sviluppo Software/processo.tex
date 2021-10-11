@@ -6,8 +6,8 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{graphics}
-\usepackage{amsfonts}
 \usepackage{listings}
+\usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amstext}
 \usepackage{engrec}
@@ -541,6 +541,98 @@ progetto in Java):
   \item deploy: Pupper, Chef, Ansible, SaltStack
   \item monitor: New Relic, Sensu, Splunk, Nagios
 \end{itemize}
+\subsection{CI/CD pipelines}
+Le pipeline sono delle componenti di alto livello per l'integrazione continua, per il delivery e per il deployment. Esse comprendono alcuni elementi fondamentali:
+\begin{itemize}
+    \item Jobs: \textbf{COSA} si deve fare.
+    \item Stages: \textbf{QUANDO} si devono eseguire dei jobs.
+\end{itemize}
+Uno stage quindi comprende più jobs, un esempio è il seguente.
+\begin{lstlisting}
+stages:
+  - build
+  - verify
+  - unit-test
+  - integration-test
+  - package
+  - release
+  - deploy
+
+build:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - echo "Building"
+    - mkdir build
+    - touch build/info.txt
+  artifacts:
+    paths:
+      -build/
+    
+    # continua
+
+verify:
+    # continua
+    
+unit-test:
+    # continua
+\end{lstlisting}
+Se tutti i jobs in uno stage hanno successo, la pipeline si muove nello stage successivo, altrimenti il percorso di essa rimane bloccato allo stege corrente. Una pipeline tipica consiste in una serie di quattro stages, eseguiti nel seguente modo:
+\begin{itemize}
+    \item \textbf{build}: compila il software
+    \item \textbf{test}: testa il software
+    \item \textbf{staging}: 
+    \item \textbf{production}: distribuzione in produzione 
+\end{itemize}
+
+\subsubsection{Basic Pipelines}
+I jobs vengono eseguiti in uno stage in maniera concorrente. Non è molto efficiente ma è facile da mantenere. Esempio:
+\begin{lstlisting}
+stages:
+  - build
+  - test
+  - deploy
+
+image: alpine
+
+build_a:
+  stage: build
+  script:
+    - echo "This job builds something."
+
+build_b:
+  stage: build
+  script:
+    - echo "This job builds something else."
+
+test_a:
+  stage: test
+  script:
+    - echo "This job tests something. It will only run when all jobs in the"
+    - echo "build stage are complete."
+
+test_b:
+  stage: test
+  script:
+    - echo "This job tests something else. It will only run when all jobs in the"
+    - echo "build stage are complete too. It will start at about the same time as test_a."
+
+deploy_a:
+  stage: deploy
+  script:
+    - echo "This job deploys something. It will only run when all jobs in the"
+    - echo "test stage complete."
+
+deploy_b:
+  stage: deploy
+  script:
+    - echo "This job deploys something else. It will only run when all jobs in the"
+    - echo "test stage complete. It will start at about the same time as deploy_a."
+\end{lstlisting}
+
+Per altre info rimandiamo alla doc: https://docs.gitlab.com/ee/ci/pipelines/
+
 \chapter{Risk management}
 Partiamo da un semplice esempio:
 \begin{esempio}

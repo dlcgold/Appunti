@@ -1666,9 +1666,130 @@ dall'equazione di Michaelis-Menten, facendone il reciproco:
 infatti si ottiene una formula rappresentante una retta, con
 $m=\frac{K_M}{V_{max}}$ e $q= \frac{1}{V_{max}}$. Tale retta incontra
 l'asse $y$, dove si ha $\frac{1}{V}$, in $\frac{1}{V_{max}}$ mentre l'asse $x$,
-dove si ha $\frac{1}{[S]}$,  in $-\frac{1}{K_M}$.
+dove si ha $\frac{1}{[S]}$, in $-\frac{1}{K_M}$.
 \chapter{Simulazioni Deterministiche e Ibride}
+Si analizza ora come andare a fare simulazioni tramite equazioni differenziali
+ordinarie, le EDO. Si introducono quindi gli algoritmi numerici, i
+\textit{risolutori}, per le EDO. Si parla quindi di \textbf{modelli di
+  simulazione deterministici}. \\
+Parlando di modellazione si hanno varie teorie in uso:
+\begin{itemize}
+  \item equazioni differenziali, per \textbf{modelli continui}
+  \item sistemi discreti, come \textit{automi a stati finiti}, \textit{reti di
+    Petri} e \textit{dataflow diagrams} (che non verranno trattati) per
+  \textbf{modelli discreti} 
+  \item tecniche per \textbf{modelli ibridi}, ovvero modelli continui ma con
+  discontinuità e cambi di stato/modalità
+\end{itemize}
+Un componente importante in tutti i tipi di modellazione è il \textbf{tempo},
+inteso come una delle variabili indipendenti del sistema e caratteristica
+fondamentale del modello e degli strumenti che si usano per le simulazioni. \\
+Una delle cose fondamentali da chiedersi studiano il \textit{tempo} è cosa
+costituisce il \textbf{progresso}. Una volta pensato a come modellare il tempo
+si ha un modo per capire come procedere a implementare un simulatore
+etc$\ldots$. \\
+Dal punto di vista computazionale il tempo è \textbf{discretizzato}, come del
+resto qualsiasi altra variabile. In ogni caso si classificano i
+\textit{framework di modellazione} in base alla loro ``visione di base'' di come
+il tempo avanza.\\
+\section{Equazioni Differenziali Ordinarie}
+Le \textbf{equazioni differenziali ordinarie (\textit{EDO})} sono un modello
+standard per modelli fisici, biologici, ingegneristici etc$\ldots$ e assumono un
+campo reale dove c'è una variabile, il tempo, reale (e quindi continua).\\
+La forma generale di una EDO è:
+\begin{gather*}
+  \dot{y}(t)=F(y(t),t)\\
+  y(t_0)=k
+\end{gather*}
+$F$ è una funzione, arbitrariamente complessa, che è sia sul tempo che sulla
+funzione da calcolare. Si sanno manipolare particolari forme di $F$,
+tendenzialmente lineari. Si segnala anche la definizione di $y$ al tempo zero,
+data da una costante $k$. Quest'ultima è la \textbf{condizione iniziale} e
+bisogna averla per forza. Risolvere l'equazioni differenziale corrisponde a
+trovare la forma di $y$ e si dice essere equivalente a \textbf{risolvere un
+  problema iniziale (\textit{initial problem solving})}.\\
+Riprendiamo, ad esempio, le equazioni del Repressilator:
+\begin{gather*}
+  \frac{\dd{m_i}}{\dd{t}}=-m_i+\frac{\alpha}{1+p_j^n}+\alpha_0\\
+  \frac{\dd{p_i}}{\dd{t}}=-\beta(p_i-m_i)
+\end{gather*} 
+Dove si hanno, si ricorda 3 copie di equazioni differenziali, relativamente
+semplici, al più del $p_j^n$ a denominatore nella prima equazione.
+\section{Modelli Discreti}
+Nei \textbf{modelli discreti} si ha un'idea molto diversa del \textit{tempo},
+avendo una nozione derivata dall'osservazione dell'evoluzione del sistema.\\
+Ad esempio con le \textbf{finite state machine (\textit{FSM})} abbiamo una
+rappresentazione di come l'evoluzione del sistema possa passare attraverso vari
+stati. Con le \textbf{reti di Petri} abbiamo una versione succinta delle FSM con
+delle eventuali estensioni. Si usano specialmente reti di Petri che sono
+codifiche che dal punto di vista teorico sono più espressive delle FSM, in
+quanto si riconosce un insieme di linguaggi che contiene quello riconosciuto
+dalle FSM.\\
+Si ha poi una particolare implementazione di FSM o di reti di Petri, detta
+\textbf{Discrete Event Systems (\textit{DES})}, ovvero una rappresentazione
+molto ``operativa'' di quei modelli, dove si ha una coda di eventi generata da
+\textit{diversi sorgenti} e processata da vari \textit{componenti}. La
+generazione degli eventi è normalmente associata ad un tempo, tempo in cui
+l'evento accadrà, e se si hanno più componenti bisogna ordinare i vari elementi
+generati. \\
+Il \textbf{tempo} è normalmente una \textit{nozione derivata} nei modelli
+discreti ottenuto da un'osservazione di sequenze di eventi o un'osservazione di
+un tempo esterno, rappresentabile a sua volta da una FSM o da una serie di
+eventi, parlando \textbf{Wall Clock}.
+\subsection{Modellazione di Cellule Staminali}
+Vediamo quindi l'uso di modelli discreti per la rappresentazione di una
+\textbf{popolazione di cellule staminali}, studiandone \textit{proliferazione}
+e \textit{differenziazione}. Nel dettaglio si parla di \textbf{cellule staminali
+ ematopoietiche}, ovvero quelle che danno origine a tutte le cellule del
+sangue (si hanno infatti vari tipi di cellule staminali, come quelle neurali,
+quelle muscolari, quelle epiteliali etc$\ldots$).\\ 
+Una cellula staminale si differenzia in una serie di possibili \textbf{cellule
+  progenitrici} che sono più differenziate e che infine si differenziano
+totalmente in cellule ``finali'', nel caso del sangue, in analisi:
+\begin{itemize}
+  \item cellule T
+  \item globuli rossi
+  \item $\ldots$
+\end{itemize}
+Con \textbf{sistema ematopoietico} si intende il sistema che da luogo alle
+cellule che compongono il nostro sangue. Le cellule ematopoietiche derivano
+dalle \textbf{cellule stromali} contenute nel \textit{midollo osseo}.\\
+Modellazione del sistema in figura \ref{fig:schema}
+\footnote{\url{https://stemcells.nih.gov/info/Regenerative_Medicine/2006Chapter2.html}}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.18]{img/schema.jpg}
+  \caption{Schema completo del sistema ematopoietico con le varie suddivisioni
+    delle cellule.}
+  \label{fig:schema}
+\end{figure}
+\newpage
+Possiamo quindi dividere la divisione e la proliferazione delle cellule
+staminali in tre tipologie:
+\begin{enumerate}
+  \item \textbf{divisione asimmetrica}, che è quello che si nota quando da una
+  cellula staminale si produce una cellula differenziata:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/asim.pdf}
+  \end{figure}
+  \item \textbf{divisione simmetrica}, in cui le cellule staminali si dividono
+  in due cellule staminali o in due cellule completamente differenziate:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/sim.pdf}
+  \end{figure}
+  \item \textbf{divisione ambientalmente asimmetrica}, anche se non è
+  propriamente rappresentato, dove si può avere una divisione simmetrica o
+  asimmetrica a seconda della presenza di un certo microambiente in cui si trova
+  la cellula: 
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{img/aasim.pdf}
+  \end{figure}
+\end{enumerate}
+% 23.30
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
-% LocalWords:  REST ligandi
+% LocalWords:  REST ligandi discretizzato Petri

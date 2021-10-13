@@ -67,7 +67,7 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#roadmap">Notes</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -79,7 +79,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
+It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti). 
 [![Product Name Screen Shot][product-screenshot]](https://www.pexels.com/photo/coffee-coffee-drink-cup-cup-of-coffee-459304/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -103,8 +103,7 @@ In Progress...
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-<!-- ROADMAP -->
-## Roadmap
+## Notes
 
 - [X] Modelli della Concorrenza
 - [X] Teoria della Computazione
@@ -147,7 +146,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-MarioAvolio - marioavolio@protonmail.com
+MarioAvolio - marioavolio@protonmail.com - www.marioavolio.ml
 
 Project Link: [https://github.com/MarioAvolio/Unimib---Computer-Science-Notes](https://github.com/MarioAvolio/Unimib---Computer-Science-Notes)
 

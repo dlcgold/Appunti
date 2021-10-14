@@ -36,7 +36,7 @@
 <h3 align="center">Computer Science Notes</h3>
 
   <p align="center">
-    A set of notes for computer Science Students of Unimib
+    A set of notes for computer Science Students of Unimib.
     <br />
     <a href="https://github.com/MarioAvolio/Unimib---Computer-Science-Notes"><strong>Explore the docs »</strong></a>
     <br />
@@ -97,8 +97,11 @@ It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti).
 <!-- GETTING STARTED -->
 ## Getting Started
 
-### Installation
-In Progress...
+### Download PDF
+[Modelli della Concorrenza](http://fumacrom.com/2W8VS)
+[Teoria della Computazione](http://fumacrom.com/2W9hZ)
+[Machine Learning](http://fumacrom.com/2W9j2)
+[Processo e sviluppo del Software](http://fumacrom.com/2W9lU)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

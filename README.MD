@@ -98,10 +98,10 @@ It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti).
 ## Getting Started
 
 ### Download PDF
-[Modelli della Concorrenza](http://fumacrom.com/2W8VS)
-[Teoria della Computazione](http://fumacrom.com/2W9hZ)
-[Machine Learning](http://fumacrom.com/2W9j2)
-[Processo e sviluppo del Software](http://fumacrom.com/2W9lU)
+[Modelli della Concorrenza](http://fumacrom.com/2W8VS)  
+[Teoria della Computazione](http://fumacrom.com/2W9hZ)  
+[Machine Learning](http://fumacrom.com/2W9j2)  
+[Processo e sviluppo del Software](http://fumacrom.com/2W9lU)  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

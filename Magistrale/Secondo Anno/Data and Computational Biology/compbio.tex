@@ -68,9 +68,11 @@
   /.style={draw=MediumPurple1, fill=MediumPurple1!20}}\tikzset{every
   relationship /.style={draw=Chartreuse2,
     fill=Chartreuse2!20}}\newcommand{\key}[1]{\underline{#1}}
+\tikzset{elliptic state/.style={draw,ellipse}}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{decorations.markings}
 \usetikzlibrary{arrows,shapes,backgrounds,petri}
+
 \tikzset{
   place/.style={
     circle,
@@ -1821,6 +1823,7 @@ Si ha quindi:
 \begin{figure}[H]
   \centering
   \includegraphics[scale = 1]{img/fsa1.pdf}
+  \label{fig:fsa1}
 \end{figure}
 Dove si ha:
 \begin{itemize}
@@ -1848,8 +1851,238 @@ esponenziale ad una transizione dell'FSA.\\
 Si possono anche associare alle transizioni differenze probabilità per poter
 passare ad uno stato partendo da un certo stato, ottenendo in pratica una
 \textit{Markov chain}, ovvero un \textbf{sistema di transizione}. \\
-% 32.32
+Vediamo quindi come manipolare questi strumenti modellistici e cosa si ottiene
+con il loro uso. Quello che viene prodotto è una \textbf{traccia}, ovvero una
+\textit{sequenza ordinata} di vettori di valori, che volendo possono essere
+\textit{simbolici}. Ad esempio, per l'FSA appena visto, potremmo avere come
+traccia, dove ogni volta la coppia è formata dal numero di cellule staminali e
+dal numero di cellule progenitrici: 
+\[\langle{(100, 10^5),(101, 10^5)\ldots(98, 10^5)\rangle}\]
+La nozione di \textit{traccia} ci permette di ragionare ad un ``livello più
+basso'' e ci permette di definire sulla base delle tracce cos'è un
+\textbf{Discrete Event Simulator (\textit{DES})}. Parlando dei DES si ha che la
+semantica è più o meno la stessa però l'idea è che studiando come è fatta una
+\textit{traccia} poi posso costruire un sistema che è di fatto più efficiente. I
+DES sono molto utili anche per fare simulazioni iniziali di circuiti
+elettronici. \\
+L'architettura di un simulatore è formata da:
+\begin{enumerate}
+  \item una \textit{specifica di sistema} (che può essere, ad esempio, una
+  rappresentazione tramite EDO)
+  \item un \textit{engine} che, prese in input le specifiche di sistema, produce
+  una \textit{traccia }di un sistema generando una serie di realizzazioni
+  \item la \textit{traccia di simulazione} che raccoglie tutte le tracce
+  prodotte dall'engine. Si ha una struttura interna
+  \item una \textit{trace inspection} che manipola la traccia con un certo
+  strumento, ad esempio, costruendo grafici, facendo analisi matematica,
+  producendo una GUI etc$\ldots$ \\
+  In alcuni casi si può anche interagire con la
+  simulazione, interrompendola, ripetendo alcuni step, cambiare parametri ``a
+  caldo'' etc$\ldots$ 
+\end{enumerate}
+Per implementare un simulatore banalmente si fa un \textit{loop}:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \For {$i$ \textbf{from} $start$ \textbf{to} $finish$}
+    \State \textit{evaluate next ($i$)}
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+dove \textit{evaluate next ($i$)} determina il tipo di simulazione che si sta
+facendo.\\
+\subsection{Simulatore di FSA}
+Per implementare  un simulatore di FSA si ha:
+\begin{itemize}
+  \item come \textit{specifica} una rappresentazione di un FSA e si hanno quindi
+  abbiamo alcune possibilità:
+  \begin{itemize}
+    \item costruire l'FSA e simularlo, tramite una funzione di transizione
+    $\delta$, mettendo in conto che il consumo di 
+    memoria cresce rapidamente (anche perché l'eventuale prodotto di un FSA con
+    $N$ stati e di uno con $M$ stati produce in risultato $NM$ stati)
+    \item tenere l'FSA separato e fare una simulazione più complessa
+  \end{itemize}
+  \item come \textit{engine} controllare l'insieme di tutte le transizioni
+  abilitate dallo stato corrente e produrre lo stato successivo
+\end{itemize}
+Dal punto di vista ``programmativo'' si potrebbe usare anche solo una matrice.\\
+La semantica di un DES è quindi quella di un FSA ma si ha una modalità di
+esecuzione più efficiente dal punto di vista spaziale a patto di avere una coda
+di eventi, per questo i DES sono scritti per tenere separati i diversi FSA. \\
+Vediamo quindi come si implementa un DES. Si hanno:
+\begin{itemize}
+  \item come \textit{specifiche} si hanno sorgenti, ad esempio unità di
+  computazione, come dei \textit{down samplers} (che riducono il campionamento
+  del segnale) o delle operazioni logiche etc$\ldots$, che studiano, ad esempio,
+  l'output di generatori di onde quadre 
+  \item come \textit{engine} una \textit{coda con priorità} (per controllare
+  quale evento far accadere prima) di coppie $\langle
+  tempo, valore\rangle$, dove il valore può anche essere una struttura dati
+  complessa. La coda contiene gli eventi che devono essere simulati. Si hanno
+  poi i vari \textit{evaluators} delle unità, avendo che 
+  ogni unità assume significato sse si hanno tutti i suoi input, potendo così
+  produrre un output
+\end{itemize}
+Usando una coda di priorità, implementata tramite un \textit{heap}, abbiamo
+tempi di inserimento e rimozione logaritmici (con un \textit{heap di Fibonacci}
+si avrebbe addirittura inserimento in tempo costante). \\
+Un esempio famoso è \textit{Simulink} che è il DES per \textit{MATLAB}.
+\subsection{Simulatore di EDO}
+Un esempio di simulatore che studia equazioni differenziali è il \textbf{metodo
+  di Runge-Kutta al quart'ordine}, che appunto è un 
+\textit{integratore} per EDO. È il metodo standard per integrare EDO ed è
+abbastanza semplice da implementare.\\
+Riprendendo la forma generale di una EDO, o di un sistema di EDO, si ha il
+cosiddetto \textbf{problema del valore iniziale (\textit{initial-value
+    problem})}, ovvero, avendo $t$ come 
+variabile (che per noi tendenzialmente è il \textbf{tempo}) e $c$ come costante:
+\[
+  \begin{cases}
+    \frac{\dd{y(t)}}{\dd{t}}=F(y(t),t)\\
+    y(0)=c
+  \end{cases}
+\]
+Si hanno quindi:
+\begin{itemize}
+  \item come \textit{specifica} un insieme di EDO
+  \item come \textit{engine} si calcola in un numero discreto di passi il tempo
+  il valore della funzione e della sua derivata. Come metodi numerici si hanno,
+  ad esempio:
+  \begin{itemize}
+    \item il \textbf{metodo di Eulero}
+    \item il \textbf{metodo di Runge-Kutta}, che può essere a diversi ordini,
+    tipicamente al secondo o al quarto
+    \item altri tipi di integratori, in particolare \textbf{metodi impliciti} in
+    grado di trattare \textit{equazioni rigide}, \textit{vincoli algebrici},
+    etc$\ldots$ 
+  \end{itemize}
+\end{itemize}
+Non si ha quindi tendenzialmente uno studio analitico delle EDO, non essendo in
+generale fattibile, ma si ha appunto uno studio numerico.
+\subsubsection{Il metodo di Eulero}
+Il \textbf{metodo di Eulero} non è più usato in quanto non ha caratteristiche
+numeriche particolarmente ragionevoli, in primis perché ``accumula'' errori
+molto velocemente. \\
+SI usando degli indici per indicare il \textbf{passo i-esimo di computazione} e
+si indica con $h$ il \textbf{passo di integrazione}, fisso.\\
+Date queste premesse si supponga di avere l'n-esimo punto della funzione già
+calcolato, ovvero $y_n$ si ha, per la forma di EDO indicata sopra:
+\[y_{n+1}=y_n+h\cdot F(y_n,x_n)\]
+In pratica l'idea generale dietro un integratore è quello di calcolare uno step
+valutando la funzione $F$ allo step precedente e moltiplicando il risultato per
+il passo di integrazione sommando per lo step precedente, ottenendo in pratica
+la forma di una retta (tra il punto $x_n$ e il punto $x_{n+h}$).
+\subsubsection{Il metodo di Runge-Kutta}
+Il \textbf{metodo di Runge-Kutta al quart'ordine} supera il problema del
+\textit{metodo di Eulero} di essere troppo lineare, dicendo che per vincolare
+meglio il computo dei valori successivi della funzione $y$ è bene considerare
+non solo il punto $x_{n+h}$ ma anche $x_{n+\frac{h}{2}}$. In particolare
+``costringiamo'' la funzione a passare in un certo ``corridoio''.\\
+Il \textit{metodo di Runge-Kutta al prim'ordine} è in pratica il \textit{metodo
+  di Eulero} e si arriva a quanti ordini si vuole.\\ 
+La formulazione completa di \textit{Runge-Kutta al quart'ordine} (quart'ordine
+in quanto si calcolano quattro punti intermedi), detto anche
+\textbf{metodo di Runge-Kutta 4} :
+\begin{gather*}
+  k_1=h\cdot F\left(x_n,y_n\right)\\
+  k_2=h\cdot F\left(x_n+\frac{h}{2},y_n+\frac{k_1}{2}\right)\\
+  k_3=h\cdot F\left(x_n+\frac{h}{2},y_n+\frac{k_2}{2}\right)\\
+  k_4=h\cdot F\left(x_n+h,y_n+k_3\right)
+\end{gather*}
+Dove si nota che ogni $k_i$ è calcolato a partire da $F$ e da voli di $x_n$ e
+$y_n$ che si conoscono e dai valori di $k_{i-1}$.\\
+Si ha infine la formula per calcolare lo step successivo:
+\[y_{n+1}=y_n+\frac{k_1}{6}+\frac{k_2}{3}+\frac{k_3}{3}+\frac{k_4}{6}+
+  \mathcal{O}(h^5)\]
+Introducendo quindi un errore è un $\mathcal{O}(h^5)$ (per questo viene anche
+chiamato \textbf{metodo di Runge-Kutta 45}, indicando sia l'ordine, 4, che
+l'ordine errore, 5), che è un valore molto
+piccolo, fornendo un ottimo compromesso tra l'errore e la velocità di
+computazione, ovvero la \textbf{velocità di convergenza} del metodo. \\
+A livello computazionale serve quindi la funzione (passandola tendenzialmente
+come \textit{funzione lambda}), il range, i valori iniziali etc$\ldots$ \\
+Si ha che lo step $h$ può essere fisso o meno, avendo un \textbf{algoritmo
+  adattivo}. 
+\subsection{Sistemi Ibridi}
+Ci si chiede cosa fare quando si ha una visione del sistema ``ad alto livello''
+e una visione ``a basso livello'', avendo sistemi complessi che in uno stato si
+comportano in un modo e in un altro stato in un altro, in uno stato magari si
+usa un modello e in un altro un modello differente. Si mischiano quindi sistemi
+con FSA, discreti, e sistemi con EDO, continui, creando dei \textbf{sistemi
+  ibridi}. Un sistema ibrido può anche essere un sistema che in due stati
+presenta due diversi insiemi di EDO, da scegliere in base a certe condizioni,
+come ad esempio in figura \ref{fig:hyb}.\\
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[shorten >=1pt,node distance=4cm,on grid,auto]
+    \node[elliptic state] (q_0) {$\frac{\dd{y}}{\dd{t}}=3$};
+    \node[elliptic state] (q_1) [right=of q_0] {$\frac{\dd{y}}{\dd{t}}=-1.5$};
+    \path[->]
+    (q_0) edge [bend left = 25] node {$y>k_2$} (q_1)
+    (q_1) edge [bend left = 25] node {$y<k_1$} (q_0);
+  \end{tikzpicture}
+  \caption{Esempio di sistema ibrido con due stati e le corrispondenti EDO,
+    avendo che nel sistema vale $k_1>k_2$.}
+  \label{fig:hyb}
+\end{figure}
+In un sistema ibrido con EDO cambia leggermente la forma del \textit{loop}
+principale dell'integratore, avendo (con uno step fisso): 
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \State $h\gets \langle\mbox{\textit{un certo valore}}\rangle$
+    \For {$i$ \textbf{from} $start$ \textbf{to} $finish$}
+    \State \textit{studia le EDO attuali ad uno step $h$}
+    \If{\textit{si abilita una qualsiasi transizione}}
+    \State \textit{cambia insieme di EDO}
+    \EndIf
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+Introducendo anche gli FSA in questo discorso potrei modellare, tramite un
+\textit{sistema ibrido}, una popolazione di cellule staminali (e il conteggio
+visto in figura \ref{fig:fsa1}) in modo più
+realistico, più vicino alla natura discreta e stocastica del modello. Si
+inserisce quindi un'equazione differenziale che modella il \textbf{tempo}, che
+si evolve in modo costante, integrando:
+\[\frac{\dd{time}}{\dd{t}}=1\]
+Si associa quindi ad ogni transizione un ritardo esponenziale che rappresenta il
+tasso di un evento del mio modello/popolazione (come la \textit{divisione
+  asimmetrica} o l'\textit{apoptosi}).\\
+Si ha quindi il seguente FSA:
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[shorten >=1pt,node distance=9cm,on grid,auto]
+    \node[elliptic state] (q_0) {$Morte/apoptosi$};
+    \node[elliptic state,label={\small quiescenza}, align=center] (q_1)
+    [right=of q_0] {$\frac{\dd{time}}{\dd{t}}=1$\\$r(morte)=random()$};
+    \path[->]
+    (q_0) edge [bend left = 25] node [above, align=center] {$test = \top $\\
+      $Ns\gets Ns-1$\\ $Ns\gets Ns-1$} (q_1)
+    (q_1) edge [bend left = 25] node [below]
+    {$-\ln(r(morte))<\alpha\cdot Ns\cdot time$} (q_0);
+  \end{tikzpicture}
+  \label{fig:hyb2}
+\end{figure}
+Dove ad ogni integrazione in pratica ``tiro dei dadi'', avendo:
+\begin{itemize}
+  \item la transizione etichettata con un certo $test$, nel nostro caso:
+  \[-\ln(r(morte))<\alpha\cdot Ns\cdot time\]
+  scatta in base al ``lancio dei dadi'' fatto con $random()$
+  \item la transizione che torna nello stato di quiescenza merita un
+  approfondimento. 
+  Avendo che se sono nello stato $morte/quiescenza$ test è sempre $\top$ e
+  tornando nello stato $quiescenza$ si ``riazzera'' il tempo e si conteggia la
+  ``morte'' di una cellula staminale
+\end{itemize}
+Ci sono dei problemi con gli algoritmi per la simulazione di \textit{sistemi
+  ibridi}, specialmente \textit{problemi numerici}, ad esempio il problema del
+\textbf{guard crossing}. Per questo problema si ha che, avendo ad esempio un
+test del tipo $y(t)<0$, non seguendo la funzione  esattamente l'andamento
+atteso, a livello numerico avendo l'integratore che integra solo in certi punti,
+si rischia di ``perdere'' il test, non facendo il cambio di stato.
+
+
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
-% LocalWords:  REST ligandi discretizzato Petri FSA
+% LocalWords:  REST ligandi discretizzato Petri FSA primis

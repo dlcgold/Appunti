@@ -215,8 +215,8 @@ linguaggio sopra definito.
 		\frac{\{p\}\,\,C_1\,\,\{q\}\,\,                       
 		\,\,\{q\}\,\,C_2\,\,\{r\}}{\{p\}\,\,C_1;C_2\,\,\{r\}} 
 	\end{align}
-	  
-	
+		  
+		
 \end{definizione}
 \subsection{Assegnamento}
 \begin{definizione}
@@ -479,10 +479,10 @@ linguaggio sopra definito.
 				      			\[\{N\geq 0\}\mbox{ \textit{P} }\{s\cceq x^N\}\]
 				      			$x$ e $N$ sono variabili, nella realtà costanti non venendo mai modificate da
 				      			$P$, e il loro valore fa parte dello stato della memoria.\\
-				      			  
+				      							      			  
 				      			\subsubsection{Trovare un'invariante}
 				      			Concentriamoci in primis sull'iterazione cercando un'invariante. \textbf{Una strategia
-				      			semplice è quella di simulare i primi passi di una esecuzione.} Supponendo $N$
+				      			semplice è quella di simulare i primi passi di una esecuzione, prendendo spunto dagli elementi nella post condizione.} Supponendo $N$
 				      			comunque non nullo abbiamo, seguendo le due variabili $i$ e $s$ nelle varie
 				      			iterazioni (procedendo verso destra nella tabella), procedendo in modo
 				      			\textit{simbolico} per $s$ (usando quindi il simbolo $x$ direttamente):
@@ -506,7 +506,7 @@ linguaggio sopra definito.
 				      			dimostrando che ho effettivamente l'invariante $s= x^i$ (poiché non varia all'inizio e alla fine, e nel dettaglio
 				      			abbiamo trovato un \textbf{invariante forte}, che lo è a priori rispetto alla
 				      			condizione booleana $B$).\\
-				      			  
+				      							      			  
 				      			\subsubsection{Risoluzione del problema data l'invariante}
 				      			Vogliamo però ottenere come pre-condizione $\{s=x^i\land i<N\}$. Sapendo però
 				      			che $s= x^i\land i<N$ è una regola ``più forte'' di $s= x^i$ (se è vera la
@@ -560,61 +560,59 @@ linguaggio sopra definito.
 				      				Da notare solo che $x$ deve essere non nullo.
 				      				\end{esempio}
 				      				\begin{esempio}
-				      			Vediamo quindi un esempio completo.\\
-				      			Si prenda il seguente programma:
-				      			\begin{listing}[H]
-				      				\begin{lstlisting}
+				      					Vediamo quindi un esempio completo.\\
+				      					Si prenda il seguente programma:
+				      					\begin{listing}[H]
+				      						\begin{lstlisting}
       quo ~ 0; rem ~ x;
       while rem > y do
         rem ~ rem - y;
         quo ~ quo + 1;
       endwhile  
-				      				\end{lstlisting}
-				      				\caption{Programma $P$}
-				      				\label{E:W}
-				      			\end{listing}
-				      			Immaginiamo che $x$ e $y$ siano state lette da standard input e che siano quindi reperibili nel programma. Vogliamo dimostrare che:
-				      			\[\{x\geq 0 \land y\geq 0\}\mbox{ \textit{P} }\{x=quo*y + rem \land 0 \leq rem \land rem < y\}\]
-				      			Quindi il programma dovrebbe calcolare il quoziente e il resto della divisione tra x e y. \\ \textbf{NOTA: $ rem < y := \neg B $, quindi al termine dell'esecuzione questa post-condizione sarà già garantita.}
-				      			\subsubsection{Trovare un'invariante}
-				      			\begin{table}[H]
-				      				\centering
-				      				\begin{tabular}[H]{c|ccccc}
-				      					quo & 0 & 1   & 2     & 3     & $\ldots$ \\
-				      					rem & $x$ & $x-y$ & $x-2y$ & $x-3y$ & $\ldots$ 
-				      				\end{tabular}
-				      			\end{table}
-				      			\textbf{NOTA:} in genere l'invariante viene calcolata partendo dalla post-condizione della regola che vogliamo raggiungere.\\
-				      			In questo caso notiamo che delle possibili invarianti possono essere:
-				      			\begin{itemize}
-				      			    \item $x=quo*y + rem$
-				      			    \item $0 \leq rem$
-				      			\end{itemize}
-				      			Impostiamo la tripla da verificare secondo la formula \ref{IterationRulePartial}:\\
-				      			\begin{align}
-				      			    \{x=quo*y + rem\,\,\,\land\,\,\,0 \leq rem\,\,\,\land\,\,\,rem\geq y\}\,\,\,C\,\,\,\{i\}
-				      			    \label{ToCheck}
-				      			\end{align}
-				      			Sapendo che C riguarda due assegnamenti indipendenti, nello specifico: $        rem := rem - y; quo := quo + 1;$, eseguiamo la regola \ref{AssignmentRule} direttamente su entrambe le sostituzioni.
-				      				\[\vdash_{ass}\{x=(quo+1)*y + (rem -y)\,\,\,\land\,\,\,0 \leq (rem-y)\}\,\,\,C\,\,\,\{i\}\]
-				      				\textbf{NOTA:} $rem \geq y $, non è contenuta nella formula chiaramente perché stiamo costruendo a posteriori la \ref{ToCheck} partendo da \[\{i\}\,\,\,C\,\,\,\{i\}\]
-				      				Svolgendo i calcoli si ottiene la formula che coincide con la \ref{IterationRulePartial} (quindi con $B = rem\geq y$ ):
-				      				\[\vdash_{}\{x=quo*y + rem\,\,\,\land\,\,\,rem\geq y\}\,\,\,C\,\,\,\{i\}\]
-				      				\textbf{NOTA:} sappiamo che $y\geq0$ poiché è una precondizione del programma.
-				      				Sfruttando la regola \ref{IterationRulePartial} allora si ottiene:
-				      				\[\vdash_{iter}\{x=quo*y + rem\,\,\,\land\,\,\,rem\geq y\}\,\,\,W\,\,\,\{x=quo*y + rem\,\,\,\land\,\,\,rem\geq 0\,\,\,\land\,\,\,rem<y\}\]
-				      				\subsubsection{Dimostriamo che vale per gli assegnamenti iniziali}
-				      				Dobbiamo dimostrare che le due invarianti hanno valore dopo gli assegnamenti iniziali ($quo := 0; rem := x;$) e che $y\geq0$. 
-				      				Dimostriamo allora la regola:
-				      				\begin{align}
-				      				\{x\geq 0 \land y\geq 0\}\mbox{ \textit{A} }\{x=quo*y + rem\,\,\,\land\,\,\,rem \geq 0\}
-				      				    \label{ToCheck2}
-				      				\end{align}
-				      				\[\vdash_{ass}\{x=x\,\,\,\land\,\,\,rem \geq 0\}\mbox{ \textit{A} }\{x=quo*y + rem\,\,\,\land\,\,\,rem \geq 0\}\]
-				      				\[\vdash_{}\{x \geq 0\}\mbox{ \textit{A} }\{x=quo*y + rem\,\,\,\land\,\,\,rem \geq 0\}\]
-				      				
-				      				... continua
-				      			\end{esempio}
+				      						\end{lstlisting}
+				      						\caption{Programma $P$}
+				      						\label{E:W}
+				      					\end{listing}
+				      					Immaginiamo che $x$ e $y$ siano state lette da standard input e che siano quindi reperibili nel programma. Vogliamo dimostrare che:
+				      					\[\{x\geq 0 \land y\geq 0\}\mbox{ \textit{P} }\{x=quo*y + rem \land 0 \leq rem \land rem < y\}\]
+				      					Quindi il programma dovrebbe calcolare il quoziente e il resto della divisione tra x e y. \\ \textbf{NOTA: $ rem < y := \neg B $, quindi al termine dell'esecuzione questa post-condizione sarà già garantita.}
+				      					\subsubsection{Trovare un'invariante}
+				      					\begin{table}[H]
+				      						\centering
+				      						\begin{tabular}[H]{c|ccccc}
+				      							quo & 0   & 1     & 2      & 3      & $\ldots$ \\
+				      							rem & $x$ & $x-y$ & $x-2y$ & $x-3y$ & $\ldots$ 
+				      						\end{tabular}
+				      					\end{table}
+				      					\textbf{NOTA:} in genere l'invariante viene calcolata partendo dalla post-condizione della regola che vogliamo raggiungere.\\
+				      					In questo caso notiamo che delle possibili invarianti possono essere:
+				      					\begin{itemize}
+				      						\item $x=quo*y + rem$
+				      						\item $0 \leq rem$
+				      					\end{itemize}
+				      					Impostiamo la tripla da verificare secondo la formula \ref{IterationRulePartial}:\\
+				      					\begin{align}
+				      						\{x=quo*y + rem\,\,\,\land\,\,\,0 \leq rem\,\,\,\land\,\,\,rem\geq y\}\,\,\,C\,\,\,\{i\} 
+				      						\label{ToCheck}                                                                          
+				      					\end{align}
+				      					Sapendo che C riguarda due assegnamenti indipendenti, nello specifico: $        rem := rem - y; quo := quo + 1;$, eseguiamo la regola \ref{AssignmentRule} direttamente su entrambe le sostituzioni.
+				      					\[\vdash_{ass}\{x=(quo+1)*y + (rem -y)\,\,\,\land\,\,\,0 \leq (rem-y)\}\,\,\,C\,\,\,\{i\}\]
+				      					\textbf{NOTA:} $rem \geq y $, non è contenuta nella formula chiaramente perché stiamo costruendo a posteriori la \ref{ToCheck} partendo da \[\{i\}\,\,\,C\,\,\,\{i\}\]
+				      					Svolgendo i calcoli si ottiene la formula che coincide con la \ref{IterationRulePartial} (quindi con $B = rem\geq y$ ):
+				      					\[\vdash_{}\{x=quo*y + rem\,\,\,\land\,\,\,rem\geq y\}\,\,\,C\,\,\,\{i\}\]
+				      					\textbf{NOTA:} sappiamo che $y\geq0$ poiché è una precondizione del programma.
+				      					Sfruttando la regola \ref{IterationRulePartial} allora si ottiene:
+				      					\[\vdash_{iter}\{x=quo*y + rem\,\,\,\land\,\,\,rem\geq y\}\,\,\,W\,\,\,\{x=quo*y + rem\,\,\,\land\,\,\,rem\geq 0\,\,\,\land\,\,\,rem<y\}\]
+				      					\subsubsection{Dimostriamo che vale per gli assegnamenti iniziali}
+				      					Dobbiamo dimostrare che le due invarianti hanno valore dopo gli assegnamenti iniziali ($quo := 0; rem := x;$) e che $y\geq0$. 
+				      					Dimostriamo allora la regola:
+				      					\begin{align}
+				      						\{x\geq 0 \land y\geq 0\}\mbox{ \textit{A} }\{x=quo*y + rem\,\,\,\land\,\,\,rem \geq 0\} 
+				      						\label{ToCheck2}                                                                         
+				      					\end{align}
+				      					\[\vdash_{ass}\{x=x\,\,\,\land\,\,\,rem \geq 0\}\mbox{ \textit{A} }\{x=quo*y + rem\,\,\,\land\,\,\,rem \geq 0\}\]
+				      					\[\vdash_{}\{x \geq 0\}\mbox{ \textit{A} }\{x=quo*y + rem\,\,\,\land\,\,\,rem \geq 0\}\]
+				      				\end{esempio}
 				      				\subsection{Correttezza totale}
 				      				Analizziamo ora il caso in cui non si abbia certezza di terminazione di
 				      				un'iterazione:
@@ -632,6 +630,9 @@ linguaggio sopra definito.
 				      				Bisognerà quindi dimostrare la terminazione.\\
 				      				Studiamo il caso semplice dove:
 				      				\[W=\mbox{ while \textit{B} do \textit{C} endwhile }\]
+				      				\begin{definizione}
+				      					Se si esegue $W$  a partire da uno stato in cui vale $p$, l'esecuzione termina e nello stato finale vale $q$
+				      				\end{definizione}
 				      				Cerchiamo un'espressione \textbf{aritmetica} $E$, dove compaiono le variabili del
 				      				programma, costanti numeriche e operazioni aritmetiche. Cerchiamo anche un
 				      				\textbf{invariante di ciclo} $i$ (che quindi è una formula) per $W$. $E$ e $i$
@@ -640,9 +641,9 @@ linguaggio sopra definito.
 				      					\item $i\implies E\geq 0$, quindi se vale $i$ allora l'espressione aritmetica
 				      					      ha valore $\geq 0$ (il valore di $E$ lo ottengo eseguendo le operazioni sulle
 				      					      costanti e sui valori, in quello stato della memoria, delle variabili)
-				    	\label{ConditionTotalCorrectness1}
+				      					      \label{ConditionTotalCorrectness1}
 				      					\item $\vdash^{tot}\{i\land B\land E=k\}\mbox{ C }\{i\land E<k\}$, dove
-				      					      nella pre-condizione abbiamo la congiunzione logica tra l'invariante $i$, la
+				      					      nella pre-condizione (che quindi supponiamo sia valida) abbiamo la congiunzione logica tra l'invariante $i$, la
 				      					      condizione di ciclo $B$ e tra $E=k$, avendo prima assegnato a $k$ il valore
 				      					      effettivo di $E$ nello stato in cui iniziamo a computare $C$. $k$ quindi non
 				      					      deve essere una variabile del programma e non deve apparire in $C$
@@ -651,10 +652,10 @@ linguaggio sopra definito.
 				      					      post-condizione è formata dall'invariante $i$ e dal fatto che il valore di $E$
 				      					      dopo l'esecuzione sia strettamente minore di $k$ (che è il valore di $E$ prima
 				      					      dell'esecuzione). \textbf{In pratica $E$ decresce ad ogni singola iterazione, ovvero
-				      					      ad ogni esecuzione di $C$.}\\
+				      					      	ad ogni esecuzione di $C$.}\\
 				      					      La notazione $\vdash^{tot}$ serve a escludere che $C$ abbia altri cicli
-				      					      annidati (portando a dover dimostrare che anche i cicli interni
-				      					      terminano). Per praticità quindi supponiamo di non avere cicli interni (stiamo
+				      					      annidati, portando a dover dimostrare che anche i cicli interni
+				      					      terminano pochè $E$ è destinata a decrementarsi un numero \textbf{finito} di volte (essendo limitata da $k$ ad essere maggiore o uguale a zero) . Per praticità quindi supponiamo di non avere cicli interni (stiamo
 				      					      partendo dal ciclo più interno)
 				      					      \label{ConditionTotalCorrectness2}
 				      				\end{enumerate}
@@ -682,7 +683,7 @@ linguaggio sopra definito.
 				      				Chiameremo questa espressione aritmetica \textbf{variante}.\\
 				      				\textit{L'invariante della correttezza totale non è sempre quello di quella
 				      				parziale, magari è uguale, magari diverso o anche uguale solo in parte}
-				        	\subsubsection{Rintracciamento dell'espressione aritmetica variante E}
+				      				\subsubsection{Rintracciamento dell'espressione aritmetica variante E}
 				      				\textit{Spesso si è visto che $E$ si ricava da $B$. Se $B$ è della forma $x>y$ 
 				      					allora $E$ sarà $x-y$. In caso di $<$, $\leq$ e $\geq$ ricondursi a $>$. Si 
 				      					specifica che non è una regola formale ma si è visto che si fa praticamente 
@@ -701,18 +702,14 @@ linguaggio sopra definito.
 				      					\end{listing}
 				      					studio la correttezza totale della tripla:
 				      					\[\{x>5\}\mbox{ P }\{x=5\}\]
-				      		\subsubsection{Ricerca variante}
+				      					\subsubsection{Ricerca variante e Invariante}
 				      					Innanzitutto cerco un variante $E$, che decresce a ogni singola iterazione, e
 				      					un'invariante $i$ come descritti sopra. Quindi, secondo la \ref{ConditionTotalCorrectness1}, qualora ci sia
 				      					l'invariante $i$ allora  $E\geq 0$.\\
-				      					Un primo invariante ``banale'' è $i=x\geq 5$.\\
-				      					In merito ad $E$ notiamo che nel corpo dell'iterazione abbiamo un solo
-				      					comando, dove il valore della variabile $x$ viene decrementato, quindi un
-				      					primo candidato per $E$ potrebbe essere proprio $x$.\\
-				      					Per comodità scegliamo però come variante $x-5$ per avere una
-				      					corrispondenza diretta con l'invariante $x\geq 5$, essendo derivato dallo
-				      					stesso invariante (basandoci in primis sulla prima condizione).\\
-				      					\textbf{NOTA: Non sempre posso ottenere una corrispondenza tra variante e
+				      					In merito ad $E$ notiamo che nel corpo dell'iterazione abbiamo un solo	comando, dove il valore della variabile $x$ viene decrementato, quindi, facendo i calcoloi su $B$, potrei pensare di prendere in considerazione 
+				      					\[E: x - 5\]
+				      					Dovendo però garantire che $E\geq 0$ in relazione ad un dato invariante $i$, allora scelgo
+				      					\[i: x \geq 5\] \\		\textbf{NOTA: Non sempre posso ottenere una corrispondenza tra variante e
 				      						invariante}.\\
 				      					Presi questo invariante e questo variante verifichiamo le condizioni \ref{ConditionTotalCorrectness1} e \ref{ConditionTotalCorrectness2}:
 				      					\begin{enumerate}
@@ -764,7 +761,73 @@ linguaggio sopra definito.
 				      					anche questo $E$ è ricavabile da $i$, anche se questo non è sempre attuabile).
 				      					Il resto della dimostrazione è analoga all'esempio precedente.
 				      				\end{esempio}
-				      				\subsection{Correttezza e Completezza}
+				      				\subsection{Esercizio di Ricapitolazione}
+				      				\begin{esempio}
+				      					\begin{lstlisting}
+	
+	   p ~ 1 ; y ~ b; 
+      while y > 0 do
+        p ~ p * x;
+        y ~ y - 1;
+      endwhile      						\end{lstlisting}
+				      Voglio sapere se vale la regola:
+				      
+				      \[\{b \geq 0\}P\{p = x^b\}\]
+				      \textbf{NOTA:} consideriamo inizialmente la correttezza parziale.
+				      \subsubsection{Correttezza Parziale: Trovo un'invariante}
+				      \[inv: p = x^{b-y} \land y \geq 0\]
+				      \subsubsection{Dimostro che inv è un'invariante di ciclo per W}
+				      Controllo la regola \ref{IterationRulePartial}
+				      \[inv: p = x^{b-y} \land y \geq 0\]
+				      Devo quindi dimostrare che:
+				      \[\{x^{b-y} \land y \geq 0 \land y > 0\}C\{x^{b-y} \land y \geq 0\}\] 
+				      Si noti dal programma che gli assegnamenti sono indipendenti, quindi applico la \ref{AssignmentRule} simultaneamente a entrambe:
+				      \[C\{x^{b-y} \land y \geq 0\}\] 
+				      Semplificando vene dimostrata la formula. Si noti che per la regola dell'implicazione $y > 0 \implies y \geq 0$.
+				      \[\vdash^{}\{x^{b-y} \land y > 0 \}C\{x^{b-y} \land y \geq 0\}\]
+				      \subsubsection{Applichiamo la regola dell'iterazione}
+
+  				      \[\vdash^{iter}\{x^{b-y} \land y \geq 0 \}W\{x^{b-y} \land y \geq 0\ \land y \leq 0\}\]
+  				       
+				      Si noti che $ y \geq 0\ \land y \leq 0 \implies y = 0$. Allora giungiamo all conclusione:
+				       				        \begin{align}
+  				       \vdash^{}\{x^{b-y} \land y \geq 0 \}W\{x^b\}
+      				        \label{Example1}
+ 				        \end{align}
+
+				      \subsubsection{Controlliamo l'invariante dopo l'assegnamento iniziale}
+                        Controlliamo se vale la regola:
+                         \[\{b \geq 0\}A\{x^{b-y} \land y \geq 0\}\]
+                         
+                         Utilizzo sempre la \ref{AssignmentRule} in maniera indipendente:
+                        
+                        \[A\{x^{b-y} \land y \geq 0\}\]
+ 				        \[\vdash^{as}\{ True \land b \geq 0 \} A \{ x^{b-y} \land y \geq 0\}\]
+ 				        \begin{align}
+      				        \vdash^{imp}\{b \geq 0 \}A\{x^{b-y} \land y \geq 0\}
+      				        \label{Example2}
+ 				        \end{align}
+				      \textbf{Nota:} applicando la regola della sequenza tra \ref{Example1} e \ref{Example2} si giunge alla conclusione.
+                    \subsubsection{Correttezza Totale: Invariante e Variante}
+                    Scelgo:
+                    \[E: y\]
+			      Dovendo però garantire che $E\geq 0$ in relazione a un dato invariante $i$, allora scelgo
+			      \[i: y \geq 0\] 
+			      Cerco di verificare secondo \ref{ConditionTotalCorrectness2}:
+			      \[\vdash^{tot}\{y \geq 0 \land y > 0 \land y=k\}\mbox{ y := y - 1 }\{y \geq 0\land y<k\}\]
+			      
+			      \[\mbox{ y := y - 1 }\{y \geq 0\land y < k\}\]
+
+			      \[\vdash^{as}\{y - 1 \geq 0\land y-1 < k\}\mbox{ y := y - 1 }\{y \geq 0\land y<k\}\]
+			      
+			      \[\vdash^{imp}\{y > 0 \land y-1 < k\}\mbox{ y := y - 1 }\{y \geq 0\land y<k\}\]
+			      
+			      \textbf{NOTA}: $y = k \implies y - 1 < k$
+
+				    \end{esempio}   
+				     
+				     
+				     \subsection{Correttezza e Completezza}
 				      				In generale quando si sviluppa una logica, con un apparato deduttivo e
 				      				un'interpretazione delle formule, siamo interessati a due proprietà generali
 				      				della logica e dell'apparato deduttivo:
@@ -781,7 +844,7 @@ linguaggio sopra definito.
 				      				occorre a volte usare deduzioni della logica proposizionale ma tali formule
 				      				parlano anche di operazioni aritmetiche. Si ha che l'aritmetica può essere
 				      				formalizzata attraverso un linguaggio logico con degli assiomi e delle regole di
-				      				inferenza. Si hanno però i \textbf{teoremi di incompletezza dell'aritmetica} di
+				      				inferenza. Si hanno però i \textbf{teoremi d'incompletezza dell'aritmetica} di
 				      				G\"{o}del che dicono che l'aritmetica come teoria matematica è incompleta in
 				      				quanto ci sono formule scritte nel linguaggio dell'aritmetica che sono vere ma
 				      				non sono dimostrabili. Questa incompletezza si riverbera sulla logica di Hoare,
@@ -789,7 +852,7 @@ linguaggio sopra definito.
 				      				\subsection{pre-condizione più debole}
 				      				Dato un comando $C$ e una formula $q$ che interpretiamo come post condizione di
 				      				$C$. Si cerca $p$ tale per cui:
-				      				\[\vdash\{p\}\mbox{ C } \{q\}\]
+				      				\[\vDash\{p\}\mbox{ C } \{q\}\]
 				      				Sia valida e quindi vera.\\
 				      				Ovviamente il caso interessante è quello totale.
 				      				\begin{esempio}
@@ -820,7 +883,12 @@ linguaggio sopra definito.
 				      				Tra le due funzioni finali si ha una sorta di ``dualità'' e agiscono in modo
 				      				speculare tra loro. Se, partendo da $\Sigma$, applico $t(\sigma)$ e scopriamo
 				      				che un certo stato $p$ appartiene a $\Pi$ e a tale $p$ associamo l'insieme dato
-				      				da $m(p)$ si avrà che $\sigma\in m(p)$.\\
+				      				da $m(p)$ si avrà che $\sigma\in m(p)$ (fig. \ref{fig:SigmaAndPi}).\\
+				      				\begin{figure}[h]
+                                        \centering \includegraphics[width=1\textwidth]{img/VENN.png}
+                                        \caption{Correlazione tra $\sigma$ e $\Pi$.}
+                                        \label{fig:SigmaAndPi}
+                                    \end{figure}
 				      				Si possono fare altre osservazioni su queste due funzioni. \\
 				      				Prendiamo due formule $p$ e $q$ e cerco di capire se è possibile avere
 				      				$m(p)=m(q)$. La risposta è positiva e si parla, in caso, di \textit{equivalenza
@@ -863,18 +931,21 @@ linguaggio sopra definito.
 				      					\item \textbf{relazione tra formule}, dove se $p$ implica $q$ (in tutti in
 				      					      casi in cui è vera $p$ è vera $q$) allora
 				      					      $m(p)\subseteq m(q)$, intendendo che $q$ è ``più debole'' (ovvero come formula
-				      					      ci da una conoscenza inferiore essendo $q$ corrispondente ad un insieme più
+				      					      ci dà una conoscenza inferiore essendo $q$ corrispondente a un insieme più
 				      					      grande di stati) di $p$. Si ha a che
 				      					      fare con una relazione algebrica tra le due formule. Più ``debole'' non
 				      					      significa comunque ``peggiore''
 				      				\end{itemize}
 				      				Posso quindi capire come definire la pre-condizione migliore per ottenere una
 				      				tripla valida, insieme al comando $C$ e alla post-condizione.\\
-				      				Un modo è quello di definire la migliore pre-condizione come la pre-condizione più
-				      				debole $p$ che presa come pre-condizione forma una tripla valida:
-				      				\[\vdash \{p\}\mbox{ C }\{q\}\]
-				      				se $p$ è la pre-condizione più debole allora corrisponde al più grande insieme di
-				      				stati tale che la tripla sia valida.\\
+				      			    \begin{definizione}
+				      			        Un modo per specificare la pre-condizione migliore per ottenere una
+				      				tripla valida è quello di definire la più
+				      				debole pre-condizione $p$ che forma una tripla valida:
+				      				\[\vDash \{p\}\mbox{ C }\{q\}\] \\
+				      				Se $p$ è la pre-condizione più debole allora corrisponde al più grande insieme di
+				      				stati tale che la tripla sia valida.
+				      			    \end{definizione}
 				      				Questa è una scelta ragionevole perché è la pre-condizione che impone meno
 				      				vincoli sullo stato iniziale, infatti determina tutti gli stati iniziali che
 				      				garantiscono il raggiungimento della post-condizione. È sempre possibile
@@ -953,8 +1024,8 @@ linguaggio sopra definito.
 				      						\begin{lstlisting}
       x ~ x+1;
       y ~ y*x;
-				      						\end{lstlisting}
-				      						\caption{Programma $P$}
+				      					\end{lstlisting}
+				      					\caption{Programma $P$}
 				      					\end{listing}
 				      					Dove i due assegnamenti sono rispettivamente $A$ e $B$ e si vuole la
 				      					post-condizione $q=x<y$. Cerco quindi $wp(P,q)$.\\
@@ -1112,7 +1183,7 @@ linguaggio sopra definito.
 				      					      				\[0\leq x^2\leq k \,\,\,\mbox{ e }\,\,\,k<(x+1)^2\]
 				      					      				la prima possiamo considerarla come \textit{invariante} (anche solo $x^2\leq
 				      					      				k$).\\
-				      					      				  
+				      					      								      					      				  
 				      					      				All'inizio possiamo pensare che $x$ dipenda da $k$ per una certa funzione $E$.
 				      					      				Si ha quindi un prototipo del genere (con un certo $B$, condizione booleana, e
 				      					      				un certo $F$, incremento nel corpo, dipendenti da $x$ e $k$):
@@ -1158,7 +1229,7 @@ linguaggio sopra definito.
 				      					      				      	\item \textit{Eiffel, programming by contract}
 				      					      				      	\item \textit{assert.h} in C
 				      					      				      \end{itemize}
-				      					      				        
+				      					      				      				      					      				        
 				      					      				\item alcune applicazioni teoriche della logica di Hoare:
 				      					      				      \begin{itemize}
 				      					      				      	\item \textit{semantica del programmi}, ovvero lo studio di cosa significa

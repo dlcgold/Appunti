@@ -21,7 +21,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![MIT License][MIT]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -64,7 +64,7 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#installation">Download PDF</a></li>
       </ul>
     </li>
     <li><a href="#roadmap">Notes</a></li>
@@ -79,7 +79,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti). 
+It is a set of notes about Computer Science. It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti). 
 [![Product Name Screen Shot][product-screenshot]](https://www.pexels.com/photo/coffee-coffee-drink-cup-cup-of-coffee-459304/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -101,7 +101,6 @@ It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti).
 [Modelli della Concorrenza](http://fumacrom.com/2W8VS)  
 [Teoria della Computazione](http://fumacrom.com/2W9hZ)  
 [Machine Learning](http://fumacrom.com/2W9j2)  
-[Processo e sviluppo del Software](http://fumacrom.com/2W9lU)  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -110,7 +109,6 @@ It is a fork of [dlcgold Notes Repository](https://github.com/dlcgold/Appunti).
 
 - [X] Modelli della Concorrenza
 - [X] Teoria della Computazione
-- [X] Processo e sviluppo del Software
 - [X] Machine Learning
 
 See the [open issues](https://github.com/MarioAvolio/Unimib---Computer-Science-Notes/issues) for a full list of proposed features (and known issues).
@@ -140,7 +138,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -176,7 +174,7 @@ Project Link: [https://github.com/MarioAvolio/Unimib---Computer-Science-Notes](h
 [issues-shield]: https://img.shields.io/github/issues/MarioAvolio/Unimib---Computer-Science-Notes.svg?style=for-the-badge
 [issues-url]: https://github.com/MarioAvolio/Unimib---Computer-Science-Notes/issues
 [license-shield]: https://img.shields.io/github/license/MarioAvolio/Unimib---Computer-Science-Notes.svg?style=for-the-badge
-[license-url]: https://github.com/MarioAvolio/Unimib---Computer-Science-Notes/blob/master/LICENSE.txt
+[license-url]: https://github.com/MarioAvolio/Unimib---Computer-Science-Notes/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/MarioAvolio
+[linkedin-url]: https://www.linkedin.com/in/mario-avolio-3666b1219/
 [product-screenshot]: images/screenshot.png

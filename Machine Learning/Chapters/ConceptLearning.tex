@@ -1,0 +1,577 @@
+\chapter{Concept Learning}
+\label{Capitolo 2}
+%%%%
+Il \textbf{concept learning} è la ricerca, nello spazio delle ipotesi, di
+funzioni che assumano valori all'interno di $\{0, 1\}$. In altre parole si
+parla di funzioni che hanno come dominio lo \textbf{spazio delle ipotesi} e
+come codominio $\{0, 1\}$:
+\[f:H\to\{0, 1\}\]
+Volendo si possono usare insiemi e non funzioni.\\
+Si cerca quindi con opportune procedure la miglior ipotesi che si adatta
+meglio al concetto implicato dal \textit{training set}.
+In questo contesto si cerca di capire quale funzione booleana è adatta al mio
+addestramento. In altre parole si cerca di apprendere un'ipotesi booleana
+partendo da esempi di training composti da input e output (etichetta target + label) della
+funzione. \\
+Nel concept learning un'ipotesi è un insieme di valori di attributi e ogni
+valore può essere:
+\begin{itemize}
+  \item Specificata
+  \item Non importante: che si indica con ``?'', e che può assumere qualsiasi
+  valore. Avere un'ipotesi con tutti i valori del vettore pari a ``?'' implica
+  avere l'ipotesi più generale, avendo classificato tutte le istanze solo come
+  esempi positivi. 
+  \item Nulla: si indica con $\emptyset$. Avere un'ipotesi con tutti i valori
+  del vettore pari a $\emptyset$ implica avere l'ipotesi più specifica, avendo
+  classificato tutte le istanze solo come esempi negativi. 
+\end{itemize}
+\begin{esempio}
+  Vediamo quindi la rappresentazione di una ipotesi (ipotizzando di avere a che
+  fare con solo 4 attributi $A_i$, sempre in prospettiva booleana):
+  \[h=\langle 0, 1, ?, 1\rangle = \langle A_1=0, A_2=1, A_3=\,?, A_4=1\rangle\]
+  nella realtà, grazie al ``?'' riferito all'istanza, l'ipotesi $h$ è un insieme
+  di due ipotesi: 
+  \[h\in\{(0, 1, 0, 1),\,(0, 1, 1, 1)\}\]
+  passando quindi da una notazione per ipotesi a una insiemistica.\\
+  Ricordiamo inoltre che lo spazio delle istanze $X$, dal punto di vista
+  insiemistico è:
+  \[X=\{(x_1, x_2, x_3, x_3): \,\, x_1\in A_1, x_2\in A_2, x_3\in A_3, x_4\in A_4\}\]
+\end{esempio}
+\section{Soddisfacimento e Consistenza}
+Sia \textit{c(x)} una \textbf{funzione target}, ovvero la funzione che, all'interno di un certo \textit{training set} $D$, esprime il valore di verità di un'istanza.
+\begin{definizione}
+Si dice che un'istanza $x$ \textbf{soddisfa} i vincoli di $h$ sse $h$ classifica $x$ come
+esempio positivo:
+\[h(x)=1\]  
+Ciò è \textbf{indipendente} dal valore della funzione target associato ad x.
+\end{definizione}
+
+\begin{definizione}
+ Si dice \textbf{consistente} un'ipotesi $h\in H$ tale che: 
+\[h(x)=c(x),\,\forall x\in D\]  
+\end{definizione}
+
+Si evince la teoria delle \textbf{ipotesi di apprendimento induttivo} che dice che se la mia $h$ approssima bene nel \textit{training set} allora approssima bene su tutti gli esempi non ancora osservati.\\
+Il concept learning è quindi una ricerca del \textit{fit} migliore.
+%----------------------------------------------------------------------------------------
+%	SECTION 
+%----------------------------------------------------------------------------------------
+\section{Generalità delle ipotesi}
+\begin{definizione}
+  Date $h_j, h_k\in H$ booleane e definite su $X$. Si ha che $h_j$ è \textbf{più
+    generale o uguale a} $h_k$ (e si scrive con $h_j\geq h_k$) sse:
+  \[(h_k(x)=1)\longrightarrow (h_j(x)=1),\,\,\forall x\in X\]
+  \textbf{Si impone quindi un ordine parziale}.\\
+  Si ha che $h_j$ è \textbf{più generale di} $h_k$ (e si scrive con $h_j> h_k$)
+  sse:
+  \[(h_j\geq h_k)\land (h_k\not\geq h_j)\]
+  Riscrivendo dal punto di vista insiemistico si ha che $h_j$ è \textbf{più
+    generale o uguale a} $h_k$ sse:
+  \[h_j\supseteq h_k\]
+  e che è \textbf{più generale di} $h_k$ sse:
+  \[h_j\supset h_k\]
+  Dal punto di vista logico si ha che $h_j$ è \textbf{più generale di} $h_k$ sse
+  impone meno vincoli di $h_k$ \ref{fig:eulero}
+\end{definizione}
+\begin{esempio}
+  Facciamo un esempio ``giocattolo'' di situazione di \textbf{concept
+    learning}.\\ 
+  La \textbf{funzione target} (o target concept), ovvero la domanda che ci si pone, è:\\
+  \begin{center}
+    \textit{In quali tipologie di giorni $A$ apprezza fare sport acquatici?}
+  \end{center}
+  Abbiamo quindi una serie di attributi per il meteo con i vari valori che
+  possono assumere:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{|c|c|}
+      \hline
+      \textbf{Attributo} & \textbf{\textit{Possibili valori}}\\
+      \hline
+      sky & \textit{Sunny, Cloudy, Rainy}\\
+      temp & \textit{Warm, Cold}\\
+      humid & \textit{Normal, High}\\
+      wind & \textit{Strong, Weak}\\
+      water & \textit{Warm, Cold}\\
+      forecast & \textit{Same, Change}\\
+      \hline
+    \end{tabular}
+  \end{table}
+  In ottica \textit{concept learning} si cerca quindi la \textbf{funzione
+    target} $enjoySport$ (che sarebbe la nostra funzione $c$): 
+  \[enjoySport:X\to\{0, 1\}\]
+  Vediamo quindi anche un esempio di \textit{training set} $D$ (per praticità i
+  valori degli attributi sono indicati con la sola iniziale):
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{|c|c|c|c|c|c|c|}
+      \hline
+      \textbf{sky} & \textbf{temp} & \textbf{humid} & \textbf{wind} &         
+      \textbf{water} & \textbf{forecast} & \textbf{enjoySport}\\
+      \hline
+      S & W & N & S & W & S & \color{darkgreen} yes\\
+      S & W & H & S & W & S & \color{darkgreen} yes\\
+      R & C & H & S & W & C & \color{red} no\\
+      S & W & H & S & C & C & \color{darkgreen} yes\\
+      \hline
+    \end{tabular}
+  \end{table}
+  Dove nella colonna finale si ha la risposta booleana al problema, è infatti
+  l'\textbf{etichetta target} (valore della funzione target per un determinato attributo).\\
+  Bisogna quindi cercare un'ipotesi $h$ tale che $h(x)=c(x)$,
+  per tutte le istanze nel \textit{training set}.\\
+  Un'ipotesi $h$, anch'essa rappresentata come vettore, sarà quindi una
+  congiunzione $\land$ di vincoli di valore sugli attributi.
+  \label{es:tab}
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio anche relativo alle nozioni di \textbf{più generale di}.\\
+  Si hanno due ipotesi:
+  \[h_J=\langle S,?,?,?,?,?\rangle\]
+  \[h_k=\langle S,?,?, S,?,?\rangle\]
+  e quindi si ha che:
+  \[h_J\geq h_k \mbox{\textnormal{ovvero} }h_j(x)=1\implies h_k(x)=1\]
+  infatti un'istanza positiva per $h_j$ è sicuramente positiva anche per $h_k$,
+  in quanto $h_k$ ha un vincolo più restrittivo sul quarto attributo, che deve
+  assumere il valore $S$, mentre il quarto attributo di $h_j$ può assumere
+  qualsiasi valore. Questo aspetto si potrebbe rappresentare con un
+  \textbf{diagramma di Eulero-Venn} dal punto di vista insiemistico (con il
+  ``cerchio'' di $h_j$ che conterrebbe quello di $h_k$ (essendo un insieme più
+  esterno e quindi più generale), nello spazio delle istanze).
+  \begin{figure}
+    \centering
+    
+    \psscalebox{1 1} % Change this value to rescale the drawing.
+    {
+      \begin{pspicture}(0,-2.3375487)(4.0, 2.3375487)
+        \definecolor{colour0}{rgb}{0.99607843, 0.30980393, 0.30980393}
+        \definecolor{colour1}{rgb}{0.25490198, 0.41960785, 0.94509804}
+        \definecolor{colour2}{rgb}{0.4117647, 0.6784314, 0.31764707}
+        \psframe[linecolor=colour0, linewidth=0.04, dimen=outer]
+        (4.0, 1.6624511)(0.0,-2.3375487)
+        \pscircle[linecolor=colour1, linewidth=0.04, dimen=outer]
+        (2.0,-0.33754882){1.6}
+        \rput{-271.73}(1.0203394,-1.7267202){
+          \psellipse[linecolor=colour2, linewidth=0.04, dimen=outer]
+          (1.4,-0.33754882)(0.6, 0.4)}
+        \psdots[linecolor=black, dotsize=0.1](2.4,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](2.4,-0.7375488)
+        \psdots[linecolor=black, dotsize=0.1](1.6,-1.1375488)
+        \psdots[linecolor=black, dotsize=0.1](1.2,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](0.4, 1.2624512)
+        \psdots[linecolor=black, dotsize=0.1](3.6, 1.2624512)
+        \psdots[linecolor=black, dotsize=0.1](3.6, 0.8624512)
+        \psdots[linecolor=black, dotsize=0.1](3.2,-1.9375489)
+        \psdots[linecolor=black, dotsize=0.1](0.4,-1.9375489)
+        \psdots[linecolor=black, dotsize=0.1](0.8,-1.9375489)
+        \psdots[linecolor=black, dotsize=0.1](2.8, 0.46245116)
+        \psdots[linecolor=black, dotsize=0.1](3.2,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](3.2,-0.33754882)
+        \psdots[linecolor=black, dotsize=0.1](2.8,-0.7375488)
+        \psdots[linecolor=black, dotsize=0.1](2.0, 0.8624512)
+        \rput[bl](0.1, 1.8624511){Spazio delle ipotesi $X$}
+        \rput[bl](0.28, 0.46245116){$h_j$}
+        \rput[bl](1.7, 0.062451173){$h_k$}
+      \end{pspicture}
+    }
+    \label{fig:eulero}
+    \caption{Rappresentazione di \textbf{più generale di} con i diagrammi di
+      Eulero-Venn, dove si nota come, in $X$, $h_j\geq h_k$} 
+  \end{figure}
+\end{esempio}
+\begin{esempio}
+  Consideriamo un'ipotesi $h$, con quattro attributi, dal punto di vista
+  insiemistico: 
+  \[h\in\{( 0, 1, 1, 1)\,(0, 1, 0, 0)\}\]
+  e ci si chiede se $h\in H$.\\
+  In primis possiamo ``comprimere'' questa rappresentazione insiemistica in:
+  \[h=\langle 0, 1, ?, ?\rangle\]
+  $h$ ora è rappresentata come tipicamente fatto nel \textit{concept
+    learning}.\\
+  Quindi $h\in H$, avendo un'ipotesi con quattro attributi. 
+\end{esempio}
+\begin{esempio}
+  Consideriamo un concetto $c$, con cinque attributi, dal punto di vista
+  insiemistico:
+  \[c\in
+    \begin{cases}
+      \begin{rcases}
+        (0, 1, 0, 1, 0),\\
+        (0, 1, 1, 1, 0),\\
+        (0, 1, 0, 1, 1),\\
+        (0, 1, 1, 1, 1)
+      \end{rcases}
+    \end{cases}
+  \]
+  e ci si chiede se $c\in H$, quindi se la strategia è di ricerca è buona esso
+  può essere ritrovato (altrimenti nessuna strategia lo potrebbe riconoscere).\\
+  Studiando $c$ otteniamo che:
+  \[c=\langle 0, 1,?, 1,?\rangle\]
+  \textbf{Usiamo la stessa rappresentazione usata per le ipotesi}
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio di studio dello spazio delle istanze $X$.\\
+  Considero che le istanze sono specificate da due attributi: $A_1=\{0, 1, 2\}$ e
+  $A_2=\{0, 1\}$.
+  Quindi, sapendo che $X=A_1\times A_2$ (con $\times$ \textbf{prodotto
+    cartesiano}), ho che: 
+  \[|X|=|A_1|\times |A_2|\]
+  e quindi in questo caso $|X|=6$
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio di studio del numero di concetti.\\
+  in $X$ abbiamo 3 attributi, ciascuno con 3 possibili valori:
+  $A_i=\{0, 1, 2\},\,\, i= 1, 2, 3$
+  Abbiamo già visto come calcolare $|X|$ e quindi sappiamo che:
+  \[|X|=3^3=27\]
+  
+  Sappiamo che un concetto $c$ è un sottoinsieme di $X$, quindi, chiamato
+  $C=\{c_i\subseteq X\}$ l'insieme di tutti i concetti so che la sua cardinalità
+  è pari alla cardinalità dell'\textbf{insieme delle parti}\footnote{In matematica, dato un insieme S, l'insieme delle parti di S, scritto P (S), è l'insieme di tutti i possibili sottoinsiemi di S. Questa collezione d'insiemi viene anche detta insieme potenza di S o booleano di S.} di $X$:
+  \[|C|=|\mathcal{P}(X)|=2^{|X|}=2^{27}\]
+\end{esempio}
+\begin{esempio}
+  Vediamo un esempio di studio del numero delle ipotesi, ovvero si studia la
+  cardinalità dello spazio delle ipotesi (che altro non è che il numero di
+  differenti combinazioni di tutti i possibili valori per ogni possibile
+  attributo).\\
+  Bisogna notare che l'uso di $\emptyset$ come valore di un attributo in
+  un'ipotesi rende tale ipotesi \textbf{semanticamente equivalente} a qualsiasi
+  altra che contenga un $\emptyset$ (anche non per lo stesso attributo). Inoltre
+  tutte queste sono ipotesi che rifiutano tutto. Tutte queste ipotesi conteranno
+  come un unico caso nel conteggio delle ipotesi.\\
+  Quindi per conteggiare tutte ipotesi \textbf{semanticamente differenti} dovrò
+  fare (indicando con $|A|$ il numero di valori possibili per l'attributo $A$):
+  \[|H|_{sem}=1+\prod (|A_i|+1)\]
+  quindi moltiplicare tutti il numero di valori di ogni attributo più 1
+  (indicante ``?'' e che quindi va conteggiato come possibile valore per ogni
+  attributi) e sommare 1 (indicante $emptyset$ che va conteggiato solo una volta
+  per il discorso fatto sopra in merito all'equivalenza semantica di tali
+  ipotesi) a questo risultato finale.\\
+  \textbf{La seguente affermazione è un esercizio dato a casa, che io risolverei
+  come scritto.}\\
+  Qualora volessi conteggiare tutte ipotesi \textbf{sintatticamente differenti}
+  dovrò contare $\emptyset$ come ipotetico valore per ogni attributo e quindi:
+  \[|H|_{sint}=\prod (|A_i|+2)\]
+\end{esempio}
+\newpage
+%----------------------------------------------------------------------------------------
+%	SECTION 
+%----------------------------------------------------------------------------------------
+\section{Primi algoritmi}
+\subsection{Algoritmo find-S}
+Parliamo ora dell'algoritmo \textbf{Find-S}. Questo algoritmo permette di
+partire dall'ipotesi più specifica (attributi nulli, indicati con
+$\emptyset$) e generalizzarla, 
+trovando ad ogni passo un'ipotesi più adatta e consistente con il training
+set $D$. L'ipotesi in uscita sarà anche consistente con gli esempi negativi
+dando prova che il target è effettivamente in $H$. Con questo algoritmo non si
+può dimostrare di aver trovato l'unica ipotesi consistente con gli esempi e,
+ignorando gli esempi negativi non posso capire se $D$ contiene dati
+inconsistenti. Inoltre non ho l'ipotesi più generale.
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{findS}{}
+    \State $h\gets \mbox{l'ipotesi più specifica in } H$
+    \For {\textit{ogni istanza di training positiva $x$}}
+    \For {\textit{ogni vincolo di attributo $a_i$ in $h$}}
+    \If {il vincolo di attributo $a_i$ in $h$ è soddisfatto da $x$}
+    \State \textit{non fare nulla}
+    \Else
+    \State \textit{sostituisci $a_i$ in $h$ con il successivo vincolo più}
+    \State \textit{generale che è soddisfatto da $x$}
+    \EndIf
+    \EndFor
+    \EndFor
+    \Return \textit{ipotesi $h$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo Find-S}
+\end{algorithm}
+\subsubsection{Esercitazione sull'algoritmo find-S}
+\textit{Verranno usati concetti spiegati più avanti in questi appunti.}\\
+Si ha che il \textbf{bias induttivo} permette di studiare anche esempi non
+visti nel training set, tuttavia è una situazione rara da analizzare a causa
+dell'inconsistenza stessa degli esempi e del loro rumore.
+\begin{esempio}
+  Prendiamo il seguente \textit{training set} $D$:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{c|cccc|c}
+      esempio & $A_1$  & $A_2$  & $A_3$  & $A_4$ & label\\
+      \hline
+      $x_1$ & 1 & 0 & 1 & 0 & 1\\
+      $x_2$ & 0 & 1 & 0 & 0 & 0\\
+      $x_3$ & 1 & 0 & 1 & 1 & 0\\
+      $x_4$ & 0 & 0 & 0 & 0 & 1\\
+      $x_5$ & 0 & 0 & 1 & 0 & 1\\
+    \end{tabular}
+  \end{table}
+  Applico \textbf{find-S}, che ad ogni iterazione cerca di generalizzare l'ipotesi.\\
+  Parto dall'ipotesi più specifica in assoluto:
+  \[S=\{\langle\emptyset,\emptyset,\emptyset,\emptyset\rangle\}\]
+  Si presenta il primo esempio $x_1=(1, 0, 1, 0)$ che ha label 1, quindi
+  $t(x_1)=1$. Il primo valore non soddisfa il vincolo imposto da
+  $S$, quindi in $S$ faccio il \textit{replace} del valore del primo attributo
+  di $x_1$ con quello di $S$. Visto che $S$ è però l'ipotesi più specifica dovrò
+  farlo per tutti i vincoli, ottenendo che $S$ diventa, di fatto, una copia di
+  $x_1$: 
+  \[S=\{\langle 1, 0, 1, 0\rangle\}\]
+  Si presenta il secondo esempio $x_2=(0, 1, 0, 0)$ che ha label 0, quindi
+  $t(x_2)=0$. Essendo un esempio negativo viene ignorato dall'algoritmo,
+  lasciando inalterato $S$.\\
+  Si presenta il terzo esempio $x_3=(1, 0, 1, 1)$ che ha label 0, quindi
+  $t(x_3)=0$. Essendo un esempio negativo viene ignorato dall'algoritmo,
+  lasciando inalterato $S$.\\
+  Si presenta il quarto esempio $x_4=(0, 0, 0, 0)$ che ha label 1, quindi
+  $t(x_4)=1$. Controllo quindi con $S$ i vari valori. Dove si ha lo stesso
+  valore lo tengo in $S$, altrimenti pongo il caso generico ``?'' (sempre
+  nell'ottica voler generalizzare il più possibile), in quanto ho
+  due esempi che mi dicono che avere, per quell'attributo, 1 o 0 va ugualmente
+  bene. Ottengo:
+  \[S=\{\langle ?, 0,?, 0\rangle\}\]
+  Si presenta il quinto esempio $x_5=(0, 0, 1, 0)$ che ha label 1, quindi
+  $t(x_5)=1$. Procedo come sopra e ottengo, infine:
+  \[S=\{\langle ?, 0,?, 0\rangle\}\]
+  Si arriva quindi a dire che $S=\{\langle ?, 0,?, 0\rangle\}$ è la nuova ipotesi
+  più specifica che verrà restituita dall'algoritmo \textbf{find-S}.
+\end{esempio}
+\begin{esempio}
+  Si ha la richiesta opposta allo scorso esempio. \\
+  Data l'ipotesi:
+  \[S=\{\langle ?, 0,?,?\rangle\}\]
+  Si trovino 5 esempi (3 positivi e due negativi) che portino, secondo
+  \textbf{find-S}, a restituire quell'ipotesi.\\
+  Parto sempre da:
+  \[S=\{\langle\emptyset,\emptyset,\emptyset,\emptyset\rangle\}\]
+  e mi invento gli esempi.\\
+  Un primo è $x_1=(1, 0, 1, 0)$ (dato che il secondo attributo ha sicuro valore 0)
+  tale che $t(x_1)=1$. Raggiungo quindi: 
+  \[S=\{\langle 1, 0, 1, 0\rangle\}\]
+  ora me ne bastano due che rendano ``?'' tutti gli attributi tranne il secondo,
+  che deve restare 0. Prendo quindi un esempio positivo che, tranne per il secondo
+  valore che deve restare 0 e per un'altro dei tre che deve restare come per
+  $x_1$ in modo da avere un ulteriore esempio positivo, sia il complemento del
+  primo. Ho quindi $x_2=(1, 0, 0, 1)$, con 
+  $t(x_2)=1$. Ho già ottenuto:
+  \[S=\{\langle 1, 0,?,?\rangle\}\]
+  Ora, per il terzo esempio, prendo $x_3=(0, 0, 0, 1)$, con $t(x_3)=1$. Ottengo
+  esattamente:
+  \[S=\{\langle ?, 0,?,?\rangle\}\]
+  Gli altri due esempi possono essere con qualsiasi valori ma devono essere
+  negativi, non influenzando il risultato.\\
+  \begin{shaded}
+    Nell'esercitazione il prof usa altri esempi:
+    \begin{itemize}
+      \item $x_1=(1, 0, 1, 0)$ con $t(x_1)=1$
+      \item $x_2=(0, 1, 0, 0)$ con $t(x_2)=0$
+      \item $x_3=(1, 0, 1, 1)$ con $t(x_3)=1$
+      \item $x_4=(0, 0, 0, 0)$ con $t(x_4)=0$
+      \item $x_5=(0, 0, 0, 0)$ con $t(x_5)=1$
+    \end{itemize}
+    Con gli ultimi due che rappresentano, in un contesto reale,
+    un \textbf{errore} e un \textbf{rumore}, in quanto gli stessi valori portano
+    ad avere le due \textit{label} opposte, si ha quindi inconsistenza. Sono
+    infatti detti \textbf{esempi inconsistenti} e vengono completamente ignorati
+    da \textbf{find-S}.
+  \end{shaded}
+\end{esempio}
+Sono evidenti i problemi di \textbf{find-S}:
+\begin{itemize}
+  \item Non si ha la garanzia che l'ipotesi in output sia l'unica consistente per il dato training set.
+  \item I training set inconsistenti possono ingannare l'algoritmo.
+\end{itemize}
+D'altro canto:
+\begin{itemize}
+  \item Garantisce che l'ipotesi in output sia quella piu specifica
+  e consistente per gli esempi positivi del training set.
+  \item L'ipotesi finale è consistente anche con gli esempi negativi, a patto
+  che il \textit{target concept} sia contenuto in $H$ e gli esempi siano
+  corretti.
+\end{itemize}
+\subsection{Algoritmi di eliminazione}
+\begin{definizione}
+  Definiamo \textbf{soddisfacibilità} quando un esempio $x$ soddisfa un'ipotesi
+  $h$ a priori sul fatto che $x$ sia un esempio positivo o negativo del
+  \textit{target concept}. Questo evento viene indicato con:
+  \[h(x)=1\]
+  Si ha quindi che i valori $x$ soddisfano i vincoli $h$. 
+\end{definizione}
+\begin{definizione}
+  Si dice che $h$ è \textbf{consistente} con il training set $D$ di concetti
+  target sse: 
+  \[Consistent(h, D):=h(x)=c(x),\,\,\forall \langle x, c(x)\rangle\in D\]
+\end{definizione}
+\begin{definizione}
+  Si definisce \textbf{version space}, rispetto ad $H$ e $D$, il
+  sottoinsieme delle ipotesi da $H$ consistenti con $D$ e si indica con:
+  \[VS_{H, D}=\{h\in H|\, Consistent(h, D)\]
+\end{definizione}
+\begin{esempio}
+  Vediamo un esempio per capire la consistenza. Riprendiamo la situazione
+  dell'esempio \ref{es:tab} con un \textit{training set} $D$ leggermente
+  diverso: 
+  \begin{table}[H]
+    \centering
+    \begin{tabular}[H]{|c|c|c|c|c|c|c|c|}
+      \hline
+      \textbf{example} & \textbf{sky} & \textbf{temp} & \textbf{humid}
+      & \textbf{wind} & \textbf{water} & \textbf{forecast} &
+      \textbf{enjoySport}\\
+      \hline
+      1 & S & W & N & S & W & S & \color{darkgreen} yes\\
+      2 & S & W & H & S & W & S & \color{darkgreen} yes\\
+      3 & R & C & H & S & W & C & \color{red} no\\
+      4 & S & W & H & S & C & C & \color{darkgreen} yes\\
+      \hline
+    \end{tabular}
+  \end{table}
+  e prendiamo l'ipotesi:
+  \[h=\langle S, W, ?, S, ?, ?\rangle\]
+  e studiamo se $h$ sia \textbf{consistente} con $D$.\\
+  Studio l'esempio 1: ($\langle S, W, N, S, W, S\rangle$,\textit{yes}). Vedo che
+  ogni valore va bene e, avendo la classificazione 
+  \textit{yes}, ho la stessa etichetta assegnata dalla \textbf{funzione target}
+  $enjoySport$, quindi l'ipotesi è consistente con l'esempio. \\
+  Questo vale per tutti e quattro gli esempi (il terzo non ``appare'' ma questo
+  è confermato dalla label \textit{no}) e quindi la mia ipotesi è
+  \textbf{consistente} con il \textit{training set}.
+\end{esempio}
+
+Vediamo quindi algoritmo \textbf{List-Then Eliminate}:
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{LTE}{}
+    \State $vs \gets$ \textit{una lista connettente tutte le ipotesi di } $H$
+    \For {\textit{ogni esempio di training $\langle x, c(x)\rangle$}}
+    \State \textit{rimuovi da $vs$ ogni ipotesi $h$ non consistente con}
+    \State \textit{l'esempio di training, ovvero $h(x)\neq c(x)$}
+    \EndFor
+    \Return \textit{la lista delle ipotesi in $vs$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo List-Then Eliminate}
+\end{algorithm}
+Questo algoritmo è irrealistico in quanto richiede un numero per forza esaustivo
+d'ipotesi.
+\begin{definizione}
+  Definiamo:
+  \begin{itemize}
+    \item $G$ come il confine generale di $VS_{H, D}$, ovvero l'insieme dei
+    membri generici al massimo. È l'insieme delle ipotesi più generali:
+    \[G=\{g\in H|\, g\mbox{è consistente con }D \land\]
+    \[ (\nexists g'\in H \mbox{t.c } g'\geq g \land g'\mbox{è consistente con
+      }D\})\]
+    Possiamo dire che $G=\langle ?,?,?,\ldots ?\rangle$.\\
+    $G$ è detto anche \textbf{insieme massimamente generico d'ipotesi}
+    \item $S$ come il confine specifico di $VS_{H, D}$, ovvero l'insieme dei
+    membri specifici al massimo. È l'insieme delle ipotesi più specifiche:
+     \[S=\{s\in H|\, s\mbox{è consistente con }D \land\]
+    \[ (\nexists s'\in H \mbox{t.c } s'\geq s \land s'\mbox{è consistente con
+      }D\})\]
+    Possiamo dire che $S=\langle \emptyset,\emptyset,\emptyset,\ldots \emptyset
+    \rangle$.\\
+        $G$ è detto anche \textbf{insieme massimamente specifico d'ipotesi}
+
+      \end{itemize}
+    \end{definizione}
+    \begin{definizione}
+      Ogni elemento di $VS_{H, D}$ si trova tra i confini definiti da $S$ e $G$:
+      \[VS_{H, D}=\{h\in H|\,(\exists s\in S)\,\,(\exists g\in G)\,\,(g\geq h\geq
+        s)\}\]
+      con $\geq$ che specifica che è \textit{più generale o uguale}
+    \end{definizione}
+    Vediamo quindi algoritmo \textbf{candidate eliminate}
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{CE}{}
+    \State $G\gets$ \textit{insieme delle ipotesi più generali in $H$}
+    \State $S\gets$ \textit{insieme delle ipotesi più specifiche in $H$}
+    \For {\textit{ogni esempio di training $d=\langle x, c(x)\rangle$}}
+    \If {\textit{d è un esempio positivo}}
+    \State \textit{rimuovi da $G$ ogni ipotesi inconsistente con $d$}
+    \For {\textit{ogni ipotesi $s$ in $S$ inconsistente con $d$}}
+    \State \textit{rimuovi $s$ da $S$}
+    \State
+    \State \textit{aggiungi a $S$ tutte le generalizzazioni minime $h$ di $s$}
+    \State \textit{tali che $h$ sia consistente con $d$ e qualche membro di $G$}
+    \State \textit{sia più generale di $h$}
+    \EndFor
+    \State \textit{rimuovi da $S$ ogni ipotesi più generale di un'altra in $S$}
+    \Else
+    \State \textit{rimuovi da $S$ ogni ipotesi inconsistente con $d$}
+    \For {\textit{ogni ipotesi $g$ in $G$ inconsistente con $d$}}
+    \State \textit{rimuovi $g$ da $G$}
+    \State
+    \State \textit{aggiungi a $G$ tutte le generalizzazioni minime $h$ di $g$}
+    \State \textit{tali che $h$ sia consistente con $d$ e qualche membro di $S$}
+    \State \textit{sia più generale di $h$}
+    \EndFor
+    \State \textit{rimuovi da $G$ ogni ipotesi più generale di un'altra in $G$}
+    \EndIf
+    \EndFor
+    \Return \textit{la lista delle ipotesi in $vs$}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo Candidate Eliminate}
+\end{algorithm}
+Questo algoritmo ha alcune proprietà:
+\begin{itemize}
+  \item Converge all'ipotesi $h$ corretta provando che non ci sono errori in $D$
+  e che $c\in H$.
+  \item Se $D$ contiene errori allora l'ipotesi corretta sarà eliminata dal
+  \textit{version space}.
+  \item Si possono apprendere \textbf{solo} le congiunzioni.
+  \item Se $H$ non contiene il concetto corretto $c$, verrà trovata l'ipotesi
+  vuota.
+\end{itemize}
+Il nostro spazio delle ipotesi non è in grado di rappresentare un semplice
+concetto di target disgiuntivo, si parla infatti di \textbf{Biased Hypothesis
+  Space}. \\
+Studiamo quindi un \textbf{unbiased learner}.\\Si vuole scegliere un $H$ che
+esprime ogni concetto insegnabile, ciò significa che $H$ è l'insieme di tutti i
+possibili sottoinsiemi di $X$. $H$ sicuramente contiene il concetto target. $S$
+diventa l'unione degli esempi positivi e $G$ la negazione dell'unione di quelli
+negativi. Per apprendere il concetto di target bisognerebbe presentare ogni
+singola istanza in $X$ come esempio di training.\\
+Un learner che non fa assunzioni a priori in merito al concetto target non ha
+basi ``razionali'' per classificare istanze che non vede.\\
+Introduciamo quindi il \textbf{bias induttivo} considerando:
+\begin{itemize}
+  \item Un algoritmo di learning del concetto $L$.
+  \item Degli esempi di training $D_C=\{\langle x, c(x)\rangle\}$.
+\end{itemize}
+Si ha che $L(x_i, D_c$) denota la classificazione assegnata all'istanza $x_1$, da
+$L$, dopo il training con $D_c$.
+\begin{definizione}
+  Il \textbf{bias induttivo} \footnote{un \textbf{bias} normalmente denota una
+  \emph{distorsione} o uno \emph{scostamento} dei dati.} di $L$ è un insieme
+  minimale di asserzioni $B$ tale 
+  che, per ogni concetto target $c$ e $D_c$ corrispondente si ha che:
+  \[[B\land D_c\land x_i]\,\vdash\, L(x_i, D_c),\,\,\forall x_i\in X\]
+  con $\vdash$ che rappresenta l'implicazione logica
+\end{definizione}
+Possiamo quindi distinguere:
+\begin{itemize}
+  \item \textbf{Sistema induttivo}: si hanno in input gli esempi di
+  training e la nuova istanza; viene usato l'algoritmo \textit{candidate
+    eliminate} con $H$ e si ottiene la classificazione della nuova istanza
+  nulla.
+  \item \textbf{Sistema deduttivo}: equivalente al sistema induttivo sopra
+  descritto dove in input si aggiunge l'asserzione ``$H$ contiene il concetto
+  target'' e si produce lo stesso output tramite un \textbf{prover di teoremi}.
+\end{itemize}
+Abbiamo quindi visto tre tipi di \textit{learner}:
+\begin{enumerate}
+  \item Il \textbf{rote learner}: si ha classificazione sse $x$ corrisponde
+  a un esempio osservato precedentemente. Non si ha \textit{bias induttivo}.
+  \item L'algoritmo \textbf{candidare eliminate} con \textbf{version space}:
+  il \textit{bias} corrisponde al fatto che lo spazio delle ipotesi contiene il concetto target. 
+  \item L'algoritmo \textbf{Find-S}: il \textit{bias} corrisponde al fatto
+  che lo spazio delle ipotesi contiene il concetto target e tutte le istanze
+  sono negative a meno che il target opposto sia implicato in un altro modo. 
+\end{enumerate}
+\newpage
+%----------------------------------------------------------------------------------------
+%	SECTION 
+%----------------------------------------------------------------------------------------

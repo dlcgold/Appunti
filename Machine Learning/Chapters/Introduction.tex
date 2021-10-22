@@ -1,0 +1,187 @@
+\chapter{Introduzione al Machine Learning}
+\label{Capitolo 1}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 
+%----------------------------------------------------------------------------------------
+\section{L'idea alla base}
+Un \textbf{sistema di apprendimento automatico} ricava da un insieme di dati
+una conoscenza non fornita a priori al fine di creare dei modelli in grado di \textit{soddisfarli}. 
+L'idea è quella di creare un modello in grado di approssimare il più possibile i dati proposti 
+in modo tale da trovare una correlazione tra essi. In
+quest'ottica bisogna mediare tra \textbf{fit} e \textbf{complessità}. Ogni
+sistema dovrà cercare di mediare tra questi due aspetti, dove un \textit{fit}
+migliore comporta alta \textit{complessità}. Si ha sempre il rischio di \textbf{overfitting} 
+\footnote{In statistica e in informatica, si parla di overfitting (in italiano: adattamento eccessivo, sovradattamento) quando un modello statistico molto complesso si adatta ai dati osservati (il campione) perché ha un numero eccessivo di parametri rispetto al numero di osservazioni.
+Un modello assurdo e sbagliato può adattarsi perfettamente se è abbastanza complesso rispetto alla quantità di dati disponibili.
+Si sostiene che l'overfitting sia una violazione del principio del rasoio di Occam.}.\\
+Definiamo alcuni concetti base:
+\begin{itemize}
+  \item \textbf{Task (\textit{T})}: il compito da apprendere. È più facile
+  apprendere attraverso esempi che codificare conoscenza o definire alcuni
+  compiti. Il comportamento della macchina in un ambiente può essere
+  diverso da quello desiderato a causa della mutabilità di quest'ultimo, ed è più
+  semplice cambiare gli esempi piuttosto che ridisegnare un intero sistema. 
+  \item \textbf{Performance (\textit{P})}: la misura della bontà
+  dell'apprendimento.
+  \item \textbf{Experience (\textit{E})}: l'esperienza sui cui basare
+  l'apprendimento. Il tipo di esperienza scelto può variare di molto il risultato e
+  il suo successo.
+\end{itemize}
+In merito alle parti ``software'' distinguiamo:
+\begin{itemize}
+  \item \textbf{Learner}: la parte di programma che impara dagli esempi in modo
+  automatico.
+  \item \textbf{Trainer}: il \textit{dataset (o Training Set)} che fornisce esperienza al
+  \textit{learner}.
+\end{itemize}
+Durante l'\textbf{apprendimento} si analizzano gli esempi dati in ingresso al fine di generare un modello che li soddisfi.\\
+Approfondiamo il discorso relativo all'\textit{esperienza}. Innanzitutto nel
+momento della scelta bisogna valutare la rappresentatività dell'esperienza. 
+Oltre ad apprendere, il \textit{learner} ha la facoltà di controllare e manipolare la propria esperienza:
+\begin{itemize}
+  \item L'esperienza può essere fornita al learner senza che esso possa
+  interagire.
+  \item Il learner può porre domande su quegli esempi che non risultano chiari. 
+\end{itemize}
+\textbf{L'esperienza DEVE essere presentata in modo causale.}\\
+Esistono due tipi di esperienza:
+\begin{enumerate}
+  \item \textbf{Diretta}: dove il learner può acquisire informazioni utili
+  direttamente dagli esempi o dover inferire indirettamente da essi
+  l’informazione necessaria.
+  \item \textbf{Indiretta}
+\end{enumerate}
+\newpage
+%----------------------------------------------------------------------------------------
+%	SECTION 
+%----------------------------------------------------------------------------------------
+\section{Terminologia}
+\begin{shaded}
+  \begin{itemize}
+  
+    \item $x\in X$, \textbf{istanza}: un singolo ``oggetto'' preso dallo
+    \textbf{spazio delle istanze}. Ogni \textbf{istanza} è rappresentata tramite
+    un \textbf{vettore di attributi unici} (un attributo per posizione del
+    vettore). In termini probabilistici questo equivale a un \textit{evento elementare}.
+    
+    \item $X$, \textbf{spazio delle istanze}: ovvero la collezione di tutte le
+    possibili istanze utili per qualche compito di \textit{learning}. 
+    In termini statistici lo \textit{spazio delle istanze} non è altro che lo 
+    \textbf{spazio campionario} \footnote{Insieme di tutti i possibili eventi elementari.}
+    
+    \item $c$, \textbf{concetto}, $c\subseteq X$: ovvero un sottoinsieme dello \textit{spazio delle istanze} che descrive una \textit{classe} d'istanze alla quale siamo interessati per costruire un modello di \textit{machine learning}. In pratica raccolgo quel sottoinsieme d'istanze che mi garantiscono, per esempio, uno o più attributi validi al mio modello. La nozione statistica equivalente è quella di \textit{evento} (ovvero un sottoinsieme dello \textit{spazio campione}).\\ 
+    Si ha quindi che, preso un concetto $A\subseteq X$:
+    \[f_A:X\to\{0, 1\}\]
+    
+    Si ottiene: 
+    
+    \[f_a(x)=
+      \begin{cases}
+        1& \mbox{se } x\in A\\
+        0& \mbox{altrimenti}
+      \end{cases}
+    \]
+    
+    \item $(x, f(x))$, \textbf{esempio}: Ovvero un'istanza etichettata con la sua classe di appartenenza. La funzione $f$ è detta \textbf{funzione target}.
+    
+    \item $D=\{(x_1, f(x_1)),\ldots,(x_n, f(x_n))\}$, \textbf{Training Set}:
+    ovvero è la raccolta degli esempi. Qualora si avesse a che fare con un \textit{training non supervisionato} si avrebbe:
+    $D=\{x_1,\ldots, x_n\}$
+    
+    \item \textbf{Ipotesi (o Modello)}, $h\subseteq X$: Essa rappresenta una possibile soluzione al problema. Normalmente simboleggiata da un vettore booleano dove ogni elemento di esso si riferisce a un attributo.
+    \begin{itemize}
+        \item \textbf{Ipotesi h}: ovvero una congiunzione di vincoli sugli
+    attributi. Tale ipotesi è \textbf{consistente}, ovvero è coerente con tutti gli esempi.
+    \item \textbf{soddisfazione di un'ipotesi}: un'istanza $x$ soddisfa
+    un'ipotesi $h$ sse tutti i vincoli espressi da $h$ sono soddisfatti dai
+    valori di $x$ e si indica con:
+    \[h(x)=1\]
+    \begin{esempio}
+      Avendo:
+      \[x=\langle S, W, N, S, W, S\rangle \mbox{\textnormal{e}
+        }h=\langle S,?,?, S,?, S\rangle\]
+      posso dire che $x$ soddisfa $h$.\\
+      se invece ho che:
+      \[h=\langle S,?,?,\emptyset,?, S\rangle\]
+      posso dire che $x$ non soddisfa $h$.
+    \end{esempio} 
+    \end{itemize}
+    
+    \item $H$, \textbf{spazio delle ipotesi (spazio dei Modelli)}: insieme d'ipotesi.
+    
+    
+    \item $\{(x_1', f(x_1')),\ldots,(x_n', f(x_n'))\}$, \textbf{test}
+    
+    
+    \item un \textbf{Modello di machine learning} è
+    quindi l'\textit{ipotesi migliore}. Questo \textbf{modello predittivo} viene
+    addestrato tramite il \textit{training set} e servirà per inferire nuove
+    informazioni mai state osservate nel \textit{training set}. 
+    
+    
+    \item \textbf{Linguaggio delle ipotesi}: è il linguaggio che definisce lo
+    \textit{spazio delle ipotesi / modelli}
+    \begin{esempio}
+      Prendiamo un problema semplice di \textit{regressione lineare}.\\
+      In questo contesto un'istanza è un punto $(x, y)$, lo spazio delle ipotesi
+      è quello formato dalle rette $y=a+bx$ (dove $a$ è il nostro
+      \textbf{bias}). Tra tutte queste rette cerco quella che sarà il
+      \textbf{modello predittivo}, tramite la quale poter prevedere l'andamento
+      dei vari punti (di modo che dato un $x$ sia in grado di stabilire un buon
+      $y$)
+    \end{esempio}
+    
+    \item \textbf{Cross validation}: ovvero ripeto $m$ volte la validazione su
+    campioni diversi d'input per evitare che un certo risultato derivi dalla
+    fortuna. 
+  \end{itemize}
+\end{shaded}
+
+
+Il tipo di dato che studieremo comunemente sarà il \textbf{vettore booleano} e la risposta sarà anch'essa di tipo booleano. In questo contesto l'ipotesi è una \textbf{congiunzione di variabili}.\\
+Il Machine learning si occupa di trovare, all'interno dello spazio dei modelli, l'ipotesi migliore mediante strategie che si basano sull'analisi del Training Set.
+Si hanno tre tipi di apprendimento:
+\begin{enumerate}
+  \item \textbf{Apprendimento supervisionato}: vengono forniti a priori
+  esempi di comportamento e si suppone che il \textit{trainer} dia la risposta
+  corretta per ogni input, mentre il learner usa gli esempi forniti per
+  apprendere. L'esperienza è fornita da un insieme di coppie di valori raffiguranti il \textit{Training Set}:
+  \[S\equiv\{(x_1, y_1),(x_2, y_2),\ldots,(x_n, y_n)\}\]
+  Per ogni input ipotetico $x_i$ il trainer restituisce il corretto
+  $y_i$
+  \item \textbf{Apprendimento non supervisionato}: si tentano di riconoscere degli
+  \textit{schemi} nell'input senza che vengano fornite indicazioni sui valori in uscita. Non c'è
+  target e si ha \textit{libertà di classificazione}. Si cerca una
+  \textit{regolarità} e una \textit{struttura} insita nei dati. In questo caso
+  si ha: 
+  \[S\equiv\{x_1, x_2,\ldots, x_n\}\]
+  Il clustering è un tipico problema di apprendimento non supervisionato. Non si
+  ha spesso un metodo oggettivo per stabilire la qualità delle prestazioni che vengono quindi
+  valutate da umani
+  \item \textbf{Apprendimento per rinforzo}: bisogna apprendere tramite il
+  \textit{learner} sulla base della risposta dell’ambiente alle proprie azioni. Si lavora con
+  un\textit{addestramento continuo}, aggiornando ripetutamente le ipotesi con l'arrivo di
+  nuovi dati (ad esempio per una macchina che deve giocare a un gioco). Durante la
+  fase di test bisogna conoscere le prestazioni e valutare la correttezza di
+  quanto appreso. Il learner viene addestrato tramite \textit{rewards} e quindi
+  apprende una strategia per massimizzarle, detta
+  \textbf{strategia di comportamento}.Per valutare la prestazione si cerca di
+  massimizzare ``a lungo termine'' la ricompensa complessivamente ottenuta.
+\end{enumerate}
+Possiamo inoltre distinguere due tipi di apprendimento:
+\begin{enumerate}
+  \item \textbf{Attivo}: il \textit{learner} può fare ``domande'' sui dati
+  a sua disposizione. 
+  \item \textbf{Passivo}: il \textit{learner} apprende solo a partire dai
+  dati disponibili. 
+\end{enumerate}
+Si parla di \textbf{inductive learning} quando voglio apprendere una funzione da
+un esempio (banalmente una funzione target $f$ con esempio $(x, f(x))$, ovvero
+una coppia). Si cerca quindi un'ipotesi $h$, a partire da un insieme d'esempi di
+apprendimento, tale per cui $h\approx f$. Questo è un modello semplificato
+dell'apprendimento reale in quanto si ignorano a priori le conoscenze e si assume
+di avere un insieme di dati. Viene usato un approccio che sfrutta anche il \textit{Rasoio di Occam}.
+Si avrà, in realtà, a che fare con dati di target e ipotesi booleani, e questo ambito è propriamente chiamato \textbf{concept learning}.
+\newpage
+

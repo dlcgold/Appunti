@@ -1,20 +1,17 @@
 \chapter{Concept Learning}
 \label{Capitolo 2}
 %%%%
-Il \textbf{concept learning} è la ricerca, nello spazio delle ipotesi, di
-funzioni che assumano valori all'interno di $\{0, 1\}$. In altre parole si
-parla di funzioni che hanno come dominio lo \textbf{spazio delle ipotesi} e
-come codominio $\{0, 1\}$:
+In questo capitolo studieremo metodi di apprendimento che possono mettere a frutto la \textbf{conoscenza a priori}. In particolare essa verrà rappresentata come un insieme di teorie generali di \href{https://it.wikipedia.org/wiki/Linguaggio_del_primo_ordine}{logica del primo ordine\footnote{Da Wikipedia: Nella logica matematica il linguaggio del primo ordine è un linguaggio formale che serve per gestire meccanicamente enunciati e ragionamenti che coinvolgono i connettivi logici, le relazioni e i quantificatori "per ogni ..." (∀) ed "esiste..." (∃). L'espressione "del primo ordine" indica che c'è un insieme di riferimento e i quantificatori possano riguardare solo gli elementi di tale insieme e non i sottoinsiemi; ad esempio si può dire "per tutti gli x elementi dell'insieme vale P(x)" ma non si può dire "per tutti i sottoinsiemi A vale P(A)" (le teorie in cui ci sono quantificatori che spaziano sui sottoinsiemi dell'insieme di riferimento sono dette invece del secondo ordine).}}.
+\section{Una formulazione logica dell'apprendimento}
+Nel capitolo precedente abbiamo definito l'apprendimento induttivo puro come il processo mediante il quale si cerca un'ipotesi che concorda con gli esempi osservati. Ora specializzeremo tale definizione per il caso in cui l'ipotesi sia rappresentata da un insieme di formule logiche. Questo approccio consente di creare delle ipotesi in maniera incrementale; inoltre consente di sfruttare la conoscenza pregressa, perché le formule già note possono aiutare la classificazione di nuovi esempi. Il \textbf{concept learning} è la ricerca, nello spazio delle ipotesi, di funzioni che assumano valori all'interno di $\{0, 1\}$. In altre parole si parla di funzioni che hanno come dominio lo \textbf{spazio delle ipotesi} e come codominio $\{0, 1\}$:
 \[f:H\to\{0, 1\}\]
 Volendo si possono usare insiemi e non funzioni.\\
+\subsection{Esempi e Ipotesi}
+Un esempio è un oggetto descritto da una formula logica e gli attributi sono predicati unari. L'intero insieme di addestramento sarà quindi espresso da una congiunzione di tutte le descrizioni e delle formule di classificazione. Lo scopo dell'apprendimento induttivo in ambito logico è trovare un'espressione equivalente al \textbf{predicato obiettivo} (la nostra ipotesi) utilizzabile per classificare correttamente gli esempi.
 Si cerca quindi con opportune procedure la miglior ipotesi che si adatta
 meglio al concetto implicato dal \textit{training set}.
-In questo contesto si cerca di capire quale funzione booleana è adatta al mio
-addestramento. In altre parole si cerca di apprendere un'ipotesi booleana
-partendo da esempi di training composti da input e output (etichetta target + label) della
-funzione. \\
-Nel concept learning un'ipotesi è un insieme di valori di attributi e ogni
-valore può essere:
+In questo contesto si cerca di capire quale funzione booleana è adatta al mio addestramento. In altre parole si cerca di apprendere un'ipotesi booleana partendo da esempi di training composti da input e output (etichetta target + label) della funzione. \\
+Nel concept learning un'ipotesi è un insieme di valori di attributi e ogni valore può essere:
 \begin{itemize}
   \item Specificata
   \item Non importante: che si indica con ``?'', e che può assumere qualsiasi
@@ -37,7 +34,10 @@ valore può essere:
   insiemistico è:
   \[X=\{(x_1, x_2, x_3, x_3): \,\, x_1\in A_1, x_2\in A_2, x_3\in A_3, x_4\in A_4\}\]
 \end{esempio}
-\section{Soddisfacimento e Consistenza}
+\subsubsection{Soddisfacimento e Consistenza}
+Ogni ipotesi predice che un certo insieme di esempi e, precisamente quelli che la soddisfano, saranno anche esempi del \textbf{predicato obiettivo}. Questo insieme è chiamato \textbf{estensione del predicato}. \begin{definizione}
+  Due ipotesi con estensioni differenti sono quindi logicamente inconsistenti l'una con l'altra, perché le loro previsioni sono discorsi su almeno un esempio.
+\end{definizione}
 Sia \textit{c(x)} una \textbf{funzione target}, ovvero la funzione che, all'interno di un certo \textit{training set} $D$, esprime il valore di verità di un'istanza.
 \begin{definizione}
 Si dice che un'istanza $x$ \textbf{soddisfa} i vincoli di $h$ sse $h$ classifica $x$ come
@@ -47,12 +47,18 @@ Ciò è \textbf{indipendente} dal valore della funzione target associato ad x.
 \end{definizione}
 
 \begin{definizione}
- Si dice \textbf{consistente} un'ipotesi $h\in H$ tale che: 
+ Si dice \textbf{consistente} un'ipotesi $h\in H$ nei confronti di un determinato insieme addestramento sse essa dev'essere consistente con ogni esempio di tale insieme. Ovvero: 
 \[h(x)=c(x),\,\forall x\in D\]  
 \end{definizione}
 
 Si evince la teoria delle \textbf{ipotesi di apprendimento induttivo} che dice che se la mia $h$ approssima bene nel \textit{training set} allora approssima bene su tutti gli esempi non ancora osservati.\\
 Il concept learning è quindi una ricerca del \textit{fit} migliore.
+\subsubsection{Falso negativo e Falso positivo}
+Se un esempio è un falso positivo o un falso negativo per un'ipotesi, l'esempio e l'ipotesi sono logicamente inconsistenti. Presumendo che l'esempio rappresenti l'osservazione corretta di un fatto, l'ipotesi può quindi essere scartata. Possiamo quindi caratterizzare l'apprendimento induttivo in ambito logico come un processo di \textbf{eliminazione graduale} delle ipotesi che si rivelano inconsistenti con gli esempi.
+\begin{itemize}
+    \item Un esempio può essere un \textbf{falso negativo} per l'ipotesi se essa predice che dovrebbe essere negativo ma, in effetti, è positivo. L'ipotesi e l'esempio sono quindi logicamente inconsistenti.
+    \item Un esempio può essere un \textbf{falso positivo} per l'ipotesi se essa dice che dovrebbe essere positivo ma, in effetti, è negativo.
+\end{itemize}
 %----------------------------------------------------------------------------------------
 %	SECTION 
 %----------------------------------------------------------------------------------------

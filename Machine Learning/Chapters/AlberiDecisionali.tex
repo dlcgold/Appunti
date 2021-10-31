@@ -191,37 +191,53 @@ La figura \ref{Albero2} mostra invece un attributo che suddivide molto meglio gl
 
 Ora sia Mario Avolio (autore di questa sezione di appunti) e sia voi vi chiederete "\textit{Ma come faccio a capire quanto è buono un attributo?}. In teoria la misura dovrebbe avere valore massimo quando l'attributo è perfetto e minimo quando l'attributo non è utile per nulla(tipo Windows). Una misura adeguata è la quantità attesa di \textbf{informazione} fornita dall'attributo. Essa viene misurata in \textbf{bit}. \\ Un bit d'informazione è sufficiente a rispondere $Y$ o $N$ a una domanda di cui non si sa nulla, se le possibili risposte $v_i$ hanno probabilità $P(v_i)$ allora il \textbf{contenuto informativo} $I$ della risposta corretta è dato dalla definizione di \textbf{entropia}:
 \begin{definizione}
-  Dato un training set $S$ con valori $v_i,\,\, i=1\ldots n$. l'entropia di un
-  insieme di bit misura la sua quantità d'informazione. In generale, se i possibili valori $v_i,\,\, i=1\ldots n$ hanno probabilità $P(v_i)$, il contenuto informatico $I$ della del training set $S$ è dato da:
-  \[I(P(v_1),\ldots, P(v_n))=\sum_{i=1}-P(v_i)\log_2P(v_i)\]
+  Dato un \textbf{training set $S$} con valori $v_i,\,\, i=1\ldots n$. l'entropia di un
+  insieme di bit misura la sua quantità d'informazione. In generale, se i possibili valori $v_i,\,\, i=1\ldots n$ hanno probabilità $P(v_i)$, il contenuto informativo $I$ (anche chiamato \textbf{entropia}) della del training set $S$ è dato da:
+  \begin{equation}
+\label{Contenuto informativo di un training set}
+  I(P(v_1),\ldots, P(v_n))=\sum_{i=1}-P(v_i)\log_2P(v_i)
+\end{equation}
   \end{definizione}
   \begin{definizione}
-      Per stimare la probabilità delle possibili risposte, prima di verificare il valore degli attributi, si può guardare la proporzione di esempi negativi e positivi nell'insieme di addestramento. Supponiamo che contenga $p$ esempi positivi e $n$ esempi negativi: una stima dell'informazione contenuta nella risposta corretta è:
-  \[I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
-    -\frac{n}{p+n}\log_2\frac{n}{p+n}\] 
+      Per stimare la probabilità delle possibili risposte, \textbf{prima di verificare il valore degli attributi}, si può guardare la proporzione di esempi negativi e positivi nell'insieme di addestramento. Supponiamo di avere un insieme di \textbf{$p$ esempi positivi e $n$ esempi negativi}: una stima dell'informazione contenuta nella risposta corretta è:
+    
+      \begin{equation}
+\label{Contenuto informatico di un insieme}
+  I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
+    -\frac{n}{p+n}\log_2\frac{n}{p+n}
+    \end{equation}
       \end{definizione}
-\begin{definizione}
-    Se si decide che $p_+$ è la proporzione di esempi positivi e $p_-$ di
-  quelli negativi (saranno quindi tra 0 e 1) possiamo misurare
-  l'\textbf{impurità} di $S$ con l'entropia: 
-  \[Entropy(S)=-p_+\log_2 p_+-p_-\log_2 p_-\]
-  Avrò un'alta entropia se positivi e negativi sono ``metà e metà ''
-  \end{definizione}
+      \textbf{NOTA:} si noti che l'equazione \ref{Contenuto informatico di un insieme} equivale alla \ref{Contenuto informativo di un training set}.
 
+\textbf{NOTA:}
+  In particolare si avrà un'alta entropia se elementi positivi e negativi sono saranno tra loro \textit{mischiati}
+  
 Il test di un singolo attributo non ci darà così tanta informazione, ma ce ne darà comunque un pò. Possiamo misurare esattamente tale quantità guardando quanta informazione ci è ancora necessaria \textit{dopo} aver effettuato il test. Ogni attributo divide l'insieme di addestramento in sottoinsiemi. Ogni sottoinsieme ha un certo numero di esempi positivi $p_i$ e un certo numero di esempi negativi $n_i$, per cui se seguiamo una certa diramazione avremo bisogno di un numero di bit pari a:
 \[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+Si faccia quindi riferimento alla regola \ref{Contenuto informatico di un insieme}.
 La probabilità che un esempio preso casualmente all'interno del Training Set abbia l'i-esimo valore per l'attributo considerato, è pari a:
 \[\frac{p_i+n_i}{p+n}\]
+Ragion per cui, in media, dopo il test dell'attributo $A$, occorreranno ancora:
+\begin{equation}
+\label{IG Attributo}
+remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
+  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)
+    \end{equation}
+bit d'informazione per classificare l'esempio.
 Parliamo quindi di \textbf{information gain} $IG$ (in italiano: guadagno d'informazione) che viene calcolato su ogni
 attributo $A$ e su $S$. In particolare il \textbf{guadagno d'informazione} ottenuto dal test dell'attributo è pari alla differenza tra il requisito informativo originale e quello corrente:
-\[IG(S, A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)\]
-dove:
-\[remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
-  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
-l'information gain è la riduzione aspettata nell'entropia per ordinare
-$S$ sull'attributo $A$. Si sceglie l'attributo con il maggiore IG.\\
-Possiamo riscrivere il conto come:
-\[IG(S, A)=Entropy(S)-\sum_{v\in values(A)}\frac{|S_v|}{|S|}Entropy(S_v)\]
+\begin{equation}
+\label{IG}
+IG(S, A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)
+\end{equation}
+\begin{definizione}
+L'information gain è la riduzione aspettata nell'entropia per ordinare$S$ sull'attributo $A$. Si sceglie quindi l'attributo con il maggiore IG. 
+\end{definizione} 
+\textbf{NOTA:} la \ref{IG} è quindi sintetizzabile anche come:
+\begin{equation}
+\label{IG2}
+IG(S, A)=Entropy(S)-\sum_{v\in values(A)}\frac{|S_v|}{|S|}Entropy(S_v)
+    \end{equation}
 \begin{esempio}
   Vediamo l'esempio di calcolo di entropia di $A_1$ con [29+, 35-]:
   \[Entropy([29+, 35-])=
@@ -233,6 +249,86 @@ Possiamo riscrivere il conto come:
   ugualmente calcolo $IG(S, A_2)=0.12$. \\
   Quindi so che devo scegliere $A_1$ in quanto $0.27 > 0.12$
 \end{esempio}
+\subsection{Entropia di una Variabile Aleatoria}
+\begin{definizione}
+  Definiamo l'\textbf{entropia di una distribuzione condizionale}. Presa $X$
+  come una variabile discreta arbitraria con valori $\{x_1,\ldots, x_n\}$, che
+  hanno ciascuno probabilità $P_X(x_i)$ ho che, per la distribuzione
+  condizionale:
+  \[P{Y|X=x_i}(y_j)=P_{Y|X}(y_j|x_i)\]
+  Ovvero la distribuzione dei valori della variabile $Y$ dato $X=x_i$.\\
+  Quindi voglio sapere la probabilità di $Y$ condizionata da un esperimento
+  precedente su $X$.\\
+  Per l'entropia ho:
+\begin{equation}
+  H_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)
+  \label{EntropiaDiUnaDistributzioneCondizionale}
+\end{equation}
+\textbf{NOTA:} la \ref{EntropiaDiUnaDistributzioneCondizionale} riprende la \ref{Contenuto informativo di un training set} utilizzando la probabilità condizionata.
+\end{definizione}
+\begin{definizione}
+  Definiamo \textbf{entropia condizionale} come il valore medio, ovvero il
+  valore atteso, dell'entropia di $p_{Y|X=x_i}$ per ciascun valore di $X$ che
+  condiziona $Y$, ovvero:
+  \[H_{Y|X}=\sum_{i=1}^n P_X(x_i)\cdot H_{Y|X=x_i}\]
+  ottenendo l'\textbf{entropia condizionale}:
+  \begin{equation}
+      H[Y|X]=\sum P(x)\cdot H(Y|X=x)
+        \label{EntropiaCondizionale}
+  \end{equation}
+  \textbf{NOTA:} essa si rifà alla \ref{IG Attributo}\\
+  \textbf{NOTA 2:} Si chiama \textbf{valore atteso} di una variabile aleatoria discreta il numero reale:
+  \[\sum_{k} P_X(X_k)\cdot X_k\]
+  Dove $X_k$ simboleggia il valore assunto dalla variabile $X$, mentre $P_X(X_k)$ è la sua densità. 
+\end{definizione}
+Quando parliamo di \textit{entropia} stiamo volgendo un esperimento
+concettuale. Prima dell'esperimento si ha una certa incertezza su un certo
+evento, che sparisce, con sorpresa, una volta eseguito l'esperimento se l'evento
+accade. D'altro canto qualora accadesse un evento atteso siamo meno sorpresi del
+fatto (chiaramente perché sarebbe appunto "atteso"). Nel primo caso però si ritiene di ottenere molta informazione, nel
+secondo caso poca. Come se ponessimo in una vasca quattro palline rosse, non
+sarei stupito di estrarne una rossa, essendo quello che mi aspetto. D'altro
+canto se ne aggiungo quattro verdi l'estrazione sarà inattesa e quindi più
+interessante.\\ 
+Si cerca un modo di quantificare questa ``sorpresa''. Riprendendo l'esempio
+delle palline posso dire che nel primo caso (solo rosse) ho \textbf{bassa
+  entropia/basso contenuto informativo} e nel secondo caso (palline miste) \textbf{alta entropia/alto contenuto informativo}. Un caso
+intermedio sarebbe a \textbf{media entropia}.\\
+Sia $P(x)$ la probabilità che avvenga un evento $x$ e sia $I(p)$ l'informazione (entropia) che ottengo dopo che l'evento si è verificato:
+\begin{itemize}
+  \item $P(x)=1\to I(p)=0$
+  \item $P(x)=0\to I(p)=\infty$
+\end{itemize}
+L'informazione $I(p)$ e quindi una quantità non negativa:
+\[I(p)\geq 0\]
+Definiamo quindi l'informazione, detta anche \textit{self-information}, per un
+evento $E$: 
+\[I(E)=-\log_2(P(E))\]
+Inoltre si può affermare che essa disponga della proprietà additiva se gli eventi sono indipendenti, ovvero:
+\[I(p_1, p_2)=I(p_1)+I(p_2)\]
+Bisogna però estendere l'informazione a tutte le possibili distribuzioni di
+tutti i possibili esiti che ho in un esperimento concettuale.\\
+Passiamo quindi alle definizioni matematiche per l'\textbf{entropia}:
+\begin{itemize}
+  \item $X\sim P_X$, presa una certa variabile aleatoria $X$ con una certa funzione di probabilità associata $P_X$
+  \item $Val(X)=\{x_1,\ldots, x_n\}$, ovvero il range di valori della variabile
+  $X$
+  \item $p_i=P_X(x_i)==P_X(X=x_i)$: Densità di X. Sia $X$ una variabile aleatoria e sia $Val(X)=\{x_1,\ldots, x_n\}$. Si dice \textbf{densità discreta} di $X$ la funzione che a ogni valore assunto da $X$ associa la probabilità che essa assuma quel valore.
+  \item $g:\mathbb{R}\to\mathbb{R}$ una funzione arbitraria tale per cui $g(X)$
+  è una variabile causale. Si definisce l'aspettativa di $G(X)$ su $P$ come:
+  \[E_P[g(X)]=\sum_{x\in Val(X)} g(x)\cdot P_X(x)\]
+\end{itemize}
+Giungendo quindi alla formula dell'\textbf{entropia} di una variabile:
+\begin{equation}
+    H[X]=-\sum_{i=1}^n p_i\cdot\log_2 p_i=E_P[\log_2(p)]
+\label{Entropia Variabile}
+\end{equation}
+\textbf{NOTA:} Non c'è bisogno d'imparare ogni singola formula! Tutte si rifanno alla \ref{Contenuto informativo di un training set}
+\begin{definizione}
+  L'\textbf{entropia}, definita da Claude Shannon (e quindi spesso chiamata
+  \textbf{entropia di Shannon}), è l'informazione media associata ad
+  una distribuzione di probabilità.
+\end{definizione}
 \section{Valutare le prestazioni dell'algoritmo di apprendimento}
 \begin{definizione}
   Un algoritmo di apprendimento è buono se produce ipotesi che riescono a predire con accuratezza la classificazione di esempi mai incontrati precedentemente.
@@ -286,8 +382,8 @@ In ID3 quindi posso scegliere sia in base all'\textit{information gain} massimo
 o all'\textit{entropia} minima tra gli attributi.\\
 Come specificato, una metodologia semplice da poter applicare in queste situazioni riguarda la \textbf{potatura dell'albero di decisione}. Essa opera impedendo la divisione ricorsiva su attributi che non sono chiaramente rilevamenti, anche quando i dati di un determinato nodo non sono classificati in modo uniforme. I lettori di questi appunti a questo punto si chiederanno sicuramente la seguente domanda: "Mario, se l'irrilevanza di un attributo si misura in relazione alla sua informazione fornita, quanto deve valere quest'ultima per etichettare un nodo come 'irrilevante'?". Per rispondere a questa domanda possiamo ricorrere a un \textbf{test di significatività} statistico: si comincia con un'\textbf{ipotesi nulla}, ovvero che l'attributo sia irrilevante; quindi i dati vengono analizzati per calcolare quanto si discostano effettivamente dalla totale assenza di pattern nei confronti degli esempi. Se il grado di derivazione risulta improbabile, questo viene considerato un buon indizio della presenza di un pattern significativo nei dati. \\ Un'altra possibile opzione da tenere in considerazione (magari insieme alla potatura) è la \textbf{validazione incrociata}: stimare quanto bene ogni ipotesi potrà predire dati mai incontrati.
 \section{Esercizi Guidati}
-Partiamo con un esercizio con find-S per coglierne le problematiche.
-\begin{esercizio}
+Partiamo con un esempio con find-S per coglierne le problematiche.
+\begin{esempio}
   Siano dati due attributi $A=\{1, 2, 3\}$ e $B=\{1, 2\}$. Diciamo che $H$ è un
   congiunzione di $and$ tra i valori degli attributi e delle istanze.\\
   Il concetto target è:
@@ -311,7 +407,7 @@ Partiamo con un esercizio con find-S per coglierne le problematiche.
   Ma questa generalizzazione mi farebbe accettare $A=3$, cosa non prevista da
   $c$.\\
   Non posso quindi usare find-S in questo caso.
-\end{esercizio}
+\end{esempio}
 Ricordiamo che un albero decisionale è formato da:
 \begin{itemize}
   \item \textbf{Nodes (\textit{nodi})}: etichettati da i vari attributi.
@@ -330,23 +426,32 @@ $\bot,\,\,\, F$} posso convertire tabelle di verità in alberi decisionali, aven
 regole. Le foglie quindi sono gli assegnamenti di verità della tabella.\\ 
 Posso avere alberi diversi a seconda della scelta del nodo radice.\\
 \begin{esempio}
-  Vediamo i due alberi per la funzione booleana $\lor$.\\
-  Abbiamo la tabella di verità:
+  Vediamo i due alberi per la funzione booleana $\lor$ e $\oplus$.\\
+  La seguente tabella e le figure \ref{OR decision tree} e \ref{XOR decision tree} ne mostrano le informazioni.
   \begin{table}[H]
     \centering
-    \begin{tabular}{c|c|c}
-      $A$ & $B$ & $B\lor B$\\
+    \begin{tabular}{c|c|c|c}
+      $A$ & $B$ & $A\lor B$ & $A\oplus B$ \\
       \hline
-      $T$ & $T$ & $T$\\
-      $T$ & $F$ & $T$\\
-      $F$ & $T$ & $T$\\
-      $F$ & $F$ & $F$
+      $T$ & $T$ & $T$ & F\\
+      $T$ & $F$ & $T$ & T\\
+      $F$ & $T$ & $T$ & T\\
+      $F$ & $F$ & $F$ & F
     \end{tabular}
   \end{table}
-  rappresentata dai due alberi:
-  \begin{figure}[H]
+  
+  \begin{figure}[h]
     \centering
     \includegraphics[scale = 0.9]{img/dt1.pdf}
+    \caption{OR decision tree}
+    \label{OR decision tree}
+  \end{figure}
+ 
+  \begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.5]{img/XOR.pdf}
+    \caption{XOR decision tree}
+    \label{XOR decision tree}
   \end{figure}
 \end{esempio}
 Essendo sempre nel concept learning, nel caso di funzioni booleane, anche il
@@ -363,7 +468,7 @@ target è booleano.
   Dato che ogni funzione booleana può essere rappresentata con una tabella di
   verità posso costruire un albero decisionale per qualsiasi funzione booleana.
 \end{proof}
-Seppur il metodo appena descritto dimostri il definizione, non è sempre
+Seppur il metodo appena descritto dimostri la definizione, non è sempre
 efficiente, per via del fatto che necessita di memorizzare sempre tutto.
 \begin{definizione}
   Avendo una funzione booleana con $n$ attributi allora posso costruire una
@@ -378,7 +483,6 @@ Vediamo quindi un algoritmo generale per la costruzione dell'albero:
   \begin{itemize}
     \item Se non ho altro da fare, calcolo la predizione con l'ultimo nodo foglia.
     \item Altrimenti si torna allo step due e si procede con un altro \textit{split}.
-    \textit{split}
   \end{itemize}
 \end{enumerate}
 Bisognerà capire:
@@ -475,7 +579,7 @@ $yes$ o solo $no$ sommo zero.
 Gli alberi di decisione possono essere utilizzati anche nel continuo, per
 attributi numerici.
 \begin{esempio}
-  Prendiamo le istanze definite da due attributi, $x$ e $y$ e costruisco un
+  Immaginando  di non ritrovarci più in casi discreti ma di passare a casi \textbf{continui}. Prendiamo le istanze definite da due attributi, $x$ e $y$ e costruisco un
   albero di decisione che definisce in quali aree del piano ho $-$ e quali ho
   $+$.
   \newpage
@@ -483,7 +587,7 @@ attributi numerici.
   dall'origine è un cinque non un sette}): 
   \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.8]{img/dt3.pdf}
+     \includegraphics[scale = 0.8]{img/dt3.pdf}
   \end{figure}
   E si ottiene, per esempio, il seguente albero decisionale:
   \begin{figure}[H]
@@ -498,54 +602,6 @@ attributi numerici.
   \textbf{Quello disegnato è solo uno dei possibili alberi.}
 \end{esempio}
 \subsection{Esercizi su ID3}
-Quando parliamo di \textit{entropia} stiamo volgendo un esperimento
-concettuale. Prima dell'esperimento si ha una certa incertezza su un certo
-eventi, che sparisce, con sorpresa, una volta eseguito l'esperimento se l'evento
-accade. D'altro canto qualora accadesse un evento atteso siamo meno sorpresi del
-fatto. Nel primo caso però si ritiene di ottenere molta informazione, nel
-secondo caso poca. Come se ponessimo in una vasca quattro palline rosse, non
-sarei stupito di estrarne una rossa, essendo quello che mi aspetto. D'altro
-canto se ne aggiungo quattro verdi l'estrazione sarà inattesa e quindi più
-interessante.\\ 
-Si cerca un modo di quantificare questa ``sorpresa''. Riprendendo l'esempio
-delle palline posso dire che nel primo caso (solo rosse) ho \textbf{bassa
-  entropia} e nel secondo caso (palline miste) \textbf{alta entropia}. Un caso
-intermedio sarebbe a \textbf{media entropia}.\\
-Quindi, detta $P(x)$ la probabilità che avvenga un evento $x$ e con $I(p)$
-l'informazione che ottengo dopo che l'evento si è verificato:
-\begin{itemize}
-  \item $P(x)=1\to I(p)=0$
-  \item $P(x)=0\to I(p)=\infty$
-\end{itemize}
-L'informazione $I(p)$ e quindi una quantità non negativa:
-\[I(p)\geq 0\]
-Definiamo quindi l'informazione, detta anche \textit{self-information}, per un
-evento $E$: 
-\[I(E)=-\log_2(P(E))\]
-Inoltre ho che è additiva se gli eventi sono indipendenti, ovvero:
-\[I(p_1, p_2)=I(p_1)+I(p_2)\]
-Bisogna però estendere l'informazione a tutte le possibili distribuzioni di
-tutti i possibili esiti che ho in un esperimento concettuale.\\
-Passiamo quindi alle definizioni matematiche per l'\textbf{entropia}:
-\begin{itemize}
-  \item $X\sim P_X$, presa una certa variabile $X$ dell'esperimento con una
-  certa funzione di probabilità associata $P_X$
-  \item $Val(X)=\{x_1,\ldots, x_n\}$, ovvero il range di valori della variabile
-  $X$
-  \item $p_i=P_X(x_i)$, probabilità per quel valore della variabile $X$
-  \item $g:\mathbb{R}\to\mathbb{R}$ una funzione arbitraria tale per cui $g(X)$
-  è una variabile causale. Si definisce l'aspettativa di $G(X)$ su $P$ come:
-  \[E_P[g(X)]=\sum_{x\in Val(X)} g(x)\cdot P_X(x)\]
-\end{itemize}
-Giungendo quindi alla formula dell'\textbf{entropia} di una variabile:
-\[H[X]=-\sum_{i=1}^n p_i\cdot\log_2 p_i=E_P[\log_2(p)]\]
-Quindi:
-\begin{definizione}
-  L'\textbf{entropia}, definita da Claude Shannon (e quindi spesso chiamata
-  \textbf{entropia di Shannon}), è l'informazione media associata ad
-  una distribuzione di probabilità.
-\end{definizione}
-Vediamo un esempio:
 \begin{esempio}
   Suppongo di lanciare una moneta, si ha:
   \[P(testa)=P(croce)=\frac{1}{2}\]
@@ -577,34 +633,13 @@ Vediamo un esempio:
   Si ha quindi la seguente distribuzione di probabilità relativa al target
   (avendo un \textit{no} e tre \textit{yes}):
   \[P_T=\left[\frac{1}{4},\frac{3}{4}\right]\]
-  e quindi posso calcolare l'entropia della tabella:
+  e quindi posso calcolare l'entropia della tabella (sempre rifacendosi alla \ref{Contenuto informativo di un training set}):
   \[H(P_T)=-P_T(0)\cdot \log_2 P_T(0)-P_T(1)\cdot\log_2
     P_T(1)=-\frac{1}{4}\cdot\log_2\frac{1}{4}-\frac{3}{4}\cdot\log_2
     \frac{3}{4}= 0.81\]
   La tabella può essere vista come un risultato di un esperimento concettuale.
 \end{esempio}
-\begin{definizione}
-  Definiamo l'\textbf{entropia di una distribuzione condizionale}. Presa $X$
-  come una variabile discreta arbitraria con valori $\{x_1,\ldots, x_n\}$, che
-  hanno ciascuno probabilità $P_X(x_i)$ ho che, per la distribuzione
-  condizionale:
-  \[P{Y|X=x_i}(y_j)=P_{Y|X}(y_j|x_i)\]
-  Ovvero la distribuzione dei valori della variabile $Y$ dato $X=x_i$.\\
-  Quindi voglio sapere la probabilità di $Y$ condizionata da un esperimento
-  precedente su $X$.\\
-  Per l'entropia ho:
-  \[H_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)\]
-  quindi è la solita formula ma con la probabilità condizionale.
-\end{definizione}
-\begin{definizione}
-  Definiamo \textbf{entropia condizionale} come il valore medio, ovvero il
-  valore atteso, dell'entropia di $p_{Y|X=x_i}$ per ciascun valore di $X$ che
-  condiziona $Y$, ovvero:
-  \[H_{Y|X}=\sum_{i=1}^n P_X(x_i)H_{Y|X=x_i}\]
-  ottenendo l'\textbf{entropia condizionale}:
-  \[H[Y|X]=\sum P(x)\cdot H(Y|X=x)\]
-\end{definizione}
-\begin{esercizio}
+\begin{esempio}
   Considero il seguente training set, con 4 esempi e target $T$:
   \begin{table}[H]
     \centering
@@ -618,11 +653,10 @@ Vediamo un esempio:
     \end{tabular}
   \end{table}
   Abbiamo già calcolato l'entropia associabile al valore target $H[P_T]=0.81$.\\
-  Passiamo ora all'uso d'iD3 per la costruzione dell'albero.\\
-  Dobbiamo cercare gli split corretti tramite information gain, usando
-  l'entropia condizionale.\\
+\textbf{  Passiamo ora all'uso d'iD3 per la costruzione dell'albero. Dobbiamo cercare gli split corretti tramite information gain, usando
+  l'entropia condizionale.\\}
   Partiamo con il primo attributo: $A$. Si ha che $P_A(0)=1$ e $P_A(1)=0$,
-  quindi:
+  quindi, seguendo la \ref{EntropiaDiUnaDistributzioneCondizionale}:
   \[H[T|A=0]=-p_{T|A}(0|0)\cdot \log_2(p_{T|A}(0|0))-p_{T|A}(1|0)\cdot
     \log_2(p_{T|A}(1|0))=\]
   \[-\frac{1}{4}\cdot\log_2\frac{1}{4}-
@@ -631,7 +665,7 @@ Vediamo un esempio:
   Non devo calcolare $H[T|A=1]$ in quanto $A$ non è mai pari ad 1.\\
   Inoltre si ha:
   \[H[T|A]=P_A(0)\cdot H[T|A=0]+P_A(1)\cdot H[T|A=1]=1\cdot 0.81=0.81\]
-  Posso quindi calcolare l'\textit{information gain}:
+  Posso quindi calcolare l'\textit{information gain} secondo la \ref{IG}:
   \[IG[T;A]=H[T]-H[T|A]=0.81-0.81=0\]
   Quindi per $A$ ho la seguente distribuzione del target (avendo nel target 3
   esempi positivi e uno negativo e $A$ sempre con valore 0):
@@ -712,8 +746,8 @@ Vediamo un esempio:
     \item $IG[T;D]=0.81$, \textbf{che è il valore massimo} e che rende minima la
     ``sorpresa''
   \end{itemize}
-\end{esercizio}
-\begin{esercizio}
+\end{esempio}
+\begin{esempio}
   Considero il seguente training set, con 4 esempi e target $T$:
   \begin{table}[H]
     \centering
@@ -730,7 +764,7 @@ Vediamo un esempio:
   \newpage
   Per farlo basta mettere gli stessi valori del target, in modo che sia
   l'attributo che meglio distribuisca i valori del target, ottenendo quindi lo
-  stesso training set dell'esercizio precedente:
+  stesso training set dell'esempio precedente:
   \begin{table}[H]
     \centering
     \begin{tabular}{c|c|c|c|c|c}
@@ -756,8 +790,8 @@ Vediamo un esempio:
       $x_4$ & 0 & 1 & 0 & 0 & \color{darkgreen}{1}\\
     \end{tabular}
   \end{table}
-\end{esercizio}
-\begin{esercizio}
+\end{esempio}
+\begin{esempio}
   Considero il seguente training set, con 4 esempi e target $T$:
   \begin{table}[H]
     \centering
@@ -828,14 +862,14 @@ Vediamo un esempio:
     H[T|f_3=1]=\frac{1}{3}\cdot 0+\frac{2}{3}\cdot 1=\frac{2}{3}\]
   Posso quindi calcolare l'\textit{information gain}:
   \[IG[T;f_3]=H[T]-H[T|f_3]=0.81-\frac{2}{3}=0.25\]
-  Avendo $f_1$ e $f_2$ lo stesso $IG$ prendo il primo e quindi ho:
+  Avendo $f_2$ e $f_3$ lo stesso $IG$ prendo il primo e quindi ho:
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.9]{img/id6.pdf}
   \end{figure}
   Con $f_2$ che verrà attaccato al nodo $[2-, 1+]$ ``uscente'' da $f_1$.\\
-  A questo punto, come sopra, abbiamo che il nodo $[1-, 0+]$ è foglia, avendo una
-  distribuzione certa. Riduco quindi nuovamente il training set studiando solo
+ \textbf{ A questo punto, come sopra, abbiamo che il nodo $[1-, 0+]$ è foglia, avendo una
+  distribuzione certa}. Riduco quindi nuovamente il training set studiando solo
   gli esempi in cui $f_2$ vale 0, ovvero $x_3$ e $x_4$, per l'attributo $f_3$;
   \begin{table}[H]
     \centering
@@ -860,4 +894,37 @@ Vediamo un esempio:
     \centering
     \includegraphics[scale = 1]{img/id8.pdf}
   \end{figure}
-\end{esercizio}
+\end{esempio}
+\section{Considerazioni Finali}
+Arrivati a questo punto è necessario fare un resoconto finale su come costruire un albero partendo da un Training Set.
+\begin{enumerate}
+    \item Calcolo dell'entropia del Training Set (\ref{Contenuto informatico di un insieme} o \ref{Contenuto informativo di un training set}):
+    \[I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
+    -\frac{n}{p+n}\log_2\frac{n}{p+n}\]
+    
+    \item Calcolo delle probabilità del primo attributo in tabella disponibile:
+    \[\frac{p_i+n_i}{p+n}\]
+
+    \item Calcolo l'entropia/contenuto informativo dell'attributo:
+        \begin{enumerate}
+            \item In Generale avremo:
+            \[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+            
+            \item Se si parla di probabilità condizionata, dalla precedente formula si deriva:
+            \[H_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)\]
+        \end{enumerate}
+    
+    \item Calcolo il $Resto(A)$
+        \begin{enumerate}
+           \item In generale si opta per:
+            \[remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
+  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+          
+            \item In caso di probabilità condizionata la formula si riduce alla \ref{EntropiaCondizionale}:
+                  \[H[Y|X]=\sum P(x)\cdot H(Y|X=x)\]
+        \end{enumerate}
+          
+    \item Calcolo IG :
+            \[IG(S,A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)\]
+\end{enumerate}
+

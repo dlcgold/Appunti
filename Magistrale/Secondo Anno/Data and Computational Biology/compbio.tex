@@ -2145,7 +2145,8 @@ possibilità di trovare soluzioni analitiche ma ottenendo un comportamento
 comunque verosimile. L'introduzione di rumore normalmente non comporta un
 cambiamento nella traiettoria complessiva del sistema ma a volte può accadere e
 quello che si vuole garantire è che il modello permetta di riprodurre
-comportamenti rilevabili anche in un normale esperimento di laboratorio. \\
+comportamenti rilevabili anche in un normale esperimento di laboratorio.
+\section{Modelli di Markov}
 Il modo più semplice per rappresentare questo tipo di modelli è comunque quello
 di usare un \textbf{processo di Markov}, che siano \textbf{catene di Markov} o
 \textbf{sistemi di transizione}.\\
@@ -2155,11 +2156,547 @@ archi, in modo tale che un sistema passi da uno statoi all'altro sse una
 condizione è vera e facendo scattare una certa serie di azioni che modificano lo
 stato del sistema. Tutto questo fa giustificato dal punto di vista
 matematico. \\
-% 15.28
-
-
-
+Una cosa che si fa con le \textbf{catene di Markov} è quello di studiare il
+comportamento nel lungo periodo, studiando il cosiddetto \textbf{steady state
+  (\textit{stato stazionario})}. Data la matrice di transizione $P$ e il vettore
+di stato $v$ che rappresenta una distribuzione di probabilità (sommando 1) sugli
+stati, possiamo definire le varie proprietà (\textbf{\textit{guardare appunti di
+    Modelli Probabilistici per le Decisioni}}). \\
+Si possono anche definire varie estensioni, tra cui:
+\begin{itemize}
+  \item Semi-Markov processes
+  \item Generalized Semi-Markov processes
+  \item Reti di Petri stocastiche
+  \item $\ldots$
+\end{itemize}
+Torniamo alle definizioni di base ricordiamo che un \textbf{vettore di
+  probabilità} ha tutte entry non negative che sommano a 1, avendo che ogni
+entry rappresenta una certa probabilità associata ad un dato stato. Solitamente
+si parte da un vettore $v_0$ che rappresenta la distribuzione iniziale di
+probabilità e si ha che $v=v_{0}\cdot P$, se si fa un singolo
+step. Se volessi ottenere la distribuzione dopo $n$ passi (avendo passi
+discreti) avrei $v_ni=v_{0}\cdot P^n$. Se si ha che $v\cdot P = v$ ho che $v$ è
+un \textit{vettore di steady state}, essendo in uno \textbf{stato
+  stazionario}. Lo \textit{stato stazionario} si noti essere un
+\textit{autovettore} della matrice $P$.
+\newpage
+\section{Reti di Petri}
+Passiamo ora alle \textbf{reti di Petri}.\\
+Le \textit{reti di Petri}, specialmente quelle \textit{stocastiche}, sono un
+interessante formalismo che si può usare per rappresentare le interazioni (di
+tipo biochimico etc$\ldots$) tra varie \textit{entità biologiche}. Le
+\textit{reti di Petri} hanno infatti trovato in primis uso nella
+rappresentazione di reazioni chimiche.\\
+In figura \ref{fig:pet1} troviamo un semplice esempio dove si rappresenta
+sostanzialmente il processo di traduzione e trascrizione di una proteina. Se
+abbiamo un \textit{gene inattivo}, che può diventare un \textit{gene
+  attivo}. Quando attivo il gene può sia produrre una proteina che rimanere
+attivo, fino a quando non torna ad essere inattivo. Le varie lettere greche
+associate alle varie transizioni hanno una precisa interpretazione e sono il
+\textbf{tasso di attivazione} di ognuna delle transizioni, ovvero si associa un
+ritardo, distribuito di fatto in modo esponenziale, ad ogni transizione,
+aggiungendo un tempo esterno al sistema e ottenendo una \textbf{rete di Petri
+  stocastica}. 
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+    \node [place, label = above: $inactive\,\,\,gene$, tokens = 1] (p0)  {};    
+    \node [transition] (t1) [below right of = p0, label = right: $\lambda$] {};
+    \node [transition] (t2) [below left of = p0, label =  left: $\mu$] {};
+    \node [place] (p1)  [below right of = t2, label = below:
+        $active\,\,\,gene$]  {}; 
+    \node [transitionv] (t3) [right of = p1, label = above: $\nu$] {};
+    \node [place] (p2) [right of = t3, label = above: $protein$] {};
+    \node [transitionv] (t4) [right of = p2, label = above: $\delta$] {};
+    \node [] (p3) [right of = t4] {$\ldots$};
+    \path[-{Latex[width=2mm]}]
+    (t2) edge (p0)
+    (p0) edge (t1)
+    (t1) edge (p1)
+    (p1) edge (t2)
+    (p1) edge [bend left = 25] (t3)
+    (t3) edge [bend left = 25] (p1)
+    (t3) edge (p2)
+    (p2) edge (t4)
+    (t4) edge (p3)
+    ;
+  \end{tikzpicture}
+  \caption{Esempio di porzione di rete di petri stocastica}
+  \label{fig:pet1}
+\end{figure}
+Le \textit{reti di Petri}, intese come \textit{sistemi elementari} o
+\textit{reti P/T}, sono solo una delle estensioni delle
+\textit{reti di Petri} utili. Una delle principali limitazioni è quella
+dell'assenza della rappresentazione del tempo. Tra le estensioni più usate se ne
+menzionano due, 
+in grado di aggiungere informazioni alle \textit{catene di Markov}, perlomeno
+dal punto di vista del formalismo grafico:
+\begin{enumerate}
+  \item \textbf{reti di Petri temporizzate}
+  \item \textbf{reti di Petri stocastiche}, già citate
+\end{enumerate}
+\subsection{Reti di Petri Temporizzate}
+Le \textbf{reti di Petri stocastiche} permettono di avere l'informazione
+temporale associata ad ogni singolo elemento della rete:
+\begin{itemize}
+  \item \textit{posti}
+  \item \textit{transizioni}, che è il caso più comune
+  \item \textit{archi}
+  \item \textit{marche}
+  \item $\ldots$
+\end{itemize}
+Vediamo il caso più comune.\\
+Tipicamente ogni transizione $t$ ha un valore di ritardo, ovvero un intervallo
+di tempo nel quale può attivarsi dal momento in cui diventa abilitata. Tale
+valore è rappresentato dalla coppia $[d,D]$, dove $d$ è il minimo quantitativo
+di unità temporali per l'esecuzione mentre $D$ il massimo.\\
+Uno degli utilizzi di tali reti è quello di misurare le prestazioni ma hanno una
+forte limitazione d'uso in presenza di \textbf{conflitti} nella rete.\\
+Quando si hanno diverse transizioni che sono contemporaneamente abilitate si
+sceglie quella che deve avvenire prima, ovvero quella con la \textit{scadenza
+  più vicina}. In ogni momento ho quindi una priorità su quale transizione far
+scattare. Potrei comunque avere più transizioni abilitate con la medesima
+scadenza e questo è un problema, dovendo fare un'ulteriore scelta, magari
+facendole scattare tutte (per questo il discorso legato ai \textit{conflitti})
+oppure scegliendone un sottoinsieme in modo arbitrario.
+\subsection{Reti di Petri Stocastiche}
+Con le \textbf{reti di Petri stocastiche} quello che succede è che si associa ad
+ogni transizione un \textit{ritardo/delay} normalmente distribuito con un tasso
+di ritardo costante $\lambda_T$.\\
+Si ha quindi che, indicando con $P(x)$ la probabilità che avvenga un evento $x$,
+che la probabilità che una certa transizione accada esattamente al tempo $\tau$:
+\[P(X_T=\tau)=\lambda_Te^{-\lambda_T\tau}\]
+e che la stessa transizione accada prima di un certo tempo:
+\[P(X_T\leq\tau)=1-\lambda_Te^{-\lambda_T\tau}\]
+Avendo un ritardo medio pari a $\frac{1}{\lambda}$.\\
+Il valore di ritardo/delay associato alla transizione $T$ è appunto $X_T$ che è
+una variabile casuale e la sua funzione di densità di probabilità è distribuita
+in modo esponenziale sul parametro $\lambda$. Come conseguenza si ha che la
+probabilità che due transizioni siano abilitate contemporaneamente è
+estremamente bassa, praticamente nulla. Di fatto quindi possiamo osservare che
+per costruzione il sistema si comporta come se ci fosse una singola transizione
+abilitata in ogni istante, risolvendo il problema riscontrato con le
+\textit{reti di Petri Temporizzate}.\\
+Vediamo un ulteriore semplice esempio.\\
+Si hanno due transizioni, $t_1$ e $t_2$, con associati i rispettivi $\lambda_1$
+e $\lambda_2$. 
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+    \node [place, tokens = 1] (p0)  {};
+    \node [place, right of = p0, tokens = 1] (p1)  {};
+    \node [place, right of = p1, tokens = 1] (p2)  {};   
+    \node [transition] (t1) [below left of = p1, label = left: $\lambda_1$] {};
+    \node [transition] (t2) [below right of = p1, label =  right: $\lambda_2$]
+    {}; 
+    \node [place, below of = t1] (p3)  {};
+    \node [place, below of = t2] (p4)  {}; 
+    \path[-{Latex[width=2mm]}]
+    (p0) edge (t1)
+    (p1) edge (t1)
+    (p1) edge (t2)
+    (p2) edge (t2)
+    (t1) edge (p3)
+    (t2) edge (p4)
+    ;
+  \end{tikzpicture}
+\end{figure}
+Entrambe le transizioni sono abilitate nello stato iniziale e bisogna capire chi
+scatta per prima. Inoltre lo scatto di una delle transizioni disabilita l'altra,
+avendo appunto un \textit{conflitto}. In realtà in questo caso, essendo entrambe
+le transizioni abilitate, si assegnano alle due transizioni due nuovi tassi:
+\[\lambda_1'=\frac{\lambda_1}{\lambda_1+\lambda_2}\]
+\[\lambda_2'=\frac{\lambda_2}{\lambda_1+\lambda_2}\]
+Poi si calcolerà cosa accade dopo lo scatto di una delle due. \\
+Con queste reti si ha un equivalente delle \textbf{catene di Markov a tempo
+  continuo}, grazie al fatto che il rateo è esponenziale e che le reti sono
+\textit{senza memoria}.\\
+(\textbf{\textit{Parte non capita a fondo}}).\\
+Avendo quindi l'approssimazione che si ha una sola transizione abilitata in
+ogni istante quello che si può dire è che la semantica delle \textbf{reti di
+  Petri stocastiche} è la stessa delle \textbf{catene di Markov} ma si ha, con
+le reti, un vantaggio dal punto di vista della mera rappresentazione grafica,
+avendo una rappresentazione molto concisa rispetto a quella delle catene,
+permettendo di dare più informazione in ``meno spazio''. Con le \textit{reti di
+  Petri stocastiche} si perde però un pezzo di espressività rispetto a quelle
+standard, in quanto, introducendo i vincoli di rateo, si riduce la rete ad un
+FSM a cui sono aggiunte le probabilità, anche se le FSM avrebbero meno
+espressività. Le reti di Petri generano linguaggi che non sono
+\textit{context-free} ma ci sono linguaggi \textit{context-free} che non possono
+essere generati dalle reti. In ogni caso l'insieme dei linguaggi
+generati/riconosciuti contiene propriamente quello relativo alle FSM. \\
+L'analisi quantitativa di tali reti è comunque permessa solo se si ha conoscenza
+dei ratei di ritardo delle varie transizioni e questo permette l'uso delle
+stesse per valutare prestazioni.\\
+Ci sono molte estensioni relative alle \textit{reti di Petri stocastiche} e si
+hanno vari pacchetti standard per le simulazioni.\\
+Vediamo ora il rapporto tra le reti e le applicazioni
+biologiche\footnote{Quantitative Modeling of Stochastic Systems in
+  Molecular Biology using Stochastic Petri Nets, Peter J.E. Goss and Jean
+  Peccoud, PNAS, 95, 6750-6755, June 1988} in questa tabella riassuntiva delle
+relazioni tra gli elementi della rete e la biologia:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    \textbf{Elemento della rete} & \textbf{Corrispettivo biologico}\\
+    \hline
+    \hline
+    posti & specie molecolari\\
+    \hline
+    marca & molecola\\
+    \hline
+    numero di marche & numero di molecole\\
+    \hline
+    transizioni & reazioni\\
+    \hline
+    posto di input & reagente\\
+    \hline
+    posto di output & prodotto\\
+    \hline
+    funzione di peso & tasso della reazione\\
+    \hline
+    transizione abilitata & reazione possibile\\
+    \hline
+    scatto & avvenimento della reazione
+  \end{tabular}
+\end{table}
+Questo è quindi \textbf{un modo} per rappresentare sistemi biologici, tramite
+\textit{reti di Petri stocastiche}, quindi con la semantica delle \textit{catene
+  di Markov}.
+\section{Algoritmi di Gillespie}
+Passiamo quindi a studiare le \textit{simulazioni stocastiche}, ovvero, data una
+rappresentazione delle reazioni in un sistema discreto e stocastico, effettuare
+la simulazione ottenendo risultati ragionevoli, nel dettaglio tramite i
+cosiddetti \textbf{algoritmi di Gillespie}.\\ 
+Si hanno alcuni aspetti biologici da considerare:
+\begin{itemize}
+  \item molti processi biologici coinvolgono un numero basso di molecole
+  \item trascrizione e traduzione hanno un comportamento stocastico
+\end{itemize}
+Spesso quindi si hanno fenomeni davvero molto complessi e quindi si ``ripiega''
+verso una simulazione stocastica e non esatta.\\
+Ci sono molti modelli scaricabili dai già citati database, come
+\textit{BioModels, Reactome, KEGG $\ldots$} e molti di questi modelli sono
+\textbf{pathway}, ovvero, si ricorda, collezioni di reazioni connesse tra loro
+organizzate in una rete, che spesso è un grafo completamente connesso. \\
+(\textbf{Su Moodle due esempi di pathway, quello di $Wnt$, una proteina molto
+  importante, e quello di $TGF\mbox{-}\beta$, importante nello studio del
+  \textit{colon}}).\\ 
+Possiamo usare vari modi per costruire tali modello di pathway, che siano
+\textit{reti di Petri} ma anche linguaggi e sistemi \textit{rules-based}, come
+\textit{Bionetgen}. In entrambi i casi si ottiene un formalismo per
+rappresentare un sistema che poi viene simulato tramite algoritmi di
+Gillespie. Tali algoritmi sono algoritmi di simulazione stocastica della classe
+degli \textbf{algoritmi/metodi Montecarlo} che hanno la peculiarità di essere
+molto semplici da implementare e sono molto utili permettendo di considerare
+comportamenti dove gli effetti di alcune, poche, molecole possono influire su
+tutto il sistema. Questi algoritmi sono giustificati in modo molto rigoroso dal
+punto di vista fisico (da notare che il primo fu pubblicato nel 1974 su
+\textit{Journal of computational physics} e anche i successivi articoli sono
+sempre legati a riviste legate al mondo della fisica, come ad esempio
+\textit{Journal of Chemical Physics}). Questi studi sono stati poco considerati
+fino agli anni 2000 e poi sono ``esplosi'' dal punto di vista delle citazioni.\\
+Vediamo quindi il funzionamento di tali algoritmi.\\
+Si parte dal descrivere lo \textit{stato dinamico del sistema} che è dato da un
+vettore numerico $\mathbf{X}(t)$, non negativo, dove ogni elemento $X_i(t)$
+rappresenta esattamente il numero di molecole che si hanno della specie $S_i$ al
+tempo $t$: 
+\[\mathbf{X}(t)=[X_1(t),\ldots, X_N(t)]\]
+Questo vettore è direttamente rappresentabile come un vettore di marcatura nelle
+\textit{reti di Petri}.\\
+L'obiettivo è quindi studiare l'evoluzione di $\mathbf{X}(t)$ a partire da un
+certo stato iniziale $\mathbf{X}(0)=\mathbf{x}_0$.\\
+Ogni reazione $R_j$ è caratterizzata da due oggetti matematici:
+\begin{enumerate}
+  \item il \textbf{vettore di cambio di stato (\textit{state change vector})}:
+  \[\beta_j=\left(\beta_{1j}, \ldots, \beta_{nj}\right)\]
+  che nelle \textit{reti di Petri} è il \textit{vettore di scatto}. Si ha quindi
+  che $\beta_{kj}$ è il cambio di popolazione della specie molecolare $S_k$ dopo
+  un'occorrenza della reazione $R_j$. Quindi se il sistema è nello stato
+  $\mathbf{x}$ e $R_j$ occorre allora lo stato del sistema passa a
+  $\mathbf{x}+B_j$.\\ 
+  La matrice $[\beta_{ij}]$, data da specie/reazione (specie sulle righe e
+  reazioni sulle colonne), è detta \textbf{matrice stochiometrica}, che quindi
+  rappresenta i possibili cambiamenti di stato dell'intero sistema date tutte le
+  reazioni
+  \item la \textbf{funzione di propensità} $a_j$. Si ha che $a_j(x) \dd{t}$ è la
+  probabilità che, dato $X(t)=\mathbf{x}$, un'occorrenza di $R_j$ accadrà
+  all'interno del \textbf{volume} $V$ (dato che si assume che le reazioni
+  avvengano in un certo volume ben definito) in un prossimo intervallo
+  infinitesimale di tempo lungo $\dd{t}$, quindi in $[t,t+\dd{t}]$. Questa
+  funzione quindi dipende dallo stato attuale
+\end{enumerate}
+\begin{esempio}
+  Vediamo un quindi un piccolo esempio:
+  \begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=2cm,bend angle=45,auto]
+    \node [place, tokens = 1, label = above: $S_2$] (p0)  {};
+    \node [transition] (t1) [below of = p0, label = below: $R_1$] {};
+    \node [place, left of = t1, tokens = 1, label = above: $S_1$] (p1)  {};
+    \node [transition] (t2) [below of = t1, label =  below: $R_3$] {};
+    \node [place, right of = t1, tokens = 1, label = above: $S_3$] (p2)  {};
+    \node [transition] (t3) [right of = p2, label =  below: $R_2$] {};
+    \node [place, right of = t3, tokens = 1,  label = above: $S_5$] (p3) {};    
+    \path[-{Latex[width=2mm]}]
+    (p0) edge (t1)
+    (p1) edge (t1)
+    (t1) edge (p2)
+    (p2) edge (t3)
+    (t3) edge (p3)
+    (t2) edge [bend left = 45]  (p0)
+    (t3) edge (p0)
+    (p2) edge   (t2)
+    (t2) edge [bend left = 25]   (p1)
+    ;
+  \end{tikzpicture}
+\end{figure}
+E ci chiediamo quanto vale il cambiamento di stato nel caso scatti $R_2$ (che
+scatta sse $S_3>0$):
+\[\beta_2=\left(\beta_{12}, \beta_{22},\beta_{32},\beta_{42}\right)\]
+Si ha quindi banalmente che:
+\[\beta_2=(0,1,-1,1)\]
+Avendo che la specie $S_1$ non viene toccato, alle specie $S_2$ e $S_4$ si
+aggiunge una marca mentre alla specie $S_3$ ne viene tolta una.
+\end{esempio}
+\begin{esempio}
+  Vediamo un altro esempio.\\
+  Si ha una reazione $R_1$ data da:
+  \[[X_1]+[X_2]\to 2[X_3]\]
+  Si ha quindi:
+  \[a_1(\mathbf{x})=c_1x_1x_2\]
+  con:
+  \begin{itemize}
+    \item $x_1=\mathbf{x}(1)$
+    \item $x_2=\mathbf{x}(2)$
+    \item $c_1$ costante correlata alla reazione quando si fa il trattamento
+    della stessa nel caso deterministico, ovvero quando si considera, ad esempio
+    la \textit{legge di massa/azione}. Tale costante è quindi legata al rateo
+    costante $k_1$ in questo modo:
+    \[c_1=\frac{k_1}{V}\]
+  \end{itemize}
+  Si ha comunque un certo insieme di valori per $\beta_1$.\\
+  Data questa forma di rappresentazione delle reazioni calcolo direttamente sia
+  l'equazione differenziale ma anche la \textbf{funzione di propensità} (che ha
+  una derivazione simile per quanto ci sia una forte differenza concettuale
+  essendo una probabilità).\\
+  \emph{La forma della \textbf{funzione di propensità} segue direttamente dalla
+    fisica molecolare e dalla teoria cinetica delle reazioni.}
+\end{esempio}
+\subsection{Chemical Master Equation}
+Uno dei problemi principali in fase di simulazione è che non si conosce la
+precisa posizione e la precisa velocità delle varie molecole nel volume $V$
+(\textit{si pensi alla teoria molecolare dei gas}). Si procede quindi predicendo
+la probabilità che una reazione accada nel tempo successivo $\dd{t}$ e
+predicendo che questa reazione sia $R_j$, parlando di \textit{dinamica
+  probabilistica}. \\ 
+Ogni reazione è caratterizzata dal \textit{vettore di cambio di stato} e
+dalla \textit{funzione di propensità} e siamo in grado di calcolare la
+probabilità che $R_j$ accada nel prossimo intervallo di tempo di ampiezza
+$\dd{t}$. Possiamo quindi calcolare la probabilità a partire da uno stato
+iniziale e ad un tempo iniziale:
+\[P(\mathbf{x},t|\mathbf{x}_0,t_0)\]
+che è appunto la probabilità di avere il vettore di stato $\mathbf{x}$ per la
+popolazione al tempo $t$ dati uno stato di partenza $\mathbf{x}_0$ e un tempo di
+partenza $t_0$. Questa probabilità, una volta ben scritta, viene chiamata
+\textbf{chemical master equation}.\\
+Per studiare meglio tale equazione consideriamo anche un'altra probabilità:
+\[P(\mathbf{x},t+\dd{t}|\mathbf{x}_0,t_0)\]
+dove si è aggiunto il ``passo temporale'' $\dd{t}$. Dobbiamo capire come
+trovarci allo stato $\mathbf{x}$ al tempo $t+\dd{t}$. Uno dei modi è pensare di
+trovarsi al tempo $t$ nello stato $\mathbf{x}$ e non avere alcune reazione per
+un tempo $\dd{t}$, in modo da essere ancora in $\mathbf{x}$ al tempo
+$t+\dd{t}$. In pratica mi serve la seguente probabilità congiunta:
+\[P(\mathbf{x},t+\dd{t}|\mathbf{x}_0,t_0)=P(\mathbf{x},t|\mathbf{x}_0,t_0)\cdot
+  \left(1-\sum_{j=1}^Ma_j(\mathbf{x})\dd{t}\right)\]
+Dove $1-\sum_{j=1}^Ma_j(\mathbf{x})\dd{t}$ rappresenta la probabilità che non
+accada alcuna reazione (essendo uno meno la probabilità che una qualsiasi
+reazione accada).\\
+Ovviamente questo non è l'unico modo, infatti potrebbe succedere che occorra una
+reazione $j$ nell'intervallo di tempo lungo $\dd{t}$. Questo però può succedere
+sse la reazione $j$-esima è accaduta nell'intervallo di tempo $\dd{t}$ e il
+sistema si trovava nello stato $\mathbf{x}-\beta_j$, ovvero nello stato
+antecedente all'occorrenza della reazione. In tal caso si ha quindi:
+\[P(\mathbf{x},t+\dd{t}|\mathbf{x}_0,t_0)=P(\mathbf{x}-\beta_j,t|
+  \mathbf{x}_0,t_0)\cdot a_j(\mathbf{x}-\beta_j)\dd{t}\]
+Ovviamente si9 hanno $M$ possibili reazione e quindi bisogna sommare tutti i
+$j$-esimi termini ottenuti con questa formula (anche se normalmente si ha
+l'occorrenza di una sola reazione). \\
+Avendo quindi visto i due possibili casi possiamo ottenere la formula finale per
+la \textbf{chemical master equation}.\\
+Definiamo prima la la somma tra la
+probabilità che nell'intervallo di tempo $\dd{t}$, partendo dal tempo $t$ non
+avvenga alcuna reazione e quella che avvengano un certo numero $M$ di
+reazioni: 
+\begin{align*}
+  P(\mathbf{x},t+\dd{t}|\mathbf{x}_0,t_0)=&P(\mathbf{x},t|\mathbf{x}_0,t_0)
+                                            \cdot
+                                            \left(1-\sum_{j=1}^Ma_j(\mathbf{x})\dd{t}\right)\\
+  +& \sum_{j=1}^M(P(\mathbf{x}-\beta_j,t|
+     \mathbf{x}_0,t_0)\cdot a_j(\mathbf{x}-\beta_j)\dd{t})
+\end{align*}
+Pur ricordando, per la seconda sommatoria, che raramente accadono più di una
+reazione.\\
+Studiamo un po' la formula appena ottenuta. Se sottraiamo da entrambe le parti
+$P(\mathbf{x},t|\mathbf{x}_0,t_0)$, dividiamo per $\dd{t}$ e ne calcoliamo il
+limite che tende a 0 otteniamo:
+{\small{\[\frac{\partial
+    P(\mathbf{x},t+\dd{t}|\mathbf{x}_0,t_0)}{\partial t}=\sum_{j=1}^M\left(
+ a_j(\mathbf{x}-\beta_j)\cdot
+ P(\mathbf{x}-\beta_j,t|\mathbf{x}_0,t_0)-a_j(\mathbf{x})\cdot P(\mathbf{x},t|
+ \mathbf{x}_0,t_0)\right)\]}}
+Ovvero ottengo la variazione della probabilità nell'intervallo di tempo
+$\dd{t}$, che è la vera e propria \textbf{Chemical Master Equation
+  (\textit{CME})}.  \\
+Si noti che la \textit{CME} è un'\textbf{equazione differenziale stocastica} che
+è intrattabile, se non in casi molto semplici, dal punto di vista analitico. Un
+pathway non rientra nella casistica dei casi semplici, avendo un elevato numero
+di specie solitamente rappresentate. L'equazione, per quanto intrattabile, ci
+dice comunque come poter costruire un sistema che ci permetta di simularla,
+simulando l'evoluzione nel tempo del sistema.\\
+\textbf{Gillespie dimostrò che si può derivare la \textit{CME} dal suo algoritmo
+  di simulazione (\textit{forse anche viceversa}).}
+\subsection{Implementazione degli Algoritmi di Gillespie}
+Vediamo quindi come implementare un sistema di simulazione stocastica che ci
+permetta di seguire l'evoluzione di un insieme di reazioni nel tempo.\\
+Dato che la \textit{CME} è intrattabile generiamo \textbf{traiettorie} di
+$\mathbf{X}(t)$ da studiare. Ovviamente non sono tutte le possibili traiettorie
+ma se ne generano abbastanza per poter fare, \textit{ex-post}, uno studio
+statistico su queste traiettorie. Questo non è uguale a fare uno studio numerico
+della \textit{CME} in quanto si costruisce un algoritmo che ogni volta genera
+una certa traiettoria, ripetendo più volte la simulazione e osservando infine un
+insieme di realizzazioni che sono consistenti con la \textit{CME}.\\
+Comunque ci serve un algoritmo numerico e questo è appunto l'\textbf{algoritmo
+  di Gillespie}.\\
+Tale algoritmo prevede alcune assunzioni:
+\begin{itemize}
+  \item un volume fissato $V$ a temperatura costante
+  \item un numero $N$, $N>1$, di specie molecolari in una miscela ben mischiata
+  che interagiscono chimicamente nel volume $V$: $S_1,S_2,\ldots,S_N$ 
+  \item un numero $M$, $M>1$, di possibili reazioni: $R_1,R_2,\ldots,R_M$
+  \item ci sia equilibrio termico ma non equilibrio chimico (avendo appunto che
+  alcune reazioni possono accadere)
+\end{itemize}
+L'assunzione di miscela ben mischiata è un'assunzione essenziale per avere una
+buona simulazione. Il citoplasma non è una miscela ben mischiata, portando
+quindi a ``prendere con le pinze'' le simulazioni. \\
+Per vedere come funziona l'algoritmo, di per sé molto banale, bisogna capire la
+matematica che c'è dietro. \\
+IL primo punto chiave è la seguente probabilità, dato
+$\mathbf{X}(t)=\mathbf{x}$, con $j$ indice della prossima reazione e $\tau$
+tempo della prossima reazione: 
+\[P(\tau, j|\mathbf{x},t)\]
+ovvero la probabilità che la reazione $j$-esima, ovvero $R_j$, accada
+nell'intervallo di tempo infinitesimale $[t+\tau, t+\tau+\dd{t}]$. Questa è in
+pratica la probabilità che voglio calcolare e si nota che non è la stessa della
+\textit{CME} ma è la \textbf{la funzione di densità di probabilità congiunta
+  condizionata di due variabili casuali $j$ e $\tau$}.\\ 
+Considero ora la probabilità:
+\[P_0(\tau|\mathbf{x},t)\]
+ovvero la probabilità che
+non accada alcuna reazione nell'intervallo $[t,t+\tau]$, dato lo stato
+$\mathbf{X}(t)=\mathbf{x}$ (si nota come si stia ragionando come nel caso della
+\textit{CME}). Ne segue, facendo derivazioni simile a quelle fatte per la
+\textit{CME}, che: 
+\[P(\tau,j|\mathbf{x},t)\dd{t}=P_0(\tau|\mathbf{x},t)\cdot
+  a_j(\mathbf{x})\dd{t}\]
+Si ha anche qui la probabilità accada una qualche reazione, avendo in tal caso:
+\[P_0(\tau+\dd{t}|\mathbf{x},t)=P_0(\tau|\mathbf{x},t)\cdot\left(1-sum_{j=1}^M
+    a_j(\mathbf{x})\dd{\tau}\right)\]
+Prendendo infine il limite per $\dd{\tau}$ che tende a 0 e risolvendo
+l'equazione differenziale per ottenere una soluzione analitica, si ottiene:
+\begin{gather*} 
+  P_0(\tau|\mathbf{x},t)=e^{-a_0(\mathbf{x})\tau}\\
+  a_0(\mathbf{x})\equiv \sum_{j=1}^M a_j(\mathbf{x})
+\end{gather*}
+Ma a questo punto, ricordando che:
+\[P(\tau,j|\mathbf{x},t)\dd{t}=P_0(\tau|\mathbf{x},t)\cdot
+  a_j(\mathbf{x})\dd{t}\]
+si ottiene che:
+\[P(\tau,j|\mathbf{x},t)=a_j(\mathbf{x})\cdot e^{-a_0(\mathbf{x})\tau}\]
+Data quest'ultima equazione si può andare a calcolare effettivamente il $\tau$
+e il $j$ che serve semplicemente usando una generazione di numeri
+pseudo-casuali. Si usa una distribuzione uniforme per generare due numeri, $r_1$
+e $r_2$ in $[0,1]$ e a quel punto si ha che:
+\[\tau=\frac{1}{a_0(\mathbf{x})}\ln\left(\frac{1}{r_1}\right)\]
+mentre $j$ è il più piccolo intero tale che sia soddisfatta la seguente
+condizione: 
+\[\left(\sum_{i=1}^ja_i(\mathbf{x})\right)>r_2a_0(\mathbf{x})\]
+Ho quindi stabilito in modo causale quando accadrà la prossima reazione e quale
+sarà questa reazione. \\
+Possiamo quindi definire i vari passi dell'\textbf{algoritmo di Gillespie}:
+\begin{enumerate}
+  \item si inizializzano $t=t_0$ e $\mathbf{x}=\mathbf{x}_0$
+  \item a partire dallo stato $\mathbf{x}$ al tempo $t$ si calcolano tutte le
+  $a_j(\mathbf{x})$ (quindi per ogni reazione) e quindi posso calcolare
+  $a_0(\mathbf{x})$. Questo è un passaggio costoso dal punto di vista
+  computazionale 
+  \item si generano pseudo-casualmente $\tau$ e $j$, come visto precedentemente
+  (e la generazione di $r_1$ e $r_2$ è la cosa computazionalmente più costosa
+  qui) 
+  \item si aggiorna $\mathbf{x}$ a $\mathbf{x}+\beta_j$ (simulando l'occorrenza
+  della reazione) e si aggiorna $t$ a $t+\tau$
+  \item si salva la coppia $(\mathbf{x}, t)$ e si torna al passaggio 2.
+  Alternativamente è possibile concludere la simulazione (in base al fatto che
+  si ha computato per troppo tempo o che magari il sistema non cambia da
+  parecchie iterazioni)
+\end{enumerate}
+Il ciclo centrale dell'algoritmo è quindi molto semplice \textit{(nel secondo
+  paper di Gillespie c'è il codice in \emph{Fortran}}), al più di sapere come
+funzioni la matematica sottostante e conoscere la rappresentazione interna
+delle reazioni, dei cambiamenti di stato etc$\ldots$\\
+L'\textit{algoritmo di Gillespie} è definibile \textbf{esatto} in quanto
+le sue realizzazioni sono in accordo con la \textit{CME}. Si osserva inoltre che
+le proprietà statistiche di un insieme di traiettorie generate dall'algoritmo,
+in linea di principio, danno un'informazione accurata circa il comportamento
+stocastico globale di un sistema dinamico come previsto dalla \textit{CME}.\\
+L'\textit{algoritmo di Gillespie} è computazionalmente costoso, dal punto di
+vista temporale più che spaziale. Potremmo avere un sistema con reazioni molto
+probabili su cui ``oscilla'' il sistema per molto tempo, prima che la
+generazione pseudo-casuale renda possibile un'altra reazione. Un altro problema
+è che $a_0(\mathbf{x})$ può essere molto grande in presenza di un gran numero di
+molecole della stessa specie e questo rende $\tau$ (essendo $a_0(\mathbf{x})$ a
+denominatore nella formula) molto piccolo, rallentando molto la
+simulazione. Quest'ultimo aspetto si contrappone a quanto accade in un
+simulatore deterministico dove, ad esempio, si ha un passo di integrazione fisso
+su cui si ha un certo controllo e che garantisce che la simulazione avanza in
+modo controllato mentre qui non si ha questo aspetto.\\
+L'\textit{algoritmo di Gillespie} è quindi molto semplice da implementare anche
+se molto costoso dal punto di vista delle risorse. Si ha inoltre che avendo
+molte reazioni e molte specie hanno conseguenze sul ciclo e, ad esempio, se una
+reazione coinvolge pochissime molecole questa viene ``ignorata'' a favore di
+reazioni che coinvolgono molte molecole. Bisogna quindi fare molte simulazioni
+(cambiando il \textit{seed} del generatore pseudo-causale) per capire come
+funzioni verosimilmente il sistema e caratterizzarlo al meglio. Questa cosa
+comporta anche molta interazione ``manuale'' nonché ulteriori costi
+computazionali.\\
+L'\textit{algoritmo di Gillespie} è molto usato in biologia computazionale, ad
+esempio in simulatori come \textit{COPASI, StochSim etc$\ldots$}
+\subsection{Variante Tau-Leaping}
+Abbiamo visto come ci possano essere problemi di prestazioni con
+l'\textit{algoritmo di Gillespie}. Non ha caso si hanno vari studi in merito al
+miglioramento delle prestazioni dello stesso in certe condizioni.\\
+Una delle prime varianti è quella detta \textbf{tau-leaping} che si basa
+sull'idea che, trovandosi in un certo stato, si procede vedendo cosa succede se
+ci si mette a fare un salto in avanti nel tempo di una quantità $\tau$
+predefinita. Quindi $\tau$ è passato come parametro.\\
+Si ha quindi l'algoritmo:
+\begin{enumerate}
+  \item si avanza della quantità di tempo pre-stabilita $\tau$ (\textit{non
+    capisco se questo step è generale perché sembra che si avanzi due volte,
+    avanzando anche nel punto 3})
+  \item si calcola $k_j$, ovvero il numero di volte che la reazione $R_j$
+  occorre nella quantità di tempo $\tau$
+  \item si avanza il tempo di $\tau$ e si aggiorna lo stato del sistema
+  $\mathbf{x}$ tramite:
+  \[\mathbf{x}+k_1\beta_1+\cdots+k_M\beta_M\]
+  \item si trova un $\tau$ sufficientemente piccolo per cui la
+  \textit{funzione di propensità} rimane costante, avendo la cosiddetta
+  \textbf{leap condition}, e tale che i vari $k_j$ siano grandi,
+  massimizzandole. Questa operazione non è affatto banale e si hanno vari
+  articoli in merito
+\end{enumerate}
 \end{document}
-
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
-% LocalWords:  REST ligandi discretizzato Petri FSA primis
+% LocalWords:  REST ligandi discretizzato Petri FSA primis delay propensità
+% LocalWords:  Gillespie condition

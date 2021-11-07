@@ -1280,7 +1280,7 @@ idrogeno, la forza di Van der Waals e la forza elettrostatica sono
 \textit{Ogni atomo di carbonio forma 4 legami con altri atomi,
   l'Azoto 3, l'ossigeno 2 e l'Idrogeno 1. Nelle figure delle molecole dove non
 si ha nulla indicato si ha un Carbonio.}
-\newpage
+
 \subsection{Biochimica e Metabolismo}
 Abbiamo visto come le reazioni biochimiche modificano le proprietà di vari
 composti. \\
@@ -1516,8 +1516,7 @@ processi di fermentazione, quindi ciò che cercavano erano misure dell'efficienz
 di una reazione enzimatica e della sua velocità.  \\
 Riprendiamo la formula $A+B\stackrel{k}{\to}C$, e la sua versione
 differenziale $\frac{\dd{[C]}}{\dd{t}}=k[A][B]$ per poter ottenere le due
-equazioni.
-\newpage
+equazioni.\\
 Avendo che $[E]_0$ è la quantità disponibile di enzima e che $[E]+[C]=[E]_0$
 possiamo riscrivere lo schema della \textit{legge di massa di azione} otteniamo
 quattro ODE:
@@ -2696,7 +2695,624 @@ Si ha quindi l'algoritmo:
   massimizzandole. Questa operazione non è affatto banale e si hanno vari
   articoli in merito
 \end{enumerate}
+\chapter{Simulazioni Spaziali}
+Si studiano ora simulazioni più complesse, che hanno a che vedere con la
+geometria della strutture biologiche (dei tessuti, dell'interno delle cellule
+etc$\ldots$) che si vogliono simulare. Si è quindi partiti da simulazioni
+discrete, simulazioni continue, simulazioni stocastiche per proseguire ora con
+simulazioni di strutture tridimensionali. Precedentemente si erano studiati
+modelli dove lo spazio non aveva un vero e proprio ruolo.
+\section{Cripte Coloniche}
+Per introdurre al meglio le simulazioni spaziali dobbiamo prima tornare a
+parlare delle \textbf{cripte coloniche}.\\
+Il \textbf{cancro al colon} è una delle principali cause delle morti di tumore
+ed è un cancro molto ben studiato con una fenomenologia e una progressione più
+uniformi dal punto di vista istologico. Si hanno anche alcuni insiemi di
+mutazioni già identificati. \\
+Il cancro al colon si origina dalle \textit{cripte coloniche} dove si ha uno
+strato di cellule staminali che si suddividono per riprodurre
+l'\textit{epitelio} dell'intestino. Normalmente il ``fondo'' della cripta, dove
+troviamo lo strato di cellule staminali epiteliali, lo indichiamo come
+\textit{base} mentre la ``cima/uscita'', ovvero la parte che da sull'intestino,
+\textit{lumen}. Le cellule staminali continuano a riprodursi e spingono verso
+il \textit{lumen} le cellule che si trovano ``sopra'' (tra virgolette in quanto
+l'intestino è comunque avvolto su se stesso oltre ad essere effettivamente un
+``tubo'') di loro. Mentre si muovono 
+verso il \textit{lumen} queste cellule, che sono cellule che sono il risultato
+della divisione delle cellule staminali, si suddividono ulteriormente e si
+differenziano e continuano a spingersi a vicenda verso il
+\textit{lumen}. Continuano a differenziarsi fino a che non diventano
+\textbf{completamente differenziate} ed escono dal \textit{lumen}, trovandosi
+sulla superficie dell'intestino (in realtà risalgono i \textbf{villi
+  intestinali}). \\
+Le cellule staminali si dividono in diversi modi, partendo con cellule un po'
+più differenziate, all'incirca a metà della cripta, fino ad essere completamente
+differenziate nei pressi del \textit{lumen}. Quando arrivano alla cima del villo
+intestinale vengono poi rimosse tramite azioni meccaniche. \\
+\textbf{\textit{Su slide, lezione 6, varie immagini delle cripte coloniche}}.\\
+Il meccanismo di suddivisione è molto interessante e nel suo proseguire produce
+quattro tipi di cellule:
+\begin{enumerate}
+  \item \textbf{absorptive cell (\textit{cellule assorbenti})}
+  \item \textbf{goblet cell (\textit{cellule caliciformi})}
+  \item \textbf{enteroendocrine cell (\textit{cellule enteroendocrine})}
+  \item \textbf{Paneth cell}
+\end{enumerate}
+Ognuna di queste cellule ha uno scopo ben preciso anche se ancora non si è ben
+definito quale per le \textit{Paneth cell}, ovviamente le funzioni sono legate
+all'\textbf{apparato digerente} (ad esempio le \textit{absorptive cell} si
+occupano di assorbire i nutrienti dalle pareti dei villi). Modellare in 3D
+questa struttura non è affatto semplice, soprattutto se si vuole coniugare la
+dinamica interna di ogni cellula con la dinamica intercellulare, con le
+interazioni tra le varie cellule. Un altro aspetto sono le tempistiche
+dell'intero processo, avendo che la differenziazione e la migrazione verso la
+cima del villo avviene tra le 24 e le 48 ore, mentre prima la migrazione verso
+il \textit{lumen} era avvenuta in circa 24/36 ore. Si ha quindi un continuo
+riciclo della ``fodera'' dell'intestino e questo è uno dei motivi per cui è
+semplice che si sviluppi un tumore all'interno del colon.\\
+Quando si osserva come le cellule si suddividono e differenziano possiamo
+costruire uno schema/modello di come si suddividono queste cellule:
+\begin{itemize}
+  \item le cellule staminali si suddividono e restano cellule staminali
+  \item le cellule staminali si suddividono e diventano dei \textit{progenitori
+    proliferativi}, che non sono ancora completamente differenziati. A questo
+  punto:
+  \begin{itemize}
+    \item il progenitore proliferativo si suddivide in un altro progenitore
+    proliferativo 
+    \item il progenitore proliferativo si suddivide in una \textit{Paneth
+      cell}. Da cui in poi, oltre ad avere ancora suddivisione in \textit{Paneth
+      cell} abbiano due ulteriori ``percorsi'': 
+    \begin{itemize}
+      \item le cellule si differenziano fino a diventare \textit{absorptive
+        cell} 
+      \item le cellule si differenziano fino ad ottenere due sotto-popolazioni,
+      una per le \textit{goblet cell} e una per le \textit{enteroendocrine cell}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+Siamo in una situazione analoga a quella del \textbf{sistema ematopoietico}, con
+un ``modello ad albero''.\\
+Interessante, dal punto di vista della simulazione 3D di questo tipo di modelli,
+è che è possibile, \textit{in silico}, tenere traccia della progenie di tutte le
+cellule che si ottiene durante i vari step di divisione. Questo è interessante
+perché i biologi sono riusciti poi a trovare dei metodi per tracciare questa
+evoluzione, tramite dei \textit{marker biochimici}, per capire da dove si
+origina una cellula differenziata. \\
+Una delle domande che ci si pone è quella di capire cosa regoli questo
+meccanismo. Chiaramente c'è un influsso di nutrienti che fa si che le cellule
+aumentino di volume e quindi successivamente si dividano ma si hanno anche altri
+``segnali'' che sostanzialmente dicono alle cellule che sono in loro prossimità
+quale sia la distanza rispetto al \textit{lumen} della cripta. Si ha quindi un
+``gradiente lineare'' di una serie di proteine e altre molecole, nel complesso
+vengono chiamati \textbf{morfogeni}, che è molto
+elevato nel fondo della cripta e molto basso nei pressi del \textit{lumen}. Si
+ha quindi una correlazione tra la quantità di \textit{morfogeni} e la velocità
+di divisione e differenziazione delle cellule. Il primo articolo che parlò di
+questa cosa uso nei grafici i colori blu, bianco e rosso e da quel momento il
+sistema venne chiamato \textbf{sistema della bandiera francese}.
+Si noti che la progenie, dal punto di vista schematico, tende a crescere in
+``colonne'' sulla superficie della cripta, avendo una serie di meccanismi che
+fanno si che la crescita sia \textbf{ordinata}.
+\section{Evoluzione Tumorale}
+Vediamo anche, prima ancora di passare alle vere e proprie simulazioni spaziali,
+come si evolve un tumore. Vediamo quindi brevemente come funzioni la
+\textbf{progressione del cancro al colon}, descritta per la prima volta ad
+inizio anni novanta. Il tutto può essere riassunto con un semplice schema:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/canc.pdf}
+\end{figure}
+Dove:
+\begin{itemize}
+  \item si parte con un \textit{epitelio normale} che è quello che normalmente
+  abbiamo nell'intestino per tantissimi anni
+  \item ad un certo punto può darsi che alcune delle cellule, normalmente alcune
+  delle cellule staminali o alcuni dei progenitori semi-differenziati,
+  acquisiscono una mutazione sui geni \textit{APC} e
+  $\beta$\textit{-catenina}. Non sappiamo come vengono acquisite tali mutazioni 
+  \item se le mutazioni rimangono fisse, ovvero le cellule che hanno la
+  mutazione si riproducono senza essere rimosse dal sistema immunitario o da
+  altri sistemi di controllo. Queste cellule quindi crescono in maniera
+  \textbf{non ordinata}, perdendo il meccanismo di regolazione della crescita,
+  avendo una \textbf{crescita displastica}. In questa situazione si ha quindi un
+  \textbf{adenoma iniziale} 
+  \item dopo questa situazione può darsi che una di queste cellule mutate
+  acquisisca anche una mutazione sul gene \textit{K-RAS} che è un gene implicato
+  nella regolazione della proliferazione delle cellule. A questo punto il
+  sistema diventa un \textbf{adenoma intermedio}
+  \item a questo punto le cellule possono acquisire anche le mutazioni sui geni
+  \textit{DCC, SMAD4} e \textit{SMAD2} (dove si noti che \textit{DCC} sta per
+  \textit{Deleted in Colorectal Carcinoma}) portando il sistema ad essere un
+  \textbf{adenoma finale}
+  \item se si aggiunge anche la mutazione su \textit{p53}, che è uno dei geni,
+  più importante della categoria, che controlla il meccanismo di ``suicidio
+  volontario'' della cellula, ovvero il processo di \textbf{apoptosi} che porta
+  la cellula a smettere di riprodursi e ad essere rimossa e ``riciclata'' dal
+  sistema. Se però si ha la mutazione su \textit{p53}n il sistema smettere di
+  rispondere ai segnali \textit{apoptotici} e di fatto la cellula diventa
+  ``immortale'' e il sistema diventa un \textbf{carcinoma}
+  \item a causa di altri cambiamenti, infine, si ha la \textbf{metastasi}
+\end{itemize}
+Questo è stato uno dei primi modelli di progressione del tumore, in particolare
+del cancro al colon. Ovviamente ora si sa che questo schema è troppo
+semplificato ma è comunque un buon riferimento per il ``normale'' cancro al
+colon.\\ 
+Si hanno però altri tipi di cancro al colon, come il cosiddetto
+\textbf{Hereditary Non-polyposis Colorectal Cancer (\textit{HNPCC})}, 
+che presenta una serie diversa di mutazioni. Un'altra variante di progressione è
+quella detta \textbf{Hypermethylation MSI-H}, dove la sigla sta per
+\textit{MicroSatellite Instability-High}. Si hanno quindi vari tipi di
+progressione anche se gli ultimi elencati hanno incidenza minore rispetto a
+quello ``normale''.\\
+Si hanno anche altri meccanismi relativi allo sviluppo di tumori, tra cui il
+\textbf{VEGF (\textit{Vascular endothelial growth factor}) pathway} che è
+relativo allo \textbf{angiogenesi}, ovvero il processo che porta alla formazione
+di nuovi vasi sanguigni da altri vasi preesistenti. Un altro problema è
+l'interazione delle cellule con lo \textbf{stroma}, ovvero la trama fondamentale
+di un organo composto generalmente dal tessuto connettivo e dai vasi sanguigni,
+e con il microambiente complessivo, dove si hanno \textit{morfogeni} presenti in
+concentrazione diversa.
+\section{Simulazioni 3D}
+Vediamo quindi, comunque in modo molto sintetico e schematico, come fare
+simulazioni tridimensionali. \\
+Per modellare un \textit{tessuto tumorale} si hanno differenti \textbf{paradigmi
+di modellazione} e diversi \textbf{livelli di astrazione, parametri
+etc$\ldots$}.\\
+Bisogna considerare, ovviamente oltre all'implementazione stessa, quali siano i
+\textit{vincoli} da considerare e quali sono le grandezze da osservare. Si
+vedranno:
+\begin{itemize}
+  \item \textbf{modelli su griglia}, detti anche \textbf{in-lattice}
+  \item \textbf{modelli senza griglia}, detti anche \textbf{off-lattice} o
+  \textbf{lattice-free} 
+\end{itemize}
+Bisogna considerare anche \textit{forze esterne, flussi, condizioni a contorno}
+etc$\ldots$ \\
+Sarebbe bello dare regole locali per ogni agente e osservare ex-post
+l'organizzazione in colonne della riproduzione delle cellule. La cripta è una
+struttura tridimensionale, a semi-cilindro, che però può essere ``srotolata'' in
+un piano, ottenendo una trasformazione del problema in un problema
+bidimensionale, in 2D, che è molto più semplice da studiare.
+\subsection{Modelli In-Lattice}
+Passiamo quindi ai \textbf{modelli su griglia}, detti appunto \textbf{modelli
+  in-lattice}. Il punto chiave che differenzia i vari modelli è come modellare
+gli agenti principali, nel dettaglio le varie cellule. Nei modelli
+\textit{in-lattice} una cellula è modellata come una composizione di posizioni
+sulla griglia e quindi non come un oggetto a se stante con una sua geometria,
+come nei modelli \textbf{off-lattice}.
+\subsubsection{Cellular Potts Mode}
+Un modello \textit{in-lattice} molto importante è il \textbf{Cellular Potts
+  Model (\textit{CPM})}, un modello che nasce nel mondo della fisica che poi è
+stato riutilizzato in ambito biologico. Questo è un modello ad \textbf{automi
+  cellulari}.\\
+Uno dei primi usi del \textit{CPM} è quello sviluppato da Glazier e Graner, nel
+1992, che è basato sul modello di Potts di meccanica statistica, ovvero uno
+\textit{spin model}. Quando si misero a studiare questa simulazione lo fecero
+per studiare la cosiddetta \textbf{Differential Adhesion Hypothesis
+  (\textit{DAH})}, proposta da Steinberg nel 1952 e validata sperimentalmente
+nel 1962 da Moscona e Moscona. Questa ipotesi è stata proposta da dei biologi ed
+enuncia, in modo semplice, che se si hanno due popolazioni di cellule mischiate
+(normalmente si vede con popolazioni batteriche) e queste cellule aderiscono
+l'una con l'altra tra le due popolazioni allora dopo un po' il sistema tenderà a
+riorganizzarsi in strati (per dire come succede quando si mischiano olio e
+acqua anche se ovviamente con le cellule, che sono vive, è un discorso più
+complesso).\\
+L'implementazione di questo sistema viene fatta mediante il calcolo complessivo
+dell'energia del sistema (indicata da Potts con $J$), energia che dipende dai
+\textit{parametri di adesione} tra una cellula e un'altra, di tipo
+diverso. L'energia del sistema dipende quindi dalla posizione relativa di
+diverse cellule. L'evoluzione del sistema ci permette di calcolare, passo per
+passo, di calcolare $J$ e di scegliere le prossime mosse per
+\textbf{minimizzare} $J$. Dal punto di vista dei vincoli abbiamo quello
+dell'\textbf{energia elastica} che dipende dal volume della cellula. \\
+In questo sistema si osservano vari fenomeni:
+\begin{itemize}
+  \item \textit{auto-ordinamento delle cellule}
+  \item \textit{posizionamento delle cellule}
+  \item \textit{riarrangiamento e migrazione delle cellule}
+\end{itemize}
+Vediamo quindi la rappresentazione interna di questo sistema.\\
+Abbiamo una griglia bidimensionale e l'idea chiave è quella di discretizzare lo
+spazio in questa griglia. Ad ogni quadratino/pixel, identificato con le
+coordinate $(i,j)$, di questa griglia si
+assegnano dei numeri (come in figura \ref{fig:grid}):
+\begin{itemize}
+  \item $\sigma(i,j)=id$, ovvero una funzione che calcola un \textbf{id}, per
+  indicare a quale cellula appartiene il pixel, 
+  infatti ogni cellula è rappresentata come un insieme connesso di pixel sulla
+  griglia 
+  \item $\tau(\sigma(i,j))=type$, ovvero una funzione che assegna un
+  \textbf{type} ad ogni cellula
+\end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1]{img/grid.pdf}
+  \caption{Esempio di parte della griglia, con due cellule diverse ($\sigma=1$ e
+    $\sigma=2$) dello stesso tipo ($\tau=1$)}
+  \label{fig:grid}
+\end{figure}
+L'energia totale del \textit{CPM} è legata alla superficie delle cellule. Si ha
+quindi la funzione:
+\[J(\tau,\tau')\]
+che rappresenta l'energia di superficie per unità di contatto tra due
+cellule. L'energia è minore tra i \textit{pixel} appartenenti a due cellule
+dello stesso tipo, maggiore per cellule di tipo diverso e nulla tra
+\textit{pixel} della stessa cellula.
+\begin{definizione}
+  Definiamo l'energia totale del \textit{CPM} è definita come la somma totale
+  delle energie calcolare sulle superfici delle cellule più una costante
+  moltiplicata per l'energia ottenuta dall'area di una cellula, ovvero:
+  \[H_{Potts}=H_{surface}+\lambda H_{Area}\]
+  Dove $H_{potts}$ è un operatore Hamiltoniano e $\lambda$ è la \textbf{costante
+  di rigidità} per il citoscheletro. Tale costante è usata nel ruolo di
+moltiplicatore Lagrangiano. 
+\end{definizione}
+L'algoritmo di simulazione è molto semplice. Ad ogni passo si seleziona
+randomicamente il pixel in posizione $(i,j)$ e si fa un calcolo probabilistico
+per convertire l'\textit{id} $\sigma(i,j)$ nel $\sigma'$ di un pixel
+confinante. Si calcola quindi la seguente probabilità (indicando con $\to$ il
+passaggio di un \textit{pixel} da una cellula all'altra), per $T\neq 0$:
+\[P(\sigma(i,j)\to\sigma'(i,j))=
+  \begin{cases}
+    e^{-\frac{\Delta H}{kT}}&\mbox{se }\Delta H>0\\
+    1&\mbox{se }\Delta H\leq 0
+  \end{cases}
+\]
+dove:
+\begin{itemize}
+  \item $\Delta H$ è il cambio di energia totale ad ogni step
+  \item $k$ è una costante
+  \item $T$ è il tempo
+\end{itemize}
+mentre se si ha $T=0$, avendo quindi la condizione iniziale:
+\[P(\sigma(i,j)\to\sigma'(i,j))=
+  \begin{cases}
+    0&\mbox{se }\Delta H> 0\\
+    0.5&\mbox{se }\Delta H= 0\\
+    1&\mbox{se }\Delta H< 0
+  \end{cases}
+\]
+È quindi un sistema molto semplice, ancora più semplice da implementare di
+quello di Gillespie.\\
+Alla fine anche questo è un algoritmo della categoria dei \textbf{metodi
+  Montecarlo}, infatti passare da uno stato della griglia all'altro è fare un
+passo con quel metodo.\\
+Inoltre si ha anche il \textbf{gradiente DAH} che ``guida'' la probabilità che
+le cellule cambino da un certo tipo ad un altro specifico tipo, facendo un
+\textit{passo di Montecarlo}. Si osserva quindi il ``movimento'' atteso delle
+cellule semplicemente implementando questo metodo.\\
+\textbf{\textit{Su slide, parte 6, varie immagini di simulazioni, dove in base a
+  diversi vingoli si ottengono separazioni nette tra tipi di cellule o miscugli,
+  in assenza di particolari vincoli}.}\\
+Si hanno numerosi problemi, durante le simulazioni più complesse, del
+mantenimento finale della forma di determinate cellule, cosa che si risolve
+tendenzialmente aggiungendo vincoli.
+\subsubsection{Modello di Wong}
+Vediamo quindi il \textit{modello in-lattice} per le cripte coloniche proposto
+da Wong\footnote{Wong et al., Computational model of cell positioning: 
+directed and collective migration in the intestinal crypt epithelium, J. Of
+The Royal Soc. Interface 7, S351-363 (2010)}.\\
+Questo modello ci permette di modellare la \textbf{motilità}, ovvero proprietà
+dell’organismo vivente (anche unicellulare), o di una sua parte, di modificare
+attivamente e in modo reversibile la propria posizione rispetto all’ambiente,
+delle cellule staminali e delle cellule progenitrici all'interno delle cripte.\\
+È un modello a due dimensioni dove sono stati aggiunti alcuni elementi, tra cui
+il fatto che la cripta è ``srotolata'' e viene forzato esternamente tramite un
+gradiente il movimento verso il \textit{lumen} da parte delle cellule.\\
+Dal punto di vista dei vincoli si hanno:
+\begin{itemize}
+  \item si ha un \textit{termine di energia} che fa si che le cellule staminali
+  rimangano fisse in posizioni predefinite
+  \item regole particolari che servono a modellare la crescita cellulare, la
+  divisione (asimmetrica con proliferazione e differenziazione) e
+  l'\textit{apoptosi} 
+  \item si ha un assunzione fondamentale di modello che ci dice che il morfogene
+  più importante che viene considerato, che è quello che fa si che le cellule si
+  dividano e salgano verso il \textit{lumen}, ovvero l'\textbf{adesione} sia
+  data da livelli di attivazione di \textit{Eph/efrina} lungo la cripta
+\end{itemize}
+Il risultato finale della simulazione consente di osservare che:
+\begin{itemize}
+  \item l'adesione differenziale regola il posizionamento delle cellule nella
+  cripta intestinale 
+  \item le cellule epiteliali si muovono verticalmente verso l'alto verso il
+  \textit{lumen} della cripta  
+  \item il movimento è coordinato, nonostante le relativamente poche assunzioni
+  \item l'omeostasi delle cellule epiteliali intestinali è mantenuta nel modello
+\end{itemize}
+Nonostante, si ripete, la simulazione sia semplice e con poche assunzioni.
+\subsubsection{Modello Ibrido di Glazier, Graner e Hogeweg}
+Un modello un poco più complesso è stato proposto da Glazier, Graner e Hogeweg e
+consiste nel \textit{CPM} con l'aggiunta della modellazione della
+\textbf{chemiotassi}, ovvero il fenomeno con cui i corpi cellulari, batteri ed
+altri organismi unicellulari o multicellulari direzionano i loro movimenti a
+seconda della presenza di alcune sostanze chimiche nel loro ambiente.\\
+Questo è quindi un modello sostanzialmente \textbf{ibrido}, in quanto viene
+appunto modellato il movimento esplicito delle cellule nell'ambiente.\\
+Per ottenere ciò si usano dei gradienti modellati con delle \textbf{equazioni a
+  derivate parziali (\textit{EDP})}. Si usano \textbf{campi discretizzati} per
+descrivere la concertazione di un attrattore chimico, definiti da un insieme di
+EDO all'interno di ogni cellula, che descrivono  la secrezione cellulare e
+l'assorbimento della sostanza chimica, ovvero dei morfogeni. Si ha inoltre un
+insieme di \textit{EDP} per calcolare la diffusione e il decadimento della
+sostanza chimica, ovvero a regolare l'attivazione dei morfogeni. Si ha quindi un
+\textbf{reaction-diffusion system}. Si ignora invece l'\textbf{avvezione},
+ovvero il trasporto di massa o proprietà fisica che in fluidodinamica avviene
+durante il moto del fluido. Si ha quindi un contributo aggiuntivo all'energia
+effettiva del \textit{CPM} per tenere conto della nuova variabile di campo. \\
+Il \textit{CPM} quindi è usato per modellare il movimento delle cellule, tramite
+la griglia, e per tener traccia dell'energia complessiva del sistema.\\
+L'uso del sistema di \textit{EDP} consente di osservare:
+\begin{itemize}
+  \item la chemiotassi
+  \item la proliferazione delle cellule tumorali
+  \item secrezione e assorbimento del \textit{fattore pro-angiogenico VEGF-A},
+  che è un fattore di crescita che serve per regolare l'afflusso di nutrienti al
+  tumore (???)
+  \item la proliferazione di \textit{cellule neovascolari}
+  \item la produzione, l'assorbimento e la diffusione di ossigeno 
+\end{itemize}
+Dal punto di vista software si ha un implementazione con \textbf{CompuCell3D}
+(sul sito ci sono anche vari video di simulazioni etc$\ldots$).
+\subsection{Modelli Lattice-Free}
+Passiamo quindi ai modelli \textbf{lattice-free/off-lattice}, quindi senza
+griglia. Questi modelli arrivano dal mondo della fisica.\\
+Questi modelli 3D si basano sulla \textbf{partizione dello spazio di
+  Voronoi-Delaunay} (anche se sarebbero nel dettaglio la \textbf{partizione di
+  Voronoi} e la \textbf{triangolazione di Delaunay}). Tali modello sono modelli
+\textit{biomeccanici,ibridi} e \textit{agent-based} di sistemi multicellulari.
+\subsubsection{Modello di Schaller e Meyer-Hermann}
+Come anticipato questo tipo di modelli deriva dal mondo della fisica, infatti il
+primo modello che viene trattato è stato fatto in quell'ambiente da  Schaller e
+Meyer-Hermann\footnote{Schaller, Meyer-Hermann, PHYSICAL REVIEW E 71, 051910
+  s2005d}. \\
+Si hanno le seguenti assunzioni in generale (comuni anche ad altri modelli): 
+\begin{itemize}
+  \item la \textbf{cellula} è un \textit{corpo semi-sferico} e la forma varia da
+  sferica in soluzione sottile a \textit{convessa poliedrica di Voronoi} in
+  tessuti densi. Questa modellazione rende tutto più semplice
+  \item dal punto di vista delle \textbf{forze} si hanno:
+  \begin{itemize}
+    \item la \textit{forza elastica} tra cellule
+    \item \textit{interazioni/forze di adesione e frizione} tra cellule
+    \item \textit{interazioni/forze di adesione e frizione} tra cellula e
+    substrato 
+  \end{itemize}
+  \item lo \textbf{stato della cellula} è rappresentato da:
+  \begin{itemize}
+    \item posizione
+    \item concentrazione nella membrana cellulare di recettori e ligandi. Questa
+    informazione è necessaria per parlare di adesione
+    \item il ciclo interno alla cellula
+    \item altre caratteristiche, rappresentate da costanti, utili per le
+    interazioni elastiche e di adesione. Tali costanti sono dipendenti dal tipo
+    preciso di cellula 
+  \end{itemize}
+  \item per la \textbf{dinamica} con cui le cellule si muovono nello spazio si
+  usano \textbf{equazioni di Newton} per le singole cellule, corredate da
+  \textit{EDP} per modellare campi in cui si muovono le cellule, dove ci sono
+  processi di reazione e diffusione che coinvolgono nutrienti, come Ossigeno e
+  Glucosio. Le \textit{EDP} determinano quindi la distribuzione spazio-temporale
+  dei nutrienti 
+  \item si hanno infine \textbf{segnali di crescita} che fanno si che aumenti la
+  \textit{biomassa} (aumentando di volume fino ad un certo limite fino alla
+  divisione), quando le cellule consumano i nutrienti
+\end{itemize}
+La \textbf{triangolazione di Delaunay} viene utilizzata per fornire in modo
+efficiente l'elenco dei prossimi vicini per l'interazione cellula-cellula.\\
+La \textbf{partizione di Voronoi} e la \textbf{triangolazione di Delaunay} sono
+duali e sono usate per rappresentare in modo approssimato cellule e tumori
+sferici. Si hanno estensioni per un numero $n$ di dimensioni.\\
+Parliamo dell'estensione bidimensionale. Si hanno dei punto in un piano che
+vengono connessi tra loro con linee tratteggiate, come in figura
+\ref{fig:tri}. Non si possono avere linee che si intersecano tra loro e tali
+linee rappresentano appunto la \textit{triangolazione di Delaunay}. Ci sono
+algoritmi che costruiscono la triangolazione in modo efficiente, basandosi su
+una \textit{scan-line} e man mano che si ha la scansione si costruisce la
+triangolazione. Si procede poi prendendo il punto medio di ogni segmento e
+costruisco un poligono in grassetto che passa coi suoi lati attraverso tali
+punti medi. La zona delimitata da questo poligono è la \textbf{cellula di
+  Voronoi} e corrisponde alla costruzione  \textit{della partizione di Voronoi}
+nel piano. Ovviamente la partizione dipende dalla posizione dei punti e si
+possono generare più partizioni, dove ogni partizione contiene un punto di
+quelli di partenza e tutti i punti ipotetici della ragione hanno quel tal punto
+come punto più vicino. Si possono ottenere così approssimazioni accettabili.\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.3]{img/tri.jpg}
+  \caption{Esempio di triangolazione bidimensionale dove viene specificata la
+    partizione del punto rosso centrale, tutti i punti che posso prendere in
+    quell'area sono più vicini al punto rosso centrale che a qualsiasi altro
+    punto rosso della figura.}
+  \label{fig:tri}
+\end{figure}
+Rappresentare le cellule con questi \textbf{diagrammi di Voronoi} facilita di
+molto la computazione di misure e quantità di interesse per capire come si
+evolve il sistema, potendo identificare schematicamente le forze, atte a
+calcolare poi i cambiamenti nella posizione delle cellule (con le forze che
+producono una forza risultante che muove la cellula in certe direzioni), ma
+anche a poter rappresentare la suddivisone delle cellule. Le varie forze vengono
+calcolate come agenti sulle facce della superficie calcolata (si associa un
+singolo valore ad ogni superficie, nel punto medio di ogni lato) e quindi si può
+computare meglio come ottenere la risultante. È anche questa un'approssimazione
+accettabile (anche perché tali calcoli su una curva non sarebbero
+gestibili). Tali calcoli, come quello della forza risultante dipende poi dal
+calcolo di integrali non banali. Per la divisione si ha che si costruisce un
+nuovo \textit{diagramma di Voronoi}, avendo che da un punto se ne producono
+due. Si hanno questioni algoritmiche non banali in quanto, dato un insieme di
+punti, su un piano o anche in uno spazio 3D, è semplice costruire il
+\textit{diagramma di Voronoi/triangolazione di Delaunay}, avendo algoritmi noti,
+mentre si hanno problemi quando si ha uno spazio partizionato e si vuole
+modificare la struttura del sistema. Tutti gli algoritmi noti infatti agiscono a
+livello \textit{globale} ma per modellare una divisione cellulare ho una
+modifica \textit{locale} al \textit{diagramma di Voronoi}, non cambiando quasi
+nulla nelle aree lontane. È quindi inefficiente ricalcolare tutto ad ogni
+divisione cellulare e quindi si hanno varie soluzioni algoritmiche non
+banali, di natura numerica, che permettono di fare aggiornamenti locali in modo
+abbastanza efficiente. La letteratura dedicata si ritrova sotto il nome di
+\textbf{dynamic update Voronoi diagrams} e spesso trattano soprattutto
+dell'errore introdotto dagli algoritmi, usando calcoli numerici non semplici da
+gestire, avendo problematiche dal punto di vista della \textbf{robustezza degli
+  algoritmi}. \\
+Tali simulazioni hanno anche avuto uso in \textit{meccanica
+muscolare} e \textit{meccanica scheletrica}, oltre che a vari problemi
+ingegneristici (turbine, centrali nucleari etc$\ldots$).\\
+Questo modello include la \textbf{proliferazione}, secondo regole predefinite, e
+si voleva modellare la dinamica della popolazione e il mantenimento della
+morfologia sferoide del tumore, studiando i meccanismi per l'induzione della
+\textbf{necrosi cellulare}.
+\subsubsection{Modello di Buske e Galle}
+Un modello diverso è quello proposto da Buske, Galle et al\footnote{P. Buske,
+  J. Galle, et al, A Comprehensive Model of the 
+Spatio-Temporal Stem Cell and Tissue Organisation in the Intestinal
+Crypt, PLoS Comput Biol, vol. 7, no. 1, 2011}, tra cui Drasdo. \\
+Questo è un modello biomeccanico \textit{agent-based} per sistemi
+multicellulari. Le cellule sono trattate come corpi elastici deformabili, pur
+tenendo a mantenere di base forma sferica, in grado di:
+\begin{itemize}
+  \item muoversi
+  \item dividersi
+  \item differenziarsi
+  \item ``comunicare'' tra loro
+\end{itemize}
+La dinamica viene rappresentata tramite le \textbf{equazioni di Langevin}.\\
+Si usano variabili di stato dinamiche per:
+\begin{itemize}
+  \item la posizione delle cellule
+  \item la dimensione delle cellule
+  \item il vettore dello stato interno (\textit{internal state vector}) per
+  l'\textit{internal activity status}, con ad esempio la trascrizione dei geni
+  target, con, ad esempio, il \textit{Wnt-pathway} o il \textit{Notch-pathway}
+\end{itemize}
+La forma delle cripte intestinali è quella di una ``scafallatura'' 3D abbastanza
+fedele alla vera forma di una cripta.\\
+Il vettore dello stato interno può essere cambiato tramite la dinamica esterne
+alle cellule, avendo dinamica delle posizioni e delle dimensioni. Non si hanno
+invece equazioni di dinamica per lo stato interno, non avendo, ad esempio,
+relazioni metaboliche e questo è importante visto che spesso si vuole accoppiare
+la dinamica interna di una cellula con quella esterna, modellando sia i processi
+intra-cellulari che inter-cellulari. La scala dei tempi in cui questi processi
+avvengono è però abbastanza diversa avendo che la simulazione potrebbe
+rallentare molto.\\
+Dal punto di vista delle forze si hanno quindi le interazioni tra cellule e le
+interazioni di una cellula con il substrato, in termini di adesione e
+frizione. \\
+Il modello puntava quindi a descrivere lo stato stazionario delle cripte
+coloniche, stato in cui si ha una \textit{dinamica stazionaria}, dove si ha la
+divisione e la differenziazione delle cellule. Si parla di \textbf{omeostasi},
+la capacità di autoregolazione degli esseri viventi, importantissima per
+mantenere costante l'ambiente interno nonostante le variazioni dell'ambiente
+esterno, ovvero l'\textit{equilibrio dinamico}.\\
+Il modello tiene traccia della crescita delle cellule, della divisione e della
+differenziazione delle stesse, per tutte e tre le cose con regole predefinite
+scelte tramite studi sperimentali. A questi vincoli si aggiungono:
+\begin{itemize}
+  \item dal punto di vista dell'energia di interazione abbiamo:
+  \begin{itemize}
+    \item interazione di adesione
+    \item l'energia di deformazione per contatto, secondo il modello di Hertz
+    \item energia di compressione elastica per le sfere 
+  \end{itemize}
+  \item per le forze si ha che essere sono sia deterministiche che stocastiche,
+  anche se i termini stocastici sono solamente \textit{termini di rumore}
+  \item si assume l'ancoraggio al substrato. Le cellule interagiscono con la
+  \textit{membrana basale}, ovvero la struttura laminare specializzata della
+  matrice extracellulare di spessore compreso tra 70 e 300 \textit{nm} che fa da
+  interfaccia tra un tessuto connettivale e un tessuto non connettivale, 
+  tipicamente epiteli. Questa interazione però avviene se la loro distanza è
+  minore di quella del loro raggio e si ha che esse sono rimosse dal sistema
+  della cripta se si perde il contatto con la membrana basale
+\end{itemize}
+Si ha inoltre un \textit{ciclo cellulare} programmato, per controllare:
+\begin{itemize}
+  \item la regolazione e il controllo della crescita cellulare
+  \item la forma di inibizione della crescita mediata dal contatto tra cellule
+  (???) 
+  \item l'arresto del ciclo cellulare in dipendenza dal contatto tra una cellula
+  e il substrato
+  \item la morte cellulare programmata in dipendenza dal contatto tra una
+  cellula e il substrato, simulando quindi processi apoptotici
+\end{itemize}
+Questo modello consente di osservare:
+\begin{itemize}
+  \item omeostasi del sistema
+  \item l'auto-organizzazione spazio-temporale del tessuto
+  \item la migrazione delle cellule verso il \textit{lumen} della cripta
+  \item la riorganizzazione delle cellule nel sistema
+\end{itemize}
+Tutto questo studiando \textit{sensitività, stabilità} e \textit{flessibilità}
+al cambiamento dei livelli di attivazione dei segnali di \textit{Wnt} e
+\textit{Notch}. La proliferazione e la differenziazione dipendono infatti
+dall'attivazione del \textit{Wnt-pathway} e del \textit{Notch-pathway}, dalla
+posizione delle cellule, tramite il \textit{Wnt-gradient} e il
+\textit{Notch-gradient} e dalla curvatura della membrana basale del substrato.
+\subsubsection{Modello di Drasdo}
+Un altro modello è quello detto \textbf{modello di Drasdo}\footnote{J. Galle,
+  G. Aust, G. Schaller, T. Beyer, and D. 
+Drasdo, “Individual cell-based models of the spatial-
+temporal organization of multicellular systems--
+Achievements and limitations,” Cytometry, vol. 69,
+no. 7, pp. 704–710, 2006.}.\\
+L'articolo indicato contiene questo modello anche se in realtà Drasdo aveva in
+primis introdotto un modello 1D, usando ``stringhe di cellule'', per le
+\textit{cripte intestinali} e aveva ha 
+introdotto le prime idee sui modelli \textit{agent-based} individuali, ovvero
+aveva introdotto i modelli \textit{off-lattice/lattice-free}. Solo dopo Galle
+ha iniziato ad applicare tali idee.
+\subsection{Obiettivi Futuri}
+Dopo aver visto alcuni modelli è interessante pensare a qualche obiettivo
+futuro, elencando le varie \textit{problematiche aperte}. Alla base si ha sempre
+la ricerca di interazioni tra i diversi livelli di simulazione e tra le idee
+possibili abbiamo:
+\begin{itemize}
+  \item combinare il modello di Galle per le cripte con l'idea di Schaller e
+  Meyer-Hermann per la rappresentazione delle cellule tramite \textit{partizioni
+    di Voronoi} e \textit{triangolazione di Delaunay}
+  \item combinare il modello di Wong delle cripte dinamiche con il modello di
+  Hogeweg per la diffusione dei nutrienti e le reazioni, nel caso 2D. Si
+  otterrebbe un modello bidimensionale che sarebbe quello di Wong con
+  l'aggiunta di \textit{EDP} 
+  \item combinare il modello di Wong delle cripte dinamiche con il modello di
+  Hogeweg per la diffusione dei nutrienti e le reazioni, nel caso 3D. Si
+  otterrebbe un modello tridimensionale che sarebbe quello di Wong con
+  l'aggiunta di \textit{EDP} ma bisognerebbe capire come implementare
+  \textit{CPM} in una forma per le cripte non cilindrica, come nel caso del
+  modello di Galle delle cripte. Qui la situazione diventa davvero complessa
+\end{itemize}
+Gli sforzi futuri dovrebbero puntare alla formazione di modelli ragionevoli in
+cui stimoli meccanici e processi intracellulari biochimici sono accoppiati in un
+quadro dinamico unificato, con un modello che permetta di ragionare in modo
+accettabile su tutti questi aspetti nel loro complesso. I modelli di crescita,
+divisione e differenziazione cellulare dovrebbero essere in grado di descrivere,
+a livello microscopico, l'esatto stimolo meccanico che innesca la crescita e
+successivamente le reazioni biochimiche che portano alla divisione e alla
+differenziazione. Inoltre questi modelli dovrebbero chiarire come le cellule
+percepiscono i segnali meccanici e li convertono in quelli chimici che alla fine
+inducono una risposta biologica come la crescita. Bisognerebbe quindi modellare
+il meccanismo sensoriale delle cellule, che dal punto di vista biologico avviene
+tramite le membrane e permette di far capire ad una cellula cosa accade attorno,
+ovvero cosa c'è sulle membrane delle cellule vicine, vario segnali molecolari
+presenti nell'ambiente in cui le cellule si trovano etc$\ldots$\\
+Al momento, la ristretta conoscenza complessiva delle diverse reazioni
+biochimiche coinvolte nella crescita, divisione e differenziazione cellulare
+rende molto difficile fornire un modello meccanico macroscopico che spieghi
+tutti i diversi passaggi microscopici coinvolti nei pathway di trasduzione del
+segnale. Non conosciamo tutti i dettagli dell'interazione tra cellule. Quindi la
+ricerca di settore si concentra attualmente nella 
+\textbf{modellazione multiscala (\textit{multiscale modelling})}, cercando di
+risolvere quindi il problema della differenza di scale temporali, per la
+rappresentazione congiunta di dinamiche intra-cellulari e inter-cellulari. Il
+problema del \textit{multiscale modelling} non è molto diverso dal problema
+visto parlando del \textit{tau-leaping} per Gillespie, facendo un passo ad una
+certa scala cercando di assicurarsi che ci siano delle condizioni che
+garantiscano che il passo non fa ``sforare troppo'' da quanto avrei ottenuto
+muovendomi con i micro-passi a scale inferiori. In questo caso ovviamente gli
+strumenti matematici per ottenere questo risultato sono assai più variegati e
+complessi. 
 \end{document}
+
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
 % LocalWords:  REST ligandi discretizzato Petri FSA primis delay propensità
-% LocalWords:  Gillespie condition
+% LocalWords:  Gillespie condition silico morfogeni discretizzare
+% LocalWords:  randomicamente

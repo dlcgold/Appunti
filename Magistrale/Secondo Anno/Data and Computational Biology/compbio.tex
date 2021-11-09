@@ -3309,10 +3309,279 @@ certa scala cercando di assicurarsi che ci siano delle condizioni che
 garantiscano che il passo non fa ``sforare troppo'' da quanto avrei ottenuto
 muovendomi con i micro-passi a scale inferiori. In questo caso ovviamente gli
 strumenti matematici per ottenere questo risultato sono assai più variegati e
-complessi. 
+complessi.
+\chapter{Flux Balance Analysis}
+Finora sono state viste diverse tecniche di simulazione. Si presenta ora una
+tecnica di analisi, detta \textbf{Flux Balance Analysis (\textit{FBA})}.\\
+In questo contesto si analizzano i sistemi biologici da un punto di vista
+diverso, ovvero quello del \textbf{metabolismo}. Si ricorda che il metabolismo
+di un sistema è rappresentato da un insieme di \textit{reazioni
+  metaboliche}, cioè cioè dalla\textit{ matrice stechiometrica} dell'insieme
+delle reazioni. Nel dettaglio con la \textit{FBA} si studiando i \textbf{flussi}
+di sostanze chimiche nel sistema\footnote{K. Raman and N. Chandra, “Flux balance
+  analysis of biological systems: applications and challenges,” Briefings in
+Bioinformatics, vol. 10, no. 4, pp. 435–449, Jun. 2009.}\footnote{J. D. Orth,
+I. Thiele, and B. Ø. Palsson, “What is flux balance analysis?,” Nature
+Publishing Group, vol. 28, no. 3, pp. 245–248, Mar. 2010.}. Il punto chiave è
+che rappresentare il metabolismo, con tutti i suoi pathway (eventualmente poi
+rappresentati tramite insiemi di equazioni), è veramente
+complesso per questo lo studio viene fatto \textit{in silico}, nell'ambito della
+\textbf{biologia computazionale}.\\
+Il \textbf{metabolismo cellulare} a partire dal cibo e tramite \textit{pathway
+  catabolici} produce:
+\begin{itemize}
+  \item energia
+  \item componenti utili alla sintesi delle cellule
+  \item calore
+\end{itemize}
+e, tramite i primi due e i \textit{pathway anabolici}, vengono prodotte varie
+macromolecole.
+\begin{definizione}
+  Si definisce \textbf{pathway metabolico} una sequenza, o meglio un
+  \emph{grafo}, di \emph{reazioni metaboliche}.
+\end{definizione}
+Un esempio di pathway metabolico è quello già introdotto della
+\textbf{glicolisi} che, a partire da una molecola di Glucosio produce
+\textit{ATP} e due molecole di piruvato, che, nel caso di un processo di
+respirazione/fermentazione anaerobica, diventa lattato.\\ 
+Un altro pathway importante, che lavora in combinazione con la
+\textit{glicolisi}, è \textbf{ciclo di Krebs}, detto anche \textbf{ciclo TCA
+  (da \textit{tricarboxylic acid cycle})}, un meccanismo metabolico presente
+in praticamente tutti gli organismi, atto a gestire l'ossigeno fornito dalla
+respirazione. \\
+Se vengono presi tutti i pathway metabolici e vengono rappresentati insieme si
+ottiene la \textbf{rete metabolica}, detta anche \textbf{metaboloma}, di cui una
+sezione è visibile in figura \ref{fig:met}.\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/met.jpg}
+  \caption{Sezione del metaboloma, rappresentata in modo ``astratto'', con una
+    dozzina di pathway connessi, tra cui i già citati pathway della glicolisi e
+    del ciclo di Krebs.} 
+  \label{fig:met}
+\end{figure}
+Un altro aspetto che bisogna considerare quando si vuole rappresentare sistemi
+biologici di questo tipo è il livello di astrazione. Una stessa reazione o uno
+stesso evento biologico può infatti essere rappresentato in modo più granulare o
+più astratto, anche se sottostante si ha comunque lo stesso comportamento.
+\newpage
+Ad esempio potremmo avere la seguente rappresentazione più granulare:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/ab.pdf}
+\end{figure}
+Dove si ha una regola booleana per l'enzima/gene che coinvolge l'enzima
+\textbf{RRM1 (\textit{Ribonucleotide Reductase Large Subunit})}, che è una
+sub-unità catalitica, l'enzima \textbf{RRM2 (\textit{Ribonucleoside-diphosphate
+    reductase subunit})} e l'enzima \textbf{RRM2B (\textit{p53-Inducible
+    Ribonucleotide Reductase subunit})}, dove le ultime due sono sub-unità
+regolatorie isoformi. Si nota che l'uso di \textit{funzioni booleane} rende
+semplice il passaggio dalla modellazione astratta al software.\\
+Tutto questo, che non approfondiamo dal punto di vista biologico, però può
+essere rappresentato in modo più astratto nel seguente modo, ad esempio:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/ab2.pdf}
+\end{figure}
+dove si ha astrazione a \textit{livello molecolare}, a cui si
+potrebbe aggiungere la conformazione delle proteine.\\
+Si hanno vari motivi per studiare il metabolismo, andando oltre il mero studio
+di sequenze tipico della \textbf{bioinformatica}, infatti la deregolamentazione
+del metabolismo cellulare è coinvolta in molte malattie, come:
+\begin{itemize}
+  \item cancro, dove si noti le cellule usano anche pathway differenti da
+  quelli standard per la produzione di energia. In merito si ha anche lo studio
+  dei tumori sia dal punto di vista interno alla cellula, \textit{intra-tumor},
+  che in un insieme di cellule, \textit{inter-tumor}
+  \item diabete
+  \item obesità
+  \item malattie legate al fegato grasso
+  \item Parkinson
+  \item Alzheimer
+\end{itemize}
+Ma lo studio è anche legato ad analizzare gli effetti dell'invecchiamento,
+infatti il metabolismo cambia con l'avanzare degli anni.\\
+Un altro motivo per cui si studia il metabolismo è l'ingegnerizzazione dello
+stesso, specialmente parlando di batteri. Si è visto con l'esempio del
+Repressilator come si possa indurre una popolazione a compiere una certa azione.
+Studi simili sui batteri hanno portato al loro uso per la produzione di: 
+\begin{itemize}
+  \item prodotti chimici di base
+  \item sostanze di \textit{chimica fine}
+  \item farmaci
+  \item combustibili
+\end{itemize}
+Per capire, all'interno del nostro sistema, quali siano le parti più attive
+possiamo quindi studiare il \textit{flusso}.
+All'atto pratico:
+\begin{itemize}
+  \item \textbf{si può} misurare il \textbf{metaboloma}, misurando la
+  concentrazione dei \textit{metaboliti}, ovvero un qualsiasi prodotto terminale
+  o intermedio del metabolismo, ad un certo tempo $t$
+  \item \textbf{non si può} misurare il \textbf{flussoma}, ovvero i flussi
+  metabolici nell'intervallo $\Delta t$ 
+\end{itemize}
+\begin{definizione}
+  In questo contesto definiamo \textbf{flusso} come il tasso delle reazioni ``in
+  avanti'' meno il tasso delle reazioni ``all'indietro'':
+  \[flux=rate_{forward}-rate_{backward}\]
+\end{definizione}
+Sarebbe comunque molto interessante per studiare \textit{metaboloma} e
+\textit{fluxome}, per capire quali reazioni sono \textbf{up-regolate} e quali
+\textbf{down-regolate}. \\
+Si hanno quindi varie soluzioni modellistiche, che si contrappongono alle
+difficoltà di una vera e propria simulazione (tra cui capire le costanti,
+scegliere i parametri, eseguire la vera e propria simulazione etc$\ldots$):
+\begin{itemize}
+  \item \textbf{modellazione statica}
+  \item \textbf{modellazione dinamica}
+  \item \textbf{modellazione dello steady-state}, che è una via di mezzo che
+  assume lo stato di equilibrio del sistema, permettendo un'analisi più semplice
+\end{itemize}
+In questo contesto viene anche utilizzata una delle nozioni base della
+\textit{Ricerca Operativa}, ovvero la ricerca di ottimo tramite approssimazione
+con \textbf{programmazione lineare}. Si hanno quindi:
+\begin{itemize}
+  \item la matrice stochiometrica $S$, dove le colonne sono le reazioni (magari
+  nel caso semplice $reazione\to prodotto$) e le colonne sono i metaboliti
+  \item lo steady state $S\cdot v = 0$
+  \item i vincoli di flusso:
+  \[v_{min}<v<v_{max}\]
+  che rappresentano diversi tipi di flusso:
+  \begin{itemize}
+    \item \textit{flussi in entrata}, tramite vincoli sui nutrienti
+    \item \textit{flussi interni}, tramite vincoli termodinamici e vincoli sul
+    tasso sul \textit{reaction rate}
+    \item \textit{flussi di secrezione}, per rappresentare che il metabolismo è
+    in grado di accumulare, rappresentando quindi la crescita e i suoi vincoli
+  \end{itemize}
+\end{itemize}
+Una volta fatti i vari conti conti con al programmazione lineare otteniamo
+un'area dei \textbf{possibili fenotipi}, ovvero l'area delimitata dai vincoli
+stessi. \\
+Prendiamo ora un piccolo esempio:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.8]{img/toy.pdf}
+\end{figure}
+dove eventuali frecce gialle rappresentano il flusso, quindi la
+quantità di sostanza trasformata per unità di tempo, mentre se rosse
+rappresentano il massimo flusso possibile (questa notazione può variare, ad
+esempio usando frecce non piene per il primo caso).\\
+Ovviamente, a seconda di dove si hanno i flussi, si possono rappresentare vari
+comportamenti e, nel dettaglio di questo esempio, si potrebbe anche creare un
+ciclo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.47]{img/toy2.pdf}
+\end{figure}
+Ottenendo un Ciclo di flusso termodinamicamente irrealizzabile.
+Una tale situazione deve essere quindi risolta modificando o aggiungendo vincoli
+al sistema.\\
+A tale sistema si aggiungono degli scambi necessari. Le reazioni di scambio sono
+definite tramite due quantità e questo, per la reazione $R$, si indica con
+$R\iff$: 
+\begin{enumerate}
+  \item \textbf{uptake (\textit{assorbimento})}: la rimozione dall'ambiente
+  extracellulare, ovvero il \textit{flusso negativo}. Il valore è compreso tra
+  $-\infty$ e $0$ 
+  \item \textbf{secretion (\textit{secrezione})}: l'inserimento nell'ambiente
+  extracellulare, ovvero il \textit{flusso positivo}. Il valore è compreso tra
+  $0$ e $+\infty$ 
+\end{enumerate}
+Si ottiene quindi:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/toy3.pdf}
+\end{figure}
+A questo punto possiamo avere molteplici steady state rappresentabili in questo
+modo. Ad esempio potremmo rappresentare uno (ma non l'unico) steady state per
+l'assorbimento forzato di Glucosio:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/toy4.pdf}
+\end{figure}
+\textbf{\textit{Su slide lezione 7 altri possibili steady state}}.\\
+Vediamo quindi come funziona una m\textbf{odellazione basata su vincoli} e la
+\textbf{Flux Balance Analysis (\textit{FBA})}. Si ha:
+\begin{itemize}
+  \item si parte con la ricostruzione metabolica su scala genomica, studiando le
+  reazioni e capendo come funzionino i vari pathway
+  \item si continua rappresentando matematicamente le reazioni metaboliche e i
+  vincoli. Nel dettaglio si usa una matrice stochiometrica $S$, a cui vengono
+  aggiunte delle colonne in fondo a destra per le ``variabili'' di interesse,
+  per esempio biomassa, Glucosio, Ossigeno etc$\ldots$. Si moltiplica tale
+  matrice per il vettore $v=\{v_1,\ldots, v_n,v_1',\ldots,v_m'\}$ contenente i
+  vari flussi più i flussi legati alle variabili di interesse (indicate con i
+  vari $v'$). Si calcola quindi $S\cdot v=0$, si ha quindi un
+  sistema lineare omogeneo in quanto si studia lo steady state
+  \item il bilancio di massa definisce un sistema di equazioni lineari a partire
+  da $S\cdot v=0$, che sono i vincoli del sistema da studiare con la
+  programmazione lineare
+  \item si definisce una funzione obiettivo su cui cercare l'ottimo del tipo:
+  \[z=c_1\cdot v_1+c_2\cdot v_2\cdots\]
+  e si usa $z$ per predire i valori di intesse, ad esempio per la biomassa, si
+  userebbe banalmente $z=v_{biomassa}$, con $v_{biomassa}$ che è uno dei $v_i'$
+  indicati sopra
+  \item si calcola infine il flusso che massimizza $z$ tramite programmazione
+  lineare
+\end{itemize}
+La forma generica, nel caso di ricerca di un massimo, di questa funzione
+obbiettivo e dei suoi vincoli è: 
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \max & \multicolumn{3}{l}{z=c^Tv} \\
+    \textrm{s.t.} & S\cdot v & = & 0 \\
+                       & \alpha & \leq & v_i & \leq& \beta \\
+  \end{array}
+\end{equation*}
+Si ha che la funzione obiettivo può anche essere riscritta come:
+\[z=\sum_i c_i\cdot v_i=c\cdot v\]
+dove si identificano meglio:
+\begin{itemize}
+  \item i pesi $c_i$
+  \item i coefficienti obiettivo $v_i$
+\end{itemize}
+Ovviamente ci sono situazioni in cui l'ottimo è un massimo e altre in cui
+l'ottimo è un minimo, infatti, tra le altre, potremmo voler studiare funzioni
+che:
+\begin{itemize}
+  \item minimizzano il consumo di Glucosio
+  \item massimizzano la produzione di composti chimici e biocarburanti
+  \item massimizzare la crescita
+  \item massimizzare la biomassa
+  \item massimizzare/minimizzare qualche particolare aspetto legato alle reazioni
+\end{itemize}
+Per esempio se volessi massimizzare l'acido grasso otterrei, sempre nell'esempio
+``giocattolo'' di prima, un sistema di questo tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/toy5.pdf}
+\end{figure}
+Questi studi vengono usati ad esempio per esperimenti con il
+\textnormal{chemostato}, ovvero un reattore biologico (o bioreattore) ideale che
+lavora in condizioni di stato stazionario.\\
+\textit{Nel reattore biologico, i microrganismi presenti usano il substrato
+  presente nella portata di alimentazione per la crescita. Le condizioni
+  stazionarie implicano da un lato che il substrato non si accumuli all'interno
+  del reattore e, dall'altro, che la biomassa prodotta sia uguale a quella
+  allontanata per unità di tempo.}\\
+In questo contesto si fanno esperimenti sui vincoli, come la produzione e il
+consumo di nutrienti, studiando ad esempio come massimizzare la crescita,
+cercando di predire questi fenomeni in \textit{dry-lab}.\\
+Si ha quindi che la \textit{programmazione lineare} è usata insieme alla
+\textit{FBA} per assicurare la fattibilità dei flussi, per ottimizzare la
+funzione che è combinazione lineare dei prodotti del sistema e per ottimizzare
+le condizioni a contorno. Ovviamente tale studio può risultare complesso dal
+punto di vista computazionale. Solitamente si parte con il famoso
+\textbf{algoritmo del simplesso}, che solitamente è sufficiente anche se può
+diventare di complessità esponenziale in certi casi. In caso di ``fallimento''
+di questa soluzione, al variare anche della presenza di variabili discrete o
+continue, si procede selezionando altri algoritmi (ed eventualmente altri
+risolutori software).
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
 % LocalWords:  REST ligandi discretizzato Petri FSA primis delay propensità
-% LocalWords:  Gillespie condition silico morfogeni discretizzare
-% LocalWords:  randomicamente
+% LocalWords:  Gillespie condition silico morfogeni discretizzare pathway
+% LocalWords:  randomicamente isoformi chemostato

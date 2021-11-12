@@ -3533,7 +3533,7 @@ Vediamo quindi come funziona una m\textbf{odellazione basata su vincoli} e la
   lineare
 \end{itemize}
 La forma generica, nel caso di ricerca di un massimo, di questa funzione
-obbiettivo e dei suoi vincoli è: 
+obiettivo e dei suoi vincoli è: 
 \begin{equation*}
   \begin{array}{rrclcl}
     \displaystyle \max & \multicolumn{3}{l}{z=c^Tv} \\
@@ -3590,7 +3590,7 @@ Come abbiamo visto usando i metodi di programmazione lineare si ottiene una
 soluzione ottima ma questo aspetto può essere a volte limitante. Il problema da
 affrontare è essenzialmente quello di classificare/scegliere i diversi ``stati''
 metabolici che emergono in un'analisi, al cambiare, ad esempio, dei parametri o
-della funzione obbiettivo. Questo tipo di discorso diventa interessante parlando
+della funzione obiettivo. Questo tipo di discorso diventa interessante parlando
 di \textbf{metabolic rewiring (\textit{ricablaggio metabolico})} nell'ambito del
 cancro. \\
 La \textit{FBA} può essere usata in molti modi, con varie applicazioni ed
@@ -3716,8 +3716,290 @@ possibile spazio delle soluzioni della \textit{FBA} nonché come si possa
 perturbare un modello e utilizzare ancora la \textit{FBA} per analizzare la
 perturbazione.
 \subsubsection{Studio delle Multiple Soluzioni}
-In proimis vengono quindi studiati i possibili risultati che si ottengono con la
-\textit{FBA}. 
+In primis vengono quindi studiati i possibili risultati che si ottengono con la
+\textit{FBA}. Un esempio potrebbe essere quello di voler studiare il tasso di
+crescita in funzione della disponibilità di nutrienti in ingresso la sistema e
+cercare l'ottimo, notando come al calare del Glucosio si necessita di più
+Ossigeno e viceversa.\\
+Un primo studio con il modello \textit{ENGRO} è quindi quello di porre
+determinati vincoli alle sostanze in ingresso al sistema, ovvero a certi flussi,
+e studiare, ottica di una certa funzione obiettivo, la distribuzione ottimale
+dei flussi, vedendo quali sono up-regolati e quali down-regolati. \\
+Ovviamente le soluzioni ottime possono essere differenti e quindi è bene
+esplorare l'intero spazio delle soluzioni accettabili, variando i vari pesi
+etc$\ldots$, facendo anche in modo che certe reazioni si abilitino/disabilitino
+di volta in volta. Ad esempio si considerino le seguenti condizioni
+sull'insieme delle soluzioni e su un numero $j$ di interazioni:
+\begin{gather*}
+  \sum_{i\in NZ_{j-1}} y_i\geq 1\\
+  \sum_{i\in NZ_{j}} w_i\leq |NZ_k|-1,\,\,\forall k = 1,2,\ldots,j-1\\
+  y_1+w_i\leq 1,\,\,\forall i\\
+  \alpha w_i\leq v_i\leq \beta w_i,\,\,\forall i
+\end{gather*}
+Ad ogni iterazione $j$ almeno uno dei flussi non nulli provenienti dalla
+soluzione precedente, ovvero $NZ_{j-1}$, deve essere impostato a zero, dove la
+variabile binaria $y_i$ 
+è 1 se quel flusso è selezionato per essere rimosso dalla base all'iterazione
+$j$. La variabile binaria $w_i$ viene successivamente forzata a zero se $y_i$ è
+uno, e i limiti superiore e inferiore per quel particolare flusso sono quindi
+vincolati a zero.\\
+Le equazioni assicurano che le basi alternative non vengano rivisitate
+eliminando almeno una variabile diversa da zero trovata nelle iterazioni
+precedenti. Questo è quindi un algoritmo ricorsivo per il calcolo di ottimi
+alternativi utilizzando la \textbf{programmazione lineare intera mista, mixed
+integer linear programming (\textit{MILP})} e ci permette di enumerare le varie
+soluzioni alternative.
+\subsubsection{Studio delle Perturbazioni al Sistema}
+Un'altra cosa interessante da studiare è come cambi il \textit{fenotipo} al
+variare di determinate perturbazioni al sistema. Si parte quindi con un
+\textbf{fenotipo wild-type} e gli si applicano vari cambiamenti al fine di
+ottenere un \textbf{fenotipo modificato}. Tra le prime perturbazioni che si
+applicano si hanno:
+\begin{itemize}
+  \item perturbazioni ai nutrienti, che non cambiano la termodinamica del
+  sistema 
+  \item delezione di geni, ottenendo le vere e proprie mutazioni
+\end{itemize}
+Inoltre si possono fare altri test, meno frequenti, come:
+\begin{itemize}
+  \item delezione di reazioni
+  \item shock termico, avendo che, essendo le reazioni sensibili alla
+  temperatura, si può avere la rottura dell'equilibrio del sistema avendo quindi
+  reazioni di tipo diverso da studiare
+\end{itemize}
+Dal punto di vista più modellistico/matematico si hanno vari modi di studiare la
+perturbazione del sistema.\\
+Un primo approccio è usare semplicemente la \textit{FBA}, simulando le risposte
+metaboliche, ad esempio studiando i \textit{knockout} (che potrebbero essere
+multipli nel sistema in analisi) e la variazione di nutrienti. Prendiamo quindi
+un esempio dove, nel caso wild-type, vogliamo massimizzare la crescita. Si ha
+quindi una certa funzione obiettivo con determinati vincoli, del tipo:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \max & f_{growth} \\
+    \textrm{s.t.} & b_L & \leq & f & \leq b_{U} \\
+                       & Sf & = & [0] \\
+  \end{array}
+\end{equation*}
+Usando semplicemente la \textit{FBA} vengono magari aggiunti dei vincoli,
+ottenendo:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \max & f_{growth} \\
+    \textrm{s.t.} & b_L & \leq & f & \leq b_{U} \\
+                       & Sf & = & [0] \\
+                       & b_L & \leq & f_{mut} & \leq b_{U} \\
+  \end{array}
+\end{equation*}
+Dove tali vincoli aggiuntivi magari rappresentano una delle perturbazioni sopra
+elencate. \\
+Si hanno comunque dei limiti:
+\begin{itemize}
+  \item la mutazione potrebbe non crescere in modo ottimale se la selezione
+  naturale non ha avuto la possibilità di agire sul nuovo background genetico 
+  \item si è ``solo'' trovata un'ottimo alternativo, avendo comunque, dal punto
+  di vista della programmazione lineare, soluzioni che si trovano sui vertici
+\end{itemize}
+Questa procedura comunque viene normalmente automatizzata, magari usando una
+lista di geni da attivare/disattivare, tenendo traccia di ogni cambiamento e
+della variazione di risultati ottenuta tramite esso.\\
+Superando l'approccio classico il primo passo è quello di introdurre una
+particolare ipotesi biologica, detta \textbf{Minimization of Metabolic
+  Adjustment (\textit{MOMA}) hypothesis}, che ipotizza che una mutazione
+tenderà ad approssimare quando si ha con il wild-type il più possibile. Più
+formalmente viene trovato un vettore di flusso \textit{MOMA} con distanza
+euclidea minima da una singola entità wild-type ottimale, soggetta ai vincoli
+della mutazione. Si ha quindi una certa funzione obiettivo con determinati vincoli, del tipo:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \max & f_{growth} \\
+    \textrm{s.t.} & b_L & \leq & f & \leq b_{U} \\
+                       & Sf & = & [0] \\
+  \end{array}
+\end{equation*}
+e, usando l'ipotesi \textit{MOMA}, si potrebbe arrivare a qualcosa del tipo:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \min & |m-f_{opt}| \\
+    \textrm{s.t.} & b_L & \leq & f & \leq b_{U} \\
+                       & Sm & = & [0] \\
+                       & b_L & \leq & f_{mut} & \leq b_{U} \\
+  \end{array}
+\end{equation*}
+Ottenendo quindi non un ottimo su un vertice ma la soluzione più vicina, sotto
+l'ipotesi \textit{MOMA}. Ovviamente anche in questo caso si hanno delle
+limitazioni: 
+\begin{itemize}
+  \item l'ipotesi \textit{MOMA} spingerà il metabolismo nel mutante verso la
+  distribuzione arbitraria di flusso ottimale singola ottenuta con la
+  \textit{FBA} ma esistono comunque soluzioni alternative che massimizzano la
+  crescita e altre soluzioni sub-ottimali    
+  \item la crescita non è comunque assicurata nelle mutazioni
+\end{itemize}
+Un altro approccio è quello più probabilistico, basato su un \textbf{sampling
+  randomico} dei vari parametri di programmazione lineare. In questo caso con:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \max & f_{growth} \\
+    \textrm{s.t.} & b_L & \leq & f & \leq b_{U} \\
+                       & Sf & = & [0] \\
+  \end{array}
+\end{equation*}
+Si otterrebbe di volta un volta un certo spazio di soluzioni accettabili per
+l'entità wild-type mentre con:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \min & |m-f_{opt}| \\
+    \textrm{s.t.} & b_L & \leq & f & \leq b_{U} \\
+                       & Sm & = & [0] \\
+                       & b_L & \leq & f_{mut} & \leq b_{U} \\
+  \end{array}
+\end{equation*}
+semplicemente si riduce tale spazio.\\
+Si hanno quindi due tipologie di approccio per il \textit{sampling}:
+\begin{enumerate}
+  \item \textbf{Hit-and-Run (\textit{HR})}, dove si ha \textit{sampling}
+  uniforme all'interno della regione delle soluzioni permesse, ovvero un punto
+  valido iniziale viene spostato ripetutamente all'interno dello spazio secondo
+  regole probabilistiche. Si ottiene quindi\footnote{Bordel et al., PLoS
+    Comp. Bio. 2010} una funzione obiettivo del tipo, avendo $i$ e $j$ una
+  coppia casuale di reazioni:
+  \[F=w_if_i+w_jf_j\]
+  \item \textbf{Convex Basis (\textit{CB})} dove si usa l'\textit{algoritmo del
+    simplesso} con un insieme casuale di funzioni obiettivo da massimizzare. La
+  massimizzazione di ciascuna di queste funzioni obiettivo darà un angolo nello
+  spazio delle soluzioni. In pratica in questo caso il \textit{sampling} è solo
+  sugli spigoli
+\end{enumerate}
+Ovviamente il numero di combinazioni che si ottengono con il \textit{sampling}
+può essere veramente enorme quindi deve essere effettuato ``sotto controllo''.\\
+Un altro elemento interessante è il cosiddetto \textbf{\textit{ENGRO}
+  Z-score}\footnote{Damiani et al. ”A metabolic core model elucidates how
+  enhanced utilization of glucose and glutamine, with enhanced
+  glutamine-dependent lactate production, promotes cancer cell growth: The
+  Warburg effect.” PLOS Computational Biology 13.9 (2017): e1005758.}. Tale
+valore altro non fa misurare la differenza tra la mutazione e l'entità
+wild-type, facendo misure su media del wild-type e deviazione standard:
+\[Z=\frac{\overline{X}_1-\overline{X}_2}{\sqrt{\frac{\sigma_1^2}{n}+
+      \frac{\sigma_2^2}{n}}}\]
+Avendo quindi che un valore alto per $Z$ corrisponde ad un'alta differenza tra
+l'entità wild-type e la mutazione.
+\subsection{Ricerca di Valori Sub-Ottimali}
+Attualmente lo studio tramite i metodi basati sulla \textit{FBA} presenta
+diverse limitazioni, anche se alcune estensioni sono possibili per superare
+alcune di queste:
+\begin{itemize}
+  \item si basa sull'assunzione di \textit{steady-state}, comportando difficoltà
+  nello studiare la dinamica del sistema
+  \item non fornisce alcuna una informazione sulle concentrazioni dei
+  metaboliti 
+  \item obbliga una scelta limitata della funzione obiettivo
+  \item presenta limite nel predire il comportamento netto, ovvero la somma dei
+  flussi, di cellule possibilmente eterogenee all'interno di una
+  popolazione. Questa è una forte limitazione nel caso dei tumori dove si hanno
+  differenti popolazioni e dove non si sa da quale popolazione arrivi una certa
+  produzione  
+\end{itemize}
+Inoltre ci si è chiesti se il metabolismo funzioni unicamente per massimizzare
+il tasso di crescita. Si hanno evidenze, studiate in
+laboratorio\footnote{Fischer, Nat Genet 2005} su \textit{Bacillus subtilis}, un
+batterio, che la delezione di alcuni geni metabolici causano un aumento dei
+tassi di crescita e della resa di biomassa rispetto all'entità wild-type. La
+pressione selettiva per aumentare il tasso di crescita deve essere bilanciata da
+altre richieste sul metabolismo, come il mantenimento cellulare o l'apparato
+sensoriale, riducendo il tasso di crescita a favore della forma fisica
+complessiva. Come detto questo si è studiato in laboratorio ma nulla assicura
+che la crescita legata alla delezione di alcuni geni possa avvenire anche in
+natura in quanto magari quel gene codificava per qualche aspetto che era
+vantaggioso ad altri aspetti della sopravvivenza e senza non si ha possibilità
+di sopravvivere. Inoltre le limitazioni del tempo evolutivo e della variabilità
+genetica possono significare che il metabolismo non è ottimale per nessun
+obiettivo, quindi non possiamo necessariamente escludere dalla considerazione
+le molte configurazioni di flusso che supportano, ad esempio, il 90\% (ma anche
+percentuali) di crescita massima. Queste configurazioni di supporto tornano
+comodo in fase di decisione dei vincoli di programmazione lineare.\\
+Il punto chiave del discorso è che magari con una soluzione ottima dal punto di
+vista del tasso di crescita si porta a massimizzare la biomassa mentre con una
+soluzione sub-ottimale, sempre lato tasso di crescita, si ottiene non solo una
+biomassa accettabile ma magari anche, per esempio, la produzione di altri
+componenti, magari biocarburanti. \\
+Partendo quindi dalla classica:
+\begin{equation*}
+  \begin{array}{rrclcl}
+    \displaystyle \max & f_{growth} \\
+    \textrm{s.t.} & b_L & \leq & f & \leq & b_{U} \\
+                       & Sf & = & [0] \\
+  \end{array}
+\end{equation*}
+Si hanno tre alternative:
+\begin{enumerate}
+  \item aggiungere vincoli, lavorando come già visto con la \textit{FBA}
+  classica, ottenendo una soluzione sub-ottimale che però comporta anche qualche
+  produzione aggiuntiva (come nell'esempio ipotetico quella di biocarburanti)
+  \item vincolare la biomassa ed esplorare lo spazio della soluzione risultante
+  tramite sampling dello spazio delle soluzioni, avendo quindi, con una
+  configurazione di supporto che porta la biomassa al 90\%:
+  \begin{equation*}
+    \begin{array}{rrclcl}
+      \displaystyle sampling\\
+      \textrm{s.t.} & b_L & \leq & f\,\,\,\,  \leq b_{U} \\
+                    & Sf & = & [0] \\
+                    & f_{biomass} & \leq & 0.9 \cdot  OPT_{biomass} 
+    \end{array}
+  \end{equation*}
+  Si ha quindi una soglia per il livello minimo di biomassa accertabile,
+  nell'esempio il 90\% della biomassa dell'entità wild-type, e si ha
+  come risultato un insieme di soluzioni e non una singola soluzione
+  \item usare una funzione obiettivo multi-pesata, cambiando quindi la forma
+  stessa della funzione. Si ottiene, ad esempio una cosa del tipo:
+  \begin{equation*}
+    \begin{array}{rrclcl}
+      \displaystyle \max & f_{MW} \\
+      \textrm{s.t.} & b_L & \leq & f\,\,\,\,  \leq b_{U} \\
+                         & Sf & = & [0] \\
+                         & f_{biomass} & \leq & 0.9 \cdot  OPT_{biomass} \\
+    \end{array}
+  \end{equation*}
+  dove la funzione obiettivo multi-peso, $f_{MW}$ è, ad esempio, del tipo:
+  \[f_{MW}=0.8f_{G}  +  0.1f_F +  0.1f_I\]
+  Quindi non si massimizza il 100\% della biomassa ma un certo $(100-x)$\%,
+  avendo quindi che il sub-ottimo della biomassa viene comunque cercato in uno
+  spigolo, e distribuendo quella percentuale residua $x$ ad altre reazioni
+\end{enumerate}
+\subsection{Metabolic Rewiring}
+Si torna quindi a parlare di cancro.\\
+Possiamo vedere il cancro come una ``malattia stocastica'', risultante da una
+serie di mutazioni che colpiscono le cellule del nostro corpo e comportante la
+selezione di un fenotipo utile unicamente ai propri scopi. Le cellule
+cancerogene sono quindi, all'incirca, parte di insiemi di cellule normali
+che hanno accumulato una serie casuale di mutazioni e modificazioni
+epigenetiche. Si ha quindi che l'evoluzione cellulare è stata in questi casi in
+qualche modo modificata e quindi possiamo studiare il normale funzionamento del
+metabolismo, questa sorta di ``metabolic wiring'' (``collegamento metabolico'')
+di 
+quegli insiemi che presentano generiche proprietà che corrispondono
+statisticamente a quelle delle cellule nella realtà. In termini più matematici
+riconosciamo l'area di fattibilità tramite programmazione lineare. All'esterno
+di tale area si hanno i fenotipi impossibili mentre all'interno si ha l'insieme
+dei fenotipi possibili, insieme in cui si possono riconoscere vari sottoinsiemi
+caratterizzati da una proprietà simile (che ha un corrispettivo reale nelle
+cellula). Si assume quindi un metabolismo simile tra cellule normali e
+cancerogene ma se ne fa uno studio diverso tramite la \textit{FBA}.\\
+Per esplorare lo spazio dei possibili ``collegamenti'' si procede tramite
+\textit{sampling} causale dei pesi, cambiando quindi funzione obiettivo ogni
+volta, e facendo anche \textit{sampling} delle reazioni, puntando infine a
+massimizzare la somma pesata dei flussi attraverso determinate reazioni. Le
+distribuzioni di flusso ottenute possono essere una rappresentazione efficiente
+di una popolazione cellulare mutata casualmente, ad esempio l'attivazione
+mutata di un gene che codifica per un enzima metabolico corrisponderebbe a
+un tentativo di aumentare il flusso attraverso quell'enzima. \\
+Dopo aver fatto varie analisi tramite la \textit{FBA} si creano insiemi di
+diverse risposte metaboliche alle perturbazioni e si procede creando una sorta
+di albero binario, che si dirama in base alle percentuali di riuscita di
+determinate azioni. Da tale albero si possono poi ottenere diverse informazioni
+sul sistema, in quanto le diverse diramazioni permettono di distinguere il
+comportamento normale da quello cancerogeno.\\
+Tutte queste analisi sono ora usate anche in ambito \textit{single-cell}.
 
 \end{document}
 

@@ -28,6 +28,7 @@
 \usepackage{polynom}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{scrextend}
 \usepackage{framed}
 \usepackage{pdfpages}
 \usepackage{pgfplots}
@@ -3584,9 +3585,143 @@ diventare di complessità esponenziale in certi casi. In caso di ``fallimento''
 di questa soluzione, al variare anche della presenza di variabili discrete o
 continue, si procede selezionando altri algoritmi (ed eventualmente altri
 risolutori software).
+\section{Questioni Avanzate per FBA}
+Come abbiamo visto usando i metodi di programmazione lineare si ottiene una
+soluzione ottima ma questo aspetto può essere a volte limitante. Il problema da
+affrontare è essenzialmente quello di classificare/scegliere i diversi ``stati''
+metabolici che emergono in un'analisi, al cambiare, ad esempio, dei parametri o
+della funzione obbiettivo. Questo tipo di discorso diventa interessante parlando
+di \textbf{metabolic rewiring (\textit{ricablaggio metabolico})} nell'ambito del
+cancro. \\
+La \textit{FBA} può essere usata in molti modi, con varie applicazioni ed
+estensioni, come riassunto in figura \ref{fig:fba}\footnote{K. Raman and
+  N. Chandra, “Flux balance analysis of 
+  biological systems: applications and challenges,” Briefings in
+  Bioinformatics, vol. 10, no. 4, pp. 435–449, Jun. 2009.}. Tali problemi
+variano al cambiamento dei pesi e della funzione obiettivo, alcuni di essi sono
+risolubili in parte numericamente etc$\ldots$ e tutti questi sono aspetti che
+devono essere studiati e approfonditi di volta in volta.\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.2]{img/fba.jpg}
+  \caption{Vecchio schema riassuntivo degli usi della \textit{FBA}.}
+  \label{fig:fba}
+\end{figure}
+Dal punto di vista della programmazione lineare si hanno varie categorie di
+risolutori per il caso continuo ma possiamo tutte racchiuderle in due
+macro-categorie, considerando comunque che dal punto di vista della biologia
+computazionale sono usati come \textbf{black-box}:
+\begin{enumerate}
+  \item \textbf{risolutori basati sull'algoritmo del simplesso}, che, come già
+  anticipato, funzionano bene nella maggioranza dei casi anche se si hanno
+  casistiche ``patologiche'' che rendono il problema esponenziale nel
+  tempo. Nonostante questo, anche perché tali casi sono estremamente rari, e
+  grazie alla semplicità di implementazione sono solitamente la soluzione più
+  adeguata 
+  \item \textbf{risolutori basati sui metodi del punto interno}, che, a
+  differenza dei risolutori basati sull'algoritmo del simplesso, sono garantiti
+  essere polinomiali. Quest'ultimo aspetto è interessante perché pone i problemi
+  di programmazione lineare continua nella classe di complessità $\mathcal{P}$ e
+  non $\mathcal{NP}$. Purtroppo tali metodi sono difficili da implementare
+\end{enumerate}
+Oltre al caso continuo si ha anche quello in cui si introducono vincoli interi,
+con le variabili che appartengono solamente a $\mathbb{N}$, avendo così la
+\textit{programmazione lineare intera}, che sappiamo essere
+$\mathcal{NP}$-\textit{complete}. Si possono inoltre avere risolutori per
+problemi misti, sia continui che discreti, e questi sono parecchio complessi e
+sofisticati.
+\subsection{Esplorazione dei Flussi}
+Durante una \textit{FBA} siamo interessati a studiare i flussi ma prima bisogna
+anche ben capire quali siano quelli di interesse. Si parte da un modello
+completo, che diciamo appartenere alla categoria dei \textbf{Genome Wide
+  Reaction Models}, ci si rende conto di avere davanti qualcosa di molto
+complesso da studiare. Tali modelli infatti sono:
+\begin{itemize}
+  \item biologicamente molto realistici e completi, rappresentando quanto più
+  possibile
+  \item ``a grana fine'', con anche 7000 reazioni
+  \item efficaci, per esempio, per l'analisi dei metaboliti o l'analisi
+  della delezione genica 
+  \item poco adatti alla quantificazione del flusso 
+\end{itemize}
+Si procede quindi alla creazione, a partire da tali modelli, dei
+\textbf{Core Reaction Models}. Tali modelli vengono ottenuti semplificando i
+modelli complessi e ``riassumendo'' le reazioni, ottenendo quindi modelli sono:
+\begin{itemize}
+  \item curati manualmente
+  \item pronti per la simulazione
+  \item ``a grana grossa'', con circa 100 reazioni
+  \item utili per la stima della distribuzione del flusso
+  \item utili per l'identificazione dei principi cardine del sistema
+\end{itemize}
+In pratica si prende un pezzo di pathway, ad esempio:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.85]{img/lr1.pdf}
+\end{figure}
+e si ``ignorano'' gli step intermedi, compattando la rappresentazione,
+semplificando le equazioni e la complessità computazionale, ottenendo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.85]{img/lr2.pdf}
+\end{figure}
+che presenta quindi, come \textit{steichiometria globale}, solo:
+\[-PEP-CO_2-2NADH+Succint\,\,\,Acid+2NAD^{+}=0\]
+Per scegliere quindi tra i \textbf{genome wide models} e i \textbf{core models}
+si utilizza il principio del \textbf{rasoio di Occam}, cercando di mediare da un
+lato per il livello dei dettagli, il costo computazionale, gli errori e gli
+eventuali cicli termodinamici infattibili e dall'altro mediando lo studio dello
+spazio di fattibilità, la cura manuale del modello, la ``simulabilità'' e la
+visualizzazione del modello stesso. Se il processo della costruzione del
+\textbf{core model} è ben fatto si ottengono con un centinaio di reazioni
+risultati praticamente analoghi a quelli che si avrebbero con 7000 e passa
+reazioni.
+\subsection{The Enhanced Growth Model}
+Studiamo ora, come esempio, il cosiddetto \textbf{The ENhanced GROwth
+  (\textit{ENGRO}) model}\footnote{Damiani et al. "A metabolic
+  core model elucidates how enhanced utilization of glucose and glutamine, with
+  enhanced glutamine-dependent lactate production,
+  promotes cancer cell growth: The Warburg
+  effect." PLOS Computational Biology 13.9 (2017):
+  e1005758.\label{engro1}}.\\
+Tale modello, visualizzabile in figura \ref{fig:engro}\footref{engro1},
+rappresenta il \textbf{core model}, quindi curato manualmente, di una crescita
+migliorata, detta appunto \textit{ENGRO}, che è stato utilizzato per studiare
+l'\textit{effetto Warburg}, ovvero la produzione aerobica di lattato dal
+glucosio. Tale effetto descrive l'osservazione che le cellule cancerose e molte
+cellule cresciute \textit{in vitro} mostrano la fermentazione del glucosio anche
+quando è 
+presente una quantità sufficiente di ossigeno per respirare adeguatamente. In
+altre parole, invece di respirare completamente in presenza di ossigeno
+adeguato, le cellule tumorali fermentano. L'\textit{ipotesi di Warburg} era che
+l'\textit{effetto 
+di Warburg} fosse la causa principale del cancro. L'attuale opinione popolare è
+che le cellule cancerose fermentino il glucosio mantenendo lo stesso livello di
+respirazione che era presente prima del processo di carcinogenesi, e quindi
+l'effetto Warburg sarebbe definito come l'osservazione che le cellule cancerose
+mostrano glicolisi con secrezione di lattato e respirazione mitocondriale in
+presenza di
+ossigeno\footnote{\url{https://it.wikipedia.org/wiki/Ipotesi_di_Warburg}}. 
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/engro.jpg}
+  \caption{Rappresentazione dei pathway della mappa metabolica del modello
+    \textit{ENGRO}}
+  \label{fig:engro}
+\end{figure}
+Per studiare questo sistema non ci si è limitati ad una singola funzione
+obiettivo di programmazione lineare ma se ne sono studiate diverse, avendo di
+fatto un \textbf{problema di meta-programmazione}. Si studia quindi tutto il
+possibile spazio delle soluzioni della \textit{FBA} nonché come si possa
+perturbare un modello e utilizzare ancora la \textit{FBA} per analizzare la
+perturbazione.
+\subsubsection{Studio delle Multiple Soluzioni}
+In proimis vengono quindi studiati i possibili risultati che si ottengono con la
+\textit{FBA}. 
+
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
 % LocalWords:  REST ligandi discretizzato Petri FSA primis delay propensità
 % LocalWords:  Gillespie condition silico morfogeni discretizzare pathway
-% LocalWords:  randomicamente isoformi chemostato
+% LocalWords:  randomicamente isoformi chemostato simulabilità

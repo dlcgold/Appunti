@@ -13,13 +13,13 @@ meglio al concetto implicato dal \textit{training set}.
 In questo contesto si cerca di capire quale funzione booleana è adatta al mio addestramento. In altre parole si cerca di apprendere un'ipotesi booleana partendo da esempi di training composti da input e output (etichetta target + label) della funzione. \\
 Nel concept learning un'ipotesi è un insieme di valori di attributi e ogni valore può essere:
 \begin{itemize}
-  \item Specificata
-  \item Non importante: che si indica con ``?'', e che può assumere qualsiasi
+  \item Specificato
+  \item Indifferente: che si indica con ``?'', e che può assumere qualsiasi
   valore. Avere un'ipotesi con tutti i valori del vettore pari a ``?'' implica
-  avere l'ipotesi più generale, avendo classificato tutte le istanze solo come
+  avere l'ipotesi più \textbf{generale}, avendo classificato tutte le istanze solo come
   esempi positivi. 
   \item Nulla: si indica con $\emptyset$. Avere un'ipotesi con tutti i valori
-  del vettore pari a $\emptyset$ implica avere l'ipotesi più specifica, avendo
+  del vettore pari a $\emptyset$ implica avere l'ipotesi più \textbf{specifica}, avendo
   classificato tutte le istanze solo come esempi negativi. 
 \end{itemize}
 \begin{esempio}
@@ -59,6 +59,25 @@ Se un esempio è un falso positivo o un falso negativo per un'ipotesi, l'esempio
     \item Un esempio può essere un \textbf{falso negativo} per l'ipotesi se essa predice che dovrebbe essere negativo ma, in effetti, è positivo. L'ipotesi e l'esempio sono quindi logicamente inconsistenti.
     \item Un esempio può essere un \textbf{falso positivo} per l'ipotesi se essa dice che dovrebbe essere positivo ma, in effetti, è negativo.
 \end{itemize}
+\subsubsection{Bias Induttivo}
+Nelle future trattazioni ricorrerà spesso la nozione di \textbf{bias induttivo}. Se ne vuole perciò fornire un'introduzione a priori per favorire l'apprendimento degli esempi che seguiranno nel corso della trattazione.
+\begin{definizione}[\textbf{Bias Induttivo}]
+  From \href{https://it.wikipedia.org/wiki/Bias_induttivo}{Wikipedia}: Nell'apprendimento automatico, il bias induttivo di un algoritmo è l'insieme di assunzioni che il classificatore usa per predire l'output dati gli input che esso non ha ancora incontrato (Mitchell, 1980).
+
+L'apprendimento automatico mira a costruire algoritmi che siano in grado di apprendere una certa funzione obiettivo. A tale scopo, si fornisce all'algoritmo di apprendimento un insieme di addestramento, che contiene esempi della relazione sottesa tra valori d'ingresso e di uscita della funzione obiettivo. Il classificatore deve quindi approssimare la funzione obiettivo a partire da tali esempi. Il tipo di assunzioni che il classificatore effettua sulla natura della funzione obiettivo prende il nome di bias induttivo (Mitchell, 1980; desJardins and Gordon, 1995).
+
+Un classico esempio di bias induttivo è il rasoio di Occam (che verrà nominato spesso nel corso della trattazione di questo libro). Tale principio assume che l'ipotesi più semplice consistente con l'insieme di addestramento sia da preferire. 
+\end{definizione}
+Più formalmente:
+\begin{definizione} 
+  Il \textbf{bias induttivo} di $L$ è un insieme
+  minimale di asserzioni $B$ tale 
+  che, per ogni concetto target $c$ e $D_c$ corrispondente si ha che:
+  \[[B\land D_c\land x_i]\,\vdash\, L(x_i, D_c),\,\,\forall x_i\in X\]
+  con $\vdash$ che rappresenta l'implicazione logica
+\end{definizione}
+
+
 %----------------------------------------------------------------------------------------
 %	SECTION 
 %----------------------------------------------------------------------------------------
@@ -77,8 +96,9 @@ Se un esempio è un falso positivo o un falso negativo per un'ipotesi, l'esempio
   e che è \textbf{più generale di} $h_k$ sse:
   \[h_j\supset h_k\]
   Dal punto di vista logico si ha che $h_j$ è \textbf{più generale di} $h_k$ sse
-  impone meno vincoli di $h_k$ \ref{fig:eulero}
+  impone meno vincoli di $h_k$( esempio \ref{fig:eulero})
 \end{definizione}
+\subsection{Esempi}
 \begin{esempio}
   Facciamo un esempio ``giocattolo'' di situazione di \textbf{concept
     learning}.\\ 
@@ -248,28 +268,26 @@ Se un esempio è un falso positivo o un falso negativo per un'ipotesi, l'esempio
   come un unico caso nel conteggio delle ipotesi.\\
   Quindi per conteggiare tutte ipotesi \textbf{semanticamente differenti} dovrò
   fare (indicando con $|A|$ il numero di valori possibili per l'attributo $A$):
-  \[|H|_{sem}=1+\prod (|A_i|+1)\]
+  \[|H|_{sem}=1+\prod_{i}(|A_i|+1)\]
   quindi moltiplicare tutti il numero di valori di ogni attributo più 1
   (indicante ``?'' e che quindi va conteggiato come possibile valore per ogni
   attributi) e sommare 1 (indicante $emptyset$ che va conteggiato solo una volta
   per il discorso fatto sopra in merito all'equivalenza semantica di tali
   ipotesi) a questo risultato finale.\\
-  \textbf{La seguente affermazione è un esercizio dato a casa, che io risolverei
-  come scritto.}\\
   Qualora volessi conteggiare tutte ipotesi \textbf{sintatticamente differenti}
   dovrò contare $\emptyset$ come ipotetico valore per ogni attributo e quindi:
-  \[|H|_{sint}=\prod (|A_i|+2)\]
+  \[|H|_{sint}=\prod_{i} (|A_i|+2)\]
 \end{esempio}
 \newpage
 %----------------------------------------------------------------------------------------
 %	SECTION 
 %----------------------------------------------------------------------------------------
-\section{Primi algoritmi}
+\section{Algoritmi per la creazione d'Ipotesi}
 \subsection{Algoritmo find-S}
 Parliamo ora dell'algoritmo \textbf{Find-S}. Questo algoritmo permette di
 partire dall'ipotesi più specifica (attributi nulli, indicati con
-$\emptyset$) e generalizzarla, 
-trovando ad ogni passo un'ipotesi più adatta e consistente con il training
+$\emptyset$) per poi generalizzarla, 
+trovando a ogni passo un'ipotesi più adatta e consistente con il training
 set $D$. L'ipotesi in uscita sarà anche consistente con gli esempi negativi
 dando prova che il target è effettivamente in $H$. Con questo algoritmo non si
 può dimostrare di aver trovato l'unica ipotesi consistente con gli esempi e,
@@ -294,8 +312,6 @@ inconsistenti. Inoltre non ho l'ipotesi più generale.
   \end{algorithmic}
   \caption{Algoritmo Find-S}
 \end{algorithm}
-\subsubsection{Esercitazione sull'algoritmo find-S}
-\textit{Verranno usati concetti spiegati più avanti in questi appunti.}\\
 Si ha che il \textbf{bias induttivo} permette di studiare anche esempi non
 visti nel training set, tuttavia è una situazione rara da analizzare a causa
 dell'inconsistenza stessa degli esempi e del loro rumore.
@@ -351,7 +367,7 @@ dell'inconsistenza stessa degli esempi e del loro rumore.
   Parto sempre da:
   \[S=\{\langle\emptyset,\emptyset,\emptyset,\emptyset\rangle\}\]
   e mi invento gli esempi.\\
-  Un primo è $x_1=(1, 0, 1, 0)$ (dato che il secondo attributo ha sicuro valore 0)
+  Un primo è $x_1=(1, 0, 1, 0)$ (dato che il secondo attributo dell'ipotesi fornita ha sicuramente valore 0)
   tale che $t(x_1)=1$. Raggiungo quindi: 
   \[S=\{\langle 1, 0, 1, 0\rangle\}\]
   ora me ne bastano due che rendano ``?'' tutti gli attributi tranne il secondo,
@@ -367,7 +383,7 @@ dell'inconsistenza stessa degli esempi e del loro rumore.
   Gli altri due esempi possono essere con qualsiasi valori ma devono essere
   negativi, non influenzando il risultato.\\
   \begin{shaded}
-    Nell'esercitazione il prof usa altri esempi:
+    Alternativa:
     \begin{itemize}
       \item $x_1=(1, 0, 1, 0)$ con $t(x_1)=1$
       \item $x_2=(0, 1, 0, 0)$ con $t(x_2)=0$
@@ -395,98 +411,54 @@ D'altro canto:
   che il \textit{target concept} sia contenuto in $H$ e gli esempi siano
   corretti.
 \end{itemize}
-\subsection{Algoritmi di eliminazione}
-\begin{definizione}
-  Definiamo \textbf{soddisfacibilità} quando un esempio $x$ soddisfa un'ipotesi
-  $h$ a priori sul fatto che $x$ sia un esempio positivo o negativo del
-  \textit{target concept}. Questo evento viene indicato con:
-  \[h(x)=1\]
-  Si ha quindi che i valori $x$ soddisfano i vincoli $h$. 
-\end{definizione}
-\begin{definizione}
-  Si dice che $h$ è \textbf{consistente} con il training set $D$ di concetti
-  target sse: 
-  \[Consistent(h, D):=h(x)=c(x),\,\,\forall \langle x, c(x)\rangle\in D\]
-\end{definizione}
+\begin{esempio}
+  Siano dati due attributi $A=\{1, 2, 3\}$ e $B=\{1, 2\}$. Diciamo che $H$ è un
+  congiunzione di $and$ tra i valori degli attributi e delle istanze.\\
+  Il concetto target è:
+  \[c:=((A=1\lor A=2), B=1)\]
+  Find-S può trovare $c$ in $H$?\\
+  Prendo un training set contenente $\langle x_1=(1, 1), 1\rangle$ e
+  $x_2=\langle(2, 1), 1\rangle$. Seguendo find-S 
+  avremo la seguente traccia dell'algoritmo:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+      A & B\\
+      \hline
+      $\emptyset$ & $\emptyset$\\
+      1 & 1 \\
+      ? & 1
+    \end{tabular}
+  \end{table}
+  Si arriva quindi a:
+  \[S=\langle ?, 1\rangle\]
+  Ma questa generalizzazione mi farebbe accettare $A=3$, cosa non prevista da
+  $c$.\\
+  Non posso quindi usare find-S in questo caso.
+\end{esempio}
+\subsection{Algoritmi di eliminazione - Ricerca a impegno minimo}
+Un'alternativa sarebbe quella di mantenere in memoria tutte e sole le ipotesi che sono consistenti con i dati raccolti. Ogni nuove istanza non avrà alcun effetto, oppure escluderà alcune delle ipotesi. L'algoritmo a \textbf{ricerca a impegno minimo} consiste nel mantenere nello spazio delle ipotesi solo quelle che rimangono consistenti mentre le altre vengono eliminate. L'insieme rimanente (contenente quindi l'ipotesi corretta) viene denominato \textbf{version space} o, analogamente, \textbf{spazio delle versioni}. Esso è uguale alla differenza tra lo \textbf{spazio delle ipotesi} e l'insieme delle ipotesi inconsistenti.
 \begin{definizione}
   Si definisce \textbf{version space}, rispetto ad $H$ e $D$, il
   sottoinsieme delle ipotesi da $H$ consistenti con $D$ e si indica con:
-  \[VS_{H, D}=\{h\in H|\, Consistent(h, D)\]
+  \[VS_{H, D}=\{h\in H|\, h(x) = c(x)\,\,\, \forall x \in D\}\]
 \end{definizione}
-\begin{esempio}
-  Vediamo un esempio per capire la consistenza. Riprendiamo la situazione
-  dell'esempio \ref{es:tab} con un \textit{training set} $D$ leggermente
-  diverso: 
-  \begin{table}[H]
-    \centering
-    \begin{tabular}[H]{|c|c|c|c|c|c|c|c|}
-      \hline
-      \textbf{example} & \textbf{sky} & \textbf{temp} & \textbf{humid}
-      & \textbf{wind} & \textbf{water} & \textbf{forecast} &
-      \textbf{enjoySport}\\
-      \hline
-      1 & S & W & N & S & W & S & \color{darkgreen} yes\\
-      2 & S & W & H & S & W & S & \color{darkgreen} yes\\
-      3 & R & C & H & S & W & C & \color{red} no\\
-      4 & S & W & H & S & C & C & \color{darkgreen} yes\\
-      \hline
-    \end{tabular}
-  \end{table}
-  e prendiamo l'ipotesi:
-  \[h=\langle S, W, ?, S, ?, ?\rangle\]
-  e studiamo se $h$ sia \textbf{consistente} con $D$.\\
-  Studio l'esempio 1: ($\langle S, W, N, S, W, S\rangle$,\textit{yes}). Vedo che
-  ogni valore va bene e, avendo la classificazione 
-  \textit{yes}, ho la stessa etichetta assegnata dalla \textbf{funzione target}
-  $enjoySport$, quindi l'ipotesi è consistente con l'esempio. \\
-  Questo vale per tutti e quattro gli esempi (il terzo non ``appare'' ma questo
-  è confermato dalla label \textit{no}) e quindi la mia ipotesi è
-  \textbf{consistente} con il \textit{training set}.
-\end{esempio}
-
-Vediamo quindi algoritmo \textbf{List-Then Eliminate}:
-\begin{algorithm}[H]
-  \begin{algorithmic}
-    \Function{LTE}{}
-    \State $vs \gets$ \textit{una lista connettente tutte le ipotesi di } $H$
-    \For {\textit{ogni esempio di training $\langle x, c(x)\rangle$}}
-    \State \textit{rimuovi da $vs$ ogni ipotesi $h$ non consistente con}
-    \State \textit{l'esempio di training, ovvero $h(x)\neq c(x)$}
-    \EndFor
-    \Return \textit{la lista delle ipotesi in $vs$}
-    \EndFunction
-  \end{algorithmic}
-  \caption{Algoritmo List-Then Eliminate}
-\end{algorithm}
-Questo algoritmo è irrealistico in quanto richiede un numero per forza esaustivo
-d'ipotesi.
-\begin{definizione}
-  Definiamo:
-  \begin{itemize}
-    \item $G$ come il confine generale di $VS_{H, D}$, ovvero l'insieme dei
-    membri generici al massimo. È l'insieme delle ipotesi più generali:
-    \[G=\{g\in H|\, g\mbox{è consistente con }D \land\]
-    \[ (\nexists g'\in H \mbox{t.c } g'\geq g \land g'\mbox{è consistente con
-      }D\})\]
-    Possiamo dire che $G=\langle ?,?,?,\ldots ?\rangle$.\\
-    $G$ è detto anche \textbf{insieme massimamente generico d'ipotesi}
-    \item $S$ come il confine specifico di $VS_{H, D}$, ovvero l'insieme dei
-    membri specifici al massimo. È l'insieme delle ipotesi più specifiche:
-     \[S=\{s\in H|\, s\mbox{è consistente con }D \land\]
-    \[ (\nexists s'\in H \mbox{t.c } s'\geq s \land s'\mbox{è consistente con
-      }D\})\]
-    Possiamo dire che $S=\langle \emptyset,\emptyset,\emptyset,\ldots \emptyset
-    \rangle$.\\
-        $G$ è detto anche \textbf{insieme massimamente specifico d'ipotesi}
-
-      \end{itemize}
-    \end{definizione}
-    \begin{definizione}
-      Ogni elemento di $VS_{H, D}$ si trova tra i confini definiti da $S$ e $G$:
-      \[VS_{H, D}=\{h\in H|\,(\exists s\in S)\,\,(\exists g\in G)\,\,(g\geq h\geq
-        s)\}\]
-      con $\geq$ che specifica che è \textit{più generale o uguale}
-    \end{definizione}
+Questo approccio ha la proprietà importante di essere \textit{incrementale}: non si deve mai tornare indietro per riesaminare vecchi esempi, dato che è comunque garantito che tutte le ipotesi rimanenti siano consistenti con essi. Voi cari lettori amanti dell'intelligenza artificiale ora mi chiederete: \textit{"Mario, ma come facciamo a rappresentare primariamente l'intero spazio delle ipotesi?"}. La domanda è abbastanza lecita, difatti su $n$ attributi potremmo avere un numero d'ipotesi semanticamente differenti pari a: 
+ \[|H|_{sem}=1+\prod_{i}(|n_i|+1)\]
+ La soluzione sta nell'usare una rappresentazione a intervallo che specifica solamente gli estremi dell'insieme. Questo funziona perché sullo spazio delle ipotesi è presente un ordinamento \textbf{parziale} (quello relativo alle relazioni di generalizzazione/specializzazione). Essendo un ordinamento parziale gli estremi verranno rappresentati da insiemi d'ipotesi, chiamati \textbf{insieme limitati}. Il vantaggio di tale pratica risiede nella rappresentazione dell'intero insieme d'ipotesi mediante due soli insiemi limitati: il più generale (\textbf{G-insieme}) e quello più specifico (\textbf{S-insieme}). Tale descrizione preserva la consistenza di tutte le ipotesi che si trovano tra le estremità. Sfortunatamente penso di aver risposto parzialmente alla vostra domanda: come inizializziamo il tutto? \\ L'inizializzazione dello spazio delle versioni iniziali (prima di considerare un qualsiasi esempio) è data dall'inizializzazione dell'insieme $G$ a \textbf{1}, mentre $S$ a \textbf{0}.\\
+ Sperando di aver chiarito alcuni dei vostri dubbi (e sperando di avervene fatto rincarare molti altri), mi aspetterei da voi la seguente domanda: \textit{"Bene Mario, ora sappiamo come strutturare e inizializzare lo spazio delle versioni, ma come facciamo a modificarlo a run-time?}. La risposta alla domanda è banale, ciò di cui ci dobbiamo occupare sono gli elementi (che sono ipotesi) $S_i$ e $G_i$ degli insiemi $S$ e $G$. Sfruttiamo allora l'ideologia, precedentemente descritta, di falso positivo e falso negativo:
+ \begin{itemize}
+     \item Falso positivo per $S_i$: Questo significa che $S_i$ è troppo generale poiché riconosce un esempio in più rispetto al DataSet. Quindi dovremmo rendere più specifica questa ipotesi, ma per ipotesi essa è già la più specifica: quindi la eliminiamo dall'insieme $S$.
+     \item Falso negativo per $S_i$: troppo specifico, quindi lo sostituiamo con tutte le sue immediate generalizzazioni, a patto che siano più specifiche di qualche elemento di $G$.
+     \item Falso positivo per $G_i$: troppo generale, per cui lo rimpiazziamo con tutte le sue immediate specializzazioni, a patto che siano più generali di qualche elemento di $S$.
+     \item Falso negativo per $G_i$: troppo specifico, lo scartiamo.
+ \end{itemize}
+ Queste operazioni proseguono finché non ci troviamo in uno dei seguenti casi:
+ \begin{itemize}
+     \item Rimane un'unica ipotesi nello spazio delle versioni.
+     \item Lo spazio delle ipotesi collassa poiché $G$ e $S$ sono vuoti.
+     \item Gli esempi finiscono e rimangono più ipotesi.
+ \end{itemize}
     Vediamo quindi algoritmo \textbf{candidate eliminate}
 \begin{algorithm}[H]
   \begin{algorithmic}
@@ -530,6 +502,12 @@ Questo algoritmo ha alcune proprietà:
   \item Si possono apprendere \textbf{solo} le congiunzioni.
   \item Se $H$ non contiene il concetto corretto $c$, verrà trovata l'ipotesi
   vuota.
+  \end{itemize}
+  Ci sono anche numerose limitazioni che pone l'algoritmo:
+  \begin{itemize}
+  \item Se il dominio di collisione contiene rumore o un numero di attributi insufficiente per una classificazione esatta, lo spazio delle versioni collasserà sempre.
+  \item Se non poniamo alcun limite alle disgiunzioni nello spazio delle ipotesi, l'insieme $S$ conterrà sempre una singola ipotesi più specifica ovvero quella relativa alla descrizione degli esempi positivi visti a run-time. In modo analogo l'insieme $G$ conterrà solo la negazione della disgiunzione della descrizione degli esempi negativi.
+  \item Per alcuni spazi delle ipotesi il numero di elementi degli insiemi $S$ e $G$ potrebbe crescere esponenzialmente con il numero di attributi.
 \end{itemize}
 Il nostro spazio delle ipotesi non è in grado di rappresentare un semplice
 concetto di target disgiuntivo, si parla infatti di \textbf{Biased Hypothesis
@@ -540,23 +518,15 @@ possibili sottoinsiemi di $X$. $H$ sicuramente contiene il concetto target. $S$
 diventa l'unione degli esempi positivi e $G$ la negazione dell'unione di quelli
 negativi. Per apprendere il concetto di target bisognerebbe presentare ogni
 singola istanza in $X$ come esempio di training.\\
+\subsubsection{Considerazioni sul learner}
 Un learner che non fa assunzioni a priori in merito al concetto target non ha
 basi ``razionali'' per classificare istanze che non vede.\\
-Introduciamo quindi il \textbf{bias induttivo} considerando:
 \begin{itemize}
   \item Un algoritmo di learning del concetto $L$.
   \item Degli esempi di training $D_C=\{\langle x, c(x)\rangle\}$.
 \end{itemize}
 Si ha che $L(x_i, D_c$) denota la classificazione assegnata all'istanza $x_1$, da
 $L$, dopo il training con $D_c$.
-\begin{definizione}
-  Il \textbf{bias induttivo} \footnote{un \textbf{bias} normalmente denota una
-  \emph{distorsione} o uno \emph{scostamento} dei dati.} di $L$ è un insieme
-  minimale di asserzioni $B$ tale 
-  che, per ogni concetto target $c$ e $D_c$ corrispondente si ha che:
-  \[[B\land D_c\land x_i]\,\vdash\, L(x_i, D_c),\,\,\forall x_i\in X\]
-  con $\vdash$ che rappresenta l'implicazione logica
-\end{definizione}
 Possiamo quindi distinguere:
 \begin{itemize}
   \item \textbf{Sistema induttivo}: si hanno in input gli esempi di

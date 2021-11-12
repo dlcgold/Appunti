@@ -11,14 +11,14 @@ lista delle ipotesi in questo caso è enorme e la scelta è guidata dal cosiddet
 \begin{definizione}
 Un albero di decisione prende in input un oggetto o una situazione descritta da un insieme di \textbf{attributi} e restituisce una \textit{"decisione"}, ovvero il valore predetto di uscita per tale input.
 \end{definizione}
-Gli attributi dell'input possono essere discreti o continui sebbene in questo corso ci limiteremo a studiare i casi discreti. L'apprendimento di una funzione a valori discreti viene chiamata \textbf{classificazione}, mentre nel caso continuo \textbf{regressione}. In particolare ci concentreremo sulla classificazione \textbf{booleana}, dove ogni esempio è classificato come vero o falso.\\  Un albero di decisione funziona eseguendo in sequenza una serie di test, dove \textbf{ogni nodo} interno all'albero corrisponde a un test sul valore di una delle proprietà, e le diramazioni uscenti dal nodo sono etichettate con tutti i possibili risultati. Ogni foglia specifica il valore da fornire in uscita. Lo scopo è quello di apprendere una definizione del \textbf{predicato obiettivo}. Se vogliamo esprimere un problema come un problema di apprendimento, per prima cosa dobbiamo definire gli attributi disponibili per descrivere gli esempi del dominio (proprio come abbiamo fatto durante il Concept Learning).\\
+Gli attributi dell'input possono essere discreti o continui sebbene in questo libro ci limiteremo a studiare i casi discreti. L'apprendimento di una funzione a valori discreti viene chiamata \textbf{classificazione}, mentre nel caso continuo \textbf{regressione}. In particolare ci concentreremo sulla classificazione \textbf{booleana}, dove ogni esempio è classificato come vero o falso.\\  Un albero di decisione funziona eseguendo in sequenza una serie di test, dove \textbf{ogni nodo} interno all'albero corrisponde a un test sul valore di una delle proprietà, e le diramazioni uscenti dal nodo sono etichettate con tutti i possibili risultati. Ogni foglia specifica il valore da fornire in uscita. Lo scopo è quello di apprendere una definizione del \textbf{predicato obiettivo}. Se vogliamo esprimere un problema come un problema di apprendimento, per prima cosa dobbiamo definire gli attributi disponibili per descrivere gli esempi del dominio (proprio come abbiamo fatto durante il Concept Learning).\\
 In figura \ref{dt} si ha un esempio dove si hanno attributi che hanno anche più di due valori. In rosso si hanno gli
-attributi, in blu i valori degli attributi e in arancione le foglie coi
+attributi, in blu i valori degli attributi e in arancione le foglie con i
 risultati. Le foglie sono le risposte booleane.
 \section{Espressività degli alberi di decisione}
 Ogni particolare ipotesi per un albero di decisione del \textbf{predicato obiettivo} preposto può essere vista come un'asserzione nella forma:
 \[\forall s\,\,\, PredicatoObiettivo(s)\,\,\,\iff\,\,\,(P1(s)\vee P2(s)  \vee ... Pn(s))\]
-Dove ogni condizione $P_i(s)$ è una congiunzione di test corrispondente a un cammino dalla radice dell'albero a un nodo foglia con esito positivo.
+Dove ogni condizione $P_H(s)$ è una congiunzione di test corrispondente a un cammino dalla radice dell'albero a un nodo foglia con esito positivo.
 Possiamo quindi scegliere, al posto delle classiche funzioni booleane,
 \textbf{alberi di decisione} per rappresentare un modello che applicato ad
 esempi non visti ci dirà se applicare in output un'etichetta vera o falsa in
@@ -26,7 +26,7 @@ base a quanto appreso. Siamo in ambito di \textbf{apprendimento
   supervisionato}.Possiamo dire che gli alberi decisionali descrivono tutte le funzioni booleane (figura \ref{dt2} e figura \ref{dt3}). 
 Notiamo a questo punto come l'albero decisionale in figura \ref{dt} è la
 rappresentazione di:
-\[(Outlook=Sunny\,\land\, Humidity=Normal)\]
+\[(Outlook=Sunny\,\land\, Humidity=Hight)\]
 \[\lor(Outlook=Overcast)\]
 \[\lor(Outlook=Rain \land Wind=Weak) \] \\ Avendo $n$ funzioni booleane avremo un numero distinto di tabelle diverità (e quindi di alberi decisionali), ciascuna con $2^n$ righe, pari a $2^{2^{n}}$. In altre parole, gli alberi decisionali vanno bene per alcuni tipi di funzione e non per altri.\\
   \textbf{NOTA:} non esiste alcuna funzione booleana che non possa essere scritta sotto forma di un albero di decisione.\\
@@ -100,314 +100,14 @@ rappresentazione di:
 \end{figure}
 \section{Introduzione di alberi di decisione dagli esempi}
 Un esempio per un albero di decisione booleano consiste in un vettore di attributi in input, $X$, e un singolo valore booleano in output $y$: ovvero un \textbf{Training Set} (come quello visto nel precedente capitolo).
-Il problema di trovare un albero decisionale che si accorda con l'insieme di addestramento potrebbe sembrare difficile, ma in effetti esiste una soluzione banale: possiamo semplicemente costruire un albero che ha un cammino verso una foglia per ogni esempio, e lungo il cammino verificare ordinatamente il valore di ogni attributo ed eseguire il valore dato nell'esempio. Il problema di questo albero è che si limita a \textbf{memorizzare} le osservazioni senza estrarre dagli esempi alcuno schema, per cui non ci possiamo aspettare che sia capace di estrapolare soluzioni che non ha già incontrato. Per evitare queste problematiche ricorriamo all'algoritmo \textbf{ID3}: verificare per primo il valore dell'attributo più "significativo", ovvero quello che ha il maggiore impatto sulla classificazione. In questo modo cerchiamo di arrivare a una soluzione in un numero ridotto di test, ovvero: creare un albero più piccolo ma equivalente logicamente. In generale, dopo che il test del primo attriuto suddivide gli eempi, ognuno dei suoi esiti può essere considerato un problema di apprendimento completamente nuovo, con un attributo in meno e un insieme di esempi più piccolo. Possiamo perciò identificare quattro casi:
+Il problema di trovare un albero decisionale che si accorda con l'insieme di addestramento potrebbe sembrare difficile, ma in effetti esiste una soluzione banale: possiamo semplicemente costruire un albero che ha un cammino verso una foglia per ogni esempio, e lungo il cammino verificare ordinatamente il valore di ogni attributo ed eseguire il valore dato nell'esempio. Il problema di questo albero è che si limita a \textbf{memorizzare} le osservazioni senza estrarre dagli esempi alcuno schema, per cui non ci possiamo aspettare che sia capace di estrapolare soluzioni che non ha già incontrato. Per evitare queste problematiche ricorriamo all'algoritmo \textbf{ID3}: verificare per primo il valore dell'attributo più "significativo", ovvero quello che ha il maggiore impatto sulla classificazione. In questo modo cerchiamo di arrivare a una soluzione in un numero ridotto di test, ovvero: creare un albero più piccolo ma equivalente logicamente. In generale, dopo che il test del primo attributo suddivide gli esempi, ognuno dei suoi esiti può essere considerato un problema di apprendimento completamente nuovo, con un attributo in meno e un insieme di esempi più piccolo. Possiamo perciò identificare quattro casi:
 \begin{itemize}
     \item Se ci sono esempi sia positivi che negativi, scegliamo l'attributo che li suddivide meglio.
-    \item Se tutti gli esempi rimanenti sono positivi \textbf{o} negativi, abbiamo fnito: possiamo rispondere Y o N rispettivamente agli esempi.
+    \item Se tutti gli esempi rimanenti sono positivi \textbf{o} negativi, abbiamo finito: possiamo rispondere Y o N rispettivamente agli esempi.
     \item Se non riesco a classificare alcun esempio, allora non è stata osservata alcuna situazione con quei valori di attributi. Restituiamo un valore di default.
-    \item Se non rimane alcun attributo ma ci sono ancora esempi sia positivi che negativi, significa che tali esempi hanno esattamentela stessa descrizione (di valori sugli attributi) ma classificazione diverse. Questo può accadere quando alcuni dati sono scorretti, ovvero c'è \textbf{rumore} (vedremo in seguito come occuparcene).
+    \item Se non rimane alcun attributo ma ci sono ancora esempi sia positivi che negativi, significa che tali esempi hanno esattamente la stessa descrizione (di valori sugli attributi) ma classificazione diverse. Questo può accadere quando alcuni dati sono scorretti, ovvero c'è \textbf{rumore} (vedremo in seguito come occuparcene).
 \end{itemize}
-\subsection{Algoritmo ID3}
-Vista la difficoltà di scegliere l'albero si ha l'idea di scegliere un piccolo
-albero di partenza (o più piccoli) e ricorsivamente l'attributo più
-significativo (sia nei nodi rossi intermedi che nelle foglie) come radice per il
-sotto-albero. Si fanno quindi crescere in modo 
-coerente gli alberi piccoli scelti in partenza. Si punta ad arrivare a un
-albero valido per tutti gli esempi ricevuti e anche per quelli non visti.\\
-Iniziamo a vedere l'algoritmo anche se saranno necessarie molte specifiche:
-\begin{algorithm}[H]
-  \begin{algorithmic}
-    \Function{ID3}{esempi, attrib, default}
-    \If{esempi è vuoto return default}
-    \EndIf
-    \If{tutti gli \textit{esempi} hanno la stessa classificazione \textbf{return la classificazione}}
-    \EndIf
-    \If{\textit{attrib} è vuoto \textbf{return VALORE\_MAGGIORANZA(esempi)}}
-    \EndIf
-    \State $best \gets$ \textit{il ``miglior'' attributo di decisione per il
-    prossimo nodo}
-    \State $albero \gets$ \textit{un nuovo albero di decisione con alla radice \textbf{best}}
-    \State $m \gets$ \textit{VALORE\_MAGGIORANZA(esempi)}
-    \For {\textit{ogni valore Vi dell'attributo best}}
-    \State $esempi \gets$ \textit{Elementi di esempi con $best = Vi$}
-    \State $sottoAlb \gets$ \textit{ID3(esempi, attrib-best, m)}
-    \State \textit{Aggiungi un ramo all'albero con etichetta Vi e sottoalbero \textbf{sottoalb}}
-    \EndFor
-    \State \textit{\textbf{return albero}}
-    \EndFunction
-  \end{algorithmic}
-  \caption{Algoritmo ID3 (Iterative Dichotomiser 3)}
-\end{algorithm}
-Facciamo qualche osservazione finale sull'\textbf{algoritmo ID3}:
-\begin{itemize}
-  \item Lo spazio delle ipotesi è completo e sicuramente contiene il target.
-  \item Ho in output una singola ipotesi.
-  \item Non si ha backtracking sugli attributi selezionati, si procede con una
-  ricerca greedy, trovando scelte buone localmente ma non ottime.
-  \item Fa scelte basate su una ricerca statistica, facendo sparire incertezze
-  sui dati.
-  \item Il bias non è sulla classe iniziale, essendo lo spazio delle ipotesi
-  completo, ma sulla scelta di solo alcune funzioni, preferendo alberi corti (e
-  più semplici) e posizionando attributi ad alto information gain vicino alla
-  radice. Il bias è quindi sulla preferenza di alcune ipotesi. Si usa il
-  criterio euristico di \textit{rasoio di Occam}.
-  \item $H$ è l'insieme potenza delle istanze $X$.
-\end{itemize}
-Sfortunatamento un algoritmo scritto in questo modo è destinato a compiere qualche errore, il nostro compito sarà quello di \textbf{scoprire quanto sara scorretto}.
-\section{Scegliere L'insieme degli attributi}
-Ricordiamo che l'idea è quella di minimizzare la profondità dell'albero risultante. L'idea è scegliere l'attributo che fornisce la classificazione più esatta possibile degli esempi.
-Bisogna in primis capire cosa si intende come \textbf{attributo migliore}.
-Gli esempi positivi sono gli esempi che già mi hanno restituito \textit{yes} mentre quelli negativi sono quelli che mi hanno restituito \textit{no}.
-Vediamo quanto detto:
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
-    distance=30pt]  
-    \node{\color{red} $Attributo1$ \color{black} Esempi: [y1, y2, y3, y4, n1, n2, n3]}
-    child {node {\color{blue} Esito1}
-      child{node {\color{orange} [y1, y2, n1, n2]}}}
-    child {node {\color{blue} Esito2}
-      child{node {\color{orange} [y3, y4, n3]}}};
-  \end{tikzpicture}
-  \label{Albero1}
-\end{figure}
-La figura \ref{Albero1} nostra un albero che ha come attributo $Attributo1$ e come possibili esiti $Esito1$ e $Esito2$. Notiamo che questo attributo non è un buon attributo, poichè suddivide gli esempi in maniera \textit{mista}.
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[nodes={draw}, -, sibling distance=70pt, level
-    distance=30pt]  
-    \node{\color{red} $Attributo2$ \color{black} Esempi: [y1, y2, y3, y4, n1, n2, n3]}
-    child {node {\color{blue} Esito1}
-      child{node {\color{orange} [y1, y2, y3, y4]}}}
-    child {node {\color{blue} Esito2}
-      child{node {\color{orange} [n1, n2, n3]}}};
-  \end{tikzpicture}
-  \label{Albero2}
-\end{figure}
-La figura \ref{Albero2} mostra invece un attributo che suddivide molto meglio gli esempi.
-\begin{definizione}
-  Un attributo perfetto suddivide gli esempi in insiemi tutti positivi o tutti negativi
-\end{definizione}
-
-Ora sia Mario Avolio (autore di questa sezione di appunti) e sia voi vi chiederete "\textit{Ma come faccio a capire quanto è buono un attributo?}. In teoria la misura dovrebbe avere valore massimo quando l'attributo è perfetto e minimo quando l'attributo non è utile per nulla(tipo Windows). Una misura adeguata è la quantità attesa di \textbf{informazione} fornita dall'attributo. Essa viene misurata in \textbf{bit}. \\ Un bit d'informazione è sufficiente a rispondere $Y$ o $N$ a una domanda di cui non si sa nulla, se le possibili risposte $v_i$ hanno probabilità $P(v_i)$ allora il \textbf{contenuto informativo} $I$ della risposta corretta è dato dalla definizione di \textbf{entropia}:
-\begin{definizione}
-  Dato un \textbf{training set $S$} con valori $v_i,\,\, i=1\ldots n$. l'entropia di un
-  insieme di bit misura la sua quantità d'informazione. In generale, se i possibili valori $v_i,\,\, i=1\ldots n$ hanno probabilità $P(v_i)$, il contenuto informativo $I$ (anche chiamato \textbf{entropia}) della del training set $S$ è dato da:
-  \begin{equation}
-\label{Contenuto informativo di un training set}
-  I(P(v_1),\ldots, P(v_n))=\sum_{i=1}-P(v_i)\log_2P(v_i)
-\end{equation}
-  \end{definizione}
-  \begin{definizione}
-      Per stimare la probabilità delle possibili risposte, \textbf{prima di verificare il valore degli attributi}, si può guardare la proporzione di esempi negativi e positivi nell'insieme di addestramento. Supponiamo di avere un insieme di \textbf{$p$ esempi positivi e $n$ esempi negativi}: una stima dell'informazione contenuta nella risposta corretta è:
-    
-      \begin{equation}
-\label{Contenuto informatico di un insieme}
-  I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
-    -\frac{n}{p+n}\log_2\frac{n}{p+n}
-    \end{equation}
-      \end{definizione}
-      \textbf{NOTA:} si noti che l'equazione \ref{Contenuto informatico di un insieme} equivale alla \ref{Contenuto informativo di un training set}.
-
-\textbf{NOTA:}
-  In particolare si avrà un'alta entropia se elementi positivi e negativi sono saranno tra loro \textit{mischiati}
-  
-Il test di un singolo attributo non ci darà così tanta informazione, ma ce ne darà comunque un pò. Possiamo misurare esattamente tale quantità guardando quanta informazione ci è ancora necessaria \textit{dopo} aver effettuato il test. Ogni attributo divide l'insieme di addestramento in sottoinsiemi. Ogni sottoinsieme ha un certo numero di esempi positivi $p_i$ e un certo numero di esempi negativi $n_i$, per cui se seguiamo una certa diramazione avremo bisogno di un numero di bit pari a:
-\[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
-Si faccia quindi riferimento alla regola \ref{Contenuto informatico di un insieme}.
-La probabilità che un esempio preso casualmente all'interno del Training Set abbia l'i-esimo valore per l'attributo considerato, è pari a:
-\[\frac{p_i+n_i}{p+n}\]
-Ragion per cui, in media, dopo il test dell'attributo $A$, occorreranno ancora:
-\begin{equation}
-\label{IG Attributo}
-remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
-  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)
-    \end{equation}
-bit d'informazione per classificare l'esempio.
-Parliamo quindi di \textbf{information gain} $IG$ (in italiano: guadagno d'informazione) che viene calcolato su ogni
-attributo $A$ e su $S$. In particolare il \textbf{guadagno d'informazione} ottenuto dal test dell'attributo è pari alla differenza tra il requisito informativo originale e quello corrente:
-\begin{equation}
-\label{IG}
-IG(S, A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)
-\end{equation}
-\begin{definizione}
-L'information gain è la riduzione aspettata nell'entropia per ordinare$S$ sull'attributo $A$. Si sceglie quindi l'attributo con il maggiore IG. 
-\end{definizione} 
-\textbf{NOTA:} la \ref{IG} è quindi sintetizzabile anche come:
-\begin{equation}
-\label{IG2}
-IG(S, A)=Entropy(S)-\sum_{v\in values(A)}\frac{|S_v|}{|S|}Entropy(S_v)
-    \end{equation}
-\begin{esempio}
-  Vediamo l'esempio di calcolo di entropia di $A_1$ con [29+, 35-]:
-  \[Entropy([29+, 35-])=
-    -\frac{29}{64}\log_2\frac{29}{64}-\frac{35}{64}\log_2\frac{35}{64}=0.99\]
-  Calcolo anche l'information gain di $A_1$, sapendo che
-  $Entropy([21+, 5-])=0.71$ e $Entropy([8+, 30-])=0.74$,
-  e quindi:
-  \[IG(S, A_1)=0.99-\frac{26}{64}\cdot 0.71-\frac{38}{64}\cdot 0.74=0.27\]
-  ugualmente calcolo $IG(S, A_2)=0.12$. \\
-  Quindi so che devo scegliere $A_1$ in quanto $0.27 > 0.12$
-\end{esempio}
-\subsection{Entropia di una Variabile Aleatoria}
-\begin{definizione}
-  Definiamo l'\textbf{entropia di una distribuzione condizionale}. Presa $X$
-  come una variabile discreta arbitraria con valori $\{x_1,\ldots, x_n\}$, che
-  hanno ciascuno probabilità $P_X(x_i)$ ho che, per la distribuzione
-  condizionale:
-  \[P{Y|X=x_i}(y_j)=P_{Y|X}(y_j|x_i)\]
-  Ovvero la distribuzione dei valori della variabile $Y$ dato $X=x_i$.\\
-  Quindi voglio sapere la probabilità di $Y$ condizionata da un esperimento
-  precedente su $X$.\\
-  Per l'entropia ho:
-\begin{equation}
-  H_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)
-  \label{EntropiaDiUnaDistributzioneCondizionale}
-\end{equation}
-\textbf{NOTA:} la \ref{EntropiaDiUnaDistributzioneCondizionale} riprende la \ref{Contenuto informativo di un training set} utilizzando la probabilità condizionata.
-\end{definizione}
-\begin{definizione}
-  Definiamo \textbf{entropia condizionale} come il valore medio, ovvero il
-  valore atteso, dell'entropia di $p_{Y|X=x_i}$ per ciascun valore di $X$ che
-  condiziona $Y$, ovvero:
-  \[H_{Y|X}=\sum_{i=1}^n P_X(x_i)\cdot H_{Y|X=x_i}\]
-  ottenendo l'\textbf{entropia condizionale}:
-  \begin{equation}
-      H[Y|X]=\sum P(x)\cdot H(Y|X=x)
-        \label{EntropiaCondizionale}
-  \end{equation}
-  \textbf{NOTA:} essa si rifà alla \ref{IG Attributo}\\
-  \textbf{NOTA 2:} Si chiama \textbf{valore atteso} di una variabile aleatoria discreta il numero reale:
-  \[\sum_{k} P_X(X_k)\cdot X_k\]
-  Dove $X_k$ simboleggia il valore assunto dalla variabile $X$, mentre $P_X(X_k)$ è la sua densità. 
-\end{definizione}
-Quando parliamo di \textit{entropia} stiamo volgendo un esperimento
-concettuale. Prima dell'esperimento si ha una certa incertezza su un certo
-evento, che sparisce, con sorpresa, una volta eseguito l'esperimento se l'evento
-accade. D'altro canto qualora accadesse un evento atteso siamo meno sorpresi del
-fatto (chiaramente perché sarebbe appunto "atteso"). Nel primo caso però si ritiene di ottenere molta informazione, nel
-secondo caso poca. Come se ponessimo in una vasca quattro palline rosse, non
-sarei stupito di estrarne una rossa, essendo quello che mi aspetto. D'altro
-canto se ne aggiungo quattro verdi l'estrazione sarà inattesa e quindi più
-interessante.\\ 
-Si cerca un modo di quantificare questa ``sorpresa''. Riprendendo l'esempio
-delle palline posso dire che nel primo caso (solo rosse) ho \textbf{bassa
-  entropia/basso contenuto informativo} e nel secondo caso (palline miste) \textbf{alta entropia/alto contenuto informativo}. Un caso
-intermedio sarebbe a \textbf{media entropia}.\\
-Sia $P(x)$ la probabilità che avvenga un evento $x$ e sia $I(p)$ l'informazione (entropia) che ottengo dopo che l'evento si è verificato:
-\begin{itemize}
-  \item $P(x)=1\to I(p)=0$
-  \item $P(x)=0\to I(p)=\infty$
-\end{itemize}
-L'informazione $I(p)$ e quindi una quantità non negativa:
-\[I(p)\geq 0\]
-Definiamo quindi l'informazione, detta anche \textit{self-information}, per un
-evento $E$: 
-\[I(E)=-\log_2(P(E))\]
-Inoltre si può affermare che essa disponga della proprietà additiva se gli eventi sono indipendenti, ovvero:
-\[I(p_1, p_2)=I(p_1)+I(p_2)\]
-Bisogna però estendere l'informazione a tutte le possibili distribuzioni di
-tutti i possibili esiti che ho in un esperimento concettuale.\\
-Passiamo quindi alle definizioni matematiche per l'\textbf{entropia}:
-\begin{itemize}
-  \item $X\sim P_X$, presa una certa variabile aleatoria $X$ con una certa funzione di probabilità associata $P_X$
-  \item $Val(X)=\{x_1,\ldots, x_n\}$, ovvero il range di valori della variabile
-  $X$
-  \item $p_i=P_X(x_i)==P_X(X=x_i)$: Densità di X. Sia $X$ una variabile aleatoria e sia $Val(X)=\{x_1,\ldots, x_n\}$. Si dice \textbf{densità discreta} di $X$ la funzione che a ogni valore assunto da $X$ associa la probabilità che essa assuma quel valore.
-  \item $g:\mathbb{R}\to\mathbb{R}$ una funzione arbitraria tale per cui $g(X)$
-  è una variabile causale. Si definisce l'aspettativa di $G(X)$ su $P$ come:
-  \[E_P[g(X)]=\sum_{x\in Val(X)} g(x)\cdot P_X(x)\]
-\end{itemize}
-Giungendo quindi alla formula dell'\textbf{entropia} di una variabile:
-\begin{equation}
-    H[X]=-\sum_{i=1}^n p_i\cdot\log_2 p_i=E_P[\log_2(p)]
-\label{Entropia Variabile}
-\end{equation}
-\textbf{NOTA:} Non c'è bisogno d'imparare ogni singola formula! Tutte si rifanno alla \ref{Contenuto informativo di un training set}
-\begin{definizione}
-  L'\textbf{entropia}, definita da Claude Shannon (e quindi spesso chiamata
-  \textbf{entropia di Shannon}), è l'informazione media associata ad
-  una distribuzione di probabilità.
-\end{definizione}
-\section{Valutare le prestazioni dell'algoritmo di apprendimento}
-\begin{definizione}
-  Un algoritmo di apprendimento è buono se produce ipotesi che riescono a predire con accuratezza la classificazione di esempi mai incontrati precedentemente.
-\end{definizione}
-Una predizione viene valutata in relazine a un \textbf{insieme di test}. Per questo motivo solitamente è doveroso adottare tale strategia:
-\begin{enumerate}
-    \item Raccogliere un grande insieme di test.
-    \item Dividerlo in due insiemi disgiunti: uno per l'addestramento e uno per i test
-    \item Applicare l'algoritmo di apprendimento all'insieme di addestramento, generando un'ipotesi $h$ (come già visto nel precedente capitolo sul Concept Learning)
-    \item Misurare la percentuale di esempi nell'insieme di test che vengono classificati correttamente da $h$.
-    \item Ripetere i passi 2 e 4 con dimensioni e insiemi diverse degli insiemi di addestramento.
-\end{enumerate}
-Il risultato di quanto descritto è un insieme di dati che può essere elaborato per fornire la qualità media della predizione in funzione delle dimensioni dell'insieme di addestramento. Questa funzione si può tracciare su un grafico, ottenendo la \textbf{curva di apprendimento}. \\ In questo contesto è opportuno evitare ciò che viene chiamato \textbf{peeking}: \textit{andare a creare un'ipotesi (NON generale) in base a un insieme di test che viene controllato a priori (e non a posteriori come si dovrebbe fare con dei test appunto).}
-\section{Rumore e sovradattamento}
-\subsection{Rumore}
-Come abbiamo visto precedentemente, qualora due o più esempi contenessero la stessa descrizione ma avessero descrizioni differenti, l'algoritmo \textbf{IG3} non riuscirà a trovare un albero consistente per tutti gli esempi proposti. Una semplice soluzione per risolvere il problema è quella di far restituire a ogni nodo foglia la classificazione di maggioranza per il suo insieme di esempi. Questo solitamente porta a problemi poiché l'algoritmo genera un albero consistente per tutti gli esempi considerando quei attributi \textbf{irrilevanti} per operare distinzioni spurie tra gli esempi. 
-\subsection{Overfitting}
-Ogniqualvolta si opera con un insieme vasto d'ipotesi occorre stare attenti a non ricadere nell'\textbf{overfitting}(sovradattamento).
-\begin{definizione}
-  \textit{Definizione tratta da Wikipedia.}\\
-  Definiamo formalmente l'\textbf{overfitting} come l'adattamento eccessivo,
-  ovvero quando 
-  un modello statistico molto complesso si adatta al campione perché ha un
-  numero eccessivo di parametri rispetto al numero di osservazioni. SI ha
-  quindi che un modello assurdo e sbagliato può adattarsi perfettamente se è
-  abbastanza complesso rispetto alla quantità di dati disponibili.\\
-  Nel machine learning se il learner viene addestrato troppo a lungo il modello
-  potrebbe adattarsi a caratteristiche che sono specifiche solo del training
-  set, ma che non hanno riscontro nel resto dei casi quindi le prestazioni sui
-  dati non visionati saranno drasticamente peggiori.\\
-  L'opposto è l'\textbf{underfitting}.
-\end{definizione}
-
-Se misuro l'errore di una ipotesi
-$h$ sul training set ($error_{traini}(h)$) e poi misuro l'errore di quella
-ipotesi sull'intero set delle possibili istanze
-$D$ ($error_D(h)$) ho che l'ipotesi $h$ va in \textbf{overfit} sul quel data set
-se:
-\[error_{traini}(h) < error_{traini}(h') \,\,\land
-  \,\, error_D(h)>error_D(h')\]
-quindi se presa un'altra ipotesi questa è migliore della prima e ha un errore
-sull'intera distribuzione delle ipotesi inferiore vado in \textit{overfit}. Il
-problema è che non posso sapere se esiste tale $h'$. Per evitare il problema uso
-sempre il rasoio di Occam scegliendo ipotesi semplici ed evitando di far
-crescere l'albero quando lo ``split'' non è statisticamente significativo. Un
-altro modo è quello di togliere pezzi, all'albero, che toccano poche istanze o
-pure calcolare una \textit{misura di complessità dell'albero}, minimizzando la
-grandezza dell'albero e gli errori del \textit{training set}, usando il
-\textbf{Minimum Description Length (\textit{MDL})}.\\
-In ID3 quindi posso scegliere sia in base all'\textit{information gain} massimo
-o all'\textit{entropia} minima tra gli attributi.\\
-Come specificato, una metodologia semplice da poter applicare in queste situazioni riguarda la \textbf{potatura dell'albero di decisione}. Essa opera impedendo la divisione ricorsiva su attributi che non sono chiaramente rilevamenti, anche quando i dati di un determinato nodo non sono classificati in modo uniforme. I lettori di questi appunti a questo punto si chiederanno sicuramente la seguente domanda: "Mario, se l'irrilevanza di un attributo si misura in relazione alla sua informazione fornita, quanto deve valere quest'ultima per etichettare un nodo come 'irrilevante'?". Per rispondere a questa domanda possiamo ricorrere a un \textbf{test di significatività} statistico: si comincia con un'\textbf{ipotesi nulla}, ovvero che l'attributo sia irrilevante; quindi i dati vengono analizzati per calcolare quanto si discostano effettivamente dalla totale assenza di pattern nei confronti degli esempi. Se il grado di derivazione risulta improbabile, questo viene considerato un buon indizio della presenza di un pattern significativo nei dati. \\ Un'altra possibile opzione da tenere in considerazione (magari insieme alla potatura) è la \textbf{validazione incrociata}: stimare quanto bene ogni ipotesi potrà predire dati mai incontrati.
-\section{Esercizi Guidati}
-Partiamo con un esempio con find-S per coglierne le problematiche.
-\begin{esempio}
-  Siano dati due attributi $A=\{1, 2, 3\}$ e $B=\{1, 2\}$. Diciamo che $H$ è un
-  congiunzione di $and$ tra i valori degli attributi e delle istanze.\\
-  Il concetto target è:
-  \[c:=((A=1\lor A=2), B=1)\]
-  Find-S può trovare $c$ in $H$?\\
-  Prendo un training set contenente $\langle x_1=(1, 1), 1\rangle$ e
-  $x_2=\langle(2, 1), 1\rangle$. Seguendo find-S 
-  avremo la seguente traccia dell'algoritmo:
-  \begin{table}[H]
-    \centering
-    \begin{tabular}{c|c}
-      A & B\\
-      \hline
-      $\emptyset$ & $\emptyset$\\
-      1 & 1 \\
-      ? & 1
-    \end{tabular}
-  \end{table}
-  Si arriva quindi a:
-  \[S=\langle ?, 1\rangle\]
-  Ma questa generalizzazione mi farebbe accettare $A=3$, cosa non prevista da
-  $c$.\\
-  Non posso quindi usare find-S in questo caso.
-\end{esempio}
+\subsection{Rappresentazione degli alberi}
 Ricordiamo che un albero decisionale è formato da:
 \begin{itemize}
   \item \textbf{Nodes (\textit{nodi})}: etichettati da i vari attributi.
@@ -456,128 +156,7 @@ Posso avere alberi diversi a seconda della scelta del nodo radice.\\
 \end{esempio}
 Essendo sempre nel concept learning, nel caso di funzioni booleane, anche il
 target è booleano.
-\begin{definizione}
-  Con un albero decisionale posso rappresentare tutte le
-  funzioni booleane
-\end{definizione}
-\begin{proof}
-  Prendiamo una qualsiasi funzione booleana e la traduciamo in tabella di
-  verità.\\
-  A partire dalla tabella costruisco l'albero decisionale dove ogni percorso
-  radice-foglia è un esempio, ovvero una riga, della tabella di verità.\\
-  Dato che ogni funzione booleana può essere rappresentata con una tabella di
-  verità posso costruire un albero decisionale per qualsiasi funzione booleana.
-\end{proof}
-Seppur il metodo appena descritto dimostri la definizione, non è sempre
-efficiente, per via del fatto che necessita di memorizzare sempre tutto.
-\begin{definizione}
-  Avendo una funzione booleana con $n$ attributi allora posso costruire una
-  tabella di verità con $2^n$ righe. Potenzialmente posso costruire 
-  $2^{2^n}$ alberi decisionali differenti aventi lo stesso significato.
-\end{definizione}
-Vediamo quindi un algoritmo generale per la costruzione dell'albero:
-\begin{enumerate}
-  \item Si inizia con un albero vuoto.
-  \item Scelgo un attributo opportuno da impostare come nodo radice per fare lo \textit{split} dei dati.
-  \item Per ogni \textit{split} dell'albero:
-  \begin{itemize}
-    \item Se non ho altro da fare, calcolo la predizione con l'ultimo nodo foglia.
-    \item Altrimenti si torna allo step due e si procede con un altro \textit{split}.
-  \end{itemize}
-\end{enumerate}
-Bisognerà capire:
-\begin{itemize}
-  \item Come fare in modo ottimizzato lo `\textit{split}
-  \item Quando fermare la costruzione dell'albero.
-\end{itemize}
-\begin{esempio}
-  Prendiamo il solito esempio giocattolo di quando andare a fare sport in base
-  al clima.\\
-  In base al valore di \textit{outlook} ottengo tre tabelle, le quali si basano sul valore del campo \textit{overcast}, mantenendo comunque il target sul campo $play$ (nell'immagine il terzo arco è etichettato con
-  $rainy$ e non con $text$):
-  \begin{figure}[H]
-    \centering
-    \includegraphics[scale = 0.9]{img/dt2.pdf}
-  \end{figure}
-  \begin{table}[H]
-    \centering
-    \begin{tabular}{c|c|c|c|c}
-      outlook & temp & humidity & windy & play\\
-      \hline
-      overcast & H & H & $\bot$ & \color{darkgreen}{yes}\\
-      overcast & C & N & $\top$ & \color{darkgreen}{yes}\\
-      overcast & M & H & $\top$ & \color{darkgreen}{yes}\\
-      overcast & H & N & $\bot$ & \color{darkgreen}{yes}
-    \end{tabular}
-    \caption{Tabella A}
-  \end{table}
-  \begin{table}[H]
-    \centering
-    \begin{tabular}{c|c|c|c|c}
-      outlook & temp & humidity & windy & play\\
-      \hline
-      sunny & H & H & $\bot$ & \color{red}{no}\\
-      sunny & H & H & $\top$ & \color{red}{no}\\
-      sunny & M & H & $\bot$ & \color{red}{no}\\
-      sunny & C & N & $\bot$ & \color{darkgreen}{yes}\\
-      sunny & M & N & $\top$ & \color{darkgreen}{yes}
-    \end{tabular}
-    \caption{Tabella B}
-  \end{table}
-  \begin{table}[H]
-    \centering
-    \begin{tabular}{c|c|c|c|c}
-      outlook & temp & humidity & windy & play\\
-      \hline
-      rainy & M & H & $\bot$ & \color{darkgreen}{yes}\\
-      rainy & C & N & $\bot$ & \color{darkgreen}{yes}\\
-      rainy & C & N & $\top$ & \color{red}{no}\\
-      rainy & M & N & $\bot$ & \color{darkgreen}{yes}\\
-      rainy & M & H & $\top$ & \color{red}{no}
-    \end{tabular}
-    \caption{Tabella C}
-  \end{table}
- 
-  Vediamo un secondo i valori del target nei vari casi:
-  \begin{itemize}
-    \item Nel caso di \textit{overcast} ho quattro \textit{yes} e zero \textit{no}
-    \item Nel caso di \textit{sunny} ho due \textit{yes} e tre \textit{no}
-    \item Nel caso di \textit{rainy} ho tre \textit{yes} e due \textit{no}
-  \end{itemize}
-  Posso quindi usare una \textbf{funzione di costo} per fissare quando una
-  distribuzione è omogenea (come nel caso di \textit{overcast}) e quando no (gli
-  altri due casi). Lo \textit{split} infatti andrebbe fatto in base ai valori
-  del target: più sono omogenei e meglio è; in quanto nel momento in cui si
-  presenta un nuovo test per la classificazione con \textit{outlook} pari a
-  \textit{overcast} saprò già cosa fare (in quanto nello storico delle
-  esperienze ho sempre avuto \textit{yes}). Le altre due situazioni sono
-  ambigue e, in quei due casi, devo procedere con la costruzione
-  dell'albero per ottenere informazioni cercando di rimuovere l'incertezza.  
-\end{esempio}
-La \textbf{funzione costo} è alla base della strategia della costruzione
-dell'albero.\\
-Una strategia può essere quella ``a maggioranza'', prendendo l'attributo che con
-i suoi valori ha meno disomogeneità. Per farlo calcolo la differenza tra $yes$ e
-$no$ di ogni valore per un certo attributo, sommandone i risultati. Scelgo
-l'attributo con più omogeneità (ovvero quello con la somma più bassa), che ha una
-distribuzione più pulita dei risultati. Se ho valori con solo
-$yes$ o solo $no$ sommo zero.
-\begin{esempio}
-  Prendendo le tre tabelle sopra, per \textit{outlook} avrei:
-  \[0+1+1=2\]
-  Se avessi avuto un attributo con:
-  \begin{itemize}
-    \item Primo valore: 1 \textit{yes} e 1 \textit{no}
-    \item Secondo valore: 2 \textit{yes} e 0 \textit{no}
-    \item Terzo valore: 0 \textit{yes} e 4 \textit{no}
-    \item Quarto valore: 2 \textit{yes} e 4 \textit{no}
-    \item Quinto valore: 2 \textit{yes} e 2 \textit{no} 
-  \end{itemize}
-  avrei avuto:
-  \[1+0+0+2+2=5\]
-\end{esempio}
-Gli alberi di decisione possono essere utilizzati anche nel continuo, per
-attributi numerici.
+Gli alberi di decisione possono essere utilizzati anche nel continuo, per attributi numerici.
 \begin{esempio}
   Immaginando  di non ritrovarci più in casi discreti ma di passare a casi \textbf{continui}. Prendiamo le istanze definite da due attributi, $x$ e $y$ e costruisco un
   albero di decisione che definisce in quali aree del piano ho $-$ e quali ho
@@ -601,7 +180,309 @@ attributi numerici.
   specificatamente a guardare anche $y<5$ o $y>5$).\\
   \textbf{Quello disegnato è solo uno dei possibili alberi.}
 \end{esempio}
-\subsection{Esercizi su ID3}
+
+\subsection{Algoritmo ID3}
+Vista la difficoltà di scegliere l'albero si ha l'idea di scegliere un piccolo
+albero di partenza (o più piccoli) e ricorsivamente l'attributo più
+significativo (sia nei nodi rossi intermedi che nelle foglie) come radice per il
+sotto-albero. Si fanno quindi crescere in modo 
+coerente gli alberi piccoli scelti in partenza. Si punta ad arrivare a un
+albero valido per tutti gli esempi ricevuti e anche per quelli non visti.\\
+\begin{algorithm}[H]
+  \begin{algorithmic}
+    \Function{ID3}{esempi, attrib, default}
+    \If{esempi è vuoto return default}
+    \EndIf
+    \If{tutti gli \textit{esempi} hanno la stessa classificazione \textbf{return la classificazione}}
+    \EndIf
+    \If{\textit{attrib} è vuoto \textbf{return VALORE\_MAGGIORANZA(esempi)}}
+    \EndIf
+    \State $best \gets$ \textit{il ``miglior'' attributo di decisione per il
+    prossimo nodo}
+    \State $albero \gets$ \textit{un nuovo albero di decisione con alla radice \textbf{best}}
+    \State $m \gets$ \textit{VALORE\_MAGGIORANZA(esempi)}
+    \For {\textit{ogni valore $V_i$ dell'attributo best}}
+    \State $esempi \gets$ \textit{Elementi di esempi con $best = Vi$}
+    \State $sottoAlb \gets$ \textit{ID3(esempi, attrib-best, m)}
+    \State \textit{Aggiungi un ramo all'albero con etichetta $V_i$ e sottoalbero \textbf{sottoalb}}
+    \EndFor
+    \State \textit{\textbf{return albero}}
+    \EndFunction
+  \end{algorithmic}
+  \caption{Algoritmo ID3 (Iterative Dichotomiser 3)}
+\end{algorithm}
+Facciamo qualche osservazione finale sull'\textbf{algoritmo ID3}:
+\begin{itemize}
+  \item Lo spazio delle ipotesi è completo e sicuramente contiene il target.
+  \item Ho in output una singola ipotesi.
+  \item Non si ha backtracking sugli attributi selezionati, si procede con una
+  ricerca greedy, trovando scelte buone localmente ma non ottime.
+  \item Fa scelte basate su una ricerca statistica, facendo sparire incertezze
+  sui dati.
+  \item Il bias non è sulla classe iniziale, essendo lo spazio delle ipotesi
+  completo, ma sulla scelta di solo alcune funzioni, preferendo alberi corti (e
+  più semplici) e posizionando attributi ad alto information gain vicino alla
+  radice. Il bias è quindi sulla preferenza di alcune ipotesi. Si usa il
+  criterio euristico di \textit{rasoio di Occam}.
+  \item $H$ è l'insieme potenza delle istanze $X$.
+\end{itemize}
+Sfortunatamento un algoritmo scritto in questo modo è destinato a compiere qualche errore, il nostro compito sarà quello di \textbf{scoprire quanto sara scorretto}.
+\section{Scegliere L'insieme degli attributi}
+Ricordiamo che l'idea è quella di minimizzare la profondità dell'albero risultante. L'idea è scegliere l'attributo che fornisce la classificazione più esatta possibile degli esempi.
+Bisogna in primis capire cosa si intende come \textbf{attributo migliore}.
+Gli esempi positivi sono gli esempi che già mi hanno restituito \textit{yes} mentre quelli negativi sono quelli che mi hanno restituito \textit{no}.
+Immaginiamo di avere un insieme di esempi $y_i$ positivi e $n_i$ negativi: \[ [y_1, y_2, y_3, y_4, n_1, n_2, n_3]\]
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=100pt, level
+    distance=30pt]  
+    \node{\color{red} $Attributo_1$ \color{black}}
+    child {node {\color{blue} $Valore_1$}
+      child{node {\color{orange} $y_1, y_2, n_1, n_2$}}}
+    child {node {\color{blue} $Valore_2$}
+      child{node {\color{orange} $y_3, y_4, n_3$}}};
+  \end{tikzpicture}
+\end{figure}
+La figura soprastante nostra un albero che ha come attributo $Attributo_1$ e come possibili esiti/valori di tale attributo: $Valore_1$ e $Valore_2$. Notiamo che questo attributo non è un buon attributo, poiché suddivide gli esempi in maniera \textit{mista}: l'attributo non possiede valori per cui smistare in maniera omogenea ogni singolo esempio.
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=100pt, level
+    distance=30pt]  
+    \node{\color{red} $Attributo_2$ \color{black}}
+    child {node {\color{blue} $Valore_1$}
+      child{node {\color{orange} $y_1, y_2, y_3, y_4$}}}
+    child {node {\color{blue} $Valore_2$}
+      child{node {\color{orange} $n_1, n_2, n_3$}}};
+  \end{tikzpicture}
+  \label{Albero2}
+\end{figure}
+La figura indicata mostra invece un attributo che suddivide molto meglio gli esempi, in particolare $Valore_1$ possiede esempi positivi e $Valore_2$ esempi negativi.
+\begin{definizione}
+  Un attributo perfetto suddivide gli esempi in insiemi tutti positivi o tutti negativi
+\end{definizione}
+
+Ora sia Mario Avolio (autore di questa sezione di appunti) e sia voi vi chiederete "\textit{Ma come faccio a capire quanto è buono un attributo?}. In teoria la misura dovrebbe avere valore massimo quando l'attributo è perfetto e minimo quando l'attributo non è utile per nulla(tipo Windows). Una misura adeguata è la quantità attesa di \textbf{informazione} fornita dall'attributo. Essa viene misurata in \textbf{bit}. \\ Un bit d'informazione è sufficiente a rispondere $Y$ o $N$ a una domanda di cui non si sa nulla, se le possibili risposte $v_i$ hanno probabilità $P(v_i)$ allora il \textbf{contenuto informativo} $I$ della risposta corretta è dato dalla definizione di \textbf{entropia}:
+\begin{definizione}
+  Dato un \textbf{training set $S$} con possibili esiti sugli esempi: $v_i,\,\, i=1\ldots n$. L'entropia (fig. \ref{Entropy}) di un
+  insieme di bit misura la sua quantità d'informazione (analogamente il \textbf{disordine}, ovvero il numero di elementi \textit{mischiati} tra loro, contenuto nell'insieme). In generale, se i possibili esiti $v_i,\,\, i=1\ldots n$ hanno probabilità $P(v_i)$ di essere frequenti sugli esempi, il contenuto informativo $I$ (anche chiamato \textbf{entropia}) della del training set $S$ è dato da:
+  \begin{equation}
+  H(P(v_1),\ldots, P(v_n))=\sum_{i=1}-P(v_i)\log_2P(v_i)
+      \label{Entropy}
+\end{equation}
+  \end{definizione}
+  \begin{figure}[H]
+      \centering
+      \includegraphics[width=1\textwidth]{img/entropy.png}
+      \caption{Entropia al variare degli esempi \cite{}}
+  \end{figure}
+    Per l'apprendimento di alberi di decisione la domanda a cui vogliamo rispondere è: \textbf{dato un esempio, qual è la sua classificazione?}\\
+      Per stimare la probabilità delle possibili risposte, \textbf{prima di verificare il valore degli attributi}, si può guardare la proporzione di esempi negativi e positivi nell'insieme di addestramento. Supponiamo di avere un insieme di \textbf{$p$ esempi positivi e $n$ esempi negativi}: una stima dell'informazione contenuta nella risposta corretta è:
+    
+      \begin{equation}
+\label{Contenuto informatico di un insieme}
+  I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
+    -\frac{n}{p+n}\log_2\frac{n}{p+n}
+    \end{equation}
+      
+  \begin{esempio}
+    Un esempio semplificato potrebbe riguardare due possibili esiti all'interno di un TrainingSet: $positivo$ e $negativo$. Se su 100 osservazioni/esempi avessimo 30 positivi e 70 negativi, allora la quantità d'informazione sarebbe:
+          \begin{equation*}
+  I\left(\frac{30}{100},\frac{70}{100}\right)=-\frac{30}{100}\log_2\frac{30}{100}
+    -\frac{70}{100}\log_2\frac{70}{100} \approx 0.88
+    \end{equation*}
+  \end{esempio}
+
+\textbf{NOTA:}
+  In particolare si avrà un'alta entropia se elementi positivi e negativi sono saranno tra loro \textit{mischiati}\\
+  
+Il test di un singolo attributo non ci darà così tanta informazione, ma ce ne darà comunque un pò. Possiamo misurare esattamente tale quantità guardando quanta informazione ci è ancora necessaria \textit{dopo} aver effettuato il test. Ogni attributo $A$ divide l'insieme di addestramento in sottoinsiemi $E_1\dots E_v$, presupponendo che $A$ possa avere $v$ valori distinti. Ogni sottoinsieme $E_i$ ha un certo numero di esempi positivi $p_i$ e un certo numero di esempi negativi $n_i$. \\
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[nodes={draw}, -, sibling distance=100pt, level
+    distance=30pt]  
+    \node{\color{red} $A$ \color{black}}
+    child {node {\color{blue} $E_i$}
+      child{node {\color{orange} $p_1 \dots p_i,\,\, n_1 \dots n_i$}}}
+    child {node {\color{blue} $E_v$}
+      child{node {\color{orange} $\dots$}}};
+  \end{tikzpicture}
+\end{figure}
+Per cui se seguiamo una certa diramazione, per capire la classificazione di un esempio, avremo bisogno di un numero di bit \textbf{ulteriori} pari a:
+\[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+Si faccia quindi riferimento alla regola \ref{Contenuto informatico di un insieme}. Un esempio preso casualmente dall'insieme di training avrà l'i-esimo valore per l'attributo con probabilità:
+\[\frac{p_i+n_i}{p+n}\]
+Ragion per cui, in media, dopo il test dell'attributo $A$, occorreranno ancora:
+\begin{equation}
+\label{IG Attributo}
+remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
+  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)
+    \end{equation}
+bit d'informazione per classificare l'esempio. Si noti che in questo caso verranno valutati tutti i valori distinti $v$ che $A$ può assumere. In particolare avremo $\frac{p_i+n_i}{p+n}$ di probabilità che $A$, in relazione ai propri possibili valori, distingui un determinato esempio.\\
+Parliamo quindi di \textbf{information gain} $IG$ (in italiano: guadagno d'informazione) che viene calcolato su ogni
+attributo $A$ e su $S$. In dettaglio il \textbf{guadagno d'informazione} ottenuto dal test dell'attributo è pari alla differenza tra il requisito informativo originale e quello corrente:
+\begin{equation}
+\label{IG}
+IG(S, A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)
+\end{equation}
+\begin{definizione}
+L'information gain è la riduzione aspettata nell'entropia per ordinare $S$ sull'attributo $A$. Si sceglie quindi l'attributo con il maggiore IG. 
+\end{definizione} 
+\textbf{NOTA:} la \ref{IG} è quindi sintetizzabile anche come:
+\begin{equation}
+\label{IG2}
+IG(S, A)=Entropy(S)-\sum_{v\in values(A)}\frac{|S_v|}{|S|}Entropy(S_v)
+    \end{equation}
+\subsection{Approfondimento - Entropia di una Distribuzione di Probabilità}
+% \begin{definizione}
+%   Definiamo l'\textbf{entropia di una distribuzione condizionale}. Presa
+%   una variabile aleatoria discreta $X$ con valori $\{x_1,\ldots, x_i\}$ 
+%   hanno ciascuno probabilità $P(x_i)$, definiamo l'entropia 
+% \begin{equation}
+%   I_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)
+%   \label{EntropiaDiUnaDistributzioneCondizionale}
+% \end{equation}
+% \textbf{NOTA:} la \ref{EntropiaDiUnaDistributzioneCondizionale} riprende la \ref{Contenuto informativo di un training set} utilizzando la probabilità condizionata.
+% \end{definizione}
+% \begin{definizione}
+%   Definiamo \textbf{entropia condizionale} come il valore medio, ovvero il
+%   valore atteso, dell'entropia di $p_{Y|X=x_i}$ per ciascun valore di $X$ che
+%   condiziona $Y$, ovvero:
+%   \[I_{Y|X}=\sum_{i=1}^n P_X(x_i)\cdot I_{Y|X=x_i}\]
+%   ottenendo l'\textbf{entropia condizionale}:
+%   \begin{equation}
+%       H[Y|X]=\sum P(x)\cdot H(Y|X=x)
+%         \label{EntropiaCondizionale}
+%   \end{equation}
+%   \textbf{NOTA:} essa si rifà alla \ref{IG Attributo}\\
+%   \textbf{NOTA 2:} Si chiama \textbf{valore atteso} di una variabile aleatoria discreta il numero reale:
+%   \[\sum_{k} P_X(X_k)\cdot X_k\]
+%   Dove $X_k$ simboleggia il valore assunto dalla variabile $X$, mentre $P_X(X_k)$ è la sua densità. 
+% \end{definizione}
+Quando parliamo di \textit{entropia} stiamo volgendo un esperimento
+concettuale. Prima dell'esperimento si ha una certa incertezza su un certo
+evento, che sparisce, con sorpresa, una volta eseguito l'esperimento se l'evento
+accade. D'altro canto qualora accadesse un evento atteso siamo meno sorpresi del
+fatto (chiaramente perché sarebbe appunto "atteso"). Nel primo caso però si ritiene di ottenere molta informazione, nel
+secondo caso poca. Come se ponessimo in una vasca quattro palline rosse, non
+sarei stupito di estrarne una rossa, essendo quello che mi aspetto. D'altro
+canto se ne aggiungo quattro verdi l'estrazione sarà inattesa e quindi più
+interessante.\\ 
+Si cerca un modo di quantificare questa ``sorpresa''. Riprendendo l'esempio
+delle palline posso dire che nel primo caso (solo rosse) ho \textbf{bassa
+  entropia/basso contenuto informativo} e nel secondo caso (palline miste) \textbf{alta entropia/alto contenuto informativo}. Un caso
+intermedio sarebbe a \textbf{media entropia}.\\
+Sia $P(x)$ la probabilità che avvenga un evento $x$ e sia $H(p)$ l'informazione (entropia) che ottengo dopo che l'evento si è verificato:
+\begin{itemize}
+  \item $P(x)=1\to H(p)=0$
+  \item $P(x)=0\to H(p)=\infty$
+\end{itemize}
+L'informazione $H(p)$ e quindi una quantità non negativa:
+\[H(p)\geq 0\]
+Definiamo quindi l'informazione, detta anche \textit{self-information}, per un
+evento $E$: 
+\[H(E)=-\log_2(P(E))\]
+Inoltre si può affermare che essa disponga della proprietà additiva se gli eventi sono indipendenti, ovvero:
+\[H(p_1, p_2)=H(p_1)+H(p_2)\]
+
+  L'\textbf{entropia}, definita da Claude Shannon (e quindi spesso chiamata
+  \textbf{entropia di Shannon}), è l'informazione media associata ad
+  una distribuzione di probabilità.\\
+\begin{definizione}
+Sia $X$ una variabile aleatoria che può assumere valori pari a ${x_1 \dots x_n}$ con probabilità $p_i$ analogamente a quanto detto nel precedente paragrafo possiamo calcolarne l'\textbf{entropia}, ovvero il \textbf{contenuto informativo}:
+\begin{equation}
+    H[X]=-\sum_{i=1}^n p_i\cdot\log_2 p_i
+\label{EntropiaVariabile}
+\end{equation}
+\end{definizione}
+Analogamente a quanto visto per un dataset, si può vedere una variabile aleatoria discreta $X$ ( quindi una distribuzione di probabilità ) come un vero e proprio dataset. Didatti si noti che la \ref{EntropiaVariabile} è identica alla \ref{Entropy}
+\subsubsection{Entropia Condizionata}
+Analogamente a quanto visto per la \ref{EntropiaVariabile} possiamo chiaramente sfruttare una distribuzione \textbf{condizionale} di probabilità. Ovvero possiamo sfruttare la \textbf{probabilità condizionata}. Per arrivare al concetto di \textbf{entropia condizionale} di un'intera variabile aleatoria $X$ (che supponiamo possa assumere $x_n$ valori) dobbiamo passare per un concetto intermedio. I lettori di questo libro sicuramente si ricorderanno che negli scorsi paragrafi abbiamo detto che:  
+\begin{displayquote}
+Ogni attributo $A$ divide l'insieme di addestramento in sottoinsiemi $E_1\dots E_v$, presupponendo che $A$ possa avere $v$ valori distinti. Ogni sottoinsieme $E_i$ ha un certo numero di esempi positivi $p_i$ e un certo numero di esempi negativi $n_i$. Per cui se seguiamo una certa diramazione, per capire la classificazione di un esempio, avremo bisogno di un numero di bit \textbf{ulteriori} pari a:
+\[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+\end{displayquote}
+Analogamente ora andremo a definire l'entropia di una variabile aleatoria discreta $Y$ condizionata dall'evento $X=x_i$, ovvero dall'evento che $X$ assuma un determinato valore. In questo caso particolare $A=X$ e $E_1 \dots E_v = x_1 \dots x_i$.
+\begin{definizione}
+Sia $Y$ una variabile aleatoria e $X=x_i$ l'evento che la coinvolge, allora si può descrivere l'entropia come:
+  \begin{equation}
+    H_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot\log_2 P_{Y|X}(y_j|x_i)
+\label{EntropiaCondizionaleParziale}
+\end{equation}
+\end{definizione}
+Tale equazione ci permette di definire l'entropia solo nel caso in cui un \textbf{attributo} o una \textbf{variabile aleatoria} $X$ assumano un valore $x_i$. 
+\textbf{L'entropia condizionale} quantifica invece la quantità d'informazione di cui si ha bisogno per descrivere l'esito di una \textbf{variabile aleatoria} $Y$ data un'\textbf{intera} variabile aleatoria $X$. In particolare essa riprende il risultato della media di $H_{Y|X=x_i}$ per tutti i possibili valori che $X$ può assumere. 
+Ricordiamo ora la quantità di bit d'informazione necessari per classificare un attributo:
+\begin{displayquote}
+Ragion per cui, in media, dopo il test dell'attributo $A$, occorreranno ancora:
+\begin{equation}
+\label{IG Attributo}
+remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
+  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)
+    \end{equation}
+bit d'informazione per classificare l'esempio. Si noti che in questo caso verranno valutati tutti i valori distinti $v$ che $A$ può assumere. In particolare avremo $\frac{p_i+n_i}{p+n}$ di probabilità che $A$, in relazione ai propri possibili valori, distingui un determinato esempio.
+\end{displayquote}
+Forniamo una definizione equivalente mediante \textbf{l'entropia condizionale}:
+\begin{definizione}
+Date due variabile aleatoria discrete $X$ e $Y$, l'\textbf{entropia condizionale} di $Y$ dato $X$ è definita come la somma ponderata di $H_{Y|X=x_i}$ per ogni possibile valore di $x_i$, usando $p(xi)$ come peso:
+  \begin{equation}
+    H_{Y|X}=\sum_{x_i\in X} p(x_i)\cdot H_{Y|X=x_i}
+    \label{EntropiaCondizionale}
+\end{equation}
+\end{definizione}
+
+\section{Valutare le prestazioni dell'algoritmo di apprendimento}
+\begin{definizione}
+  Un algoritmo di apprendimento è buono se produce ipotesi che riescono a predire con accuratezza la classificazione di esempi mai incontrati precedentemente.
+\end{definizione}
+Una predizione viene valutata in relazione a un \textbf{insieme di test}. Per questo motivo solitamente è doveroso adottare tale strategia:
+\begin{enumerate}
+    \item Raccogliere un grande insieme di test.
+    \item Dividerlo in due insiemi disgiunti: uno per l'addestramento e uno per i test
+    \item Applicare l'algoritmo di apprendimento all'insieme di addestramento, generando un'ipotesi $h$ (come già visto nel precedente capitolo sul Concept Learning)
+    \item Misurare la percentuale di esempi nell'insieme di test che vengono classificati correttamente da $h$.
+    \item Ripetere i passi 2 e 4 con dimensioni e insiemi diverse degli insiemi di addestramento.
+\end{enumerate}
+Il risultato di quanto descritto è un insieme di dati che può essere elaborato per fornire la qualità media della predizione in funzione delle dimensioni dell'insieme di addestramento. Questa funzione si può tracciare su un grafico, ottenendo la \textbf{curva di apprendimento}. \\ In questo contesto è opportuno evitare ciò che viene chiamato \textbf{peeking}: \textit{andare a creare un'ipotesi (NON generale) in base a un insieme di test che viene controllato a priori (e non a posteriori come si dovrebbe fare con dei test appunto).}
+\section{Rumore e sovradattamento}
+\subsection{Rumore}
+Come abbiamo visto precedentemente, qualora due o più esempi contenessero la stessa descrizione ma avessero descrizioni differenti, l'algoritmo \textbf{IG3} non riuscirà a trovare un albero consistente per tutti gli esempi proposti. Una semplice soluzione per risolvere il problema è quella di far restituire a ogni nodo foglia la classificazione di maggioranza per il suo insieme di esempi. Questo solitamente porta a problemi poiché l'algoritmo genera un albero consistente per tutti gli esempi considerando quei attributi \textbf{irrilevanti} per operare distinzioni spurie tra gli esempi. 
+\subsection{Overfitting}
+Ogniqualvolta si opera con un insieme vasto d'ipotesi occorre stare attenti a non ricadere nell'\textbf{overfitting}(sovradattamento).
+\begin{definizione}
+  \textit{Definizione tratta da Wikipedia.}\\
+  Definiamo formalmente l'\textbf{overfitting} come l'adattamento eccessivo,
+  ovvero quando 
+  un modello statistico molto complesso si adatta al campione perché ha un
+  numero eccessivo di parametri rispetto al numero di osservazioni. SI ha
+  quindi che un modello assurdo e sbagliato può adattarsi perfettamente se è
+  abbastanza complesso rispetto alla quantità di dati disponibili.\\
+  Nel machine learning se il learner viene addestrato troppo a lungo il modello
+  potrebbe adattarsi a caratteristiche che sono specifiche solo del training
+  set, ma che non hanno riscontro nel resto dei casi quindi le prestazioni sui
+  dati non visionati saranno drasticamente peggiori.\\
+  L'opposto è l'\textbf{underfitting}.
+\end{definizione}
+
+Se misuro l'errore di una ipotesi
+$h$ sul training set ($error_{traini}(h)$) e poi misuro l'errore di quella
+ipotesi sull'intero set delle possibili istanze
+$D$ ($error_D(h)$) ho che l'ipotesi $h$ va in \textbf{overfit} sul quel data set
+se:
+\[error_{traini}(h) < error_{traini}(h') \,\,\land
+  \,\, error_D(h)>error_D(h')\]
+quindi se presa un'altra ipotesi questa è migliore della prima e ha un errore
+sull'intera distribuzione delle ipotesi inferiore vado in \textit{overfit}. Il
+problema è che non posso sapere se esiste tale $h'$. Per evitare il problema uso
+sempre il rasoio di Occam scegliendo ipotesi semplici ed evitando di far
+crescere l'albero quando lo ``split'' non è statisticamente significativo. Un
+altro modo è quello di togliere pezzi, all'albero, che toccano poche istanze o
+pure calcolare una \textit{misura di complessità dell'albero}, minimizzando la
+grandezza dell'albero e gli errori del \textit{training set}, usando il
+\textbf{Minimum Description Length (\textit{MDL})}.\\
+In ID3 quindi posso scegliere sia in base all'\textit{information gain} massimo
+o all'\textit{entropia} minima tra gli attributi.\\
+Come specificato, una metodologia semplice da poter applicare in queste situazioni riguarda la \textbf{potatura dell'albero di decisione}. Essa opera impedendo la divisione ricorsiva su attributi che non sono chiaramente rilevamenti, anche quando i dati di un determinato nodo non sono classificati in modo uniforme. I lettori di questi appunti a questo punto si chiederanno sicuramente la seguente domanda: "Mario, se l'irrilevanza di un attributo si misura in relazione alla sua informazione fornita, quanto deve valere quest'ultima per etichettare un nodo come 'irrilevante'?". Per rispondere a questa domanda possiamo ricorrere a un \textbf{test di significatività} statistico: si comincia con un'\textbf{ipotesi nulla}, ovvero che l'attributo sia irrilevante; quindi i dati vengono analizzati per calcolare quanto si discostano effettivamente dalla totale assenza di pattern nei confronti degli esempi. Se il grado di derivazione risulta improbabile, questo viene considerato un buon indizio della presenza di un pattern significativo nei dati. \\ Un'altra possibile opzione da tenere in considerazione (magari insieme alla potatura) è la \textbf{validazione incrociata}: stimare quanto bene ogni ipotesi potrà predire dati mai incontrati.
+\section{Esercizi Guidati}
 \begin{esempio}
   Suppongo di lanciare una moneta, si ha:
   \[P(testa)=P(croce)=\frac{1}{2}\]
@@ -633,37 +514,22 @@ attributi numerici.
   Si ha quindi la seguente distribuzione di probabilità relativa al target
   (avendo un \textit{no} e tre \textit{yes}):
   \[P_T=\left[\frac{1}{4},\frac{3}{4}\right]\]
-  e quindi posso calcolare l'entropia della tabella (sempre rifacendosi alla \ref{Contenuto informativo di un training set}):
+  e quindi posso calcolare l'entropia della tabella, ovvero il contenuto informatico $H$ dato dalla distribuzione di probabilità del target $T$ (che sarebbe la nostra variabile aleatoria $X$).
   \[H(P_T)=-P_T(0)\cdot \log_2 P_T(0)-P_T(1)\cdot\log_2
     P_T(1)=-\frac{1}{4}\cdot\log_2\frac{1}{4}-\frac{3}{4}\cdot\log_2
     \frac{3}{4}= 0.81\]
-  La tabella può essere vista come un risultato di un esperimento concettuale.
-\end{esempio}
-\begin{esempio}
-  Considero il seguente training set, con 4 esempi e target $T$:
-  \begin{table}[H]
-    \centering
-    \begin{tabular}{c|c|c|c|c|c}
-      example & A & B & C & D & T\\
-      \hline
-      $x_1$ & 0 & 0 & 1 & 1 & \color{darkgreen}{1}\\
-      $x_2$ & 0 & 1 & 1 & 1 & \color{darkgreen}{1}\\
-      $x_3$ & 0 & 1 & 0 & 0 & \color{red}{0}\\
-      $x_4$ & 0 & 1 & 0 & 1 & \color{darkgreen}{1}\\
-    \end{tabular}
-  \end{table}
-  Abbiamo già calcolato l'entropia associabile al valore target $H[P_T]=0.81$.\\
+    Tramite essa siamo riusciti a calcolare il contenuto informativo del DataSet.
 \textbf{  Passiamo ora all'uso d'iD3 per la costruzione dell'albero. Dobbiamo cercare gli split corretti tramite information gain, usando
   l'entropia condizionale.\\}
-  Partiamo con il primo attributo: $A$. Si ha che $P_A(0)=1$ e $P_A(1)=0$,
-  quindi, seguendo la \ref{EntropiaDiUnaDistributzioneCondizionale}:
+  Partiamo con il primo attributo: $A$.\\ Si ha che $P_A(0)=1$ e $P_A(1)=0$,
+  quindi, seguendo la \ref{EntropiaCondizionaleParziale}:
   \[H[T|A=0]=-p_{T|A}(0|0)\cdot \log_2(p_{T|A}(0|0))-p_{T|A}(1|0)\cdot
     \log_2(p_{T|A}(1|0))=\]
   \[-\frac{1}{4}\cdot\log_2\frac{1}{4}-
     \frac{3}{4}\cdot\log_2\frac{3}{4}=0.81\]
   (Risultato pari a quello dell'intero training set in quanto $A$ è sempre 0)\\
   Non devo calcolare $H[T|A=1]$ in quanto $A$ non è mai pari ad 1.\\
-  Inoltre si ha:
+  A questo punto è doveroso calcolare \textbf{l'entropia condizionale} per l'attributo $A$ (che in questo caso sarebbe la variabile aleatoria $X$) seguendo la \ref{EntropiaCondizionale}:
   \[H[T|A]=P_A(0)\cdot H[T|A=0]+P_A(1)\cdot H[T|A=1]=1\cdot 0.81=0.81\]
   Posso quindi calcolare l'\textit{information gain} secondo la \ref{IG}:
   \[IG[T;A]=H[T]-H[T|A]=0.81-0.81=0\]
@@ -737,7 +603,7 @@ attributi numerici.
     \includegraphics[scale = 0.9]{img/id4.pdf}
   \end{figure}
   $D$ rende quindi il massimo della ``purezza'' tra i valori di $D$ e quelli del
-  target. Non ho incertezza nel partizionamento.\\
+  target. Non si ha incertezza nel partizionamento e non siamo sorpresi da esso.\\
   Quindi, ricapitolando, ho i seguenti information gain:
   \begin{itemize}
     \item $IG[T;A]=0$
@@ -813,7 +679,7 @@ attributi numerici.
   $[0-, 1+]$ in quanto so già che in quel caso avrei un'istanza positiva, valore
   minimo $0$.\\
   Quindi se $f_1=0$ vado a scegliere un nuovo attributo in quanto ancora non ho
-  una distribuzione certa. Considero quindi le righe in cui $f_1=0$ e avanzo
+  una distribuzione certa.\textbf{ Considero quindi le righe in cui $f_1=0$} e avanzo
   iterativamente studiando $f_2$ ed $f_3$. Studio quindi il sottoinsieme: 
   \begin{table}[H]
     \centering
@@ -895,36 +761,36 @@ attributi numerici.
     \includegraphics[scale = 1]{img/id8.pdf}
   \end{figure}
 \end{esempio}
-\section{Considerazioni Finali}
-Arrivati a questo punto è necessario fare un resoconto finale su come costruire un albero partendo da un Training Set.
-\begin{enumerate}
-    \item Calcolo dell'entropia del Training Set (\ref{Contenuto informatico di un insieme} o \ref{Contenuto informativo di un training set}):
-    \[I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
-    -\frac{n}{p+n}\log_2\frac{n}{p+n}\]
+% \section{Considerazioni Finali}
+% Arrivati a questo punto è necessario fare un resoconto finale su come costruire un albero partendo da un Training Set.
+% \begin{enumerate}
+%     \item Calcolo dell'entropia del Training Set (\ref{Contenuto informatico di un insieme} o \ref{Contenuto informativo di un training set}):
+%     \[I\left(\frac{p}{p+n},\frac{n}{p+n}\right)=-\frac{p}{p+n}\log_2\frac{p}{p+n}
+%     -\frac{n}{p+n}\log_2\frac{n}{p+n}\]
     
-    \item Calcolo delle probabilità del primo attributo in tabella disponibile:
-    \[\frac{p_i+n_i}{p+n}\]
+%     \item Calcolo delle probabilità del primo attributo in tabella disponibile:
+%     \[\frac{p_i+n_i}{p+n}\]
 
-    \item Calcolo l'entropia/contenuto informativo dell'attributo:
-        \begin{enumerate}
-            \item In Generale avremo:
-            \[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+%     \item Calcolo l'entropia/contenuto informativo dell'attributo:
+%         \begin{enumerate}
+%             \item In Generale avremo:
+%             \[I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
             
-            \item Se si parla di probabilità condizionata, dalla precedente formula si deriva:
-            \[H_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)\]
-        \end{enumerate}
+%             \item Se si parla di probabilità condizionata, dalla precedente formula si deriva:
+%             \[I_{Y|X=x_i}=-\sum_{j=1}^m P_{Y|X}(y_j|x_i)\cdot \log_2 P_{Y|X}(y_j|x_i)\]
+%         \end{enumerate}
     
-    \item Calcolo il $Resto(A)$
-        \begin{enumerate}
-           \item In generale si opta per:
-            \[remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
-  I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
+%     \item Calcolo il $Resto(A)$
+%         \begin{enumerate}
+%           \item In generale si opta per:
+%             \[remainder(A)=\sum_{i=1}^v \frac{p_i+n_i}{p+n}
+%   I\left(\frac{p_i}{p_i+n_i},\frac{n_i}{p_i+n_i}\right)\]
           
-            \item In caso di probabilità condizionata la formula si riduce alla \ref{EntropiaCondizionale}:
-                  \[H[Y|X]=\sum P(x)\cdot H(Y|X=x)\]
-        \end{enumerate}
+%             \item In caso di probabilità condizionata la formula si riduce alla \ref{EntropiaCondizionale}:
+%                   \[H[Y|X]=\sum P(x)\cdot H(Y|X=x)\]
+%         \end{enumerate}
           
-    \item Calcolo IG :
-            \[IG(S,A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)\]
-\end{enumerate}
+%     \item Calcolo IG :
+%             \[IG(S,A)=I\left(\frac{p}{p+n},\frac{n}{p+n}\right)-remainder(A)\]
+% \end{enumerate}
 

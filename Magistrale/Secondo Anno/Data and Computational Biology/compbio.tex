@@ -4306,7 +4306,7 @@ portali per accedere semplicemente, tra cui \textit{cBIO portal} o \textit{TCGA
 \textit{FireBrowse}. 
 \begin{figure}
   \centering
-  \includegraphics[scale = 0.25]{img/csd.jpg}
+  \includegraphics[scale = 0.23]{img/csd.jpg}
   \caption{Esempio di analisi di mutazioni somatiche e \textit{CNA}, nelle due
     parti dell'immagine. Ogni colonna rappresenta un paziente. } 
   \label{fig:csd}
@@ -4323,26 +4323,419 @@ A questo punto si vorrebbe rispondere a tre domande:
 Si vede ora quindi come ricostruire modelli di progressione  per un insieme di
 dati, cioè per dati provenienti da più pazienti, usando dei \textbf{Direct
   Acyclic Graph (\textit{DAG})}, che codificano l'accumularsi delle alterazioni
-e delle mutazioni. \\
+e delle mutazioni, restando quindi sempre in ottica di \textit{dati
+  cross-sectional}. \\ 
 Una libreria utile in questo contesto è \textit{TRONCO}, sviluppata per
-l'ambiente \textit{R}. \\
-Rispondendo al primo quesito si ha quindi una risposta affermativa, avendo questo
-schema indicativo:
+l'ambiente \textit{R}, che contiene varie tecniche ed algoritmi per la
+ricostruzione di modelli di progressione.
+\subsubsection{Primo Quesito}
+Rispondendo al primo quesito si ha quindi una risposta affermativa, avendo
+questo schema indicativo, come in figura \ref{fig:q1}\footnote{adattato da:
+  Gerstung et al., PLoS ONE, 6(11), 2011}: 
 \begin{itemize}
-  \item si parte da una matrice binaria dove le colonne sono le mutazioni e le
+  \item si parte da una matrice booleana dove le colonne sono le mutazioni e le
   righe i tumori, indicando con 1 e 0 la presenza o meno di una certa mutazione
   in un certo tumore
   \item si crea una rete causale, inferita dalla matrice, dove si specifica
-  quale mutazione causa
+  quale mutazione causa. Si ottiene quindi un concetto di ``precedenza''
   \item dalla rete si studia quindi la causalità reciproca tra le mutazioni
-  \item dai risultati si studia la causalità a livello di pathway 
-  \item infine si studiano i fenotipi, ovvero gli \textit{hallmark}
+  \item dai risultati si studia la causalità a livello di pathway o si studiano
+  i fenotipi, ovvero gli \textit{hallmark}, avendo quindi livelli ulteriroi di
+  astrazione a partire dal generico \textit{DAG}
 \end{itemize}
-% \chapter{Seminari}
+A partire da questo tipo di modelli si possono ottenere le corrette terapie per
+curare un paziente.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.185]{img/q1.jpg}
+  \caption{Schema rappresentativo di quanto si ottiene a partire da una matrice
+    booleana per studiare la ricostruzione di modelli di progressione.}
+  \label{fig:q1}
+\end{figure}
+\subsubsection{Secondo Quesito}
+Per il secondo quesito bisogna citare nuovamente le banche dati pubbliche per i
+dati relativi al cancro, tra cui:ì
+\begin{itemize}
+  \item The Cancer Genome Atlas (\textit{TCGA})
+  \item International Cancer Genome Consortium (\textit{ICGC})
+\end{itemize}
+Tutte queste banche dati rispondono al problema della centralizzazione dei dati
+e delle informazioni, che fino a qualche anno fa erano anche parecchio
+costosi.\\
+Direttamente collegato è anche il tema centrale della \textit{gestione dei dati
+  sperimentali}, avendo che essi devono:
+\begin{itemize}
+  \item essere ben catalogati
+  \item essere facilmente accessibili e studiabili
+  \item garantire interoperabilità
+  \item garantire conformità con gli standard
+  \item etc$\ldots$
+\end{itemize}
+e tutte queste sono tematiche prettamente computazionali.\\
+Ovviamente in ottica di studio del cancro le informazioni più interessanti delle
+banche dati, tra le tante informazioni disponibili, sono quelle relative alle
+mutazioni, che sono di solito ereditate e persistenti tra generazioni successive
+di cellule tumorali (\textit{questa è una sorta di assunzione}). Le mutazioni
+più interessanti sono solitamente quelle di carattere \textit{somatico}, ovvero
+le \textbf{mutazioni somatiche}. Inoltre si più dire che La probabilità di
+insorgenza di una data alterazione/mutazione è correlata a quanto funzionale è
+allo sviluppo del tumore, avendo quindi che si hanno le mutazioni dette
+\textit{driver} e quelle dette \textit{passenger}, oltre a diversi tassi di
+mutazione tumorale (\textit{anche questa è una sorta di assunzione}). Ovviamente
+anche le mutazioni possono essere di vario tipo:
+\begin{itemize}
+  \item i cosiddetti \textbf{single nucleotide variant (\textit{SNP})}, ovvero
+  mutazioni su singole basi
+  \item le \textbf{perdite di eterozigosità}, con perdite di regioni genomiche,
+  perdite di porzioni più piccole, mutazioni copy-number etc$\ldots$
+  \item intere \textbf{delezioni} che siano terminali o interne alla sequenza
+  \item \textbf{duplicazioni} di parti di sequenze che possono portare a
+  \textbf{tandem}, dove le duplicazioni si appaiano una accanto all'altra, o a
+  duplicazioni dove le porzioni duplicate sono separate tra loro da un'altra
+  porzione di genoma
+  \item \textbf{amplificazioni} di porzioni genomiche di tipo
+  \textbf{intra-cromosomico} e \textbf{inter-cromosomico}
+  \item \textbf{duplicazione dell'intero genoma}
+\end{itemize}
+\subsubsection{Terzo Quesito}
+In merito al terzo quesito ci viene incontro la letteratura degli ultimi
+vent'anni e oltre. Si sono studiati infatti vari tipi di modelli:
+\begin{itemize}
+  \item \textbf{modelli ad albero}\footnote{Desper, Papadimitriou Schäffer et
+    al, 1999, 2000}, soprattutto all'inizio quando si avevano dati molto
+  ``grezzi'' con grosse alterazioni. Tali modelli erano in primis basati sulle
+  correlazioni. Un esempio potrebbe essere il seguente\footnote{Olde Loohuis et
+    al, 2014, originally from Desper et al, 1999}, dove si ha un esempio di
+  progressione cancerogena (nel dettaglio sul cancro ovarico ) rappresentata
+  tramite albero:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.25]{img/ovt.jpg}
+  \end{figure}
+  \item \textbf{modelli congiunti}\footnote{Beerenwinkel, Sturmfelds et al,
+    2005, 2006, 2007}, basati principalmente su modelli Bayesiani. Un esempio
+  potrebbe essere il seguente\footnote{Beerenwinkel et al, 1999} ottenuto per
+  progressione congiuntiva ricostruita da un set di dati sulla risposta ai
+  farmaci dell'HIV:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.25]{img/ovc.jpg}
+  \end{figure}
+  \item \textbf{modelli DAG}, che sono una generalizzazione dei due modelli
+  precedenti 
+\end{itemize}
+\subsection{Algoritmo CAPRI}
+\begin{shaded}
+  Quanto trattato in merito a \textbf{TRONCO}, \textbf{CAPRESE} e \textbf{CAPRI}
+  è ritrovabile nei seguenti articoli:
+  \begin{itemize}
+    \item D. Ramazzotti, G. Caravagna, L. Olde-Loohuis, A. Graudenzi,
+    I. Korsunsky, G. Mauri, M. Antoniotti, and B. Mishra, “CAPRI: Efficient
+    Inference of Cancer Progression Models from Cross-sectional Data.,”
+    Bioinformatics, p. btv296, May 2015.
+    \item L. O. Loohuis, G. Caravagna, A. Graudenzi, D. Ramazzotti, G. Mauri,
+    M. Antoniotti,  and B. Mishra, “Inferring Tree Causal Models of Cancer
+    Progression with Probability Raising,” PLoS ONE, vol. 9, no. 10, p. e108358,
+    Oct. 2014.
+    \item L. De Sano, G. Caravagna, D. Ramazzotti, A. Graudenzi, G. Mauri,
+    B. Mishra, and M. Antoniotti, “TRONCO: an R package for the inference of
+    cancer progression models from heterogeneous genomic data.,” Bioinformatics,
+    p. btw035, Feb. 2016. 
+    \item G. Caravagna, A. Graudenzi, D. Ramazzotti, R. Sanz-Pamplona, L. De
+    Sano, G. Mauri, V. Moreno, M. Antoniotti, and B. Mishra, “Algorithmic
+    methods to infer the evolutionary trajectories in cancer progression,”
+    Proc. Natl. Acad. Sci. U.S.A., pp.  201520213–10, Jun. 2016.
+  \end{itemize}
+\end{shaded}
+Si approfondiscono ora alcune delle tecniche sviluppate nel laboratorio di
+ricerca \textit{BIMIB}, ora \textit{DCB}:
+\begin{itemize}
+  \item in primis è stato sviluppato l'algoritmo detto \textbf{CAncer
+    PRogression Extraction with Single Edges (\textit{CAPRESE})}, per la
+  modellazione tramite alberi
+  \item si è poi lavorato sull'algoritmo \textbf{CAncer PRogression Inference
+    (\textit{CAPRI})}, un'estensione di \textit{CAPRESE} per lavorare tramite
+  modelli \textit{DAG}. Approfondiremo sopratutto questo
+  \item questi algoritmi, più altre funzionalità di supporto, come l'accesso a
+  \textit{cBIO} e \textit{TCGA}, sono state raccolte nella libreria per il
+  linguaggio $R$ detta \textbf{Translational ONCOlogy
+    (\textit{TRONCO})}. L'algoritmo in grado di ricostruire un DAG
+  rappresentativo delle possibili progressioni di un tumore, intese come
+  accumuli di eventi diversi, il \textit{DAG} prodotto è un riassunto delle
+  possibili progressioni osservabili in una popolazione  
+\end{itemize}
+partiamo da un esempio molto sintetico. Si supponga di voler modellare una
+progressione tumorale in cui avvengono in primis due mutazioni, una detta
+\textit{EGFR} e, poi, una detta \textit{CDK}. Si devono fare due importanti
+assunzioni, abbastanza forti per di più, per poter procedere con la
+modellazione: 
+\begin{enumerate}
+  \item \textbf{assunzione di persistenza}, ovvero le mutazioni acquisite non
+  scompaiono (\textit{e questo non è vero per le espressioni geniche e gli
+    effetti epigenetici}). Si ha quindi, riprendendo l'esempio, che con la
+  mutazione \textit{EGFR} si acquisisce un vantaggio selettivo e si procede
+  quindi con l'espansione clonale, aumentando anche la probabilità di acquisire
+  una mutazione \textit{CDK}. Quando si hanno entrambe le mutazioni si ha una
+  specie selettivamente ancora più avvantaggiata
+  \item \textbf{assunzione di selezione di eventi}, ovvero gli eventi rilevanti
+  per la progressione devono essere scelti in anticipo. In pratica, riferendoci
+  all'esempio, si sa già che bisogna studiare un modello con in input le
+  mutazioni \textit{EGFR} e \textit{CDK}. Limitarsi a poche combinazioni di
+  eventi rende la ricostruzione computazionalmente più fattibile, non usando
+  quindi l'intera moltitudine di dati provenienti dagli studi oncologici. Si fa
+  quindi una sorta di \textit{studio supervisionato}, che nel dettaglio viene
+  fornito da vari tool ormai standard atti soprattutto a scovare le mutazioni
+  \textit{driver} 
+\end{enumerate}
+Un'altro aspetto fondamentale in questo studio è che ogni paziente ha una sua
+storia di evoluzione e progressione cancerogena diversa.  L'effettivo input
+all'algoritmo di ricostruzione della progressione può essere pensato come un
+insieme di possibili traiettorie, cioè di sequenze di alterazioni genomiche che
+si accumulano in modo diverso, bisogna quindi procedere con il conteggiare e
+assegnare le giuste probabilità ad ogni singola occorrenza di un evento.\\
+Si sono sviluppati vari modi negli anni per ricostruire modelli ad alberi o DAG
+e utti gli algoritmi necessitano di una misura per decidere se e come includere
+un arco nella ricostruzione. Vediamo quindi come si è scelto di procedere in
+\textit{BIMIB/DCB}, che si basa sulla \textbf{teoria della causalità
+  probabilistica}. \\
+Un primo punto cardine considerato è infatti quello della \textbf{teoria della
+  causalità} di Suppes, un filosofo e matematico. In biologia bisogna comunque
+considerare che aggiungere dei concetti di causalità complicano molto i modelli,
+anche se con questa teoria si riesce ad ottenere in modo implicito l'idea di
+\textbf{direzionalità temporale} nei modelli. Il nucleo di questa teoria è molto
+semplice. Dati due eventi $c$ ed $e$, occorrenti rispettivamente al tempo $t:c$
+e $t_e$, con:
+\[0<P(c)\mbox{ e } P(e)<1\]
+si ha che $c$ è detto \textbf{causa \textit{prima facie}} per $e$ se si
+rispettano due proprietà:
+\begin{enumerate}
+  \item la \textbf{proprietà di priorità temporale}, ovvero banalmente:
+  \[t_c<t_e\]
+  che garantisce un ordine temporale tra gli eventi
+  \item la \textbf{proprietà della crescita delle probabilità}, che ci dice che
+  la probabilità che l'evento $e$ accada essendo accaduto l'evento $c$ sia
+  maggiore (e preferibilmente molto maggiore) di quella in cui non si ha
+  l'evento $c$:
+  \[P(e | \neg c) < P(e | c)\]
+\end{enumerate}
+Queste due proprietà, \textbf{necessarie ma non sufficienti}, garantiscono la
+direzionalità del modello.\\
+Oltre alla teoria di Suppes si ha anche che sia le misurazioni che le analisi
+teoriche vengono reinterpretate in termini biologicamente plausibili,
+eventualmente anche ridefinendo le  relazioni di vantaggio selettivo. Queste
+scelte permettono di racchiudere maggiori informazioni negli algoritmi proposti
+da \textit{BIMIB/DCB} di ricostruzione, che mostrano ottime prestazioni rispetto
+allo stato dell'arte, ora spesso basati su modelli Bayesiani o sui modelli
+causali di Pearl.\\
+Approfondiamo quindi meglio le basi per la ricostruzione del modello di
+progressione.\\
+Le già anticipate cause \textit{prima facie} possono essere di due tipologie:
+\begin{itemize}
+  \item \textbf{autentiche/genuine}, quelle ``corrette''
+  \item \textbf{spurie}, quelle ``errate''
+\end{itemize}
+e per questo le due condizioni risultano solo sufficienti e non
+necessarie. Inoltre, parlando di dati \textit{cross-sectional},  la priorità
+temporale tra gli eventi non è nota, quindi il problema della ricostruzione
+diventa più difficile. Il problema diventa quindi come stabilire se un dato
+arco tra due eventi corrisponda o meno a una causa spuria, e quindi non
+vada considerato, avendo comunque che l'interpretazione di un arco sarà quella
+di una relazione di vantaggio selettivo tra eventi genetici. \\
+Inoltre un'ulteriore complicazione è data dal fatto che nulla assicura che si
+parli solo di due eventi ma si possono avere combinazioni complesse di causalità
+tra eventi e per questo nell'algoritmo \textit{CAPRI} queste situazioni vengono
+gestite tramite \textbf{formule booleane}, come le formule congiuntive del tipo
+utilizzato nelle reti Bayesiane congiuntive. Si distinguono quindi:
+\begin{itemize}
+  \item \textbf{singleton}, dove una mutazione accade prima di un'altra e si ha
+  relazione causale
+  \item \textbf{co-occorrenze}, dove più di una mutazione accade prima di
+  un'altra e si ha relazione causale. Ovviamente in questo caso la complessità
+  aumenta 
+\end{itemize}
+Nell'algoritmo \textit{CAPRI} si ha anche una condizione finale, ovvero la
+condizione per la seleziona vantaggiosa tramite \textit{patterns} (indicando con
+$\triangleright$ la corretta causalità):
+\[c\triangleright e\iff P(c)>P(e)\land P(e|c)>P(e\neg c)\]
+Si parte quindi da un modello causale con i vantaggi selettivi, si fanno le
+osservazioni sulle \textit{regolarità imperfette} e si fanno studi di frequenza. 
+Più nel profondo l'inferenza dei risultati viene poi ottenuta, ad esempio,
+tramite tecniche statistiche come:
+\begin{itemize}
+  \item \textbf{boostrap}, una tecnica statistica di ricampionamento con
+  reimmissione per approssimare la distribuzione campionaria di una
+  statistica. Permette perciò di approssimare media e varianza di uno stimatore,
+  costruire intervalli di confidenza e calcolare \textit{p-value} di test
+  quando, in particolare, non si conosce la distribuzione della statistica di
+  interesse
+  \item \textbf{test del \textit{p-value}} e altri test
+\end{itemize}
+Si ottengono quindi relazioni causali tra mutazioni, eventualmente anche con
+l'effetto co-occorrente (e quindi senza avere interesse sull'ordine) di più
+mutazioni che causano una terza mutazione. Ad esempio se si ha una mutazione $A$
+e una mutazione $B$ che causano in modo co-occorrente la mutazione $C$ si ha, dal
+punto di vista statistico:
+\[\min\{P(A),P(B)\}>P(C)\land P(C|A,B)>P(C|\neg(AB))\]
+Per pattern complessi si è studiato sperimentalmente come l'algoritmo
+\textit{CAPRI} che è in grado di capire la causalità tra varie mutazioni e
+rappresentarle tramite formule booleane. La complessità del modello poi si
+riconduce alla complessità di tali formule, ottica dei vari studi teorici sulla
+complessità di \textit{SAT} etc$\ldots$.\\
+Le formule booleane sono della forma \textbf{conjunctive normal form
+  (\textit{CNF})}, ovvero una congiunzione di clausole, dove le clausole sono
+una disgiunzione di letterali.\\ 
+In ottica di limitare la complessità dobbiamo quindi evidenziare le relazioni
+\textit{autentiche} più significative in quanto l'algoritmo
+\textit{naive} individuerebbe anche transitività, sotto-formule e altri archi
+topologici come possibili relazioni di selettività. Un esempio è mostrato in
+figura \ref{fig:gvss}.\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1.4]{img/gvss.pdf}
+  \caption{Test case di confronto tra una progressione reale a sinistra (dove i
+    collegamenti sottintendono la congiunzione) e una selezione 
+    co-occorrente a destra per rappresentare la formula
+    $a\land b\land c\triangleright d$. Con le frecce piene si rappresentano le
+    relazioni ``reali'', quelle autentiche, con le frecce tratteggiate rosse
+    e verdi, rispettivamente, transitività e sotto-formule, che sono una via di
+    mezzo tra relazioni autentiche e relazioni spurie ma comunque eliminabili,
+    mentre con le righe tratteggiate viola gli archi topologici, che sono la
+    massima rappresentazione di relazioni spurie.} 
+  \label{fig:gvss}
+\end{figure}
+L'\textit{algoritmo CAPRI} è una combinazione di sei passaggi che sono
+responsabili della produzione di un insieme di relazioni di selettività e della
+successiva pulizia del modello generato:
+\begin{enumerate}
+  \item una prima fase gestione dei dati in input
+  \item una fase di preprocessing con aggiunta di informazioni, sotto forma di
+  \textit{CNF}, detta \textbf{lifting}, al modello grezzo 
+  ottenuto dai dati. Si ha un insieme $G$ di $n$ eventi provenienti da $m$
+  samples \textit{cross-sectional}, avendo quindi una matrice booleana $n\times
+  m$. Si assume in questa un insieme di ipotesi:
+  \[\Phi=\{\phi_i\triangleright e_i|\,\,\,1\leq i\leq k\}\mbox{, con }k+n\ll m\]
+  Ogni singolo $\phi_i\triangleright e_i$ è usato per accresce la matrice in
+  input ottenendo una matrice $D(\Phi)$ che codifica le relazioni di selettività
+  opzionali come eventi
+  \item una fase di selezione dei nodi del \textit{DAG}
+  \item una prima fase di selezione degli archi del \textit{DAG}
+  \item si ha poi una fase di etichettamento degli archi. In questa fase e
+  relazioni di selettività codificate sono formule 
+  \textit{CNF}, quindi possono essere trattate in modo composito verificando
+  separatamente ogni congiunzione (ovvero una disgiunzione).\\
+  L'algoritmo include nella costruzione archi tra due eventi $c$ e $e$ sse:
+  \[P(c)-P(e)>0\land P(e|c)-P(e|\neg c)>0\]
+  e questa è la condizione principale. Si noti che le probabilità sono stimate
+  dai dati direttamente, tramite un primo step di \textit{boostrap}. Il
+  \textit{DAG} ricostruito contiene tutte le corrette relazioni di selettività
+  ma anche parecchie spurie, che non vengono ancora eliminate. Ogni arco è
+  etichettato con una probabilità che è essenzialmente la probabilità di
+  osservare un certo profilo mutazionale in un campione. \\
+  Già alla fine di questa fase il modello ricostruito è interpretabile dal punto
+  di vista grafico, tramite varie librerie esterne 
+  \item si ha infine una fase di \textit{likelihood fit}. Ricordando che le
+  assunzioni di Suppes sono solo necessarie per ``filtrare'' le relazioni
+  spurie, ovvero i falsi positivi che sono stati inclusi nei passaggi
+  precedenti, calcoliamo un \textit{fit di massima verosimiglianza} che include
+  un termine di regolarizzazione, termine che può essere scelto e calcolato in
+  modo diverso. Ad esempio come criteri si hanno attualmente
+  nell'\textit{algoritmo CAPRI}: 
+  \begin{itemize}
+    \item \textbf{Bayesian Information Criterion (\textit{BIC})}, più
+    conservativo
+    \item \textbf{Akaike Information Criterion (\textit{AIC})}
+  \end{itemize}
+  questa scelta permette quindi vari \textit{tradeoff}.\\
+  Infine si usa un passaggio di \textit{bootstrap} per dedurre gli intervalli
+  di confidenza per ciascuna relazione di selettività dedotta. 
+\end{enumerate}
+L'\textit{algoritmo CAPRI} (ma anche in primis l'\textit{algoritmo CAPRESE})
+è \textbf{corretto} e \textbf{completo}, avendo che sono riportate tutte e sole
+le vere relazioni di selettività desumibili dai dati. Dal punto di vista
+computazionale invece si nota come gli step più onerosi sono la fase di
+preprocessing dei dati, ad esempio il parsing dei file \textit{MAF}, e le due
+fasi di \textit{boostrap}.\\
+Va sempre ricordato che le relazioni di precedenza che l'algoritmo
+deduce non spiegano le cause meccanicistiche biochimiche di un modello di
+progressione, infatti l'algoritmo fa solo un'affermazione sul fatto che
+l'osservazione di un dato insieme di mutazioni aumenta la probabilità di vederne
+uno successivo (\textbf{questa osservazione è fondamentale}).\\
+Un altro vantaggio dell'\textit{algoritmo CAPRI} è la gestione del
+\textit{rumore}, migliore di altre soluzioni allo stato dell'arte. Si hanno
+comunque molti altri punti di forza rispetto ad altre soluzioni, tra le quali si
+annoverano:
+\begin{itemize}
+  \item \textbf{Incremental Association Markov Blanket (\textit{IAMB})} e
+  \textbf{PC}, per quanto riguarda soluzioni strutturali
+  \item \textbf{Bayesian Information Criterion (\textit{BCI})} e
+  \textbf{Bayesian Dirichlet (\textit{BDE})}, per quanto riguarda la
+  soluzioni basate sulla verosimiglianza  
+  \item \textbf{Conjunctive Bayesian Networks}, per quanto riguarda soluzioni
+  ibride 
+\end{itemize}
+\textbf{Su slide lezione 10 alle pagine 39 e 40 vari grafici per la misura delle
+  performance di \textit{CAPRI}}.
+\subsection{Usi reali di TRONCO e CAPRI}
+L'uso di \textit{TRONCO}, e quindi dell'\textit{algoritmo CAPRI} è stato usato,
+ad esempio per:
+\begin{itemize}
+  \item lo studio della \textbf{leucemia}, nel dettaglio della \textbf{Atypical
+    Chronic Myeloid Leukemia (\textit{aCML})}, a partire dai dati di 64 pazienti
+  studiati con il dipartimento di Medicina della Bicocca
+  \item lo studio del cancro al colon, il \textbf{Colorectal cancer
+    (\textit{CRC})}, in collaborazione con l'università di Barcellona e usando
+  dati di circa 200 samples presi da \textit{TCGA}
+\end{itemize}
+\subsubsection{Il caso Reale dello Studio della aCML}
+In questo caso si è considerato un set di 64 pazienti con aCML per i quali una
+\textit{mutazione puntiforme missense}, un tipo di mutazione puntiforme in cui
+un aminoacido diverso è posto all’interno della proteina prodotta, diverso da
+quello originale, ricorrente della proteina \textbf{SET-binding 1 
+  (\textit{setbp1})}\footnote{Piazza, R., et al. (2013). Recurrent setbp1
+  mutations in atypical chronic myeloid leukemia. Nature genetics, 45(1),
+  18–24.}.  \\
+L'analisi ha considerato:
+\begin{itemize}
+  \item geni selezionati in modo che fossero mutati in almeno il 5\% dei
+  pazienti
+  \item geni selezionati che si ipotizzava facessero parte di un
+  pattern funzionale di progressione aCML (come indicato in letteratura) 
+\end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.22]{img/acml1.jpg}
+  \caption{Immagine ottenuta tramite la libreria \textit{oncoprint} con una
+    rappresentazione delle analisi fatte per \textit{aCML}. Ogni colonna
+    rappresenta un paziente/sample mentre ogni riga una mutazione. Le mutazioni
+    sono ordinate in ordine decrescente di incidenza.}
+\end{figure}
+In merito a questo studio sono stati formulati due rigidi vincoli di
+esclusività:
+\begin{enumerate}
+  \item l'esclusività tra le mutazioni \textit{ASXL1} e \textit{SF3B1},
+  rappresentabile tramite la formula:
+  {\small{\[(\mbox{ASXL1 Nonsense point} \oplus \mbox{ASXL1 Ins/Del}) \oplus
+        \mbox{SF3B1 Missense point}\] }}
+  \item  l'esclusività tra le mutazioni \textit{TET2} e \textit{IDH2},
+  rappresentabile tramite la formula:
+  \[(\mbox{TET2 Nonsense point} \oplus \mbox{TET2 Missense point}\]\[ \oplus
+    \mbox{TET2 Ins/del}) \oplus \mbox{IDH2 Missense point}\]
+\end{enumerate}
+Ottenendo i seguenti risultati, direttamente tramite \textit{TRONCO}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.22]{img/acml2.jpg}
+\end{figure}
+Alla fine l'\textit{algoritmo CAPRI} trova la seguente, tra le altre, relazione
+di selettività:
+{\footnotesize{\[(\mbox{ASXL1 Nonsense point} \oplus \mbox{ASXL1 Ins/del})
+      \oplus \mbox{SF3B1 Missense point} \triangleright \mbox{CBL Missense
+        point}\]}} 
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
 % LocalWords:  REST ligandi discretizzato Petri FSA primis delay propensità
 % LocalWords:  Gillespie condition silico morfogeni discretizzare pathway
 % LocalWords:  randomicamente isoformi chemostato simulabilità colonscopia
-% LocalWords:  replicatori microambienti microambiente
+% LocalWords:  replicatori microambienti microambiente Bayesiani preprocessing
+% LocalWords:  etichettamento

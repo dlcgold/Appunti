@@ -4730,7 +4730,198 @@ Alla fine l'\textit{algoritmo CAPRI} trova la seguente, tra le altre, relazione
 di selettività:
 {\footnotesize{\[(\mbox{ASXL1 Nonsense point} \oplus \mbox{ASXL1 Ins/del})
       \oplus \mbox{SF3B1 Missense point} \triangleright \mbox{CBL Missense
-        point}\]}} 
+        point}\]}}
+\subsection{Analisi Cancro al Colon Via PiCnIc}
+Dopo aver visto l'analisi reale dei dati della \textit{aCML} si illustra
+brevemente uno studio fatto sui dati del \textit{cancro al colon}, appunto il
+\textbf{Colorectal Cancer Analysis (\textit{CRC})}, soprattutto 
+in ottica di presentazione della \textbf{Pipeline for Cancer Inference
+  (\textit{PiCnIc})}, il cui schema generale è visualizzabile in figura
+\ref{fig:picnic}\footnote{Giulio Caravagna, Alex Graudenzi, Daniele Ramazzotti,
+  Rebeca Sanz-Pamplona, Luca De Sano, Giancarlo Mauri, Victor Moreno, Marco
+  Antoniotti, and Bud Mishra (2016) Algorithmic Methods to Infer the
+  Evolutionary 
+Trajectories in Cancer Progression. PNAS.}, una serie di script in \textit{R},
+associati alla già 
+presentata libreria \textit{TRONCO} per l'analisi di dati tumorali tramite una
+specifica pipeline.\\
+Dal punto di vista dei dati per il \textit{CRC} viene usato come
+dataset il \textit{COADREAD 2012 TCGA dataset}, contenente sempre dati
+\textit{cross-sectional}. Tale dataset è giù incluso in \textit{TRONCO}.\\
+Come detto gli \textit{algoritmi CAPRI e CAPRESE} sono usati sia in condizioni
+di studio individuali (nel caso detto appunto \textit{individual}) che di studi
+di molteplici pazienti (nel caso detto appunto \textit{ensemble}).\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.19]{img/picnic.jpg}
+  \caption{Schema generale di \textit{PiCnIc}}
+  \label{fig:picnic}
+\end{figure}
+All'interno di questa pipeline sono riconoscibili cinque passaggi che verranno
+approfonditi a breve. La pipeline produce \textit{modelli grafici
+  probabilistici} restituendo le relazioni di ordinamento temporale e dipendenza
+statistica tra le \textit{alterazioni driver} che si accumulano in quello
+specifico sottotipo, quindi l'inferenza del modello di progressione fornisce una
+caratterizzazione delle tendenze di accumulo più probabili delle
+\textit{alterazioni del driver} alla base di ciascun sottotipo di tumore. Si
+noti che la definizioni dei sottotipi si può ottenere tramite studi di
+letteratura o tecniche software, magari basate su immagini. Con la pipeline, nel
+caso del \textit{CRC}, otteniamo risultati relativi ad una popolazione di
+pazienti, risultati che devono comunque subire una forte validazione medica
+specialistica. \\
+L'idea di massima è quindi quella di fornire all'\textit{algoritmo CAPRI},
+l'ultimo step della pipeline \textit{PiCnIc}, un input elaborato costituito da
+dati \textit{cross-sectional (epi)genomici} di singoli pazienti oncologici,
+stratificato in diversi sottotipi, da studiare nel complesso.
+\subsubsection{Input Data}
+I dati per la pipeline vengono presi dai soliti \textit{TCGA},
+\textit{Firebrowse} etc$\ldots$ e sono dati relativi, principalmente, alle
+mutazioni e alle informazioni relative al \textit{copy-number}.\\
+I dati in input servono a creare la \textit{matrice booleana}, contenente i
+profili mutazionali \textit{cross-sectional}. Come già spiegato più volte tale
+matrice booleana indica tramite 0 e 1, rispettivamente, la presenza e assenza
+di:
+\begin{itemize}
+  \item \textbf{single nucleotide variation (\textit{SVN})}
+  \item \textbf{copy number alterations (\textit{CNA})}
+  \item \textbf{fusioni}
+  \item \textbf{varianti strutturali}
+  \item \textbf{dati epigenetici}, come, ad esempio, dati di metilazione
+  (ovvero l'addizione o la sostituzione di un gruppo metile su vari substrati,
+  catalizzata da enzimi) ed espressione, ma solo se persistenti, per
+  \textit{l'assunzione di persistenza}
+\end{itemize}
+Dal punto di vista dei formati file la pipeline \textit{PiCnIc} accetta:
+\begin{itemize}
+  \item \textbf{file Mutation Annotation Format, \textit{MAF}}. tali file sono
+  file delimitati da tabulazioni che contengono annotazioni di mutazioni
+  somatiche e/o germinali. I file MAF contenenti eventuali annotazioni di
+  mutazione germinale sono protetti e distribuiti nella parte ad accesso
+  controllato del \textit{GDC Data Portal}. I file MAF contenenti solo mutazioni
+  somatiche sono disponibili pubblicamente \footnote{\url{https://docs.gdc.
+      cancer.gov/Encyclopedia/pages/Mutation_Annotation_Format/}} 
+  \item \textbf{file GISTIC}, contenente i risultati delle \textit{copy-number
+    analysis} 
+\end{itemize}
+Inoltre, entrando nei dettagli numerici del dataset \textit{COADREAD
+  2012}, si hanno:
+\begin{itemize}
+  \item 15995 mutazioni somatiche provenienti da 224 pazienti
+  \item 10184 acquisizioni di alto livello (\textit{high-level gain})
+  provenienti da 564 pazienti 
+  \item 8174 delezioni omozigote provenienti da 564 pazienti
+\end{itemize}
+\subsubsection{Subtyping}
+Per evitare gli effetti confusionari delle popolazioni eterogenee, i campioni
+dovrebbero essere stratificati in sottotipi molecolari omogenei, si procede
+quindi con la fase di riconoscimento dei sottotipi.\\
+Bisogna notare che in alcuni dataset, tipo quello relativo al \textit{CRC}, tale
+lavoro era già incluso ma non è sempre così. Ignorare che il lavoro sia già
+stato fatto, inoltre, può comportare risultati disastrosi sulla pipeline, per
+questo bisogna sempre leggere la documentazione.\\
+Nel dettaglio, per il \textit{CRC}, si conoscono due sottotipi molecolari:
+\begin{itemize}
+  \item \textbf{microsatellite instability (\textit{MSI})}
+  \item \textbf{microsatellite stability (\textit{MSS})}
+\end{itemize}
+Questa fase di riconoscimento dei sottotipi si basa prettamente su tecniche di
+\textit{clustering}:
+\begin{itemize}
+  \item \textit{mutation clustering}
+  \item \textit{methylation clustering}
+  \item \textit{expression clustering}
+\end{itemize}
+\subsubsection{Driver Selection}
+Partendo dall'idea che con il termine \textit{evento} si intende un qualsiasi
+fenomeno inferibile dalla matrice booleana in input si ricercano quelli
+principali, gli \textit{eventi driver}, che saranno quelli indicati nei nodi del
+\textit{DAG} finale della pipeline.\\
+Per ogni sottogruppo, deve essere selezionato un elenco di eventi driver
+putativi, in vari modi:
+\begin{itemize}
+  \item sfruttando la conoscenza biologica a priori, tramite letteratura,
+  oncologi, paper su \textit{TCGA} etc$\ldots$
+  \item tramite software, tra cui \textit{Dendrix}, \textit{MUTEX},
+  \textit{MutsigCV} etc$\ldots$
+  \item database specifici come \textit{COSMIC}, il catalogo delle mutazioni
+  somatiche nel cancro
+\end{itemize}
+In questa fase si ricercano vari fenomeni e tra i principali si identificano:
+\begin{itemize}
+  \item inattivazioni dei geni di soppressione dei tumori, \textbf{Tumor
+    Suppressor Genes (\textit{TSG})}
+  \item amplificazioni oncogene ad alto livello
+  \item mutazioni oncogene
+\end{itemize}
+\subsubsection{Mutual Exclusivity Relations}
+Questa fase è opzionale.\\
+La pipeline \textit{PiCnIc} può testare modelli di mutua esclusività, tramite
+funzioni booleane con \textit{or} o \textit{xor}, al fine di indagare la
+possibile esistenza di traiettorie evolutive \textit{fitness-equivalent}. Anche
+in questo caso per riconoscere tali pattern si hanno varie soluzioni:
+\begin{itemize}
+  \item sfruttando la conoscenza biologica a priori, tramite letteratura,
+  oncologi, paper su \textit{TCGA} etc$\ldots$ andando ad analizzare alcuni
+  pathway, tipo il \textit{pathway RAS}, un dei pathway principali che è usato
+  per trasdurre i segnali intracellulari in risposta ai mitogeni per controllare
+  la crescita cellulare, la sopravvivenza e i programmi anti-apoptotici. Tale
+  pathway è quindi fortemente legato alla proliferazione. Un altro pathway che
+  viene spesso impattato è il \textit{pathway Wnt}, legato alla trasduzione del
+  segnale attraverso proteine che trasmettono il segnale dall'esterno della
+  cellula, attraverso recettori di superficie, all'interno della cellula 
+  \item tramite software, tra cui \textit{MEMO}, \textit{MUTEX} etc$\ldots$
+\end{itemize}
+Infine per ogni gruppo si identifica un particolare formula.\\
+In ogni caso si ricorda che i risultati ottenuti in questo passaggio (ma anche
+in quello precedente) sono puramente inferiti dai dati e non sono risultati
+meccanicistici.
+\subsubsection{Step Finale}
+Nello step finale si usa, come gioà anticipato, l'\textit{algoritmo CAPRI}.\\
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.21]{img/onco.jpg}
+  \caption{Varie stampe della funzione \texttt{oncoprint} dei vari stage. Si
+    noti, nella figura $B$ come il \textit{pathway Wnt} e il \textit{pathway
+      RAS} siano i più alterati. Si noti anche, nella figura $D$, la creazione
+    delle formule booleane.}
+\end{figure}
+L'algoritmo viene fatto girare scegliendo opportunamente i termini di
+regolarizzazione e gli altri parametri, ovvero gli step di \textit{boostrap}
+(solitamente un centinaio), le
+soglie di \textit{p-values} etc$\ldots$\\
+Alla fine della pipeline \textit{PiCnIc} si avraà quindi un \textit{DAG}, che ha
+comunque un fondamento biologico ma necessita comunque di un'interpretazione
+medica, dove:
+\begin{itemize}
+  \item ogni nodo rappresenta un \textit{evento driver}
+  \item ogni arco rappresenta una relazione di ordinamento temporale 
+  \item i gruppi di esclusività sono visualizzati in ``forma estesa'', ovvero in
+  modo semplificato
+\end{itemize}
+Il modello finale descrive le tendenze più probabili dell'accumulo degli
+\textit{eventi driver}, rispetto a quello specifico sottogruppo/sottotipo di
+cancro, avendo quindi che ogni relazione nel modello potrebbe essere
+interpretata come una relazione di vantaggio selettivo tra due \textit{eventi
+  driver}. In termini pratici significa che la presenza dell'alterazione $X$
+aumenta le probabilità che il tumore acquisisca in seguito anche la mutazione
+$Y$, dato l'input. Ovviamente le mutazioni successive potrebbero essere non
+solo $Y$ ma anche molteplici.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/resc.jpg}
+  \caption{Immagine coi risultati del modello di progressione completo dello
+    studio su \textit{MSI-HIGH TCGA COADREAD 2012}. La codifica a colori nella
+    figura $A$ con il \textit{DAG}, indica
+    i diversi tipi di alterazioni, i percorsi coinvolti e gli schemi
+    disgiuntivi. L'immagine $A$ è ottenuta direttamente dalla pipeline
+    \textit{PiCnIc} mentre l'immagine $B$ presenta grafici ottenuti in seguito
+    manualmente, in quanto non possono esserege generati automaticamente. }
+\end{figure}
+Quindi per utilizzare effettivamente l'\textit{algoritmo CAPRI} in modo
+corretto, è necessario procedere alla pre-elaborazione dei dati, utilizzando
+anche una serie di strumenti ``pronti all'uso'' per eseguire una serie di
+passaggi di stratificazione e filtraggio necessari e a questo serve la pipeline
+\textit{PiCnIc}.  
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
@@ -4738,4 +4929,4 @@ di selettività:
 % LocalWords:  Gillespie condition silico morfogeni discretizzare pathway
 % LocalWords:  randomicamente isoformi chemostato simulabilità colonscopia
 % LocalWords:  replicatori microambienti microambiente Bayesiani preprocessing
-% LocalWords:  etichettamento
+% LocalWords:  etichettamento PiCnic

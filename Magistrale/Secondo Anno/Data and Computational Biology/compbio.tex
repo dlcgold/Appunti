@@ -4262,7 +4262,7 @@ sulle mutazioni nel cancro, può assumere delle varianti\footnote{The evolution
       analysis}.} 
   \label{fig:sca}
 \end{figure}
-\subsection{Cross Sectional Data}
+\section{Cross Sectional Data}
 Si approfondisce velocemente la tematica della raccolta dati. Si hanno due
 modalità di studio, due livelli:
 \begin{enumerate}
@@ -4905,7 +4905,8 @@ interpretata come una relazione di vantaggio selettivo tra due \textit{eventi
   driver}. In termini pratici significa che la presenza dell'alterazione $X$
 aumenta le probabilità che il tumore acquisisca in seguito anche la mutazione
 $Y$, dato l'input. Ovviamente le mutazioni successive potrebbero essere non
-solo $Y$ ma anche molteplici.
+solo $Y$ ma anche molteplici.\\
+Una rappresentazione di uno studio è visualizzabile in figura \ref{fig:resu}.
 \begin{figure}
   \centering
   \includegraphics[scale = 0.35]{img/resc.jpg}
@@ -4916,12 +4917,299 @@ solo $Y$ ma anche molteplici.
     disgiuntivi. L'immagine $A$ è ottenuta direttamente dalla pipeline
     \textit{PiCnIc} mentre l'immagine $B$ presenta grafici ottenuti in seguito
     manualmente, in quanto non possono esserege generati automaticamente. }
+  \label{fig:resu}
 \end{figure}
 Quindi per utilizzare effettivamente l'\textit{algoritmo CAPRI} in modo
 corretto, è necessario procedere alla pre-elaborazione dei dati, utilizzando
 anche una serie di strumenti ``pronti all'uso'' per eseguire una serie di
 passaggi di stratificazione e filtraggio necessari e a questo serve la pipeline
-\textit{PiCnIc}.  
+\textit{PiCnIc}.
+\section{Individual Data}
+Finora si è parlato di \textit{cross-sectional data}, parlando di dati
+\textit{ensemble}. Si introduce ora la tematica relativa agli \textbf{individual
+data}, parlando di ricostruzione di modelli di progressione tumorale nel caso di
+singoli tumori, provenienti dallo stesso paziente. A tale fine si studiano varie
+strutture dati:
+\begin{itemize}
+  \item \textbf{alberi di filogenesi (\textit{phylogentic trees})}
+  \item \textbf{alberi clonali (\textit{clonal trees})}
+  \item \textbf{alberi e grafi mutazionali (\textit{mutational trees and graph})}
+\end{itemize}
+Si introduce anche un sottomodulo della libreria \textit{TRONCO}, chiamato
+\textbf{TRaIT (\textit{Temporal oRder of Individual
+    Tumors})}\footnote{Ramazzotti et al., Learning mutational graphs of
+  individual tumour 
+  evolution from single-cell and multi-region sequencing data, BMC
+  Bioinformatics 20, 210 (2019). https://doi.org/10.1186/s12859-019-
+  2795-4}, atto appunto a
+inferire alberi mutazionali dai dati individuali di tumori.\\
+In questo contesto quindi lo studio dell'evoluzione tumorale/cancerogena diventa
+lo studio dell'evoluzione di una singola popolazione di cellule all'interno di
+un tumore. Come già detto più volte il cancro sviluppa il progressivo accumulo
+di alterazioni genomiche ed epigenetiche, dette \textit{mutazioni driver}, che
+possono essere modellate tramite modelli di filogenesi o similari, ovvero
+tramite \textit{alberi} o in rari casi \textit{grafi}. Inoltre nel
+contesto di questi studi non bisogna dimenticare la già citata \textbf{Intra
+  Tumour Heterogeneity (\textit{ITH})}.\\
+Nell'ottica di ricostruire quale processo evolutivo sia in corso per il tumore
+si possono ottenere quattro modelli evolutivi, raffigurabili come in figura
+\ref{fig:evo}\footnote{Davis, A., Gao, R., Navin, N. (2017) Biochim Biophys Acta
+  1867(2)}, per quattro tipi di evoluzione, ovvero: 
+\begin{enumerate}
+  \item \textbf{linear evolution}
+  \item \textbf{branching evolution}
+  \item \textbf{neutral evolution}
+  \item \textbf{punctuated evolution}
+\end{enumerate}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.25]{img/evolu.jpg}
+  \caption{Rappresentazioni grafiche manuali dei vari modelli di evoluzione
+    tumorale. Oggigiorno esistono tool per ottenere tali grafiche.} 
+  \label{fig:evo}
+\end{figure}
+In \textit{BIMIB/DCB} inoltre sono in corso anche studi in merito a come
+discernere come studiare il tumore principale a fronte di eventuali metastasi.\\
+Si ricorda che dal punto degli \textit{individual data} si hanno due situazioni
+possibili, descritte da Schwartz e Sch\"{a}ffer\footnote{The evolution of tumour
+  phylogenetics: principles and practice, R. Schwartz and A. A. Sch\"{a}ffer,
+  Nature Review Genetics, 2017}:
+\begin{itemize}
+  \item partire dal \textbf{bulk sequencing} (con i vari ``side-effects''
+  relativi a questo tipo di sequenziamento, per quanto molto usato in quanto
+  economico) e produrre una albero di filogenesi 
+  dei ``pezzi'' di tumori, distinguendo nei nodi i tumori principali e le
+  metastasi e avendo come radice un tumore progenitore. Con il \textit{bulk
+    sequencing} si trattano dati provenienti da più regioni del tumore, dati che
+  sono a \textit{deep coverage}, studiando principalmente deconvoluzioni dei
+  segnali come i \textbf{Variant Allele Frequency (\textit{VAF})} (???)
+  \item partire dai dati di \textbf{single-cell sequencing (\textit{SCS})} (con
+  costi molto 
+  elevati), isolando cellule nel tumore principale o nelle metastasi. Si segnala
+  inoltre che tali sequenziamenti non
+  hanno un altissimo \textit{coverage}. In questo 
+  caso si ottiene un albero di filogenesi con i vari sotto-cloni di un tumore,
+  avendo come radice una cellula ancestrale sana,
+  ottenendo un modello filogenetico molto più preciso per costruire modelli di
+  progressione statisticamente ben fondati di un singolo tumore. Queste analisi
+  hanno però anche problematiche tecniche dovute al dover isolare le cellule (un
+  isolamento anche solo parziale impedisce il successo dell'esperimento, avendo
+  risultati sfalsati). Tali problematiche sono comunque gestite sempre più con
+  facilità. Di recente, anche in \textit{BIMIB/DCB}, si è iniziato ad usare
+  tecniche di ML/DL, come gli \textit{auto-encoder}, per ``pulire'' i dati
+  prodotti da \textit{SCS} in caso di problematiche di isolamento. Un'altra
+  problematica tecnica è dovuta al fatto che si usa il cosiddetto \textbf{whole
+    genome amplification (\textit{WGA})}, che potrebbe comportare ulteriori
+  problematiche. Si hanno anche errori legati prettamente ai dati, come:
+  \begin{itemize}
+    \item allelic dropouts (\textit{ADOs})
+    \item falsi alleli
+    \item dati mancanti
+    \item coverage non unifome
+    \item doublets
+  \end{itemize}
+\end{itemize}
+\subsection{Tipologie di Alberi}
+Vediamo quindi nel dettaglio le tipologie di output che si producono in fase di
+studio di dati individuali, nel dettaglio assumendoli di provenienza
+\textit{SCS}. La maggior parte degli algoritmi sono ormai storici, 
+in quanto nati nella fase di massima crescita dell'algoritmica, intorno agli
+anni settanta.\\
+In tutti i casi si parte da:
+\begin{itemize}
+  \item un insieme di mutazioni, che nelle immagini verranno rappresentate
+  tramite ``nuvolette'' etichettate con un \textit{id} per ogni mutazione
+  \item un insieme di cellule che ``annotano'' tali mutazioni, che nelle
+  immagini verranno rappresentati tramite cerchi colorati
+\end{itemize}
+Tutti questi problemi solitamente appartengono comunque alla classe dei problemi
+\textit{NP-hard}, quindi la loro gestione, dal punto di vista computazionale,
+non è affatto banale e deve essere sempre tenuta in considerazione durante lo
+sviluppo di nuove soluzioni.
+\subsubsection{Standard Phylogenetic Trees}
+Sono il modello standard e più studiato in letteratura. La struttura è la
+seguente:
+\begin{itemize}
+  \item le foglie rappresentano le cellule
+  \item gli archi sono etichettati dalle mutazioni
+\end{itemize}
+Si ottiene quindi un modello del tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/sf.pdf}
+\end{figure}
+Si hanno ormai vari tool standard per il loro studio \footnote{Davis, A.,Navin,
+  N. (2016) Genome Biology, 17(1):113}. 
+\subsubsection{Clonage Lineage Trees}
+Questo particolare tipo di alberi può essere creato a partire da quelli di
+filogenesi standard, essendo di fatto una rappresentazione compatta degli stessi
+dove si hanno:
+\begin{itemize}
+  \item i nodi che rappresentano i cloni, quindi sotto-popolazioni tumorali con
+  una certa caratteristica, inferibili anche con tecniche che vanno oltre il
+  mero algoritmo di ricostruzione dell'albero. Si rappresenta quindi la
+  cosiddetta \textit{clonal signature}
+  \item gli archi sono etichettati dalle mutazioni
+\end{itemize}
+In questi alberi si ha un'\textit{ordinazione basata sulla prevalenza}.\\
+Si ottiene quindi un modello del tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/ct.pdf}
+\end{figure}
+Si hanno vari tool dedicati a questa soluzione, tra cui:
+\begin{itemize}
+  \item \textit{Bitphylogeny}\footnote{Yuan et al. (2015) Genome biology 16(1),
+    1}, tra i più usati
+  \item \textit{OncoNem}\footnote{Ross \& Markowetz (2016) Genome biology 17(1),
+    1} 
+  \item \textit{Single Cell Genotyper}\footnote{Roth et al. (2016) Nat met
+    13(7), 573-576} 
+  \item \textit{ddClone}\footnote{Salehi et al (2017) Genome biology 18:44}, tra
+  i tool più sofisticati
+\end{itemize}
+\subsubsection{Mutational Trees}
+In questo caso considerano invece solo le mutazioni, in modo analogo a quanto
+visto con i \textit{DAG} prodotti nel caso di dati \textit{cross-sectional}
+usando \textit{TRONCO}.\\
+Si hanno quindi solo le mutazioni, nei nodi, e si ha un \textit{DAG} che
+rappresenta l'ordine delle mutazioni (delle varie tipologie, come le
+\textit{copy-number} etc$\ldots$) stesso. \\
+Si ottiene quindi un modello del tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/mt.pdf}
+\end{figure}
+Si hanno vari tool dedicati a questa soluzione, tra cui:
+\begin{itemize}
+  \item \textit{MUTTREE}\footnote{Kim, \& Simon (2014), BMC bioinformatics,
+    15(1), 27} 
+  \item \textit{SCITE}\footnote{Kuipers et al. (2016) Genome biology, 17(1),
+    86}, che è il primo di una serie di tool dedicati
+  \item \textit{SiFit}\footnote{Zafar et a. (2017), Genome Biology 18:178}, che
+  è un tool davvero molto sofisticato in quanto è il primo che non si basa sulla
+  \textit{Infinite Site Assumpion}
+\end{itemize}
+Tutti questi tool si basano su determinate assunzioni tra cui quella detta
+\textbf{Infinite Site Assumpio (\textit{ISA})}, tranne \textit{SiFit}. Questa
+assunzione ci impone che:
+\begin{center}
+  \textit{ogni mutazione si verifica al massimo una volta durante la storia
+    evolutiva di un tumore e non viene mai persa.} 
+\end{center}
+Essendo quindi un'assunzione, che incide sopratutto nel caso di modelli
+\textit{mutational trees} piuttosto che \textit{clonage lineage trees}, che
+permette di ``alleggerire'' la complessità computazionale dei problemi
+trattati.\\
+Si hanno comunque violazioni possibili alla \textit{ISA}, ad esempio nel caso di
+\textbf{evoluzione convergente}, che comporta quindi un'evoluzione a
+``diamante'' del tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/dt.pdf}
+\end{figure}
+\subsection{TRaIT}
+Si introduce quindi, in modo spanno-metrico, il funzionamento del sotto-modulo
+di \textit{TRONCO} chiamato \textbf{TRaIT (\textit{Temporal oRder
+    of Individual Tumors})}.\\
+Questo modulo fornisce una stima robusta dell'ordinamento mutazionale nei
+singoli tumori e supporta sia dati \textit{multi-regionali bulk} che
+\textit{SCS}, tramite un framework statistico unificato e non si ha nessun
+modello di rumore specifico per i dati. \\
+Anche in questo caso si ha in input la solita matrice booleana rappresentante i
+vari tipi di alterazione, tra cui:
+\begin{itemize}
+  \item \textit{SNV}
+  \item \textit{CNA}
+  \item \textit{fusioni}
+  \item $\ldots$
+\end{itemize}
+e si premura poi di estendere gli alberi mutazionali ai grafi mutazionali ,
+ovvero ai \textit{DAG}, gestendo:
+\begin{itemize}
+  \item fattori di confusione
+  \item possibili molteplici traiettorie indipendenti
+  \item violazioni dell'\textit{ISA}, dovute all'evoluzione convergente 
+\end{itemize}
+Si hanno vari tipi di studi fattibili con \textit{TRaIT}, a seconda della
+provenienza e dalla tipologia dei dati, riassumibili con questa immagine (anche
+se si segnala che la forma a ``diamante'' del quarto modello, a causa dell'uso
+dei \textit{minimum spanning trees} è solo ``ideale''):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/trait.jpg}
+\end{figure}
+Vediamo quindi brevemente i vari step:
+\begin{enumerate}
+  \item si parte dalla una matrice booleana che memorizza la presenza di
+  un'alterazione in un campione  
+  \item si procede con una fase di \textit{boostrap non parametrico}, per
+  ottenere un \textit{boostrap prima facie} praticamente tramite
+  l'\textit{algoritmo CAPRI} assegnando: 
+  \begin{itemize}
+    \item ordine temporale
+    \item associazione statistica
+  \end{itemize}
+  in modo da poter poi usare la teoria di Suppes. Si fa anche una fase di
+  testing delle ipotesi, producendo un grafo diretto 
+  dove i nodi/variabili sono le varie alterazioni mentre gli archi sono pesati
+  tramite la \textit{mutua informazione}, eventualmente tramite la \textit{mutua
+    informazione puntuale} e si estraggono i modelli di output con strategie
+  algoritmiche basate su misure teoriche dell'informazione
+  \item dal grafo ottenuto si rimuovono i cicli
+  \item a questo punto si può scegliere se mantenere o meno l'orientamento del
+  grafo (e usando la mutua informazione che è simmetrica posso non tenere
+  l'orientamento) e i base a tale scelta si hanno due alternative per il calcolo
+  del \textit{minimum spanning tree (MST)}:
+  \begin{itemize}
+    \item il calcolo dell'\textit{MST} a partire da un grafo diretto, aciclico e
+    pesato tramite l'\textit{algoritmo di Edmonds} o l'\textit{algoritmo di
+      Gabow}. Il risultato sarà un \textit{MST diretto}, un \textit{DAG} in
+    pratica 
+     \item il calcolo dell'\textit{MST} a partire da un grafo indiretto tramite
+     l'\textit{algoritmo di Prim} o l'\textit{algoritmo di Chow-Liu}. Il
+     risultato non sarà un \textit{MST diretto} e quindi serve una fase di
+     postprocessing. In questa fase si introducono nuovamente le conoscenze di
+     ordinamento temporale e crescita probabilistica, per la teoria di Suppes,
+     che già si hanno (erano infatti solo state dimenticate nel corso del
+     processo) 
+   \end{itemize}
+   Tutti gli algoritmi per il calcolo dell'\textit{MST} sono in tempo
+   \textit{polinomiale} ma i due relativi al calcolo a partire da grafi non
+   orientati sono più efficienti.
+ \end{enumerate}
+ Volendo si può anche scegliere di usare l'\textit{algoritmo CAPRESE} durante
+ l'uso di \textit{TRaIT}.\\
+ In figura \ref{fig:tr1}\footnote{Lu, You-Wang, et al. "Colorectal cancer
+   genetic heterogeneity delineated by multi-region sequencing." PloS one 11.3
+(2016): e0152673} e \ref{fig:tr2}\footnote{Wang, Yong, et al. "Clonal evolution
+in breast cancer revealed by single nucleus genome sequencing." Nature 512.7513
+(2014): 155} alcuni grafici di
+due studi fatti con \textit{TRaIT}, rispettivamente sul \textit{CRC} e sul
+\textit{cancro ai polmoni}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.28]{img/tr1.jpg}
+  \caption{Esempio di studio sul \textit{CRC}, partendo da dati
+    \textit{multi-region bulk}, dove si parte dalla solita
+    matrice dove si hanno sulle righe le varie alterazioni e sulle colonne i
+    vari sample del singolo paziente. S hanno poi due \textit{MST}, prodotti uno
+    con l'\textit{algoritmo di Edmonds} e uno con l'\textit{algoritmo di
+      Prim}. Si ha infine, nella figura \textit{C}, il risultato vero dello
+    studio, con il confronto dei quattro algoritmi di \textit{TRaIT}.} 
+  \label{fig:tr1}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1.1]{img/tr2.jpg}
+  \caption{Esempio di studio sul \textit{cancro ai polmoni}, uno dei primi fatti
+    con dati \textit{single-cell}. In figura \textit{B} si ha la filogenesi
+    curata manualmente attesa, con 3 gruppi di sotto-cloni. In figura \textit{C}
+    l'uso di \textit{TRaIT} rileva i tre gruppi più uno aggiuntivo mentre in
+    figura \textit{D} nl'uso del tool \textit{OncoNEM}, sviluppato a Cambridge,
+    si dimostra insufficiente non riconoscendo tutti e tre i gruppi.}  
+  \label{fig:tr2}
+\end{figure}
 \end{document}
 
 % LocalWords:  clock  differenzialmente sequenziatore reference trascrivibile
@@ -4929,4 +5217,4 @@ passaggi di stratificazione e filtraggio necessari e a questo serve la pipeline
 % LocalWords:  Gillespie condition silico morfogeni discretizzare pathway
 % LocalWords:  randomicamente isoformi chemostato simulabilità colonscopia
 % LocalWords:  replicatori microambienti microambiente Bayesiani preprocessing
-% LocalWords:  etichettamento PiCnic
+% LocalWords:  etichettamento PiCnic sottomodulo

@@ -98,6 +98,11 @@ It is a set of notes about Computer Science. It is a fork of [dlcgold Notes Repo
 - [X] Teoria della Computazione
 - [X] Machine Learning
 
+### Compilation
+
+```shellscript
+    xelatex -synctex=1 -interaction=nonstopmode --shell-escape file.tex
+```
 See the [open issues](https://github.com/MarioAvolio/Unimib---Computer-Science-Notes/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>

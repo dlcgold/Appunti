@@ -62,9 +62,6 @@
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#installation">Download PDF</a></li>
-      </ul>
     </li>
     <li><a href="#roadmap">Notes</a></li>
     <li><a href="#contributing">Contributing</a></li>
@@ -94,15 +91,6 @@ It is a set of notes about Computer Science. It is a fork of [dlcgold Notes Repo
 
 
 <!-- GETTING STARTED -->
-## Getting Started
-
-### Download PDF
-[Modelli della Concorrenza](http://fumacrom.com/2W8VS)  
-[Teoria della Computazione](http://fumacrom.com/2W9hZ)  
-[Machine Learning](http://fumacrom.com/2W9j2)  
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 
 ## Notes
 

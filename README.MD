@@ -99,7 +99,7 @@ It is a set of notes about Computer Science. It is a fork of [dlcgold Notes Repo
 - [X] Machine Learning
 
 ### Compilation
-
+This repository doesn't offer PDF file because it is an **OPEN SOURCE** project! If you want notes you will compile text file and you will help with pull request! It is **free** only for the people helps in this project!  
 ```shellscript
     xelatex -synctex=1 -interaction=nonstopmode --shell-escape file.tex
 ```

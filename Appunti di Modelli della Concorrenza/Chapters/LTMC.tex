@@ -25,17 +25,21 @@ due processi non siano mai contemporaneamente nella sezione critica (userebbero
 insieme la risorsa) e che prima o poi un processo entri in zona critica. Un
 metodo è controllare l'intero spazio delle marcature raggiungibili e verificare
 che tutto vada come voluto, per la prima richiesta, ma ci sono tecniche
-migliori.  \\
-Un altro caso d'uso è quello dei circuiti asincroni.\\
-Volendo si può adattare la logica di Hoare a modelli concorrenti ma solo se si
+migliori.  
+\begin{nota}
+    Volendo si può adattare la logica di Hoare a modelli concorrenti ma solo se si
 ha comunque un output finale e non un'evoluzione ciclica infinita.
+\end{nota}
 \section{Logica PLTL/LTL}
 Fino'ora ci si è basati sulla logica proposizionale ma tale logica ha dei
 limiti, si introduce quindi la 
 \textbf{logica PLTL (\textit{Propositional Linear Time Logic})} che introduce il
 concetto di \textbf{tempo}, in ottica \textbf{lineare}, nel processo
-logico. Tale logica è anche abbreviata in \textbf{LTL (\textit{Linear Time
-    Logic})}.\\  
+logico. 
+\begin{nota}
+    Tale logica è anche abbreviata in \textbf{LTL (\textit{Linear Time
+    Logic})}.
+\end{nota}
 La logica PLTL viene usata per \textbf{model checking} e lo scopo generale che
 ci si propone è quello di presentare un approccio formale alla progettazione e
 all'implementazione di sistemi basato su un linguaggio formale che permetta di
@@ -53,13 +57,14 @@ quindi nel sistema, in ogni istante di tempo:
   ogni coppia forma una transizione. Si introduce quindi il concetto
   \textbf{temporale} 
 \end{itemize}
-Il \textbf{tempo} viene pensato come un oggetto discreto, cadenzato dalle
+Il \textbf{tempo} viene pensato come un oggetto discreto, scandito dalle
 transizioni, su cui può essere definita anche una relazione d'ordine (potrebbe
 servire che un processo termini prima, dopo o nello stesso tempo di un altro).
-\begin{definizione}
-  Si definisce \textbf{sistema reattivo} una componente:
+\subsection{Sistemi Reattivi e Correttezza degli stessi}
+\begin{definizione}(Sistema Reattivo)
+  Si definisce \textbf{sistema reattivo} come una componente:
   \begin{itemize}
-    \item non terminante e interattivo
+    \item non terminante e interattiva
     \item che può leggere il proprio input non solo all'inizio della
     computazione e che può produrre output non solo alla fine della sua
     computazione (si possono quindi avere multipli input e multipli output)
@@ -80,7 +85,7 @@ servire che un processo termini prima, dopo o nello stesso tempo di un altro).
     \item ``a partire da qualsiasi stato è possibile riportare il sistema allo
     stato iniziale''
   \end{itemize}
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Bisogna stabilire la correttezza di un sistema reattivo esprimendo il criterio
 di correttezza come formula di un opportuno linguaggio logico. Il sistema
 reattivo si modella tramite un sistema di transizioni, tramite i \textbf{modelli
@@ -98,6 +103,7 @@ specificare come:
   \item \textbf{proprietà di liveness}
   \item \textbf{proprietà di fairness}
 \end{itemize}
+\subsection{Modelli di Kripke}
 Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
 \begin{definizione}
   Definiamo un \textbf{sistema di transizioni} $A$ come:
@@ -109,14 +115,19 @@ Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
     \item $T\subseteq Q\times Q$ insieme delle transizioni di stato che portano
     da uno stato ad un altro
   \end{itemize}
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
   Definiamo \textbf{cammino} come:
   \[\pi=q_0q_1q_2\ldots,\,\,\, q_i\in T,\,\,\, \forall\, i\]
-  Un cammino può essere infinito.\\
-  Definiamo \textbf{cammino massimale} un cammino che non può più essere esteso
-  (generalmente studieremo casi dove i cammini massimali sono infiniti).
-\end{definizione}
+  \begin{corollario}
+  
+  Un cammino può essere infinito.
+  \end{corollario}
+\end{definizione} \vspace{5mm} %5mm vertical space
+\begin{definizione}
+  
+  Definiamo \textbf{cammino massimale} un cammino che non può più essere esteso. Spesso si tratta di \textbf{cammini infiniti}.
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
   Definiamo un \textbf{modello di Kripke} $A$ come un sistema di transazioni a
   cui ad ogni stato è associato, dato l'insieme delle proposizioni atomiche
@@ -126,22 +137,29 @@ Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
   avendo una \textbf{funzione di interpretazione} $I$, che mi restituisce
   l'insieme delle proposizioni atomiche vere in uno stato, tale che:
   \[I:Q\to 2^{AP}\]
+  \begin{nota}
+  $2^{AP}$ è l'insieme delle parti di $AP$.
+  \end{nota}
+ \begin{nota}
   Potrei avere stati dove nessuna proposizione atomica è vera avendo il
-  sottoinsieme associato vuoto.\\
-  Non si specifica di base uno stato iniziale ma si può arricchire la
+  sottoinsieme associato vuoto.
+ \end{nota}
+\begin{nota}
+   Non si specifica di base uno stato iniziale ma si può arricchire la
   definizione con uno stato iniziale.
-\end{definizione}
+\end{nota}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{esempio}
   Vediamo un esempio:
   \begin{figure}[H]
     \centering
     \begin{tikzpicture}[node distance=2.5cm, bend angle=45, auto]
-      \node [place] (p0) [label=below left:q] {1};
-      \node [place] (p1) [right of = p0, label=below left:q] {2};
-      \node [place] (p2) [right of = p1, label=below left:p] {5};
-      \node [place] (p3) [below of = p0, label=below left:{p, r}] {4}; 
-      \node [place] (p4) [below of = p1, label=below left:{p, q}] {3}; 
-      \node [place] (p5) [below of = p2, label=below left:{p, r}] {6}; 
+      \node [place] (p0) [label=below left:\small q] {\small 1};
+      \node [place] (p1) [right of = p0, label=below left:\small q] {\small 2};
+      \node [place] (p2) [right of = p1, label=below left:\small p] {\small 5};
+      \node [place] (p3) [below of = p0, label=below left:{\small p, r}] {\small 4}; 
+      \node [place] (p4) [below of = p1, label=below left:{\small p, q}] {\small 3}; 
+      \node [place] (p5) [below of = p2, label=below left:{\small p, r}] {\small 6}; 
       \path[-{Latex[width=2mm]}]
       (p0) edge (p1)
       (p1) edge (p2)
@@ -172,9 +190,8 @@ Introduciamo quindi meglio i \textbf{modelli di Kripke}.\\
 \begin{definizione}
   Definiamo le famiglie di cammini massimali, indicandole in una notazione tipo
   regex, ($\,^*$ per indicare una o più ripetizione e $\,^\omega$ per indicare
-  un ciclo infinito), come le ``tipologie'' di cammino che si possono avere.\\
-  (\textit{Il prof non ha davvero dato una definizione})
-\end{definizione}
+  un ciclo infinito), come le ``tipologie'' di cammino che si possono avere.
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{esempio}
   Nell'esempio sopra si hanno le seguenti famiglie di cammini massimali:
   \begin{itemize}
@@ -187,7 +204,7 @@ Si può quindi già intuire che:
   \textit{le logiche temporali sono frammenti della logica del primo ordine}
 \end{center}
 Infatti con le logiche temporali, come la \textit{logica PLTL}, si supera il
-limite di rappresentazione temporale della logica proposizionale, permettendo,
+limite di rappresentazione temporale della logica proposizionale\footnote{From Wikipedia: La logica proposizionale (o enunciativa) è un linguaggio formale con una semplice struttura sintattica, basata fondamentalmente su proposizioni elementari (atomi) e su connettivi logici di tipo vero-funzionale, che restituiscono il valore di verità di una proposizione in base al valore di verità delle proposizioni connesse (solitamente noti come AND, OR, NOT...). La semantica della logica proposizionale definisce il significato dei simboli e di qualsiasi proposizione che rispetti le regole sintattiche del linguaggio, basandosi sui valori di verità associati agli atomi. Data una interpretazione (o modello) di una proposizione (in generale di un insieme di proposizioni), e cioè una associazione tra le proposizioni elementari e le realtà rappresentate, possiamo generare un insieme infinito di proposizioni con significato definito che riguardino quella realtà. Ciascuna proposizione si riferisce quindi a uno o più oggetti della realtà rappresentata (anche astratta, ovviamente) e permette di descrivere o ragionare su quell'oggetto, utilizzando i due soli valori "Vero" e "Falso".}, permettendo,
 per esempio, di rappresentare proposizioni del tipo \textit{``prima o poi'',
   ``accade sempre che'' etc$\ldots$}.\\
 Si ha un \textbf{tempo lineare e discreto}, che si può pensare di rappresentare
@@ -195,7 +212,7 @@ nella logica classica proposizionale (per esempio come indice) ma questo
 comporta il doversi dotare di infinite variabili proposizionali (corrispondenti
 ad ogni \textit{``step''} temporale) e comporta l'ottenimento di una formula
 proposizionale di lunghezza infinita. Si può pensare di passare allo studio di
-questi casi con la \textit{logica predicativa} ma sarebbe ben più del
+questi casi con la \textit{logica predicativa}\footnote{From Wikipedia: Nella logica matematica il linguaggio del primo ordine è un linguaggio formale che serve per gestire meccanicamente enunciati e ragionamenti che coinvolgono i connettivi logici, le relazioni e i quantificatori "per ogni ..." (∀) ed "esiste..." (∃). L'espressione "del primo ordine" indica che c'è un insieme di riferimento e i quantificatori possano riguardare solo gli elementi di tale insieme e non i sottoinsiemi; ad esempio si può dire "per tutti gli x elementi dell'insieme vale P(x)" ma non si può dire "per tutti i sottoinsiemi A vale P(A)" (le teorie in cui ci sono quantificatori che spaziano sui sottoinsiemi dell'insieme di riferimento sono dette invece del secondo ordine). } ma sarebbe ben più del
 necessario, in quanto le procedure sarebbero di complessità molto elevata, a
 causa della grande espressività della logica predicativa. Inoltre la logica dei
 predicati è indecidibile. \\
@@ -218,21 +235,23 @@ alla rappresentazione temporale richiesta.
   proporzionale, si definiscono i seguenti connettivi:
   \begin{itemize}
     \item \textbf{X}, detto anche \textbf{next} o \textbf{tomorrow}. È un
-    connettivo unario e viene rappresentato con $\circ$
+    connettivo unario e viene rappresentato con $\circ$. Esprime l'idea: \textit{"Nel prossimo stato della computazione"}
     \item \textbf{F}, detto anche \textbf{sometime} o \textbf{future}. È un
-    connettivo unario e viene rappresentato con $\diamond$
+    connettivo unario e viene rappresentato con $\diamond$. Esprime l'idea: \textit{"Da un certo punto in poi ..."}
     \item \textbf{G}, detto anche \textbf{globally} o \textbf{always}. È un
-    connettivo unario e viene rappresentato con $\square$
-    \item \textbf{U}, detto anche \textbf{until}. È un connettivo binario
+    connettivo unario e viene rappresentato con $\square$. Esprime l'idea: \textit{"E' sempre vero che..."}
+    \item \textbf{U}, detto anche \textbf{until}. È un connettivo binario. Esprime l'idea: \textit{"Se vale una formula allora varrà anche un'altra..."}
   \end{itemize}
+  \subsubsection{Approfondimento}
   Viene inoltre indicato con $V$ l'\textbf{insieme delle variabili
     proposizionali}, l'\textbf{insieme delle proposizioni atomiche},
   variabili che hanno lo stesso significato della logica
   proposizionale, quindi ogni variabile corrisponde ad una singola proposizione
   del linguaggio naturale. 
-\end{definizione}
-\textbf{Qui chiamo $V$ quello che prima chiamavo $AP$ per non dover riscrivere
-  tutti gli appunti tratti da metodi formali.\\}
+\end{definizione} \vspace{5mm} %5mm vertical space
+\begin{nota}
+    indichiamo con $V$ quello che prima chiamavamo $AP$.
+\end{nota}
 \begin{definizione}
   Diamo ora una definizione, formale, procedendo per induzione di
   \textbf{formula ben formata} del linguaggio PLTL (definendo così l'aspetto
@@ -268,7 +287,7 @@ alla rappresentazione temporale richiesta.
     formule classiche della logica proporzionale}. Si ha quindi che l'insieme
   delle formule PLTL non è altro che un'estensione di quello delle formule
   classiche della logica proposizionale.
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Si hanno varianti della logica temporale con anche operatori relativi al passato
 ma non sono utili in merito al model checking.
 \begin{definizione}
@@ -299,7 +318,7 @@ ma non sono utili in merito al model checking.
       \textit{<simbolo> ::= \_espressione\_}
     \end{center}
   \end{shaded}
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Il cammino nel modello di Kripke corrisponde ad una esecuzione di un sistema,
 che è una sequenza di stati. 
 \subsection{Semantica}
@@ -322,7 +341,7 @@ che è una sequenza di stati.
     e, $\forall \alpha \in S$, \textbf{esiste ed è unico} $\beta\in S$ tale che
     vale:
     \[\alpha\to\beta\]
-    Preso quindi uno stato qualsiasi ho un solo modo per passare ad un altro
+    Preso quindi uno stato qualsiasi abbiamo un solo modo per passare ad un altro
     stato (esiste quindi un ``prima'' e un ``dopo'').\\
     Inoltre vale che, $\forall \alpha\in S$, $\alpha\not\to \rho$, dove $\rho\in
     S$ è l'unico elemento di $S$ a godere di questa proprietà (in quanto $\rho$
@@ -332,22 +351,44 @@ che è una sequenza di stati.
     si indica che $(\alpha, p)\in\,\Vdash$ è valido, ovvero che $\alpha$
     \textbf{soddisfa} $p$, con $\alpha\in S$ e $p\in V$
   \end{itemize}
-  La struttura $M$ viene detta \textbf{modello per PLTL}.\\
-  Si nota come questi modelli lineari seguano un ordinamento simile a quello che
-  si ha tra i numeri in $\mathbb{N}$.\\ 
-  Si nota come la semantica della logica PLTL sia drasticamente più complessa
-  di quella della logica classica proposizionale 
-\end{definizione}
+    \begin{definizione}
+      
+  La struttura $M$ viene detta \textbf{modello per PLTL}.
+  \end{definizione} \vspace{5mm} %5mm vertical space
+  \begin{nota}
+      
+  Si noti come questi modelli lineari seguano un ordinamento simile a quello che
+  si ha tra i numeri in $\mathbb{N}$.
+  \end{nota}
+  \begin{nota}
+      
+  Si noti come la semantica della logica PLTL sia drasticamente più complessa
+  di quella della logica classica proposizionale
+  \end{nota}
+\end{definizione} \vspace{5mm} %5mm vertical space
 
 Bisogna dare ora significato ai connettivi PLTL. Per i connettivi della logica
 proposizionale si usano tavole di verità e induzione ma per la logica PLTL le
 cose sono un po' diverse.\\
 Per dare un significato alle formule del linguaggio PLTL bisogna basarsi sui
-modelli per PLTL.\\
-
+modelli per PLTL.
+\begin{definizione}(Suffisso)\\
+  Preso un cammino:
+  \[\pi = q_0, q_1, q_2, \dots q_n\]
+  Si dice \textbf{suffisso di ordine $i$ di $\pi$} un cammino:
+    \[\pi^{(i)} = q_i, q_i+1, \dots q_n\]
+  
+\end{definizione} \vspace{5mm} %5mm vertical space
+\subsubsection{Interpretazione di LTL su un modello di Kripke}
+Precediamo in due fasi:
+\begin{enumerate}
+    \item definiamo un criterio per stabilire se una formula $\alpha$ è vera in un
+cammino massimale $\pi$.
+\item diciamo che la formula è vera rispetto a uno stato q se è vera in tutti
+i cammini massimali che partono da q
+\end{enumerate}
 \begin{definizione}
-  Vediamo quindi la semantica dei vari operatori.\\
-  Diciamo anche che un a formula è vera rispetto ad uno stato $q$ del modello di
+  Diciamo anche che una formula è vera rispetto ad uno stato $q$ del modello di
   Kripke se è vera in tutti i cammini massimali $\pi$ che partono da $q$,
   dicendo che la formula $\alpha$ è soddisfatta in $\pi$.\\
   Per comodità indichiamo un cammino massimale generico con:
@@ -360,7 +401,8 @@ modelli per PLTL.\\
   \[\pi\vDash\alpha\]
   per indicare che $\alpha$ è vera/valida in $\pi$ (o che $\pi$ soddisfa
   $\alpha$).\\
-  
+\end{definizione} \vspace{5mm} %5mm vertical space
+\subsubsection{Operatori di base}
   Se pensiamo ai modelli di Kripke si ha, dati $\alpha,\beta$ due formule e $p$
   una proposizione atomica:
   \begin{enumerate}
@@ -369,7 +411,8 @@ modelli per PLTL.\\
     \item $\pi\vDash \alpha\lor\beta$ sse $\pi\vDash \alpha$ o $\pi\vDash \beta$
   \end{enumerate}
   Potenzialmente bastano questi due connettivi per definire tutti gli altri per
-  la logica proposizionale. \\
+  la logica proposizionale. 
+  \subsubsection{Operatori temporali}
   Passando agli operatori temporali, con $\alpha\in FBF$ (formule ben formate)
   si ha:
   \begin{enumerate}
@@ -381,15 +424,19 @@ modelli per PLTL.\\
     \item $\pi\vDash\mathbf{G}\,\alpha$ sse $\forall\, i\in
     \mathbb{N}:\pi^{(i)}\vDash \alpha$, quindi $\alpha$ deve essere vero in
     tutti i suffissi di $\pi$ (e quindi anche nello stato iniziale)
-    \item $\pi\vDash\alpha\,\mathbf{U}\,\beta$ sse $\pi^{(i)}\vDash \beta$ (che
-    sarebbe $\pi\vDash\mathbf{F}\,\beta$) \textbf{e} $\forall\, h, 0\leq
-    h<i,\,\,\, \pi^{(h)}\vDash \alpha$ quindi esiste uno stato $i$ dove vale
-    $\beta$ e in tutti gli stati precedenti (escluso $i$) vale $\alpha$. Se
-    $\beta$ è vera in $\pi$ posso dire che l'until è valido, trascurando la
-    parte dopo l'\textit{and} della formula (modificando la definizione possiamo
-    dire che la seconda parte vale solo ``se esistono stati precedenti'').
+    \item $\pi\vDash\alpha\,\mathbf{U}\,\beta$ sse 
+    \begin{itemize}
+        \item $\pi^{(i)}\vDash \beta$ (che
+    sarebbe $\pi\vDash\mathbf{F}\,\beta$)
+    \item  $\forall\, h, 0\leq
+    h<i,\,\,\, \pi^{(h)}\vDash \alpha$
+    \end{itemize}
+    Quindi esiste uno stato $i$ dove vale
+    $\beta$ e in tutti gli stati precedenti (escluso $i$) vale $\alpha$.
+    \begin{nota}
+        Se $h=0$ allora la formula è sempre vera. Non esistendo valori $h$ allora $\alpha$ è vera sempre indipendentemente dagli stati.
+    \end{nota}
   \end{enumerate}
-\end{definizione}
 % \textbf{Vedere anche esempio su slide.}\\
 % \begin{esempio}
 %   Graficamente si ha qualcosa del tipo:
@@ -408,16 +455,19 @@ Si nota che la definizione di \textbf{modello PLTL} non esclude che due stati
 diversi possano soddisfare le stesse variabili, ovvero che si possano comportare
 nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
 \begin{esempio}
+  \includepdf{img/ltl.pdf}
+\end{esempio}
+\begin{esempio}
   Vediamo degli esempi (considerando cammini infiniti):
   \begin{itemize}
     \item $\mathbf{FG}\,\alpha$ indica che $\alpha$ è invariante da un certo
     punto in poi
     \item $\mathbf{GF}\,\alpha$ indica che $\alpha$ è vera in un numero infinito
     di stati (ma non necessariamente tutti)
-    \item $\mathbf{G}\neq (cs_1\land cs_2)$ è la mutua esclusione, avendo $cs_1$
+    \item $\mathbf{G}(cs_1\land cs_2)$ è la mutua esclusione, avendo $cs_1$
     e $cs_2$ per indicare che il processo 1 e 2 sono rispettivamente in sezione
     critica 
-    \item $\mathbf{G}(req\implies\mathbf{XF}\, ack)$, avendo $req$ richiesta
+    \item $\mathbf{G}\neq(req\implies\mathbf{XF}\, ack)$, avendo $req$ richiesta
     pendente di un server e $ack$ aknowledge, per dire che se si ha una
     richiesta pendente prima o poi si avrà il messaggio di ack subito dopo la
     req (non avviene in contemporaneamente ma nello stato dopo)
@@ -425,7 +475,7 @@ nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
     vero che se si ha una richiesta da un certo punto in poi si dovrà avere un
     ack, con la req che rimane vera fino al momento prima dell'ack
     \item $\mathbf{G}(req\implies((req\land \neg ack)\,\mathbf{U}\,(ack\land\neg
-    req)))$ per dire che se ho una richiesta pendente posso avere che resti tale
+    req)))$ per dire che se abbiamo una richiesta pendente posso avere che resti tale
     fino all'ack ma quando arriva l'ack la req deve essere ``negativizzata''
     (non serve il next perché tanto non possono valere nello stesso stato per
     come è stata scritta la formula)
@@ -468,11 +518,11 @@ nello stesso modo \textit{(come se nulla cambiasse nel tempo)}.
   Per la prima formula possiamo dire che è una \textbf{proprietà di safety},
   esprimendo che non si può raggiungere uno stato ``pericoloso'', come l'uso
   contemporaneo della risorsa. La verifico anche solo scorrendo le
-  interpretazioni degli stati e vedendo che non esiste una stato in cui
-  compaiono sia $sc1$ che $sc2$ (questo perché ho il globally e basta quindi
+  interpretazioni degli stati e vedendo che non esiste uno stato in cui
+  compaiono sia $sc1$ che $sc2$ (questo perché abbiamo il globally e basta quindi
   vale semplicemente per tutti gli stati). \\
-  Non posso fare lo stesso per la seconda. Ho sempre una globally con quindi
-  una proprietà invariante ma ho all'interno un altro operatore temporale
+  Non posso fare lo stesso per la seconda. abbiamo sempre una globally con quindi
+  una proprietà invariante ma abbiamo all'interno un altro operatore temporale
   quindi non posso semplicemente scorrere la lista delle interpretazioni degli
   stati. In ogni caso questa seconda formula non è valida in quando potrei
   avere $(1)(2, 4, 8)^\omega$ in cui anche il secondo processo fa richiesta e ci
@@ -498,25 +548,29 @@ Introduciamo nuovi operatori temporali:
   falso. Praticamente $\alpha$ libera $\beta$, che negli istanti successivi può
   essere falsa
 \end{itemize}
-\textit{Per tradurre un enunciato in linguaggio naturale in logica temporale per
+\begin{nota}
+    Per tradurre un enunciato in linguaggio naturale in logica temporale per
   prima cosa, occorre individuare le proposizioni atomiche; in seguito si
   analizza la struttura della frase, eventualmente riformulandola in una frase
-  equivalente con espressioni corrispondentiagli operatori temporali.}\\
+  equivalente con espressioni corrispondenti agli operatori temporali.
+\end{nota}
+  \subsubsection{Equivalenza di Formule}
 \begin{definizione}
+Due formule sono equivalenti se quando una di esse è vera allora è vera anche l'altra.
   Definiamo l'equivalenza tra due formule come:
   \[\alpha\equiv \beta\iff \forall\,\pi:(\pi\vDash\alpha\leftrightarrow\pi\vDash
     \beta)\]
-  per ogni cammino $\pi$. Quindi varia il modo per esprimere la stessa cosa, per
-  ogni cammino $\alpha$ è soddisfatta nel cammino sse lo è anche $\beta$ (e
-  avendo il sse vale il viceversa).
-\end{definizione}
+  \begin{nota}
+      Quindi varia il modo per esprimere la stessa cosa. Per
+  ogni cammino, $\alpha$ è soddisfatta sse lo è anche $\beta$ (e
+  avendo il sse vale anche il viceversa).
+  \end{nota}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{esempio}
   Vediamo esempi di formule equivalenti:
   \begin{itemize}
     \item $\mathbf{F}\,\alpha\equiv\alpha\lor\mathbf{XF}\,\alpha$\\
-    infatti prima o poi diventerà vero $\alpha$ equivale a dire che vale nello
-    stato corrente e nello stato prossimo vale che prima o poi sarà vero
-    $\alpha$ 
+    Ovvero: se $\alpha$ è vera in $q_0$ o sarà vera prima o poi in uno stato futuro.
     \item $\mathbf{G}\,\alpha\equiv\alpha\land\mathbf{XG}\,\alpha$\\
     infatti dire che vale sempre $\alpha$ è come dire che ora vale $\alpha$ e
     che nel prossimo stato vale il globally di $\alpha$
@@ -525,8 +579,12 @@ Introduciamo nuovi operatori temporali:
     ovvero l'until è equivalente a dire che ora vale $\beta$ o che ora vale
     $\alpha$ ma nello stato successivo varrà l'until
   \end{itemize}
-  Si evidenzia in tutti e tre i casi la natura ricorsiva delle formule della
-  logica temporale.\\
+ \end{esempio}
+\begin{nota}
+      Si evidenzia in tutti e tre i casi la natura ricorsiva delle formule della
+  logica temporale.
+\end{nota}
+\begin{esempio}
   Vediamo infatti altri esempi:
   \begin{itemize}
     \item $\mathbf{FGF}\,\alpha\equiv\mathbf{GF}\,\alpha$
@@ -535,44 +593,56 @@ Introduciamo nuovi operatori temporali:
     quindi aggiungere il primo globally in \textbf{\textit{GFG}} è inutile   
   \end{itemize}
 \end{esempio}
-
+\subsubsection{Insiemi minimali di operatori}
+Partendo da un insieme minimale di operatori possiamo derivare tutti gli altri.
+\begin{esempio}
 Prendiamo la formula:
 \[\top\,\mathbf{U}\,\alpha\]
 ma per definizione ci basta dire che $\alpha$ prima o poi diventi vera e
 quindi basta:
 \[\top\,\mathbf{U}\,\alpha\equiv F\alpha\]
-\textbf{Il future può sempre essere rappresentato dall'until}.\\
-Vediamo un altra formula:
+Da questo esempio deriviamo che: \textbf{Il future può sempre essere rappresentato dall'until}.
+\end{esempio}
+\begin{esempio}
+  Vediamo un altra formula:
 \[\neg\mathbf{F}\,(\neg\alpha)\]
 ma questo equivale a dire:
 \[\neg\mathbf{F}\,(\neg\alpha)=\mathbf{G}\,\alpha\]
 Quindi il globally può essere derivato dal future che è derivato dall'until e
 quindi \textbf{anche il globally potrebbe essere rimosso}.\\
-Si può dimostrare che il \textbf{next non è derivabile} e che \textbf{l'until, a
-  sua volta, non è derivabile}. 
+\end{esempio}
+\begin{nota}
+      Si può dimostrare che il \textbf{next non è derivabile} e che \textbf{l'until, a
+  sua volta, non è derivabile}.
+\end{nota}
 \begin{definizione}
   Definiamo un \textbf{insieme minale di operatori}. L'insieme
   $\{\mathbf{X},\mathbf{U}\}$ forma un insieme minimale di operatori, dal quale
   possiamo derivare tutti gli altri (\textbf{\textit{F, G, W, R}}).\\
-  Potenzialmente potrei quindi usare solo until e next.\\
-  Si hanno anche altri insiemi minimali di operatori volendo (ma in tutti ci
+\end{definizione} \vspace{5mm} %5mm vertical space
+\begin{nota}
+  Potenzialmente potrei quindi usare solo until e next.
+      Si hanno anche altri insiemi minimali di operatori volendo (ma in tutti ci
   sarà l'until essendo l'unico operatore binario, non potendo derivarlo da uno
   unario). 
-\end{definizione}
+\end{nota}
 \noindent
-Studiamo ora meglio la negazione di connettivi logici.\\
-Pensiamo a ``non è vero che $\mathbf{F}\,\alpha$''. Possiamo riformularla con
-``Non è vero che in ogni cammino, prima o poi $\alpha$ diventa vera'', cioè
-``esiste un cammino nel quale $\alpha$ è sempre falsa''. D'altro canto
+\subsubsection{La negazione in LTL e le formule “esistenziali”}
+Studiamo ora meglio la negazione di connettivi logici. Forniamo alcuni esempi\\
+\begin{itemize}
+    \item Pensiamo a ``non è vero che $\mathbf{F}\,\alpha$''. Possiamo riformularla con
+``Non è vero che in ogni cammino, prima o poi $\alpha$ diventi vera'', cioè
+``esiste un cammino nel quale $\alpha$ è sempre falsa''.
+    \item D'altro canto
 $\neg\mathbf{F}\,\alpha$ significa ``in ogni cammino non è vero che prima o poi
-$\alpha$ diventa vera'', che equivale a $\mathbf{G}\,(\neg \alpha)$, quindi in
-realtà $\neg\mathbf{F}\,\alpha$ non è la negazione logica di
-$\mathbf{F}\,\alpha$ perché nasconde il concetto di ``per ogni cammino'', con
+$\alpha$ diventi vera'' (che equivale a $\mathbf{G}\,(\neg \alpha)$) 
+\end{itemize}
+Quindi in realtà $\neg\mathbf{F}\,\alpha$ non è la negazione logica di $\mathbf{F}\,\alpha$ perché nasconde il concetto di ``per ogni cammino'', con
 quindi il quantificatore $\forall$. Dalla logica predicativa sappiamo che la
 negazione di una formula dove compare un quantificatore equivale a cambiare il
 quantificatore e aggiungere la negazione e quindi la riformulazione giusta
 sarebbe ``esiste un cammino in cui vale $\mathbf{F}\,\alpha$'', che non può
-essere rappresentato in logica temporale LTL (\textbf{CONTROLLARE}). Si ha
+essere rappresentato in logica temporale LTL. Si ha
 quindi un limite 
 espressivo, non può esprimere proprietà del tipo:
 \begin{center}
@@ -605,11 +675,11 @@ espressivo, non può esprimere proprietà del tipo:
   per farlo bisogna studiare ogni possibile evoluzione a partire da ogni stato
   (che di volta in volta diventa uno stato iniziale).
   \begin{itemize}
-    \item per il primo basta osservare i vari stati e osservare che vale
+    \item $\mathbf{G}\,(x=0\lor y=0)$: per il primo basta osservare i vari stati e osservare che vale
     l'argomento del globally in ogni stato, quindi qualsiasi sia lo stato
     iniziale varrà il globally (visto che passo in stati in cui vale sempre
     l'argomento) e quindi la formula è verificata
-    \item parto dalla formula più interna (dopo aver valutato dove vale
+    \item $\mathbf{GF}\,(y=0)$: parto dalla formula più interna (dopo aver valutato dove vale
     l'argomento, ovvero in $q_1$ e $q_2$), ovvero il future, e studiare dove
     vale. Per proprietà del future vedo che posso partire da $q_1$ e dire che
     vale (dato che vale anche in $q_1$ stesso), posso partire da $q_2$ per lo
@@ -617,7 +687,7 @@ espressivo, non può esprimere proprietà del tipo:
     da lui parte un solo arco e porta in uno stato dove vale $y=0$ quindi ogni
     cammino che parte da $q_3$ soddisfa $y=0$. Il future vale quindi in ogni
     stato e di conseguenza anche il globally e quindi la formula è verificata
-    \item ragiono come per il caso 2. Per $q_3$ vale ovviamente il future. Passo
+    \item $\mathbf{GF}\,(y=1)$: ragiono come per il caso 2. Per $q_3$ vale ovviamente il future. Passo
     a $q_1$ e già qui vedo che potrei avere un cammino massimale con solo $q_1$
     e $q_2$ e quindi non vale il future. Analogamente si fa lo stesso per $q_2$,
     che non soddisfa il future. Il globally quindi non vale in $q_1$ e $q_2$,
@@ -625,7 +695,7 @@ espressivo, non può esprimere proprietà del tipo:
     potrei, in uno dei cammini da $q_3$ entrare nel loop tra $q_1$ e $q_2$,
     quindi anche per $q_3$ non vale il globally e quindi la formula non è
     verificata    
-    \item prendo il cammino che parte da $q_1$ e cicla infinitamente con $q_3$ e
+    \item $\mathbf{G}\,(x=1\implies \mathbf{F}\,(y=1))$: prendiamo il cammino che parte da $q_1$ e cicla infinitamente con $q_3$ e
     $q_2$, in questo cammino la formula è verificata. In ogni cammino in qui da
     $q_1$ passo a $q_3$ la formula è verificata ma non lo è nel solito loop tra
     $q_1$ e $q_2$ e quindi la formula non è verificata
@@ -695,7 +765,7 @@ espressivo, non può esprimere proprietà del tipo:
   privilegi di accesso. Si garantisce comunque la mutua esclusione, si soddisfa
   la seconda proprietà (garantendo alternanza di accesso).
 \end{esempio}
-\section{Computation tree logic}
+\section{Computation tree logic (CTL)}
 Studiamo ora \textbf{alberi di computazione} derivati da modelli di Kripke.
 \begin{esempio}
   Prendiamo il modello:
@@ -713,7 +783,7 @@ Studiamo ora \textbf{alberi di computazione} derivati da modelli di Kripke.
 \begin{definizione}
   Propriamente definiamo \textbf{computazione} un cammino dell'albero a partire
   dalla radice.
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Passiamo ora alla sintassi delle formule ben formate della \textbf{Computational
   Tree Logic (\textit{CTL})}.
 \begin{definizione}
@@ -729,9 +799,11 @@ Passiamo ora alla sintassi delle formule ben formate della \textbf{Computational
     \item $\mathbf{A}$ indica il ``per ogni cammino''
     \item $\mathbf{E}$ indica il ``esiste almeno un cammino tale che''
   \end{itemize}
-  \textbf{Questi operatori possono precedere un solo operatore temporale per
+  \begin{nota}
+    Questi operatori possono precedere un solo operatore temporale per
     volta e ogni operatore temporale deve essere preceduto da un
-    quantificatore}.\\ 
+    quantificatore.
+  \end{nota}
   Si ha quindi che:
   \begin{itemize}
     \item $\mathbf{AX}\,\alpha,\mathbf{EX}\,\alpha\in FBF$
@@ -740,10 +812,34 @@ Passiamo ora alla sintassi delle formule ben formate della \textbf{Computational
     \item $\mathbf{A}\,(\alpha\,\mathbf{U}\,\beta),\,\mathbf{E}\,
     (\alpha\,\mathbf{U}\,\beta)\in FBF$    
   \end{itemize}
-  Si hanno formule, come $\mathbf{AFG}\,\alpha$, non sono una formula CTL. \\
- \textbf{Si hanno formule LTL che non sono formule CTL, e viceversa}.
-\end{definizione}
-\textbf{Vari esempi/esercizi su slide del 14 Dicembre.}\\
+\begin{nota}
+    Si hanno formule, come $\mathbf{AFG}\,\alpha$, che non sono una formula CTL. 
+\end{nota}
+\begin{nota}
+ Si hanno formule LTL che non sono formule CTL, e viceversa.
+\end{nota}
+\end{definizione} \vspace{5mm} %5mm vertical space
+\subsection{CTL - Semantica}
+\begin{definizione}
+  Sia M = (Q, T, I) un modello di Kripke, $\alpha$ una formula di CTL, q uno stato di M. Allora
+\[M,q \vDash \alpha\]
+significa che $\alpha$ è vera nello stato q del modello M
+\end{definizione} \vspace{5mm} %5mm vertical space
+\begin{nota}
+ Definiamo la relazione $\vDash$ per induzione sulla struttura delle formule
+\end{nota}
+Quindi al contrario di LTS, stiamo controllando il valore di verità di una formula in un singolo stato. In particolare supponiamo che $\alpha$ e $\beta$ siano due formule, $p$ una proposizione atomica, allora:
+ \begin{enumerate}
+    \item $M,q\vDash p$ sse $p\in I(q)$, con $q$ stato iniziale scelto
+    \item $M,q\vDash \neg \alpha$  sse $M,q\not\vDash \alpha$
+    \item $M,q\vDash \alpha\lor\beta$ sse $M,q\vDash \alpha$ o $M,q\vDash \beta$
+    \item $M,q$  $\vDash$ AX$\alpha$ sse per ogni q' tale che q $\implies$ q', $M,q$ ' $\vDash$ $\alpha$
+    \item $M,q$  $\vDash$ EX$\alpha$ sse esiste q' tale che q $\implies$ q' e $M,q$ ' $\vDash$ $\alpha$
+    \item $M,q$  $\vDash$ AU($\alpha$, $\beta$) sse per ogni cammino q = ${q_0, q_1, \dots}$ esiste k $\geq$ 0 tale che $M,q_k$  $\vDash$ $\beta$, e per ogni $ 0 \leq i < k$ $\,\,\,\,M,q_i \vDash \alpha$
+  \end{enumerate}
+ \subsection{Esempi}
+ \includepdf[pages=-]{img/CTSEsercizi.pdf}
+ \subsection{Confronto CTL e LTL}
 Si ha che molte proprietà possono essere espresse sia in PLTL che in CTL:
 \begin{itemize}
   \item \textbf{proprietà invarianti}, con $\mathbf{G}\,\alpha$ e con
@@ -755,16 +851,19 @@ Si ha che molte proprietà possono essere espresse sia in PLTL che in CTL:
 Ma si hanno anche proprietà non rappresentabili. Prendiamo ad esempio la
 \textbf{reset property}:
 \[\mathbf{AG}\,\mathbf{EF}\,\alpha\]
-ovvero \textit{da ogni stato raggiungibile in ogni cammino è sempre possibile
-  raggiungere uno stato nel quale vale $\alpha$}. Questa non può essere espressa
+ovvero: \textit{"da ogni stato raggiungibile in ogni cammino è sempre possibile
+  raggiungere uno stato nel quale vale $\alpha$}". \\Questa non può essere espressa
 in LTL ma solo in CTL.\\
 Vediamo una formula che può essere espressa solo in PLTL:
 \[\mathbf{FG}\,\alpha\]
-ovvero \textit{in ogni cammino, prima o poi si raggiungerà uno statoa partire
-  dal quale $\alpha$ rimane sempre vera}. Questa non può essere espressa
-in CTL (se prendo l'albero ho cammini in cui non è vero che $\alpha$ rimane
+ovvero:\textit{"in ogni cammino, prima o poi si raggiungerà uno stato a partire
+  dal quale $\alpha$ rimane sempre vera"}.\\ Questa non può essere espressa
+in CTL (se  prendiamo l'albero abbiamo cammini in cui non è vero che $\alpha$ rimane
 sempre vero) ma solo in PLTL.\\
-\textbf{Su slide dimostrazione della cosa tramite confronti}.\\
+\subsubsection{Dimostrazione per Confronto}
+ \includepdf[pages=-]{img/CTSConfronto.pdf}
+
+\begin{nota}
 Si ha un'estensione di CTL e PLTL, detta CTL$^*$, nella quale si mantengono i
 quantificatori sui camini ma si elimina il vincolo CTL per il quale ogni
 operatore temporale deve avere un quantificatore (posso quindi avere formule del
@@ -772,7 +871,8 @@ tipo $\mathbf{EFG}\,\alpha$).\\
 Potrei avere formule di CTL$^*$ che non sono esprimibili in CTL e
 PLTL, estendendone la capacità espressiva ma aumentando la complessità degli
 algoritmi associati. In pratica l'insieme delle formule CTL$^*$ contiene gli
-altri due (che per di più hanno un'intersezione tra loro).
+altri due (che per di più hanno un'intersezione tra loro). 
+\end{nota}
 \section{Model checking}
 \begin{definizione}
   Due modelli di Kripke $M_1$ e $M_2$ con stati iniziali $q_0$ e $s_0$, si ha
@@ -781,8 +881,12 @@ altri due (che per di più hanno un'intersezione tra loro).
   \[M_1, q_0\vDash \alpha\iff M_2, s_0\vDash \alpha\]
   Avendo che i due modelli sono effettivamente indistinguibili.\\
   L'equivalenza è quindi in funzione di proprietà della logica stessa.\\
-  \textbf{Esempi su slide.}
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
+\subsection{Insiemi parzialmente ordinati}
+Una relazione d'orine parziale afferma che non tutti gli elementi di un determinato insieme possono essere \textbf{confrontati}. In generale, due elementi di una relazione d'ordine parziale possono non essere confrontabili, cioè non sono necessariamente in relazione fra di loro. Ad esempio in $\mathbb{N} \backslash \{0\}$ munito della relazione di divisibilità, gli elementi 2 e 3 non sono in relazione perché nessuno dei due è divisore dell'altro. 
+\begin{definizione}
+  Due elementi $a$ e $b$ di un insieme parzialmente ordinato $( A , \leq )$ si dicono confrontabili se accade che  $a\leq b$ oppure $b\leq a$. 
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
   Si ha che una relazione parziale $\leq$ su $A$:
   \[\leq\,\,\, \subseteq A\times A\]
@@ -794,11 +898,13 @@ altri due (che per di più hanno un'intersezione tra loro).
     \item \textbf{transitiva}, infatti $(x\leq y\,\,\land\,\, y\leq z)\implies
     x\leq z,\forall\, x, y, z\in A$
   \end{itemize}
+  \begin{nota}
   La notazione:
   \[x<y\]
   significa;
   \[x\leq y\,\,\land\,\, x\neq y\]
-\end{definizione}
+  \end{nota}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
   Dato $(A,\leq)$ un insieme parzialmente ordinato e $B\subseteq A$ si
   definiscono:
@@ -818,7 +924,7 @@ altri due (che per di più hanno un'intersezione tra loro).
     \item $x\in B$ è il \textbf{minimale} di $B$ se $y\leq x\implies y=x$
     \item $x\in B$ è il \textbf{massimale} di $B$ se $x\leq y\implies y=x$
   \end{itemize}
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
   Si ha che:
   \begin{itemize}
@@ -829,17 +935,67 @@ altri due (che per di più hanno un'intersezione tra loro).
       (meet)} di $B$:
     \[x=\inf B=\bigwedge B\]
   \end{itemize}
-  In particolare se $B=\{x, y\}$ si ha che $x\lor y$ indica $\bigvee B$ (se
+\begin{corollario}
+  Se $B=\{x, y\}$ si ha che $x\lor y$ indica $\bigvee B$ (se
   esiste) e $x\land y$ indica $\bigwedge B$ (se esiste).
+\end{corollario}
 \end{definizione}
+\vspace{5mm} %5mm vertical space
+\begin{esempio}
+Documentiamo alcuni esempi:
+  \begin{itemize}
+      \item $(2^{A}, \subseteq )$ con $A$ un insieme qualsiasi.
+      \begin{itemize}
+          \item Riflessiva: ogni insieme $2^A\,\,\, \forall A$ è contenuto in se stesso.
+          \item Antisimmetrica
+          \item Transitiva
+      \end{itemize}
+      In questo insieme $A$ è l'elemento massimo e $\emptyset$ è quello minimo. \\ 
+      Presi due sottoinsiemi di $A$ esiste un \textit{join} e un \textit{meet} tra loro. In particolare il \textit{join} sarebbe un estremo superiore che è più grande di questi due, cioè contiene questi due sottoinsiemi, ma è piu piccolo di \textbf{tutti gli altri} sottoinsiemi che li contengono. Si noti che l'insieme dato dall'unione contiene tutti i sottoinsieme di partenza ed è più piccolo rispetto agli altri. Simmetricamente l'operazione di \textit{meet} riguarda l'intersezione.
+      \item $(\mathbb{N^+}, |)$. 
+      \begin{itemize}
+          \item Riflessiva: ogni numero divide se stesso
+          \item Antisimmetrica: \textbf{non} posso avere due numeri $x\neg y$ con la proprietà che $x/y$ e $y/x$.
+          \item Transitiva.
+      \end{itemize}
+      Il numero 1 è il valore più piccolo poiché divide tutti gli altri, sebbene non esista un massimo. \\
+      Dati due numeri appartenenti all'insieme $\mathbb{N^+}$:
+      \begin{itemize}
+          \item Il \textit{meet} riguarderebbe un numero che divide entrambi ed è più grande di ciascun numero che li divide entrambi: il \textit{massimo comune divisore}.
+          \item il \textit{join} riguarda analogamente il \textit{minimo comune multiplo}.
+      \end{itemize}
+      \item $([FBF_{LP}]_\equiv, \implies )$: ovvero l'\textbf{implicazione} tra \textbf{classi di equivalenza} di formule di una logica proposizionale. \\ 
+      La classi di equivalenza di $\alpha$ e minore o uguale della classe di equivalenza di $\beta$ se vale la \textbf{relazione di inplicazione} tra un elemento qualunque della c.d.e di $\alpha$ e un elemento qualunque della c.d.e di $\beta$.
+      \begin{itemize}
+          \item Riflessiva: $\alpha \iff \alpha$ è una tautologia.
+          \item Antisimmetrica: se $\alpha \implies \beta$ e $\beta \implies \alpha$ allora $\alpha \iff \beta$ quindi le formule $\alpha$ e $\beta$ sono nella stessa classi di equivalenza.
+          \item Transitiva.
+      \end{itemize}
+      Il minimo è una formula che implica tutte le altre formule: la classe di equivalenza delle \textbf{contraddizioni}. La classe di equivalenza delle \textbf{tautologie} è l'elemento massimo.\\
+      Date due classi di equivalenza:
+      \begin{itemize}
+          \item Join: Disgiunzione logica
+          \item Meet: Congiunzione logica
+      \end{itemize}
+      \item Una rete di occorrenze: non sarebbe una relazione d'ordine parziale perché non è né transitiva né riflessiva, ma tramite la relazione $F\#$, ovvero la chiusura riflessiva e transitiva della relazione $F$.
+      In particolare la chiusura riflessiva è tale se aggiungiamo ad una relazione tutte le coppie $(x,x)$, mentre quella transitiva è tale se esistono $(a,b);(b,c)$ per cui si può aggiungere $(a,c)$. Così facendo si parte dalla relazione di partenza e si aggiunge la transitività o la riflessività. Quindi \textbf{la relazione d'ordine in una rete di occorrenze è la chiusura riflessiva e transitiva della relazione di flusso della rete di occorrenze}.
+  \end{itemize}
+\end{esempio}
+\subsubsection{Diagrammi di Hasse}
+I diagrammi di Hasse servono a gestire graficamente le relazioni d'ordine. Si vuole inoltrare l'apprendimento di questa parte alla pagina appropriata: \url{https://it.wikipedia.org/wiki/Diagramma_di_Hasse}.
+\subsection{Reticoli}
 \begin{definizione}
   Definiamo \textbf{reticolo} un insieme parzialmente ordinato $(L,\leq)$ tale
   che, $\forall\, x, y\in L$ esistono $x\lor y$ e $x\land y$.
-\end{definizione}
+  \begin{nota}
+  Per ogni coppia di elementi devono esistere l'estremo superiore e inferiore. Quindi \textit{join} e \textit{meet} esistono per ogni sottoinsieme finito.
+  \end{nota}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione} 
   Definiamo \textbf{reticolo completo} se $\bigvee B$ e $\bigwedge B$ esistono
-  per ogni $B\subseteq L$.
-\end{definizione}
+  per ogni $B\subseteq L$, eventualmente anche per sottoinsiemi  $B\subseteq L$ infiniti.
+\end{definizione} \vspace{5mm} %5mm vertical space
+\subsubsection{Insiemi parzialmente ordinati e funzioni monotòne}
 \begin{definizione}
   Prendiamo due insiemi parzialmente ordinati $(A,\leq)$ e $(B,\leq)$, si ha che
   una funzione:
@@ -848,13 +1004,14 @@ altri due (che per di più hanno un'intersezione tra loro).
   \[x\leq y\implies f(x)\leq f(y)\]
   ovvero se \textbf{preserva la relazione d'ordine}.\\
   Vale anche nel caso particolare in cui $A$ e $B$ coincidono.
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
+\subsubsection{Funzioni e punti fissi}
 \begin{definizione}
-  Considerando funzioni con dominio e codominio coincidenti, ovvero del tipo:
+  Prese in considerazione funzioni con dominio e codominio coincidenti, ovvero del tipo:
   \[f:X\to X\]
   si ha che un elemento $x\in X$ è un \textbf{punto fisso} di $f$ se:
   \[f(x)=x\]
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{esempio}
   Vediamo qualche esempio:
   \begin{itemize}
@@ -914,7 +1071,8 @@ chiede se esistono un massimo e un minimo punto fisso.
   vuoto (ed esistono vari punti fissi minimali).
   \label{es:k}
 \end{esempio}
-\begin{teorema}[di Knaster-Tarski]
+\subsubsection{Teorema di Knaster-Tarski}
+\begin{definizione}[Teorema di Knaster-Tarski]
   Sia $(L,\leq)$ un reticolo completo (quindi per ogni coppia si hanno
   \textit{join} e \textit{meet} e quindi ogni sottoinsieme finito di elementi di
   $L$ ha ancora \textit{join} e \textit{meet}, anche i sottoinsiemi infiniti) e
@@ -923,7 +1081,7 @@ chiede se esistono un massimo e un minimo punto fisso.
   Detto altrimenti l'insieme dei punti fissi forma un reticolo completo (e
   quindi necessariamente si ha un minimo e un massimo).\\
   \textbf{Riascolare esempio detto prima della pausa}.
-\end{teorema}
+\end{definizione}
 \begin{proof}
   Per semplicità consideriamo $L=\mathcal{P}(A)$ per un certo insieme $A$,
   sapendo che l'insieme delle parti è un reticolo completo (nonché un'algebra
@@ -971,12 +1129,12 @@ chiede se esistono un massimo e un minimo punto fisso.
   e codominio che sono reticoli completi (un reticolo finito è sempre completo),
   so sicuramente che ci sono un punto fisso massimo e uno minimo.
 \end{esempio}
-Questo teorema è poco utile dal punto di vista algoritmico, dovendo costruire
+Questo definizione è poco utile dal punto di vista algoritmico, dovendo costruire
 $\mathcal{Z}$ che può essere infinito.\\
 Per lo più il model checking si fa su insiemi finiti ma con un numero di stati
 magari enorme e quindi analizzare tutti i sottoinsiemi è poco pratico. Si ha
-quindi un altro teorema.
-\begin{teorema}[di Kleene]
+quindi un altro definizione.
+\begin{definizione}[di Kleene]
   Sia $f:2^A\to 2^A$ una funzione monotona. Tale funzione è \textbf{continua}
   se, con $X_i\subseteq 2^A$:
   \[X_1\subseteq X_2\subseteq\cdots\subseteq X_i\subseteq\cdots\]
@@ -987,19 +1145,19 @@ quindi un altro teorema.
   Questa proprietà non è detto che valga se la funzione è solo monotona ma deve
   essere anche continua e in tal caso si ha che:
   \begin{itemize}
-    \item il minimo punto fisso di $f$ (che esiste per il teorema precedente)
+    \item il minimo punto fisso di $f$ (che esiste per il definizione precedente)
     può essere calcolato con:
     \[f(\emptyset),\qquad f(f(\emptyset)),\qquad f(f(f(\emptyset))),
       \qquad\cdots\]
     calcolando lo ``step'' successivo fino ad arrivare ad un punto fisso
     arrivando prima o poi al minimo punto fisso 
-    \item il massimo punto fisso di $f$ (che esiste per il teorema precedente)
+    \item il massimo punto fisso di $f$ (che esiste per il definizione precedente)
     può essere calcolato con:
     \[f(A),\qquad f(f(A)),\qquad f(f(f(A))),\qquad\cdots\]
     arrivando prima o poi al massimo punto fisso (occhio che $A$ è quello di
     $2^A$) 
   \end{itemize}
-\end{teorema}
+\end{definizione}
 \begin{esempio}
   Siano $A=2^{\mathbb{N}}$, $S\subseteq\mathbb{N}$ e $F(S)=S\cup \{2, 7\}$.\\
   Applico $f$ all'insieme vuoto e trovo $\{2, 7\}$ che non è punto fisso e quindi
@@ -1023,7 +1181,7 @@ quindi un altro teorema.
   escludendo di volta in volta gli stati in cui non vale $\mathbf{G}\, p$ (quindi
   l'insieme di partenza, diciamo, è quello in cui vale $\neg p$). Di volta in
   volta escludo gli stati che mi portano ad avere $\neg p$ più gli eventuali
-  stati già inclusi nell'insieme in uno step precedente fino a che non ho più
+  stati già inclusi nell'insieme in uno step precedente fino a che non abbiamo più
   passi possibili. Si arriva a trovare il massimo punto fisso.
 \end{esempio}
 \begin{definizione}
@@ -1047,12 +1205,12 @@ quindi un altro teorema.
   è sufficiente passarci infinite volte.\\
   Diciamo che $L(B)$ è il linguaggio, ovvero l'insieme di tutte le parole
   accettate dalla'automa.
-\end{definizione}
-\begin{teorema}
+\end{definizione} \vspace{5mm} %5mm vertical space
+\begin{definizione}
   Il problema:
   \[L(B)=\emptyset\]
   è \textbf{decidibile}.
-\end{teorema}
+\end{definizione}
 \begin{esempio}
   Sia:
   \begin{center}
@@ -1129,8 +1287,8 @@ Passiamo ora cercare un algoritmo per CTL.
   \[[[\alpha]]=\{q\in Q|\, M, q\vDash \alpha\}\]
   Se $\alpha=\top$ estensione è l'insieme di tutti gli stati, se è $\bot$ è
   l'insieme vuoto. Se la formula è una proposizione atomica allora l'estensione
-  è l'insieme degli stati dove vale la proposizione atomica. Se ho un connettivo
-  tra due formule già estese segue la logica dell'operatore (esempio se ho l'and
+  è l'insieme degli stati dove vale la proposizione atomica. Se abbiamo un connettivo
+  tra due formule già estese segue la logica dell'operatore (esempio se abbiamo l'and
   in un certo stato è valido sse valgono entrambe le proposizioni).\\
   Passiamo a CTL.\\
   Sia $\alpha\equiv\mathbf{AF}\,\beta$. Si
@@ -1159,12 +1317,12 @@ Passiamo ora cercare un algoritmo per CTL.
   serve un ragionamento così complesso mentre per l'until si fa un ragionamento
   simile al future, essendo nella pratica una sua forma rafforzata (poi si
   cerca, come per il future, il minimo punto fisso).
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Possiamo quindi trovare un algoritmo per CTL che sarà ricorsivo.
 \begin{definizione}
   Definiamo \textbf{$\mu$ calcolo} come un linguaggio logico che permette di
   definire formule ricorsive.  
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Si supponga di avere solo l'operatore temporale next e i
 quantificatori. Cerchiamo di esprimere, solo con il next, la proprietà
 $\mathbf{EF}\,\alpha$. Si ha quindi una sorta di srotolamento:
@@ -1208,7 +1366,7 @@ detto appunto \textbf{calcolo $\mu$}.
   La semantica del calcolo $\mu$ è definita sui modelli di Kripke attraverso gli
   operatori di punto fisso, usando idee simili a quelle usate per definire le
   estensioni di formule temporali.
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Si nota che:
 \[CTL^*\subset \mbox{calcolo } \mu\]
 quindi tutte le formule di $CTL^*$ sono esprimibili nel $\mu$ calcolo che quindi
@@ -1241,11 +1399,11 @@ Parliamo giusto un secondo di \textbf{fairness}.
 \begin{definizione}
   Si dice che un'esecuzione è \textbf{unfair} se un evento rimane sempre
   abilitato da un certo istante in poi ma non scatta mai.\\
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
   Si definisce \textbf{fairness debole} se un evento che è abilitato
   prima o poi scatta o viene disabilitato.
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 Bisogna quindi limitare la valutazione di una formula alla sua esecuzione
 \textbf{fair}, nella realtà è irrealistico pensare che qualcosa non scatti
 mai essendo sempre abilitata.
@@ -1255,7 +1413,7 @@ mai essendo sempre abilitata.
   aspetti quantitativi). Ovvero, in PLTL, se:
   \[\mathbf{GF}\,(\mbox{evento è abilitato})\to\mathbf{GF}\,(\mbox{evento
       scatta})\] 
-\end{definizione}
+\end{definizione} \vspace{5mm} %5mm vertical space
 \textbf{Su slide vari esempi per la fairness.}\\
 Per il model checking si hanno diversi tool, tra cui:
 \begin{itemize}

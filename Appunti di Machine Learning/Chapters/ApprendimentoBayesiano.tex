@@ -1,183 +1,124 @@
-\chapter{Apprendimento Bayesano}
-Nell'ambito Bayesano si cambia l'approccio avendo la valutazione d'ipotesi in
-base alla loro probabilità. Si studia la probabilità rispetto ai dati e rispetto
-alle conoscenze pregresse. Non troviamo un'ipotesi che combacia ma che è
-probabile.\\
-Bisogna studiare come scegliere le ipotesi, usando risultati noti del calcolo
-probabilistico e quindi come funziona l'apprendimento. Useremo le nozioni di
-probabilità e probabilità condizionata, oltre ovviamente alla \textbf{regola di
-  Bayes}. Il ``meglio'' è definito quindi tramite probabilità.\\
+\chapter{Apprendimento Bayesiano}
+In questo capitolo considereremo l'apprendimento come una forma di ragionamento incerto sulle osservazioni. Sappiamo che l'incertezza è prevalente negli ambienti reali e gli agenti possono gestirla mediante metodi probabilistici. Per far ciò però essi devono apprendere una loro teoria probabilistica del mondo circostante. Il punto di vista Bayesiano sull'apprendimento è estremamente potente ed offre soluzioni generali ai problemi del rumore, del sovradattamento e della predizione ottima. Viene anche considerato il fatto che un agente non onnisciente non potrà mai essere certo della correttezza di una teoria sul mondo ma deve comunque utilizzarne una per prendere delle decisioni, per cui viene sfruttata \textbf{solitamente} l'ipotesi più probabile. Nell'ambito Bayesiano si cambia l'approccio avendo la valutazione d'ipotesi in base alla loro probabilità. Si studia la probabilità rispetto ai dati e rispetto alle conoscenze pregresse. Non troviamo quindi un'ipotesi perfettamente compatibile ma una che è più probabile rispetto ad altre. Bisogna dunque studiare come scegliere le ipotesi, usando risultati noti del calcolo
+probabilistico. Useremo le nozioni di probabilità e probabilità condizionata, oltre ovviamente alla \textbf{regola di Bayes}.
 Si assume quindi che le quantità d'interesse siano ``governate'' da
-distribuzioni di probabilità e che la decisione migliore può essere presa
-ragionando su tali distribuzioni e sull'insieme di dati di
-training. L'apprendimento Bayesano è importante per due ragioni principali:
+distribuzioni di probabilità e che la decisione migliore può essere presa ragionando su tali distribuzioni e sull'insieme di dati di
+training. L'apprendimento Bayesiano è importante per due ragioni principali:
 \begin{enumerate}
-  \item si ha una manipolazione esplicita delle probabilità rispetto ad altri
-  approcci pratici di alcuni tipi di problemi di apprendimento (infatti si hanno
+  \item si ha una manipolazione esplicita delle probabilità rispetto ad altri approcci pratici di alcuni tipi di problemi di apprendimento (infatti si hanno
   spesso paragoni con gli alberi decisionali e con le reti neurali)
   \item fornisce una prospettiva utile per comprendere metodi di apprendimento
   che non manipolano effettivamente le probabilità
 \end{enumerate}
-Dal punto di vista delle funzionalità si ha che ogni esempio di training
-osservato può aumentare o diminuire, in modo incrementale, la stima di
-probabilità relativa alla correttezza di un'ipotesi. Inoltre, come già
-anticipato, la conoscenza pregressa può essere combinata con i dati osservati
-per determinare la probabilità finale delle varie ipotesi. Si ha inoltre che le
-varie ipotesi possono effettuare predizioni probabilistiche e le istanze possono
-essere quindi classificate combinando le predizioni delle varie ipotesi, che
-sono pesate tramite il peso delle loro probabilità. Con il metodo Bayesano si
-ottiene quindi uno ``standard'' per prendere decisioni ottimali rispetto al
-quale è possibile misurare ulteriori misure pratiche.\\
-Si hanno però alcune difficoltà legate all'apprendimento Bayesano:
+\section{Apprendimento Statistico}
+I concetti chiave sono i \textbf{dati} e le \textbf{ipotesi}. I dati rappresentano \textbf{prove}, ovvero istanziazioni di alcune o tutte le \textbf{\href{https://it.wikipedia.org/wiki/Variabile_casuale}{Variabili Casuali}} che descrivono il dominio. Le ipotesi invece esprimono  teorie probabilistiche sul funzionamento del dominio.
+Dal punto di vista delle funzionalità si ha che ogni esempio di training osservato può aumentare o diminuire, in modo incrementale, la stima di probabilità relativa alla correttezza di un'ipotesi. Inoltre, come già anticipato, la conoscenza pregressa può essere combinata con i dati osservati per determinare la probabilità finale delle varie ipotesi. In particolare si afferma inoltre che le
+varie ipotesi possono effettuare predizioni probabilistiche e le istanze possono essere quindi classificate combinando le predizioni delle varie ipotesi, che sono pesate tramite il peso delle loro probabilità. Con il metodo Bayesiano si ottiene quindi uno ``standard'' per prendere decisioni ottimali rispetto al quale è possibile misurare ulteriori misure pratiche.\\
+Si hanno però alcune difficoltà legate all'apprendimento Bayesiano:
 \begin{itemize}
   \item si necessita avere la conoscenza di varie probabilità
   \item si hanno costi computazionali non indifferenti
 \end{itemize}
-Inquadrando nuovamente il fulcro del machine learning ricordiamo che si sta
-cercando la ``miglior'' ipotesi $h$, contenuta dello spazio delle ipotesi $H$, a
-partire dai dati contenuti in un training set $D$. Nell'apprendimento Bayesano
-si ha che la ``miglior'' ipotesi altro non è che la più probabile. Ovviamente
-potrei avere più ipotesi.\\
-Il punto centrale di questo tipo è dato dal \textbf{definizione di Bayes} che
-fornisce un metodo diretto per calcolare la probabilità di tale ipotesi in base:
+\subsection{Probabilità a priori delle ipotesi e Verosimiglianza}
+\begin{definizione}(Apprendimento Bayesiano)
+L'apprendimento Bayesiano calcola semplicemente la probabilità di ogni ipotesi condizionandola ai dati osservati,  e su tale base formula predizioni. Le predizioni possono essere quindi basate su tutte le ipotesi, pesate secondo la rispettiva probabilità, e non solo su quella migliore.
+\end{definizione}
+% Inquadrando nuovamente il fulcro del machine learning ricordiamo che si sta
+% cercando la ``miglior'' ipotesi $h$, contenuta dello spazio delle ipotesi $H$, a
+% partire dai dati contenuti in un training set $D$. Nell'apprendimento Bayesiano
+% si ha che la ``miglior'' ipotesi altro non è che la più probabile. Ovviamente
+% potrebbero esistere più ipotesi. 
+La \textbf{formula di Bayes} fornisce un metodo diretto per calcolare la probabilità di tale ipotesi in base:
 \begin{itemize}
   \item alla sua probabilità conosciuta a priori
   \item alle probabilità di osservare vari dati data l'ipotesi
   \item ai dati stessi
 \end{itemize}
-\begin{definizione}[definizione di Bayes]
-  Il definizione enuncia che:
-  \[P(h|D)=\frac{P(D|h)P(h)}{P(D)}\]
-  Avendo:
+\begin{definizione}(definizione di Bayes)
+  Sia \textbf{D} il DataSet dove i valori osservati vengono indicati con \textbf{d}:
+  \[P(h_i|d)=\frac{P(d|h_i)P(h_i)}{P(d)}\]
+  Dove:
   \begin{itemize}
-    \item $P(h)$ che è la probabilità conosciuta a priori di $h$. Tale
-    probabilità riflette qualsiasi conoscenza di base sulla possibilità
-    che $h$ sia corretta  
-    \item $P(D)$ che è la probabilità conosciuta a priori di $D$, ovvero la
-    probabilità che $D$ sia osservato
-    \item $P(D|h)$ che è la probabilità di osservare $D$ in presenza
-    dell'ipotesi $h$
-    \item $P(D|h)$ che è la probabilità a posteriori di $h$. Tale probabilità
-    riflette la ``confidenza'' di avere $h$  dopo che $D$ è stato osservato
-  \end{itemize}
+        \item $P(h_i)$ viene chiamata \textbf{probabilità a priori delle ipotesi}
+        \item $P(d|h_i)$ è la \textbf{verosimiglianza} dei dati sotto ogni ipotesi.
+    \end{itemize}
+%   \begin{itemize}
+%     \item $P(h)$ che è la probabilità conosciuta a priori di $h$. Tale
+%     probabilità riflette qualsiasi conoscenza di base sulla possibilità
+%     che $h$ sia corretta  
+%     \item $P(d)$ che è la probabilità conosciuta a priori di $D$, ovvero la
+%     probabilità che $D$ sia osservato
+%     \item $P(d|h)$ che è la probabilità di osservare $D$ in presenza
+%     dell'ipotesi $h$
+%     \item $P(h|d)$ che è la probabilità a posteriori di $h$. Tale probabilità
+%     riflette la ``confidenza'' di avere $h$  dopo che $D$ è stato osservato
+%   \end{itemize}
 \end{definizione}
-In molti scenari di apprendimento, il learner considera un insieme d'ipotesi
-candidate H ed è interessato a trovare l'ipotesi $h\in H$ più probabile in base
-ai dati osservati in $D$.
+\begin{definizione}
+Sia \textbf{D} il DataSet dove i valori osservati vengono indicati con \textbf{d}. Supponiamo di voler predire una predizione $"X"$:
+\begin{equation}
+    P(X|d)=\sum_{i}P(X|d, h_i)P(h_i|d) = \sum_{i}P(X|h_i)P(h_i|d) 
+    \label{Bayes}
+\end{equation}
+\begin{nota}
+    Abbiamo presunto che ogni ipotesi determini una distribuzione di probabilità $X$. Quest'equazione mostra che le predizioni sono medie pesate delle predizioni delle singole ipotesi. Le ipotesi stesse fungono essenzialmente da \textit{intermediari} tra i dati nudi e le predizioni.
+\end{nota}
+\end{definizione}
+La figura \ref{Fig:Prob2} mostra la predizione della probabilità che l'osservazione successiva abbia una data classificazione, seguendo la \ref{Bayes}. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/prob2.png}
+    \label{Fig:Prob2}
+    \caption{Predizione bayesiana $P(d_{n+1} = x_k | d1 \dots d_n)$}
+\end{figure}
+\begin{definizione}(Verosimiglianza)
+  La verosimiglianza dei dati è calcolata partendo dal presupposto che le osservazioni siano indipendentemente e identicamente distribuite (\textbf{i.i.d}), così che:
+  \[P(d|h_i)=\prod_{j}P(d_j|h_i)\]
+\end{definizione}
+La figura \ref{Fig:Prob1} mostra come cambia la probabilità a posteriori di alcune ipotesi man mano che viene osservata una sequenza di elementi in \textbf{d}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/prob1.png}
+    \label{Fig:Prob1}
+    \caption{}
+\end{figure}
+\subsection{Massima a posteriori}
+La predizione bayesiana è \textbf{ottima}, indipendentemente dalle dimensioni dell'insieme dei dati: in altre parole, sarà corretta più spesso di qualsiasi altra predizione. Naturalmente c'è un prezzo da pagare per l'ottimalità dell'apprendimento bayesiano. Difatti nei sistemi reali i dati da gestire sono molti e spesso si deve ricorrere forzatamente ad una qualche forma ti approssimazione. \\ 
+Un'approssimazione molto comune è formulare predizioni che si basano su un'ipotesi più probabile: la $h_i$ che massimizza $P(h_i, d)$. Questa viene spesso denominata \textbf{massimo a posteriori} o MAP. Le predizioni che si basano su un'ipotesi $h_{MAP}$ sono approssimativamente bayesiane dal momento che:
+\[P(X|d)= \approx P(X|h_{MAP})\]
+La figura \ref{Fig:Prob1} mostra difatti che l'ipotesi $h_1 = h_{MAP}$ dopo un certo numero di classificazioni tali per cui $d_{n+1} = x_k$ (ovvero dopo aver predetto una certa sequenza di classificazioni), per cui un agente MAP predirà che l'\textit{n-esimo} valore sarà opportunamente classificato con $x_k$ con probabilità 1. 
+Man mano che vengono elaborati nuovi dati, la predizione MAP e quella bayesiana si avvicinano (dato che le altre predizioni MAP diventano meno probabili). Generalmente trovare l'ipotesi MAP è più facile poiché si sta risolvendo un problema di ottimizzazione anziché eseguire una grande sommatoria.
 \begin{definizione}
   Definiamo le \textit{ipotesi maximum a posteriori (MAP)} ogni ipotesi
   massimamente probabile:
-  \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|D)\]
-  \[\operatorname*{argmax}_{h\in H}\frac{P(D|h)P(h)}{P(D)}\]
-  Ma $P(D)$ può essere cancellato in quanto costante e indipendente da $h$,
+  \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|d)\]
+  \[\operatorname*{argmax}_{h\in H}\frac{P(d|h)P(h)}{P(d)}\]
+  Ma $P(d)$ può essere cancellato in quanto costante e indipendente da $h$,
   ottenendo:
-  \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(D|h)P(h)\]
+  \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(d|h)P(h)\]
 \end{definizione}
-Spesso si assume anche che ogni ipotesi è, a priori, equiprobabile e quindi
-possiamo semplificare i conti.
+\subsection{Massima Verosimiglianza}
+Un'ultima semplificazione si può ottenere presupponendo una distribuzione a priori uniforme dello spazio delle ipotesi. Spesso si assume anche che ogni ipotesi è, a priori, equiprobabile e quindi possiamo semplificare i conti. La massima verosimiglianza (maximum likehood) si indica con ML. Esso è un approccio ragionevole quando non c'è ragione di preferire a priori un'ipotesi all'altra.
 \begin{definizione}
-  Dato che $P(D|h)$ viene spesso chiamata \textbf{likehood
+  Dato che $P(d|h)$ viene spesso chiamata \textbf{likehood
     (\textit{probabilità})} di $D$ data $h$ viene definita \textbf{ipotesi
-    maximum likehood (ML)} ogni ipotesi che massimizza $P(D|h)$:
-  \[h_{ML}=\operatorname*{argmax}_{h\in H}P(D|h)\]
+    maximum likehood (ML)} ogni ipotesi che massimizza $P(d|h)$:
+  \[h_{ML}=\operatorname*{argmax}_{h\in H}P(d|h)\]
   potendo quindi trascurare $P(h)$ in quanto equivalente $\forall\, h\in H$
 \end{definizione}
-
-Si può usare il definizione di Bayes per specificare un algoritmo di apprendimento
-molto semplice detto \textbf{algoritmo Brute-Force MAP LEARNING} che si articola
-in 2 step:
-\begin{enumerate}
-  \item $\forall\, h\in H$ calcolo la probabilità a posteriori tramite il definizione
-  di Bayes:
-  \[P(h|D)=\frac{P(D|h)P(h)}{P(D)}\]
-  
-  \item restituisco l'ipotesi $h_{MAP}$ con la più alta probabilità a
-  posteriori:
-  \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|D)\]
-\end{enumerate}
-Però, per specificare il problema d'apprendimento per l'algoritmo, bisogna
-obbligatoriamente specificare i valori di:
-\begin{itemize}
-  \item $P(h)$
-  \item $P(D|h)$
-\end{itemize}
-e quindi dobbiamo obbligatoriamente fare una serie di assunzioni:
-\begin{itemize}
-  \item il training set deve essere privo di rumore, avendo:
-  \[d_i=c(x_i)\]
-  \item il target concept deve essere contenuto nello spazio delle ipotesi:
-  \[\exists h\in H \mbox{t.c. }h(x)=c(x),\,\,\,\forall\, x\in X\]
-  \item devo assumere che le ipotesi siano equiprobabili e quindi:
-  \[P(h)=\frac{1}{|H|}\,\,\,\forall\, h\in H\]
-  e avendo quindi:
-  \[P(D|h)=
-    \begin{cases}
-      1&\mbox{se } d_i=h(x_i),\,\,\,\forall\, d_i\in D\\
-      0&\mbox{altrimenti}
-    \end{cases}
-  \]
-\end{itemize}
-Si ha quindi che il problema di apprendimento per l'algoritmo è completamente
-definito. Possiamo quindi specificare che, nel primo step, ovvero quando si
-cerca $P(h|D)$, posso avere due casi:
-\begin{enumerate}
-  \item $h$ è inconsistente con $D$, avendo quindi:
-  \[P(h|D)=\frac{0\cdot P(h)}{P(D)}=0\]
-  \item $h$ è consistente con $D$, avendo quindi:
-  \[P(h|D)=\frac{1\cdot \frac{1}{|H|}}{P(D)}=\frac{1\cdot
-      \frac{1}{|H|}}{\frac{|VS_{H, D}|}{|H|}}=\frac{1}{|VS_{H, D}|}\] 
-\end{enumerate}
-Si ha quindi che questa analisi implica che, sotto le condizioni sopra definite,
-ogni ipotesi coerente è un'ipotesi MAP, perché per ogni ipotesi coerente si ha
-che:
-\[P(h|D)=\frac{1}{|VS_{H, D}|}\]
-\begin{figure}
-  \centering
-  \includegraphics[scale = 0.6]{img/map.pdf}
-  \caption{Nell'immagine le evoluzioni di probabilità delle
-    ipotesi. Nel primo grafico tutte le ipotesi hanno la stessa probabilità, è
-    il punto di partenza. Con gli altri due grafici si ha che man mano che i
-    dati di addestramento si accumulano, la probabilità a posteriori delle
-    ipotesi inconsistenti diventa zero mentre la probabilità totale che si somma
-    a 1 è condivisa equamente tra le ipotesi consistenti rimanenti.}
+\subsubsection{Learn a Read-Value Function}
+Ipotizziamo di voler trovare un'ipotesi per una funzione target:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/hml.png}
 \end{figure}
-Si ha che ogni learner consistente ha in output ipotesi MAP se si assume a
-priori la distribuzione uniforme delle probabilità su $H$ dati di training
-deterministici e privi di rumore.\\
-Riprendendo per esempio anche l'algoritmo find-S si ha che:
-\begin{itemize}
-  \item ha in output ipotesi consistenti e quindi ipotesi MAP sotto la
-  distribuzione di probabilità $P(h)$ e $P(D|h)$
-  \item $\forall\, P(h)$ che favorisce le ipotesi più specifiche find-S trova
-  appunto le ipotesi MAP
-\end{itemize}
-A riprova che il metodo Bayesano è un modo per caratterizzare il comportamento
-degli algoritmi di apprendimento.\\
-inoltre, identificando $P(h)$ e $P(D|h)$ base alle quali l'output è l'ipotesi
-ottimale, è possibile caratterizzare le ipotesi implicite dell'algoritmo ovvero
-il \textbf{bias induttivo} dell'algoritmo (avendo anche che l'inferenza
-induttiva è modellata da un sistema di ragionamento probabilistico equivalente
-basato sul definizione di Bayes). \\
-Si introduce ora il problema di apprendere funzioni target a valori continui
-(reti neurali regressione lineare etc$\ldots$). Si ha che n base a determinate
-ipotesi, qualsiasi algoritmo di apprendimento che minimizzi l'errore quadratico
-tra l'ipotesi di output e i dati di addestramento, produrrà un'ipotesi
-ML. Prepariamo quindi il nostro insieme di assunzioni per il problema:
-\begin{itemize}
-  \item $h:X\to\mathbb{R},\,\,\,\forall\, h\in H$
-  \item li esempi sono della forma $\langle x_i, d_i\rangle$
-  \item la funzione target è definita come $f:X\to\mathbb{R}$
-  \item si hanno $m$ esempi di training dove il valore target di ogni esempio è
-  ``sporcato'' dal rumore casuale $e_i$ secondo una distribuzione di probabilità
-  normale con media nulla, avendo $d_i=f(x_i)+e_i$
-\end{itemize}
-Avendo quindi che $h_{ML}=\operatorname*{argmax}_{h\in H}P(D|h)$ e che gli
+Avendo quindi che $h_{ML}=\operatorname*{argmax}_{h\in H}P(d|h)$ e che gli
 eventi di training vengono assunti come indipendenti si ha che:
-\[h_{ML}=\operatorname*{argmax}_{h\in H}\prod_{i=1}^mP(d_i|h)\]
+\[h_{ML}=\operatorname*{argmax}_{h\in H}\prod_{i=1}^mP(d_i|h) = \operatorname*{argmax}_{h\in H}P(d|h) \]
 Dato quindi l'errore e$_i$ distribuito normalmente con media zero e varianza
 sconosciuta $\sigma^2$ si ha che anche ogni $d_i$ segue la stessa
 distribuzione attorno al target $f(x_i)$. Poiché stiamo scrivendo l'espressione
-per $P(D|h)$, assumiamo che $h$ sia la descrizione corretta per $f$, quindi:
+per $P(d|h)$, assumiamo che $h$ sia la descrizione corretta per $f$, quindi:
 \[\mu=f(x_i)=h(x_i)\]
 e avendo quindi, per la distribuzione normale:
 \[h_{ML}=\operatorname*{argmax}_{h\in H}
@@ -208,15 +149,106 @@ Si specifica la scelta della normale in quanto:
   distribuite obbedisce a una distribuzione Normale 
 \end{itemize}
 \textbf{\textit{Si considera solo il rumore sul valore del target e non sugli
-    attributi che descrivono le istanze stesse}}.\\
+    attributi che descrivono le istanze stesse}}.
+% \subsection{Brute-Force MAP LEARNING}
+% Si può usare il definizione di Bayes per specificare un algoritmo di apprendimento
+% molto semplice detto \textbf{algoritmo Brute-Force MAP LEARNING} che si articola
+% in 2 step:
+% \begin{enumerate}
+%   \item $\forall\, h\in H$ calcolo la probabilità a posteriori tramite il definizione
+%   di Bayes:
+%   \[P(h|d)=\frac{P(d|h)P(h)}{P(d)}\]
+  
+%   \item restituisco l'ipotesi $h_{MAP}$ con la più alta probabilità a
+%   posteriori:
+%   \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|d)\]
+% \end{enumerate}
+% Però, per specificare il problema d'apprendimento per l'algoritmo, bisogna
+% obbligatoriamente specificare i valori di:
+% \begin{itemize}
+%   \item $P(h)$
+%   \item $P(d|h)$
+% \end{itemize}
+% e quindi dobbiamo obbligatoriamente fare una serie di assunzioni:
+% \begin{itemize}
+%   \item il training set deve essere privo di rumore, avendo:
+%   \[d_i=c(x_i)\]
+%   \item il target concept deve essere contenuto nello spazio delle ipotesi:
+%   \[\exists h\in H \mbox{t.c. }h(x)=c(x),\,\,\,\forall\, x\in X\]
+%   \item devo assumere che le ipotesi siano equiprobabili e quindi:
+%   \[P(h)=\frac{1}{|H|}\,\,\,\forall\, h\in H\]
+%   e avendo quindi:
+%   \[P(d|h)=
+%     \begin{cases}
+%       1&\mbox{se } d_i=h(x_i),\,\,\,\forall\, d_i\in D\\
+%       0&\mbox{altrimenti}
+%     \end{cases}
+%   \]
+% \end{itemize}
+% Si ha quindi che il problema di apprendimento per l'algoritmo è completamente
+% definito. Possiamo quindi specificare che, nel primo step, ovvero quando si
+% cerca $P(h|d)$, posso avere due casi:
+% \begin{enumerate}
+%   \item $h$ è inconsistente con $D$, avendo quindi:
+%   \[P(h|d)=\frac{0\cdot P(h)}{P(d)}=0\]
+%   \item $h$ è consistente con $D$, avendo quindi:
+%   \[P(h|d)=\frac{1\cdot \frac{1}{|H|}}{P(d)}=\frac{1\cdot
+%       \frac{1}{|H|}}{\frac{|VS_{H, D}|}{|H|}}=\frac{1}{|VS_{H, D}|}\] 
+% \end{enumerate}
+% Si ha quindi che questa analisi implica che, sotto le condizioni sopra definite,
+% ogni ipotesi coerente è un'ipotesi MAP, perché per ogni ipotesi coerente si ha
+% che:
+% \[P(h|d)=\frac{1}{|VS_{H, D}|}\]
+% \begin{figure}
+%   \centering
+%   \includegraphics[scale = 0.6]{img/map.pdf}
+%   \caption{Nell'immagine le evoluzioni di probabilità delle
+%     ipotesi. Nel primo grafico tutte le ipotesi hanno la stessa probabilità, è
+%     il punto di partenza. Con gli altri due grafici si ha che man mano che i
+%     dati di addestramento si accumulano, la probabilità a posteriori delle
+%     ipotesi inconsistenti diventa zero mentre la probabilità totale che si somma
+%     a 1 è condivisa equamente tra le ipotesi consistenti rimanenti.}
+% \end{figure}
+% Si ha che ogni learner consistente ha in output ipotesi MAP se si assume a
+% priori la distribuzione uniforme delle probabilità su $H$ dati di training
+% deterministici e privi di rumore.\\
+% Riprendendo per esempio anche l'algoritmo find-S si ha che:
+% \begin{itemize}
+%   \item ha in output ipotesi consistenti e quindi ipotesi MAP sotto la
+%   distribuzione di probabilità $P(h)$ e $P(d|h)$
+%   \item $\forall\, P(h)$ che favorisce le ipotesi più specifiche find-S trova
+%   appunto le ipotesi MAP
+% \end{itemize}
+% A riprova che il metodo Bayesiano è un modo per caratterizzare il comportamento
+% degli algoritmi di apprendimento.\\
+% inoltre, identificando $P(h)$ e $P(d|h)$ base alle quali l'output è l'ipotesi
+% ottimale, è possibile caratterizzare le ipotesi implicite dell'algoritmo ovvero
+% il \textbf{bias induttivo} dell'algoritmo (avendo anche che l'inferenza
+% induttiva è modellata da un sistema di ragionamento probabilistico equivalente
+% basato sulla definizione di Bayes). \\
+% Si introduce ora il problema di apprendere funzioni target a valori continui
+% (reti neurali regressione lineare etc$\ldots$). Si ha che in base a determinate
+% ipotesi, qualsiasi algoritmo di apprendimento che minimizzi l'errore quadratico
+% tra l'ipotesi di output e i dati di addestramento, produrrà un'ipotesi
+% ML. Prepariamo quindi il nostro insieme di assunzioni per il problema:
+% \begin{itemize}
+%   \item $h:X\to\mathbb{R},\,\,\,\forall\, h\in H$
+%   \item li esempi sono della forma $\langle x_i, d_i\rangle$
+%   \item la funzione target è definita come $f:X\to\mathbb{R}$
+%   \item si hanno $m$ esempi di training dove il valore target di ogni esempio è
+%   ``sporcato'' dal rumore casuale $e_i$ secondo una distribuzione di probabilità
+%   normale con media nulla, avendo $d_i=f(x_i)+e_i$
+% \end{itemize}
+\subsection{Minima Lunghezza della descrizione}
+Sia nell'apprendimento bayesiano che in quello MAP la distribuzione a priori delle ipotesi $P(h_i)$ ha un ruolo importante difatti ha il ruolo di \textit{penalizzare la complessità} nel caso di \textbf{overfitting}. Tipicamente le ipotesi più complesse hanno una probabilità a priori più bassa, sebbene abbiano una maggior capacità di adattarsi ai dati. Quindi la probabilità a priori rappresenta un compromesso tra la sua complessità e la sua capacità di adattarsi ai dati.
 Anche in questo caso si usa il Rasoio di Occam, scegliendo di usare il principio
 \textbf{Minimum Description Length (\textit{MDL})}, scegliendo la spiegazione
 più breve per i dati osservati.\\
 Tramite MDL posso ``giustificare'' la scelta di $h_{MAP}$ in base alla teoria
 dell'informazione, infatti:
-\[h_{MAP}=\operatorname*{argmax}_{h\in H}P(D|h)P(h)\]
-\[=\operatorname*{argmax}_{h\in H}\log_2P(D|h)+\log_2P(h)\]
-\[=\operatorname*{argmin}_{h\in H}-\log_2P(D|h)-\log_2P(h)\]
+\[h_{MAP}=\operatorname*{argmax}_{h\in H}P(d|h)P(h)\]
+\[=\operatorname*{argmax}_{h\in H}\log_2P(d|h)+\log_2P(h)\]
+\[=\operatorname*{argmin}_{h\in H}-\log_2P(d|h)-\log_2P(h)\]
 e queste equazioni possono essere interpretate come un'affermazione che sono
 preferite ipotesi brevi, assumendo un particolare schema di rappresentazione per
 la codifica d'ipotesi e dati.\\
@@ -224,8 +256,8 @@ Il principio MDL fornisce un modo per scambiare la complessità delle ipotesi
 per il numero di errori commessi dall'ipotesi.\\
 
 \textbf{Su slide altre informazioni su teoria dell'informazione.}
-\section{Classificatore Bayesano ottimo}
-Ci si chiede quindi qual è la classificazione più probabile della nuova istanza
+\section{Classificatore Bayesiano ottimo}
+Ci si chiede quindi qual è la \textbf{classificazione più probabile} della nuova istanza
 secondo i dati di training.\\
 Vediamo con un esempio che non basta applicare $h_{MAP}$:
 \begin{esempio}
@@ -242,31 +274,31 @@ Vediamo con un esempio che non basta applicare $h_{MAP}$:
 \end{esempio}
 Abbiamo che la classificazione più probabile si ottiene combinando le previsioni
 di tutte le ipotesi, ponderate in base alle loro probabilità posteriori. Data
-$P(v_j|D)$ come la probabilità che la classificazione corretta sia $v_j$:
-\[P(v_j|D)=\sum_{h_i\in H}P(v_j|h_i)P(h_i|D)\]
-ottenendo che il classificatore Bayesano ottimo è:
-\[\operatorname*{argmax}_{v_j\in V}\sum_{h_i\in H}P(v_j|h_i)P(h_i|D)\]
-dato $V$ come insieme dei target (?).
+$P(v_j|d)$ come la probabilità che la classificazione corretta sia $v_j$:
+\[P(v_j|d)=\sum_{h_i\in H}P(v_j|h_i)P(h_i|d)\]
+ottenendo che il classificatore Bayesiano ottimo è:
+\[\operatorname*{argmax}_{v_j\in V}\sum_{h_i\in H}P(v_j|h_i)P(h_i|d)\]
+dato $V$ come insieme di tutte le possibili classi.
 \begin{esempio}
   Vediamo un esempio chiarificatore.\\
   Sia $V=\{+,-\}$ e siano:
   \begin{itemize}
-    \item $P(h_1, D) =0.4,\,\,\, P(-, h_1) = 0,\,\,\, P(+, h_1) = 1$
-    \item $P(h_2, D) =0.3\,\,\, P(-, h_2) = 1,\,\,\, P(+, h2) = 0$
-    \item $P(h_3, D) =0.3,\,\,\, P(-, h_3) = 1,\,\,\, P(+, h3) = 0$
+    \item $P(h_1, d) =0.4,\,\,\, P(-, h_1) = 0,\,\,\, P(+, h_1) = 1$
+    \item $P(h_2, d) =0.3\,\,\, P(-, h_2) = 1,\,\,\, P(+, h2) = 0$
+    \item $P(h_3, d) =0.3,\,\,\, P(-, h_3) = 1,\,\,\, P(+, h3) = 0$
   \end{itemize}
   Si hanno:
-  \[\sum_{h_i\in H}P(+|h_i)P)(h_i|D)=0.4\]
-  \[\sum_{h_i\in H}P(-|h_i)P)(h_i|D)=0.6\]
-  \[\operatorname*{argmax}_{v_j\in \{+,-\}}\sum_{h_i\in H}P(v_j|h_i)P(h_i|D)=-\]
+  \[\sum_{h_i\in H}P(+|h_i)P)(h_i|d)=0.4\]
+  \[\sum_{h_i\in H}P(-|h_i)P)(h_i|d)=0.6\]
+  \[\operatorname*{argmax}_{v_j\in \{+,-\}}\sum_{h_i\in H}P(v_j|h_i)P(h_i|d)=-\]
 \end{esempio}
-\section{Classificatore Bayesano naive}
-Il Classificatore Bayesano naive si applica alle attività di learning in
+\section{Classificatore Bayesiano naive}
+Il Classificatore Bayesiano naive si applica alle attività di learning in
 cui ogni istanza $x$ è descritta da una giunzione di valori di attributi e in
 cui la funzione target $f(x)$ può prendere un valore qualsiasi dall'insieme
 finito $V$. Descriviamo gli esempi di training come $\langle a_1, a_2,\ldots
 a_n\rangle $. \\
-Applicando il metodo Bayesano si ha:
+Applicando il metodo Bayesiano si ha:
 \[v_{MAP}=\operatorname*{argmax}_{v_j\in V}P(v_j|a_1, a_2,\ldots a_n)\]
 \[=\operatorname*{argmax}_{v_j\in V}\frac{P(a_1, a_2,\ldots
     a_n|v_j)P(v_j)}{P(a_1, a_2,\ldots a_n)}\]
@@ -275,10 +307,10 @@ e, rimuovendo le i fattori indipendenti:
 Avendo che:
 \begin{itemize}
   \item $P(v_j)$ può essere stimato tramite la frequenza di $v_j$ in $D$
-  \item $P(a_1, a_2,\ldots a_n|v_j)$ non può essere stimato in questo modo am il
+  \item $P(a_1, a_2,\ldots a_n|v_j)$ non può essere stimato in questo modo ma il
   numero di questi termini è pari a $|X|\cdot |V|$
 \end{itemize}
-Con il classificatore Bayesano naive si hanno diverse semplificazioni. In primis
+Con il classificatore Bayesiano naive si hanno diverse semplificazioni. In primis
 i valori degli attributi sono condizionatamente indipendenti comprando:
 \begin{itemize}
   \item $P(a_1, a_2,\ldots a_n|v_J)=\prod_iP(a_i|v_j)$
@@ -292,7 +324,7 @@ i valori degli attributi sono condizionatamente indipendenti comprando:
   \item non si ha la ricerca esplicita dentro $H$ ma solo il contro delle
   frequenze 
 \end{itemize}
-Si ha quindi il classificatore Bayesano naive:
+Si ha quindi il classificatore Bayesiano naive:
 \[v_{NB}=\operatorname*{argmax}_{v_j\in V}P(v_j)\prod_iP(a_i|v_j)\]
 \newpage
 \begin{esempio}
@@ -336,9 +368,9 @@ Si ha però un limite se $n_c$ è molto piccolo, avendo risultati errati con:
 \begin{itemize}
   \item sottovalutazione delle probabilità a causa di un bias
   \item se addirittura $n_c$ è nullo esso ``dominerà'' sul classificatore
-  Bayesano 
+  Bayesiano 
 \end{itemize}
-Si introduce un nuovo approccio Bayesano sfruttando il cosiddetto
+Si introduce un nuovo approccio Bayesiano sfruttando il cosiddetto
 \textbf{m-estimate}, ovvero: 
 \[\frac{n_c+m\cdot p}{n+m}\]
 dove $p$ è una stima precedente della probabilità che desideriamo determinare,
@@ -351,37 +383,37 @@ Si nota che per $m$ nullo si ha che l'm-estimate è uguale a:
 \[\frac{n_c}{n}\]
 e quindi $m$ può essere interpretato come il numero di campioni virtuali
 distribuiti su $p$ a cui vengono aggiunti gli $n$ esempi effettivi osservati.
-\subsubsection{Esercitazione su Bayes concept learning}
+\section{Esempi}
 Si ricorda che si cerca una strategia per trovare la miglior ipotesi nello
 spazio delle ipotesi. In questo caso si parla di ``migliore'' in termini di più
 ``probabile''. \\
 Quando si fa inferenza bayesana e tutto governato da \textit{incertezza} ma
 permette di sfruttare conoscenze a priori.\\
 Ricordiamo quindi la formula di Bayes:
-\[P(\theta|D)=\frac{P(D|\theta)P(\theta)}{P(D)}\]
+\[P(\theta|d)=\frac{P(d|\theta)P(\theta)}{P(d)}\]
 con:
 \begin{itemize}
   \item $D$ è il dataset
   \item $\theta$ che per noi è l'ipotesi
-  \item $P(\theta|D)$ che è la distribuzione a posteriori
+  \item $P(\theta|d)$ che è la distribuzione a posteriori
   \item $P(\theta)$ è la distribuzione a priori
-  \item $P(D|\theta)$ è la verosimiglianza
-  \item $P(D)$ è l'evidenza
+  \item $P(d|\theta)$ è la verosimiglianza
+  \item $P(d)$ è l'evidenza
 \end{itemize}
 Sapendo che:
-\[P(D)=\sum_i(D, \theta_i)=\sum_i P(D|\theta_i)P(\theta_i)\]
-$P(D)$ è invariante rispetto al valore dell'ipotesi e quindi possiamo benissimo
+\[P(d)=\sum_i(d, \theta_i)=\sum_i P(d|\theta_i)P(\theta_i)\]
+$P(d)$ è invariante rispetto al valore dell'ipotesi e quindi possiamo benissimo
 rimuoverlo nel calcolo in quanto non influisce sulla probabilità a posteriori:
-\[P(\theta_i|D)\varpropto P(D|\theta_i)P(\theta_i)\]
+\[P(\theta_i|d)\varpropto P(d|\theta_i)P(\theta_i)\]
 (si ricorda che $\varpropto$ indica \textbf{proposizionale a} quindi che due
 cose sono uguali al più di una costante)\\
 Ricordiamo inoltre che la massima ipotesi a posteriori è:
-\[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|D)=
-  \operatorname*{argmax}_{h\in H}P(D|h)P(h)\]
+\[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|d)=
+  \operatorname*{argmax}_{h\in H}P(d|h)P(h)\]
 Se si sa che anche la conoscenza a priori è ininfluente, essendo distribuita
 seconda una distribuzione uniforme, e si parla d'ipotesi di massima
 verosimiglianza:
-\[h_{ML}=\operatorname*{argmax}_{h\in H}P(D|h)\]
+\[h_{ML}=\operatorname*{argmax}_{h\in H}P(d|h)\]
 L'approccio di Bayes nel machine learning è abbastanza oneroso, dovendo
 calcolare tutte le probabilità a posteriori di ogni ipotesi (se $H$ è grande
 diventa molto costoso).
@@ -397,7 +429,7 @@ diventa molto costoso).
       cold & no &yes & no & yes \\
       \hline
       \hline
-      $P(D|h)$ & 0 & 0 & 1 &0
+      $P(d|h)$ & 0 & 0 & 1 &0
     \end{tabular}
   \end{table}
   Si calcoli $h_{MAP}$, assumendo una conoscenza a priori con distribuzione
@@ -409,18 +441,18 @@ diventa molto costoso).
   distribuzione uniforme per tutte le ipotesi.\\
   Calcolo innanzitutto:
   %14
-  \[P(D)=\sum_i(D, h_i)=\sum_i
-    P(D|h_i)P(h_i)=0\cdot\frac{1}{4}+0\cdot\frac{1}{4}+
+  \[P(d)=\sum_i(d, h_i)=\sum_i
+    P(d|h_i)P(h_i)=0\cdot\frac{1}{4}+0\cdot\frac{1}{4}+
     1\cdot\frac{1}{4}+0\cdot\frac{1}{4}=\frac{1}{4}\]
   
   e quindi:
-  \[P(h_0|D)=\frac{P(D|h_0)P(h_0)}{P(D)}=
+  \[P(h_0|d)=\frac{P(d|h_0)P(h_0)}{P(d)}=
     \frac{0\cdot\frac{1}{4}}{\frac{1}{4}}=0\]
-  \[P(h_1|D)=\frac{P(D|h_1)P(h_1)}{P(D)}=
+  \[P(h_1|d)=\frac{P(d|h_1)P(h_1)}{P(d)}=
     \frac{0\cdot\frac{1}{4}}{\frac{1}{4}}=0\]
-  \[P(h_2|D)=\frac{P(D|h_2)P(h_2)}{P(D)}=
+  \[P(h_2|d)=\frac{P(d|h_2)P(h_2)}{P(d)}=
     \frac{1\cdot\frac{1}{4}}{\frac{1}{4}}=1\]
-  \[P(h_3|D)=\frac{P(D|h_3)P(h_3)}{P(D)}=
+  \[P(h_3|d)=\frac{P(d|h_3)P(h_3)}{P(d)}=
     \frac{0\cdot\frac{1}{4}}{\frac{1}{4}}=0\]
   Si ottiene infine:
   \[h_{MAP}=1\]
@@ -497,7 +529,7 @@ diventa molto costoso).
 Ricordiamo che per Naive Bayes si ha, avendo una sequenza $d_1, d_2\ldots d_n$ di
 osservazioni: 
 \[h_{MAP}=\operatorname*{argmax}_{h\in H}P(h|d_1, d_2\ldots d_n)\]
-\[=\operatorname*{argmax}_{h\in H}\frac{P(d_1, d_2\ldots d_n|h)P(h)}{P(D)}\]
+\[=\operatorname*{argmax}_{h\in H}\frac{P(d_1, d_2\ldots d_n|h)P(h)}{P(d)}\]
 \[\varpropto\operatorname*{argmax}_{h\in H}P(d_1, d_2\ldots d_n|h)P(h)\]
 Per semplificare, tramite naive Bayes, si può assumere:
 \[P(d_1, d_2\ldots d_n|h)=\prod_iP(d_i|h)\]

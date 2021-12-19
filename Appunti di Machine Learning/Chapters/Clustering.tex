@@ -1,4 +1,8 @@
 \chapter{Clustering}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/LearningNonSupervisionato.png}
+\end{figure}
 Il \textbf{clustering} è un approccio non supervisionato. Come se stessimo
 lavorando ``ad occhio'' si potrebbero avere vari criteri per effettuare il
 raggruppamento delle istanze, in mancanza di label. Il criterio di scelta è
@@ -24,7 +28,7 @@ criterio di misura (sempre basato sulla distanza).\\
 Avendo una classificazione non supervisionata si ha una scarsa conoscenza a
 priori dei dati da analizzare, puntando quindi all'estrazione automatica delle
 classi mentre in quella supervisionata si partiva da classi etichettate, avendo
-magari speso costo computazionale per ottenerle, e e da una struttura
+magari speso costo computazionale per ottenerle, e da una struttura
 classificatoria conosciuta (avendo un set d'ipotesi possibili). I sistemi non
 supervisionati tornano comodo quando la distribuzione dei valori degli attributi
 è informazione sufficiente per separare le istanze in più classi, si hanno
@@ -62,6 +66,7 @@ rispettare:
   \item \textbf{separazione} quando elementi di cluster diversi hanno basso
   livello di similarità, quindi tra cluster
 \end{itemize}
+\section{Definizioni Generali}
 \begin{definizione}
   Dato $N=\{e_1,\ldots, e_n\}$ un insieme di $n$ elementi e sia
   $C=\{C_1,\ldots, C_k\}$ una partizione di $N$ in sottoinsiemi. Ogni $C_i$ è
@@ -80,7 +85,7 @@ quali misura una specifica caratteristica (feature).\\
     \item la \textbf{distanza euclidea} (che è la solita distanza ottenuta dal
     definizione di Pitagora, è semplicemente la lunghezza del segmento che collega
     due punti nello spazio):
-    \[d(\vec{x},\vec{y})=\sqrt{\sum_i (x_i-y_i)^2}\]
+    \[d(\vec{x},\vec{y})=\sqrt{\sum_i (x_i-y_i)^2} = \lVert x_i - y_i \rVert^2\]
     è invariante rispetto alle  traslazioni e rotazioni degli assi
     \item la \textbf{distanza di Manhattan} (misuro gli spostamenti, che hanno
     peso 1, tra due punti in termini di somma ti tali spostamenti che formano
@@ -145,22 +150,43 @@ la  soluzione non è visualizzabile attraverso dendrogrammi e assume che il
 numeor $K$ di cluster sia noto, puntando a minimizzare le distanze tra elementi
 e i centroidi (un punto geometrico di riferimento per i cluster) dei clusters
 loro assegnati.\\
-L'algoritmo lavora con dati numerici in cinque step:
+L'algoritmo lavora con dati numerici in cinque step e si basa su due principali funzioni:
 \begin{enumerate}
-  \item si fissano a caso $K$ centroid'iniziali di altrettanti cluster
-  \item per ogni elemento si calcola la distanza da ciascun centroide e lo si
-  assegna al più vicino. Questo è uno step di classificazione, scegliendo il cluster
-  per un elemento dato il centroide del cluster
-  \item per la partizione provvisoria così ottenuta si ricalcolano i centroidi
-  di ogni cluster, usando media aritmetica dei punti del cluster parziale,
-  ottenendo il nuovo centroide. Si aggiustano quindi tutti i centroidi
-  \item per ogni individuo si ricalcola la distanza dai centroidi e si
-  effettuano gli eventuali spostamenti tra cluster dei vari elementi in base al
-  fatto che si hanno nuovi centroidi
-  \item si ripetono le operazioni 3 e 4 finché si raggiunge il numero massimo di
+    \item \textbf{Assegnazione del Cluster}: ogni elemento viene assegnato ad un cluster mediante il centroide più vicino.
+    \item \textbf{Movimento dei Centroidi}: i centroidi vengono spostati finché non viene rintracciati i cluster ottimi.
+\end{enumerate}
+\begin{enumerate}
+  \item Si fissano randomicamente $K$ centroidi iniziali di altrettanti cluster
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans1.PNG}
+\end{figure}
+  \item Per ogni elemento si calcola la distanza da ciascun centroide e lo si
+  assegna al più vicino. L'assegnazione ad un centroide indica l'assegnazione al relativo cluster.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans2.PNG}
+\end{figure}
+    \begin{nota}
+     Qualora $x^{(i)} \approx c^{(j)} \implies x^{(i)} \in Cluster_j$
+    \end{nota}
+  \item Per la partizione provvisoria così ottenuta si ricalcolano le posizioni dei centroidi per ogni cluster. Ciò avviene sfruttando la media aritmetica dei punti del cluster parziale. I centroidi vengono spostati in relazione alla media stessa.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans3.PNG}
+\end{figure}
+  \item si ripetono le operazioni 3 e 4 finché Si raggiunge il numero massimo di
   iterazioni impostate, avendo un euristica, o non si verificano altri
   spostamenti, avendo una stabilità di risultato, avendo il risultato
   ``migliore'' 
+      \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans4.PNG}
+\end{figure}
+%GIF
+\begin{nota}
+Gif animation: \url{https://machinelearningmedium.com/assets/2018-04-19-k-means-clustering/fig-1-clustering-animation.gif?raw=true}
+\end{nota}
 \end{enumerate}
 Si nota quindi la semplicità d'implementazione e un tempo di calcolo in :
 \[O(tKn)\]
@@ -170,42 +196,136 @@ con:
   \item $K$ numero di cluster
   \item $t$ numero d'iterazioni del ciclo (avendo quindi $kt<<n$)
 \end{itemize}
-Di contro si ha una sensibilità rispetto alla scelta dei centroidi
-iniziali, sperimentalmente si è dimostrato che brutti valori iniziali corrompano
-l'intero processo. Inoltre, come detto all'inizio, non si può predire il numero
-di cluster non conoscendo a priori i dati e non esiste un $K$ ottimale e non ci
-sono proprietà che ce lo possano suggerire. \\
-In ogni caso mappa sensatamente i vari elementi in base alle loro
-caratteristiche e quindi è un approccio parecchio usato, essendo generalmente
-efficacie.\\
-Non sapendo a priori il numero di $K$ posso ottenere scarsi risultati magari non
-avendo abbastanza centroidi. Adattarsi a un numero
-``eerato'' di centroidi può portare a risultati ``sporchi''. \\
+\subsection{Algoritmo Formale}
+Ipotizziamo che sia i centroidi $\mu$ che gli esempi $x$ siano \textbf{vettori}.
+\textbf{Input:}
+\begin{itemize}
+    \item  $K$: numero di clusters
+    \item $x^{(1)}, x^{(2)}, \cdots, x^{(m)}$: trainingset non supervisionato
+\end{itemize}
+\textbf{Algoritmo:}
+\begin{itemize}
+    \item $\mu_1, \mu_2, \cdots, \mu_k \in \mathbb{R}^n$: scelta randomica di centroidi.
+\end{itemize}
+% <![CDATA[
+\begin{align*}
+Repeat \{ \\
+    \text{for }i &= 1\text{ to }m \text{ ---> Assegnazione del cluster}\\
+        & c^{(i)} =\text{ indice (from }1\text{ to }K\text{) del centroide più vicino a }x^{(i)}\text{ -----> } min_k \lVert x^{(i)} - \mu_k \rVert^2 \\
+    \text{for }k &= 1\text{ to }K \text{---> Movimento dei centroidi} \\
+        & \mu_k =\text{ media dei punti assegnati al cluster }k\text{ -----> } \frac {\text{sum of } x^{(i)}\text{, where }c^{(i)} = k} {\text{number of }c^{(i)} = k} \\
+\}
+\end{align*} %]]>
+Si noti che i due cicli for riguardano i due principali step da compiere. In particolare durante lo spostamento dei centroidi potrebbe accadere un esempio simile:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans16.PNG}
+\end{figure}
+\subsection{K-Means per clusters non separati}
 Un altro problema è dato da dati distribuiti secondo diverse ``dimensioni''
 nello spazio ma l'algoritmo lavorando sui centroidi potrebbe misclassificare
 questo dettaglio, non distinguendo i corretti insiemi di punti. Analogamente
 succede se si hanno insiemi di punti più o meno densi, portando a
 misclassicazioni. Sempre in modo analogo le proprietà di distribuzione
 geometrica degli elementi comporta problemi (anche con un $K$ adeguato).
-
 Per superare queste difficoltà si può provare ad aumentare il numero di cluster,
 unendo poi, in un secondo passaggio, i vari cluster secondo certi criteri,
-magari avendo una netta separazione lineare tra cluster.\\
-\begin{figure}
-  \centering
-  \includegraphics[scale = 0.4]{img/clu1.jpg}
-  \includegraphics[scale = 0.4]{img/clu2.jpg}
-  \includegraphics[scale = 0.4]{img/clu3.jpg}
-  \caption{Esempi di problematiche per il clustering. A sinistra il valore
-    atteso e a destra quello ottenuto. Prima si ha il problema di cluster con
-    diverse dimensioni, poi con diverse densità e infine con problemi di
-    proprietà geometriche.}
+magari avendo una netta separazione lineare tra cluster.
+ \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans5.PNG}
 \end{figure}
-\begin{figure}
-  \centering
-  \includegraphics[scale = 0.4]{img/clusol.jpg}
-  \caption{Esempi di risoluzione delle tre problematiche aggiungendo cluster.}
+\subsection{Optimization Objective}
+\begin{definizione}
+  Siano:
+  \begin{itemize}
+      \item $c^{(i)}$: l'\textbf{indice} del cluster a cui è assegnato l'esempio $x^{(i)}$. 
+      \begin{nota}
+      Gli indici dei clusters $c^{(i)}$ variano nell'insieme $1 \cdots K$.
+      \end{nota}
+      \item $\mu_k$ il centroide k-esimo.
+      \item $\mu_{c^{(i)}}$ il centroide del cluster a cui è stato assegnato 'esempio $x^{(i)}$.
+      \begin{nota}
+      $x^{(5)} \in \mu_1 \implies c^{(5)} = 1$
+      \end{nota}
+  \end{itemize}
+  Allora definiamo la funzione di costo (\textbf{funzione di distorsione}), come:
+  \[J(c^{(1)}, c^{(2)}, \cdots, c^{(m)}, \mu_1, \mu_2, \cdots, \mu_K) = {1 \over m} \sum_{i=1}^m \lVert x^{(i)} - \mu_{c^{(i)}} \rVert^2\]
+  Da cui si evince la funzione di ottimizzazione:
+  \[min_{c^{(1)}, c^{(2)}, \cdots, c^{(m)},\\ \mu_1, \mu_2, \cdots, \mu_K} J(c^{(1)}, c^{(2)}, \cdots, c^{(m)}, \mu_1, \mu_2, \cdots, \mu_K)\]
+\end{definizione}
+\begin{nota}
+$\lVert x^{(i)} - \mu_{c^{(i)}} \rVert^2$ è la distanza tra un esempio e un centroide.
+ \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/kmeans6.PNG}
 \end{figure}
+\end{nota}
+Dalla funzione di costo notiamo alcune particolarità nell'algoritmo:
+ \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans14.PNG}
+\end{figure}
+\subsection{Inizializzazione randomica dei centroidi}
+Si è dimostrato che grossolani valori iniziali corrompano l'intero processo. Quindi, i cari lettori si staranno chiederanno: \textit{"Mario, quindi come facciamo a inizializzare i centroidi nel modo opportuno?"}.
+\begin{enumerate}
+    \item Prendiamo in considerazione $k$ elementi all'interno del dataset.
+    \begin{nota}
+    Non potendo avere più centroidi che elementi nel dataset, dovremo avere $k<m$.
+    \end{nota}
+     \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/kmeans7.PNG}
+\end{figure}
+    \item Impostiamo $\mu_1 \cdots \mu_k$ in base ai $k$ esempi presi in considerazione.
+     \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/kmeans8.PNG}
+\end{figure}
+\end{enumerate}
+I cari lettori sempre molto attenti avranno notato un problema all'interno della procedura: \textit{"Se i centroidi venissero inizializzati in modo errato?"}.
+     \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans9.PNG}
+\end{figure}
+     \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans10.PNG}
+\end{figure}
+Una possibile soluzione al problema è quella di eseguire l'inizializzazione e l'algoritmo per un certo numero di volte.
+     \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans15.PNG}
+\end{figure}
+Dopo un certo numero di iterazioni avremo diversi modi per classificare i dati in clusters. L'idea è quella di scegliere la soluzione \textbf{la cui funzione di costo è minore}. Il numero di iterazioni varia molto in relazione al parametro $k$:
+\begin{itemize}
+    \item Se $k \approx 10$ allora il numero di iterazioni sarà minore poiché il numero di cluster da analizzare è minore.
+    \item Se $k >> 10$ avviene l'inverso.
+\end{itemize}
+\subsection{La scelta del parametro $K$}
+Non sapendo a priori il numero di $K$ posso ottenere scarsi risultati magari non
+avendo abbastanza centroidi. Adattarsi a un numero
+``erato'' di centroidi può portare a risultati ``sporchi''. La scelta migliore per trovare il numero di clusters ottimali ricade \textbf{sempre} nell'analizzare per bene un dataset prima di agire. Difatti potrebbe risultare ambiguo far eseguire tale procedura ad un algoritmo.
+     \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/kmeans11.PNG}
+\end{figure}
+Esistono però metodi più o meno efficaci per eseguire automaticamente tale procedura.
+\subsubsection{Elbow Method}
+\begin{definizione}(Elbow Method)
+  From Wikipedia: Nell'analisi dei cluster, il metodo gomito è un metodo euristico utilizzato per determinare il numero di cluster in un set di dati. Il metodo consiste nel tracciare la variazione spiegata in funzione del numero di cluster e selezionare il gomito della curva come numero di cluster da utilizzare.
+\end{definizione}
+\begin{figure}[!htb]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=1\linewidth]{img/kmeans12.PNG}
+   \end{minipage}\hfill
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=1\linewidth]{img/kmeans13.PNG}
+   \end{minipage}
+\end{figure}
+\subsection{Silhouette}
 Per misurare le prestazioni di clustering bisogna capire come classificare i
 risultati. Si usa la \textbf{misura di silhouette} per capire se un clustering è
 migliore di un altro. Tale misura si basa sempre sul concetto di distanza. Si
@@ -236,8 +356,8 @@ linee molto più strette rispetto al resto nel diagramma di silhouette. Quindi
 grafici e media di silhouette 
 possono essere utilizzati per determinare il numero ``naturale'' di cluster
 all'interno di un set di dati. 
-\subsubsection{Esercitazione clustering e K-Means}
-\begin{esercizio}
+\subsection{Esempi}
+\begin{esempio}
   Siano dati i seguenti 8 esempi:
   \begin{enumerate}
     \item $A1=(1, 10)$
@@ -342,7 +462,7 @@ all'interno di un set di dati.
     \includegraphics[scale = 0.4]{img/clue3.jpg}
   \end{figure}
   Avendo una sola epoca da calcolare mi fermo.
-\end{esercizio}
+\end{esempio}
 \chapter{Reinforcement learning}
 \textit{Brevissima introduzione a caso}.\\
 Questi metodi sono usati spesso in ambienti in cui serve trainare una macchina

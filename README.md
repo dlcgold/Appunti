@@ -57,7 +57,7 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 
 ##### II anno Magistrale
 - [x] Fondamenti Logico Matematici dell'Informatica
-- [ ] Data and Computational Biology
+- [x] Data and Computational Biology (RC1)
 - [ ] Big Data in Biotechnology & Biosciences
 - [ ] Computational Systems Biology 
 - [ ] Laboratorio di Progettazione

@@ -6,6 +6,7 @@
 \usepackage{graphics}
 \usepackage{amsfonts}
 \usepackage{listings}
+\usepackage{pdfpages}
 \usepackage{amsmath}
 \usepackage{amstext}
 \usepackage{engrec}
@@ -14,6 +15,20 @@
 \usepackage[safe,extra]{tipa}
 % \usepackage{showkeys}
 \usepackage{multirow}
+
+\newenvironment{dedication}
+  {%\clearpage           % we want a new page          %% I commented this
+   \thispagestyle{empty}% no header and footer
+   \vspace*{\stretch{1}}% some space at the top
+   \itshape             % the text is in italics
+   \raggedleft          % flush to the right margin
+  }
+  {\par % end the paragraph
+   \vspace{\stretch{3}} % space at bottom is three times that at the top
+   \clearpage           % finish off the page
+  }
+
+
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{fontspec}
@@ -30,6 +45,17 @@
 \usepackage{enumitem}
 \usepackage{framed}
 \usepackage{pdfpages}
+
+\usepackage{afterpage}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage
+    \input{Chapters/readme}
+    }
+
 \usepackage{pgfplots}
 \usepackage{color}
 \usepackage{algorithm}
@@ -140,8 +166,13 @@
 
 
 \title{Modelli della Concorrenza}
-\author{UniShare\\\\Davide Cozzi\\\href{https://t.me/dlcgold}{@dlcgold} and Mario Avolio}
-\date{}
+\author{
+  Davide Cozzi\\
+  \texttt{https://t.me/dlcgold}
+  \and
+  Mario Avolio\\
+  \texttt{https://github.com/MarioAvolio}
+}
 
 \pgfplotsset{compat=1.13}
 \begin{document}
@@ -158,7 +189,7 @@
             
         \vspace{1.5cm}
             
-        \textbf{\href{https://t.me/dlcgold}{Davide Cozzi} \\ \href{https://www.marioavolio.ml/}{Mario Avolio}}
+        \textbf{\href{https://t.me/dlcgold}{Davide Cozzi} \\ \href{https://github.com/MarioAvolio/}{Mario Avolio}}
             
         \vfill
             
@@ -205,116 +236,31 @@
 \textbf{Sebbene, questo nobile gesto vuole essere una risorsa free e open source per aiutare gli studenti, è doveroso sottolineare che questo libro non è stato scritto da professori dell'UnimiB ma da studenti. Non è quindi da considerarsi una risorsa ufficiale. Alcuni contenuti di questo testo riprendono slide di alcuni corsi o elementi di alcuni libri. \\ Si ringrazia Freepik di www.flaticon.com per l'icona della prima pagina.}
 
 \input{Chapters/Intro}
+
+\afterpage{\blankpage}
+
 \input{Chapters/Logica}
+
+\afterpage{\blankpage}
+
 \input{Chapters/ConcorrenzaSequenziali}
+
+\afterpage{\blankpage}
+
+
 \input{Chapters/COCS}
+
+
+\afterpage{\blankpage}
+
 \input{Chapters/Petri}
+
+\afterpage{\blankpage}
+
+
 \input{Chapters/LTMC}
+\afterpage{\blankpage}
 
-
-\chapter{Seminario su logiche quantistiche e sistemi concorrenti}
-\textit{\textbf{Nota: queste note, prese durante il seminario del prof
-    Bernardinello, tenuto l'11 Febbraio 2021, sono incomplete, parziali e
-    probabilmente scorrette in determinati punti, soprattutto a causa del lag
-    della chiamata.}} \\
-Si parla di logica in relazione a sistemi concorrenti, superando il punto di
-vista non concorrente visto coi modelli di Kripke.\\
-Partiamo da alcune considerazioni precedenti a quelle che riguardano
-direttamente la concorrenza. \\
-Immaginando gli stati di un modello di Kripke, con un insieme di stati $Q$ e un
-insieme di transizioni $T$, si ha una funzione di transizione:
-\[I:Q\to 2^{AP}\]
-con $AP$ insieme delle proposizioni. Prendiamo un $p\in AP$ e prendiamo
-l'insieme degli stati nel modello dove è vero $p$, ugualmente facciamo con una
-certa $1\in AP$. Tali insiemi di stati potrebbero avere un'intersezione non
-vuota e in tali stati vale $p\land q\in\mathbb{F}$, con $\mathbb{F}$ che
-rappresenta l'insieme delle formule proposizionali. La congiunzione logica è
-quindi l'intersezione tra insiemi. Ragionamenti analoghi si fanno per gli altri
-operatori logici. Qualunque sottoinsieme di stati corrisponde ad una certa
-proposizione e quindi, dato $Q$, costruiamo $2^Q$ e ogni elemento di questa
-famiglia è una proposizione. Può capitare che due proposizioni atomiche vengano
-associate allo stesso insieme di stati. Si dice che una proposizione è per
-definizione un sottoinsieme di stati e si parla di \textbf{dualità
-  stati-proprietà} (con \textit{proprietà} come stato associato alla
-proposizione). Quindi una \textbf{proprietà} è per definizione un insieme di
-\textit{stati} e uno \textbf{stato} è per definizione un insieme di
-\textit{proprietà}, per questo si parla di \textbf{dualità}.\\
-Se immaginiamo di prendere la famiglia $2^Q$ e di avere un sottoinsieme di soli
-tre elementi, per esempio, posso disegnare un grafo con $X\rightarrow Y$ che
-indica che 
-$X$ è contenuto in $Y$. Parto quindi da $\emptyset$, poi i sottoinsiemi con un
-solo elemento, poi con due e il singolo con tre, con gli archi che indicano
-l'essere contenuto, ovvero $\subseteq$. Si ha quindi una relazione di ordine
-parziale ma si può vedere anche come \textit{implicazione logica} $X\implies
-Y$, con $\emptyset$ che è la costante logica $\bot$ mentre l'insieme completo a
-$\top$. Si è creato un reticolo o meglio un'\textbf{algebra di bool}. Un algebra
-di bool è un reticolo con anche \textit{join($\lor$), meet ($\land$),
-  complemento/not ($\neg$)}. Possiamo identificare la logica proposizionale
-classica con le algebre di bool. \\
-Introduciamo nel discorso l'idea di sistema concorrente. Pensando ai
-\textit{sistemi di transizione} abbiamo automi che fissano uno stato in un certo
-istante temporale $t$. Nei sistemi concorrenti il concetto di \textit{stato
-  globale} non è osservabile (per un discorso di velocità dei segnali e tempo
-che passa prima della ricezione). Si pensi che nella fisica non esiste un
-sistema di riferimento temporale unico e privilegiato e questo discorso è
-approfondito nella \textit{teoria della relatività} (dove si introduce anche la
-velocità della luce come limite superiore di velocità). \\
-Un sistema distribuito è quindi intrinsecamente concorrente e nessun componente
-può osservare lo stato globale, nemmeno un osservatore esterno, non si ha
-determinismo. \\ 
-Per ovviare al problema Petri introduce le \textit{reti di Petri}. \\
-Discorso utile nelle reti di Petri è quello di condizione complementare,
-l'aggiunta di tali condizioni non cambia il comportamento della rete. La stessa
-cosa accade se aggiungo uno stato che è una \textbf{combinazione logica} di
-stati già presenti. \\
-Portare avanti questa osservazione si ha la \textbf{saturazione della rete},
-ovvero si aggiungono tutti gli stati che non modificano il comportamento della
-rete. \\
-\textit{La logica delle condizioni delle reti di Petri non è la logica classica
-dell'algebra booleana}. La teoria delle reti Petri nasce appunto dal fatto che
-le semantiche interleaving non sono adeguate per i sistemi concorrenti.\\
-Si ha un \textbf{poset ortomodulare} (parzialmente ordinata) o \textbf{logica
-  quantistica} come la 
-\textit{struttura logica degli stati locali}, dove appunto non valgono alcune
-proprietà delle algebre booleane. \\
-\textit{La seguente parte formale è tratta dalle slide, purtroppo la discussione
-in merito è persa causa lag.}\\
-Formalmente prendiamo una rete:
-\[N=(B,E,F,C)\]
-si ha che, per $x,y\in B$:
-\[x\leq y\iff \forall c\in C:x\in c\implies y\in c\]
-Si prende quindi anche una rete:
-\[N'=(B',E,F',C')\]
-avendo che:
-\begin{itemize}
-  \item $B\subseteq B'$
-  \item $CG(N)$ è isomorfo $CG(N')$
-  \item $N'$ è \textit{saturo} di stati locali
-\end{itemize}
-\begin{teorema}
-  Date le premesse fatte su $N'$ si ha che:
-  \[\langle B', \leq, \bot,\top,(,)'  \rangle\]
-  è un \textbf{poset ortomodulare}.
-\end{teorema}
-\begin{definizione}
-  Preso:
-  \[P=\langle P, \sqsubseteq, \bot,\top,(,)'  \rangle\]
-  si definisce \textbf{prime filter} $f\subseteq P$ tale che:
-  \begin{itemize}
-    \item $x\in f, x\leq y\implies y\in f$
-    \item $x,y\in f, x\$y\implies x\land y\in f$
-  \end{itemize}
-\end{definizione}
-Ogni componente osserva le proprie condizioni locali in modo oggettivo e
-istantaneo ma dal punto di vista globale tutto l'insieme è formato all'unione
-delle algebre booleane dei singoli elementi. Non posso quindi usare sempre lo
-stato globale per ottenere informazioni utili, serve una \textit{logica
-  quantistica}, concetto nato nel tentativo di studiare sistemi di meccanica
-quantistica, dove si ha il fenomeno per il quale, rompendo i principi della
-meccanica classica, non si possono osservare simultaneamente due quantità
-fisiche diverse (questa caratteristica è simile a quella che si ottiene in un
-sistema distribuito, dove non posso osservare lo stato globale in un certo
-istante).   
 
 \end{document}
 % LocalWords:  Machine Learning dell multicore monocore checking mutex thread

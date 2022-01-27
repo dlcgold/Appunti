@@ -2,6 +2,21 @@
 Il percettrone, sebbene sia estremamente semplice, riesce ad impara solo funzioni di separazione lineari. Le reti neurali multistrato invece riescono anche ad apprendere funzioni di separazione non lineari complesse ma con
 difficoltà di addestramento avendo molti minimi locali e tanti pesi. Le Support Vector Machines (\textbf{SVM}) presentano un algoritmo di apprendimento efficiente e imparano funzioni di
 separazione non lineari complesse.
+In particolare le SVM hanno il compito di trovare il confine decisionale (decision boundary) con il margine più ampio rispetto agli elementi del dataset. Ecco perchè le SVM sono anche chiamate \textbf{Large Margin Classifier} \cite{SVMTowardDataScience}.
+Generalmente più è ampio il margine e più il separatore generalizza meglio i punti.
+\begin{definizione}[Dimensione di
+Vapnik-Cervonenkis]
+  Con la teoria statistica dell’apprendimento si
+dimostra che più allarghiamo il margine meglio
+l’iperpiano generalizza.
+\end{definizione}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/Svm_max_sep_hyperplane_with_margin.png}
+    \caption{SVM e margine decisionale}
+    \label{fig:svm}
+\end{figure}
+Ipotizziamo per ora che il margine decisionale sia rappresentato da una retta $w\cdot x - b = 0$ in due dimensioni (avremo modo di vedere che si potrà fare anche in modo diverso), proprio come in figura \ref{fig:svm}. Si noti che essa possiede due margini: $w\cdot x - b = 1$ e $w\cdot x - b = -1$. Su tali margini ricadono i \textbf{vettori di supporto}, ovvero dei punti tale per cui $w\cdot x - b = -1$ o $w\cdot x - b = 1$. Tali punti rappresentano un campione classificato in modo errato o un campione vicino a al confine decisionale. In dettaglio essi sono \textbf{gli unici punti} ad avere un impatto sul'algoritmo SVM per la ricerca del separatore ottimo. Il perchè di tale caratteristica è spiegato dalla funzione di costo delle SVM.
 \section{Una visione alternativa della regressione logistica}
 Le \textit{Support Vector Machine} possono essere viste come una versione alternativa della regressione logistica. In particolare prendiamo in considerazione la funzione sigmoide:
 \[h_\theta(x) = \frac {1} {1 + e^{-z}}\]
@@ -16,111 +31,133 @@ J(\theta) &= -{1 \over m} \sum_{i=1}^m \left( y^{(i)}\,log(h_\theta(x^{(i)}) + (
 \end{align*} %]]>
 Dove ogni esempio nel DataSet contribuisce alla funzione di costo:
 \[-y\,log(\frac {1} {1 + e^{-z}}) - (1-y)\,log(1 - \frac {1} {1 + e^{-z}})\]
-Andando a modificare tale funzione di costo avremo un problema più semplice da risolvere. In particolare le SVM sfruttano una semplificazione della funzione di costo indicata (\ref{Fig:SVMCosty1} e \ref{Fig:SVMCosty0}).
+Andando a modificare tale funzione di costo avremo un problema più semplice da risolvere. In particolare le SVM sfruttano una semplificazione della funzione di costo indicata (\ref{fig:SVMCosty1} e \ref{fig:SVMCosty0}).
 \begin{figure}[!htb]
    \begin{minipage}{0.48\textwidth}
      \centering
-     \includegraphics[width=.7\linewidth]{img/costFunSVMy1.png}
-     \caption{Funzione di costo per SVM con y = 1}\label{Fig:SVMCosty1}
+     \includegraphics[width=1\linewidth]{img/costFunSVMy1.png}
+     \caption{Funzione di costo per SVM con y = 1}\label{fig:SVMCosty1}
    \end{minipage}\hfill
    \begin{minipage}{0.48\textwidth}
      \centering
-     \includegraphics[width=.7\linewidth]{img/costFunSVMy0.png}
-     \caption{Funzione di costo per SVM con y = 0}\label{Fig:SVMCosty0}
+     \includegraphics[width=1\linewidth]{img/costFunSVMy0.png}
+     \caption{Funzione di costo per SVM con y = 0}\label{fig:SVMCosty0}
    \end{minipage}
 \end{figure}
-Da cui si evincono le funzioni di costo per le SVM: $Cost_0(\Theta^Tx)$ per le predizioni di $y=0$ e $Cost_1(\Theta^Tx)$ per le predizioni di $y=1$.
-\subsection{Funzione di costo per le SVM}
-Ricordiamo che nella funzione logistica possiamo inserire il parametro di regolarizzazione seguendo la funzione di costo:
-\[J(\theta) = {1 \over m} \sum_{i=1}^m \left( y^{(i)}\,(-log(h_\theta(x^{(i)}))) + (1-y^{(i)})\,(-log(1 - h_\theta(x^{(i)}))) \right) + {\lambda \over 2m } \sum_{j=1}^n \theta_j^2\]
-Che si può riscrivere nella forma di parametrizzazione:
-\[A + \lambda B\]
-Da essa ricaviamo una prima forma di funzione di costo per le SVM sostituendo semplicemente i termini di costo:
-\[J(\theta) = {1 \over m} \sum_{i=1}^m \left( y^{(i)}\,cost_1(z) + (1-y^{(i)})\,cost_0(z) \right) + {\lambda \over 2m } \sum_{j=1}^n \theta_j^2\]
-Notiamo però alcuni accorgimenti che possiamo attuare per cambiare la notazione pur facendo rimanere inalterata la logica:
-\begin{itemize}
-    \item Rimuove il parametro $\frac{1}{m}$ non ha effetto sulla minimizzazione poiché rimane sempre costante.
-    \item Inserendo un termine $C = \frac{1}{\lambda}$ possiamo scrivere che $A + \lambda B = CA+B$.
-\end{itemize}
-Da cui si evince la seguente funzione di costo (equivalente logicamente alla precedente):
-\[J(\theta) = C \sum_{i=1}^m \left[ y^{(i)}\,cost_1(\theta^T x^{(i)}) + (1-y^{(i)})\,cost_0(\theta^T x^{(i)}) \right] + {1 \over 2 } \sum_{j=1}^n \theta_j^2\]
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1\textwidth]{img/costFunctionSVM.png}
-% \end{figure}
-% Su cui possiamo anche inserire un parametro di regolarizzazione:
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1\textwidth]{img/costFunctionSVM2.png}
-% \end{figure}
-Per cui prendiamo in considerazione la seguente ipotesi per le SVM:
+Da cui si evincono le funzioni di costo per le SVM: $Cost_0(\Theta^Tx)$ per le predizioni di $y=0$ e $Cost_1(\Theta^Tx)$ per le predizioni di $y=1$.\\ 
+Introduciamo allora l'\textbf{ipotesi} per le SVM:
   \[h_\theta(x) =
     \begin{cases}
       1& \iff \Theta^Tx \geq 0 \\
       0& Altrimenti
     \end{cases}
   \]
+Dai grafici della funzione di costo però si può benissimo notare che per $0 \leq \Theta^Tx < 1$ la funzione di costo penalizza (anche se di poco) l'algoritmo, ma secondo la nostra ipotesi questo va comunque bene. In particolare la funzione di costo esprime il seguente concetto:
+  \[Predizione =
+    \begin{cases}
+      1& \implies Cost_1(\Theta^Tx) = 0 \implies \Theta^Tx \geq 1\\
+      0& \implies Cost_0(\Theta^Tx) = 0  \implies \Theta^Tx \leq -1
+    \end{cases}
+  \]
+Se prendessimo in considerazione la \ref{fig:SVMCosty1} noteremmo che per $\Theta^Tx \geq 1$ la funzione di costo non penalizza l'algoritmo, ovvero ci fornisce un valore nullo. Se $\Theta^Tx < 1$ il costo aumenta e il valore di $\Theta^Tx$ diminuisce.\\ 
+Notando le figure \ref{fig:svmCost} e \ref{fig:SVMCostPlots} possiamo sottolineare il fatto che\textbf{ per ogni predizione positiva o negativa, se essa è compresa in valori tali per cui $-1 < \Theta^Tx < 1$, la funzione di costo penalizza sempre l'algoritmo}. Oltre a ciò è doveroso sottolineare che la funzione di costo penalizza, chiaramente, anche nei casi in cui la predizione sia scorretta.
+\begin{figure}[!htb]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+    \includegraphics[width=1\textwidth]{img/SVMCostExample.png}
+    \caption{SVM e costo}
+    \label{fig:svmCost}
+   \end{minipage}\hfill
+   \begin{minipage}{0.48\textwidth}
+     \centering
+  \includegraphics[width=1\textwidth]{img/cost-plots-SVM.png}
+    \caption{SVM funzioni di costo}
+    \label{fig:SVMCostPlots}
+   \end{minipage}
+\end{figure}
+Ricordando che il processo di adattamento del modello consiste nel ridurre al minimo la funzione di costo, notiamo che non vi è alcun costo per i vettori \textbf{non} di supporto, il valore totale della funzione di costo non verrà modificato aggiungendoli o rimuovendoli. Questo è il motivo per cui non siamo interessati ai valori che non siano \textbf{vettori di supporto}.
+\subsection{Valore della funzione di costo per le SVM}
+Ora possiamo definire più approfonditamente il valore della funzione di costo per le SVM. Notando le figure \ref{fig:SVMCosty0} e \ref{fig:SVMCosty1} si evince che:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/SVMCostFunctionValue.png}
+\end{figure}
+% TODO: studiare la regolarizzazione prima di descrivere questo aspetto
+% \subsubsection{Regolarizzazione: Il parametro C}
+% Ricordiamo che nella funzione logistica possiamo inserire il parametro di regolarizzazione seguendo la funzione di costo:
+% \[J(\theta) = {1 \over m} \sum_{i=1}^m \left( y^{(i)}\,(-log(h_\theta(x^{(i)}))) + (1-y^{(i)})\,(-log(1 - h_\theta(x^{(i)}))) \right) + {\lambda \over 2m } \sum_{j=1}^n \theta_j^2\]
+% Che si può riscrivere nella forma di parametrizzazione:
+% \[A + \lambda B\]
+% Da essa ricaviamo una prima forma di funzione di costo per le SVM sostituendo semplicemente i termini di costo:
+% \[J(\theta) = {1 \over m} \sum_{i=1}^m \left( y^{(i)}\,cost_1(z) + (1-y^{(i)})\,cost_0(z) \right) + {\lambda \over 2m } \sum_{j=1}^n \theta_j^2\]
+% Notiamo però alcuni accorgimenti che possiamo attuare per cambiare la notazione pur facendo rimanere inalterata la logica:
+% \begin{itemize}
+%     \item Rimuove il parametro $\frac{1}{m}$ non ha effetto sulla minimizzazione poiché rimane sempre costante.
+%     \item Inserendo un termine $C = \frac{1}{\lambda}$ possiamo scrivere che $A + \lambda B = CA+B$.
+% \end{itemize}
+% Da cui si evince la seguente funzione di costo (equivalente logicamente alla precedente):
+% \[J(\theta) = C \sum_{i=1}^m \left[ y^{(i)}\,cost_1(\theta^T x^{(i)}) + (1-y^{(i)})\,cost_0(\theta^T x^{(i)}) \right] + {1 \over 2 } \sum_{j=1}^n \theta_j^2\]
+% % \begin{figure}[H]
+% %     \centering
+% %     \includegraphics[width=1\textwidth]{img/costFunctionSVM.png}
+% % \end{figure}
+% % Su cui possiamo anche inserire un parametro di regolarizzazione:
+% % \begin{figure}[H]
+% %     \centering
+% %     \includegraphics[width=1\textwidth]{img/costFunctionSVM2.png}
+% % \end{figure}
+% Per cui prendiamo in considerazione la seguente ipotesi per le SVM:
+%   \[h_\theta(x) =
+%     \begin{cases}
+%       1& \iff \Theta^Tx \geq 0 \\
+%       0& Altrimenti
+%     \end{cases}
+%   \]
+% % \begin{figure}[H]
+% %     \centering
+% %     \includegraphics[width=1\textwidth]{img/SVMHypo.png}
+% % \end{figure}
+% Lasciando che il parametro \[C = \frac{1}{\lambda} \to \infty\]
+% Per minimizzare la funzione di costo allora:
+% \[\sum_{i=1}^m \left[ y^{(i)}\,cost_1(\theta^T x^{(i)}) + (1-y^{(i)})\,cost_0(\theta^T x^{(i)}) \right] \to 0\]
+% In particolare si deve far si che:
+%   \[y =
+%     \begin{cases}
+%       1& \implies Cost_1(\Theta^Tx) = 0\\
+%       0& \implies Cost_0(\Theta^Tx) = 0 
+%     \end{cases}
+%   \]
+%   \begin{esempio}
+% Se avessimo una predizione $y=1$ allora dovremo rifarci alla funzione $Cost_1(\Theta^Tx)$, tale per cui se il nostro input $x$ sia tale che $\Theta^Tx < 1$ allora il costo stesso fornito dalla funzione tenderebbe a $\infty$. Quest'ultimo ci avvertirebbe che la nostra ipotesi non è sicuramente adatta alla tipologia di predizione considerata.
+% \end{esempio}
+% Seguendo quindi questa intuizione possiamo descrivere il tutto come:
+% \[min_\theta J(\theta) = min_\theta {1 \over 2 } \sum_{j=1}^n \theta_j^2\]
+% % <![CDATA[
+% \begin{align*}
+% \theta^Tx^{(i)} &\geq 1 \text{, if } y^{(i)}=1 \\
+% \theta^Tx^{(i)} &\leq -1 \text{, if } y^{(i)}=0
+% \end{align*} %]]>
+% Dalla precedente osservazione possiamo anche notare che basterebbe $\Theta^Tx \geq 0$ per classificare un esempio come positivo. Ora sicuramente i lettori si staranno ponendo la seguente domanda: \textit{"Mario, ma allora perché stiamo ponendo $\Theta^Tx \geq 1$?"}. La risposta alla domanda riguarda la differenza stessa tra la \textit{regressione logistica} e le \textbf{Support Vector Machine}, ovvero: quest'ultime preservano un comportamento chiamato \textbf{margine}. Esso si ottiene principalmente dalla \textbf{minimizzazione della funzione di costo}, in particolare si raggiunge un \textbf{decision boundary} molto interessante tale per cui il \textbf{margine} sia il più grande possibile. In particolare ricordiamo che la minimizzazione della funzione di costo ha il compito di trovare i valori di $\theta$ più bassi, in dettaglio al variare di tali valori varia anche il confine decisionale.
 % \begin{figure}[H]
 %     \centering
-%     \includegraphics[width=1\textwidth]{img/SVMHypo.png}
+%     \includegraphics[width=1\textwidth]{img/margin.png}
 % \end{figure}
-\section{Margine e confine decisionale}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{img/cost-plots-SVM.png}
-    \caption{SVM funzioni di costo}
-    \label{Fig:SVMCostPlots}
-\end{figure}
-Notando la figura \ref{Fig:SVMCostPlots} forniamo le seguenti osservazioni:
-  \[y =
-    \begin{cases}
-      1& \implies \Theta^Tx \geq 1 \,\,\,\mbox{ NON basta $\geq$ 0 }\\
-      0& \implies \Theta^Tx \leq -1 \,\,\,\mbox{ NON basta < 0 }
-    \end{cases}
-  \]
-\subsection{Minimizzazione della funzione di costo}
-Lasciando che il parametro \[C = \frac{1}{\lambda} \to \infty\]
-Per minimizzare la funzione di costo allora:
-\[\sum_{i=1}^m \left[ y^{(i)}\,cost_1(\theta^T x^{(i)}) + (1-y^{(i)})\,cost_0(\theta^T x^{(i)}) \right] \to 0\]
-In particolare si deve far si che:
-  \[y =
-    \begin{cases}
-      1& \implies Cost_1(\Theta^Tx) = 0\\
-      0& \implies Cost_0(\Theta^Tx) = 0 
-    \end{cases}
-  \]
-  \begin{esempio}
-Se avessimo una predizione $y=1$ allora dovremo rifarci alla funzione $Cost_1(\Theta^Tx)$, tale per cui se il nostro input $x$ sia tale che $\Theta^Tx < 1$ allora il costo stesso fornito dalla funzione tenderebbe a $\infty$. Quest'ultimo ci avvertirebbe che la nostra ipotesi non è sicuramente adatta alla tipologia di predizione considerata.
-\end{esempio}
-Seguendo quindi questa intuizione possiamo descrivere il tutto come:
-\[min_\theta J(\theta) = min_\theta {1 \over 2 } \sum_{j=1}^n \theta_j^2\]
-% <![CDATA[
-\begin{align*}
-\theta^Tx^{(i)} &\geq 1 \text{, if } y^{(i)}=1 \\
-\theta^Tx^{(i)} &\leq -1 \text{, if } y^{(i)}=0
-\end{align*} %]]>
-Dalla precedente osservazione possiamo anche notare che basterebbe $\Theta^Tx \geq 0$ per classificare un esempio come positivo. Ora sicuramente i lettori si staranno ponendo la seguente domanda: \textit{"Mario, ma allora perché stiamo ponendo $\Theta^Tx \geq 1$?"}. La risposta alla domanda riguarda la differenza stessa tra la \textit{regressione logistica} e le \textbf{Support Vector Machine}, ovvero: quest'ultime preservano un comportamento chiamato \textbf{margine}. Esso si ottiene principalmente dalla \textbf{minimizzazione della funzione di costo}, in particolare si raggiunge un \textbf{decision boundary} molto interessante tale per cui il \textbf{margine} sia il più grande possibile. In particolare ricordiamo che la minimizzazione della funzione di costo ha il compito di trovare i valori di $\theta$ più bassi, in dettaglio al variare di tali valori vari anche il confine decisionale.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{img/margin.png}
-\end{figure}
-\begin{definizione}
-  La SVM è un classificatore di margini di grandi dimensioni.
-\end{definizione}
-Dando più \textit{"priorità"} al parametro $A$ mediante $C$ avremo:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{img/fig-4-large-margin-decision-boundary.png}s
-\end{figure}
-\subsubsection{L'effetto del Parametro C}
-Il parametro $C$ può essere visto come $\frac{1}{\lambda}$. In particolare un valore piccolo di C garantisce che i valori anomali (\textit{outliers}) vengano trascurati e che venga determinata la migliore approssimazione per il margine. 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{img/fig-5-effect-of-regularization.png}
-\end{figure}
+% \begin{definizione}
+%   La SVM è un classificatore di margini di grandi dimensioni.
+% \end{definizione}
+% Dando più \textit{"priorità"} al parametro $A$ mediante $C$ avremo:
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.7\textwidth]{img/fig-4-large-margin-decision-boundary.png}s
+% \end{figure}
+% Il parametro $C$ può essere visto come $\frac{1}{\lambda}$. In particolare un valore piccolo di C garantisce che i valori anomali (\textit{outliers}) vengano trascurati e che venga determinata la migliore approssimazione per il margine. 
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=1\textwidth]{img/fig-5-effect-of-regularization.png}
+% \end{figure}
 
 \section{Kernel: un modo per classificare ipotesi non lineari}
-Le \textit{Support Vector Machine} riescono anche a classificare funzioni \textbf{non lineari complesse}. Un modo per farlo è quello di trovare una serie di caratteristiche polinomiali complesse: facciamo corrispondere ogni vettore di input $x$ a un nuovo vettore $f$ di valori di caratteristiche.
+Le \textit{Support Vector Machine} riescono anche a classificare funzioni \textbf{non lineari complesse}. Un modo per farlo è quello di trovare una serie di features polinomiali complesse: facciamo corrispondere ogni vettore di input $x$ a un nuovo vettore $f$ di valori di features. Si può immaginare una feature come una funzione che mappa un esempio $x$ in uno spazio con più dimensioni.
   \[h_\theta(x) =
     \begin{cases}
       1& \iff \Theta^Tf \geq 0 \\
@@ -150,87 +187,97 @@ Per farlo prendiamo in considerazione la seguente ipotesi:
       0& Altrimenti
     \end{cases}
   \]
-  Essendo l'insieme di dati non linearmente separabile, sfruttiamo una mappatura mediante un insieme di caratteristiche:
-  \[f_1 = x_1,\,\,\,f_2 = x_2,\,\,\,f_3 = x_1x_2, \,\,\, f_4 = x_1^2 \,\,\,\dots\]
+  Essendo l'insieme di dati non linearmente separabile, sfruttiamo una mappatura mediante un insieme di features:
+  \[f^{(1)} = x_1,\,\,\,f^{(2)} = x_2,\,\,\,f^{(3)} = x_1x_2, \,\,\, f^{(4)} = x_1^2 \,\,\,\dots\]
   Da cui deriviamo la nuova ipotesi \textbf{linearmente separabile}:
   \[h_\theta(x) =
     \begin{cases}
-      1& \iff \theta_0 + \theta_1f_1 + \theta_2f_2 + 
-      \theta_3f_3 + \theta_4f_4 \dots \geq 0 \\
+      1& \iff \theta_0 + \theta_1f^{(1)} + \theta_2f^{(2)} + 
+      \theta_3f^{(3)} + \theta_4f^{(4)} \dots \geq 0 \\
       0& Altrimenti
     \end{cases}
   \]
 \end{esempio}
-\subsection{Creazione delle caratteristiche}
-Ora la domanda sorge spontanea: \textit{"Mario, ma come facciamo a trovare le features per eseguire una mappatura?"}. Per rispondere a questa domanda dobbiamo introdurre i \textbf{vettori di supporto}: punti sull'estremità del margine del separatore lineare che hanno il compito di punti di riferimento (fig.\ref{supportVector}). \textbf{Per ognuno di questi punti esiste una nuova feature}.
+\subsection{Creazione delle features}
+Ora la domanda sorge spontanea: \textit{"Mario, ma come facciamo a trovare le features per eseguire una mappatura?"}. Per rispondere a questa domanda dobbiamo introdurre i \textbf{punti di riferimento} (fig.\ref{fig:supportVector}). 
+\begin{definizione}
+  Per ogni elemento $x_k$ all'interno di un dataset, preso in considerazione l'insieme di punti di riferimento $l$, definiamo le features $f^k$ come:
+  \[f^k = similarity(x_k,l) = k(x_k,l)\]
+\end{definizione}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{img/supportVector.png}
-    \caption{Vettori di supporto}
-    \label{supportVector}
+    \includegraphics[width=0.7\textwidth]{img/fig-9-svm-landmarks.png}
+    \caption{Punti di riferimento nello spazio originale degli elementi}
+    \label{fig:supportVector}
 \end{figure}
-\begin{definizione}
-  Dato un vettore $x$ e un insieme di vettori di supporto $l^{(i)}$, definiamo le caratteristiche $f_i$ come:
-  \[f_i = similarity(x,l^{(i)}) = k(x,l^{(i)})\]
-\end{definizione}
-Le \textbf{funzioni kernel} esprimono quindi la \textit{"somiglianza"} tra un esempio $x$ e un vettore di supporto $l^{(i)}$. In particolare la funzione kernel più utilizzata è quella \textbf{Gaussiana}:
-  \[ exp\left(-\frac{\lVert x - l^{(k)}\lVert^2}{2\sigma^2}\right) = \left(-\frac{\sum_j(x_j-l_j^{(k)})^2}{2\sigma^2}\right)\]
+Le \textbf{funzioni kernel} esprimono quindi la \textit{"somiglianza"} tra un esempio $x$ e un punto di riferimento $l^{(i)}$. In particolare la funzione kernel più utilizzata è quella \textbf{Gaussiana}:
+  \[ exp\left(-\frac{\lVert x - l^{(i)}\lVert^2}{2\sigma^2}\right) = \left(-\frac{\sum_j(x_j-l_j^{(i)})^2}{2\sigma^2}\right)\]
+  \begin{esempio}
+  Presto un generico elemento $x_k$ all'interno del grafico in figura \ref{fig:supportVector}, possiamo generare questa feature:
+  \begin{align*}
+f_1^{(k)} &= similarity(x_k, l^{(1)}) = exp \left(- \frac {\lVert x_k - l^{(1)} \rVert^2} {2 \sigma^2} \right) \\
+f_2^{(k)} &= similarity(x_k, l^{(2)}) = exp \left(- \frac {\lVert x_k - l^{(2)} \rVert^2} {2 \sigma^2} \right) \\
+f_3^{(k)} &= similarity(x_k, l^{(3)}) = exp \left(- \frac {\lVert x_k - l^{(3)} \rVert^2} {2 \sigma^2} \right) \\
+    & \vdots
+\end{align*}
+\end{esempio}
+
 \begin{nota}
-$\lVert x - l^{(i)} \lVert$ è la distanza euclidea tra due punti.
+$\lVert x_k - l^{(i)} \lVert$ è la distanza euclidea tra due punti.
 \end{nota}
-Da tale funzione kernel possiamo notare caratteristiche importanti nel calcolo del \textbf{separatore ottimo}:
-  \[f_n \approx
+Da tale funzione kernel possiamo notare features importanti nel calcolo del \textbf{separatore ottimo}:
+  \[f^k_i \approx
     \begin{cases}
-      1& \iff x \approx l^{(k)} \\
+      1& \iff x_k \approx l^{(i)} \\
       0& Altrimenti
     \end{cases}
   \]
   \begin{nota}
-  \[x \approx l^{(k)} \implies  exp\left(-\frac{0^2}{2\sigma^2}\right)  \approx 1\]
-  \[x \neq l^{(k)} \implies  exp\left(-\frac{\infty}{2\sigma^2}\right)  \approx 0\]
+  \[x_k \approx l^{(i)} \implies  exp\left(-\frac{0^2}{2\sigma^2}\right)  \approx 1\]
+  \[x_k \neq l^{(i)} \implies  exp\left(-\frac{\infty}{2\sigma^2}\right)  \approx 0\]
   \end{nota}
 \begin{esempio}
-  Sia $\Theta = [-0.5, 1, 1, 0]$ e siano 3 i valori di vettori di supporto $l^{(k)}$. Definiamo l'ipotesi come:
+  Sia $\Theta = [-0.5, 1, 1, 0]$ e siano 3 i valori di punti di riferimento $l^{(i)}$. Definiamo l'ipotesi come:
   \[h_\theta(x) =
     \begin{cases}
-      1& \iff \theta_0 + \theta_1f_1 + \theta_2f_2 + 
-      \theta_3f_3 \geq 0 \\
+      1& \iff \theta_0 + \theta_1f_1^{(k)} + \theta_2f_2^{(k)} + 
+      \theta_3f_3^{(k)} \geq 0 \\
       0& Altrimenti
     \end{cases}
   \]
-  Se avessimo $x \approx f_1$ avremo:
-  \[f_1 \approx 1,\,\,\,f_2 \approx 0,\,\,\,f_3 \approx 0\]
+  Se avessimo $x_1 \approx l^{(1)}$ avremo:
+  \[f^1_1 \approx 1,\,\,\,f^1_2 \approx 0,\,\,\,f^1_3 \approx 0\]
   Da cui si deriva che:
   \[\theta_0 + \theta_1 = -0.5+1 = 0.5 \implies h_\theta(x) = 1\]
 \end{esempio}
-\subsection{Creazione dei vettori di supporto}
-Abbiamo spiegato che i vettori di supporto sono punti di riferimento posti al confine del margine dato dal separatore. Ora i cari lettori sicuramente si porgeranno la seguente domanda: \textit{"Mario, ma questi vettori di supporto come li possiamo creare se ancora non conosciamo a priori né il separatore né il corrispettivo margine?"}. 
+\subsection{Creazione dei punti di riferimento}
+ 
+ Ora i cari lettori sicuramente si porgeranno la seguente domanda: \textit{"Mario, ma questi punti di riferimento come li possiamo creare se ancora non conosciamo a priori né il separatore né il corrispettivo margine?"}. 
 \begin{definizione}
   Preso un DataSet con esempi sia positivi che negativi. Per ogni esempio si va a creare un corrispettivo punto di riferimento nella medesima posizione. In particolare, preso un dataset:
   \[{(x_1, y_1) \dots (x_n, y_n)}\]
   Si avranno:
-  \[{(x_1 = l^{(1)}) \dots (x_n, l^{(n)})}\]
+  \[{(x_1 = l^{(1)}) \dots (x_n = l^{(n)})}\]
 \end{definizione}
 Questo è abbastanza utile poiché quando si riceverà un esempio \textbf{non} catalogato possiamo avere come punti di riferimento le coordinate degli esempi già analizzati in precedenza. Ovvero:
-\[f_n = similarity(x_{new}, l^{(n)})\,\,\,\,\, \forall n \implies f_n = [f_1 \dots f_n]\]
-Quindi si applica la funzione kernel in relazione ad ogni possibile vettore di supporto. \\ Allo stesso tempo, per creare una mappatura di tutti gli elementi presente nel dataset eseguiamo la medesima procedura:
-\[x_i \implies 
-    f = \begin{bmatrix}
-           f_{1} \\
-           f_{2} \\
+\[f^{new}_i = similarity(x_{new}, l^{(i)}) \implies f^{new} = [f^{new}_1 \dots f^{new}_n]\]
+Quindi si applica la funzione kernel in relazione ad ogni possibile punto di riferimento. \\ Allo stesso tempo, per creare una mappatura di tutti gli elementi presente nel dataset eseguiamo la medesima procedura:
+\[x_k \implies 
+    f^k = \begin{bmatrix}
+           f^k_{1} \\
+           f^k_{2} \\
            \vdots \\
-           f_{i} = 1 \\
+           f^k_{k} = 1 \\
            \vdots \\
-           f_{n}
          \end{bmatrix} \]
-In questa specifica situazione notiamo un fattore importante: esisterà $f_{i} = 1$ per $x_i$ poiché sarà relativo al vettore di supporto $l^{(i)}$.
+In questa specifica situazione notiamo un fattore importante: esisterà $f^k_{k} = 1$ per $x_k$ poiché sarà relativo al punto di riferimento $l^{(i)}$.
 \subsection{Kernel e Funzione di costo}
 La funzione di costo, prese in considerazione le features calcolate, si può riscrivere come:
 \[min_\theta \, C \sum_{i=1}^m \left[ y^{(i)}\,cost_1(\theta^T f^{(i)}) + (1-y^{(i)})\,cost_0(\theta^T f^{(i)}) \right] + {1 \over 2 } \sum_{j=1}^m \theta_j^2\]
 \section{Scelta dei Kernel}
 Le funzioni kernel per la creazione delle \textit{features} sono diverse, in particolare le più utilizzate sono:
 \begin{itemize}
-    \item \textbf{Linear Kernel}: equivalente a non usare una funzione kernel, con essa possiamo quindi sfruttare le funzionalità basilari di una SVM che riesce solo a produrre una classificazione lineare. L'utilizzo di tale kernel presuppone la \textbf{non} creazione di vettori di supporto. Essa viene spesso utilizzata quando il numero di esempi nel DataSet è piccolo ma il numero di classificazioni è grande.
+    \item \textbf{Linear Kernel}: equivalente a non usare una funzione kernel, con essa possiamo quindi sfruttare le funzionalità basilari di una SVM che riesce solo a produrre una classificazione lineare. L'utilizzo di tale kernel presuppone la \textbf{non} creazione di punti di riferimento. Essa viene spesso utilizzata quando il numero di esempi nel DataSet è piccolo ma il numero di classificazioni è grande.
     \[\theta_0\,x_0 + \theta_1\,x_1 + \theta_2\,x_2 + \theta_3\,x_3 + \cdots \geq 0\]
     \item \textbf{Gaussian Kernel}: Utilizzato quando il numero di esempi è elevato e il numero di classificazioni è basso (es. classificazione binaria).
 \end{itemize}
@@ -239,13 +286,13 @@ Le funzioni kernel per la creazione delle \textit{features} sono diverse, in par
 \end{definizione}
 \begin{nota}
 
-Esiste un altro kernel meno utilizzato: \textbf{Polynomial Kernels}:
+Esiste un altro kernel meno utilizzato, ovvero il \textbf{Polynomial Kernels}:
 \[k(x, l) = (x^T l + constant)^{degree}\]
 \end{nota}
 \section{Regressione Logistica vs SVM}
 Sia $n$ il numero di classificazioni in un DataSet e $m$ il numero di esempi. 
 \begin{itemize}
-    \item Se $n >> m$ allora possiamo sfruttare la regressione logistica o una SVM con Kernel lineare. Questo poiché se avessimo tante caratteristiche differenti in un dataset molto piccolo allora non avremo a disposizione abbastanza dati per creare un adattamento ad una funzione non lineare complessa.
+    \item Se $n >> m$ allora possiamo sfruttare la regressione logistica o una SVM con Kernel lineare. Questo poiché se avessimo tante features differenti in un dataset molto piccolo allora non avremo a disposizione abbastanza dati per creare un adattamento ad una funzione non lineare complessa.
     \item se $n$ è  piccolo e $m$ è intermedio allora possiamo sfruttare le SVM con Kernel Gaussiano.
     \item Se $m >> n$ allora possiamo creare manualmente più classificazioni per poi utilizzare la regressione logistica o la SVM con kernel lineare.
 \end{itemize}
@@ -431,7 +478,7 @@ Sia $n$ il numero di classificazioni in un DataSet e $m$ il numero di esempi.
 % e si ha che:
 % \[w=\sum_{i\in Q}\alpha_i\cdot x_i\]
 % Ovvero scritta in termini di un sottoinsieme di esempi del training set (noto
-% come vettori di supporto) che giacciono sul margine dell’iperpiano, prendendo
+% come punti di riferimento) che giacciono sul margine dell’iperpiano, prendendo
 % una somma pesata dei contenuti dei vettori.\\
 % % pic pagina 36
 % Il passaggio finale è che se ho $\langle w, x\rangle+b$ che indicano cosa ho
@@ -440,9 +487,9 @@ Sia $n$ il numero di classificazioni in un DataSet e $m$ il numero di esempi.
 %     x_i, x\Big\rangle +b\right)=sgn\left(\sum_{i\in Q}\alpha_i\langle x_i, x\rangle
 %     +b\right)\]
 % Quindi la funzione di decisione associata alla soluzione può essere scritta in
-% termini del prodotto interno tra i vettori di supporto (\textit{support vector})
+% termini del prodotto interno tra i punti di riferimento (\textit{support vector})
 % $x_i$ e il vettore da classificare $x$.\\
-% $\alpha$ viene elaborato dai vettori di supporto ma non verrà ora trattato.\\
+% $\alpha$ viene elaborato dai punti di riferimento ma non verrà ora trattato.\\
 % Passiamo quindi oltre alla sola separabilità lineare.\\
 % Si usa lo stesso approccio rivedendo la formulazione tramite i \textbf{metodi
 %   kernel}. Si cerca di mappare lo spazio d'input in un nuovo spazio, (in
@@ -599,11 +646,11 @@ Sia $n$ il numero di classificazioni in un DataSet e $m$ il numero di esempi.
 % questa tecnica soffre di ambiguità in quanto alcune regioni del suo spazio di
 % input possono ricevere lo stesso numero di voti.
 \section{SVM Avanzate}
-\begin{definizione}(Normale)
+\begin{definizione}[Normale]
   Il normale di un vettore è la distanza euclidea del vettore data dal teorema di Pitagora:
   \[\lVert v\rVert = \sqrt{\sum_{i=0}^n v_i^2} \in \mathbb{R}\]
 \end{definizione}
-\begin{definizione}(Vector inner product)
+\begin{definizione}[Vector inner product]
   Siano due vettori $w$ e $v$ tali che:
     \[w = \begin{bmatrix}w_1 \\ w_2 \end{bmatrix}\]
     \[v = \begin{bmatrix}v_1 \\ v_2 \end{bmatrix}\]
@@ -650,6 +697,103 @@ Consideriamo due confini decisionali (A e B), e i loro corrispettivi parametri p
     \centering
     \includegraphics[width=0.7\textwidth]{img/fig-8-choosing-large-margin.png}
 \end{figure}
+Dobbiamo quindi scrivere un algoritmo per trovare l'iperpiano di separazione di
+massimo margine. In input si hanno le istanze etichettate e in output un
+vettore che identifica l'iperpiano.\\
+Viene usata una notazione matematica che prevede che, preso un insieme di punti
+di training:
+\[S = \{(x_1,y_1), (x_2,y_2),\ldots, (x_n,y_n)\}\]
+ad ogni vettore $x_i$ associo la classe di appartenenza $y_i$ (con un etichetta
+non booleana):
+\[y_i\in\{-1,+1\}\]
+Ho i punti linearmente separabili:
+\[
+  \begin{cases}
+    \langle w,x_i\rangle + b >0 &\mbox{ se }y_i=+1\\
+    \langle w,x_i\rangle + b <0 &\mbox{ se }y_i=-1\\
+  \end{cases}
+\](quindi l'iperpiano separa positivi e negativi)\\
+che scritto in un solo vincolo diventa:
+\[y_i(\langle w,x_i\rangle + b )>0,\,\,\,i=1,\ldots, n\]
+Si ha che $w$ mi dirà quanto è inclinato il piano mentre $b$ è la distanza tra
+l'origine e il piano (quindi queste due variabili identificano i vari iperpiani
+possibili tra cui cercare il ``migliore'' ovvero quello che separa meglio punti
+positivi e negativi).\\
+Ci si sposta quindi dalla geometria visualizzabile all'algebra lineare.\\
+L'ipotesi quindi tra $w$ e $b$ è una funzione che prende il segno di $<langle
+w,x\rangle+b$ per associare l'etichetta:
+\[h_{w,b}(x)=sgn(\langle w,x\rangle+b)\]
+Date $d_-$ e $d_+$ le distanze tra l’iperpiano separatore e il punto positivo e
+negativo più vicino definiamo:
+\begin{itemize}
+  \item margine funzionale
+  \item margine geometrico
+\end{itemize}
+\begin{definizione}
+  Definiamo il \textbf{margine funzionale} di un punto $(x_i,y_i)$ rispetto
+  all'iperpiano $(w,b)$ come:
+  \[\hat{\gamma}=y_i\cdot(\langle w,x_i\rangle+b)\]
+  e quindi il \textbf{margine funzionale} dell'iperpiano rispetto al training
+  set $S$ è definito come:
+  \[\hat{\rho}=\min_{i=1,\ldots,n}\hat{\gamma_i}\]
+\end{definizione}
+Si hanno quindi due casistiche:
+\begin{enumerate}
+  \item se si ha un punto $x_i$ tale che $y_i=+1$, perchè il margine funzionale
+  sia grande è necessario che la quantità
+  $\langle w,x_i\rangle+b$ abbia un grande valore positivo
+   \item se si ha un punto $x_i$ tale che $y_i=-1$, perchè il margine funzionale
+  sia grande è necessario che  la quantità
+  $\langle w,x_i\rangle+b$ abbia un grande valore negativo
+\end{enumerate}
+\begin{teorema}
+  Se $\hat{\gamma}_i>0,\forall \mbox{ classificazione}$ $"i"$ la classificazione è
+  approvata in quanto le classi sono linearmente separabili e l'iperpiano
+  $(w,b)$ separa effettivamente le classi
+\end{teorema}
+Si ha quindi che un ampio margine funzionale fornisce probabilità sulla qualità
+della previsione anche se l'uso del solo $\hat{\gamma}$ può essere problematico
+in quanto il margine funzionale non è invariante rispetto ad un iperpiano
+``riscalato''. Analizziamo meglio quest'aspetto.\\
+Per come è stato scelto il classificatore $f$ se si scala l'iperpiano:
+\[(w,b)\to(c\cdot w,b)\]
+si ottengono:
+\begin{itemize}
+  \item lo stesso iperpiano, ovvero lo stesso luogo di punti
+  \item la stessa funzione di decisione, visto che quest'ultima dipende solo dal
+  segno di $\langle w,x\rangle+b$, con il segno che può essere invertito se
+  $c<0$ 
+\end{itemize}
+ma dato che il margine funzionale viene moltiplicato per $c$ non possiamo usarlo
+come distanza di un punto dall’iperpiano, perché non è invariante rispetto alla
+scala.\\
+Bisogna ora studiare la distanza $d$ del punto $x$ dall'iperpiano. Si ha quindi:
+\[d = \frac{\sum_{i=1}^n w_i\cdot x_i+v}{\norm{w}}=\frac{\langle w,
+    x_i\rangle +b}{\norm{w}} \]
+Quindi:
+\begin{definizione}
+  Definiamo il \textbf{margine geometrico} di un punto $(x_i,y_i)$ rispetto
+  all'iperpiano $(w,b)$ come:
+  \[\gamma_i=\frac{y_i\cdot(\langle w,x_i\rangle+b)}{\norm{w}}\]
+  e quindi il \textbf{margine geometrico} dell'iperpiano rispetto al training
+  set $S$ è definito come:
+  \[\rho=\min_{i=1,\ldots, n}\gamma_i\]
+\end{definizione}
+\begin{teorema}
+  Se $\gamma_i>0,\forall \mbox{ classificazione} i$ la classificazione è
+  approvata analogamente a quanto detto per il margine funzionale.
+\end{teorema}
+Dato un punto positivo/negativo il margine geometrico rappresenta la sua
+distanza geometrica dall'iperpiano. Quindi il margine geometrico rende meglio
+l'idea della distanza di un punto sa un iperpiano in $\mathbb{R}^n$.\\
+Inoltre si ha che \textbf{i margine geometrico è invariante rispetto alla scala
+  di $w$} e quindi possiamo ``riscalare'' l'iperpiano senza cambiamenti, non
+variando il margine.\\
+Dalla formula notiamo che, posto $\norm{w}=1$ si ``riscala'' l'iperpiano $(w,b)$:
+\[(w,b)\to\left(\frac{w}{\norm{w}},\frac{b}{\norm{w}}\right)\]
+Si considera quindi un iperpiano
+$\left(\frac{w}{\norm{w}},\frac{b}{\norm{w}}\right)$ con il vettore di pesi
+$\frac{w}{\norm{w}}$ di \textbf{norma unitaria}.
 \section{Esempi}
 \textbf{Nell'esercitazione ogni $\vec{w}\cdot\vec{x}$ è da calcolarsi come
   $\vec{w}^T\cdot\vec{x}$.} 
@@ -703,14 +847,14 @@ un iperpiano che separava) con SVM si cerca l'iperpiano ottimo per separare i
 punti.
 \begin{esempio}
   Sia data una funzione d'ipotesi (che definisce un'ipotesi in $H$) tale che:
-  \[h(\vec{x}_i=
+  \[h(\vec{x}_i)=
     \begin{cases}
       +1&\mbox{se }\vec{w}\cdot\vec{x}_i+b\geq 0\\
       -1&\mbox{se }\vec{w}\cdot\vec{x}_i+b< 0
     \end{cases}
   \]
   ovvero:
-  \[h(\vec{x_i}=sign(\vec{w}\cdot\vec{x}_i+b)\]
+  \[h(\vec{x_i})=sign(\vec{w}\cdot\vec{x}_i+b)\]
   quindi i valori positivi sono sopra etichettati come positivi e i negativi
   come  negativi.\\
   Siano dati:
@@ -768,7 +912,7 @@ Si introduce quindi il \textbf{margine geometrico}, dividendo il margine
 funzionale per la norma di $\vec{w}$:
 \[\hat{\gamma}^{(i)}=y^{(i)}\left(\frac{\vec{w}}{\norm{\vec{w}}}
     \cdot\vec{x}^{(i)}+\frac{b}{\norm{\vec{w}}}\right)\]
-si ha quindi un invaiante rispetto al fattore di scala, a differenza del margine
+si ha quindi un invariante rispetto al fattore di scala, a differenza del margine
 funzionale (con la divisione per la norma semplifico eventuali fattori
 moltiplicativi costanti).\\
 Anche in questo caso cerco il minimo:
@@ -810,7 +954,7 @@ separabili.
   feature risultate dal mapping definito da $\phi$.\\
   La funzione $k$ ha quindi come argomenti due vettori senza restrizioni,
   potendo mappare un ampio spettro di entità (documenti, proteine etc$\ldots$),
-  può quindi essere penata come una \textbf{funzione si similarità} (pensata
+  può quindi essere pensata come una \textbf{funzione si similarità} (pensata
   come prodotto euclideo), dicendo
   quanto sono simili gli oggetti della funzione kernel.\\
   Avendo il prodotto interno scalare si ha anche la norma, dando prova della

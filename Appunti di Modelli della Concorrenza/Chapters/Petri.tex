@@ -50,55 +50,46 @@ d'uso, tra i quali:
   \item modellare sistemi biologici e per modellare reazioni chimiche
   \item valutare le prestazioni (tramite reti stocastiche e temporizzate)
 \end{itemize}
-\begin{definizione}
-  I \textbf{sistemi di transizione etichettati} sono definiti come gli automi a
-  stati finiti ma senza essere visti come riconoscitori di linguaggi infatti un
-  sistema è formato da un insieme, solitamente finito, di stati globali $"S"$. Si
-  ha poi un \textit{alfabeto} delle possibili azioni che può eseguire il
-  sistema. Si hanno anche delle relazioni di transizioni, ovvero delle
-  transizioni che permettono di specificare come, attraverso un'azione, si passa
-  da uno stato ad un altro. Le transizioni si rappresentano con archi
-  etichettati tra i nodi, che rappresentano 
-  gli stati. Le etichette degli archi rappresentano le azioni necessarie alla
-  trasformazione. L'insieme delle azioni viene chiamato $"E"$ mentre $T\subseteq
-  S\times E\times S$ è l'insieme degli archi etichettati. Può essere,
-  opzionalmente, individuato uno stato iniziale $s_0$. Un sistema non è
-  obbligato a ``terminare'', quindi non si ha obbligatoriamente uno stato
-  finale.\\ 
-  Riassumendo quindi un sistema di transizione etichettato è un quadrupla:
-  \[A=(S, E, T, s_0)\]
-  % aggiungere pic
-  % \begin{figure}[H]
-  %   \centering
-  %   \includegraphics[scale = 0.5]{img/ste.jpg}
-  %   \caption{Esempio di sistema di transizione etichettato}
-  % \end{figure}
-\end{definizione} \vspace{5mm} %5mm vertical space
-La critica di Petri è che in un sistema distribuito non sia individuabile uno
-\textbf{stato globale}, che in un sistema distribuito le trasformazioni di stato
-siano \textbf{localizzate} e non globali, che non esista un sistema di
-riferimento temporale unico (si possono avere più assi temporali in un sistema
-distribuito). Quindi la simulazione sequenziale non deterministica (semantica a
-``interleaving'') dei sistemi distribuiti è una forzatura e non rappresenta le
-reali caratteristiche del comportamento del sistema, ovvero la località, la
-distribuzione degli eventi e la relazione di dipendenza causale e non causale
-tra gli eventi.
-\begin{definizione} (Rete di Petri From Wikipedia \cite{RetiPetri}):
-  Una rete di Petri PT (Place/Transition) è un grafo orientato con due tipi di nodi, posti e transizioni, connessi da archi diretti. I posti sono rappresentati graficamente da cerchi e le transizioni da rettangoli.
+Il problema della rappresentazione dei sistemi concorrenti, mediante i sistemi di transizioni etichettati, è che lo stato globale non è
+osservabile, inoltre la simulazione sequenziale non deterministica dei sistemi distribuiti è una
+forzatura, non rispecchia il reale comportamento. Tali sistemi modellano un sistema con un insieme di stati e un insieme di transizioni, dove lo stato è globale, cioè uno stato è un elemento dell’insieme degli stati.
+Come vedremo in seguito nelle reti di Petri gli stati sono locali e lo stato globale o caso, o configurazione, è dato dall’insieme di condizioni vere in quel determinato caso.
+Allo stesso modo le transizioni o eventi sono transizioni locali, ovvero: la loro occorrenza dipende dalle loro pre-condizioni e post-condizioni e non dalla validità di condizioni (stati locali) che non hanno connessione con l’evento in oggetto.
+Le reti di Petri (o sistemi elementari) presentano invece le seguenti caratteristiche:
+\begin{itemize}
+ \item Lo stato è definito da una collezione di stati locali ovvero le condizioni vere in quel momento 
+ \item Gli eventi possono occorrere solamente se tutte le precondizioni dello stesso sono vere e tutte
+le post condizioni sono false. Quando un evento occorre trasforma tutte le sue precondizioni
+in false e le post in vere; questo meccanismo prende il nome di regola di scatto.
+\item Gli eventi possono avvenire anche in maniera concorrente
+\end{itemize}
 
-Un arco può unire solamente nodi di tipo diverso, quindi possono esserci archi tra posti e transizioni - ma non tra posti e posti o transizioni e transizioni. Un posto da cui un arco parte per finire in una transizione è detto posto di input della transizione; un posto in cui un arco arriva partendo da una transizione è detto posto di output della transizione.
+  Una rete di Petri PT (Place/Transition) è un grafo orientato con due tipi di nodi, condizioni e eventi, connessi da archi diretti. I condizioni sono rappresentati graficamente da cerchi e le eventi da rettangoli.
 
-I posti possono contenere un certo numero di token o marche. Una distribuzione di token sull'insieme dei posti della rete è detta marcatura. Le transizioni agiscono sui token in ingresso secondo una regola, detta regola di scatto (in inglese firing). Una transizione è abilitata se può scattare, cioè se ci sono token in ogni posto di input. Quando una transizione scatta, essa consuma token dai suoi posti di input, esegue dei task e posiziona un numero specificato di token in ognuno dei suoi posti di uscita. Ciò avviene automaticamente, ad esempio in un singolo step non-prelazionabile. L'esecuzione delle reti di Petri è non deterministica. Ciò significa due cose:
+Un arco può unire solamente nodi di tipo diverso, quindi possono esserci archi tra condizioni e eventi - ma non tra condizioni e condizioni o eventi e eventi. Una condizione da cui un arco parte per finire in un evento è detto condizione di input dell'evento; un condizione in cui un arco arriva partendo da una evento è detto condizione di output dell'evento.
 
-    se più transizioni sono abilitate nello stesso momento, una qualsiasi di esse può scattare
-    non è garantito che una transizione abilitata scatti; una transizione abilitata può scattare immediatamente, dopo un tempo di attesa qualsiasi (a patto che resti abilitata), o non scattare affatto.
+I condizioni possono contenere un certo numero di token o marche. Una distribuzione di token sull'insieme dei condizioni della rete è detta marcatura. Gli eventi agiscono sui token in ingresso secondo una regola, detta regola di scatto (in inglese firing). Un evento è abilitata se può scattare, cioè se ci sono token in ogni condizione di input. Quando una evento scatta, essa consuma token dai suoi condizioni di input, esegue dei task e posiziona un numero specificato di token in ognuno dei suoi condizioni di uscita. Ciò avviene automaticamente, ad esempio in un singolo step non-prelazionabile. L'esecuzione delle reti di Petri è non deterministica. Ciò significa due cose:
 
-Poiché lo scatto di una transizione non è predicibile a priori, le reti di Petri sono molto adatte a modellare il comportamento di un sistema concorrente. 
-\end{definizione} \vspace{5mm} %5mm vertical space
+    se più eventi sono abilitate nello stesso momento, una qualsiasi di esse può scattare ma
+    non è garantito che una evento abilitato scatti; una evento abilitato può scattare immediatamente, dopo un tempo di attesa qualsiasi (a patto che resti abilitata), o non scattare affatto.
+
+Poiché lo scatto di una evento non è predicibile a priori, le reti di Petri sono molto adatte a modellare il comportamento di un sistema concorrente. 
+
 
 \section{Reti elementari}
-
-Introduciamo quindi i \textbf{sistemi elementari}.\\
+Diamo una definizione generale degli argomenti che andremo a trattare.
+Una rete descrive la struttura \textbf{statica} del sistema, il \textbf{comportamento} è invece definito da: 
+\begin{itemize}
+    \item \textbf{Regola si scatto}: un evento si dice abilitato quando tutte le sue precondizioni sono vere e tutte le
+post sono false, se un evento si trova in questa situazione può scattare trasformando tutte le sue
+precondizioni in false e le post-condizioni in vere. É rispettato il principio di estensionalità: quando
+un evento scatta modifica solamente le sue pre e le sue post, le altre condizioni rimangono
+inalterate.
+    \item \textbf{Caso}: non è altro che un insieme di condizioni che rappresentano
+l’insieme di condizioni vere in una certa configurazione del sistema.
+\end{itemize}
+Una rete che non ha auto anelli (per ogni evento, l’intersezione delle pre e delle post dello stesso è vuoto) si dice \textbf{pura}. Un insieme di eventi indipendenti è tale se per ogni evento nessuno ha pre o post condizioni in comune con un altro evento dell’insieme. Un passo è abilitato se due eventi possono scattare in maniera concorrente, questo può
+succedere se i due eventi sono indipendenti.
 Per introdurre i sistemi elementari delle reti di Petri, ovvero una classe molto
 semplice e astratta, partiamo da un esempio:
 \begin{esempio}
@@ -179,7 +170,7 @@ semplice e astratta, partiamo da un esempio:
       \node [place, tokens=1] (p2) [above right of = t4, label=above:pronto a
       prelevare] {}; 
       \node [transition] (t3) [below right of = p2, label=right:\small{consuma}] {};
-      \node [place] (p4) [below right of = t4, label=below:\small{pronto a consumare}]
+      \node [place] (p4) [below right of = t4, label=below: \small{pronto a consumare}]
       {}; 
       
       \path[-{Latex[width=2mm]}]
@@ -286,9 +277,9 @@ Passiamo ora alla formalizzazione di questi aspetti.\\
     modificherebbero mai una condizione) o condizioni isolate (che non
     verrebbero mai modificate da un evento). Si ha, formalmente, che: 
     \[dom(F)\cup ran(F)=B\cup E\]
-    ovvero non ho condizioni/eventi isolati, in quanto non avrebbero senso
-    (potrei anche non modellarle), avrei una condizione costante e un
-    evento che non accade mai, quindi dominio e codominio di $"F"$ coprono
+    ovvero non abbiamo condizioni/eventi isolati, in quanto non avrebbero senso
+    (potremmo anche non modellarle), avremmo una condizione costante e un
+    evento che non accade mai, quindi dvigili del fuocoo e codvigili del fuocoo di $"F"$ coprono
     l'insieme di condizioni ed eventi
   \end{itemize}
   Si ha che:
@@ -318,7 +309,7 @@ Passiamo ora alla formalizzazione di questi aspetti.\\
   
   \end{definizione} \vspace{5mm} %5mm vertical space
   \begin{corollario}
-     Posso estendere questa notazione a insiemi di elementi. Sia $"A"$ un insieme
+     possiamo estendere questa notazione a insiemi di elementi. Sia $"A"$ un insieme
   qualsiasi di elementi, che possono quindi essere sia condizioni che eventi:
   \[A\subseteq B\cup E\]
   Si ha quindi che i pre-elementi dell'insieme $"A"$ sono rappresentati con:
@@ -337,13 +328,10 @@ Passiamo ora alla formalizzazione di questi aspetti.\\
     trasformazioni di stato locali
   \end{nota}
 \end{definizione} \vspace{5mm} %5mm vertical space
-\subsection{Configurazione e Transizione}
+\subsection{Configurazione e evento}
 La rete $N=(B, E, F)$ descrive la \textit{struttura statica del sistema}, il
 comportamento è definito attraverso le nozioni di \textbf{caso (o
-  configurazione)} e di \textbf{regola di scatto (o di transizione)}.\\
-Una rete può anche essere suddivisa in sotto-reti, seguendo l'esempio sopra si
-potrebbe avere una sotto-rete per il produttore, una per il consumatore e anche
-una per il buffer.\\
+  configurazione)} e di \textbf{regola di scatto (o di evento)}.\\
 \begin{definizione}
   Un \textbf{caso} (o \textbf{configurazione}) è un insieme di condizioni
   $c\subseteq B$ che rappresentano l’insieme di condizioni \textbf{vere} in una certa
@@ -393,6 +381,9 @@ il cambiamento di stato è locale:
     negli stati locali, tali cambiamenti sono indipendenti dalla particolare
     configurazione in cui l’evento occorre.}
 \end{center}
+Ovvero: quando
+un evento scatta modifica solamente le sue pre e le sue post, le altre condizioni rimangono
+inalterate.
 \end{definizione} \vspace{5mm} %5mm vertical space
 L'importante è che le precondizioni di un evento siano vere e le post-condizioni
 false (siamo comunque interessati solo alla validità delle condizioni che
@@ -460,7 +451,7 @@ non importa il valore di verità delle condizioni che \textbf{non} toccano un ev
       ;
     \end{tikzpicture}
   \end{center}
-  Quindi dato $C=\{P1, B, C1\}$ ho che, dopo lo scatto dell'evento $"e"$
+  Quindi dato $C=\{P1, B, C1\}$ abbiamo che, dopo lo scatto dell'evento $"e"$
   (possibile visto che tutte le post-condizioni di $"e"$ sono disabilitate):
   \[C[e>C'\]
   con $C'=\{P1, C2\}$.
@@ -557,7 +548,6 @@ non importa il valore di verità delle condizioni che \textbf{non} toccano un ev
 \begin{nota}
 In questo libro considereremo sempre \textbf{reti pure}.
 \end{nota}
-\section{Sistema Elementare e nozioni derivate}
 \subsection{Indipendenza tra eventi}
 \begin{definizione}
   Data una rete elementare $N=(B, E, F)$ e sia $U \subseteq E$ un sottoinsieme di
@@ -566,19 +556,16 @@ In questo libro considereremo sempre \textbf{reti pure}.
     \item $"U"$ è un \textbf{insieme di eventi indipendenti} sse:
     \[\forall e_1, e_2\in U:\,\, e_1\neq e_2\Rightarrow (^\bullet e_1\cup
       e_1^\bullet)\cap  (^\bullet e_2\cup e_2^\bullet) = \emptyset\]
-    ovvero per ogni coppia distinta di eventi nell'insieme $"U"$ si ha che le
-    precondizioni e le post-condizioni dei due eventi sono completamente
-    disgiunte.
+    Ovvero se per ogni evento nessuno ha pre o post condizioni in
+comune con un altro evento dell’insieme.
     \item $"U"$ è un \textbf{passo abilitato}, ovvero un insieme di \textit{eventi
       concorrenti} in una certa configurazione $"c"$, che si indica con:
     \[c[U>\]
     sse:
     \[U \mbox{ è un insieme di eventi indipendenti } \wedge\,\, \forall e\in
       U:\,\, c[e>\]
-    $"U"$ quindi deve essere un insieme di eventi indipendenti e ogni evento in
-    $"U"$ è abilitato in $"c"$, quindi le sue precondizioni sono vere e le sue
-    post-condizioni sono false. Si ha quindi che $"U"$ è un insieme di eventi
-    abitati in maniera concorrente in $"c"$
+      Ciò implica che più eventi possono scattare in maniera concorrente, questo può
+succedere se gli eventi dell'insieme sono indipendenti in una determinata configurazione, ovvero hanno pre-condizioni e post-condizioni differenti/disgiunte.
     \item $"U"$ è un \textbf{passo} dalla configurazione $c_1$ alla configurazione
     $c_2$, che si indica con:
     \[c_1[U > c_2\]
@@ -629,7 +616,22 @@ In questo libro considereremo sempre \textbf{reti pure}.
     $\{p, e\}$.
   \end{itemize}
 \end{esempio}
-\subsection{Sistema Elementare}
+\section{Sistema Elementare}
+Cominciamo a definire alcuni concetti che rivedremo più dettagliatamente nel corso della trattazione.\\
+Un sistema elementare è definito da una rete (definizione vista sopra ’N’) e da un caso iniziale.\\
+L’insieme dei casi raggiungibili può essere definito induttivamente come segue: il caso iniziale è
+un caso raggiungibile e ogni caso raggiunto facendo un passo da un caso raggiungibile, è un
+caso raggiungibile.\\
+Il comportamento dei sistemi elementari può essere descritto in 3 modi:
+\begin{itemize}
+    \item Sequenza di occorrenze ed eventi: in questo modo si descrive il comportamento sequenziale
+del sistema
+    \item Sequenza di passi: in questo modo è possibile descrivere il comportamento non sequenziale
+del sistema
+    \item Processi non sequenziali: in questo metodo si cattura une registrazione di quello che ha fatto
+un processo eseguendo il sistema. Viene descritto il comportamento non sequenziale.
+\end{itemize}
+
 Diamo ora una definizione formale di \textbf{sistema elementare}.
 \begin{definizione}
   Un \textbf{sistema elementare} $\Sigma=(B, E, F;c_{in})$ è definito come una
@@ -649,15 +651,17 @@ Diamo ora una definizione formale di \textbf{sistema elementare}.
     \item $c_{in}\in C_\Sigma$, ovvero sicuramente il caso iniziale appartiene
     all'insieme dei casi raggiungibili
     \item se $c\in C_\Sigma,\, U\subseteq E$ e $c'\subseteq B$ sono tali che
-    $c[U>c'$ allora $c'\in C_\Sigma$, ovvero se ho un generico caso $"c"$ che
-    appartiene ai casi raggiungibili, se ho un insieme di eventi $"U"$ tale che
+    $c[U>c'$ allora $c'\in C_\Sigma$, ovvero se abbiamo un generico caso $"c"$ che
+    appartiene ai casi raggiungibili, se abbiamo un insieme di eventi $"U"$ tale che
     questo insieme di eventi (che abbiamo visto essere indipendenti, per la
     definizione di passo abilitato) è abilitato
     in $"c"$ in un unico passo e la sua occorrenza mi porta in $c'$, allora anche
     $c'$ appartiene a $C_\Sigma$. 
   \end{itemize}
+ \begin{nota}
   Questa è una definizione data per \textbf{induzione strutturale}, nel primo
-  punto si ha la base, nel secondo l'ipotesi e la conseguenza
+  punto si ha la base, nel secondo l'ipotesi e la conseguenza.
+ \end{nota}
 \end{definizione} \vspace{5mm} %5mm vertical space
 \subsubsection{Insieme dei passi}
 \begin{definizione}
@@ -683,10 +687,10 @@ Diamo ora una definizione formale di \textbf{sistema elementare}.
     \[c_{in} [e_1 e_2 \ldots e_n > c_n\]
     Possiamo dire di avere a che fare con una \textbf{simulazione sequenziale
       non deterministica, detta anche \textit{semantica a interleaving}},
-    infatti ho più eventi abilitati da prendere uno alla volta
+    infatti abbiamo più eventi abilitati da prendere uno alla volta
     \item un \textbf{comportamento non sequenziale}, in quanto possiamo anche
     considerare insiemi di eventi, ovvero passi. Considero quindi sequenze di
-    passi, avendo a che fare con la \textbf{step semantics}. Non ho quindi una
+    passi, avendo a che fare con la \textbf{step semantics}. Non abbiamo quindi una
     simulazione sequenziale non deterministica in quanto dal caso iniziale
     faccio scattare un insieme di eventi, in maniera concorrente (e quindi senza
     ordine specificato), per poi far scattare un altro insieme di eventi fino ad
@@ -696,7 +700,7 @@ Diamo ora una definizione formale di \textbf{sistema elementare}.
     \[c_{in} [U_1 U_2 \ldots U_n > c_n\]
     Gli insiemi $U_i$ non sono insiemi massimali abilitati ma sottoinsiemi
     indipendenti e abilitati in $c_{in}$.\\
-\item    Posso avere anche un altro tipo di \textbf{comportamento non sequenziale},
+\item    possiamo avere anche un altro tipo di \textbf{comportamento non sequenziale},
     definito da Petri stesso, in una \textbf{semantica a ordini parziali} (si
     parla anche di \textbf{true concurrency}) in
     cui si definiscono processi non sequenziali. Il comportamento di tale
@@ -718,24 +722,25 @@ Diamo ora una definizione formale di \textbf{sistema elementare}.
   \textbf{deadlock}, in quanto il sistema non può evolvere ulteriormente.\\
   Vediamo anche la seguente possibile sequenza di passi. In ``1'' e ``2'' sia
   ``a'' che ``b'' sono indipendenti e sono entrambi abilitati (scattano in
-  maniera concorrente in un unico passo, ovviamente posso avere passi con lo
+  maniera concorrente in un unico passo, ovviamente possiamo avere passi con lo
   scatto di un solo evento):
   \[\{1, 2\}[\{a, b\} > \{3, 4\}[\{c\} > \{1, 2\}[\{b\} > \{1, 4\}\]
-  Come ricordato posso finire in una sequenza infinita.\\
-  Potrei modellare un processo non sequenziale di $\Sigma$:
+  Come ricordato possiamo finire in una sequenza infinita.\\
+  potremmo modellare un processo non sequenziale di $\Sigma$:
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.4]{img/seq5.jpg}
   \end{figure}
 \end{esempio}
 \subsection{Modellare e registrare il comportamento di un sistema}
-Vediamo ora come modellare e registrare il comportamento del sistema. Un modo è
-usando il \textbf{grafo dei casi raggiungibili} (equivalentemente a quanto si
-faceva con il CCS).
+Il comportamento di un sistema elementare può essere rappresentato dal suo \textbf{grafo dei casi} (sequenziale o non sequenziale).
+Questo grafo non è altro che un sistema di transizioni (LTS) etichettato dove le etichette sugli archi
+rappresentano l’insieme di eventi che possono occorrere in un passo; questi archi collegano i vari
+casi raggiungibili, formati da insiemi di condizioni vere.
 \newpage
 \subsubsection{Grafo dei casi raggiungibili}
 \begin{definizione}
-  Il \textbf{grafo dei casi raggiungibili} di un sistema elementare
+  Il \textbf{grafo dei casi raggiungibili} (o non sequenziale) di un sistema elementare
   $\Sigma=(B, E, F;c_{in})$ è il sistema di transizioni etichettato:
   \[CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})\]
   dove:
@@ -746,7 +751,7 @@ faceva con il CCS).
     l'alfabeto 
     \item $"A"$ è l'insieme di archi etichettati, formalmente definito come:
     \[A=\{(c, U, c')|\, c, c'\in C_\Sigma, U\in U_\Sigma, c[U>c'\}\]
-    ovvero sono archi che connettono uno caso $"c"$ con un caso $c'$ e sono
+    ovvero sono archi che connettono un caso $"c"$ con un caso $c'$ e sono
     etichettati con un passo $"U"$ sse $"U"$ è abilitato in $"c"$ e porta in
     $c'$. Ovviamente $"c"$ e $c'$ sono devono essere raggiungibili e $"U"$ deve
     appartenere all'insieme dei passi di $\Sigma$
@@ -776,7 +781,7 @@ faceva con il CCS).
     \caption{Esempio di grafo dei casi sequenziale}
   \end{figure}
   Si registra quindi l'occorrenza di un evento alla volta. Il grafo dei casi
-  sequenziale è quindi il sistema di transizione con gli archi etichettati dai
+  sequenziale è quindi il sistema di evento con gli archi etichettati dai
   singoli eventi.
   \begin{figure}[H]
     \centering
@@ -786,10 +791,13 @@ faceva con il CCS).
   \end{figure}
 \end{definizione} \vspace{5mm} %5mm vertical space
 \subsubsection{Diamond Property}
-Dato un sistema elementare $\Sigma = (B, E, F;c_{in})$ e il suo grafo dei casi
-$CG_\Sigma=(C_\Sigma, U_\Sigma, A, c_{in})$ si ha 
-che il grafo soddisfa una particolare proprietà, detta \textbf{diamond
-  property}, tipica solo dei sistemi elementari.
+Grazie a questa proprietà possiamo dire che è sempre possibile ricavare dal grafo dei casi
+sequenziale, il grafo dei casi non sequenziale/dei casi raggiungibili. In particolare  per passare da un grafo all'altro basta aggiungere le \textit{"diagonali"} in maniera esaustiva. 
+ L'utilità di questa proprietà ricade nel concetto che potremmo anche non considerare il grafo dei casi
+raggiungibili ma solo il \textbf{grafo dei casi sequenziale} (che è più comodo). Quindi se vale tale proprietà possiamo concludere che
+questi due grafi sono quindi sintatticamente equivalenti.\\
+La diamond property afferma che se si hanno due passi (insieme di eventi indipendenti abilitati in qualche caso)
+disgiunti, e si ha un sottografo adatto, possiamo allora aggiungere la diagonale. In maniera più formale potremmo dire:
 \begin{definizione}
   La \textbf{diamond property} stabilisce una proprietà della struttura del
   grafo della rete elementare, ovvero, dati $U_1, U_2\in U_\Sigma$ tali che:
@@ -798,17 +806,15 @@ che il grafo soddisfa una particolare proprietà, detta \textbf{diamond
     \item $U_1\neq\emptyset$
     \item $U_2\neq\emptyset$
   \end{itemize}
-  e dati $c_i\in C_\Sigma$ allora vale, per esempio:
+  e dati $c_i\in C_\Sigma$ allora possiamo aggiungere le diagonali.
+\end{definizione} \vspace{5mm} %5mm vertical space
+\begin{esempio}
   \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.6]{img/diam.jpg}
+    \caption{Esempio di Diamond Property}
     \label{fig:dia}
-    \caption{}
   \end{figure}
-  ovvero se posso rilevare come sottografo una struttura come quella a sinistra
-  nell'immagine allora sicuramente tale sottografo contiene anche gli
-  archi per ottenere l'immagine di destra. 
-\end{definizione} \vspace{5mm} %5mm vertical space
 Si possono fare delle prove:
 \begin{enumerate}
   \item \textbf{prima prova:}\\
@@ -833,7 +839,7 @@ Si possono fare delle prove:
   che una condizione sia contemporaneamente pre-condizione di $e_1$ (vera) e
   anche post-condizione di $e_2$ (falsa), e viceversa. Quindi le precondizioni
   di un evento sono disgiunte dalle post-condizioni dell'altro.\\
-  Inoltre dal fatto che ho $c_1 [e_1 > c_2 [e_2$, ovvero che da $c_1$ è
+  Inoltre dal fatto che abbiamo $c_1 [e_1 > c_2 [e_2$, ovvero che da $c_1$ è
   abilitato $e_1$ e che dopo lo scatto di $e_1$ è ancora abilitato $e_2$
   possiamo dire che:
   \begin{itemize}
@@ -869,7 +875,7 @@ Si possono fare delle prove:
     \item $c_1[U_2>$
   \end{itemize}
   resta da dimostrare che dopo lo scatto di $U_1$ è ancora abilitato $U_2$ in
-  $c_2$. Ma se $U_1\cup U_2$ è un passo abilitato significa che posso eseguirli
+  $c_2$. Ma se $U_1\cup U_2$ è un passo abilitato significa che possiamo eseguirli
   in qualsiasi ordine, quindi anche prima $U_1$ e poi $U_2$, e questo comporta
   sicuramente che $U_2$ è abilitato e che porta a $c_3$. Analogamente invertendo
   $U_1$ e $U_2$, formalmente: 
@@ -879,38 +885,31 @@ Si possono fare delle prove:
   \end{itemize}
   Si dimostra così che l'immagine di sinistra comporta quella di destra.
 \end{enumerate}
-\begin{nota}
-Grazie alla diamond property possiamo non considerare il grafo dei casi
-raggiungibili ma solo il \textbf{grafo dei casi sequenziale}
-\end{nota}
+\end{esempio}
 \begin{nota}
 Riprendendo l'immagine precedente si ha che per la diamond property possono
 aggiungere l'arco ``centrale'' che trasformerebbe nuovamente il grafo dei casi
 sequenziale in quello dei casi raggiungibili quindi:
-\textit{per la diamond property, nei sistemi elementari il grafo dei casi e il
+per la diamond property, nei sistemi elementari il grafo dei casi e il
   grafo dei casi sequenziale sono \textbf{sintatticamente equivalenti}, ovvero
-  possono essere ricavati a vicenda e nessuno dei due fornisce più informazioni rispetto all'altro.\\
-  Questo implica il fatto che due sistemi elementari hanno grafi dei casi
-  \textbf{isomorfi} sse hanno grafi dei casi sequenziali isomorfi.} 
+  possono essere ricavati a vicenda e nessuno dei due fornisce più informazioni rispetto all'altro.
 \end{nota}
   \begin{definizione}
     Dal \textbf{grafo sequenziale} si può ricostruire il \textbf{grafo dei casi} sse il sistema è elementare.
   \end{definizione} \vspace{5mm} %5mm vertical space
-  \begin{nota}
-  Per passare da un grafo all'altro basta aggiungere le \textit{"diagonali"} in maniera esaustiva.
-  \end{nota}
-\subsection{Isomorfismo tra Sistemi di Transizione Etichettati}
+
+\subsection{Isomorfismo tra Sistemi di eventi Etichettati}
 Si parla di isomorfismo quando due strutture complesse si possono
     applicare l'una sull'altra, cioè far corrispondere l'una all'altra, in modo
     tale che per ogni parte di una delle strutture ci sia una parte
     corrispondente nell'altra struttura; in questo contesto diciamo che due
     parti sono corrispondenti se hanno un ruolo simile nelle rispettive
     strutture.\\
-Diamo ora una definizione formale di isomorfismo tra sistemi di transizione
+Diamo ora una definizione formale di isomorfismo tra sistemi di evento
 etichettati, che possono quindi essere grafi dei casi o grafi dei casi
 sequenziali.
 \begin{definizione}
-  Siano dati due sistemi di transizione etichettati:\\
+  Siano dati due sistemi di evento etichettati:\\
   $A_1 = (S_1, E_1, T_1, s_{01})$ e $A_2 = (S_2 , E_2 , T_2 , s_{02})$.\\
   e siano date due \textbf{mappe biunivoche}:
   \begin{enumerate}
@@ -935,36 +934,42 @@ sequenziali.
   \end{itemize}
 \end{definizione} \vspace{5mm} %5mm vertical space
 \begin{definizione}
-  Si definiscono due \textbf{sistemi equivalenti} sse hanno grafi dei casi
+  Si definiscono \textbf{equivalenti} due \textbf{sistemi elementari} sse hanno grafi dei casi
   sequenziali, e quindi di conseguenza anche grafi dei casi (per la diamond property), \emph{isomorfi}.\\
   Due sistemi equivalenti accettano ed eseguono le stesse sequenze di eventi
 \end{definizione} \vspace{5mm} %5mm vertical space
-% TODO
-% Il problema della sintesi viene, per il momento, lasciato in disparte poché esula dagli argomenti di questo libro. In futuro qualcuno dei lottori potrà approfondirne i contenuti e caricarli in questo libro.
-% \subsection{Il Problema della Sintesi}
-% Si presenta ora un problema tipico dell'informatica, il \textbf{problema della
-%   sintesi}, ovvero dato un comportamento, o meglio una sua specifica, decidere
-% se esiste un'implementazione di tale specifica, ovvero un modello, che abbia
-% esattamente quel comportamento.\\
-% In questo caso dato un sistema di transizioni etichettato $A=(S, E, T, s_0)$, con:
-% \begin{itemize}
-%   \item $"S"$ insieme degli stati
-%   \item $"E"$ insieme delle etichette, ovvero degli eventi
-%   \item $"T"$ insieme delle transizioni
-%   \item $s_0$ stato iniziale
-% \end{itemize}
-% ci si propone di stabilire se esiste un sistema elementare
-% $\Sigma=(B, E, F;c_{in})$, tale che l'insieme degli eventi del sistema esattamente
-% l'insieme delle etichette di $"A"$ e tale che il suo grafo dei casi $SCG_\Sigma$
-% sia isomorfo ad $"A"$. Ci si propone anche di costruirlo.\\
-% Il problema è stato risolto mediante la cosiddetta \textbf{teoria delle regioni}
-% (che però non verrà trattato nel corso). Una \textbf{regione} comunque è un
-%   particolare sottoinsiemi di stati, legati tramite una certa condizione. Si può
-%   però dire che $"A"$ dovrà 
-% soddisfare la diamond property, in quanto altrimenti non sarebbe un sistema di
-% transizioni che potrebbe corrispondere al comportamento di un sistema
-% elementare.
+\subsection{Il Problema della Sintesi}
+Si presenta ora un problema tipico dell'informatica, il \textbf{problema della
+  sintesi}, ovvero dato un comportamento, o meglio una sua specifica, decidere
+se esiste un'implementazione di tale specifica, ovvero un modello, che abbia
+esattamente quel comportamento. Ovvero dato un sistema di transizioni etichettato stabilire se esiste un sistema
+elementare tale che il suo grafo dei casi sia isomorfo al sistema di transizioni etichettato di
+partenza. Questo problema è stato dimostrato essere risolvibile.
+In questo caso dato un sistema di transizioni etichettato $A=(S, E, T, s_0)$, con:
+\begin{itemize}
+  \item $"S"$ insieme degli stati
+  \item $"E"$ insieme delle etichette, ovvero degli eventi
+  \item $"T"$ insieme delle transizioni
+  \item $s_0$ stato iniziale
+\end{itemize}
+
+ci si propone di stabilire se esiste un sistema elementare
+$\Sigma=(B, E, F;c_{in})$, tale che l'insieme degli eventi del sistema esattamente
+l'insieme delle etichette di $"A"$ e tale che il suo grafo dei casi $SCG_\Sigma$
+sia isomorfo ad $"A"$. Ci si propone anche di costruirlo.\\
+Il problema è stato risolto mediante la cosiddetta \textbf{teoria delle regioni}
+(che però non verrà trattato nel corso). Una \textbf{regione} comunque è un
+  particolare sottoinsiemi di stati, legati tramite una certa condizione. Si può
+  però dire che $"A"$ dovrà 
+soddisfare la diamond property, in quanto altrimenti non sarebbe un sistema di
+transizioni che potrebbe corrispondere al comportamento di un sistema
+elementare.
 \subsection{Contatti}
+Cominciamo ad introdurre l'argomento in maniera poco formale: il contatto in una rete avviene quando un evento ha tutte le precondizioni vere ma non tutte le post
+condizioni false. Un sistema privo da contatti è tale se ogni volta che le pre-condizioni sono vere,
+necessariamente le post condizioni sono false. É possibile trasformare ogni rete in una priva di
+contatti aggiungendo ad ogni evento il suo complemento. In un sistema privo di contatti è
+sufficiente verificare che le precondizioni siano vere per essere sicuro che un evento può scattare.
 \begin{definizione}
   Sia $\Sigma = (B, E, F;c_{in})$ un sistema elementare e siano $e\in E$ un evento
   e $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale. Allora si ha che
@@ -1093,6 +1098,9 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
 \end{figure}
 \subsection{Situazioni Fondamentali}
 \subsubsection{Sequenza}
+Dato un sistema elementare, due eventi sono in sequenza se uno dipende
+causalmente dall’altro. In parole piu semplici, se l’avvenire di un evento è subordinato
+all’avvenire di un altro evento.
 \begin{definizione}
   Sia $\Sigma = (B, E, F;c_{in})$ un sistema elementare, con contatti o meno
   e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale ed $e_1, e_2\in
@@ -1129,6 +1137,10 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
   \end{figure}
 \end{definizione} \vspace{5mm} %5mm vertical space
 \subsubsection{Concorrenza}
+Dato un caso raggiungibile e due eventi indipendenti (senza pre o post
+condizioni in comune), i due eventi possono evolvere/scattare in un unico passo. In parole piu
+semplici posso dire che se due eventi sono entrambi abilitati nello stesso istante, sono
+concorrenti.
 \begin{definizione}
   Sia $\Sigma = (B, E, F;c_{in})$ un sistema elementare, con contatti o meno
   e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1, e_2\in
@@ -1165,6 +1177,9 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
   \end{figure}
 \end{definizione} \vspace{5mm} %5mm vertical space
 \subsubsection{Conflitto}
+Due eventi sono in conflitto se sono entrambi abilitati ma l’occorrenza di uno
+disabilita l’altro. Intuitivamente possiamo dire che avviene quando due eventi condividono una
+precondizione oppure un post condizione.
 \begin{definizione}
   Sia $\Sigma = (B, E, F;c_{in})$ un sistema elementare, con contatti o meno
   e siano $c\in C_\Sigma$ un caso raggiungibile dal caso iniziale e $e_1, e_2\in
@@ -1223,11 +1238,11 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
   Si ha quindi una situazione di \textbf{non determinismo}, non essendo
   specificato quale dei due eventi scatterà prima (e lo scatto di uno impedisce
   lo scatto dell'altro).
-  Posso ritrovarmi nel caso in cui effettivamente un evento scatta, cambiando lo
+  Possiamo ritrovarci nel caso in cui effettivamente un evento scatta, cambiando lo
   stato del sistema. In tal caso, in un'ottica completamente deterministica, si
   deve assumere che \textbf{l'ambiente} abbia fornito un'informazione
   riguardo il conflitto, ovvero c'è stato qualcosa di esterno che ha permesso ad
-  uno dei due eventi di scattare ugualmente. Ho quindi guadagnato
+  uno dei due eventi di scattare ugualmente. abbiamo quindi guadagnato
   dell'informazione. 
   \begin{figure}[H]
     \centering
@@ -1282,6 +1297,8 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
   fisica). 
 \end{definizione} \vspace{5mm} %5mm vertical space
 \subsubsection{Confusione}
+Quando non è possibile stabilire oggettivamente un conflitto ci si trova in
+situazione di confusione. Chi ha deciso? Chi ha la responsabilità di decidere?
 \begin{definizione}
   La situazione di \textbf{confusione} è una \textit{mistura} di situazioni di
   concorrenza e di conflitto. Si hanno 2 tipi di confusione, entrambe
@@ -1327,16 +1344,15 @@ Se un sistema è senza contatti si ha una regola di contatto semplificata:
       \end{tikzpicture}
       \caption{Esempio di confusione asimmetrica tra $e_1$ ed $e_2$} 
     \end{figure}
-    Una soluzione che vedremo sarà la scomposizione in più componenti del
-    sistema 
-    \item detta \textbf{confusione simmetrica}, nome dovuto al fatto che la rete
+
+    \item \textbf{Confusione simmetrica}, nome dovuto al fatto che la rete
     risulta disegnata in modo simmetrico, comportando delle
     problematiche. Prendiamo nell'immagine il caso raggiungibile $c=\{b_1, b_2\}$
     e i due eventi $e_1$ ed $e_3$, abilitati in maniera concorrente. Si ha che
     $c[\{e_1, e_3\}>c'$, con $c'=\{b_3, b_5\}$. Anche in questo caso si hanno dei
     conflitti, infatti sia $e_1$ che $e_3$ sono in conflitto con $e_2$ (in
     quanto se uno dei due viene eseguito $e_2$ non può più occorrere). Anche in
-    questo caso non posso stabilire se il conflitto è stato risolto nel momento
+    questo caso non possiamo stabilire se il conflitto è stato risolto nel momento
     in cui arrivo in $c'$ (ovvero se si è deciso di fare $e_1$ piuttosto che
     $e_2$ o $e_3$ piuttosto che $e_2$).\\
     Anche in questo caso potremo dividere in componenti (una che esegue $e_1$ ed
@@ -1407,9 +1423,9 @@ Smith per spiegare come la confusione sia inevitabile nella realtà.
   Scrivendo formalmente si ha che, nel caso che la risorsa sia stata acquisita
   dalla componente rossa e successivamente rilasciata:
   \[\{b_3, b_4, b_6\}[\{e_3, e_4\}>\{b_1, b_7\}\]
-  ma se scatta prima $e_3$ ho il conflitto tra $e_1$ ed $e_4$, se scatta prima
-  $e_4$ non ho conflitti con $e_1$. Quindi non ho informazioni sulla risoluzione
-  del conflitto.\\
+  \textbf{ma se scatta prima $e_3$ abbiamo il conflitto tra $e_1$ ed $e_4$, se scatta prima
+  $e_4$ non abbiamo conflitti con $e_1$. Quindi non abbiamo informazioni sulla risoluzione
+  del conflitto.}\\
 \end{esempio}
 \section{Sottoreti}
 Partiamo subito con una definizione formale:
@@ -1442,7 +1458,7 @@ Partiamo subito con una definizione formale:
     di flusso di $N_1$ è definita come la restrizione della relazione di flusso
     di $"N"$ rispetto alle condizioni $B_1$ e agli eventi $E_1$
   \end{itemize}
-  Non ho quindi una sottorete generata da un insieme arbitrario di condizioni ed
+  Non abbiamo quindi una sottorete generata da un insieme arbitrario di condizioni ed
   eventi ma questi ultimi sono direttamente presi in relazione all'insieme delle
   condizioni scelto
 \end{definizione} \vspace{5mm} %5mm vertical space
@@ -1461,7 +1477,7 @@ Partiamo subito con una definizione formale:
     di flusso di $N_1$ è definita come la restrizione della relazione di flusso
     di $"N"$ rispetto alle condizioni $B_1$ e agli eventi $E_1$
   \end{itemize}
-  Non ho quindi una sottorete generata da un insieme arbitrario di condizioni ed
+  Non abbiamo quindi una sottorete generata da un insieme arbitrario di condizioni ed
   eventi ma le prime sono direttamente prese in relazione all'insieme degli
   eventi scelto
 \end{definizione} \vspace{5mm} %5mm vertical space
@@ -1544,10 +1560,10 @@ Iniziamo informalmente a vedere degli esempi pratici.
   \end{figure}
 \end{esempio}
 \section{Processi non sequenziali}
-Parliamo ora di sistemi non sequenziali, a ordini parziali. Difatti Petri voleva registrare il comportamento tenendo ben chiare quali fossero le relazioni di dipendenza o indipendenza causale tra gli eventi. Vediamo un esempio: Petri pensò a un sistema in cui diversi omini, spostandosi avanti nel tempo, portassero dei secchi per andare a spegnere un fuoco (dato che il sentiero  è
+ Parliamo ora di sistemi non sequenziali, a ordini parziali (ovvero uno dei tre comportamenti dei sistemi elementari). Difatti Petri voleva \textbf{registrare} il comportamento \textbf{tenendo ben chiare quali fossero le relazioni di dipendenza o indipendenza causale tra gli eventi} (i comportamenti visti fin ora non forniscono tale possibilità). Vediamo un esempio: Petri pensò a un sistema in cui diversi vigili del fuoco, spostandosi avanti nel tempo, che portassero dei secchi per andare a spegnere un fuoco (dato che il sentiero  è
 stretto si studia protocollo per cui se hanno il secchio vuoto si muovono a
 sinistra fino alla fonte d'acqua e a quel punto ci si sposta a destra). Se due
-omini si incontrano lungo la strada si scambiano 
+vigili del fuoco si incontrano lungo la strada si scambiano 
 il secchio e invertono la direzione di marcia:
 \begin{figure}[H]
   \centering
@@ -1567,11 +1583,11 @@ Si può osservare una configurazione del tipo:
   \includegraphics[scale = 0.5]{img/fire2.jpg} 
 \end{figure}
 con relazioni di dipendenza degli eventi (le righe blu) e situazioni di
-indipendenza (la riga verde).\ 
-Gli omini potrebbero essere quindi
-modellati da una rete con gli incontri tra omini che diventano
+indipendenza (la riga verde).
+I vigili del fuoco potrebbero essere quindi
+modellati da una rete con gli incontri tra vigili del fuoco che diventano
 sincronizzazioni. L'evoluzione del sistema può essere registrato salvando
-informazioni vere. Nel sistema la prima transizione a sinistra è quindi il
+informazioni vere. Nel sistema la prima evento a sinistra è quindi il
 prelevamento dell'acqua e l'ultimo a destra il versamento sul fuoco:
 \begin{figure}[H]
   \centering
@@ -1581,7 +1597,7 @@ Gli eventi in mezzo sono i cambiamenti di secchio.\\
 L'ordine degli archi segue il secchio, verso sinistra con il secchio vuoto e
 verso destra con il secchio pieno. Le condizioni in alto praticamente sono il
 secchio vuoto mentre in basso pieno.\\
-L'evoluzione del sistema posso memorizzarlo tramite condizioni \textbf{vere}. 
+L'evoluzione del sistema possiamo memorizzarlo tramite condizioni \textbf{vere}. 
 \textbf{Possiamo quindi produrre la rete in base alle condizioni che possono scattare}
 (in corrispondenza degli elementi della rete),
 ottenendo:
@@ -1604,6 +1620,26 @@ quello finale, dove blocco il sistema
 Tra le varie linee colorate (non quelle tratteggiate) si hanno relazioni di
 dipendenza. \\
 \subsection{Reti Causali}
+\subsubsection{Introduzione}
+Si tratta di particolari reti di petri identificate anche con il nome di \textbf{reti di occorrenze senza conflitti}.
+\begin{itemize}
+    \item Non ci devono essere cicli
+    \item Non ci devono essere conflitti
+    \item Preso un qualsiasi evento, il suo passato deve essere finito. L’insieme di elementi che
+precedono un evento deve essere finito.
+    \item Ad una rete causale è sempre possibile associare un ordine parziale
+\end{itemize}
+Se $x < y$ possiamo dire che $x$ causa $y$. Grazie a questo possiamo dare la definizione di \textbf{taglio} e \textbf{linea}:
+\begin{itemize}
+    \item \textbf{TAGLIO}: Data una Rete casuale con un ordinamento parziale, due elementi sono in relazione
+\textbf{co} se non è definita una relazione di causalità su di loro (sono causalmente indipendenti). Un
+\textbf{co-set} è un insieme di elementi che sono tutti in relazione co. Un taglio non è altro che un co-set massimale.
+    \item \textbf{LINEA}: Data una Rete casuale con un ordinamento parziale, due elementi sono in relazione \textbf{li}
+se è definito un ordine su di loro, se sono causalmente dipendenti. Un \textbf{li-set} è un insieme di
+elementi che sono tutti in relazione li. Una linea non è altro che un li-set massimale.
+\end{itemize}
+Una rete si dice k-densa se ogni linea ed ogni taglio si intersecano tutti in un punto.
+\subsubsection{Definizione}
 Definiamo il tutto in modo formale.
 \begin{definizione}
   Definiamo:
@@ -1619,12 +1655,11 @@ Definiamo il tutto in modo formale.
     \item $\forall a, y\in B\cup E:(x, y)\in F^+\implies (y, x)\not\in F^+$, ovvero
     non si hanno cicli, quindi presi due elementi collegati da una sequenza di
     archi orientati, avendo un cammino tra i due elementi ($F^+$ è la chiusura
-    transitiva della relazione $"F"$) non ho anche un cammino opposto tra i due
-    \item $\forall e\in E:\{x\in B\cup E|\, xF^*e\}$ è finito, ovvero si ha un
+    transitiva della relazione $"F"$) non abbiamo anche un cammino opposto tra i due
+    \item $\forall e\in E:\{x\in B\cup E|\, xF^*e\}$ il passato è finito, ovvero si ha un
     numero finito di pre-elementi di un certo elemento
   \end{itemize}
 \end{definizione} \vspace{5mm} %5mm vertical space
-\begin{nota}
   Sono quindi reti che registrano un comportamento e quindi non si hanno
   conflitti (che in caso sono sciolti registrando solo quello che è
   effettivamente successo e non quello che potrebbe succedere). Si registra una
@@ -1636,14 +1671,15 @@ Definiamo il tutto in modo formale.
   registrato, anche se nel complesso il comportamento è infinito ``in
   avanti''. \\
   Con una rete causale si possono non distinguere più condizioni ed eventi.
-
-\end{nota}
 \subsubsection{Ordine Parziale delle reti Causali}
 Ad una rete causale è possibile associare un ordine parziale:
 \[(X,\leq)=(B\cup E, F^*)\]
 Dicendo che un elemento ``è minore'' di un altro se esiste un cammino orientato
-dall'uno all'altro (si specifica che $F^*$ non mi farà mai identificare $"x"$ con
-$"x"$).
+dall'uno all'altro.
+\begin{nota}
+$F^*$ non ci farà mai identificare $"x"$ con
+$"x"$.
+\end{nota}
 \begin{esempio}
   Vediamo un esempio di rete causale:
    \begin{figure}[H]
@@ -1665,7 +1701,7 @@ $"x"$).
       ;
     \end{tikzpicture}
   \end{figure}
-  che quindi avendo un ordine parziale ed essendo causale posso scrivere come:
+  che quindi avendo un ordine parziale ed essendo causale possiamo scrivere come:
   \begin{figure}[H]
     \centering
     \begin{tikzpicture}[node distance=2cm, bend angle=45, auto]
@@ -1737,12 +1773,10 @@ $"x"$).
   indipendenza o dipendenza causale, ovvero presi $x, y\in X$ come elementi che
   occorrono nella storia di $X=B\cup E$ si hanno le seguenti diciture:
   \begin{itemize}
-    \item $x\leq y$ (avendo un cammino da $"x"$ a $"y"$) corrisponde a \textbf{$"x"$
-      causa $"y"$}, ovvero si ha una relazione di dipendenza causale tra i due
     \item $x \mbox{ \textbf{li} }y$ indica che $x\leq y\lor y\leq x$ e quindi
     corrisponde a \textbf{$"x"$ e $"y"$ sono causalmente dipendenti}. Si ha che
-    \textbf{li} può venire letto come \textit{linea} ($"x"$ in linea con $"y"$) 
-    avendo che uno dei due precede l'altro
+    \textbf{li} può venire letto come \textit{linea} ($"x"$ in linea con $"y"$)
+    avendo che uno dei due precede l'altro.  Ovvero si ha una relazione di dipendenza causale tra i due
     \item $x \mbox{ \textbf{co} }y$ indica che $\neg(x< y)\land \neg(y < x)$ e
     quindi corrisponde a \textbf{$"x"$ e $"y"$ sono causalmente indipendenti},
     avendo che i due elementi non si precedono a vicenda, non avendo ordine tra
@@ -1783,31 +1817,38 @@ Si ha quindi che \textbf{\textit{li} \textnormal{e} co} sono:
   \item riflessive
 \end{itemize}
 che sono comunque proprietà derivate dalla teoria degli ordini parziali.\\
+\subsubsection{Aggiunta della transitività}
 Possiamo ora considerare sottoinsiemi dell'ordine parziali in cui la relazione
 \textbf{li} e la relazione \textbf{co} sono transitive.
-\begin{definizione}(\textbf{Co-Set})
+\begin{definizione}[\textbf{Co-Set}]
   Data una rete causale $N=(B, E, F)$ e dato un ordine parziale $(X, \leq)$ con
   $X=B\cup E$ definiamo \textbf{co-set} un sott'insieme di $"X"$:
   \[C\subseteq X\]\mbox{ sse} \[\forall x, y\in C:\, x\mbox{ \textbf{co }}y\]
     Quindi $"C"$ è una clique della relazione \textbf{co}, ovvero tutti gli elementi dell'insieme sono in relazione \textbf{co} tra loro.
 \end{definizione} \vspace{5mm} %5mm vertical space
-\begin{definizione}(\textbf{Taglio})
+\begin{definizione}[\textbf{Taglio}]
  Data una rete causale $N=(B, E, F)$ e dato un ordine parziale $(X, \leq)$ con
   $X=B\cup E$ definiamo \textbf{taglio} un sott'insieme di $"X"$:
         \[C\subseteq X\]\mbox{ sse }\[C\,\,\,è\,\,\,un\,\,\,co-set\,\,\,massimale.\] Quindi non esiste alcun elemento che, una volta aggiunto, possa andare a creare una relazione \textbf{co} con gli altri elementi precedentemente aggiunti.
         \begin{corollario}
-         Si dice \textbf{B-Taglio} un taglio formato interamente da \textbf{condizioni}. Dove ogni elemento è in ha una relazione \textbf{co} con un altro. Rappresentano i casi raggiungibili del sistema.
+         Si dice \textbf{B-Taglio} un taglio formato interamente da \textbf{condizioni}. Dove ogni elemento è in ha una relazione \textbf{co} con un altro. \textbf{Rappresentano i casi raggiungibili del sistema.}
+        \end{corollario}
+        \begin{corollario}
+         Il taglio ci dice in un certo istante temporale in che stato si trovano tutti i sotto-processi.
         \end{corollario}
  \end{definizione} \vspace{5mm} %5mm vertical space
- \begin{definizione}(\textbf{Li-Set})
+ \begin{definizione}[\textbf{Li-Set}]
  Data una rete causale $N=(B, E, F)$ e dato un ordine parziale $(X, \leq)$ con
   $X=B\cup E$ definiamo \textbf{li-set} un sott'insieme di $"X"$:
         \[L\subseteq X\]\mbox{ sse }\[ \forall x, y\in L:\, x\mbox{ \textbf{li }}y\]
 \end{definizione} \vspace{5mm} %5mm vertical space
- \begin{definizione}(\textbf{Linea})
+ \begin{definizione}[\textbf{Linea}]
  Data una rete causale $N=(B, E, F)$ e dato un ordine parziale $(X, \leq)$ con
   $X=B\cup E$ definiamo \textbf{Linea} un sott'insieme di $"X"$:
         \[L\subseteq X\]\mbox{ sse }\[ L\,\,\,è\,\,\, un\,\,\, li-set\,\,\, massimale\]
+        \begin{corollario}
+         La linea è la storia di un sotto-processo sequenziale vista come \textit{"parto da un certo stato che è la configurazione di condizioni vere iniziale e vedo cosa succede a partire da qui durante la run (quindi non vedo l'esecuzione concorrente ma solo quella di un sotto-processo)"}
+        \end{corollario}
 \end{definizione} \vspace{5mm} %5mm vertical space
 \begin{nota}
 In un \textbf{co-set} la relazione \textbf{co} è \textbf{transitiva}
@@ -1829,20 +1870,20 @@ Linee e tagli possono essere sia eventi che condizioni.
   \begin{itemize}
     \item la storia del secchio è un insieme di elementi in relazione
     \textbf{li} e, nello specifico, ad esempio la parte azzurra o quella gialla,
-    è una \textit{linea} che descrive un sottoprocesso
+    è una \textit{linea} che descrive un sotto-processo
     \item le parti tratteggiate, sono invece
     un co-set e, nel dettaglio, sono un 
     taglio (infatti se cerco di aggiungere un qualsiasi altro elemento otterrei
     una relazione di dipendenza con uno degli elementi già presenti)
   \end{itemize}
 \end{esempio}
-\textbf{I tagli fatti di sole condizioni rappresentano casi raggiungibili
-  (nell'immagine quello verde che quello viola che quello viola-chiaro)}.\\
 \begin{nota}
+I tagli fatti di sole condizioni rappresentano casi raggiungibili
+  (nell'immagine quello verde che quello viola che quello viola-chiaro)
+\end{nota}
 Una rete causale quindi registra il comportamento di un sistema elementare.\\
 Si hanno quindi, con i tagli, possibili osservazioni di configurazioni possibili
-nella storia del sistema. In particolare, una rete causale, non registra cosa succede al variare del tempo ma registra le varie dipendenze e indipendenze causali tra le condizioni egli eventi che occorrono.
-\end{nota}
+nella storia del sistema. In particolare, una rete causale, non registra cosa succede al variare del tempo ma registra le varie dipendenze e indipendenze causali tra le condizioni e gli eventi che occorrono.
 \begin{definizione}
   Grazie alle reti causali, preso un elemento $x\in X$, possiamo definire:
   \begin{itemize}
@@ -1863,14 +1904,12 @@ nella storia del sistema. In particolare, una rete causale, non registra cosa su
 \begin{definizione}
   Data una rete causale $N=(B, E, F)$ e dato un ordine parziale $(X, \leq)$ con
   $X=B\cup E$ definiamo che la rete è \textbf{K-densa} se ogni linea e ogni
-  taglio si intersecano in un punto, tutti hanno un punto comune. Formalmente:
+  taglio si intersecano tutti in un punto, ovvero: tutti hanno un punto comune. Formalmente:
   \[\forall\, h\in Linee(N),\forall\, c\in Tagli(N):|h\cap c|=1\]
-  Con $Linee(N)$ e $Tagli(N)$ che sono rispettivamente li insiemi di tutte le
+  Con $Linee(N)$ e $Tagli(N)$ che sono rispettivamente gli insiemi di tutte le
   linee e dei tagli.\\
   \end{definizione} \vspace{5mm} %5mm vertical space
-  \begin{nota}
-    Quindi: per ogni coppia Taglio-Linea, se la linea rappresenta un sotto-processo e il taglio rappresenta una \textit{"fotografia"} di quello che sta succedendo, allora ogni sotto-processo deve incrociarci con quello che viene fotografato.
-  \end{nota}
+  Quindi per ogni coppia Taglio-Linea, se la linea rappresenta un sotto-processo e il taglio rappresenta una \textit{"fotografia"} di quello che sta succedendo, allora ogni sotto-processo deve incrociarci con quello che viene fotografato.
   \begin{nota}
   Immaginiamo una linea come la "storia" di un sotto-processo. Quindi viene interpretata come un sotto-processo sequenziale. Mentre una fotografia su una linea indica che un sotto-processo si deve trovare in un qualche stato.
   \end{nota}
@@ -1906,6 +1945,11 @@ Ogni rete che modella il comportamento di un sistema deve essere k-densa.
   condizioni a sinistra ($b_1, b_4, b_6$) sono un taglio anche le
   ultime a destra ($b_1, b_5, b_7$)). 
 \end{esempio}
+\subsection{Processi non sequenziali - Definizione}
+Dato un sistema elementare senza conflitti e finito, possiamo dire che P è un processo di questa rete
+se la rete del processo è una rete causale e ci fa corrispondere eventi/condizioni del sistema in
+eventi/condizioni della rete. Se registriamo un evento devo essere sicuro di registrare tutte le sue pre
+e le sue post. Tramite questa procedura ci assicuriamo di registrare un'esecuzione del sistema (ma non tutte), ovvero solo le dipendenze e indipendenze causali.
 \begin{definizione}
   Sia $\Sigma=(S, T, F, c_{in})$ un sistema elementare senza contatti e finito,
   tale che $S\cup T$ sia finito. Si ha che, con $\phi$ che mappa dalla rete
@@ -1918,30 +1962,42 @@ Ogni rete che modella il comportamento di un sistema deve essere k-densa.
     \begin{itemize}
       \item $\phi(B)\subseteq S, \phi(E)\subseteq T$
       \item $\forall x, y\in B\cup E:\phi(x)=\phi(y)\implies (x\leq y)\lor (y\leq
-      x)$ non avendo quindi concorrenza
+      x)$ Due elementi mappati sullo stesso elemento del sistema, allora saranno registrazioni dello stessa condizione/evento in successione per due volte. Allora sicuramente una delle due condizioni deve essere minore dell'altra perchè viene registrata prima. Non avendo quindi concorrenza. In particolare i due $x,y$ saranno in relazione \textbf{li}.
       \item $\forall e\in E:\phi(\,^\bullet e)=\,^\bullet
       \phi(e)\land\phi(e^\bullet)=\phi(e)^\bullet$ quindi le precondizioni di un
       evento nella rete causale devono corrispondere alle pre dell'evento nel
-      sistema elementare (e così anche per le post)
-      \item $\phi(Min(N))=c_{in}$,\\ con $Min(N)=\{x\in B\cup E|\nexists
-      y_(y, x)\in F\}$ che sono gli stati locali iniziali, ovvero se prendo gli
-      elementi minimali della rete 
-      causali, che non hanno un arco entrante, essi sono mappati nel caso
-      iniziale del sistema elementare
+      sistema elementare (e così anche per le post). Ovvero si devono registrare tutte le "pre" e tutte le "post" del sistema.
+      \item $\phi(Min(N))=c_{in}$,\\ con $Min(N)=\{x\in B|\nexists
+      y: (y, x)\in F\}$ 
+      Le condizioni iniziali (minimali rispetto alla relazione d'ordine), corrispondano al caso iniziale del sistema. Si prendono gli elementi che non hanno archi entranti nella rete, (che saranno condizioni poiché è un sistema senza contatti) queste condizioni verranno mappate nel caso iniziale. Dobbiamo avere la registrazione del caso iniziale. Ovvero: l'immagine delle condizioni deve essere il caso iniziale.
+      \begin{nota}
+      Non possiamo avere $x\in E$ poiché gli eventi senza archi entranti sono eventi senza pre-condizioni. Allora sicuramente avremo le pre-condizioni vere (poiché vuote) ma le post non tutte false. Quindi si avrebbero dei contatti.
+      \end{nota}
     \end{itemize}
   \end{itemize}
-  Se ho queste proprietà la rete causale è una registrazione del sistema
+  \begin{figure}[H]
+          \centering
+          \includegraphics[width=0.7\textwidth]{img/procnonseq.png}      
+          \end{figure}
+  Se abbiamo queste proprietà la rete causale è una registrazione del sistema
   elementare.\\
   In tal caso si ha che $N=(B, E, F)$ è K-densa (sia che sia finita che infinita),
-  avendo il sistema di partenza finito. Le linee sono quindi sottoprocessi
+  avendo il sistema di partenza finito. Le linee sono quindi sotto-processi
   sequenziali e i tagli possibili configurazioni sempre raggiungibili.\\
   Inoltre si ha che:
   \[\forall K\in B\mbox{ K è B-taglio di } N \mbox{ t.c. } K \mbox{ è finito}
     \land \exists c\in C_\Sigma:\phi(K)=c\]
 \end{definizione} \vspace{5mm} %5mm vertical space
-Dato un sistema ho tanti processi non sequenziali che rappresentano esecuzioni
-del sistema. Ci si chiede quindi se ho un unico oggetto che rappresenta tutti i
-possibili run del sistema.
+
+
+\subsection{Registrazione di più run del sistema}
+Dato un sistema abbiamo tanti processi non sequenziali che rappresentano esecuzioni
+del sistema. In particolare:
+\begin{definizione}
+  Se un sistema presenta dei conflitti, possiamo avere diversi modi per risolverli. Ogni modo differente presenta una differente run del sistema.
+\end{definizione}
+Ci si chiede quindi se abbiamo un unico oggetto che rappresenta tutti i
+possibili run del sistema. Questo oggetto esiste e sono i \textbf{processi ramificati}, ma per introdurli dobbiamo prima parlare di \textbf{reti di occorrenze}.
 \begin{figure}[H]
   \centering
   \includegraphics[scale = 0.6]{img/be4.jpg}
@@ -1950,17 +2006,25 @@ possibili run del sistema.
     modellati da un’unica rete con conflitti in avanti.}
 \end{figure}
 \subsubsection{Reti di Occorrenze}
+Una rete di occorrenze è una particolare rete, utilizzata \textbf{al posto delle reti causali}, tale che:
+\begin{itemize}
+    \item Ha conflitti solo in avanti.
+    \item Non ci sono cicli.
+    \item Il passato di un
+evento è finito.
+    \item La relazione di conflitto non è riflessiva.
+\end{itemize}
 \begin{definizione}
   Data una rete causale $N=(B, E, F)$, con $X=B\cup E$, diciamo che è una
   \textbf{rete di occorrenze} sse:
   \begin{itemize}
-    \item $\forall\, b\in B:|\,^\bullet b|=1$, ovvero ho conflitti solo in
+    \item $\forall\, b\in B:|\,^\bullet b|=1$, I pre eventi di ogni condizione sono al più uno.Ovvero abbiamo conflitti solo in
     avanti
     \item $\forall\, x, y\in B\cup E:(x, y)\in F^+\implies (y, x)\not\in F^+$,
-    ovvero non ho cicli, in quanto le ripetizioni sono già registrate
+    ovvero non abbiamo cicli, in quanto le ripetizioni sono già registrate
     \item $\forall\, e\in E:\{x\in B\cup E|xF^*e\}$, ovvero il passato di un
     evento, è finito 
-    \item la \textbf{relazione di conflitto} $\#$ non è riflessiva, avendo:
+    \item la \textbf{relazione di conflitto} $\#$ \textbf{non è riflessiva}, avendo:
     \[\#\subset X\times X\]
     definita come:
     \[x\# y\iff \exists e_1, e_2\in E:\,^\bullet e_1\cap \,^\bullet e_2\neq
@@ -2026,9 +2090,16 @@ possibili run del sistema.
     \end{figure}
   \end{itemize}
   È comunque possibile associare a una rete di occorrenze $"N"$ un ordine
-  parziale. 
+  parziale.
+  \begin{definizione}
+    La relazione di conflitto non può avvenire se esistono relazioni \textbf{li} o \textbf{co} tra gli elementi corrispondenti.
+  \end{definizione}
 \end{definizione} \vspace{5mm} %5mm vertical space
-\subsection{Processi Ramificati}
+\subsubsection{Processi Ramificati}
+Un processo si dice ramificato quando si sono registrati piu comportamenti in una rete, la rete che
+mi registra tutti i comportamenti si chiama \textbf{unfolding} (piu precisamente possiamo dire che l’unfolding
+rappresenta il processo ramificato che contiene tutti i comportamenti del sistema). Un processo
+ramificato è definito con una rete di occorrenze.
 Prendiamo in considerazione tutti i possibili comportamenti di un sistema. Per far ciò sfruttiamo un \textbf{Processi Ramificato}, ovvero un'\textbf{alternativa} alle reti causali. Per cui un processo deve descrivere fino a un certo punto cosa è successo, ma descriviamo tutti i possibili futuri. Quindi parliamo della registrazione dei possibili futuri di un processo, dove vi sono solo conflitti in avanti. Molto utili in questo ambito sono le \textbf{reti di occorrenza}, che hanno il compito di registrare tutti i possibili processi \textbf{non} sequenziali dove i conflitti sono \textbf{solo} in avanti.
 \begin{definizione}
   Sia $\Sigma=(S, T, F, c_{in})$ un sistema elementare senza contatti e
@@ -2044,14 +2115,17 @@ Prendiamo in considerazione tutti i possibili comportamenti di un sistema. Per f
       \item $\phi(B)\subseteq S, \phi(E)\subseteq T$
       \item $\forall e_1, e_2\in E:(\,^\bullet e_1=\,^\bullet e_2\land
       \phi(e_1)=\phi(e_2))\implies e_1=e_2$, ovvero se due eventi condividono le
-      precondizioni e corrispondono allo stesso eventi del sistema secondo la
-      mappa allora necessariamente sono lo stesso evento
+      precondizioni e corrispondono allo stesso evento del sistema (secondo la
+      mappa) allora necessariamente sono lo stesso evento. Quindi non necessariamente possiamo registrare due eventi perchè sono in linea, come nelle reti causali, ma perchè possono essere anche in conflitto. Questo può avvenire perchè siamo in un processo ramificato.
       \item $\forall e\in E:\phi(\,^\bullet e)=\,^\bullet
       \phi(e)\land\phi(e^\bullet)=\phi(e)^\bullet$ quindi le precondizioni di un
-      evento nella rete causale devono corrispondere alle pre dell'evento nel
-      sistema elementare (e così anche per le post)
+      evento nella rete di occorrenze devono corrispondere alle pre dell'evento nel
+      sistema elementare (e così anche per le post). Ovvero dobbiamo registrare tutte le "pre" e tutte le "post". 
+      \begin{nota}
+        In realtà deve esserci una corrispondenza biunivoca tra le precondizioni della rete e quelle del sistema. Quindi \textbf{non} possiamo mappare più precondizioni della rete in \textbf{una sola } precondizione del sistema e viceversa.
+      \end{nota}
       \item $\phi(Min(N))=c_{in}$, quindi il taglio iniziale deve essere il caso
-      iniziale del sistema
+      iniziale del sistema. In particolare ci vuole una relazione biunivoca tra $(Min(N))$ e $c_{in}$.
     \end{itemize}
   \end{itemize}
 \end{definizione} \vspace{5mm} %5mm vertical space
@@ -2071,39 +2145,58 @@ Prendiamo in considerazione tutti i possibili comportamenti di un sistema. Per f
 \end{esempio}
 \noindent
 Cerchiamo ora di definire meglio l'unfolding, quell'oggetto che rappresenta
-tutti i possibili sottoprocessi non sequenziali di del sistema, ovvero tutti i
+tutti i possibili sotto-processi non sequenziali del sistema, ovvero tutti i
 possibili comportamenti del sistema.\\
 Definiamo prima dei ``prerequisiti''.
-\begin{definizione}
+\begin{definizione}[Prefisso]
   Sia $\Sigma=(S, T, F, c_{in})$ un sistema elementare senza contatti e finito, e
   siano:
   \[\Pi_1=\langle N_1;\phi_1\rangle\]
   \[\Pi_2=\langle N_2;\phi_2\rangle\]
   due processi ramificati di $\Sigma$.\\
   Si ha che $\Pi_1$ è un \textbf{prefisso} di $\Pi_2$ (e quindi $\Pi_1$ è un
-  sottoprocesso di $\Pi_2$) sse:
+  sotto-processo di $\Pi_2$) sse:
   \begin{itemize}
     \item $N_1$ è una sottorete di $N_2$
     \item $\phi_{2|N_1}=\phi_1$ ovvero $\phi_2$ ristretto a $N_1$  è uguale a
     $\phi_1$ 
   \end{itemize}
+  Questo vuol dire che $N_2$ registra tutto quello che registra $N_1$ e anche qualcos'altro.
+  \end{definizione}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/prefisso.png}
+\end{figure}
+  \begin{definizione}[Unfolding]
   Si ha che $\Sigma$ ammette un unico processo ramificato che è massimale
   rispetto alla relazione di prefisso tra processi e tale processo è detto
   \textbf{unfolding} di $\Sigma$:
   \[Unf(\Sigma)\]
-  Quindi è il processo ramificato più grande, largo il più possibile e lungo
-  infinito se il sistema ha comportamento ciclico.\\
+  \begin{corollario}
+   Un processo ramificato è un prefisso dell'unfolding.
+  \end{corollario}
+  \begin{nota}
+    Quindi è il processo ramificato più grande tale per cui tutti gli altri saranno \textbf{prefissi} di questo.
+  Esso può essere infinito se il sistema ha comportamento ciclico.
+  \end{nota}
+  \begin{nota}
   Ha senso studiare un prefisso finito dell'unfolding che permette di
-  determinare tutto l'unfolding.\\
-  Tale processo non sequenziale è un processo ramificato:
-  \[\Pi=\langle N;\phi\rangle\]
-  tale che $"N"$ è una rete causale, senza conflitti. Il processo $\Pi$ è anche
-  detto \textbf{run} di $"N"$.\\
-  L'unfolding tiene traccia di tutti i processi sequenziali di un sistema
+  determinare tutto l'unfolding.
+  \end{nota}
+  \begin{nota}
+    L'unfolding tiene traccia di tutti i processi sequenziali di un sistema
   elementare. 
-\end{definizione} \vspace{5mm} %5mm vertical space
-\textbf{Rivedere bene questa parte (lezione 30 novembre, con anche parte di
-  esercizi)}.\\
+  \end{nota}
+\end{definizione} \vspace{5mm} %5mmvertical space
+\begin{definizione}
+  Un \textbf{processo non sequenziale} è un processo ramificato
+  $\Pi=\langle N;\phi\rangle$
+  tale che $"N"$ è una rete causale (senza conflitti). Il processo $\Pi$ è anche
+  detto \textbf{run}/\textbf{corsa} di $"N"$.
+  \begin{corollario}
+   Ogni processo non sequenziale di $\Sigma$ è un prefisso dell'unfolding $Unf(\Sigma)$
+  \end{corollario}
+\end{definizione}
 
 \begin{esempio}
   Riprendendo il solito esempio di mutua esclusione si ha il seguente unfolding
@@ -2114,15 +2207,11 @@ Definiamo prima dei ``prerequisiti''.
   \end{figure}
 \end{esempio}
 Si è cercato di capire se un prefisso dell'unfolding basti a studiare l'intero
-sistema.
+sistema. Tale problema lo si risolve mediante i prefissi completi.
 \begin{definizione}
-  Definiamo \textbf{prefisso completo} un prefisso che include tutti i casi
+  Definiamo \textbf{prefisso completo} un prefisso che include tutti i casi (o finito)
   raggiungibili.
 \end{definizione} \vspace{5mm} %5mm vertical space
-Più si ha concorrenza e più la discrepanza tra unfolding e sistema di
-transizioni aumenta a favore del prefisso finito dell'unfolding (???). Con
-concorrenza alta si hanno algoritmi più efficienti di calcolo dell'unfolding (e
-anche di model checking).
 % \subsection{Reti posti e transizioni}
 % Vediamo ora una nuova classe delle \textit{reti di Petri}, detta \textbf{reti
 % Posti e Transizioni}, permette di rappresentare un sistema in modo più
@@ -2241,9 +2330,9 @@ anche di model checking).
 %   presenti al suo interno. Un buffer a due posizioni diventa quindi una
 %   condizione non più booleana, detta \textbf{Posto}, con una \textbf{capacità}
 %   pari a 2. Il produttore non può produrre oltre la capacità.\\
-%   Con questa rappresentazione non ho più alcuna difficoltà nel rappresentare più
-%   posizioni del buffer in quanto basta aumentare la capacità. Ho però perso
-%   delle informazioni infatti non ho più una relazione di dipendenza tra dove si
+%   Con questa rappresentazione non abbiamo più alcuna difficoltà nel rappresentare più
+%   posizioni del buffer in quanto basta aumentare la capacità. abbiamo però perso
+%   delle informazioni infatti non abbiamo più una relazione di dipendenza tra dove si
 %   deposita (se nella prima posizione o nella seconda) e dove si preleva.\\
 %   Aggiungiamo un'altra complicanza: aggiungiamo un secondo consumatore:
 %   \begin{figure}[H]
@@ -2292,11 +2381,11 @@ anche di model checking).
 % dotati di \textbf{contatori}, gli elementi all'interno sono detti
 % \textbf{marche}. Ai posti si assegna anche una \textbf{capacità}. 
 % \\
-% Si ha inoltre che lo scatto di una transizione dipende dalla disponibilità
+% Si ha inoltre che lo scatto di una evento dipende dalla disponibilità
 % delle risorse, per esempio un produttore può produrre $"n"$ elementi alla volta
 % e il consumatore consumarne $"m"$. Si usano quindi archi pesati (se non indicato
 % ovviamente ha peso 1, quello del normale check booleano di condizione attiva)
-% tali che una transizione possa scattare sse i pesi vengono rispettati:
+% tali che una evento possa scattare sse i pesi vengono rispettati:
 % \begin{figure}[H]
 %   \centering
 %   \begin{tikzpicture}[node distance=2cm, bend angle=45, auto]
@@ -2336,7 +2425,7 @@ anche di model checking).
 %     (t0) edge (p4)
 %     ;
 %   \end{tikzpicture}
-%   \caption{Esempi con la transizione $t_i$ non abilitata}
+%   \caption{Esempi con la evento $t_i$ non abilitata}
 % \end{figure}
 % \begin{figure}[H]
 %   \centering
@@ -2377,7 +2466,7 @@ anche di model checking).
 %     (t0) edge (p4)
 %     ;
 %   \end{tikzpicture}
-%   \caption{Esempio con la transizione $t_i$ abilitata, a sinistra il ``prima''
+%   \caption{Esempio con la evento $t_i$ abilitata, a sinistra il ``prima''
 %     e a destra il ``dopo'' lo scatto di $t_i$}
 % \end{figure}
 % \subsection{I Filosofi a Cena}
@@ -2453,7 +2542,7 @@ anche di model checking).
 % inizializzate con 5 marche ciascuno. Questo modello però perde informazione
 % sulla forchetta che un filosofo può prendere, si ha un radicale \textbf{cambio
 %   di protocollo}. Un filosofo può prendere una qualsiasi forchetta e non più
-% quella alla sua destra/sinistra. Non posso quindi usare le \textit{reti Posti e
+% quella alla sua destra/sinistra. Non possiamo quindi usare le \textit{reti Posti e
 %   Transizioni} in quanto perdo troppe informazioni.\\
 % L'unica soluzione possibile è quindi quella di recuperare le informazioni perse
 % inserendole nelle marche, alle quali viene aggiunta una struttura dati. Si ha
@@ -2485,7 +2574,7 @@ anche di model checking).
 %   \includegraphics[scale = 0.6]{img/pt18.jpg}
 % \end{figure}
 % Le transizioni scattano in determinate condizioni. Per esempio la prima
-% transizione, relativa al fatto che il filosofo prende la forchetta alla sua
+% evento, relativa al fatto che il filosofo prende la forchetta alla sua
 % destra, scatta sse con l'istanza filosofo $p_j$ e forchetta $f_i$ si ha che
 % $i=j$ (ho quindi almeno una forchetta, almeno un filosofo e la forchetta deve
 % essere quella alla sua destra, che, per come abbiamo modellato il problema, è
@@ -2538,7 +2627,7 @@ anche di model checking).
 %   \end{tikzpicture}
 %   \caption{Modello produttore-consumatore compatto con due consumatori.}
 % \end{figure}
-% quindi al massimo ho cinque marche nel buffer e 2 in uno degli stati del
+% quindi al massimo abbiamo cinque marche nel buffer e 2 in uno degli stati del
 % consumatore (in quanto rappresenta due consumatori).\\
 % Passiamo ora alla formalizzazione:
 
@@ -2557,7 +2646,7 @@ anche di model checking).
 %     \end{itemize}
 %     \item $K:S\to\mathbb{N}^{+}\cup \{\infty\}$ che rappresenta una funzione che
 %     ad ogni posto in $"S"$ assegna un valore, che può essere un naturale
-%     strettamente positivo o anche infinito (ovvero in quel posto posso avere un
+%     strettamente positivo o anche infinito (ovvero in quel posto possiamo avere un
 %     numero qualsiasi di marche). Il valore zero non è ammesso in quanto
 %     implicherebbe che il posto non potrebbe mai essere occupato, rendendo la
 %     modellazione di un tale posto inutile. $"K"$ è detta \textbf{funzione
@@ -2577,20 +2666,20 @@ anche di model checking).
 %     marche}, la regola per cui le marche si spostano sulla rete. Si ha quindi,
 %   dati:
 %   \[M:S\to\mathbb{N}\cup \{\infty\}\mbox{ e }t\in T\]
-%   ovvero data una marcatura e una qualsiasi transizione $"t"$ si ha che:
+%   ovvero data una marcatura e una qualsiasi evento $"t"$ si ha che:
 %   \[M[t>\]
-%   ovvero una transizione è abilitata in una certa marcatura,
+%   ovvero una evento è abilitata in una certa marcatura,
 %   \begin{center}
 %     sse:
 %   \end{center}
 %   \[\forall s\in S,\,\, M(s)\geq W(s, t)\wedge M(s)+W(t, s)\leq K(s)\]
 %   ovvero per ogni posto si ha che ci sono abbastanza marche nei posti perché
-%   possa scattare la transizione, ovvero c'è un arco di peso corretto che collega
-%   quel posto con la transizione, avendo peso dell'arco minore o uguale al numero
-%   di marche del posto, e, inoltre, si deve verificare che la transizione non
+%   possa scattare la evento, ovvero c'è un arco di peso corretto che collega
+%   quel posto con la evento, avendo peso dell'arco minore o uguale al numero
+%   di marche del posto, e, inoltre, si deve verificare che la evento non
 %   metta troppe marche in quel posto, quindi la marcatura del posto (ovvero il
 %   numero di marche già presenti in esso) più il numero di marche che si
-%   aggiungono con lo scatto della transizione non deve superare la capacità del
+%   aggiungono con lo scatto dell'evento non deve superare la capacità del
 %   posto.
 %   \begin{figure}[H]
 %     \centering
@@ -2611,19 +2700,19 @@ anche di model checking).
 %       ;
 %     \end{tikzpicture}
 %     %\includegraphics[scale = 0.75]{img/pt21.jpg}
-%     \caption{Nell'esempio si ha che la transizione $t_2$ può scattare sse nella
-%       posto precedente ho almeno due marche, in quanto l'arco tra i due ha peso
-%       due. Inoltre ho il posto che segue vuoto ma con capacità massima pari a
-%       tre, quindi la transizione può scattare in quanto l'arco tra i due pesa
-%       due, assicurandomi che dopo la transizione, nel posto che la segue, non
+%     \caption{Nell'esempio si ha che la evento $t_2$ può scattare sse nella
+%       posto precedente abbiamo almeno due marche, in quanto l'arco tra i due ha peso
+%       due. Inoltre abbiamo il posto che segue vuoto ma con capacità massima pari a
+%       tre, quindi la evento può scattare in quanto l'arco tra i due pesa
+%       due, assicurandomi che dopo la evento, nel posto che la segue, non
 %       verrà superata la capienza massima, arrivando infatti ad avere marcatura
 %       pari a 2}
 %   \end{figure}
-%   Lo scatto della transizione, se questa è abilitata nella marcatura, mi genera
+%   Lo scatto dell'evento, se questa è abilitata nella marcatura, mi genera
 %   una nuova marcatura che viene ottenuta da quella precedente togliendo tante
-%   marche dal posto che è di input alla transizione quanto il peso dell'arco che
-%   connette tale posto alla transizione e aggiungendo tante marche al posto in
-%   output quante il peso dell'arco che connette la transizione a tale posto,
+%   marche dal posto che è di input alla evento quanto il peso dell'arco che
+%   connette tale posto alla evento e aggiungendo tante marche al posto in
+%   output quante il peso dell'arco che connette la evento a tale posto,
 %   ovvero, formalmente: 
 %   \[M[t>M'\]
 %   \begin{center}
@@ -2644,9 +2733,10 @@ anche di model checking).
 %     delle marcature raggiungibili
 %     \item se $M\in [M_0> \wedge\,\exists t\in T:\, M[t>M'$ allora $M'\in [M_0$,
 %     ovvero se $"M"$ appartiene all'insieme delle marcature raggiungibili ed esiste
-%     una transizione una transizione tale per cui $"M"$ va in $M'$ allora, di
+%     una evento una evento tale per cui $"M"$ va in $M'$ allora, di
 %     conseguenza si ha che $M'$ appartiene all'insieme delle marcature
 %     raggiungibili dallo stato iniziale
 %   \end{itemize}
 %   \emph{Anche questa è una definizione per induzione}
+
 % \end{definizione} \vspace{5mm} %5mm vertical space

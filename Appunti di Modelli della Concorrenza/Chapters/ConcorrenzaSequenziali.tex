@@ -35,7 +35,7 @@ Introduciamo l'argomento con un esempio.
 	\end{nota}
 	Al termine di una certa iterazione $x$ contiene il massimo 
 	tra i valori compresi tra $v[0]$ e $v[h-1]$ (detto altrimenti il massimo in
-	$v[0..h-1]$). Inoltre al fine di una certa iterazione mi aspetto che $h\leq
+	$v[0..h-1]$). Inoltre al fine di una certa iterazione ci aspetto che $h\leq
 	n$.\\
 	Possiamo quindi dire che quando esco dal ciclo $x$ è il massimo in $v[0..h-1]$
 	ma in questo momento $h=n$ e quindi $x$ è il massimo del vettore.\\
@@ -43,7 +43,7 @@ Introduciamo l'argomento con un esempio.
 	che $x$ è il massimo in $v[0..h-1]$. Dopo l'istruzione di scelta $x$ è il
 	massimo in $v[0..h]$, comunque sia andata la scelta. Alla fine
 	dell'iterazione, dopo l'incremento di $h$, avrò ancora che $x$ è il massimo in
-	$v[0..h-1]$. Ragiono quindi per induzione. Se all'inizio dell'iterazione e
+	$v[0..h-1]$. ragioniamo quindi per induzione. Se all'inizio dell'iterazione e
 	alla fine abbiamo la stessa asserzione, ed è vera prima d'iniziare l'iterazione,
 	posso dire che abbiamo una \textbf{proprietà invariante} e vale anche al termine
 	dell'ultima iterazione e quindi vale anche alla fine dell'esecuzione del
@@ -111,8 +111,8 @@ quanto detto sopra è in realtà un'approssimazione della realtà.
 Durante il corso useremo un linguaggio imperativo non reale semplificato.
 Dovremo anche definire una logica, definendo un apparato deduttivo, un insieme
 di regole per costruire dimostrazioni derivando nuove formule da quelle
-preesistenti. Useremo la \textbf{logica di abbiamoare}. Le formule della logica di
-abbiamoare sono triple di tipo $(\alpha P \beta)$ quindi si tratta di una logica di tipo diverso
+preesistenti. Useremo la \textbf{logica di Hoare}. Le formule della logica di
+Hoare sono triple di tipo $(\alpha P \beta)$ quindi si tratta di una logica di tipo diverso
 anche se si appoggia su quella proposizionale.
 \section{Linguaggio semplificato}
 Definiamo quindi il linguaggio di programmazione imperativo semplificato che
@@ -156,7 +156,7 @@ Un'espressione booleana ``B'' può essere la costante ``truè', la costante
 \end{listing}
 Cerchiamo di capire se il programma $D$, sopra definito, soddisfa la tripla:
 \[\{a>0\land b>0\}\,\, D\,\, \{x=MCD(a, b)\}\]
-Quindi mi chiedo se eseguendo il programma con uno stato della memoria dove $a$
+Quindi, chiediamoci se eseguendo il programma con uno stato della memoria dove $a$
 e $b$ sono due interi positivi (pre-condizione) allora, alla fine dell'esecuzione
 di $D$, $x$ sarà il massimo comune divisore tra $a$ e $b$
 (post-condizione). Dobbiamo dimostrare la tripla e qualora non fosse vera bisogna
@@ -166,24 +166,22 @@ sia verificata).
 %----------------------------------------------------------------------------------------
 %	SECTION 
 %----------------------------------------------------------------------------------------
-\section{Regole di derivazione}
-\subsection{Logica di abbiamoare}
-\begin{definizione}
-	Una \textbf{dimostrazione}, in una logica data, è una sequenza di formule di
-	quella logica che sono o \textit{assiomi} (formule che riteniamo vere a
-	priori) o formule derivate dalle precedenti tramite una \textit{regola di
-	inferenza}. 
-\end{definizione} \vspace{5mm} %5mm vertical space
-Una regola d'inferenza mi manda da un insieme di formule
+\section{Logica di Hoare: Assiomi e Regole di inferenza}
+La logica di Hoare è un sistema formale che rientra tra le semantiche assiomatiche pubblicato per la prima volta nel 1969 da C. A. R. Hoare che si prefigge, definendo un insieme iniziale di assiomi e di regole su di essi, di valutare la correttezza di programmi utilizzando il rigore dei formalismi matematici.
+
+La logica è stata sviluppata per essere utilizzata con un semplice linguaggio di programmazione imperativo ed ha subito sviluppi ulteriori per merito dello stesso Hoare e di altri ricercatori per la gestione di casistiche particolari quali la concorrenza, i puntatori e le procedure. 
+L'intero sistema si basa sul concetto di tripla di Hoare, ovvero delle\textbf{ specifiche di correttezza}.
+Il sistema per verificare le triple utilizza assiomi, ossia triple che risultano sempre soddisfatte, e regole di inferenza che permettono di semplificare il comando per \textbf{induzione strutturale}. 
+Una regola d'inferenza ci manda da un insieme di formule
 $\alpha_1,\alpha_2,\ldots,\alpha_n$ a una nuova formula $\alpha$ e si indica
 con: 
-\[\frac{\alpha_1,\alpha_2,\ldots,\alpha_n}{\alpha}\]
+\[\frac{\alpha_1,\alpha_2,\ldots,\alpha_n}{\alpha} \dots \frac{Premesse}{Conclusioni}\]
 Che si legge come: "\textit{se abbiamo già derivato $\alpha_1, \alpha_2,
 	\ldots,\alpha_n$ sono autorizzato a derivare $\alpha$}".\\ 
-Nel nostro caso ogni $\alpha_i$ è una tripla della \textbf{logica di abbiamoare}.\\
-\textbf{Una dimostrazione si ottiene quindi applicando le regole di derivazione fino
+Nel nostro caso ogni $\alpha_i$ è una tripla della \textbf{logica di Hoare}.\\
+\textbf{Una dimostrazione si ottiene quindi applicando le regole di inferenza fino
 ad arrivare, se si riesce, a una soluzione.}
-Vediamo quindi le regole di derivazione, che sono associate alle regole del
+Vediamo quindi le regole di inferenza, che sono associate alle regole del
 linguaggio sopra definito.
 \subsection{Skip}
 \begin{definizione}
@@ -201,7 +199,7 @@ linguaggio sopra definito.
 \begin{definizione}
 	La seconda è una regola che non ha un rapporto diretto con il linguaggio e
 	chiameremo \textbf{regola di conseguenza (o dell'implicazione)}. Ha due
-	premesse: una tripla appartenente alla logica di abbiamoare e una implicazione della
+	premesse: una tripla appartenente alla logica di Hoare e una implicazione della
 	logica proposizionale.
 	\begin{align}\label{ImplicationRule}
 		\frac{p\implies p'\,\, \,\,\{p'\}\,\, C\,\,\{q\}}{\{p\}\,\, C\,\,\{q\}} 
@@ -237,7 +235,7 @@ linguaggio sopra definito.
 	indicante che cerchiamo in $p$ tutte le occorrenze $x$ e le sostituiamo con $E$.
 	\begin{esempio}
 		Se abbiamo $x \cceq y+1$ con $E$ pari a $y+1$ e con $p$ pari a $\{x>0\}$ come
-		post-condizione data e cerco la pre-condizione. Quindi la tripla completa
+		post-condizione data e Cerchiamo la pre-condizione. Quindi la tripla completa
 		sarebbe: 
 		\[\{y+1>0\}\,\, x \cceq y+1\,\,\{x>0\}\]
 		E la tripla sappiamo che è \emph{vera} (\textbf{se so che $y+1$ è positivo, dopo
@@ -245,7 +243,7 @@ linguaggio sopra definito.
 	\end{esempio}
 	\begin{esempio}
 		Se abbiamo $x \cceq x+2$ con $E$ pari a $x+2$ e con $p$ pari a $\{x>0\land x\leq
-		y\}$ come post-condizione data e cerco la pre-condizione. Quindi la tripla
+		y\}$ come post-condizione data e Cerchiamo la pre-condizione. Quindi la tripla
 		completa sarebbe:
 		\[\{x+2>0\land x+2\leq y\}\,\, x \cceq x+2\,\,\{x>0\land x\leq y\}\]
 		e anche questa tripla è garantita dalla regola di sostituzione.
@@ -292,7 +290,7 @@ linguaggio sopra definito.
 		qualsiasi interpretazione}
 		\item \textit{ogni tripla \textbf{vera} vorremmo fosse anche
 		      \textbf{derivabile} e il discorso verrà approfondito in seguito per la
-		logica di abbiamoare}
+		logica di Hoare}
 	\end{itemize}
 	$\vdash$ può avere a pedice una sigla per la regola rappresentata, ad esempio
 	$\vdash_{ass}$ per l'assegnamento.
@@ -315,7 +313,7 @@ linguaggio sopra definito.
 	\[\{z> 0\}\,\,\, x\cceq (y\cdot z)+1\,\,\,\{x>0\}\]
 	e vediamo che la tripla non è valida in quanto $y$ potrebbe essere negativo e
 	non portare alla positività di $x$. Formalmente cerchiamo un controesempio
-	cercando di non soddisfare la post-condizione. Scelgo in memoria $z=1$ e
+	cercando di non soddisfare la post-condizione. Scegliamo in memoria $z=1$ e
 	$y=-2$. Abbiamo fatto quindi un ragionamento semantico. Provo anche
 	sintatticamente e giungo a:
 	\[\vdash\{(y\cdot z+1)> 0\}\,\,\, x\cceq (y\cdot z)+1\,\,\,\{x>0\}\]
@@ -341,7 +339,7 @@ linguaggio sopra definito.
 	\[\vdash_{ass}\{sx=x^{i+1}\}\,\,\, i\cceq i+1\,\,\,\{sx=x^i\}\]
 	per transitività si può scrivere:
 	\[\{sx=x^{i+1}\}\,\,\, i\cceq i+1,\, s\cceq s\cdot x\,\,\,\{s=x^i\}\]
-	ma non coincide con quanto voglio dimostrare. Ragiono quindi in modo
+	ma non coincide con quanto vogliamo dimostrare. ragioniamo quindi in modo
 	algebrico. In $\{sx=x^{i+1}\}\,\,\, i\cceq i+1\,\,\,\{sx=x^i\}$ divido per $x$:
 	\[\{s\cancel{x}=x^{i+\cancel{1}}\}\to\{sx=x^i\},\mbox{ se }x\neq 0\]
 	e quindi la formula iniziale è dimostrata.
@@ -359,7 +357,7 @@ linguaggio sopra definito.
 			D \mbox{ endif}\,\,\,\{y\geq 0\}\]
 			che in modo ancora più compatto sarebbe:
 			\[\{\top\}\,\,\, S\,\,\,\{y\geq 0\}\]
-			\textbf{Applico quindi la regola di derivazione al primo caso:}
+			\textbf{applichiamo quindi la regola di derivazione al primo caso:}
 			abbiamo quindi:
 			\[\{\top \land x<0\}\,\,\, C\,\,\,{y\geq 0}\]
 			che è uguale a:
@@ -395,7 +393,7 @@ linguaggio sopra definito.
 				\end{itemize}
 			\end{definizione} \vspace{5mm} %5mm vertical space
 			In particolare analizzeremo i programmi prima con la \textbf{correttezza parziale} per poi controllare se effettivamente essi terminano, mediante la \textbf{correttezza totale}.\\
-			\begin{definizione}(Invariante)
+			\begin{definizione}[Invariante]
 			
 			\[\mbox{ while \textit{B} do 
 				\textit{C} endwhile }\]
@@ -411,7 +409,7 @@ linguaggio sopra definito.
 			Non è detto che l'invariante valga anche durante l'esecuzione di $C$, basta solo che valga alla fine.
 			\end{nota}
 			\end{definizione}
-				L'idea alla basa di questa regola è quella di trovare un'inviante particolare che valga solo in \textbf{relazione} alla condizione $B$. Quindi non siamo interessati a tutte le possibili invarianti di ciclo, basi pensare solo alla costante $T$ che rimane un'invariante per qualunque ciclo, ma essa non fornirà alcuna particolare informazione. In particolare la scelta dell'inviante dipende molto dal contesto in cui ci troviamo.
+				L'idea alla basa di questa regola è quella di trovare un invariante particolare che valga solo in \textbf{relazione} alla condizione $B$. Quindi non siamo interessati a tutte le possibili invarianti di ciclo, basi pensare solo alla costante $T$ che rimane un'invariante per qualunque ciclo, ma essa non fornirà alcuna particolare informazione. In particolare la scelta dell'invariante dipende molto dal contesto in cui ci troviamo.
 			\subsubsection{Correttezza Parziale}
 			Partiamo con la correttezza parziale \textbf{supponendo a priori che l'esecuzione
 			termini}. 
@@ -419,7 +417,7 @@ linguaggio sopra definito.
 			    Se si esegue $W$ a partire da uno stato in cui vale la formula $p$ e si conosce a priori che l'esecuzione termina, allora si arriverà a uno stato finale in cui sicuramente varrà $q$.
 			   	\[\{p\}\mbox{ while \textit{B} do \textit{C} endwhile }\{q\}\]
 			 \end{definizione}
-			 \begin{definizione}(Regola iterativa per la correttezza parziale)
+			 \begin{definizione}[Regola iterativa per la correttezza parziale]
 			 			\begin{align}\label{IterationRulePartial}
 				\frac{\{i\land B\}\,\,\, C\,\,\,\{i\}}{\{i\}\mbox{ while \textit{B} do 
 				\textit{C} endwhile }\{i\land \neg B\}}                               
@@ -430,7 +428,7 @@ linguaggio sopra definito.
 			\end{nota}
 			\end{definizione}
 			
-			In particolare siamo interessati a trovare un'invariante di ciclo solo quando è valida la condizione di ciclo $B$. La formula $i$ non è inviante in senso assoluto, difatti, diventa tale solo nel momento in cui si mette in congiunzione con $B$. Nello stato raggiunto
+			In particolare siamo interessati a trovare un'invariante di ciclo solo quando è valida la condizione di ciclo $B$. La formula $i$ non è invariante in senso assoluto, difatti, diventa tale solo nel momento in cui si mette in congiunzione con $B$. Nello stato raggiunto
 			dopo $C$ la condizione $B$ può essere valida o meno. 
 			
 			\begin{definizione}
@@ -458,7 +456,7 @@ linguaggio sopra definito.
 				      iterazioni inserite in un programma. In questi casi quindi la scelta di un
 				      invariante adeguato dipende sia dall'iterazione che dall'intero contesto.
 				      \begin{esempio}
-				      	abbiamo un programma su cui voglio dimostrare:
+				      	abbiamo un programma su cui vogliamo dimostrare:
 				      	\[\{p\}\mbox{ \textit{C; W; D} }\{q\}\]
 				      	con $W$ iterazione e $C, D$ comandi.\\
 				      	Spezziamo quindi il programma per fare la dimostrazione, tramite la regola
@@ -578,13 +576,13 @@ linguaggio sopra definito.
 				      				\end{align}
 				      				Bisogna infatti vedere se anche le condizioni iniziali permettono
 				      				all'invariante doppio di restare tale.\\
-				      				Applico quindi due volte l'assegnamento (partendo dal fondo); il primo con
+				      				applichiamo quindi due volte l'assegnamento (partendo dal fondo); il primo con
 				      				$s\cceq 1$: 
 				      				\[\vdash_{ass}\{1=x^i\land i\leq N\}\mbox{ $s\cceq 1$ }\{s=x^i\land i\leq N\}\]
 				      				Utilizzando la pre-condizione appena descritta come post-condizione, passo quindi a $i\cceq 0$ seguendo il nuovo ordine delle condizioni:
 				      				\[\vdash_{ass}\{1=x^0\land 0\leq N\}\mbox{ $i\cceq 0$ }\{1=x^i\land i\leq N\}\]
 				      				Ricordando che la regola di derivazione per la \textbf{sequenza} (si veda la \ref{SequenceRule}) equivale a:   \[\frac{\{p\}\,\, C_1\,\,\{q\}\,\,
-				      					\,\,\{q\}\,\, C_2\,\,\{r\}}{\{p\}\,\, C_1;C_2\,\,\{r\}}\] \\Applico quindi la sequenza con la \ref{PrimaParte} (sapendo $1=x^0$ è sempre vero):
+				      					\,\,\{q\}\,\, C_2\,\,\{r\}}{\{p\}\,\, C_1;C_2\,\,\{r\}}\] \\applichiamo quindi la sequenza con la \ref{PrimaParte} (sapendo $1=x^0$ è sempre vero):
 				      				\[\vdash_{seq}\{N\geq 0\}\mbox{ \textit{A} }\{s=x^i\land i\leq N\}\]
 				      				completando la dimostrazione.\\
 				      				\end{esempio}
@@ -668,7 +666,7 @@ linguaggio sopra definito.
 				      				un'iterazione:
 				      				\[\{p\}\mbox{ while \textit{B} do \textit{C} endwhile }\{q\}\]
 				      								      				\begin{definizione}
-				      					Se si esegue $W$  a partire da uno stato in cui vale $p$ e dimostriamo che l'esecuzione termina allora nello stato finale vale $q$.
+				      					Se si esegue $W$  a partire da uno stato in cui varrà $p$ e dimostriamo che l'esecuzione termina allora nello stato finale vale $q$.
 				      				\end{definizione} \vspace{5mm} %5mm vertical sspace
 
 				      				Distinguiamo i due tipi di correttezza, dal punto di vista della derivabilità,
@@ -716,7 +714,7 @@ linguaggio sopra definito.
 				      					      \label{ConditionTotalCorrectness2}
 				      				\end{enumerate}
 				      				In pratica, nella seconda condizione, uso $E$ per concludere che una singola
-				      				esecuzione dell'iterazione mi porta in uno stato in cui vale l'invariante, dove
+				      				esecuzione dell'iterazione ci porta in uno stato in cui vale l'invariante, dove
 				      				può valere o meno $B$ (che potrebbe portare all'uscita dall'iterazione) ma in
 				      				cui $E$ ha un valore diverso, minore a quello di partenza ma mai minore di zero per
 				      				la prima condizione (in quanto l'invariante è sempre valido e per la prima condizione ciò implica che $E \geq 0$). Quindi, a un
@@ -741,11 +739,9 @@ linguaggio sopra definito.
 				      				parziale, magari è uguale, magari diverso o anche uguale solo in parte.
 				      				\end{nota}
 				      			    
-				      				\subsubsection{Rintracciamento dell'espressione aritmetica variante E}
-				      				\textit{Spesso si è visto che $E$ si ricava da $B$. Se $B$ è della forma $x>y$ 
-				      					allora $E$ sarà $x-y$. In caso di $<$, $\leq$ e $\geq$ ricondursi a $>$. Si 
-				      					specifica che non è una regola formale ma si è visto che si fa praticamente 
-				      					sempre così}.\\
+				      				\paragraph{Rintracciamento dell'espressione aritmetica variante E}
+				      				Spesso si è visto che $E$ si ricava da $B$. Se $B$ è della forma $x>y$ 
+				      					allora $E$ sarà $x-y$. In caso di $<$, $\leq$ e $\geq$ allora bisognerebbe ricondursi a $>$.
 				      				\begin{esempio}
 				      					Vediamo un esempio chiarificatore.\\
 				      					Dato il programma (una sorta di conto alla rovescia):
@@ -760,28 +756,31 @@ linguaggio sopra definito.
 				      					\end{listing}
 				      					studio la correttezza totale della tripla:
 				      					\[\{x>5\}\mbox{ P }\{x=5\}\]
-				      					\subsubsection{Ricerca variante e Invariante}
-				      					Innanzitutto cerco un variante $E$, che decresce a ogni singola iterazione, e
-				      					un'invariante $i$ come descritti sopra. Quindi, secondo la \ref{ConditionTotalCorrectness1}, qualora ci sia
+				      					\paragraph{Ricerca variante e Invariante}
+				      					Innanzitutto Cerchiamo un variante $E$, che decresce a ogni singola iterazione, e
+				      					un'invariante $i$ come descritti sopra. Quindi, secondo la regola  \ref{ConditionTotalCorrectness1}, qualora ci sia
 				      					l'invariante $i$ allora  $E\geq 0$.\\
-				      					In merito ad $E$ notiamo che nel corpo dell'iterazione abbiamo un solo	comando, dove il valore della variabile $x$ viene decrementato, quindi, facendo i calcoloi su $B$, potrei pensare di prendere in considerazione 
+				      					In merito ad $E$ notiamo che nel corpo dell'iterazione abbiamo un solo	comando, dove il valore della variabile $x$ viene decrementato, quindi, facendo i calcoli su $B$, potremmo pensare di prendere in considerazione 
 				      					\[E: x - 5\]
-				      					Dovendo però garantire che $E\geq 0$ in relazione ad un dato invariante $i$, allora scelgo
-				      					\[i: x \geq 5\] \\		\textbf{NOTA: Non sempre posso ottenere una corrispondenza tra variante e
-				      						invariante}.\\
-				      					Presi questo invariante e questo variante verifichiamo le condizioni \ref{ConditionTotalCorrectness1} e \ref{ConditionTotalCorrectness2}:
+				      					Dovendo però garantire che $E\geq 0$ in relazione a un dato invariante $i$, allora scegliamo:
+				      					\[i: x \geq 5\] \\		
+				      					\begin{nota}
+				      					Non sempre posso ottenere una corrispondenza tra variante e
+				      						invariante.
+				      					\end{nota}
+				      					Presi questo invariante e questo variante verifichiamo le regole \ref{ConditionTotalCorrectness1} e \ref{ConditionTotalCorrectness2}:
 				      					\begin{enumerate}
 				      						\item $x\geq 5\implies x-5\geq 0$ è ovviamente corretto perché si ottiene
 				      						      che $x\geq 5\implies x \geq 5$ (infatti questo è il motivo per cui si è
 				      						      scelto $x-5$ come variante)
 				      						\item $\vdash^{tot}\{x\geq 5\land x>5\land x-5=k\}\,\,\, x\cceq
 				      						      x-1\,\,\,\{x\geq 5\land x-5<k\}$\\
-				      						      Applico quindi la regola dell'assegnamento (\ref{AssignmentRule}) (che si applica anche per la
+				      						      applichiamo quindi la regola dell'assegnamento (\ref{AssignmentRule}) (che si applica anche per la
 				      						      correttezza totale) e ottengo la pre-condizione per la post-condizione
 				      						      $\{x\geq 5\land x-5<k\}$:
 				      						      \[\{x-1\geq 5\land x-1-5<k\}=\{x\geq 6\land x-6 < k\}\]
 				      						      che però è diversa da $\{x\geq 5\land x>5\land x-5=k\}$.\\
-				      						      Cerco quindi di applicare la regola dell'implicazione. Riguardando la
+				      						      Cerchiamo quindi di applicare la regola dell'implicazione. Riguardando la
 				      						      pre-condizione originale noto che $x>5$ è ``più fortè' di $x\geq 5$ e quindi
 				      						      quest'ultimo può essere trascurato. Ricordando che stiamo lavorando su
 				      						      valori interi si ha che $x>5\implies x\geq 6$. Inoltre, sempre per il fatto
@@ -809,7 +808,7 @@ linguaggio sopra definito.
 				      					\end{listing}
 				      					studio la correttezza totale della tripla:
 				      					\[\{x<5\}\mbox{ P }\{x=5\}\]
-				      					Dal punto di vista della correttezza parziale ragiono come al solito mentre
+				      					Dal punto di vista della correttezza parziale ragioniamo come al solito mentre
 				      					per la correttezza totale la situazione è un po' diversa.\\
 				      					Ovviamente non posso usare $x$ come variante ma posso sicuramente usare, per
 				      					esempio, $-x$, che sicuramente decresce visto che $x$ cresce, in entrambi i
@@ -819,7 +818,7 @@ linguaggio sopra definito.
 				      					anche questo $E$ è ricavabile da $i$, anche se questo non è sempre attuabile).
 				      					Il resto della dimostrazione è analoga all'esempio precedente.
 				      				\end{esempio}
-				      				\subsection{Esercizio di Ricapitolazione}
+				      				\subsection{Esempi di Ricapitolazione}
 				      				\begin{esempio}
 				      					\begin{lstlisting}
 	
@@ -828,32 +827,35 @@ linguaggio sopra definito.
         p ~ p * x;
         y ~ y - 1;
       endwhile      						\end{lstlisting}
-				      Voglio sapere se vale la regola:
+				      vogliamo sapere se vale la regola:
 				      
-				      \[\{b \geq 0\}P\{p = x^b\}\]
-				      \textbf{NOTA:} consideriamo inizialmente la correttezza parziale.
-				      \subsubsection{Correttezza Parziale: Trovo un'invariante}
+				      \[\{b \geq 0\}P\{p = x^b\}\] 
+				      
+				      \paragraph{Correttezza Parziale: Trovare un'invariante}
+				      Consideriamo inizialmente la correttezza parziale.
+				     
 				      \[inv: p = x^{b-y} \land y \geq 0\]
-				      \subsubsection{Dimostro che inv è un'invariante di ciclo per W}
-				      Controllo la regola \ref{IterationRulePartial}
+				      \paragraph{Dimostro che inv è un'invariante di ciclo per W}
+				      
 				      \[inv: p = x^{b-y} \land y \geq 0\]
-				      Devo quindi dimostrare che:
+				      dobbiamo quindi dimostrare che:
 				      \[\{x^{b-y} \land y \geq 0 \land y > 0\}C\{x^{b-y} \land y \geq 0\}\] 
-				      Si noti dal programma che gli assegnamenti sono indipendenti, quindi applico la \ref{AssignmentRule} simultaneamente a entrambe:
+				      Si noti dal programma che gli assegnamenti sono indipendenti, quindi applichiamo la \ref{AssignmentRule} simultaneamente a entrambe:
 				      \[C\{x^{b-y} \land y \geq 0\}\] 
-				      Semplificando vene dimostrata la formula. Si noti che per la regola dell'implicazione $y > 0 \implies y \geq 0$.
+				      Semplificando viene dimostrata la formula. Si noti che per la regola dell'implicazione $y > 0 \implies y \geq 0$.
 				      \[\vdash^{}\{x^{b-y} \land y > 0 \}C\{x^{b-y} \land y \geq 0\}\]
-				      \subsubsection{Applichiamo la regola dell'iterazione}
-
+				      Quindi abbiamo dedotto la premessa per eseguire la regola d'iterazione per la correttezza parziale. \ref{IterationRulePartial}.
+				      \paragraph{Applichiamo la regola dell'iterazione}
+            
   				      \[\vdash^{iter}\{x^{b-y} \land y \geq 0 \}W\{x^{b-y} \land y \geq 0\ \land y \leq 0\}\]
   				       
-				      Si noti che $ y \geq 0\ \land y \leq 0 \implies y = 0$. Allora giungiamo all conclusione:
+				      Si noti che $ y \geq 0\ \land y \leq 0 \implies y = 0$. Allora giungiamo alla conclusione:
 				       				        \begin{align}
   				       \vdash^{}\{x^{b-y} \land y \geq 0 \}W\{x^b\}
       				        \label{Example1}
  				        \end{align}
 
-				      \subsubsection{Controlliamo l'invariante dopo l'assegnamento iniziale}
+				      \paragraph{Controlliamo l'invariante dopo l'assegnamento iniziale}
                         Controlliamo se vale la regola:
                          \[\{b \geq 0\}A\{x^{b-y} \land y \geq 0\}\]
                          
@@ -865,13 +867,15 @@ linguaggio sopra definito.
       				        \vdash^{imp}\{b \geq 0 \}A\{x^{b-y} \land y \geq 0\}
       				        \label{Example2}
  				        \end{align}
-				      \textbf{Nota:} applicando la regola della sequenza tra \ref{Example1} e \ref{Example2} si giunge alla conclusione.
-                    \subsubsection{Correttezza Totale: Invariante e Variante}
-                    Scelgo:
+				      \begin{nota}
+				      Applicando la regola della sequenza tra \ref{Example1} e \ref{Example2} si giunge alla conclusione.
+				      \end{nota} 
+                    \paragraph{Correttezza Totale: Invariante e Variante}
+                    Scegliamo:
                     \[E: y\]
-			      Dovendo però garantire che $E\geq 0$ in relazione a un dato invariante $i$, allora scelgo
+			      Dovendo però garantire che $E\geq 0$ in relazione a un dato invariante $i$, allora Scegliamo
 			      \[i: y \geq 0\] 
-			      Cerco di verificare secondo \ref{ConditionTotalCorrectness2}:
+			      Cerchiamo di verificare secondo la regola \ref{ConditionTotalCorrectness2} della correttezza totale:
 			      \[\vdash^{tot}\{y \geq 0 \land y > 0 \land y=k\}\mbox{ y := y - 1 }\{y \geq 0\land y<k\}\]
 			      
 			      \[\mbox{ y := y - 1 }\{y \geq 0\land y < k\}\]
@@ -880,8 +884,10 @@ linguaggio sopra definito.
 			      
 			      \[\vdash^{imp}\{y > 0 \land y-1 < k\}\mbox{ y := y - 1 }\{y \geq 0\land y<k\}\]
 			      
-			      \textbf{NOTA}: $y = k \implies y - 1 < k$
-
+			      \begin{nota}
+			      $y = k \implies y - 1 < k$
+			      \end{nota}
+			      
 				    \end{esempio}   
 				     
 				     
@@ -892,39 +898,36 @@ linguaggio sopra definito.
 				      				\begin{enumerate}
 				      					\item \textbf{correttezza}, ovvero il fatto che tutto quello che si può
 				      					      derivare con l'apparato deduttivo è effettivamente vero, ovvero
-				      					      $\vdash\implies\vDash$. Quindi se una tripla è derivabile è anche vera
+				      					      $'\vdash' \implies '\vDash'$. Quindi se una tripla è derivabile è anche vera
 				      					\item \textbf{completezza}, ovvero il fatto che l'apparato deduttivo sia in
-				      					      grado di derivare tutte le formule vere (ovvero tutte le triple) vere. Si ha
-				      					      quindi $\vDash\implies\vdash$
+				      					      grado di derivare tutte le formule vere (ovvero tutte le triple). Si ha
+				      					      quindi $'\vDash' \implies '\vdash'$
 				      				\end{enumerate}
-				      				Per la logica di abbiamoare vale la correttezza ma vale una proprietà di completezza
-				      				è \textit{relativa} in quanto nel corso di una dimostrazione di completezza
+				      				Per la logica di Hoare vale la correttezza ma vale una proprietà di completezza \textit{relativa} in quanto nel corso di una dimostrazione di completezza
 				      				occorre a volte usare deduzioni della logica proposizionale ma tali formule
 				      				parlano anche di operazioni aritmetiche. Si ha che l'aritmetica può essere
 				      				formalizzata attraverso un linguaggio logico con degli assiomi e delle regole di
 				      				inferenza. Si hanno però i \textbf{teoremi d'incompletezza dell'aritmetica} di
 				      				G\"{o}del che dicono che l'aritmetica come teoria matematica è incompleta in
 				      				quanto ci sono formule scritte nel linguaggio dell'aritmetica che sono vere ma
-				      				non sono dimostrabili. Questa incompletezza si riverbera sulla logica di abbiamoare,
+				      				non sono dimostrabili. Questa incompletezza si riverbera sulla logica di Hoare,
 				      				che comunque, dal punto di vista deduttivo sulle triple, è completa.
-				      				\subsection{pre-condizione più debole}
-				      				Dato un comando $C$ e una formula $q$ che interpretiamo come post condizione di
+				      				\subsection{Pre-condizione debole: ricerca della migliore precondizione}
+				      				Dato un comando $C$ e una post-condizione $q$ di
 				      				$C$. Si cerca $p$ tale per cui:
 				      				\[\vDash\{p\}\mbox{ C } \{q\}\]
 				      				Sia valida e quindi vera.\\
-				      				Ovviamente il caso interessante è quello totale.
 				      				\begin{esempio}
 				      					Suppongo di avere come comando un singolo assegnamento $y\cceq 2\cdot x-1$ e
 				      					come post-condizione $\{y>x\}$.\\
-				      					Cerco possibili precondizioni che, dopo l'assegnamento, portino a quella
+				      					Cerchiamo possibili precondizioni che, dopo l'assegnamento, portino a quella
 				      					post-condizione. Ovviamente si avrebbero infiniti valori di $x$ che consentono
 				      					di arrivare alla post-condizione (nonché altrettanti che non lo permettono). 
 				      				\end{esempio}
-				      				Si cerca quindi la ``migliorè' pre-condizione per arrivare ad una data
-				      				post-condizione ma per farlo ci serve un criterio di confronto. \\
-				      				Introduciamo quindi alcuni simboli e nozioni utili:
+				      				L'obiettivo riguarda la ricerca della migliore pre-condizione per arrivare ad una data
+				      				post-condizione, ma per far ciò serve un \textbf{criterio di confronto}. Introduciamo quindi alcuni simboli e nozioni utili:
 				      				\begin{itemize}
-				      					\item $V$ è l'insieme della variabili di $C$
+				      					\item $V$ è l'insieme delle variabili di $C$
 				      					\item $\Sigma=\{\sigma|\,\sigma:V\to\mathbb{Z}\}$ è l'insieme degli stati
 				      					      della memoria (ricordando che posso avere solo valori interi nel nostro
 				      					      linguaggio)
@@ -933,92 +936,119 @@ linguaggio sopra definito.
 				      					      $\sigma$ e si ha che $\vDash\subseteq\Sigma\times \Pi$, con $\vDash$ che
 				      					      indica la veridicità di una formula in uno stato
 				      					\item $t(\sigma)=\{p\in \Pi|\,\sigma\vDash p\}$ come la funzione che assegna
-				      					      ad uno stato l'insieme delle proposizioni, ovvero tutte le formule, che sono
-				      					      vere in $\sigma$
+				      					      ad uno stato $\sigma$ tutte le formule che sono
+				      					      vere in esso.
 				      					\item $m(p)=\{\sigma\in \Sigma|\,\sigma\vDash p\}$ come la funzione che
-				      					      associa ad una formula l'insieme di tutti gli stati che soddisfano la formula
+				      					      associa ad una formula $p$ l'insieme di tutti gli stati che soddisfano la formula stessa.
 				      				\end{itemize}
+				      				\subsubsection{Dualità}
 				      				Tra le due funzioni finali si ha una sorta di ``dualità'' e agiscono in modo
-				      				speculare tra loro. Se, partendo da $\Sigma$, applico $t(\sigma)$ e scopriamo
-				      				che un certo stato $p$ appartiene a $\Pi$ e a tale $p$ associamo l'insieme dato
-				      				da $m(p)$ si avrà che $\sigma\in m(p)$ (fig. \ref{fig:SigmaAndPi}).\\
-				      				\begin{figure}[h]
+				      				speculare tra loro.
+				      				\begin{definizione}
+				      				     Se, partendo da $\sigma \in \Sigma$ applicassimo $t(\sigma)$ tale per cui risultasse una formula $p \in t(\sigma)$ allora sicuramente $ \sigma \in m(p)$ (fig. \ref{fig:SigmaAndPi}).
+				      				     \[p \in t(\sigma) \iff \sigma \in m(p) \,\,\,\,\,\, \forall p, \sigma \]
+				      				\end{definizione}
+				      				\begin{figure}[H]
                                         \centering \includegraphics[width=1\textwidth]{img/VENN.png}
-                                        \caption{Correlazione tra $\sigma$ e $\Pi$.}
+                                        \caption{Correlazione tra $\Sigma$ e $\Pi$.}
                                         \label{fig:SigmaAndPi}
                                     \end{figure}
 				      				Si possono fare altre osservazioni su queste due funzioni. \\
-				      				Prendiamo due formule $p$ e $q$ e cerco di capire se è possibile avere
-				      				$m(p)=m(q)$. La risposta è positiva e si parla, in caso, di \textit{equivalenza
-				      					tra formule}. Fissati due stati $\sigma_1$ e $\sigma_2$ mi chiedo se possano
+				      				Prendiamo due formule $p$ e $q$ e cerchiamo di capire se è possibile avere
+				      				$m(p)=m(q)$, ovvero cerchiamo di capire se l'insieme degli stati in cui vale $p$ è uguale a quello di $q$. La risposta alla domanda viene data grazie al concetto di \textbf{equivalenza
+				      					tra formule}: difatti due formule possono essere vere negli stessi stati. \\ 
+				      					Fissati due stati $\sigma_1$ e $\sigma_2$ chiediamoci ora se possano
 				      				appartenere allo stesso insieme di formule. In questo caso la risposta è
 				      				negativa, in quanto se i due stati sono distinti allora ci deve essere almeno
-				      				una variabile $x$ che ha valore diverso nei due stati ma allora è facile trovare
-				      				una formula che separa i due stati e tale formula potrà essere vera solo in uno
-				      				dei due stati.\\
-				      				Dato $S\subseteq \Sigma$ e $F\subseteq\Pi$ (ragiono quindi su sottoinsiemi) si
+				      				una variabile $x$ che ha valore diverso nei due stati.\\
+				      				\subsubsection{Sottoinsiemi}
+				      			\begin{definizione}
+				      			    	Dato $S\subseteq \Sigma$, sottoinsieme di stati, e $F\subseteq\Pi$, sottoinsieme di formule, si
 				      				ha che:
 				      				\begin{itemize}
 				      					\item $t(S)=\{p\in \Pi|\,\forall\,\sigma\in S,\,\,\,\sigma\vDash
-				      					      p\}=\bigcap_{\sigma\in S}t(\sigma)$ (ragiono quindi su tutti gli stati di $S$
+				      					      p\}=\bigcap_{\sigma\in S}t(\sigma)$ (ragioniamo quindi su tutti gli stati di $S$
 				      					      e quindi sulle formule che sono vere in tutti questi stati) 
 				      					\item $m(F)=\{\sigma\in \Sigma|\,\forall\, p\in F\,\,\,\sigma\vDash
-				      					      p\}=\bigcap_{p\in \Pi}m(p)$ (ragiono quindi su tutte le formule di $\Pi$
+				      					      p\}=\bigcap_{p\in \Pi}m(p)$ (ragioniamo quindi su tutte le formule di $\Pi$
 				      					      e quindi su tutti gli stati in devono essere soddisfatte tutte queste formule) 
 				      				\end{itemize}
-				      				Abbiamo quindi esteso il dominio delle due funzioni a sottoinsiemi di stati e
-				      				sottoinsiemi di formule.\\
-				      				Si può anche dimostrare che $S\subseteq m(t(s))$ e che $F\subseteq
-				      				t(m(F))$. Inoltre, dati $A\subseteq B$, si può dimostrare che $m(B)\subseteq
-				      				m(A)$ (se abbiamo un insieme più grande di formule abbiamo meno stati che le soddisfano
-				      				tutte).\\
+				      				\begin{corollario}
+				      				            $S\subseteq m(t(S))$ e $F\subseteq
+				      				t(m(F))$
+				      				\end{corollario}
+				      				\begin{corollario}
+				      				             Dati $A\subseteq B$, si può dimostrare che $m(B)\subseteq
+				      				m(A)$
+				      				\end{corollario}
+				      			\end{definizione}
+				      			 \subsubsection{Relazione tra logica proposizionale e stati}
 				      				Si ha un rapporto tra la logica proposizionale (coi suoi connettivi logici) e
 				      				l'insieme di stati ($p$ e $q$ sono formule di $\Pi$): 
 				      				\begin{itemize}
 				      					\item $m(\neg p)=\Sigma \,\,\backslash \,\, m(p)$, quindi il complemento
 				      					      insiemistico di $p$
 				      					\item $m(p\lor q)=m(p)\cup m(q)$, quindi all'unione dei due insiemi  
-				      					\item $m(p\land q)=m(p)\cap m(q)$ (da verificare) quindi all'intersezione dei
-				      					      due insiemi
+				      				
 				      				\end{itemize}
-				      				L'implicazione merita un discorso a parte in quanto ha due ``naturè':
+				      				L'implicazione merita un discorso a parte in quanto ha si può vedere sotto due punti di vista:
 				      				\begin{itemize}
-				      					\item \textbf{operatore logico}, che comporta che $p\implies q= \neg p\lor q$
+				      					\item come \textbf{operatore logico}, che comporta che $p\implies q= \neg p\lor q$
 				      					      e in tal caso si ha, in linea a quanto detto per gli altri connettivi:
 				      					      \[m(p\implies q)= m(\neg p)\cup m(q)\]
-				      					\item \textbf{relazione tra formule}, dove se $p$ implica $q$ (in tutti in
+				      					\item come \textbf{relazione tra formule}: che si può vedere in modo insiemistico dove se $p$ implica $q$ (in tutti in
 				      					      casi in cui è vera $p$ è vera $q$) allora
-				      					      $m(p)\subseteq m(q)$, intendendo che $q$ è ``più debolè' (ovvero come formula
-				      					      ci dà una conoscenza inferiore essendo $q$ corrispondente a un insieme più
-				      					      grande di stati) di $p$. Si ha a che
-				      					      fare con una relazione algebrica tra le due formule. Più ``debolè' non
-				      					      significa comunque ``peggiorè'
+				      					      $m(p)\subseteq m(q)$, intendendo che $q$ è ``\textbf{più debolè}' di $p$. Ovvero viene vista come una formula che
+				      					      ci dà una conoscenza inferiore/incertezza maggiore essendo $q$ corrispondente a un insieme più
+				      					      grande di stati. 
 				      				\end{itemize}
 				      				Posso quindi capire come definire la pre-condizione migliore per ottenere una
 				      				tripla valida, insieme al comando $C$ e alla post-condizione.\\
+				      				\subsubsection{Criterio di scelta della pre-condizione migliore}
 				      			    \begin{definizione}
 				      			        Un modo per specificare la pre-condizione migliore per ottenere una
 				      				tripla valida è quello di definire la più
 				      				debole pre-condizione $p$ che forma una tripla valida:
 				      				\[\vDash \{p\}\mbox{ C }\{q\}\] \\
 				      				Se $p$ è la pre-condizione più debole allora corrisponde al più grande insieme di
-				      				stati tale che la tripla sia valida.
+				      				stati tale per cui la tripla è valida, ovvero il più grande insieme di stati a partire dai quali l'esecuzione di $C$ porta ad uno stato in $m(q)$.
 				      			    \end{definizione} \vspace{5mm} %5mm vertical space
 				      				Questa è una scelta ragionevole perché è la pre-condizione che impone meno
 				      				vincoli sullo stato iniziale, infatti determina tutti gli stati iniziali che
 				      				garantiscono il raggiungimento della post-condizione. È sempre possibile
 				      				calcolare la pre-condizione più debole.\\
-				      				Indichiamo, fissati $C$ comando e $q$ formula di post-condizione, con $wp(C, q)$
+				      				\begin{nota}
+				      				Se trovassimo come pre-condizione più debole l'insieme vuoto di formule allora sicuramente non saremo mai in grado di arrivare alla post-condizione.
+				      				
+				      				\begin{esempio}
+				      				    Immaginiamo il programma:
+				      				    \[\mbox{ x:=5 }\{x < 0\}\]
+				      				    
+				      				    allora sicuramente la pre-condizione sarebbe l'insieme vuoto, ovvero la costante $F$. Per cui non saremo mai in grado di arrivare alla post-condizione.
+				      				\end{esempio}
+				      				\end{nota}
+				      				\begin{definizione}
+				      				    La pre-condizione più debole viene implicata da tutte le altre che soddisfano la tripla comune.
+				      				\end{definizione}
+				      			\begin{definizione}
+				      			    	Indichiamo, fissati $C$ comando e $q$ formula di post-condizione, con $wp(C, q)$
 				      				la pre-condizione più debole (\textbf{weakest precondition (\textit{wp})}).
-				      				\begin{teorema}[proprietà fondamentale della condizione più debole]
-				      					Si ha che $\vDash\{p\}\mbox{ C }\{q\}$ (quindi la tripla è vera) sse:
+				      			\end{definizione}
+				      				\begin{definizione}[proprietà fondamentale della condizione più debole]
+				      					  $\vDash\{p\}\mbox{ C }\{q\}$ (quindi la tripla è vera) sse:
 				      					\[p\implies wp(C, q)\]
-				      				\end{teorema}
-				      				\begin{teorema}
+				      					Ovvero la tripla è vera sse tutte le pre-condizioni implicano quella più debole, ovvero ogni pre-condizione è piu \textbf{forte}.
+				      					\begin{nota}
+				      					Si ricorda che la pre-condizione più debole per definizione è la più generale, quindi include tutte le altre.
+				      					\end{nota}
+				      				\end{definizione}
+				      				\begin{definizione}
 				      					L'\textbf{esistenza} della pre-condizione più debole è garantita.\\
 				      					È garantita inoltre l'\textbf{unicità} della pre-condizione più debole (a meno
 				      					di eventuali equivalenze logiche).
-				      				\end{teorema}
+				      				\end{definizione}
+				      				\subsubsection{Calcolo della pre-condizione più debole}
+				      				Abbiamo visto che la pre-condizione più debole esiste, ma come si fa a calcolarla?
 				      				Vediamo quindi la \textit{regola di calcolo}.\\
 				      				Si hanno diversi casi a seconda dei tipi di comando:
 				      				\begin{itemize}
@@ -1028,9 +1058,9 @@ linguaggio sopra definito.
 				      					      $q$ abbiamo che la pre-condizione più debole si ottiene sostituendo in $q$ ogni
 				      					      occorrenza di $x$ con l'espressione $E$, ottenendo quindi:
 				      					      \[\{q[E/x]\}\]
-				      					\item \textbf{sequenza:} in questo caso, se abbiamo la sequenza di due comando
+				      					\item \textbf{sequenza:} in questo caso, se abbiamo la sequenza di due comandi
 				      					      $C_1$ e $C_2$ allora la pre-condizione più debole si calcola nel seguente modo:
-				      					      calcolo la pre-condizione più debole per $C_2$, ottenendo $wp(C_2, q)$, che sarà
+				      					      calcoliamo la pre-condizione più debole per $C_2$, ottenendo $wp(C_2, q)$, che sarà
 				      					      quindi la formula usata come post-condizione per calcolare la pre-condizione più
 				      					      debole di $C_1$, ovvero: $wp(C_1, wp(C_2, q))$. Questo non è altro che la
 				      					      condizione più debole della sequenza:
@@ -1038,24 +1068,34 @@ linguaggio sopra definito.
 				      					\item \textbf{scelta:} in questo caso, avendo:
 				      					      \[S=\mbox{ if \textit{B} then \textit{C} else \textit{D} endif }\]
 				      					      fisso la post-condizione $q$ e procedo come per la regola di
-				      					      derivazione. Separo i due casi in cui sia vera $B$ o meno. Se $B$ è vera devo
-				      					      eseguire $C$ quindi calcolo, eseguendo $C$ la pre-condizione più debole
-				      					      $wp(C, q)$. Qualora $B$ non sia vera calcolo, eseguendo $D$, la pre-condizione
-				      					      più debole $wp(D, q)$. Nel complesso quindi, facendo la disgiunzione dei due
+				      					      derivazione. Separiamo i due casi in cui sia vera $B$ o meno:
+				      					      \begin{itemize}
+				      					          \item   Se $B$ è vera dobbiamo
+				      					      eseguire $C$ quindi calcolo, eseguendo $C$, la pre-condizione più debole
+				      					      $wp(C, q)$. 
+				      					      
+				      					      \item Qualora $B$ non sia vera calcolo, eseguendo $D$, la pre-condizione
+				      					      più debole $wp(D, q)$.
+				      					      \end{itemize}
+				      					       Nel complesso quindi, facendo la disgiunzione dei due
 				      					      casi, ottengo: 
 				      					      \[wp(S, q)\equiv(B\land wp(C, q))\lor (\neg B\land wp(D, q))\]
-				      					\item \textbf{iterazione:} in questo caso, avendo:
+				      					    
+				      					\item \textbf{iterazione:} 
 				      					      \[W=\mbox{while \textit{B} do \textit{C} endwhile}\]
-				      					      È il caso più complicato.\\
-				      					      Si ha che se $\neg B$ è nello stato iniziale dll'iterazione allora il corpo
-				      					      non viene eseguito (arrivando direttamente alla post-condizione), invece se
-				      					      vale $B$ si avrà che $W$ equivale a $C;W$, in 
-				      					      quanto sicuramente almeno una volta eseguo $C$. Ma a questo punto potrei
-				      					      rifare lo stesso discorso se $B$ è ancora vera (questo fino a che non abbiamo $\neg
-				      					      B$, uscendo dal ciclo e arrivando a $q$), ragionando su $W$ di $C;W$. Si
+				      					      
+				      					      \begin{itemize}
+				      					          \item se $\neg B$ è nello stato iniziale dell'iterazione allora il corpo
+				      					      non viene eseguito (arrivando direttamente alla post-condizione)
+				      					      
+				      					      \item invece se
+				      					      vale $B$ si può pensare all'iterazione in modo ricorsivo seguendo la regola della sequenza: $C;W$. In modo tale che una volta eseguito $C$ il programma riproporrà nuovamente $W$. Per fissare il concetto basti pensare \textbf{idealmente} (seppur in modo sintatticamente errato) all'eguaglianza $W=C;W$. Questo può accadere in 
+				      					      quanto sicuramente almeno una volta si esegue $C$ e lo stesso processo viene riprodotto fin quando $B$ non diventa falso. 
+				      					      \end{itemize}   
+				      					      Si
 				      					      arriva di fatto ad una regola ricorsiva:
 				      					      \[wp(W, q)\equiv(\neg B\land q)\lor(B\land wp((C;W), q))\]
-				      					      Applico quindi la regola della sequenza per la condizione più debole,
+				      					      applichiamo quindi la regola della sequenza per la condizione più debole,
 				      					      arrivando a:
 				      					      \[wp(W, q)\equiv(\neg B\land q)\lor(B\land wp(C, wp(W, q)))\]
 				      					      Si nota che questa definizione ricorsiva ha un problema grave: non si ha un
@@ -1086,12 +1126,12 @@ linguaggio sopra definito.
 				      					\caption{Programma $P$}
 				      					\end{listing}
 				      					Dove i due assegnamenti sono rispettivamente $A$ e $B$ e si vuole la
-				      					post-condizione $q=x<y$. Cerco quindi $wp(P, q)$.\\
+				      					post-condizione $q=x<y$. Cerchiamo quindi $wp(P, q)$.\\
 				      					Procediamo con la formula della sequenza (che ricordiamo procede ``a
 				      					ritroso'').
 				      					\begin{itemize}
 				      						\item Parto dal secondo assegnamento, $B$, e calcolo $wp(B, q)$.\\
-				      						      Procedo con la regola e applico la sostituzione, ottenendo:
+				      						      Procedo con la regola e applichiamo la sostituzione, ottenendo:
 				      						      \[r=wp(B, q)=x<y\cdot x\]
 				      						      quindi se $x<y\cdot x$ vale prima dell'esecuzione di $B$ allora sicuramente
 				      						      si raggiunge uno stato finale dove vale la post-condizione $q$ 
@@ -1124,7 +1164,7 @@ linguaggio sopra definito.
 				      						\caption{Programma $P$}
 				      					\end{listing}
 				      					Dove i due assegnamenti sono rispettivamente $A$ e $B$ e si vuole la
-				      					post-condizione $q=(x=(b-y)\cdot a)$. Cerco quindi $wp(P, q)$.\\
+				      					post-condizione $q=(x=(b-y)\cdot a)$. Cerchiamo quindi $wp(P, q)$.\\
 				      					Nella post-condizione abbiamo una variabile $b$ esterna alla sequenza di interesse
 				      					fissato a priori.\\
 				      					Come prima ottengo:
@@ -1147,7 +1187,7 @@ linguaggio sopra definito.
 				      						\caption{Programma $P$}
 				      					\end{listing}
 				      					Dove i due comandi sono rispettivamente $C$ e $D$ e la condizione booleana è
-				      					$B$. Come post-condizione voglio $q=(x=y)$.\\
+				      					$B$. Come post-condizione vogliamo $q=(x=y)$.\\
 				      					Per il caso della scelta bisogna calcolare i due casi e usare poi la
 				      					disgiunzione tra essi.\\
 				      					Calcolo quindi:
@@ -1157,7 +1197,7 @@ linguaggio sopra definito.
 				      						      assegnamento. La formula però comporta che abbiamo due casi possibili: $y=0\lor
 				      						      x=1$ (il secondo appunto se abbiamo $y\neq 0$)
 				      					\end{enumerate}
-				      					Applico quindi la regola della scelta, ottenendo:
+				      					applichiamo quindi la regola della scelta, ottenendo:
 				      					\[wp(P, q)\equiv (y=0\land y=0)\lor(y\neq 0\land (y=0\lor x=1))\]
 				      					Semplificando si ha che:
 				      					\[wp(P, q)\equiv(y=0)\lor(x=1\land y\neq 0)\]
@@ -1216,13 +1256,13 @@ linguaggio sopra definito.
 				      					      				\textit{C; F}  endwhile}\]
 				      					      			\item \textbf{procedure, metodi e funzioni}
 				      					      			\item \textbf{array}, anche se solo in lettura se vogliamo applicare la logica
-				      					      			di abbiamoare come l'abbiamo vista
+				      					      			di Hoare come l'abbiamo vista
 				      					      			\end{itemize}
 				      					      			Un altro limite è dato dal fatto che abbiamo usato solo il tipo intero, ma
 				      					      			possiamo potenzialmente aggiungere anche gli altri senza cambiare le basi della
 				      					      			logica introdotte.
-				      					      			\subsection{Logica di abbiamoare per sviluppare programmi}
-				      					      			Possiamo vedere le logiche di abbiamoare come \textbf{contratti} tra chi scrive il
+				      					      			\subsection{Logica di Hoare per sviluppare programmi}
+				      					      			Possiamo vedere le logiche di Hoare come \textbf{contratti} tra chi scrive il
 				      					      			programma e l'utente. In questo contesto l'utente commissiona il programma
 				      					      			specificando la post-condizione e chiede al programmatore di garantire che tale
 				      					      			post-condizione venga garantita al termine dell'esecuzione. Per garantire la
@@ -1231,13 +1271,19 @@ linguaggio sopra definito.
 				      					      			\begin{esempio}
 				      					      				Ci proponiamo di calcolare la radice quadrata intera di un certo $k\geq 0$,
 				      					      				approssimando per difetto.\\
-				      					      				Alla fine del programma voglio il risultato nella variabile $x$, quindi
-				      					      				voglio:
+				      					      				Alla fine del programma vogliamo il risultato nella variabile $x$, quindi
+				      					      				vogliamo:
 				      					      				\[\{k\geq 0\}\mbox{ P }\{0\leq x^2\leq k<(x+1)^2)\}\]
-				      					      				con $(x+1)^2$ per la correttezza dell'approssimazione.\\
+				      					      			\begin{nota}
+				      					      				 $(x+1)^2$ per la correttezza dell'approssimazione.
+				      					      			\end{nota}
+				      					      			\begin{nota}
+				      					      			     $x$ è la radice quadrata di $k$.
+				      					      			\end{nota}
 				      					      				Ci si propone di fare il calcolo per approssimazioni successive, partendo da
 				      					      				un valore più piccolo di quello corretto.\\
-				      					      				Possiamo spaccare $q$ in:
+				      					      				L'obiettivo in questa situazione non è quella di trovare una pre-condizione o una post-condizione, bensì quella di trovare un programma $P$ che le soddisfi entrambe. \\
+				      					      				Possiamo dividere $q$ in:
 				      					      				\[0\leq x^2\leq k \,\,\,\mbox{ e }\,\,\, k<(x+1)^2\]
 				      					      				la prima possiamo considerarla come \textit{invariante} (anche solo $x^2\leq
 				      					      				k$).\\
@@ -1277,9 +1323,9 @@ linguaggio sopra definito.
 				      					      			\[\{p\}\mbox{ A } \{inv\} \mbox{ W } \{inv\land \neg B\}\mbox{ C }\{q\}\]
 				      					      			Questo schema usa i cosiddetti \textbf{invarianti costruttivi}.\\
 				      					      			\subsection{Ultime considerazioni}
-				      					      			Vediamo qualche ultima considerazione sulla logica di abbiamoare.
+				      					      			Vediamo qualche ultima considerazione sulla logica di Hoare.
 				      					      			\begin{itemize}
-				      					      				\item alcune applicazioni pratiche della logica di abbiamoare:
+				      					      				\item alcune applicazioni pratiche della logica di Hoare:
 				      					      				      \begin{itemize}
 				      					      				      	\item \textit{java modelling language}, un linguaggio di specificazione
 				      					      				      	      scritto in Java, che permette di fare \textit{design by contract} stabilendo
@@ -1288,7 +1334,7 @@ linguaggio sopra definito.
 				      					      				      	\item \textit{assert.h} in C
 				      					      				      \end{itemize}
 				      					      				      				      					      				        
-				      					      				\item alcune applicazioni teoriche della logica di abbiamoare:
+				      					      				\item alcune applicazioni teoriche della logica di Hoare:
 				      					      				      \begin{itemize}
 				      					      				      	\item \textit{semantica del programmi}, ovvero lo studio di cosa significa
 				      					      				      	      un programma, tramite:
@@ -1311,4 +1357,7 @@ linguaggio sopra definito.
 				      					      				\item \textbf{terminazione} del programma
 				      					      				\item \textbf{composizionalità} tra più comandi per ottenere un programma
 				      					      			\end{enumerate}
-				      					      			Le triple di abbiamoare vivono ancora nella \textbf{programmazione by contract}.
+				      					      			Le triple di Hoare vivono ancora nella \textbf{programmazione by contract}.
+				      					      			
+				      	    \section{Schema Generale di Dimostrazione}
+				      	    \includepdf[pages=-]{img/SchemaGenerale.pdf}

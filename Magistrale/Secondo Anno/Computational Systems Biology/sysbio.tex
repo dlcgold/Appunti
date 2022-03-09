@@ -743,6 +743,322 @@ degli approcci presenti:
   \item \textbf{modelli logici (\textit{logici-based models})}
   \item \textbf{modelli meccanicistici (\textit{mechanism-based models})}
 \end{enumerate}
+Un generale dato un certo sistema biologico d'interesse, dopo aver risposto alla
+domanda fondamentale e avendo quindi ben chiaro il fine di tale modello, la
+scelta del modello stesso viene presa considerando secondo quattro aspetti
+fondamentali:
+\begin{enumerate}
+  \item la \textbf{dimensione del sistema}, data in primis dal numero di
+  componenti e dal numero delle interazioni tra esse. Si distinguono, secondo
+  questo aspetto, due grandi macro-categorie di sistemi:
+  \begin{enumerate}
+    \item \textbf{sistemi small-scale}, se siamo nel range delle unità o delle
+    decine di componenti/interazioni
+    \item \textbf{sistemi large-scale}, se siamo nel range delle centinaia o
+    migliaia (se non oltre) di componenti/interazioni 
+  \end{enumerate}
+  Questo è già un ottimo fattore discriminatorio per la scelta del sistema 
+  \item il \textbf{livello di dettaglio} necessario a descrivere in modo
+  completo le componenti del sistema e le loro interazioni. Si ricorda sempre
+  però che formalizzare informazioni inutili e/o ridondanti comporta solo
+  un'inutile spreco dal punto di vista computazionale
+  \item il \textbf{tipo} e la \textbf{qualità} dei \textbf{dati sperimentali}
+  che sono già disponibili o che si è in grado di produrre all'evenienza con
+  precisi protocolli al fine di supportare la fase di modellazione. Tali dati
+  possono essere ad esempio \textit{dati omici, western blots} etc$\ldots$
+  \item il \textbf{carico computazionale} che l'approccio scelto comporta in
+  fase di simulazione e analisi dei dati. Un esempio è quello della
+  \textit{dinamica molecolare}, che studia come interagiscono tra loro più
+  molecole (o anche il comportamento interno di una sola). Tali studi
+  normalmente impiegano settimane per simulare anche range temporali molto
+  ridotti e necessitano di molte informazioni che non possono essere trascurate
+  per ottenere un modello ed una simulazione realistici. Questa scelta è spesso
+  un trade-off nella scelta di \textbf{approcci modellistici quantitativi} e
+  \textbf{approcci modellistici qualitativi}.\\
+  L'uso di \textbf{super computer}, di \textbf{tecniche di calcolo parallelo su
+    GPU} etc$\ldots$ sono molto comuni in \textit{systems biology}
+\end{enumerate}
+Una misura fondamentale è poi la \textbf{capacità predittiva del modello} che,
+se bassa, ci porta a preferire \textit{modelli qualitativi}, se alta invece a
+\textit{modelli quantitativi}.\\
+Vediamo quindi un comodo grafico che classifica le quattro tipologie di modelli
+in base a questi quattro aspetti\footnote{Besozzi D. (2016) Reaction-Based
+  Models of Biochemical Networks. In: Beckmann A., Bienvenu L., Jonoska N. (eds)
+  Pursuit of the Universal. CiE 2016. Lecture Notes in Computer Science, vol
+  9709. Springer, Cham. https://doi.org/10.1007/978-3-319-40189-8\_3}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[width = \textwidth]{img/choice.pdf}
+\end{figure}
+Nel grafico notiamo come i \textit{modelli meccanicistici}, tra quelli
+analizzati, siano 
+quelli con il più alto potere predittivo, che è un aspetto fondamentale ma anche
+con i più alti livelli di 
+dettaglio, costi computazionali e sfide nella misurazione dei dati
+richiesti. L'ovvia conseguenza è che la dimensione del sistema da studiare deve
+essere ridotta, avendo quindi \textit{sistemi small-scale}.\\
+Si noti che collocare i \textit{modelli logici} non sia così banale in quanto il
+livello di dettaglio e la facilità di misurazione possono essere migliorati
+usando ad esempio le \textbf{logiche fuzzy}.\\
+Un altro aspetto fondamentale da tenere in considerazione è che il processo di
+modellazione richiede molto tempo e si basa su continui rifinimenti del modello
+stesso, in un processo circolare, come visualizzabile in figura
+\ref{fig:cyc}\footnote{Chou IC, Voit EO. Recent developments in parameter
+  estimation and structure identification of biochemical and genomic
+  systems. Math
+  Biosci. 2009;219(2):57-83. doi:10.1016/j.mbs.2009.03.002}. Quindi partendo dai
+dati biologici si abbozza un primo modello che viene poi continuamente sistemato
+tramite nuove ipotesi, altri dati, analisi \textit{in silico} etc$\ldots$ fino
+all'ottenimento di un modello validato.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.8]{img/cycle.jpg}
+  \caption{Raffigurazione che mostra i dettagli del processo ciclico di
+    modellazione in \textit{systems biology}. Molte, ma non tutte, delle keyword
+    presenti verranno approfondite nel corso}
+  \label{fig:cyc}
+\end{figure}
+Vediamo ora una breve introduzione ai quattro approcci elencati al fine di poter
+fare un confronto tra essi prima di studiarli e formalizzarli nel dettaglio.\\
+Prima di fare ciò diamo una più precisa idea dei criteri con cui si classifica
+un modello.
+\begin{definizione}
+  Si definisce \textbf{modello qualitativo} un modello che specifica le
+  interazioni tra le componenti del modello stesso.
+\end{definizione}
+\begin{definizione}
+  Si definisce \textbf{modello quantitativo} un modello che assegna un valore ad
+  ogni elemento che descrive e anche alle interazioni tra essi. In questo caso
+  si possono avere o non avere cambiamenti nel modello.
+\end{definizione}
+\begin{definizione}
+  Si definisce \textbf{modello deterministico} un modello per il quale
+  l'evoluzione attraverso i vari stati può essere predetta a partire dallo stato
+  corrente, nel dettaglio anche dallo \textit{stato iniziale}. Il comportamento
+  evoluzionistico del modello quindi non varierà tra una simulazione e l'altra.
+\end{definizione}
+\begin{definizione}
+  Si definisce \textbf{modello stocastico} un modello che descrive, a partire da
+  uno stato corrente, uno stato futuro attraverso una \textit{distribuzione di
+    probabilità}.
+\end{definizione}
+\begin{definizione}
+  Un processo è detto \textbf{reversibile/irreversibile} se si può o meno
+  procedere in avanti o indietro tra i vari stati.
+\end{definizione}
+\begin{definizione}
+  Con il termine \textbf{periodicità} si intende che il sistema assume una serie
+  di stati nell'intervallo di tempo $[t, t+\Delta t]$ ma anche in:
+  \[[t+i \Delta t, t+(i+1)\Delta t],\,\,i=1,2,3,\ldots\]
+\end{definizione}
+\subsection{Modelli Basati su Interazioni}
+Questo tipo di modelli vengono usati per \textit{sistemi large-scale} con
+centinaia o migliaia di componenti che interagiscono tra loro in modo fisico o
+funzionale. Abbiamo vari esempi di questi modelli, tra cui:
+\begin{itemize}
+  \item \textbf{reti di interazioni proteina-proteina}
+  \item \textbf{reti di regolazione genica}
+  \item \textbf{reti metaboliche}
+  \item \textbf{reti di malattie}, modelli più complessi, modellati tramite un
+  particolare tipo di grafo, che sfruttano
+  l'integrazione tra \textit{reti di regolazione genica} e grafi/reti
+  rappresentanti le malattie e le relazioni tra esse. Si ottiene quindi un grafo
+  che mette in relazione componenti genomiche e malattie
+\end{itemize}
+In questo caso la scelta del formalismo matematico ricade principalmente sulla
+\textbf{teoria dei grafi} e si ha quindi un \textit{modello qualitativo} e
+\textit{statico}. Infatti il \textit{tempo} non viene considerato in tali
+modelli, che di conseguenza non permettono di ottenere informazioni su
+eventuali \textbf{comportamenti emergenti}. Non si possono nemmeno ottenere
+informazioni quantitative.\\
+Parlando di \textit{modelli basati su interazioni} non si può propriamente
+parlare di ``simulazioni'' vere e proprie in quanto in primis manca la
+modellazione del \textit{tempo} ma anche di altri fattori come il
+\textit{kinetic rate}. Inoltre tali modelli difettano anche di una qualsivoglia
+modellazione dello \textit{spazio}. Il fulcro dello studio di tali modelli
+quindi solitamente si concerta sulle proprietà ``architetturali'' della
+struttura della rete, studiando, ad esempio:
+\begin{itemize}
+  \item la presenza di \textbf{hub}, ovvero nodi in cui sono entranti/uscenti un
+  gran numero di archi rispetto agli altri nodi della rete
+  \item misure di centralità
+  \item presenza di \textit{motivi (motifs)} nella rete
+  \item la robustezza topologica
+\end{itemize}
+Tutte queste misure permettono anche di caratterizzare, caratterizzando la
+topologia stessa, una rete rispetto ad un
+altra. Infatti si vedranno vari tipologie di rete, tra cui:
+\begin{itemize}
+  \item \textbf{random network}
+  \item \textbf{scale-free network}, caratterizzate da una forte
+  \textit{robustezza}
+  \item \textbf{hierarchical network}
+\end{itemize}
+\subsection{Modelli Logici}
+Questi modelli possono essere usati sia per sistemi \textit{small-scale} che per
+sistemi \textit{large-scale} e alcuni degli esempi sono:
+\begin{itemize}
+  \item \textbf{reti di regolazione gene-gene}
+  \item \textbf{pathway di trasduzione del segnale} (che si ricorda essere la
+  capacità di una cellula di convertire uno stimolo esterno in una particolare
+  risposta cellulare) 
+  \item \textbf{differenziazione cellulare}
+  \item \textbf{pathway per la morte cellulare programmata}
+\end{itemize}
+Il primo caso è un esempio di \textit{sistema large-scale} mentre gli altri di
+\textit{sistemi small-scale}.\\
+Dal punto di vista del formalismo matematico si ha anche qui la \textbf{teoria
+  dei grafi}, a cui viene aggiunta la \textbf{logica booleana}, con i classici
+operatori logici $\neg,\land,\lor$, o anche,
+preferibilmente, la \textbf{logica fuzzy}, che verrà approfondita più avanti. L'idea di base è quella che lo stato
+delle componenti è regolato da altre componenti del sistema stesso. I nodi
+possono assumere o valore booleano 0/1 o, in logica fuzzy, qualsiasi valore tra
+0 e 1 (con varie conseguenze nel loro studio).\\
+Tali modelli sono in grado di simulare il tempo, rientrando quindi nella
+categoria dei \textit{sistemi dinamici} ma sono anch'essi della tipologia dei
+\textit{modelli qualitativi}. Tali sistemi si prestano ad essere sia
+\textit{deterministici} che \textit{non deterministici}.\\
+Lo studio di tali modelli solitamente consiste, tramite le simulazioni e le
+analisi, nel determinare:
+\begin{itemize}
+  \item \textbf{cicli}, ovvero sequenze finite di stati complessivi del sistema
+  che si ripetono
+  \item \textbf{attrattori}, ovvero degli \textit{stati finali} che sono
+  raggiungibili da qualsiasi stato iniziale e una volta raggiunti sio resta in
+  tali stati
+  \item \textbf{bacini di attrattori}, ovvero percorsi che partono da stati
+  intermedi e che conducono a degli \textit{attrattori}
+\end{itemize}
+Tendenzialmente si arriva sempre ad un \textit{ciclo} o ad un insieme di
+\textit{attrattori}.\\
+La ``potenza'' della \textit{logica fuzzy} permette, come detto, anche di
+modellare il \textit{tempo}, derivando quindi un comportamento dinamico del
+sistema, descrivendo, ad esempio, la variazione nel tempo tra i valori degli
+stati di ogni componente.\\
+Un esempio semplice di quello che si può ottenere con tali modelli è
+visualizzabile in figura \ref{fig:log}\footnote{}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.65]{img/logicnet.jpg}
+  \caption{Esempio di modellazione di interazioni tra componenti tramite
+    funzioni logiche.}
+  \label{fig:log}
+\end{figure}
+\subsection{Modelli Meccanicistici}
+Come già anticipato tali modelli si limitano a descrivere \textit{sistemi
+  small-scale}. Questa è la classe di approcci modellistici più complessa ed
+eterogenea infatti, in primis, richiede una parametrizzazione completa delle
+componenti, con un ampio range di formalismi matematici, tra cui spiccano tra
+gli altri i \textbf{metodi numerici} e gli \textbf{algoritmi di simulazione stocasitca}. Un problema, già solo
+a questo punto, è che non si hanno spesso i dati per effettuare la
+parametrizzazione in quanto i biologi/biotecnologi spesso non sono interessati a
+misurarli. \\
+Le simulazioni con questi modelli sono usate per studiare l'\textbf{evoluzione
+  nel tempo}, quindi la dinamica, del sistema. Si usano metodi
+\textit{deterministici, stocastici} e \textit{ibridi}, insieme ad una serie
+infinita di altre tecniche computazionali, tra cui l'\textit{analisi di
+  sensitività} o il \textit{parameters sweeping}.\\
+Si arriva quindi a modelli \textit{quantitativi} e \textit{dinamici}. \\
+La scelta tra metodi stocastici, solitamente più dispendiosi, e deterministici
+dipende anche dal fatto che \textbf{la vita non è deterministica}. Ad esempio
+modellare le interazioni tra, ad esempio tra la proteina \textit{Mdm3} e la
+proteina \textit{p53}, avendo che la prima inibisce la seconda, comporta una
+funzione molto pulita se studiata in modo deterministico quando in realtà, a
+causa di molti fattori, non si ha tale precisione se si va a studiare cosa
+accade realmente in natura. Da qui l'uso anche di \textit{modelli stocastici}.\\
+La stima dei parametri resta comunque un grandissimo problema e spesso si usano
+altre tecniche computazionali/modellistiche in pipeline per inferire gli stessi.
+\subsection{Modelli Basati su Vincoli}
+Tali modelli sono usati esplicitamente e solo per \textit{sistemi large-scale
+  per reti metaboliche}. Il formalismo matematico qui usato si compone di
+\textbf{matrici stechiometriche}, \textbf{algebra lineare} e tecniche di
+\textbf{ricerca operativa} mentre le
+simulazioni e le analisi consistono nello studiare le variazioni nelle
+\textbf{distribuzione di flusso}, calcolando i valori di flusso di tutte le
+reazioni metaboliche, a seconda di perturbazioni/input prefissati.\\
+Non è semplice se si può dire di ottenere dei \textit{sistemi quantitativi} in
+quanto si studia il comportamento ad uno \textit{steady state}.\\
+Tra gli esempi di uso si hanno:
+\begin{itemize}
+  \item l'\textbf{ingegnerizzazione metabolica}, ovvero l'ottimizzazione, il
+  design e la regolarizzazione di certe strutture/funzioni metaboliche al fine
+  di ottenere un certo fenotipo metabolico
+  \item studiare \textbf{bersagli di farmaci}, attraverso ad esempio lo studio
+  del \textit{rewiring metabolico del cancro}
+\end{itemize}
+L'idea è quindi quella di:
+\begin{itemize}
+  \item stabilire dei \textbf{vincoli}
+  \item stabilire una \textbf{funzione obiettivo} da
+  \textit{massimizzare/minimizzare}
+  \item determinare automaticamente la distribuzione dei flussi
+\end{itemize}
+Si parla di \textbf{Flux Balance Analysis (\textit{FBA})}.
+\subsection{Confronto tra i Vari Approcci}
+Viste queste prime piccole premesse sui quattro approcci possiamo fare qualche
+piccolo confronto. \\
+In primis abbiamo capito come lo studio del \textit{tempo} sia assente del tutto
+nei \textit{modelli basati su interazioni} e che sia di dubbio uso nel caso dei
+\textit{modelli basati su vincoli} a causa dello \textit{steady state}. Quindi
+se si dovesse, ad esempio, studiare il cambio di concertazione di una certa
+molecola al variare del \textit{tempo} tali approcci sarebbero da scartare a
+priori.\\
+Si è anche visto come, in realtà, praticamente solo i \textit{modelli
+  meccanicistici} ci offrono uno studio quantitativo, al costo di una
+complessità sia formale, che di dati, che computazionale molto alta e
+riducendosi a studiare solo sistemi piccoli. Ne segue che:
+\begin{center}
+  \textit{I sistemi meccanicistici sono l'approccio modellistico migliore per
+    comprendere e acquisire nuove intuizioni il funzionamento del sistema.} 
+\end{center}
+Nella realtà però ``avere tutto'' è un'utopia quindi non si ha un vero e proprio
+vincitore in questa ``gara tra approcci modellistici'', ben riassunti nella
+figura \ref{fig:app}\footnote{Bordbar, A., Monk, J., King, Z. et
+  al. Constraint-based models predict metabolic and associated cellular
+  functions. Nat Rev Genet 15, 107–120 (2014). https://doi.org/10.1038/nrg3643},
+in quanto al variare del problema, dei dati, e di mille altri fattori potrei
+aver motivi validi per preferire un approccio ad un altro.\\
+\begin{figure}
+  \centering
+  \includegraphics[width = \textwidth]{img/apptable.jpg}
+  \caption{Schema riassuntivo delle caratteristiche dei vari approcci.}
+  \label{fig:app}
+\end{figure}
+Inoltre, in questa breve introduzione, si è scoperto come ci siano moltissime
+\textbf{dicotomie} in \textit{systems biology}:
+\begin{itemize}
+  \item \textit{top-down} e \textit{bottom-up}
+  \item \textit{qualitativo} e \textit{quantitativo}
+  \item \textit{statico} e \textit{dinamico}
+  \item \textit{deterministico} e \textit{stocastico}
+  \item \textit{discreto} e \textit{continuo} (sia in ottica di
+  rappresentazione del \textit{tempo} che della numerazione delle componenti)
+  \item \textit{omogeneo} e \textit{eterogeneo}
+  \item \textit{a singolo volume} e \textit{multicompartamentale}
+\end{itemize}
+Integrare i vari modelli è per lo più utopia. Fare \textit{data integration} è
+già di per se uno scoglio complesso ma si aggiunge anche la difficoltà di
+integrare vari formalismi matematici. Non si ha il modello ``perfetto'' ma si
+può scegliere bene in base al sistema biologico da studiare, magari integrando
+anche qualche (molto pochi) approccio modellistico diverso, come visibile in
+figura \ref{fig:pap}\footnote{Gonçalves E, Bucher J, Ryll A, et al. Bridging the
+  layers: towards integration of signal transduction, regulation and metabolism
+  into mathematical models. Molecular Biosystems. 2013 Jul;9(7):1576-1583. DOI:
+  10.1039/c3mb25489e. PMID: 23525368. }. Nel diagramma si segnala il paper
+centrale di Karr et al.: \textit{A whole-cell computational model predicts
+  phenotype from genotype}\footnote{Karr JR, Sanghvi JC, Macklin DN, et al. A
+  whole-cell computational model predicts phenotype from
+  genotype. Cell. 2012;150(2):389-401. doi:10.1016/j.cell.2012.05.044} cruciale
+nello studio di un approccio misto per modellare il sistema un'intera cellula di
+un piccolo batterio.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/papers.jpg}
+  \caption{Diagramma che mostra varie soluzioni modellistiche al variare del
+    problema biologico}
+  \label{fig:pap}
+\end{figure}
+\chapter{Interaction-Based Modelling}
 \end{document}
 
-% LocalWords: 
+% LocalWords:  rewiring

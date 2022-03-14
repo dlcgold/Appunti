@@ -58,12 +58,12 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 ##### II anno Magistrale
 - [x] Fondamenti Logico Matematici dell'Informatica
 - [x] Data and Computational Biology (RC1)
-- [ ] Big Data in Biotechnology & Biosciences
+- [ ] Data Science Lab in Biosciences
 - [ ] Computational Systems Biology 
 - [ ] Laboratorio di Progettazione
 
 ### Altro
-Suggeriamo queste repository open:
+Suggeriamo queste repository open (triennale):
 - [Informazioni Generali sulla Laurea Triennale](https://github.com/dlcgold/LaureaTriennale-Bicocca) 
 - [Altri appunti sui corsi (Ilaria)](https://github.com/IlariaB/class-notes)
 - [Altri appunti sui corsi (Sofia)](https://github.com/amarusofia/Appunti-universitari)

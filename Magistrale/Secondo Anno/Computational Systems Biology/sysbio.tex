@@ -1304,10 +1304,21 @@ collegamenti.
   In un grafo si definisce \textbf{cappio} un arco tra un nodo e se stesso.
 \end{definizione}
 \begin{definizione}
-  In un grafo si definisce \textbf{percorso} come una sequenza finita o infinita
-  di archi che unisce una sequenza di vertici. Se il vertice di partenza
-  coincide con quello di fine si parla di \textbf{ciclo}.
+  In un grafo $G=\langle V,E\rangle$ si definisce \textbf{percorso/cammino} come
+  una sequenza finita o infinita 
+  di archi che unisce una sequenza di vertici. Dati quindi due nodi $v_1,v_n\in
+  V$ un cammino da $v_1$ a $v_n$ un cammino è una sequenza di nodi: 
+  \[(v_1,v_2, \ldots, v_n) \mbox{ tali che }\forall i =1,2,\ldots,
+    n-1,\,\,\exists \,e=(v_1, v_{i+1})\in E\]
+  Se il vertice di partenza coincide con quello di fine si parla di
+  \textbf{ciclo}, quindi $v_1=v_n$. \\
+  Ovviamente tra due nodi possono avere distinti cammini.
 \end{definizione}
+Il concetto di \textit{cammino} e il concetto di \textit{ciclo} assumono
+particolare rilevanza in biologia. I \textit{cicli} servono, ad esempio, per
+rappresentare i \textit{feedback} mentre i \textit{cammini}, ad esempio, per le
+\textit{vie di trasduzione del segnale} dove si parte da un recettore
+transmembrana per poi attivare una catena di reazioni.
 \begin{definizione}
   Si definisce \textbf{grafo connesso} un grafo dove esiste un percorso tra ogni
   coppia di vertici. In caso contrario si parla di \textbf{grafo non connesso}.
@@ -1317,8 +1328,31 @@ collegamenti.
   un grafo, di $n$ nodi, dove ogni nodo è collegato ai rimanenti $n-1$ nodi.
 \end{definizione}
 \begin{definizione}
-   Si definisce \textbf{grafo totalmente sconnesso} un grafo che non presenta
-   archi.  
+  Si definisce \textbf{grafo totalmente sconnesso} un grafo che non presenta
+  archi.  
+\end{definizione}
+\begin{definizione}
+  Due nodi $v_i$ e $v_j$ si dicono \textbf{adiacenti} se esiste un arco, diretto
+  o indiretto, $e=(v_i, v_j)$.
+\end{definizione}
+\begin{definizione}
+  Dato un nodo $v$ in un \textit{grafo indiretto} si definisce
+  \textbf{grado/connettività/degree} come il 
+  numero di 
+  nodi adiacenti ad esso. Tale valore solitamente si indica con $k_v$, che è
+  ovviamente un numero intero non negativo. Qualora ci sia un cappio esso conta
+  doppio.\\
+  Un \textbf{nodo isolato} presenta un grado nullo.
+\end{definizione}
+\begin{definizione}
+  Dato un \textit{grafo diretto} si definiscono:
+  \begin{itemize}
+    \item \textbf{indegree} di un nodo $v$ come il numero di archi entranti in $v$
+    \item \textbf{outdegree} di un nodo $v$ come il numero di archi uscenti da $v$
+  \end{itemize}
+  \textit{In letteratura ha volte si definisce
+    \textbf{grado/connettività/degree} in un grafo diretto come la somma di
+    \emph{indegree} e \emph{outdegree}}.
 \end{definizione}
 Nella modellazione di sistemi biologici mediante questa classe di modelli è
 interessante notare come si possa passare da un grafo connesso ad uno non
@@ -1390,6 +1424,300 @@ interesse biologico, rappresentate appunto da sottografi\footnote{Winterbach W,
 \end{itemize}
 \textbf{Questi argomenti verranno approfonditi più avanti, queste sono solo le
   ``definizioni'' recuperate nel paper indicato.}\\
+Torniamo a parlare di della nozione di \textbf{grado}.
+\begin{definizione}
+  Si definisce \textbf{distribuzione dei gradi/degree distribution} come la
+  distribuzione di 
+  probabilità dei gradi dei nodi sull'intera rete. Tale distribuzione, denotata
+  con $P(k)$, quindi è la
+  probabilità che un certo nodo abbia grado esattamente pari a $k$. Tale
+  probabilità si ottiene contando il numero di nodi del grafo, denotati $N(k)$,
+  che presentano grado $k$ e dividendo tale valore per il numero totale di nodi
+  del grafo, che indichiamo con $N=|V|$. Si ha quindi:
+  \[P(k)=\frac{N(k)}{N},\,\,k=1,2,\ldots\]
+  Avendo una distribuzione di probabilità ne segue che:
+  \[\sum_{i=1}^{k_{max}} P(i)=1\]
+\end{definizione}
+La \textbf{degree distribution} ci permette di classificare un grafo, anche
+solo plottando con un istogramma i valori di $P(k)$ al variare di $k$
+stesso. Ad esempio qualora si avesse un picco nel plot di tali valori allora si
+avrebbe che la rete ha un ``grado caratteristico'' (estremizzando l'esempio
+magari si ha una rete dove tutti i nodi hanno grado $k=2$) e quindi non si hanno
+nodi fortemente connessi, con alto \textit{degree}. Questo tipo di analisi non
+può essere fatta ``visivamente'' su reti reali ma ci si deve per forza affidare
+a conti precisi o al più plot della distribuzione stessa. Da tali studi posso
+estrarre alcune informazioni, ad esempio:
+\begin{itemize}
+  \item i nodi con $k=0$, ovvero i nodi isolati possono rilevare che ci sono
+  probabilmente informazioni mancanti, falsi negativi etc$\ldots$ mentre il
+  valore di $P(0)$ mi dice la probabilità stessa che un qualsiasi nodo della
+  rete sia un nodo isolato
+  \item i nodi con un $k$ elevato sono tendenzialmente molto pochi e sono i
+  cosiddetti \textbf{hubs}, che hanno un ruolo chiave nello studio di
+  \textit{reti large-scale} 
+\end{itemize}
+Al fine di rappresentare i vari valori si usa un piano cartesiano (spesso per
+necessità rappresentato in \textit{scala logaritmica}) dove:
+\begin{itemize}
+  \item l'asse delle $x$ è formato dai valori di $k$
+  \item l'asse delle $y$ è formato dai valori di $P(k)$
+\end{itemize}
+Rappresentando tutte le varie coppie $\langle k,P(k)\rangle$ si ottiene una
+``forma'' che è la cosiddetta \textbf{power-law degree distribution} (che
+rappresenta la relazione funzionale tra $k$ e $P(k)$ dove una variazione
+relativa in una delle due quantità si traduce in una variazione relativa
+proporzionale nell'altra quantità, indipendentemente dalla dimensione iniziale
+delle due quantità, avendo quindi che una quantità varia come potenza di
+un'altra). Lo studio della \textit{power-law degree distribution} è spesso
+essenziale nello studio di sistemi biologici.\\
+Sempre restando sullo stesso discorso si è notato che in molte reti se si ha un
+nodo $v_i$ connesso con un nodo $v_j$, che a sua volta è connesso al nodo $v_h$,
+allora è altamente probabile che $v_i$ sia anch'esso collegato al nodo
+$v_h$. Questo \textbf{fenomeno di clusering} può essere quantificato usando il
+cosiddetto \textbf{coefficiente di clustering}.
+\begin{definizione}
+  Dato un nodo $v$ si definisce il \textbf{coefficiente di clustering} del nodo
+  $v$, denotato con $C_v$, come il numero di archi che connettono nodi adiacenti
+  a $v$ diviso il numero totale delle possibili connessioni che si avrebbero tra
+  i nodi adiacenti a $v$. Formalmente:
+  \[C_v=\frac{2N_v}{k_v(k_v-1)}\]
+  infatti si hanno:
+  \begin{itemize}
+    \item $N_v$ come numero di archi che connettono coppie di nodi adiacenti a
+    $v$. Questo valore è facilmente contabile avendo il grafo
+    \item $\frac{k_v(k_v-1)}{2}$, parlando di \textit{grafo indiretto}, come
+    numero di tutti i possibili archi tra 
+    coppie di nodi adiacenti a $v$, che ha grado $k_v$, un valore conosciuto
+  \end{itemize}
+  Si osserva inoltre che, ricordando che alla fine si ha a che fare con la
+  misura di probabilità di quanto sia probabile che si abbia o meno un cluster
+  che include il nodo $v$:
+  \[0\leq C_v\leq 1\]
+\end{definizione}
+\begin{esempio}
+  Vediamo un semplice esempio che mostra come varia il \textit{coefficiente di
+    clustering}. Si studia, nel dettaglio, il valore $C_5$ nei seguenti grafi:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1.3]{img/clus.pdf}
+  \end{figure}
+  In tutti i casi si ha $k_5=4$ ma:
+  \begin{itemize}
+    \item nel \textit{Grafo 1} si ha $N_5=6$ e $C_5=\frac{12}{12}=1$ e infatti
+    il nodo $5$ è sicuramente in cluster
+    \item nel \textit{Grafo 2} si ha $N_5=3$ e $C_5=\frac{6}{12}=0.5$
+    \item nel \textit{Grafo 3} si ha $N_5=0$ e $C_5=\frac{0}{12}=0$ e infatti il
+    nodo $5$ non è sicuramente in cluster
+  \end{itemize}
+\end{esempio}
+Questo tipo di coefficiente è utile soprattutto nel caso di \textit{grafi
+  indiretti}. Nel caso di \textit{grafi diretti} bisogna invece ragionare in
+ottica di \textit{indegree} e \textit{outdegree}.\\
+Un caso limite interessante in ottica di \textit{coefficiente di clustering} è
+quello della \textbf{clique}.
+\begin{definizione}
+  Si definisce \textbf{clique (\textup{cricca})} di un \textit{grafo non
+    orientato}
+  $G=\langle V,E\rangle$ come un sottoinsieme $V'\subseteq V$ di vertici tale
+  che: 
+  \[(v_1,v_2)\in E,\,\,\forall \,v_1,v_2\in V'\]
+  quindi un sottoinsieme di vertici con solo vertici collegati da un arco.
+\end{definizione}
+Il caso della \textit{clique} è quindi il ``caso migliore'' parlando del
+fenomeno del clustering.\\
+Il singolo \textit{coefficiente di clustering} di un nodo comunque non è di
+particolare interesse se preso in modo isolato, in quanto si vuole classificare
+l'intera rete.
+\begin{definizione}
+  Si definisce il \textbf{coefficiente di clusering medio}, denotato con
+  $\langle C\rangle$, il valore medio di tutti i \textit{coefficienti di
+    clusering} dei nodi del grafo.
+\end{definizione}
+Il \textit{coefficiente di clusering medio} permette di caratterizzare la
+tendenza complessiva dei nodi di una rete a formare gruppi o cluster. Questo è
+quindi un valore che ci permette di caratterizzare la topologia di una rete.
+\begin{definizione}
+  Si definisce la funzione $C(k)$, che potremmo chiamare ``\textbf{average
+    clustering distribution}'', come la media dei \textit{coefficienti di
+    clusering} di tutti i nodi di grado pari a $k$ nella rete.
+\end{definizione}
+Il valore $C(k)$ quindi fornisce un'indicazione del carattere
+modulare/gerarchico di una rete, ovvero l'esistenza di sottografi/sottoreti
+caratterizzati da nodi fortemente collegati internamente, che presentano scarse
+connessioni con altre parti della rete.
+\begin{definizione}
+  Si definisce la \textbf{lunghezza del cammino} tra due nodi $v_1$ e $v_n$ come
+  il numero di archi che si hanno nel cammino.\\
+  Si definisce \textbf{cammino minimo}, notando che potrebbe non essere unico,
+  un cammino di lunghezza minima tra due nodi. 
+\end{definizione}
+Anche la nozione di \textit{lunghezza del cammino}  ha un ruolo centrale nella
+modellazione di sistemi biologici. Basti pensare, in modo comunque approssimato
+e semplicistico, che più è lungo il cammino e più sono le interazioni biologiche
+e quindi, ad esempio, più energia è richiesta alla cellula. Infatti normalmente
+la natura ha fatto sì che ogni ``operazione biologica'' venga fatta nel modo
+meno dispendioso possibile, quindi, ricollegando la modellazione a grafo,
+mediante \textit{cammini minimi}. Nella realtà si vedrà il concetto di
+\textbf{ridondanza} in quanto si hanno vari modi, nel mondo biologico, per
+ottenere lo stesso risultato anche se con ``cammini'' di lunghezza diversa
+(magari per casi, ad esempio, in cui alla cellula conviene
+``temporeggiare''). Inoltre magari ad un percorso più lungo può comunque
+corrispondere un dispendio energetico minore. In ogni casa l'aggiunta di
+\textbf{pesi} al grafo permette 
+una modellazione leggermente più precisa, potendo rappresentare ad esempio, i
+``costi'' delle reazioni etc$\ldots$\\
+Un'altra cosa interessante da notare nella maggior parte delle reti è che
+esiste un cammino relativamente breve tra qualsiasi coppia di nodi e la
+lunghezza media di tale cammino è proporzionale al logaritmo della dimensione
+della rete, quindi al numero totale di nodi. Questa è la cosiddetta
+\textbf{small world property} che sembra caratterizzare la maggior parte delle
+reti complesse, comprese \textit{reti metaboliche} e \textit{reti PPI}.
+\begin{definizione}
+  Si definisce un \textbf{grafo pesato} $G=\langle V,E\rangle$ come un grafo a
+  cui viene associata anche una \textbf{funzione di peso} $w$:
+  \[w:E\to\mathbb{R}\]
+\end{definizione}
+Esistono, oltre a quelle già citate, anche altre metriche di studio, tra
+cui\footnote{Winterbach W, Van Mieghem P, Reinders M, Wang H, de Ridder
+  D. Topology of molecular interaction networks. BMC Syst
+  Biol. 2013;7:90. Published 2013 Sep 16. doi:10.1186/1752-0509-7-90}: 
+\begin{itemize}
+  \item ulteriori \textbf{metriche per i cammini} come il \textit{cammino
+    minimo} su \textit{grafi pesati} o il \textit{cammino minimo medio} tra
+  ogni coppia di nodi
+  \item la \textbf{metrica di centralità} fornisce una classifica dei nodi in
+  base alla loro "importanza". La versione più semplice sfrutta appunto il grado
+  di un nodo per misurarne la centralità, parlando quindi di \textbf{degree
+    centrality}. Un'alternativa è la \textbf{closeness centrality} che è il
+  reciproco della somma dei cammini più brevi verso tutti gli altri nodi (cioè
+  un nodo la cui \textit{closeness centrality} è alta è vicino a molti
+  nodi). Un'ulteriore metrica è la \textbf{betweenness centrality} ovvero la
+  frazione di cammini minimi che passano attraverso un nodo. Tra le metriche più
+  elaborate si annoverano la \textbf{centralità per autovettori} e il
+  \textbf{pagerank} che sono misure della frequenza con cui si arriva a un nodo
+  quando si esegue una \textit{random walk} su una rete.  
+\end{itemize}
+\textbf{Queste non sono comunque metriche solitamente utili per la
+  caratterizzazione della topologia di una rete}.
+\begin{definizione}
+  Si definisce un grafo $G=\langle V,E\rangle$, orientato o meno, come un
+  \textbf{grafo bipartito} se:
+  \begin{itemize}
+    \item l'insieme dei nodi $V$ è in realtà l'unione di due sottoinsiemi di
+    nodi $V_1$ e $v_2$, ovvero $V=V_1\cup V_2$, tali che la loro intersezione è
+    nulla, ovvero $V_1\cap V_2=\emptyset$
+    \item data la prima premessa si ha che ogni arco del grafo connette solo un
+    nodo in $V_1$ ad un nodo in $V_2$
+  \end{itemize}
+  Ad esempio potremmo avere questi casi, dove i primi due grafi sono bipartiti
+  (come evidenziato anche a livello visivo dai colori che identificano le
+  partizioni) a differenza del terzo (a causa dell'arco in rosso):
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1.3]{img/bip.pdf}
+  \end{figure}
+  Potenzialmente si possono anche avere \textbf{grafi tripartiti}, con 3
+  partizioni, o in generale \textbf{grafi multipartiti} con $m$ partizioni.
+\end{definizione}
+\newpage
+Un esempio d'uso dei \textit{grafi bipartiti} sono le \textbf{human desaesome
+  networks}, come ad esempio\footnote{Goh, Kwang-Il, et al. "The
+  human disease network." Proceedings of the National Academy of Sciences 104.21
+  (2007): 8685-8690.}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.7]{img/bi.jpg}
+  \label{fig:mbip}
+\end{figure}
+Nella figura si hanno appunto due partizioni: 
+\begin{itemize}
+  \item un sottoinsieme di nodi per i geni
+  \item un sottoinsieme di nodi per le malattie
+\end{itemize}
+Banalmente quindi un nodo che rappresenta una malattia è legato a un nodo che
+rappresenta un gene se è noto che una
+mutazione di quel gene induce l'insorgenza di quella malattia. A supporto posso
+inoltre avere due ulteriori reti solo per i geni e solo per le malattie.\\
+Un esempio di rete basata su un \textit{grafo multipartito} è, ad esempio, una
+\textbf{drug-target protein network}, come quella proposta da
+Nacher visualizzabile in figura
+\ref{fig:mbip}\footnote{Nacher, J., Akutsu, T. Structural controllability of
+  unidirectional bipartite networks. Sci Rep 3, 1647
+  (2013). https://doi.org/10.1038/srep01647}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.22]{img/multi.jpg}
+  \caption{Esempio di \textit{drug-target protein network}, rappresentata
+    mediante \textit{grafo multipartito}.}  
+  \label{fig:mbip}
+\end{figure}
+\newpage
+Un esempio invece di rete tripartita può essere la rappresentazione di un
+\textit{pathway metabolico}\footnote{Réka Albert; Scale-free networks in cell
+  biology. J Cell Sci 1 November 2005; 118 (21): 4947–4957. doi:
+  https://doi.org/10.1242/jcs.02714}: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.22]{img/tri.jpg} 
+\end{figure}
+dove si hanno tre tipologie di nodo:
+\begin{enumerate}
+  \item nodi per i \textit{reagenti} (nell'immagine rappresentati da cerchi)
+  \item nodi per le \textit{reazioni} (nell'immagine rappresentate da ovali)
+  \item nodi per gli \textit{enzimi} (nell'immagine rappresentati da quadrati)
+\end{enumerate}
+Si hanno inoltre due tipologie di archi:
+\begin{enumerate}
+  \item le linee solide per rappresentare il \textit{mass flow},
+  ovvero il \textit{tasso di turnover} delle molecole attraverso una via
+  metabolica, tasso che serve ad indicare il dispendio energetico (???)
+  \item le linee tratteggiate per la \textit{catalisi}, ovvero fenomeno chimico
+  attraverso il quale la velocità di una reazione chimica subisce delle
+  variazioni per l'intervento di una sostanza (o una miscela di sostanze) detta
+  catalizzatore, che non viene consumata dal procedere della reazione
+  stessa\footnote{\url{https://it.wikipedia.org/wiki/Catalisi}} 
+\end{enumerate}
+Inoltre i pesi degli archi indicano i \textit{coefficienti stechiometrici}, che
+rappresentano infatti il rapporto tra le moli delle diverse sostanze, dei
+reagenti.  \\
+Ovviamente l'uso delle reti in ambito biologico può essere espanso, considerando
+ad esempio i legami tra più reti, che rappresentano vari livelli, ad esempio:
+\begin{itemize}
+  \item \textit{reti sociali}, da usare comunque con cautela a causa della loro
+  alta probabilità di portare \textit{falsi positivi/negativi} anche se possono
+  rappresentare informazioni importanti. Ormai si tende comunque a preferire il
+  dato del singolo paziente, puntando alla \textit{medicina personalizzata} in
+  quando ``la media tra i pazienti'' raramente è un dato utile. Esse
+  possono rappresentare legami 
+  famigliari, vicinanza tra persone, informazioni sui luoghi in cui si vive
+  etc$\ldots$ 
+  \item \textit{disease networks}
+  \item \textit{reti metaboliche}
+  \item \textit{reti PPI}
+  \item \textit{reti di regolazione genica}
+  \item $\ldots$
+\end{itemize}
+I vari livelli sono ovviamente connessi a vicenda ma non sempre è facile
+studiare tali connessioni a causa della mancanza di dati etc$\ldots$\\
+Altri esempi interessanti di uso sono le \textbf{reti in ecologia}, come, ad
+esempio, lo 
+studio di Faust e Raes\footnote{Faust, K., Raes, J. Microbial interactions: from
+  networks to models. Nat Rev Microbiol 10, 538–550
+  (2012). https://doi.org/10.1038/nrmicro2832} dove si studiavano le
+\textit{interazioni microbiche}, tra cui il parassitismo, il mutualismo la
+competizione etc$\ldots$ tramite appunto delle reti.\\
+Un uso recente delle reti è anche quello nelle \textbf{neuroscienze}, per
+capire, durante una malattia, cosa non stia funzionando bene nel cervello. Un
+esempio è lo studio di Chennu, Srivas et al.\footnote{Chennu, Srivas, et
+  al. "Spectral 
+  signatures of reorganised brain networks in disorders of consciousness." PLoS
+  computational biology 10.10 (2014): e1003887.} dove si è sfruttata la
+relazione tra reti e funzionalità del cervello per identificare quali aree del
+cervello/funzioni del cervello funzionassero male in pazienti in stato
+vegetativo e pazienti 
+minimamente coscienti, facendo il paragone con vari soggetti controllo
+sani. Sono stati usati anche i concetti di grado etc$\ldots$ nello studio.
 \end{document}
 
-% LocalWords:  rewiring trascrizionali regolatorie
+% LocalWords:  rewiring trascrizionali regolatorie degree distribution
+% LocalWords:  multipartiti

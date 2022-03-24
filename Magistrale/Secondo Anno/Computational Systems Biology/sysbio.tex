@@ -71,6 +71,8 @@
   }
 } 
 \usetikzlibrary{automata,positioning,chains,fit,shapes}
+\usetikzlibrary{circuits.logic.US}
+\usetikzlibrary{positioning}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -1958,7 +1960,8 @@ di essi:
 \begin{itemize}
   \item i \textbf{module}, ovvero un gruppo di nodi collegati fisicamente o
   funzionalmente che lavorano insieme per ottenere una specifica funzione
-  cellulare  
+  cellulare, come ad esempio la trasduzione del segnale di una determinata
+  molecola 
   \item i \textbf{motif}, ovvero sottografi che si verificano significativamente
   più frequentemente nella rete data di quanto si otterrebbe con una
   \textit{random network}
@@ -2055,8 +2058,468 @@ ME, Ono K, et al. A travel guide to Cytoscape plugins. Nat
 Methods. 2012;9(11):1069-1076. doi:10.1038/nmeth.2212}, che aggiungono
 moltissime funzionalità, tra cui, ad esempio, 
 collegare una rete ad un database esterno per fare \textit{gene enrichment}. 
-
+\chapter{Logic-Based Modelling}
+Si introducono ora i \textbf{modelli logic-based}.\\
+Ricordiamo che tali modelli, come visibile in figura \ref{fig:appro}:
+\begin{itemize}
+  \item sono sistemi meno \textit{large-scale} di quanto lo fossero i
+  \textit{modelli interaction-based}
+  \item presentano tendenzialmente un basso costo computazionale
+  \item presentano un livello di dettaglio, per quanto ambiguo nello schema,
+  variabile
+  \item presentano alcune difficoltà nella misurazione dei dati
+\end{itemize}
+Il tutto comporta una miglior capacità predittiva rispetto ai \textit{modelli
+  interaction-based} e, grazie all'uso di vari tipi di logiche, può portare
+anche a ottenere modelli molto più predittivi.\\
+Un'altra differenza sostanziale rispetto ai \textit{modelli interaction-based} è
+che si può iniziare a parlare di \textit{simulazioni}, superando il ``limite''
+delle sole analisi. In questo caso i modelli più semplici si basano sulla
+\textit{logica booleana} e, come si vedrà, se simulazioni e le analisi
+consistono nel determinare:
+\begin{itemize}
+  \item \textbf{cicli}, ovvero sequenze ripetute di stati di sistema
+  \item \textbf{attrattori}, ovvero stati finali raggiungibili da un qualsiasi
+  stato iniziale
+  \item \textbf{bacini di attrazione}, percorsi di stati intermedi che iniziano
+  da uno stato iniziale e terminano in un attrattore
+\end{itemize}
+Con l'aggiunta della \textbf{logica fuzzy}, più complessa di quella booleana, si
+può anche derivare il \textit{comportamento dinamico} del sistema, ad esempio
+derivando la variazione temporale del valore di ogni componente in uno o più
+stati, magari dopo una certa \textit{perturbazione}. Si parla quindi di
+\textbf{modelli qualitativi} e 
+\textbf{dinamici}. L'informazione \textit{quantitativa} è ridotta al minimo, non
+avendo la rappresentazione di vere e proprie interazioni/proprietà chimiche e
+fisiche 
+come, ad esempio, la rappresentazione di \textit{kinetic-rate} etc$\ldots$\\ 
+Come detto si hanno sia \textit{sistemi small-scale} che \textit{sistemi
+  large-scale}, anche se comunque di dimensioni ridotte rispetto ai
+\textit{modelli interaction-based}, e ad esempio sono usati per:
+\begin{itemize}
+  \item \textbf{reti di regolazione gene-gene}
+  \item \textbf{pathway per il segnale di trasduzione}
+  \item \textbf{differenziazione cellulare}, soprattutto grazie allo studio
+  degli \textit{attrattori}
+  \item \textbf{pathway per la morte programmata cellulare}
+\end{itemize}
+Tecnologie sperimentali di natura qualitativa (ad esempio \textit{targeting
+  genico} e \textit{screening fenotipici}) hanno portato allo sviluppo di metodi
+computazionali per modellare e analizzare reti regolatorie geniche sulla base di
+regole logiche. L'architettura di tali modelli, per semplificare, consiste in
+due ``aspetti'' principali:
+\begin{enumerate}
+  \item la \textbf{struttura della rete}, modellata tramite \textit{grafi
+    diretti}, dove con la direzione si specificano principalmente, ma non solo,
+  fenomeni di regolazione
+  \item le \textbf{dinamiche della rete}, modellati tramite stati logic-based
+  mutevoli e funzioni di update degli stati stessi, che garantiscono
+  un'evoluzione nel tempo
+\end{enumerate}
+L'idea generale è quindi quella di partire da uno \textbf{stato iniziale} per
+poi assegnare un nuovo valore ad ogni variabile del modello, quindi ad ogni nodo
+della rete, tramite l'uso di \textit{funzioni logiche} che combinano i valori
+delle variabili dello stato corrente per produrre il nuovo stato.\\
+Interessante è elencare fin da subito alcuni \textbf{pro} di questo approccio
+modellistico:
+\begin{itemize}
+  \item i \textit{modelli logic-based} sono \textbf{versatili}, in quanto una
+  variabile può praticamente rappresentare qualsiasi cosa, come ad esempio un
+  gene, un'attività genica, la presenza di una proteina, un fenotipo, lo stato
+  di una cellula etc$\ldots$ Inoltre si possono mischiare componenti eterogenee
+  in modo abbastanza semplice, a differenza di quanto accadeva coi
+  \textit{modelli interaction-based}, dove era molto più complesso fare ciò
+  \item i \textit{modelli logic-based} sono \textbf{flessibili}, in quanto lo
+  stato di un dato componente cellulare può essere rappresentato da una o più
+  variabili, con diversi insiemi di valori. Quindi una certa componente può
+  avere funzioni diverse a seconda dello stato del sistema e questo risolve
+  quanto visto nel caso dei \textit{modelli interaction-based} in merito ai
+  nodi ripetuti nella rete, avendo che in questo caso i due o più nodi sono
+  ben distinti, magari avendo un nodo per una certa proteina e un altro per la
+  stessa proteina ma fosforilata (si ricorda che la \textit{fosforilazione} è
+  una reazione chimica, fondamentale in biochimica,  che consiste
+  nell'addizione di un gruppo fosfato, $PO_4^{3-}$, ad una proteina o ad
+  un'altra molecola e si ricorda che gli enzimi che solitamente catalizzano le
+  fosforilazioni sono le chinasi)   
+  \item gli effetti delle \textit{perturbazioni}, come \textit{inibizioni} o
+  \textit{mutazioni}, possono essere ``testati'' in modo molto facile e diretto
+\end{itemize}
+Si hanno però anche vari \textbf{contro}, che principalmente si riconducono al
+fatto che non sono modelli meccanicistici. Infatti, per quanto si abbia alla
+base un \textit{grafo diretto}, non è possibile inferire la proprietà
+meccanicistica che si ha dietro la regolazione positiva/negativa, o altro, che
+viene rappresentata mediante l'arco diretto. Ipotizziamo anche solo di avere due
+nodi $A$ e $B$, con $A$ che regola $B$:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+    \node[state] (q_0) {$A$};
+    \node[state] (q_1) [right=of q_0] {$B$};
+    \path[->]
+    (q_0) edge  node {} (q_1);
+  \end{tikzpicture}
+\end{center}
+Potremmo dire che ``l'attività di $A$ stimola l'attività di $B$'' e si può
+modellare una regolazione positiva o negativa ma non
+potremo mai caratterizzare nel dettaglio il meccanismo stesso, che potrebbe
+essere, ad esempio: 
+\begin{itemize}
+  \item l'attivazione della produzione di $B$
+  \item l'inibizione della degradazione di $B$
+  \item la stabilizzazione dell'\textit{high-activity state} di $B$
+  \item $\ldots$
+\end{itemize}
+Posso solo sapere che c'è uno stimolo, avendo infatti perdita d'informazione che
+impedisce l'inferenza dei meccanicismi. \\
+Nei paragrafi precedenti si sono nominate spesso le
+\textit{variabili}. Approfondendo il discorso si ha che in modello matematico
+esse possono essere:
+\begin{itemize}
+  \item \textbf{valori booleani}, ovvero valori binari come 0/1,
+  presente/assente, attivo/inattivo etc$\ldots$
+  \item \textbf{valori multi-stato}, sia \textbf{linguistici} che
+  \textbf{numerici}, come ad esempio nullo/basso/medio/alto, 0/1/2/3 etc$\ldots$
+  \item \textbf{valori numerici interi o reali}, usati ad esempio per
+  rappresentare la concentrazione o il numero di molecole
+\end{itemize}
+Le prime due categorie sono quindi sono a \textit{valori discreti} mentre la
+terza è a \textit{valori continui}. Una categorizzazione più precisa, parlando
+di \textit{modelli-logic based} si può osservare in figura
+\ref{fig:log}\footnote{Morris MK, Saez-Rodriguez J, Sorger PK, Lauffenburger
+  DA. Logic-based models for the analysis of cell signaling
+  networks. Biochemistry. 2010;49(15):3216-3224. doi:10.1021/bi902202q}. \\ 
+È stato anche citato il cosiddetto \textit{stato iniziale del sistema}, ovvero
+la \textit{condizione iniziale} del modello, che prevede l'assegnamento di un
+valore, all'inizio della simulazione, ad ogni variabile del sistema. La
+\textit{condizione iniziale} influisce ovviamente i risultati stessi della
+simulazione, determinando come evolve il sistema nel tempo, soprattutto se si ha
+una simulazione deterministica.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1]{img/log.pdf}
+  \caption{Schema riassuntivo dell'uso delle variabili in modelli
+    \textit{logic-based}.}
+  \label{fig:log}
+\end{figure}
+\newpage
+\noindent
+Ovviamente la scelta tra discreto e continuo comporta delle
+conseguenze. Prendiamo ad esempio la seguente situazione:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+    \node[state] (q_0) {$Y$};
+    \node[state] (q_1) [right=of q_0] {$X$};
+    \path[->]
+    (q_0) edge  node {} (q_1);
+  \end{tikzpicture}
+\end{center}
+e il seguente grafico\footnote{Albert, Reka, and
+  Juilee Thakar. "Boolean modeling: a logic‐based dynamic approach for
+  understanding signaling and regulatory networks and for making useful
+  predictions." Wiley Interdisciplinary Reviews: Systems Biology and Medicine
+  6.5 (2014): 353-369.}, che descrive la regolazione positiva di $Y$ su $X$: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.2]{img/boolf.jpg}
+\end{figure}
+Nel grafico si hanno:
+\begin{itemize}
+  \item sull'asse delle ascisse il tempo
+  \item sull'asse delle ordinate la concentrazione del nodo $X$ (si assume che
+  la concentrazione/attività del nodo $Y$ cresca linearmente)
+  \item la funzione booleana in verde
+  \item due funzioni continue in rosso e blu che rappresentano il ``caso reale''
+\end{itemize}
+Si nota come il ``cambio'' per la funzione booleana sia ``secco'', prima 0 e poi
+1, un certo momento temporale. Questa eccessiva semplificazione non sempre è
+accettabile per descrivere casi reali ma ci sono situazioni in cui è comunque
+accettabile. Potrei avere anche altre funzioni, magari multi-stato, come quelle
+in figura \ref{fig:funbool}\footnote{Morris MK, Saez-Rodriguez J, Sorger PK,
+  Lauffenburger DA. Logic-based models for the analysis of cell signaling 
+  networks. Biochemistry. 2010;49(15):3216-3224. doi:10.1021/bi902202q}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.35]{img/funbool.jpg}
+  \caption{Esempio di approssimazioni di un certo andamento, partendo
+    dall'approssimazione  booleana a
+    quella nel caso continuo, che rappresenta correttamente la relazione
+    a sigmoide tra i livelli di input e output ad esempio nel casi dell'azione
+    della chinasi su un substrato, passando per diverse approssimazioni
+    multi-strato.}  
+  \label{fig:funbool}
+\end{figure}
+Si può quindi rilevare un ulteriore \textbf{contro} che si può avere in
+\textit{sistemi logic-based} in quanto quando un nodo è ``off'', ad esempio, non
+significa esattamente che la molecola ha zero concentrazione in quel momento nel
+sistema. Si sottintende una \textit{soglia implicita} che stabilisce ``on''  e
+``off'', quindi è ``off'' sse la molecola non è presente in modo
+sufficiente al punto da permettere cambiamenti nelle molecole regolate da
+essa. Quando supera quella soglie diventa ``on'' (ad esempio si può pensare di
+avere $0\leq x\leq 1$ e che fino a $x=0.8$ si ha lo stato ``off'' e con $x>0.8$
+lo stato ``on''). Si ha quindi solo
+un'approssimazione qualitativa della regolazione molecolare anche se bisogna
+notare che noti che molti dati sperimentali disponibili sulle regolazioni
+molecolari sono di natura qualitativa. \\
+Si possono, come anticipato, fare delle \textit{simulazioni} e l'aggiornamento
+degli stati può essere determinato in vari modi, tramite diverse concezioni del \textit{tempo}:
+\begin{itemize}
+  \item tramite \textbf{iterazioni} che non rappresentano necessariamente una
+  durata temporale fisica specifica, infatti un ``passo temporale'', un
+  \textit{time step} può rappresentare una durata diversa per iterazioni diverse
+  (magari in un caso è un evento che avviene in un secondo e in un altro che
+  avviene in un'ora ma entrambi sono un singolo \textit{time step} di ugual
+  durata). Si hanno inoltro due ulteriori sotto casistiche:
+  \begin{enumerate}
+    \item la \textbf{modalità di aggiornamento sincrona}, dove il valore di
+    tutte le variabili viene ricalcolato dopo ogni singola
+    iterazione. \textit{Questa sarà la modalità che verrà approfondita nel
+      corso}  
+    \item la \textbf{modalità di aggiornamento asincrona}, dove le variabili
+    subiscono transizioni una alla volta e le variabili da aggiornare vengono
+    scelte in modo tendenzialmente causale
+  \end{enumerate}
+  \item tramite \textbf{step discreti}, che quindi hanno una specifica durata
+  eventualmente diversa l'uno dagli altri, dopo i quali avvengono gli
+  aggiornamenti delle variabili
+  \item \textbf{tempo continuo}, dove si simula (eventualmente su una scala
+  diversa) il trascorrere reale del tempo
+\end{itemize}
+Un'altra problematica che si presenta dopo aver capito come viene aggiornato lo
+stato del sistema in un \textit{modello logic-based} è quello che il numero di
+stati cresce in modo esponenziale rispetto al numero di variabili, quindi al
+numero di nodi $|V|$. Questo aspetto rende complicata anche la validazione dei
+modelli, validazioni che solitamente vengono fatte in modo probabilistico
+(\textit{aspetto non ben chiarito a lezione ma magari si vedrà più avanti nel
+  corso}). Inoltre, avendo nei \textit{modelli logic-based} solitamente l'uso di
+iterazioni per descrivere l'evoluzione temporale si ha difficoltà a tracciare
+processi lenti/veloci o anche \textit{ritardi}, spesso frequenti nei sistemi
+biologici.\\
+Come detto ad ogni iterazione si ha una \textbf{transizione di stati}, quindi
+l'\textit{aggiornamento degli stati}, che avviene dopo la computazione di un
+insieme di \textit{funzioni logiche} assegnate ad ogni variabile del modello,
+quindi ad ogni nodo del grafo nel nostro caso. Si hanno quindi:
+\begin{itemize}
+  \item gli \textbf{operatori booleani}, nel caso specifico un sottoinsieme
+  degli stessi composto da $\land$ (l'\textit{and logico}), $\lor$ (l'\textit{or
+    logico}) e il $\neg$ (il \textit{not logico})
+  \item le \textbf{espressioni booleane} ottenute tramite gli \textit{operatori
+    booleani} 
+\end{itemize}
+Dopo che si è definita la logica di un modello e si è costruito il modello
+stesso si possono produrre le cosiddette \textbf{traiettorie}, dette anche
+\textbf{pseudo time-courses}, quindi sequenze di stati raggiungibili
+consecutivamente ognuno a partire dal precedente, e studiare eventuali
+\textit{attrattori} etc$\ldots$ Ovviamente, poiché il tempo non è correlato al
+tempo fisiologico/reale, i modelli booleani possono fornire solo una cronologia
+qualitativa delle attivazioni dei nodi.
+\section{Introduzione alla Logica Booleana}
+Prima di procedere occorre fare un piccolo ripasso di logica booleana, anche per
+poterla collegare a situazioni biologiche.\\
+Come anticipato abbiamo tre \textit{operatori logici}:
+\begin{enumerate}
+  \item il \textit{not}, indicato solitamente con $\neg$, è un operatore unario
+  che viene rappresentato, a livello circuitale tramite:
+  \begin{center}
+    \begin{tikzpicture}[circuit logic US]
+      \node [not gate] (and1) {};
+      \draw (and1.input) -- node[at end,left]{A} ++(left:4mm);
+      \draw (and1.output) -- node[at end,right]{B} ++(right:4mm);
+    \end{tikzpicture}
+  \end{center}
+  e al quale corrisponde la seguente tabella di verità:
+  \begin{table}[H]
+    \small
+    \centering
+    \begin{tabular}{c|c}
+      $A$&$B=\neg A$\\
+      \hline
+      0 & 1 \\
+      1 & 0
+    \end{tabular}
+  \end{table}
+  \item l'\textit{and}, indicato solitamente con $\land$, è un operatore binario
+  che viene rappresentato, a livello circuitale tramite:
+  \begin{center}
+    \begin{tikzpicture}[circuit logic US]
+      \node [and gate, inputs=nnn] (and1) {};
+      \draw (and1.input 1) -- node[at end,left]{\footnotesize{A}} ++(left:4mm);
+      \draw (and1.input 3) -- node[at end,left]{\footnotesize{B}} ++(left:4mm);
+      \draw (and1.output) -- node[at end,right]{C} ++(right:4mm);
+    \end{tikzpicture}
+  \end{center}
+  e al quale corrisponde la seguente tabella di verità:
+  \begin{table}[H]
+    \small
+    \centering
+    \begin{tabular}{c|c|c}
+      $A$&$B$&$C=A\land B$\\
+      \hline
+      0 & 0 & 0 \\
+      0 & 1 & 0\\
+      1 & 0 & 0\\
+      1 & 1 & 1 
+    \end{tabular}
+  \end{table}
+  \item l'\textit{or}, indicato solitamente con $\lor$, è un operatore binario
+  che viene rappresentato, a livello circuitale tramite:
+  \begin{center}
+    \begin{tikzpicture}[circuit logic US]
+      \node [or gate, inputs=nnn] (and1) {};
+      \draw (and1.input 1) -- node[at end,left]{\footnotesize{A}} ++(left:4mm);
+      \draw (and1.input 3) -- node[at end,left]{\footnotesize{B}} ++(left:4mm);
+      \draw (and1.output) -- node[at end,right]{C} ++(right:4mm);
+    \end{tikzpicture}
+  \end{center}
+  e al quale corrisponde la seguente tabella di verità:
+  \begin{table}[H]
+    \small
+    \centering
+    \begin{tabular}{c|c|c}
+      $A$&$B$&$C=A\lor B$\\
+      \hline
+      0 & 0 & 0 \\
+      0 & 1 & 1\\
+      1 & 0 & 1\\
+      1 & 1 & 1 
+    \end{tabular}
+  \end{table}
+\end{enumerate}
+Un'\textit{espressione booleana} è appunto la combinazione degli
+\textit{operatori booleani} e delle \textit{variabili booleane}. Uno dei
+problemi è che, date $n$ variabili booleane (quindi $|v|=n$ nodi), si hanno
+esattamente $2^n$ possibili combinazioni di valori di stato, avendo $2^n$ righe
+nella tavola di verità.\\
+Un esempio potrebbe essere la seguente espressione booleana:
+\[C=(A\land B)\lor (\neg B)\]
+alla quale corrisponde la seguente tabella di verità:
+\begin{table}[H]
+  \small
+  \centering
+  \begin{tabular}{c|c|c|c|c}
+    $A$&$B$&$A\land B$ & $\neg B$ & $C$\\
+    \hline
+    0 & 0 & 0 & 1 & 1\\
+    0 & 1 & 0 & 0 & 0\\
+    1 & 0 & 0 & 1 & 1\\
+    1 & 1 & 1 & 0 & 1
+  \end{tabular}
+\end{table}
+\section{Simulazioni su Modelli Logic-Based}
+Si riprende per comodità un esempio già visto nell'introduzione ai modelli per
+avere un esempio di quanto detto rapportato alla regolazione
+molecolare\footnote{Wynn ML, Consul N, Merajver SD, 
+  Schnell S. Logic-based models in systems biology: a predictive and
+  parameter-free network analysis method. Integr Biol
+  (Camb). 2012;4(11):1323-1337. doi:10.1039/c2ib20193c}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.65]{img/logicnet.jpg}
+\end{figure}
+In questo esempio notiamo come possiamo differenziare regolazioni positive, come
+quella di $A$ su $C$, e quelle negative, come quella di $B$ su $C$, anche a
+livello grafico. Notiamo anche come il formalismo sia del tipo:
+\[C^{t+1}=\neg B^t\]
+indicando con gli apici lo step temporale, avendo quindi specificato che lo
+stato risultante in $C$ al tempo $t+1$ dipende da quello di $B$ al tempo
+$t$. Ovviamente questi esempi, con le rispettive tabelle diversità, sono
+minuscoli, infinitamente più piccoli rispetto a modelli logici
+reali. Nell'esempio possiamo comunque vedere le varie casistiche dove $A$ attiva
+$C$, facendo regolazione positiva, mentre $B$ lo inibisce, facendo regolazione
+negativa, vedendo i vari risultati possibili nelle varie possibili combinazioni
+di ``input''.\\
+Nel dettaglio, inoltre, lo stato del sistema al tempo $t$ corrisponde ad un
+vettore booleano consistente nel valore di ogni variabile booleana al tempo
+$t$. Purtroppo a volte non abbiamo informazioni biologiche per assegnare la
+funzione booleana al nodo e ovviamente la questione si complica all'aumentare
+dei nodi regolatori, positivamente e negativamente, del nodo in
+questione. Quindi alla semplicità matematica si associa in questo caso anche un
+``lack'' di informazioni biologiche preliminari. \\
+Si procede quindi dallo \textit{stato iniziale}, che viene definito per $t=0$, e
+si calcola la traiettoria che si ha a partire da quello stato, che viene
+composta quindi dall'insieme degli stati a $t=1$, $t=2$, $t=3$ etc$\ldots$ dove
+il tempo è una \textbf{variabile discreta}, avendo quindi $\{t,
+t+1,t+2,\ldots\}$, e dove si assume aggiornamenti in \textit{modalità sincrona}.
+Fatte queste premesse è ovvio che lo stato corrente del sistema è identificato
+univocamente dallo stato precedente, che a sua volta identificava univocamente
+lo stato corrente come suo successore. Si ha quindi che i \textit{modelli
+  logic-based booleani sincroni} sono \textbf{deterministici}, avendo che un
+certo input produrrà sempre e solo lo stesso output.\\
+Sfruttiamo ora un esempio per caratterizzare meglio \textit{attrattori} e
+\textit{bacini di attrazione}.\\
+Sia data la seguente rete:
+\begin{center}
+  \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+    \node[state] (q_0) {$A$};
+    \node[state] (q_1) [below right=of q_0] {$C$};
+    \node[state] (q_2) [above right=of q_1] {$B$};
+    \path[->]
+    (q_1) edge  node {} (q_0)
+    (q_2) edge  node {} (q_1)
+    (q_2) edge  node {} (q_0)
+    (q_0) edge [bend left = 25] node {} (q_2);
+  \end{tikzpicture}
+\end{center}
+\newpage
+\noindent
+Alla quale vengono aggiunte le seguenti funzioni booleane:
+\begin{itemize}
+  \item $f(A)=B\land (\neg C)$
+  \item $f(B)=A$
+  \item $f(C)=B$
+\end{itemize}
+Si ha quindi la seguente tabella di verità, che avendo $3$ variabili/nodi avrà
+$2^3=8$ possibili combinazioni di stati di nodi, avendo che ogni riga della
+tabella di verità rappresenta uno stato della rete:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c|c||c|c|c}
+    $A$&$B$&$C$&$f(A)$ & $f(B)$ & $f(C)$\\
+    \hline
+    0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 1 & 0 & 0 & 0\\
+    0 & 1 & 0 & 1 & 0 & 1\\
+    0 & 1 & 1 & 0 & 0 & 1\\
+    1 & 0 & 0 & 0 & 1 & 0\\
+    1 & 0 & 1 & 0 & 1 & 0\\
+    1 & 1 & 0 & 1 & 1 & 1\\
+    1 & 1 & 1 & 0 & 1 & 1\\
+  \end{tabular}
+\end{table}
+Possiamo quindi distinguere uno \textit{stato iniziale} che comporta un
+\textbf{ciclo} o un \textbf{punto fisso}. Infatti, ad esempio, se parto da
+$[1,0,0]$ avrò la seguente traiettoria: 
+\[[1,0,0]\Rightarrow [0,1,0]\Rightarrow [1,0,1] \Rightarrow [0,1,0]\Rightarrow
+  [1,0,1]\Rightarrow\cdots\]
+Avendo quindi che si ha un \textbf{ciclo} tra gli stati $[0,1,0]$ e $[1,0,1]$,
+che funge da \textit{attrattore}.\\
+D'altro canto se si seleziona come \textit{stato iniziale} $[1,1,0]$ avrò la
+seguente traiettoria:
+\[[1,1,0]\Rightarrow[1,1,1]\Rightarrow[0,1,1]\Rightarrow[0,0,1]
+  \Rightarrow[0,0,0]\Rightarrow[0,0,0]\Rightarrow\ldots\]
+raggiungendo quindi un \textbf{punto fisso}, un \textit{attrattore}, ovvero lo
+stato $[0,0,0]$. Nel dettaglio inoltre, in questo caso semplice e fortuito, il
+\textbf{bacino di attrazione} per l'attrattore $[0,0,0]$ e formato da tutte le
+traiettorie che partono dagli
+stati presenti nella \textit{traiettoria} che parte dallo stato $[1,1,0]$,
+ovvero dagli stati dell'insieme (\textbf{capire se attrattore è nel suo stesso
+  bacino di attrazione}): 
+\[\{[1,1,0],\,\,[1,1,1],\,\,[0,1,1],\,\,[0,0,1],\,\,[0,0,0]\}\]
+Data quindi una \textit{rete booleana} e una traiettoria sufficientemente lunga
+prima o poi lo stato della rete sarà una ripetizione di una sequenza di stati
+già incontrata, questo perché si ha un numero di stati totali \textbf{finito},
+in quanto \textbf{discreto}.\\
+Visto l'esempio possiamo raffinare quindi quanto già definito:
+\begin{itemize}
+  \item un \textbf{attrattore} è definito come \textbf{punto fisso
+    (\textit{fixed state})} qualora si abbia che un singolo stato appare
+  ripetutamente in una \textit{traiettoria}
+  \item un \textbf{attrattore} è definito come \textbf{ciclo} se un insieme di
+  stati appare più di una volta in una \textit{traiettoria}
+\end{itemize}
+Avendo quindi che un \textbf{attrattore} rappresenta uno stato dal quale non è
+possibile scappare a meno che non si verifichi una \textit{perturbazione}
+esterna al sistema stesso mentre un \textbf{bacino di attrazione} è l'insieme di
+tutte le traiettorie che terminano in un \textit{attrattore}.
 \end{document}
 
-% LocalWords:  rewiring trascrizionali regolatorie degree distribution
-% LocalWords:  multipartiti
+% LocalWords:  rewiring trascrizionali regolatorie degree distribution update
+% LocalWords:  multipartiti fosforilata

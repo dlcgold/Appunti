@@ -3122,6 +3122,274 @@ per costruire rappresentazioni eseguibili degli antecedenti, sotto forma di
   \label{lst:fuzzyrepr}
 \end{listing}
 
+\chapter{Mechanism-Based Modelling}
+Si introducono ora i modelli \textbf{mechanism-based}.\\
+Ricordiamo che tali modelli, come visibile in figura \ref{fig:appro}:
+\begin{itemize}
+  \item hanno un sistema di piccole dimensioni, essendo quindi \textit{modelli
+    small-scale} 
+  \item presentano tendenzialmente un elevato costo computazionale per le
+  analisi, dovuto all'elevata parametrizzazione delle componenti
+  \item hanno un alto livello di dettaglio, avendo una descrizione dettagliata
+  delle componenti
+  \item presentano difficoltà nella misurazione dei dati conseguente alla
+  necessità di caratterizzare a fondo le componenti del modello stesso
+\end{itemize}
+Nel complesso si hanno quindi modelli con altissima \textit{capacità
+  predittiva}, essendo per di più \textit{modelli quantitativi}, che sono come
+anticipato \textbf{fully parameterized} (fattore che rende difficile lo studio
+di tali modelli), e
+\textit{dinamici}. Nel dettaglio, per l'aspetto legato alla dinamicità, si ha
+una \textit{rappresentazione continua del tempo}, rappresentazione che cerca di
+essere il èpiù vicina possibile alla realtà biologica. Un breve confronto coi
+\textit{modelli logic-based} è visibile in figura \ref{fig:meclog}\footnote{Le
+  Novère N. Quantitative and logic modelling of molecular and gene networks. Nat
+  Rev Genet. 2015;16(3):146-158. doi:10.1038/nrg3885}. \\  
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/meclog.jpg}
+  \caption{Confronto tra modelli quantitativi, come i \textit{modelli
+    mechanism-based}, dove si nota lo studio esplicito delle \textit{time
+    series}, con l'evoluzione nel tempo delle variabili, e
+  modelli qualitativi, come i \textit{modelli logic-based}.}  
+  \label{fig:meclog}
+\end{figure}
+Questa è la classe più complessa ed eterogenea di approcci di modellazione,
+avendo che comprende molti formalismi matematici diversi. In generale le
+simulazioni usate per studiare l'evoluzione temporale, quindi la dinamica, del
+sistema sfruttano diversi metodi:
+\begin{itemize}
+  \item \textit{deterministici}
+  \item \textit{stocastici}
+  \item \textit{ibridi}, ovvero sia deterministici che stocastici
+\end{itemize}
+Inoltre il cuore di tali modelli sono appunto i \textbf{parametri} e anche per
+il loro studio, al fine di calibrare e analizzare il modello, si hanno varie
+tecniche, tra cui:
+\begin{itemize}
+  \item \textit{parameter sweep analysis/scan}, che è il metodo più semplice
+  \item \textit{parameter estimation}, metodo più complesso ma anche più
+  importante, basato sulla risoluzione di problemi di ottimizzazione globale
+  \item \textit{sensitivity analysis}, per l'identificazione delle componenti
+  più fragili o più importanti del sistema stesso
+\end{itemize}
+In figura \ref{fig:confr}\footnote{Bordbar, Aarash, et al. "Constraint-based
+  models predict metabolic and associated cellular functions." Nature Reviews
+  Genetics 15.2 (2014): 107-120.} troviamo inoltre un breve confronto tra i 
+pro e i contro dei vari approcci modellistici. Se ci si concentra sui
+\textit{modelli mechanism based} si nota come le difficoltà di ottenere i dati
+quantitativi, parametrizzare il modello ed effettivamente procedere con la
+simulazione, che ha un costo computazionale non indifferente, siano fattori da
+tenere in considerazione in fase di scelta del modello.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/confr.jpg}
+  \caption{Confronto sommario tra i vari approcci di modellazione.}  
+  \label{fig:confr}
+\end{figure}
+In questo tipo di modelli si hanno principalmente variabili intere o reali, ad
+esempio per rappresentare la concentrazione o il numero di molecole. Tutte le
+variabili devono essere inizializzate, anche a zero (o al valore nullo
+corrispondente), prima di procedere con la simulazione, altrimenti si avrà solo
+errori (anche perché dal punto di vista algoritmico è necessario il caso
+iniziale).\\
+Come detto si ha un range molto ampio di formalismi matematici. Tra i più
+importanti si hanno:
+\begin{itemize}
+  \item \textit{modelli reaction-based}, che verranno approfonditi nel corso, in
+  quanto facili da comprendere e con un semplice formalismo matematico. Sono
+  \textit{modelli quantitativi, dinamici, fully parameterized} e solitamente
+  utilizzati per sistemi biologici su piccola scala, oltre ad essere di facile
+  comprensione anche per biologi/biotecnologi nonostante abbiano diversi
+  vantaggi rispetto ad altri formalismi
+  \item \textit{equazioni differenziali ordinarie (EDO)} 
+  \item \textit{equazioni differenziali parziali (EDP)}
+  \item \textit{modelli rule-based}, che verranno approfonditi in un seminario
+  \item \textit{reti di Petri}
+  \item \textit{algebre di processi}, tendenzialmente da evitare in quanto
+  inutilmente complesse
+\end{itemize}
+Brevi esempi di alcuni di questi formalismi sono visibili in figura
+\ref{fig:mecs}\footnote{Bartocci, Ezio, and Pietro Lió. "Computational modeling,
+  formal analysis, and tools for systems biology." PLoS computational biology
+  12.1 (2016): e1004591.}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.3]{img/mecs.jpg}
+  \caption{Vari toy examples per esempi di modellazione, meccanicistica e non.} 
+  \label{fig:mecs}
+\end{figure}
+\section{Reaction-Based Models}
+Approfondiamo quindi i \textit{modelli reaction-based}.\\
+Dato un sistema biologico con qualsiasi tipo di componenti interagenti (che
+possono essere molecole, cellule, persone, animali etc$\ldots$), una
+formalizzazione delle sue componenti e delle loro interazioni può essere fatta
+specificando:
+\begin{itemize}
+  \item un \textit{insieme di specie}, nel nostro caso un \textit{insieme di
+    specie molecolari} $\mathcal{S}=\{S_1,S_2,\ldots, S_n\}$
+  \item un \textit{insieme di reazioni}, nel nostro caso un \textit{insieme di
+    reazioni biochimiche} $\mathcal{R}=\{R_1,R_2,\ldots, R_m\}$
+  \item un \textit{insieme di quantità iniziali} $\mathcal{X}=\{X_1,X_2,\ldots,
+  X_n\}$, avendo quindi una quantità per ogni elemento di $\mathcal{S}$. Si ha
+  che o $X_i\in \mathbb{N}$ o $X_i\in\mathbb{R}$
+  \item un \textit{insieme di costanti}, nel nostro caso un \textit{insieme di
+    costanti cinetiche} $\mathcal{K}=\{K_1,K_2,\ldots, K_m\}$ che caratterizzano
+  ogni singola reazione in $\mathcal{R}$ tramite le proprietà
+  fisico/chimiche
+  \item si assume di avere un volume $\mathcal{V}$ dove avvengono le
+  reazioni. Tale volume è assunto come definito a priori e costante. Inoltre è
+  \textit{well-stirred (ben mescolato)}, avendo che le componenti si
+  distribuiscono in modo uniforme al suo interno. Queste, volume
+  costante/distribuzione uniforme, non sono assunzioni
+  realistiche, anche se a volte lo sono di più che in altre (basti pensare al
+  caso della \textit{diffusione} dove non si ha assolutamente una distribuzione
+  uniforme). Sono comunque approssimazioni accettabili nella maggioranza dei
+  casi e, si vedrà, potranno anche essere ``superate'' in determinate situazioni
+\end{itemize}
+Si è parlato di \textit{specie} e nel dettaglio essere caratterizzano ogni
+componente del sistema, quindi, nel caso biologico, si potrebbe parlare di:
+\begin{itemize}
+  \item ioni
+  \item metaboliti
+  \item geni
+  \item proteine
+  \item $\ldots$
+\end{itemize}
+Bisogna inoltre considerare i \textit{complessi} che si formano tramite legami
+tra più componenti. A livello rotazionale una componente la identifichiamo con
+$p_i$ mentre per un complesso potremmo usare vari formalismi, basta che siano
+coerenti per tutto il modello. Dati $P_1$ e $p_2$ potremmo avere:
+\begin{itemize}
+  \item $p_1p_2$
+  \item $p_1*p_2$
+  \item $p_1\_\,p_2$
+  \item $p_1:p_2$
+  \item $\ldots$
+\end{itemize}
+Si noti che $p_1p_2$ è diverso da $p_2p_1$, sia per motivazioni sintattiche che
+semantiche (magari dovute alla matematica implicita che non commuta).\\
+In questi modelli  le quantità di specie possono essere fornite come numero di
+molecole, via numeri interi, o come concentrazioni, via numeri reali e il lor
+uso varia a seconda del metodo:
+\begin{itemize}
+  \item nei modelli stocastici si usa il numero di molecole
+  \item nei modelli deterministi si usano le concentrazioni
+\end{itemize}
+In ogni caso si può passare da uno all'altro usando il volume $\mathcal{V}$ e il
+numero di Avogadro $N_A=6,02214076\times 10^{23}$ avendo che:
+\[\mbox{numero di specie in }\mathcal{S}=\mbox{concentrazione di
+  }\mathcal{S}\cdot N_A\cdot \mathcal{V}\]
+Parlando invece delle costanti legate alle reazioni si ha che sono
+caratterizzati da un numero reale non negativo e la loro specifica dipende
+anch'essa dall'interpretazione del modello:
+\begin{itemize}
+  \item nei modelli stocastici si ha la probabilità che avvenga una reazione. In
+  questo caso le costanti si indicano con $c$
+  \item nei modelli deterministi si ha il \textit{reaction rate}. In
+  questo caso le costanti si indicano con $k$
+\end{itemize}
+Si ha una generalizzazione per passare da $c$ a $k$, che dipende dal numero di
+reagenti e dal loro ordine, ma per ora basta la seguente
+tabella riassuntiva:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+    caso&formula\\
+    \hline
+    1 reagente & $c=k$\\
+    &\\
+    2 reagenti di specie diverse & $c=\frac{k}{N_A\cdot \mathcal{V}}$\\
+    &\\
+    2 reagenti di specie ugaule & $c=\frac{2k}{N_A\cdot \mathcal{V}}$
+  \end{tabular}
+\end{table}
+A questo punto possiamo descrivere una reazione $R$ come un insieme di reagenti
+e un insieme di prodotti, entrambi formati da elementi di $\mathcal{S}$, avendo
+che: 
+\[R:a_1S_1+a_2S_2+\cdots+a_nS_n\to b_1S_1+b_2S_2+\cdots+b_nS_n\]
+dove:
+\begin{itemize}
+  \item a sinistra del $\to$ si hanno i reagenti e a destra i prodotti della
+  reazione
+  \item i vari $+$ segnalano la coesistenza di reagenti/prodotti (bisogna avere
+  tutti quei reagenti e si ottengono tutti quei prodotti)
+  \item ogni reagente e ogni prodotto sono caratterizzati da un
+  \textit{coefficiente stechiometrico} $a_i$ per i reagenti e  $b_i$ per i
+  prodotti. Tali coefficienti possono essere nulli. Qualora $a_i=1$ o $b_i=1$
+  solitamente si omette nel formalizzare la reazione (scrivo $S_i$ e non $1S_i$)
+\end{itemize}
+Grazie al \textit{coefficiente stechiometrico} si passa ad una descrizione non
+astratta del meccanismo che si ha dietro una reazione.
+\begin{esempio}
+  Per chiarire meglio le idee vediamo un esempio.\\
+  Si assume:
+  \[\mathcal{S}=\{A,B,C,AB,ABC\}\]
+  Posso quindi avere le seguenti reazioni (dove per semplicità si omette il
+  $k$), ad esempio: 
+  \[R_1:A+B\to AB\]
+  \[R_2:AB+C\to ABC\]
+\end{esempio}
+\noindent
+Da questo esempio semplificato si notano varie cose:
+\begin{itemize}
+  \item i composti devono essere conosciuti a priori e specificati in
+  $\mathcal{S}$
+  \item le reazioni possibili sono conosciute a priori nel modello
+  \item è preferibile avere una catena di\textbf{ reazioni di secondo ordine}
+  (quindi con 
+  solo due componenti come reagenti). Questo viene fatto sia per fedeltà alla
+  realtà biologica che per praticità nel formalismo matematico
+  \item non sono modellate le inibizioni che quindi dovranno essere modellate in
+  modo esplicito come reazioni precise nel modello
+\end{itemize}
+Il primo vantaggio dei \textit{modelli reaction-based} è che sfruttano il
+linguaggio della biochimica essendo di semplice comprensione/modellazione anche
+per biologi/biotecnologi in quanto non richiede forti basi matematiche e aiuta
+quindi la comunicazione con i modellisti. Questo tipo di formalizzazione è
+abbastanza generale da descrivere qualsiasi tipo di processo determinato da
+componenti interagenti, a condizione che la semantica appropriata sia assegnata
+all'insieme delle specie e all'insieme delle reazioni.
+\subsection{Sistema di Lotka-Volterra}
+Un esempio famoso, per quanto di ambito ecologico, è quello del \textbf{sistema
+  di Lotka-Volterra}. In questo sistema si hanno tre specie:
+\begin{enumerate}
+  \item l'insieme $A$ per il cibo
+  \item l'insieme $X$ per le prede
+  \item l'insieme $Y$ per i predatori
+\end{enumerate}
+Il comportamento è quello che le prede, in presenza di cibo, aumentano di
+numero. I predatori, in presenza di prede, aumentano di numero mentre in assenza
+delle stesse spariscono. La quantità di cibo rimane costante osservando quindi
+un comportamento oscillatorio, sfasato, per le altre due specie. Si hanno, per
+rappresentare tutto ciò, le seguenti reazioni:
+\[R_1:A+X\to X+X\]
+\[R_2:X+Y\to Y+Y\]
+\[R_3:Y\to\]
+Si assumono $k_1\geq 0$, $k_2\geq 0$ e $k_3\geq 0$. Come detto $|A|$ è fissato,
+magari avendo $|A|=100$, mentre $|X|$ e $|Y|$ sono variabili, entrambi con
+stato iniziale fissato a 1000. SI ottengo quindi ad esempio i seguenti
+risultati:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.4]{img/volt.jpg}
+\end{figure}
+Dove nel grafico a sinistra si ha lo stesso output che si otterrebbe, ad
+esempio, con lo studio di un sistema di EDO mentre nel grafico a destra si
+plottano le coppie $(X_i, Y_i)$, dove $i$ rappresenta il tempo in modo
+implicito, avendo il cosiddetto \textbf{spazio delle fasi}. In questo caso il
+plot è ottenuto tramite metodo stocastico in quanto con un metodo deterministico
+si avrebbe un'unico ``ovale'', in quanto si tornerebbe, in modo periodico, nelle
+stesse coordinate. Si nopta quindi come il sistema si vada ogni volta a
+bilanciare, prima crescono le prede, poi i predatori calando le prede, poi
+calano i predatori aumentando le prede etc$\ldots$\\
+In questo cointesto risulta interessante la \textbf{teoria delle biforcazioni},
+non approfondita nel corso.
+La \textit{teoria delle biforcazioni} è una teoria matematica che si occupa
+dello studio dei cambiamenti qualitativi o della struttura topologica di
+integrali di un campo vettoriale o, equivalentemente, dalla soluzione di
+un'equazione differenziale. In pratica si studia, al variare dei parametri, il
+variare comportamento del sistema (magari passando da lineare a oscillatorio).
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update

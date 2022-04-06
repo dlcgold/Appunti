@@ -3160,7 +3160,6 @@ e helikar\footnote{A. Niarakis and T. Helikar, A practical guide to mechanistic
 introduttivo, sorta una guida pratica, alla simulazione booleana via software.\\
 \textbf{Su moodle sono indicati vari paper interessanti sui \textit{modelli
     logic-based}}. 
-
 \chapter{Mechanism-Based Modelling}
 Si introducono ora i modelli \textbf{mechanism-based}.\\
 Ricordiamo che tali modelli, come visibile in figura \ref{fig:appro}:
@@ -3406,29 +3405,101 @@ rappresentare tutto ciò, le seguenti reazioni:
 \[R_2:X+Y\to Y+Y\]
 \[R_3:Y\to\]
 Si assumono $k_1\geq 0$, $k_2\geq 0$ e $k_3\geq 0$. Come detto $|A|$ è fissato,
-magari avendo $|A|=100$, mentre $|X|$ e $|Y|$ sono variabili, entrambi con
-stato iniziale fissato a 1000. SI ottengo quindi ad esempio i seguenti
-risultati:
+magari ad esempio $|A|=100$, mentre $|X|$ e $|Y|$ sono variabili, entrambi con
+stato iniziale fissato a 1000. Si ottengo quindi ad esempio i seguenti
+risultati di una simulazione stocastica, con i grafici che sono due
+rappresentazioni analoghe del 
+comportamento emergente dinamico del sistema, dato lo stato iniziale appena
+definito: 
 \begin{figure}[H]
   \centering
   \includegraphics[scale = 0.4]{img/volt.jpg}
 \end{figure}
 Dove nel grafico a sinistra si ha lo stesso output che si otterrebbe, ad
-esempio, con lo studio di un sistema di EDO mentre nel grafico a destra si
-plottano le coppie $(X_i, Y_i)$, dove $i$ rappresenta il tempo in modo
-implicito, avendo il cosiddetto \textbf{spazio delle fasi}. In questo caso il
+esempio, con lo studio di un sistema di EDO, avendo quindi un comportamento
+oscillatorio non in fase (in quanto al crescere dei predatori diminuiscono le
+prede e mano a mano che diminuiscono le prede diminuisce anche il numero di
+predatori, per poi cominciare a crescere il numero di prede etc$\ldots$), mentre nel grafico a destra si
+plottano le coppie $(X_i, Y_i)$, avendo il cosiddetto \textbf{spazio delle
+  fasi}. Il tempo non viene esplicitamente rappresentato in questo caso ma viene
+rappresentato in modo implicito, in quanto la curva (che si noti si sviluppa in
+senso antiorario) che si viene a generare può
+essere caratterizzata in modo dinamico, ogni nuovo punto specifica il
+trascorrere del tempo. In questo caso il
 plot è ottenuto tramite metodo stocastico in quanto con un metodo deterministico
-si avrebbe un'unico ``ovale'', in quanto si tornerebbe, in modo periodico, nelle
-stesse coordinate. Si nopta quindi come il sistema si vada ogni volta a
+si avrebbe un'unico ``ovale'', una \textit{curva chiusa}, in quanto si
+tornerebbe, in modo periodico, nelle 
+stesse coordinate (non variando ampiezza e frequenza come nel caso
+stocastico). Si nota quindi come il sistema si vada ogni volta a 
 bilanciare, prima crescono le prede, poi i predatori calando le prede, poi
 calano i predatori aumentando le prede etc$\ldots$\\
+L'ampiezza diverso nel grafico a sinistra è anch'essa dovuta alla simulazione
+stocastica. Anche se meno visualizzabile anche la frequenza è variabile a causa
+della simulazione stocasitca.\\
 In questo cointesto risulta interessante la \textbf{teoria delle biforcazioni},
 non approfondita nel corso.
 La \textit{teoria delle biforcazioni} è una teoria matematica che si occupa
 dello studio dei cambiamenti qualitativi o della struttura topologica di
 integrali di un campo vettoriale o, equivalentemente, dalla soluzione di
 un'equazione differenziale. In pratica si studia, al variare dei parametri, il
-variare comportamento del sistema (magari passando da lineare a oscillatorio).
+variare comportamento del sistema (magari passando da lineare a oscillatorio).\\
+Giusto per completezza, dato il tempo $t$, $X(t)$ il numero di prede al tempo
+$t$ e $Y(t)$ il numero di predatori sempre al tempo $t$, si avrebbe il seguente
+sistema di equazioni differenziali ordinarie
+\footnote{\url{https://it.wikipedia.org/wiki/Equazioni_di_Lotka-Volterra}}: 
+\[
+  \begin{cases}
+    \frac{\dd{X}}{\dd{t}}=(A-B\cdot Y)\cdot X\\
+    \frac{\dd{Y}}{\dd{t}}=(C\cdot X-D)\cdot Y
+  \end{cases}
+\]
+dove $A,B,C,D$ sono parametri positivi che descrivono l'interazione tra le due
+specie. 
+\subsection{Dinamica dei Modelli Reaction-Based}
+Vediamo quindi più nel dettaglio l'aspetto della dinamica nei \textit{modelli
+  reaction-based}.\\
+Dato un \textit{modello reaction-based} possiamo determinare come cambia lo
+stato del sistema biologico nel tempo, in pratica vediamo cosa succede
+effettuando delle \textit{simulazioni}, capendo come partire da uno
+\textit{stato iniziale}, a $t=0$, dove si ha la quantità iniziale di tutte le
+specie del sistema. Si procede quindi partendo dallo stato al tempo $t$ per
+ottenere lo stato al tempo $t+1$, esattamente come visto nei \textmd{modelli
+  logic-based}. \\
+Definiamo quindi lo stato del sistema al tempo $t$ come $X(t)$, che è un vettore
+che contiene le quantità di ogni specie al tempo $t$:
+\[X(t)=\left( X_1(t), X_2(t),\ldots, X_n(t)\right)\]
+dove $X_1(t), X_2(t),\ldots, X_n(t)$ sono le quantità al tempo $t$ delle specie
+$S_1, S_2,\ldots, S_n$. Lo stato del sistema si aggiorna quindi automaticamente
+mediante un \textit{algoritmo di simulazione}.
+\begin{esempio}
+  Si vede un breve toy example per capire meglio il discorso, ``nascondendo
+  sotto il tappeto'' gli aspetti più matematici della simulazione vera e
+  propria.\\ 
+  Sia dato:
+  \[\mathcal{S}=\{S_1,S_2,S_3\}\]
+  e le seguenti reazioni:
+  \[R_1:S_1+S_2\to 2S_3\]
+  \[R_2: S_3\to S_1\]
+  Si assume il seguente stato al tempo $t$:
+  \[X(t)=\left( X_1(t), X_2(t), X_3(t)\right) = (15,7,23)\]
+  Le reazioni vengo o studiate in modo sequenziale, una reazione alla volta,
+  sommando il numero di molecole dei prodotti e sommando il numero di molecole
+  dei reagenti. Non si ragiona in termini di moli ma di brutale numero di
+  molecole, quindi con numeri in $\mathbb{N}$. Ci sono algoritmi stocastici che
+  permettono 
+  lo studio parallelo di più reazioni, anche se con qualche ``effetto
+  collaterale'',  ma non è il caso di questo esempio, che
+  semplifica la massimo l'\textit{algoritmo stocastico di Gillespie}.\\ 
+  Si simula quindi $R_1$, ottenendo:
+  \[X(t+1)=(15-1, 7-1, 23+2) = (14, 6, 25)\]
+  Si simula quindi $R_2$, partendo dallo stato appena ottenuto al tempo $t+1$,
+  ottenendo: 
+  \[X(t+2)=(14+1, 6+0, 25-1) = (15, 6, 24)\]
+  Questo è una semplificazione di quanto succede con una simulazione stocastica
+  mentre nel caso di una simulazione deterministica si avrebbe che tutte le
+  specie verrebbero modificate contemporaneamente.
+\end{esempio}
+% fine parte persa causa open day
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update

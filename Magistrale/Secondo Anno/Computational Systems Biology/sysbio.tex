@@ -22,6 +22,7 @@
 \usepackage{enumerate}
 \usepackage{physics}
 \usepackage{braket}
+\usepackage{mhchem}
 \usepackage{marginnote}
 \usepackage{pgfplots}
 \usepackage{cancel}
@@ -3499,8 +3500,326 @@ mediante un \textit{algoritmo di simulazione}.
   mentre nel caso di una simulazione deterministica si avrebbe che tutte le
   specie verrebbero modificate contemporaneamente.
 \end{esempio}
-% fine parte persa causa open day
+Uno dei vantaggi dei \textit{modelli reaction-based} è quello che sono
+formalizzati in modo tale da supportare sia simulazioni deterministiche che
+simulazioni stocastiche. Secondo la formulazione stocastica della cinetica
+chimica\footnote{Exact stochastic simulation of coupled chemical reactions,
+Daniel T. Gillespie
+The Journal of Physical Chemistry 1977 81 (25), 2340-2361
+DOI: 10.1021/j100540a008 }, la formalizzazione di una rete
+biochimica come un insieme di specie e un insieme di reazioni può essere
+utilizzata direttamente per eseguire algoritmi di simulazione stocastica, previa
+descrizione del modello mediante, appunto, insiemi di reazioni.
+\subsection{Dalle Reazioni alle Equazioni Differenziali}
+È possibile trasformare qualsiasi \textit{modello reaction-based} nel
+corrispondente sistema di equazioni differenziali ordinarie, tendenzialmente in
+modo automatico sfruttando la \textbf{legge di azione di massa (\textit{Law of
+    Mass-Action})}. Tali \textit{EDO} possono essere:
+\begin{itemize}
+  \item \textit{del primo ordine}, ovvero equazioni differenziali che
+  stabiliscono una relazione tra una variabile indipendente $x$,  la funzione
+  incognita $y = f(x)$, e la derivata prima $y'$
+  \item \textit{accoppiate}, se, date due o più \textit{EDO}, non è possibile
+  risolverle singolarmente 
+\end{itemize}
+Il \textit{sistema di EDO} viene poi simulato tramite \textbf{algoritmi di
+  integrazione numerica}. Nel dettaglio ogni equazione differenziale, che in
+abito biologico/biochimico viene anche nominata \textit{rate equation}, descrive
+la variazione nel tempo della concentrale di ogni specie molecolare $X$,
+considerando ogni singola interazione con altre specie. La concentrazione di $X$
+viene specificata con $[X]$. Si hanno quindi:
+\begin{itemize}
+  \item \textit{variazioni positive}, che accrescono la concentrazione di $X$
+  \item \textit{variazioni negative}, che diminuiscono la concentrazione di $X$
+\end{itemize}
+Facendo un breve esempio:
+\[\frac{\dd{[X]}}{\dd{t}}=\dot{[X]}=\mbox{sintesi}-
+  \mbox{fosforilazione}+\mbox{defosforilazione}-\mbox{legami}+\cdots\]
+Quindi, a differenza di quanto visto nel toy example precedente ogni specie è
+legata ad una singola \textit{EDO} e lo studio non prevede di simulare una
+reazione per volta ma bensì tutte le \textit{EDO} in modo parallelo, studiando
+quindi contemporaneamente tutte le variazioni di tutte le specie.\\
+Si vedono quindi vari esempi di passaggio dalla sintassi per le reazioni alle
+\textit{EOD}.
+\begin{esempio}
+  Si prenda la semplice reazione, dove $S_1$ viene consumato, a velocità $k$,
+  aumentando la concentrazione di $S_2$:
+  \[S_1 \stackrel{k}{\rightharpoondown} S_2\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \dot{[S_1]}=-k[S_1]\\
+      \dot{[S_2]}=k[S_1]
+    \end{cases}
+  \]
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S_1 +S_2\stackrel{k}{\rightharpoondown} S_3\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \dot{[S_1]}=-k[S_1][S_2]\\
+      \dot{[S_2]}=-k[S_1][S_2]\\
+      \dot{[S_3]}=k[S_1][S_2]
+    \end{cases}
+  \]
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S_1 +lS_2\stackrel{k}{\rightharpoondown} S_3\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \dot{[S_1]}=-k[S_1][S_2]^l\\
+      \dot{[S_2]}=-kl[S_1][S_2]^l\\
+      \dot{[S_3]}=k[S_1][S_2]^l
+    \end{cases}
+  \]
+  Dove si nota che il \textit{coefficiente stechiometrico} passa all'esponente,
+  oltre che a moltiplicare il $k$ per la \textit{EDO} di $S_2$.
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S +lS\stackrel{k}{\rightharpoondown} \cdots\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \dot{[S_1]}=-2k[S]^2\\
+      \cdots
+    \end{cases}
+  \]
+\end{esempio}
+
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S_1 +S_2\stackrel{k}{\rightharpoondown} S_3+S_3\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \cdots\\
+      \dot{[S_3]}=2k[S_1][S_2]
+    \end{cases}
+  \]
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S_1 \underset{k_2}{\stackrel{k_1}{\rightleftharpoons}} S_2\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \dot{[S_1]}=-k_1[S_1]+k_2[S_2]\\
+      \dot{[S_2]}=k_1[S_1]-k_2[S_2]
+    \end{cases}
+  \]
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S_1 +S_2\underset{k_2}{\stackrel{k_1}{\rightleftharpoons}} S_3\]
+  Questa verrà modellata da:
+  \[
+    \begin{cases}
+      \dot{[S_1]}=-k_1[S_1][S_2]+k_2[S_3]\\
+      \dot{[S_2]}=-k_1[S_1][S_2]+k_2[S_3]\\
+      \dot{[S_3]}=k_1[S_1][S_2]-k_2[S_3]\\
+    \end{cases}
+  \]
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[\emptyset \stackrel{k}{\rightharpoondown} S\]
+  Questa verrà modellata da:
+  \[
+    \dot{[S]}=k
+  \]
+\end{esempio}
+\begin{esempio}
+  Si prenda la semplice reazione:
+  \[S \stackrel{k}{\rightharpoondown} \emptyset\]
+  Questa verrà modellata da:
+  \[
+    \dot{[S]}=-k[S]
+  \]
+\end{esempio}
+Come già anticipato bisogna tendenzialmente usare reazioni al più di secondo
+ordine, quindi con due reagenti.\\
+In alcuni casi posso avere anche \textit{EDO} non derivate dalle reazioni
+tramite la \textit{Law of Mass-Action} ma si possono anche usare altre equazioni
+arbitrarie, come ad esempio sinusoidali o esponenziali, sempre atte a
+rappresentare la variazione di concentrazione nel tempo. Un esempio di tale
+funzione è la famosa \textbf{equazione di Hill}, che verrà approfondita a
+breve.\\
+Si vede ora un esempio più interessante.
+\begin{esempio}
+  \label{ese:enzsub}
+  Si prenda la seguente reazione:
+  \[E+S\underset{k_r}{\stackrel{k_f}{\rightleftharpoons}}
+    ES\stackrel{k_{cat}}{\rightharpoondown} E+P\]
+  dove:
+  \begin{itemize}
+    \item $S$ è il substrato
+    \item $E$ è l'enzima
+    \item $ES$ è il complesso enzima-substrato, formato quindi da $E$ e $S$
+    \item $P$ è il prodotto della reazione
+    \item $k_f\geq 0$, $k_r\geq 0$ e $k_{cat}\geq 0$, avendo che quest'ultima è
+    irreversibile 
+  \end{itemize}
+  In pratica è come se avessimo tre reazioni:
+  \begin{enumerate}
+    \item $R_1:E+S\stackrel{k_{f}}{\rightharpoondown} ES,\,\,k_f\geq 0$
+    \item $R_2:ES\stackrel{k_{r}}{\rightharpoondown} E+S,\,\,k_r\geq 0$
+    \item $R_3:ES\stackrel{k_{cat}}{\rightharpoondown} E+P,\,\,k_{cat}\geq 0$
+  \end{enumerate}
+  Questa reazione viene modellata dal seguente \textit{sistema di EDO}, dove per
+  ogni specie si ha una singola equazione complessiva:
+  \[
+    \begin{cases}
+      \frac{\dd{[E]}}{\dd{t}}=-k_f[E][S]+k_r+k_{cat}[ES]=- k_f[E][S]+
+      (k_{r}+k_{cat})[ES]\\
+      \frac{\dd{[S]}}{\dd{t}}=k_{f}[ES]-k_r[S][E]\\
+      \frac{\dd{[ES]}}{\dd{t}}=k_f[E][S]-k_r[ES]-k_{cat}[ES]=k_f[E][S]-
+      (k_r+k_{cat})[ES]\\
+      \frac{\dd{[P]}}{\dd{t}}=k_{cat}[ES]
+    \end{cases}
+  \]
+  
+\end{esempio}
+Bisogna analizzare un secondo anche i vari $k_i$. Nell'approccio deterministico,
+l'unità di misura della costante di qualsiasi equazione differenziale dipende
+dall'ordine della corrispondente reazione biochimica, ovvero dal numero di
+molecole reagenti. Si ha quindi, limitandosi ai primi ordini di reazione:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c|c}
+    Ordine della reazione& Unità&Unità equivalente con $M=\frac{mol}{L}$\\
+    \hline
+    1 & $\frac{1}{s}$ & \\
+                         &&\\
+    2 & $\frac{L}{mol\cdot s}$ & $\frac{1}{M\cdot s}$\\
+                         &&\\
+    3 & $\frac{L^2}{mol^2\cdot s^2}$ & $\frac{1}{M^2\cdot s^2}$
+  \end{tabular}
+\end{table}
+Questo non vale con l'\textit{approccio stocastico} dove si studia il numero di
+molecole e non le concentrazioni delle stesse.\\
+\textbf{I valori di $k_i$ sono raramente disponibili in letteratura, non avendo
+  molta utilità calcolarli in \textit{wet-lab}}.\\
+Avendo dato quindi un primo sguardo anche all'uso delle equazioni differenziali
+possiamo identificare un ulteriore \textbf{pro} dei \textit{modelli
+  reaction-based}, ovvero che forniscono una descrizione dettagliata e accurata
+delle interazioni molecolari e dei meccanismi di controllo (inclusi feedback o
+regolazione feedforward) che avvengono nei processi cellulari, prevenendo le
+possibilità del cosiddetto \textit{hard-wire} del comportamento del sistema,
+ovvero impedendo di modellare il comportamento del sistema in fase di specifica
+dello stesso. Potendo modellare solo le reazioni non posso modellare tramite
+formalismi matematici altri comportamenti, avendo quindi che i comportamenti del
+sistema saranno solo emergenti dalla simulazione dello stesso. Ad esempio, se
+si sa che la concentrazione di una specie oscilla nel tempo, e si formalizza
+l'equazione differenziale di quella specie come funzione sinusoidale (ad esempio
+con una funzione del tipo $f(x)=\alpha\sin(x)+\beta-\cdots$, si
+otterranno 
+oscillazioni grazie a questa funzione sinusoidale e ma queste non saranno
+ottenibili come proprietà emergente del sistema stesso. Per di più un'assunzione
+di tale tipo, che ``forza'' il sistema, potrebbe essere errata.\\
+Si ha quindi un ulteriore \textbf{pro}, in quanto poiché tutte le specie
+molecolari e le loro reazioni reciproche appaiono nel modello come ``entità
+atomiche'', possono essere analizzate indipendentemente l'una dall'altra o in
+combinazione con altri componenti, al fine di determinare la corrispondente
+influenza sul comportamento del sistema. Con questo tipo di modellazione, basata
+solo sulle reazioni (ed eventualmente sulle \textit{EDO} generate
+automaticamente da esse), si evita l'uso di funzioni cinetiche approssimative,
+come la \textbf{legge di frequenza di Michaelis-Menten} per i processi
+enzimatici, o le \textbf{funzioni di Hill} per il legame cooperativo, che sono
+spesso sfruttate nelle \textit{EDO}
+ma impediscono la possibilità di associare l'effetto della perturbazione dei
+singoli componenti sul sistema complessivo il comportamento. Questo è quindi un
+ulteriore \textbf{pro}.\\
+Un altro \textbf{pro} ancora è quello che, contrariamente ad altri formalismi,
+un \textit{modello reaction-based} può essere facilmente perfezionato o esteso
+senza 
+alcun aggiustamento laborioso nella formalizzazione della versione precedente
+del modello, basta infatti aggiungere la reazione. Se si partisse da un sistema
+modellato a priori con delle \textit{EDO} (che non sono generate
+automaticamente) si avrebbe che l''aggiunta di nuove specie o di nuove reazioni
+richiederebbe la modifica di molte delle sue equazioni differenziali, avendone
+una per specie che ``contiene'' tutte le informazioni sulle interazioni con
+essa. La \textit{modellazione reaction-based} è adatta quindi alla costruzione
+modulare di modelli sempre più grandi, per cui un nucleo iniziale di specie e
+reazioni può essere esteso per tenere conto di altri processi.
+\subsubsection{Legge di Michaelis-Menten}
+Per approfondire quanto detto si introduce brevemente la \textbf{legge di
+  Michaelis-Menten}.\\
+Questa legge ha valenza sse si trova nella cosiddetta \textbf{approssimazione
+  allo stato quasi stazionario (\textit{quasi-steady-state approximation})},
+che, riprendendo l'esempio \ref{ese:enzsub}, sarebbe:
+\[k_f[E][S]=k_r[ES]+k_{cat}[ES]\]
+Qualora questa approssimazione sia valida si può scrivere la vera e propria
+\textit{legge di Michaelis-Menten}:
+\[\frac{\dd{P}}{\dd{t}}=\dot{[P]}=\frac{V_{max}[S]}{k_M+[S]}\]
+dove:
+\begin{itemize}
+  \item $V_{max}[S]=k_{cat}[E_{tot}]$
+  \item $k_M=\frac{k_r+k_{cat}}{k_f}$
+\end{itemize}
+Si ha quindi una sola equazione dipendente da $k_M$ e $V_{max}$ che posso
+perturbare senza però sapere da cosa poi dipenda, nel dettaglio rispetto alla
+reazione iniziale, una variazione del risultato. Avendo una sola equazione si
+parla di \textbf{modelli ridotti}, che sono comodi per alcuni aspetti ma che
+impediscono perturbazioni mirate, in quanto le varie componenti vengono
+``nascoste'' da questa singola equazione.\\
+\textbf{Conti extra e dimostrazione dell'ottenimento della legge negli appunti
+  del corso di\textit{ Data} \& \textit{Computational Biology}.}
+\subsubsection{Equazione di Hill}
+Vediamo quindi anche un breve approfondimento sull'\textbf{equazione di Hill}.\\
+Questa equazione descrive il cosiddetto \textbf{legame/binding cooperativo} che
+consiste 
+nel rappresentare il fenomeno per cui il legame di un ligando con una
+macromolecola è talvolta ``potenziato'' se altri ligandi sono già presenti sulla
+stessa macromolecola.\\
+Si ha quindi la vera e propria equazione:
+\[\sigma=\frac{[L]^n}{K_A^n+[L]^n}\]
+dove:
+\begin{itemize}
+  \item $\sigma$ è la frazione della concentrazione della macromolecola legata
+  al ligando 
+  \item $[L]$ è la concentrazione del ligando libero, quindi non ancora legato
+  \item $n$ è il \textbf{coefficiente di Hill} che quantifica il grado di
+  interazione tra i siti di legame del ligando in due modi:
+  \begin{enumerate}
+    \item \textit{legame/binding cooperativo positivo} se $n>1$
+    \item \textit{legame/binding cooperativo negativo} se $n<1$
+    \item se si avesse $n=1$ non si avrebbero legami che cooperano
+  \end{enumerate}
+  \item $K_A$ è la \textbf{costante di dissociazione}
+\end{itemize}
+Si può descrivere questo tipo di interazione molecolare per mezzo di reazioni
+biochimiche. Definendo:
+\begin{itemize}
+  \item $L$ come il ligando
+  \item $M$ come la macromolecola
+  \item un \textit{legame cooperativo positivo}
+\end{itemize}
+posso rappresentare lo stesso comportamento con le seguenti reazioni
+biochimiche, limitate al secondo ordine (aumentando l'ordine sarebbero meno):
+\[R_1:L+M\underset{}{\stackrel{k_1}{\rightleftharpoons}} LM\]
+\[R_2:LM+L\underset{}{\stackrel{k_2}{\rightleftharpoons}} 2LM\]
+\[R_3:2LM+L\underset{}{\stackrel{k_3}{\rightleftharpoons}} 3LM\]
+Avrei potuto scrivere anche con la seguente notazione, ma sempre limitando al
+secondo ordine:
+\[R_1:L+M\underset{}{\stackrel{k_1}{\rightleftharpoons}} LM\]
+\[R_2:LM+L\underset{}{\stackrel{k_2}{\rightleftharpoons}} L^2M\]
+\[R_3:L^2M+L\underset{}{\stackrel{k_3}{\rightleftharpoons}} L^3M\]
+Imponendo $k_1> k_2>k_3$ (ignorando per semplicità i valori numerici) definisco
+come si ``favorisce'' ogni 
+volta l'attacco di un'altra $L$, definendo così il \textit{legame/binding
+  cooperativo}. Il punto chiave è appunto lavorare sulle 
+costanti.\\ 
+\textbf{Informazioni aggiuntive sull'equazione negli appunti
+  del corso di\textit{ Data} \& \textit{Computational Biology}.}
+\subsection{Esempio del Pathway RAS/CAMP/PKA}
+Si vede ora un esempio esteso e ``reale'' di modellazione del \textbf{pathway
+  RAS/CAMP/PKA} mediante un \textit{modello reaction-based}.
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update
-% LocalWords:  multipartiti fosforilata
+% LocalWords:  multipartiti fosforilata ligando

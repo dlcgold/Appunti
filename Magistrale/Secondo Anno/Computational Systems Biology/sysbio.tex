@@ -3818,8 +3818,365 @@ costanti.\\
   del corso di\textit{ Data} \& \textit{Computational Biology}.}
 \subsection{Esempio del Pathway RAS/CAMP/PKA}
 Si vede ora un esempio esteso e ``reale'' di modellazione del \textbf{pathway
-  RAS/CAMP/PKA} mediante un \textit{modello reaction-based}.
+  RAS/CAMP/PKA}, che è un \textit{signal trasduction pathway}, mediante un
+\textit{modello reaction-based}. Questo esempio 
+permetterà di confrontare ``sul campo'' un modello su cui effettuare sia
+\textit{simulazioni stocastiche} che \textit{simulazioni deterministiche},
+permettendo anche di introdurre la tecnica del \textbf{parameter sweeping}.\\
+Nel dettaglio si ha a che fare con il \textbf{glucose signaling} nel lievito,
+che comprende cinque pathway \textit{interbloccati}, visibili in figura
+\ref{fig:gluco}\footnote{Zaman, Shadia, et al. "Glucose regulates transcription
+  in yeast through a network of signaling pathways." Molecular systems biology
+  5.1 (2009): 245.} che comportano enormi
+cambiamenti trascrizionali. Di questi cinque pathway si ha che il
+\textit{pathway RAS/CAMP/PKA} è quello principale, in quanto coinvolge circa
+2000 geni. Inoltre tale pathway ha un ruolo centrale:
+\begin{itemize}
+  \item nella regolazione del metabolismo
+  \item nella resistenza allo stress
+  \item nella progressione del ciclo cellulare
+\end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.25]{img/gluco.jpg}
+  \caption{Schema rassiuntivo dei pathway legati al \textit{glucose signaling}.}
+  \label{fig:gluco}
+\end{figure}
+Possiamo inoltre vedere una raffigurazione più dettagliata in figura
+\ref{fig:figuregluco}\footnote{Santangelo GM. Glucose signaling in Saccharomyces
+  cerevisiae. Microbiol Mol Biol
+  Rev. 2006;70(1):253-282. doi:10.1128/MMBR.70.1.253-282.2006}. In alto a destra
+notiamo come \textit{RAS} venga attivato da \textit{GTP} e disattivato da
+\textit{GDP}. Si hanno inoltre \textit{Ira1} e \textit{Ira2} che inducono
+l'inattivazione di \textit{RAS} mentre \textit{Cdc25} e \textit{Sdc25} inducono
+l'attivazione. L'attivazione di \textit{RAS} induce quindi \textit{Cyr1} che
+comporta \textit{cAMP}. Con quattro \textit{cAMP} si ha il rilascio dei domini
+catalitici di \textit{PKA} inattivo, rilasciando due \textit{PKA},
+formati appunto da \textit{TPK}, scindendola dai domini regolatori formati da
+due \textit{Bcy1}. Si rilascia quindi \textit{PKA} attivo. Si hanno inoltre
+\textit{Pde1} e \textit{Pde2} (typo nell'immagine) che sono i
+\textit{degradatori di cAMP}, senza in quali il pathway sarebbe sempre
+attivo. Per completezza, in 
+alto a sinistra, si ha un comportamento simile a quanto si ha con \textit{RAS},
+avendo in più la rappresentazione dei recettori transmembrana (\textit{Gpr1}).
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.22]{img/figuregluco.jpg}
+  \caption{Raffigurazione più dettagliata del \textit{pathway RAS/CAMP/PKA}, che
+    consiste nella zona in alto a destra, in centro e in basso dell'immagine.}
+  \label{fig:figuregluco}
+\end{figure}
+\newpage
+\noindent
+Possiamo inoltre produrre uno schema più ``pulito'' molto utile per avere
+un'immediata trascrizione dello stesso in un insieme di reazioni. \\
+\textit{RAS viene indicato con Ras2 mentre con $\cdot$ si specificano i
+  composti}\footnote{Besozzi D, Cazzaniga P, Pescini D, Mauri G, Colombo S,
+  Martegani E. The role of feedback control mechanisms on the establishment of
+  oscillatory regimes in the Ras/cAMP/PKA pathway in S. cerevisiae. EURASIP J
+  Bioinform Syst Biol. 2012;2012(1):10. Published 2012 Jul
+  20. doi:10.1186/1687-4153-2012-10}: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 1]{img/glucomodel.pdf}
+\end{figure}
+Per quanto all'apparenza semplice questo modello non è scontato da
+studiare. Inoltre non vengono rappresentate componenti che sono date ``per
+scontate'' in questo tipo di modello biologico, come l'\textit{ATP}. Facendo
+quindi un piccolo ``recap'' si hanno:
+\begin{itemize}
+  \item la proteina \textit{Ras2}, con \textit{GTP}, che viene regolata
+  positivamente da \textit{Cdc25} e regolata negativamente da \textit{Ira2}
+  \item \textit{Ras2}$\cdot$\textit{GTP} che attiva le \textit{attiva le
+    adenilato ciclasi Cry1}
+  \item \textit{Cyr1} che induce la sintesi di \textit{cAMP}
+  \item \textit{cAMP} che attiva \textit{PKA}
+  \item \textit{cAMP} che viene degradato da due \textit{fosfodiesterasi},
+  ovvero \textit{Pde1} e \textit{Pde2} 
+  \item \textit{PKA} che esercita tre \textit{feedback}:
+  \begin{enumerate}
+    \item una regolazione positiva su \textit{Pde1}, che a livello del sistema
+    complessivo risulta essere un \textit{feedback negativo} in quanto
+    \textit{Pde1} inattiva \textit{cAMP}
+    \item una regolazione positiva su \textit{Ira2}, che a livello del sistema 
+    complessivo risulta essere un \textit{feedback negativo} in quanto si ha
+    regolazione negativa su \textit{Ras2}
+    \item una regolazione negativa su \textit{Cdc25}
+  \end{enumerate}
+\end{itemize}
+Nel complesso si può quindi parlare di \textbf{totally non linear system}.\\
+Questo progetto di modellazione è stato proposto al laboratorio della
+professoressa Besozzi dal professor Martegani e si poneva varie questioni su
+questo pathway alla luce di conoscenze pregresse scarne sullo stesso, in quanto
+consistevano praticamente nella solo evidenza indiretta di oscillazioni, come in
+figura \ref{fig:wetgluco}\footnote{Medvedik, Oliver, et al. "MSN2 and MSN4 link
+  calorie restriction and TOR to sirtuin-mediated lifespan extension in
+  Saccharomyces cerevisiae." PLoS biology 5.10 (2007): e261.}, nelle 
+cellule del lievito come \textit{spostamento nucleo-citoplasmatico del
+  fattore di trascrizione Msn2}
+(bersaglio finale di \textit{PKA}), in accordo allo \textit{stato di
+  fosforilazione}. In altri termini ci si attendeva un andamento oscillatorio ma
+senza nemmeno saperne le vere cause, non sapendo cosa accadesse di preciso
+all'interno del pathway stesso.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 1.5]{img/glucowet.png}
+  \caption{Immagini e grafici che mostrano i risultati sperimentali, ottenuti in
+  \textit{wet-lab}, per l'andamento oscillatorio atteso del \textit{pathway
+    RAS/CAMP/PKA}.} 
+\label{fig:wetgluco}
+\end{figure}
+Si possono quindi elencare le principali questioni scientifiche che si hanno
+dietro questo modello:
+\begin{enumerate}
+  \item quali sono le condizioni che assicurano la presenza di oscillazioni in
+  questo pathway?
+  \item qual è il ruolo svolto dai modulatori \textit{Ras2} (\textit{Cdc25/Ira2}
+  e \textit{GTP/GDP}) sull'insorgere dei regimi oscillatori?
+  \item il \textit{rumore biologico} (discorso che verrà anche approfondito nel
+  corso) ha un ruolo rilevante in questo pathway? 
+\end{enumerate}
+\newpage
+\noindent
+Si è quindi arrivati ad un modello con \textbf{33 specie} (composti inclusi) e
+\textbf{29 reazioni}\footnote{Besozzi D, Cazzaniga P, Pescini D, Mauri G,
+  Colombo S, Martegani E. The role of feedback control mechanisms on the
+  establishment of oscillatory regimes in the Ras/cAMP/PKA pathway in
+  S. cerevisiae. EURASIP J Bioinform Syst Biol. 2012;2012(1):10. Published 2012
+  Jul 20. doi:10.1186/1687-4153-2012-10} (con conseguenti costanti):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.43]{img/glucoreact.jpg}
+\end{figure}
+Nel dettaglio:
+\begin{itemize}
+  \item le reazioni dalla 1 alla 10, inclusa, rappresentano lo \textit{switch
+    cycle} di 
+  \textit{Ras2}, quindi tutta la parte del superiore del modello
+  (\textit{Cdc23, GTP, GDP, Ras2$\cdot$GDP, Ras2$\cdot$GTP} e \textit{Ira2}),
+  ovvero (\textit{si noti che tutte queste reazioni potrebbero essere scritte
+    in una riga ma per praticità sono state mandate a capo ripetendo il
+    prodotto della reazione $i$ nel reagente della reazione $i+1$}; le
+  costanti delle reazioni non sono indicate):
+  \[Ras2\cdot GDP+Cdc25\underset{}{\stackrel{}{\rightleftharpoons}}
+    Ras2\cdot GDP\cdot Cdc25\]
+  \[Ras2\cdot GDP\cdot Cdc25\underset{}{\stackrel{}{\rightleftharpoons}}
+    Ras2\cdot Cdc25+GDP\]
+  \[Ras2\cdot Cdc25+GDP\underset{}{\stackrel{}{\rightleftharpoons}}
+    Ras2\cdot Cdc25+GTP\]
+  \[Ras2\cdot Cdc25+GTP\underset{}{\stackrel{}{\rightleftharpoons}}
+    Ras2\cdot GTP\cdot Cdc25\]
+  \[Ras2\cdot GTP\cdot Cdc25\underset{}{\stackrel{}{\rightleftharpoons}}
+    Ras2\cdot GTP+Cdc25\]
+  \item le reazioni dalla 11 alla 13, inclusa, rappresentano la
+  \textit{sintesi di cAMP}, quindi la parte centrale del modello
+  (\textit{Ras2$\cdot$GTP, Cyr1, cAMP}, con l'aggiunta di \textit{ATP})
+  \item le reazioni dalla 14 alla 25, inclusa, rappresentano
+  l'\textit{attivazione di PKA}, quindi la parte centrale/inferiore del
+  modello (\textit{cAMP, PKA}). Si noti che per il discorso di mantenere
+  reazioni al più del secondo ordine le varie reazioni che implicano quattro
+  \textit{cAMP} sono state spezzate. Inoltre si hanno:
+  \begin{itemize}
+    \item $C$ come la \textit{catalytic subunit}, ovvero i due \textit{TPK}
+    di \textit{PKA} inattivo
+    \item $R$ come la \textit{regulatory subunit}, ovvero i due \textit{Bcy1}
+    di \textit{PKA} inattivo
+  \end{itemize}
+  \item le reazioni dalla 26 alla 33, inclusa, rappresentano
+  l'\textit{attività delle fosfodiesterasi}, quindi la parte inferiore del
+  modello (\textit{cAMP, PKA, Pde1, Pde2}). Si noti l'aggiunta di
+  \textit{PPA2} per la defosforilazione di \textit{Pde1}
+  \item le reazioni 34 e 35 rappresentano il \textit{feedback su Cdc25},
+  quindi la parte sinistra del modello (\textit{PKA} e \textit{Cdc25}, con
+  l'aggiunta di \textit{C} e \textit{PPA2}). Si noti
+  come, a livello di modello, basti creare \textit{Cdc25}$^P$, dove $P$ sta
+  per fosforilato (ed è presente anche in altre reazioni), per rappresentare
+  eventuali inibizioni, in quanto si sta creando una variabile aggiuntiva, che
+  quindi non ``interagisce'' come la ``vecchia'' variabile per \textit{Cdc25}
+  (avendo che \textit{Cdc25}$\neq$\textit{Cdc25}$^P$). Si sta quindi
+  modellando in modo semplice i \textit{feedback negativi} senza fare
+  \textit{hard wiring}
+  \item le reazioni dalla 36 alla 39, inclusa, rappresentano il
+  \textit{feedback su Ira2}, quindi la parte destra del modello
+  (\textit{PKA} e \textit{Ira2}, con l'aggiunta di \textit{C}). In questo caso
+  si noti come la differenza della costante delle reazioni, avendo una
+  costante maggiore in presenza di \textit{Ira2} non fosforilata, permetta la
+  modellazione del \textit{feedback negativo}
+\end{itemize}
+Lo \textit{stato iniziale} prevede di avere un ``sistema spento'', avendo
+\textit{cAMP} con concentrazione nulla. Per le restanti componenti si segnala
+come le quantità iniziali siano state scelte anche per rappresentare una sorta
+di ``range stocastico'', atto a rappresentare la realtà biologica.
+Inoltre si noti che tutti i composti hanno concentrazione nulla all'inizio, in
+quanto, in caso contrario, non si sarebbero potuti studiare alcuni comportamenti
+emergenti.\\
+Vediamo quindi il risultato di una prima simulazione, dove sopra si hanno i
+comportamenti dinamici di \textit{cAMP,Ras2$\cdot$GTP} e \textit{PKA} attivo
+avendo un feedback solo su \textit{Cdc25} (avendo quindi posto a 0 la costante
+per \textit{Ira2}), mentre sotto avendo entrambi i feedback attivi (sia su
+\textit{Cdc25} che su \textit{Ira2})\footnote{Besozzi D, Cazzaniga P, Pescini D,
+  Mauri G, 
+  Colombo S, Martegani E. The role of feedback control mechanisms on the
+  establishment of oscillatory regimes in the Ras/cAMP/PKA pathway in
+  S. cerevisiae. EURASIP J Bioinform Syst Biol. 2012;2012(1):10. Published 2012
+  Jul 20. doi:10.1186/1687-4153-2012-10}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.25]{img/glucosimu1.jpg}
+\end{figure}
+Si nota come queste siano \textit{simulazioni stocastiche} (infatti le curve
+non sono ``precise''). Si nota come nel primo caso si raggiunga una sorta di
+\textit{steady state stabile}. Nel primo caso, inoltre, non si ha un
+comportamento oscillatorio (e si avrebbe lo stesso comportamento anche togliendo
+il feedback di \textit{Cdc25}).\\
+\textbf{Si ha un grafico per ogni singola componente del sistema}.
+\subsection{Parameter Sweep Analysis}
+Possiamo sfruttare l'esempio del \textit{pathway RAS/CAMP/PKA} anche per
+introdurre la tecnica detta \textbf{Parameter Sweep Analysis (\textit{PSA})}.\\
+Con questa tecnica si ha l'analisi automatica dell'effetto di un insieme di
+diverse condizioni iniziali, attraverso la variazione sistematica di un dato
+parametro entro un range fisso (rispetto al valore di riferimento). Nel caso
+dell'esempio quindi si variano le concentrazioni iniziali e/o le costanti delle
+reazioni. Possiamo dividere le tecniche di \textit{PSA} in due categorie:
+\begin{enumerate}
+  \item \textbf{PSA a singolo parametro (\textit{PSA-1D})}, che a sua volta
+  prevede due tecniche di sampling:
+  \begin{itemize}
+    \item \textit{sampling lineare}, usato quando il parametro è la
+    concentrazione di una componente (solitamente non molto piccole) in quanto,
+    basandosi su una distribuzione 
+    uniforme, qualora si abbia a che fare con valori prossimi allo zero, si
+    ottengono solo valori ``schiacciati'' verso lo zero, ottenendo quindi valori
+    tendenzialmente in un subset del range di valori voluto e quindi non sarebbe
+    utilizzabile per le costanti delle reazioni
+     \item \textit{sampling logaritmico}, usato quando il parametro è la
+    costante di una reazione (solitamente molto piccole) in quanto, basandosi su
+    una distribuzione 
+    uniforme logaritmica, copre l'intero range dei valori. 
+  \end{itemize}
+  \item \textbf{PSA a doppio parametro (\textit{PSA-2D})}
+\end{enumerate}
+Inoltre la generazione dei samples può essere fatta in due modi:
+\begin{enumerate}
+  \item usare un \textbf{Pseudo-Random Number Generator (\textit{PRNG})}, come
+  ad esempio il \textit{Mersenne Twister}, che però rischia di produrre sample
+  non equamente distribuiti sullo spazio di ricerca, avendo quindi un
+  \textit{basso grado di equidistribuzione}
+  \item usare un \textbf{low-discrepancy series method}, come la
+  \textit{sequenza di Sobol}, che genera numeri che
+  sono meglio equidistribuiti rispetto ai numeri pseudocasuali in un dato spazio
+  di ricerca, avendo una distribuzione migliore rispetto ai numeri generati da
+  un \textit{PRNG} anche per valori piccoli, avendo quindi un \textit{alto
+    grado
+    di equidistribuzione}. Tali metodi dovrebbero permettere comunque l'uso di
+  un \textit{seed} per generare sequenze uguali
+\end{enumerate}
+Riprendendo quindi l'esempio del \textit{pathway RAS/CAMP/PKA} possiamo vedere
+un esempio di perturbazione su \textit{Cdc25}, variandone la concentrazione nel
+range $[125,400]$, per quattro sole casistiche per semplicità, studiando la
+variazione del comportamento oscillatorio di \textit{cAMP}. Si hanno quindi a 
+sinistra la \textit{simulazione stocastica} mentre a destra la
+\textit{simulazione deterministica}\footnote{Besozzi D, Cazzaniga P, Pescini D, 
+  Mauri G, 
+  Colombo S, Martegani E. The role of feedback control mechanisms on the
+  establishment of oscillatory regimes in the Ras/cAMP/PKA pathway in
+  S. cerevisiae. EURASIP J Bioinform Syst Biol. 2012;2012(1):10. Published 2012
+  Jul 20. doi:10.1186/1687-4153-2012-10}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/glucosimu2.jpg}
+\end{figure}
+Si notano varie cose:
+\begin{itemize}
+  \item sia all'aumentare che al diminuire di \textit{Cdc25} si perde il
+  comportamento oscillatorio
+  \item alcuni comportamenti oscillatori della simulazione stocastica, come per
+  la curva rossa relativa a $Cdc25=150$ sono dovuti unicamente al rumore
+  stocastico, e questo è verificabile nella simulazione deterministica dove è
+  una linea piatta. L'uso della simulazione deterministica ha comunque poco
+  spazio, non essendo realistica rispetto alla natura, ma permette, ad esempio,
+  di vedere come, per $Time=800$ la linea viola relativa a $Cdc25=400$ si smorzi
+  (comportamento non facilmente individuabile nella simulazione stocastica),
+  avendo quindi una visualizzazione più facile di variazioni del comportamento
+  qualitativo del sistema
+\end{itemize}
+Usando quindi la \textit{PSA-1D} e studiando l'ampiezza delle oscillazione si èp
+scoperto che il comportamento oscillatorio è mantenuto per:
+\[150<Cda25<400\]
+avendo per valori minori fluttuazioni stocastiche attorno a uno stato
+stazionario stabile mentre per valori maggiori oscillazioni smorzate e poi uno
+stato stazionario. Si è quindi ottenuta risposta ad uno dei quesiti iniziali.\\
+Con questo tipo di simulazioni si studiano quindi molti comportamenti
+risparmiando soldi e fatica in \textit{wet-lab}. Facendo varie perturbazioni si
+può scoprire ad esempio come le variazioni sulla concentrazione di \textit{GTP}
+non sortiscano alcun effetto sul comportamento oscillatorio di \textit{cAMP},
+con $Cdc25=300$ (condizione standard) mentre solo un piccolo range di quantità
+di \textit{GTP} 
+mantiene il comportamento oscillatorio di \textit{cAMP}, con $Cdc25=500$
+(overespressione).\\
+Parlando invece di \textit{PSA-2D} si possono studiare, per esempio,
+contemporaneamente come le variazioni su \textit{GTP}, avendo $GTP\in[1.9\times
+10^4, 5\times 10^6]$ (ovvero da nutrienti ridotti a crescita normale), e
+\textit{Cdc25}, avendo $GDC25\in[0, 600]$ (ovvero dalla delezione al
+\textit{2-fold expression}), variano 
+il comportamento oscillatorio di \textit{cAMP}. Si ottiene un grafico 3D del
+tipo
+\footnote{Besozzi D, Cazzaniga P, Pescini D, 
+  Mauri G, 
+  Colombo S, Martegani E. The role of feedback control mechanisms on the
+  establishment of oscillatory regimes in the Ras/cAMP/PKA pathway in
+  S. cerevisiae. EURASIP J Bioinform Syst Biol. 2012;2012(1):10. Published 2012
+  Jul 20. doi:10.1186/1687-4153-2012-10} (\textit{si ignorino le scale}):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.45]{img/glucosimu3.jpg}
+\end{figure}
+Per ottenere un tale plot si è fatto uso di \textit{calcolo parallelo su GPU},
+in quanto, per questo modello:
+\begin{itemize}
+  \item su \textit{CPU} in due ore si hanno circa 200 simulazioni
+  \item su \textit{GPU} in due ore si hanno circa 65000 simulazioni
+\end{itemize}
+Un esempio di \textit{PSA-1D} su una costante di reazione si ha invece con lo
+studio della perturbazione della fosforilazione di \textit{Pde1}, avendo, per la
+reazione 26, $c_{26}\in[1.0\times 10^{-9},1.0\times 10^{-3}]$, avendo
+$[1.0\times 10^{-6}$ come valore di reference. Si sono studiate quindi le
+variazioni in \textit{cAMP, Ras2$\cdot$GTP, Ira2$^P$} e \textit{Pde1}$^P$,
+ottenendo\footnote{Besozzi D, Cazzaniga P, Pescini D, 
+  Mauri G, 
+  Colombo S, Martegani E. The role of feedback control mechanisms on the
+  establishment of oscillatory regimes in the Ras/cAMP/PKA pathway in
+  S. cerevisiae. EURASIP J Bioinform Syst Biol. 2012;2012(1):10. Published 2012
+  Jul 20. doi:10.1186/1687-4153-2012-10}: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.5]{img/glucosimu4.jpg}
+\end{figure}
+Dove si noti come nonostante  Ras2$\cdot$GTP aumenti si ha un ``collasso'' di
+\textit{cAMP}. Questo accade in quanto si ha poca concentrazione di
+\textit{Ira2} quindi \textit{Ras2} resta nello stato attivo.\\
+\textit{Qui si coglie il vantaggio di questi modelli che permettono di studiare
+  la dinamica di tutte le componenti}.\\
+Per concludere con questo modello:
+\begin{itemize}
+  \item si è mostrata l'enfasi sul ruolo svolto dai modulatori \textit{Ras}
+  (\textit{Cdc25/Ira2} e \textit{GTP/GDP}) e dalle fosfodiesterasi, avendo la
+  predizione della dinamica dei sistemi in diverse condizioni, sia fisiologiche
+  che perturbate
+  \item per il significato biologico delle oscillazioni si è pensati all'ipotesi
+  del 
+  \textit{``frequency modulated'' signaling system} introdotta da Cai et
+  al\footnote{Cai L, Dalal CK, Elowitz MB. Frequency-modulated nuclear
+    localization bursts coordinate gene
+    regulation. Nature. 2008;455(7212):485-490. doi:10.1038/nature07292}  
+  \item nel \textit{pathway RAS/CAMP/PKA}, secondo il professor Martegani (???),
+  le 
+  oscillazioni potrebbero estendere l'intervallo di regolamentazione del
+  sistema, avendo che \textit{PKA} è conosciuto per controllare il $90\%$ dei
+  geni regolati dal glucosio nel lievito 
+\end{itemize}
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update
-% LocalWords:  multipartiti fosforilata ligando
+% LocalWords:  multipartiti fosforilata ligando regolatoria transmembrana
+% LocalWords:  degradatori sampling

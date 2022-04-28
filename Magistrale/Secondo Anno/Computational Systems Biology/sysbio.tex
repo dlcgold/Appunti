@@ -4371,9 +4371,184 @@ si avrebbe che, con $\Delta t = 0.001$ l'errore globale sarebbe:
     quart'ordine}
 \end{itemize}
 \textbf{Si noti che esistono altri metodi di Runge-Kutta, per ordini diversi}.
+\subsubsection{Metodo Adam-Moulton}
+Per completezza si cita anche il \textbf{metodo di Adam-Moulton} che è un
+algoritmo multi-step implicito che sfrutta il 
+informazioni da diversi punti precedenti e valori derivati piuttosto che
+scartarli come nei metodi appena visti, che usavano solo il precedente. Nel
+dettaglio questo metodo sfrutta un numero fissato di step precedenti ma esistono
+anche metodi in grado di calcolare dinamicamente il numero di step utili.\\
+Tra quelli visti il \textit{metodo di Adam-Moulton} è il più accurato ma anche
+il più oneroso dal punto di vista computazionale.
 \subsection{Errori dei Risolutori Numerici}
+Se pensiamo ai metodi appena descritti si può dimostrare come il \textit{metodo
+  di Eulero} può divergere così tanto dalla soluzione esatta da portare
+addirittura a fraintendimenti, pensando magari che una funzione abbia un
+comportamento oscillatorio. 
+Ogni risolutore numerico cerca di soddisfare la condizione per cui la differenza
+tra la soluzione approssimata e quella esatta debba rimanere in un certo
+\textit{range di tolleranza}. In termini più tecnici il ``massimo errore'' viene
+impostato direttamente dall'utilizzatore del risolutore. Ci sono essenzialmente
+due valori da impostare:
+\begin{enumerate}
+  \item la \textbf{relative tollerance (\textit{rtoi})}, per gestire
+  l'\textbf{errore relativo}
+   \item l'\textbf{absolute tollerance (\textit{atoi})}, per gestire
+  l'\textbf{errore assoluto} 
+\end{enumerate}
+Impostando quindi questi due valori si imposta l'accuratezza dell'algoritmo di
+integrazione numerico in qualsiasi software di simulazione (tra cui
+\textit{COPASI}). Dal punto di vista 
+più teorico si ha che errore e tolleranza sono i due lati di un'espressione di
+disuguaglianza nota come \textbf{criterio di convergenza}, che dice che un
+algoritmo di integrazione numerica converge se la soluzione approssimativa si
+avvicina alla soluzione esatta per $\lim_{\Delta t\to 0}$. Quindi una minor
+tolleranza, scelta alla fine mediante soglie psicologiche, genera una soluzione
+più accurata ma al costo di un maggior tempo macchina.\\
+Parlando più formalmente si ha che, denotando con $y_a$ la soluzione
+approssimata e con $y_e$ la soluzione esatta, che solitamente non si conosce,
+si definiscono:
+\begin{itemize}
+  \item l'\textbf{errore assoluto} come $|y_a-y_e|$
+  \item l'\textbf{errore relativo} come $\frac{|y_a-y_e|}{|y_e|}$
+\end{itemize}
+Ricordando che solitamente $y_e$ non è nota si procede fissando valori bassi per
+la tolleranza in modo da poter ragionare indirettamente sui due tipi di errore.
+L'\textit{errore relativo} è generalmente una misura migliore dell'errore
+rispetto all'errore assoluto, sebbene l'\textit{errore assoluto} sia necessario
+per determinare l'accuratezza della soluzione approssimativa quando ci si
+avvicina allo zero, avendo $|y_e|$ a denominatore. Si noti che in alcuni
+risolutori l'\textit{errore relativo} è usato per controllare la qualità della
+soluzione approssimata riducendo la grandezza del time-step $\Delta t$.
+\subsection{Problema della Stiffness}
+Il \textbf{problema della Stiffness (\textit{rigidità})} è uno dei problemi di
+efficienza della \textit{systems biology}. Per tale problema non esiste ancora
+una vera e propria definizione formale ma dipende da:
+\begin{itemize}
+  \item il problema stesso
+  \item il risolutore
+  \item i parametri d'errore fissati
+\end{itemize}
+Un algoritmo è \textit{numericamente instabile} se l'errore si propaga durante
+il processo iterativo, quindi la soluzione approssimativa calcolata avrà una
+grande deviazione dalla soluzione esatta. In pratica la soluzione approssimata
+non converge a quella esatta.\\
+Un'equazione differenziale è detta \textbf{stiff} se i metodi di integrazione
+numerica risultano essere \textit{instabili} a meno di scegliere dei valori di
+$\Delta t$ molto piccoli, portando quindi ad una ``esplosione'' dal punto di
+vista del tempo macchina. Il problema è che non si può sapere a priori se
+un'equazione sia \textit{stiff} ma lo si capisce solo eseguendo l'algoritmo di
+integrazione numerica, vedendo che ad un certo punto si ``impasta'' impiegando
+tantissimo tempo per avanzare nelle iterazioni, avendo che l'algoritmo tenta di
+ridurre il $\Delta t$ per restare nel range di tolleranza richiesto ma
+comportando tempi macchina ingestibili. Quello che succede è che si riduce
+moltissimo il $\Delta t$ avendo la soluzione approssimata che continua ad
+oscillare intorno alla soluzione esatta, avendo quindi tantissimo tempo macchina
+per una soluzione che non è nemmeno accettabile.\\
+Fortunatamente si sono sviluppati algoritmi che sono in grado di riconoscere la
+\textit{stiffness} e a procedere di conseguenza, adattando il $\Delta t$ anziché
+ridurlo troppo.
+\subsubsection{LSODA}
+Uno dei risolutori in grado di gestire la \textit{stiffness} è
+\textbf{LSODA}\footnote{L. Petzold, Automatic selection of methods for solving
+  stiff and nonstiff systems of ordinary differential 
+equations, SIAM Journal on Scientific and Statistical Computing 4(1):136-148,
+1983}  che è un algoritmo di integrazione numerico adattivo caratterizzato da un
+processo di riconoscimento automatico della \textit{stiffness}. Questo
+risolutore è ormai diventato uno standard nella \textit{systems biology} ed è
+basato su due algoritmi di integrazione numerica (\textit{che non vengono
+  approfonditi nel corso}):
+\begin{enumerate}
+  \item il \textbf{metodo di Adams} per le regioni non \textit{stiff}
+  \item la \textbf{bacward differentiation formula \textit{BDF}} per le regioni
+  \textit{stiff} 
+\end{enumerate}
+In pratica \textit{LSODA} switcha tra i due algoritmi a seconda della
+situazione che viene analizzata in modo dinamico.  
 \section{Simulazioni Stocastiche}
-
+Si introducono ora le \textbf{simulazioni stocastiche} che, in contesto
+biologico, risultano essere più utili per poter studiare comportamenti emergenti
+rispetto alle simulazioni deterministiche. Nel dettaglio ci si concentrerà
+soprattutto sui \textit{modelli stocastici discreti} (si noti che verranno
+spesso indicati solo con \textit{modelli stocastici}).\\
+Si ricorda che, a differenza dei \textit{modelli deterministici}, in questo caso
+si modella la quantità di elementi di ogni specie, tramite numeri interi, e non
+la concentrazione delle stesse.\\ 
+In questo contesto si ha la già citata \textbf{well-stirred assumption},
+infatti si
+assume che\textbf{ eventi molecolari non reattivi/elastici}, che randomizzano le
+posizioni delle molecole, si verificano molto più frequentemente degli
+\textbf{eventi molecolari reattivi/anelastici}, che modificano le quantità di
+popolazione delle varie specie molecolari, avendo appunto che questa circostanza
+produce una ridistribuzione uniforme delle molecole all'interno del volume,
+a priori rispetto ogni collisione reattiva. In termini più pratici possiamo dire
+che con tali modelli si riesce a studiare cosa avviene a livello molecolare
+simulandone il comportamento non deterministico (o meglio ``non determinitico''
+per le nostre conoscenze attuali di come funzionino i sistemi biologici). La
+formulazione stocastica si riduce 
+alla formulazione deterministica nel limite termodinamico che si ha quando il
+numero di molecole di ciascuna specie e il volume del sistema si avvicinano
+all'infinito. Un confronto coi \textit{modelli deterministici} e coi
+\textit{modelli stocastici continui} è visibile in figura
+\ref{fig:stocdet} \footnote{Wilkinson, D. Stochastic modelling for quantitative
+  description of heterogeneous biological systems. Nat Rev Genet 10, 122–133
+  (2009). https://doi.org/10.1038/nrg2509}.
+\begin{figure}
+  \centering
+  \includegraphics[width = \textwidth]{img/stocdet.jpg}
+  \caption{Esempio di confronto tra \textit{modelli deterministici, stocastici
+      discreti e stocastici continui}. Si nota come il \textit{modello
+      deterministico} sia più ``pulito'' ma anche per questo meno ``utile''.} 
+  \label{fig:stocdet}
+\end{figure}
+Inoltre, coi \textit{modelli stocastici}, si considera il cosiddetto
+\textbf{rumore biologico}. Il discorso necessita di un approfondimento. Il
+comportamento cellulare e l'ambiente extra cellulare sono stocastici, infatti i
+circuiti genetici che regolano le funzioni cellulari sono soggetti a
+fluttuazioni stocastiche, o rumore, nei livelli delle loro componenti. La causa
+principale è la \textbf{fluttuazione} dell'\textbf{espressione genica}. In
+termini poco tecnici si ha che nel DNA ogni gene è presente, in termini di
+molecola, una volta (o al più due) e quindi si 
+hanno pochi eventi in cui si ha il legame effettivo col promotore (non tutto
+nelle cellule è subito ``pronto all'uso''). Con
+l'\textit{espressione genica} si ha quindi un comportamento stocastico si a
+livello di \textit{mRNA} che a livello di \textit{proteine} si ottiene
+l'\textbf{eterogeneità intracellulare}, infatti anche a parità di cloni
+cellulari essi non saranno mai nella stessa condizione in termini di
+\textit{espressione genica}. Questo comportamento ``randomico'' è quello che
+permette l'\textit{evoluzione delle specie}, in quanto è ciò che permette
+l'\textit{adattamento}, infatti la stocasticità rappresenta un mezzo benefico
+sfruttato dagli organismi viventi per rispondere ad ambienti in continuo
+mutamento adattando i propri comportamenti. Si ha che i fenotipi cellulari
+variano tra le 
+popolazioni isogeniche (ovvero con individui di identica costituzione genetica)
+e nelle singole cellule nel tempo. Le misurazioni dell'espressione genica in
+singole cellule hanno rivelato \textit{burst (esplosioni)} stocastiche sia di
+\textit{mRNA} che di \textit{sintesi proteica} in molti organismi, portando
+quindi all'\textbf{eterogeneità intracellulare}. Le cellule che rispondono
+stocasticamente possono competere con le cellule che sono sopraffatte dai
+cambiamenti ambientali e questo comporta che, nelle scale temporali più lunghe,
+il rumore può facilitare le transizioni evolutive. \\
+Prima di procedere bisogna introdurre alcuni concetti. \\
+Molti processi biochimici coinvolgono un basso numero di molecole o interazioni
+poco frequenti, dando origine a fluttuazioni stocastiche. Si hanno quindi due
+concetti:
+\begin{enumerate}
+  \item il \textbf{concetto di burst (\textit{esplosione})} che si ha in quanto
+  i promotori genici possono passare stocasticamente tra gli stati ``off'' e
+  ``on'' , provocando burst/esplosioni di produzione di mRNA. Ogni singolo RNA
+  messaggero, inoltre, è tipicamente tradotto molte volte per produrre molte
+  proteine, generando i corrispondenti burst di proteine
+  \item il \textbf{concetto di propagation} che si ha in quanto i tassi di
+  espressione genica sono influenzati direttamente dai livelli dei fattori di
+  trascrizione e di altri componenti a monte, che sono essi stessi soggetti a
+  bursting e media temporale, di conseguenza, fluttuazioni nell'espressione di
+  un gene si propagano per generare fluttuazioni nei geni a valle 
+\end{enumerate}
+Si noti che a livello di \textit{pathway metabolici} si ha meno possibilità di
+burst,e in generale di comportamenti stocastici, in quanto le specie necessarie
+ai vari meccanismi, come l'\textit{ATP}, sono presenti in grandi quantità. In
+tal caso si ha quindi meno \textit{rumore biologico}.
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update

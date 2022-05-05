@@ -2823,7 +2823,7 @@ manca al ristorante, in figura \ref{fig:fuze}.
     propri 
     o in modo \textit{knowledge-driven}, se possibile quindi partendo dalla
     letteratura, o \textit{data-driven}, soluzione tendenzialmente meno efficace
-    e non preferibile  che parte dai dati. le regole vengono valutate
+    e non preferibile che parte dai dati. Le regole vengono valutate
     simultaneamente per ottenere lo stato al tempo $t+1$ partendo dal tempo
     $t$. I 
     $\mu$ degli input serviranno a calcolare il $\mu$ dell'output.}
@@ -4773,8 +4773,399 @@ riportano giusto alcuni titoli:
   steady state del metabolismo, nonostante le reazioni metaboliche subiscano
   anch'esse il \textit{rumore biologico}
 \end{itemize}
+\subsection{Verso l'Algoritmo di Gillespie}
+Bisogna quindi vedere come simulare il \textit{rumore biologico} per mezzo di
+\textit{algoritmi stocastici}, parlando, nel dettaglio, dell'\textbf{algoritmo
+  di Gillespie}.\\
+Prima di parlare dell'algoritmo in se bisogna introdurre alcune basi.
+\begin{definizione}
+  Data una reazione $R_\mu$, con la sua \textit{costante cinetica
+    stocastica} $c_\mu$, la cui unità di misura è sempre
+  $\left[\frac{1}{\mbox{unità del tempo }\dd{t}}\right]$ (diversificandosi
+  quindi dall'unità di misura 
+  variabile che si aveva per le costanti di reazioni nel caso deterministico),
+  si definisce l'\textbf{ipotesi fondamentale della 
+    formulazione stocastica della cinetica chimica} che, formalmente, dice che:
+  \[c_\mu\dd{t}=\overline{\mathcal{P}}\]
+  Dove $\overline{\mathcal{P}}$ è la probabilità media (che quindi non basta per
+  poter descrivere la probabilità esatta nell'istante di tempo attuale, non
+  prendendo in considerazione tutte le altre molecole in quel preciso istante
+  temporale) che 
+  qualsiasi 
+  combinazione particolare di molecole che appaiono come reagenti nella reazione
+  $R_\mu$ reagisca di conseguenza, nel prossimo intervallo di tempo
+  infinitesimale $\dd{t}$.
+\end{definizione}
+Il secondo aspetto fondamentale per poter capire l'\textit{algoritmo di
+  Gillespie} è capire le motivazioni fisiche per le quali l'approccio stocastico
+è effettivamente validabile. \\
+Si assuma di lavorare nel contesto della \textit{well-stirred hypothesis}, in un
+volume costante $\mathcal{V}$, e si
+considerino due molecole, una della specie $S_1$ e una della specie $S_2$ che
+reagiscono tra loro. In pratica si vuole studiare cosa succede quando queste due
+molecole ``collidono''. Sfruttiamo quindi direttamente il semplice modello
+proposto da Gillespie nel 1977\footnote{Gillespie, D. T. (1977). Exact
+  stochastic simulation of coupled chemical reactions. The journal of physical
+  chemistry, 81(25), 2340-2361.}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.25]{img/gill1.jpg}
+\end{figure}
+Si hanno quindi (tenendo la stessa notazione dell'immagine):
+\begin{itemize}
+  \item $S_1$ e $S_2$ approssimate come due \textit{sfere dure}, rispettivamente
+  di raggio $r_1$ e $r_2$. Si noti che sarebbe comunque troppo complesso
+  simulare direttamente la posizione delle due molecole nello spazio
+  \item si denota $r_{12}=r_1+r_2$ come la distanza da centro a centro
+  che deve essere raggiunta affinché le due molecole entrino in collisione 
+  \item si denota1 $v_{12}$ come la velocità relativa di $S_1$ rispetto a $S_2$
+  \item si denota $\delta \mathcal{V}_{coll}$ come il \textit{volume di
+    collisione} che ci dice che se il centro della molecola $S_2$ si trova in un
+  istante temporale $t$ all'interno di questo spazio (che in pratica è lo spazio
+  a forma di cilindro in cui si muove la molecola), allora le due molecole
+  si scontreranno nel prossimo intervallo di tempo infinitesimale $\delta t$,
+  quindi nell'intervallo $[t, t+\delta t)$. Come detto tale volume altro non è
+  che un cilindro il cui volume è:
+  \[\delta\mathcal{V}_{coll}=\pi r_{12}^2v_{12}\delta t\]
+  Si noti inoltre che se $\delta t\to 0$ allora c'è solo una probabilità
+  trascurabile che una collisione tra le due molecole nel tempo $\delta t$ sia
+  impedita da una collisione precedente di una delle due molecole con un'altra
+  molecola 
+  \item nell'ipotesi di \textit{omogeneità spaziale}, il valore
+  $\frac{\delta\mathcal{V}_{coll}}{\mathcal{V}}$  rappresenta la
+  probabilità che il centro di una molecola di $S_2$ si trovi all'interno di
+  $\delta\mathcal{V}_{coll}$  
+\end{itemize}
+Fatte queste premesse si ha che la probabilità media che il centro di una
+molecola di $S_2$ si trovi all'interno di $\delta\mathcal{V}_{coll}$ è:
+\[\overline{\left(\frac{\delta\mathcal{V}_{coll}}{\mathcal{V}}\right)}=
+  \mathcal{V}^{-1}\pi r_{12}^2\overline{v_{12}}\delta t\]
+Che è quindi la probabilità media che avvenga una collisione tra $S_1$ e
+$S_2$. \\
+Inoltre, se, al tempo $t$, si hanno $X_1$ molecole $S_1$ e $X_2$ molecole $S_2$,
+si ha che esistono $X_1X_2$ possibili combinazioni distinte delle stesse, avendo
+quindi che la probabilità esatta, denotata con $\mathcal{P}_{coll}$ di avere una
+collisione tra una molecola $S_1$ e 
+una molecola $S_2$ nel prossimo intervallo di tempo infinitesimale
+$(t,t+\dd{t})$ altro non è che: 
+\[\mathcal{P}_{coll}=X_1X_2\mathcal{V}^{-1}\pi r_{12}^2\overline{v_{12}}\dd{t}\]
+Si possono dire varie cose su questa equazione:
+\begin{itemize}
+  \item per calcolare $\overline{v_{12}}$ ci si affida alla cinetica di Maxwell
+  e alla sua (e di Boltzmann) \textit{distribuzione di velocità},
+  avendo che:
+  \[\overline{v_{12}}=\left(\frac{8kT}{\pi m_{12}}\right)^{\frac{1}{2}}\]
+  dove:
+  \begin{itemize}
+    \item $k$ è la \textit{costante di Boltzmann}
+    \item $T$ è la \textit{temperatura assoluta}
+    \item $m_{12}=\frac{m_1m_2}{m_1+m_2}$ è la \textit{massa ridotta}
+  \end{itemize}
+  \item $\mathcal{V}^{-1}\pi r_{12}^2\overline{v_{12}}\dd{t}$ altro non è che
+  l'\textbf{ipotesi fondamentale della formulazione stocastica della cinetica
+    chimica} 
+  \item $\mathcal{V}^{-1}\pi r_{12}^2\overline{v_{12}}$ nel dettaglio è la
+  \textit{costante stocastica cinetica} $c_\mu$, avendo quindi che la costante
+  stocastica tiene conto di tutte le proprietà chimiche e fisiche della reazione 
+\end{itemize}
+Ci si avvicina quindi alla spiegazione dell'algoritmo. Data una serie di
+reazioni e lo stato attuale del sistema, vogliamo rispondere a due domande:
+\begin{enumerate}
+  \item \textit{quando avverrà la prossima reazione?} Chiedendosi quindi quanto
+  tempo dobbiamo aspettare prima che la prossima reazione si verifichi da
+  qualche parte all'interno del volume, avendo quindi che si passa ad un
+  $\Delta t$ non fisso come nel caso deterministico, avendo quindi che può
+  passare ogni volta un tempo diverso tra una reazione e un'altra. Si noti però
+  che, passato quel tempo, si assume che la reazione in se avvenga in tempo
+  istantaneo 
+  \item \textit{quale sarà la prossima reazione?} Avendo che non per forza la
+  reazione con più probabilità di essere la prossima sarà necessariamente quella
+  che avverrà
+\end{enumerate}
+Si prenda quindi un \textit{sistema reaction-based}, con $M$ reazioni e $N$
+specie distinte. Si ha che 
+ogni reazione $R_\mu$, con $1\leq \mu\leq M$ è caratterizzata da:
+\begin{itemize}
+  \item lo \textbf{state-change vector (\textit{vettore di cambiamento di
+      stato})}, che è un vettore di interi che denota la variazione del sistema
+  dopo che è avvenuta una e una sola precisa reazione
+  \item la \textbf{propensity function (\textit{funzione di propensione})}, che
+  è necessaria per calcolare la probabilità che occorra una certa reazione, dato
+  lo stato attuale del sistema
+\end{itemize}
+\subsubsection{State-Change Vector}
+Si comincia con il descrivere lo \textbf{state-change vector}. Data la reazione
+$R_\mu$, in un sistema con con $M$ reazioni e $N$
+specie distinte, si ha che lo \textit{state-change vector}, $v_\mu$, è definito
+come: 
+\[v_\mu=(v_{1\mu},v_{2\mu},\ldots, v_{N\mu})\]
+dove $v_{i\mu}$ denota la variazione della quantità di specie $S_i$, con $1\leq
+i\leq N$, dovuta al verificarsi della reazione $R_\mu$. Viene quindi specificato
+un vettore lungo a priori $N$ ma se non si ha una certa specie per una certa
+reazione si indica la cosa tramite lo zero, avendo che di fatto tale specie non
+viene condizionata dalla reazione stessa.
+\begin{esempio}
+  Sia dato:
+  \[\mathcal{S}=\{S_1,S_2,S_3\}\]
+  e le seguenti reazioni:
+  \[R_1:S_1+S_2\to 2S_3\]
+  \[R_2: S_3\to S_1\]
+  Si ottengono quindi due \textit{state-change vectors}:
+  \[v_1=(-1,-1,+2)\]
+  \[v_2=(+1,0,-1)\]
+  Si assume il seguente stato al tempo $t$:
+  \[X(t)=\left( X_1(t), X_2(t), X_3(t)\right) = (15,7,23)\]
+  Se si ha la reazione $R_1$ al tempo $t+1$ si avrà:
+  \[X(t+1)=X(t)+v_1=(15-1,7-1,23+2)=(14,6,25)\]
+  Se si ha la reazione $R_2$ al tempo $t+2$ si avrà:
+  \[X(t+2)=X(t+1)+v_2=(14+1,6+0,25-1)=(15,6,24)\]
+\end{esempio}
+\subsubsection{Propensity Function}
+La definizione della \textbf{propensity function} è più complessa. Data la
+reazione $R_\mu$ in un sistema con con $M$ reazioni e $N$
+specie distinte, si ha che la \textit{propensity function}, denotata $a_\mu$,
+della reazione è definita come:
+\[a_\mu(X(t))=c_\mu h_\mu(t)\]
+dove:
+\begin{itemize}
+  \item $c_\mu$ è sempre la \textit{costante stocastica cinetica} della reazione
+  $R_\mu$
+  \item $h_\mu(t)$ è una funzione combinatoria che caratterizza la reazione, sia
+  in base al suo ordine (che si ricorda non dovrebbe superare il secondo) che al
+  tipo di reagenti. In pratica rappresenta tutte le  
+  possibili combinazioni di reazioni che si hanno al momento $t$ al variare
+  della tipologia della reazione. Possiamo quindi vedere alcuni esempi per il
+  calcolo di $h_\mu$, che è basato solo sui reagenti della reazione e non sui
+  prodotti\footnote{Gillespie, D. T. (1976). A general method for numerically
+    simulating the stochastic time evolution of coupled chemical
+    reactions. Journal of computational physics, 22(4), 403-434.}:  
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+      Reagenti & $h_\mu$\\
+      \hline
+      \hline
+      $\cdot$ & $h_\mu=1$\\
+      $S_j$ & $h_\mu=X_j$\\
+      $S_j+S_k, \,\,j\neq k$ & $h_\mu=X_jX_k$\\
+      $2S_j$ & $h_\mu=\frac{X_j(X_j-1)}{2}$\\
+      $S_i+S_j+S_k,\,\, i\neq j\neq k\neq i$ & $h_\mu=X_iX_jX_k$\\
+      $S_j+2S_k,\,\, j\neq k$ & $h_\mu=\frac{X_jX_k(X_k-1)}{2}$\\
+      $3S_j$ & $h_\mu=\frac{X_j(X_j-1(X_j-2)}{6}$\\
+    \end{tabular}
+  \end{table}
+\end{itemize}
+\textit{Probabilmente esiste una formulazione generale ma non l'ho trovata nel
+  paper.}\\ 
+Avendo quindi che i vari $X_l$ cambiano nel tempo si ha che ad ogni step bisogna
+ricalcolare tali valori.\\
+Possiamo inoltre dire che, avendo:
+\[a_\mu(X(t))\dd{t}=c_\mu\dd{t} h_\mu(t)\]
+si ha che $a_\mu(X(t))\dd{t}$ rappresenta il numero totale delle possibili
+combinazioni distinte dei reagenti di $R_\mu$ presenti nel volume $\mathcal{V}$
+al tempo $t$, cioè 
+è uguale alla probabilità che, dato lo stato del sistema $X(t)$ (avendo quindi
+che $h_\mu$ dipende direttamente dallo stato corrente), avvenga una
+reazione di tipo $R_\mu$ da qualche parte in $\mathcal{V}$ nell'intervallo di
+tempo $[t, t+\dd{t})$. 
+\begin{shaded}
+  Si ricorda inoltre che si ha una generalizzazione per passare da $c$, la
+  \textit{costante stocastica cinetica}, a $k$, la \textit{costante
+  deterministica 
+  cinetica}, per passare da simulazioni stocastiche a deterministiche e
+  viceversa, che dipende dal numero di 
+  reagenti e dal loro ordine, ma per ora basta la seguente
+  tabella riassuntiva:
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+      caso&formula\\
+      \hline
+      1 reagente & $c=k$\\
+          &\\
+      2 reagenti di specie diverse & $c=\frac{k}{N_A\cdot \mathcal{V}}$\\
+          &\\
+      2 reagenti di specie ugaule & $c=\frac{2k}{N_A\cdot \mathcal{V}}$
+    \end{tabular}
+  \end{table}
+  si ha che le costanti stocastiche $c$ delle reazioni unimolecolari e
+  bimolecolari sono ``diverse'' tra loro, avendo che:
+  \begin{itemize}
+    \item per le reazioni unimolecolari, $c$ è indipendente dal volume del
+    sistema 
+    \item per le reazioni bimolecolari $c$ è inversamente proporzionale a
+    $\mathcal{V}$, 
+    riflettendo il fatto che due molecole reagenti avranno più difficoltà a
+    trovarsi all'interno di un volume maggiore 
+  \end{itemize}
+\end{shaded}
+\subsection{Chemical Master Equation}
+Il passaggio successivo per arrivare all'\textit{algoritmo di Gillespie} è
+parlare della \textbf{Chemical Master Equation (\textit{CME})}.\\
+Poiché stiamo descrivendo il sistema in termini probabilistici, ci interessa
+determinare $P(X,t|X_0, t_0)$, cioè la probabilità di essere nello stato $X$ al
+tempo $t$, a partire dallo stato $X_0$ al tempo $t_0$. In questo contesto la
+\textit{CME} è l'equazione che determina la probabilità che ogni specie abbia
+una quantità molecolare specificata in un dato momento futuro ed è
+formalizzabile come, in un sistema con con $M$ reazioni e $N$
+specie distinte:
+\[\frac{\partial P(X,t|X_0,t_0)}{\partial
+    t}=\sum_{\mu=1}^M\left[a_\mu(X-v_\mu)P(X-v_\mu,t|X_0,t_0)-a_\mu(X)P(X,t|X_0,
+    t_0)\right]\]
+avendo che:
+\begin{itemize}
+  \item avendo $\sum_{\mu=1}^M$ si stanno considerano tutte le reazioni del
+  sistema 
+  \item $a_\mu$ è la \textit{propensity function} della reazione $R_\mu$
+  \item $v_\mu$ è lo \textit{state-change vector} della reazione $R_\mu$
+  \item $a_\mu(X-v_\mu)P(X-v_\mu,t|X_0,t_0)$ indica la probabilità di arrivare
+  allo stato $X$ tramite la reazione $\mu$, avendo che lo stato $X-v_\mu$ è
+  quello esattamente prima all'applicazione delle reazione $R_\mu$
+  \item $a_\mu(X)P(X,t|X_0, t_0)$ indica la probabilità di arrivare
+  allo stato $X$ senza che avvenga alcuna reazione
+  \item con la \textit{CME} si ha il calcolo della probabilità esatta che il
+  sistema sia in un certo stato $X$ al tempo $t$
+\end{itemize}
+Dal punto di vista più matematico però la \textit{CME} è in realtà un sistema di
+\textit{EDO accoppiate}, con un'equazione per ogni possibile combinazione di
+molecole reagenti. Il problema diventa quindi il numero di possibili stati che
+un sistema può avere. Si prenda ad esempio un catena di $n$ semplici reazioni di
+isomerizzazione:
+\[S_1\leftrightharpoons \cdots \leftrightharpoons S_n\]
+e uno stato iniziale:
+\[X=(Z,0,0,\ldots, 0)\]
+Si ha quindi che il numero di possibili stati è:
+\[\frac{(Z+n-1)!}{Z!(n-1)!}\approx \left(\frac{eZ}{n-1}\right)^{n-1}\]
+Avendo quindi che il numero di stati possibili è esponenziale, essendo un
+$O(Z^{n-1})$, avendo quindi anche un numero esponenziale di \textit{EDO}. Si è
+quindi nella situazione in cui non solo risulta impossibile, a meno di
+particolarissimi casi ad hoc che vengono regolarmente studiati in un ramo di
+ricerca praticamente solo dedicato ad essi, trovare una
+soluzione analitica ma anche una approssimata tramite algoritmi di integrazione
+numerica. Possiamo quindi dire che la \textit{CME} è \textbf{unfeasible},
+praticamente ``irrisolvibile''.\\
+Si è quindi cercata una via alternativa alla risoluzione ``diretta'' della
+\textit{CME}, cercando un modo alternativo per costruire realizzazioni numeriche
+di $X(t)$, cioè le \textit{traiettorie simulate} (quindi le variazioni) del
+stato del sistema $X(t)$ nel tempo $t$ che corrispondono alla \textit{CME}. La
+chiave per generare traiettorie simulate di $X(t)$ non è la funzione
+$P(X,t|X_0,t_0)$, ma piuttosto una nuova funzione di probabilità congiunta
+$P(\tau,\mu|X,t)$, che è chiamata \textbf{funzione densità di probabilità della
+  reazione}. Tale funzione di probabilità congiunta è la \textit{funzione
+  densità di probabilità} di due variabili casuali:
+\begin{itemize}
+  \item $\tau$, che è il tempo dopo il quale avverrà reazione successiva
+  \item $\mu$, che è l'indice della prossima reazione
+\end{itemize}
+Tramite vari massaggi matematici, volendo disponibili nel paper di Gillespie del
+1976\footnote{Gillespie, D. T. (1976). A general method for numerically
+  simulating the stochastic time evolution of coupled chemical
+  reactions. Journal of computational physics, 22(4), 403-434.}, è possibile
+ricavare una formula esatta per $P(\tau,\mu|X,t)$ applicando le leggi della 
+probabilità, ottenendo:
+\[P(\tau,\mu|X,t)=a_\mu (X)e^{-a_0(X)\tau}\]
+Avendo che:
+\[a_0(X)=\sum_{\mu=1}^Ma_\mu(X)\]
+Tale valore non cambia fino a che non cambia lo stato del sistema $X$, ovvero
+fino a che non si fa un altro step di simulazione.\\
+Scomponendo l'equazione si nota che:
+\begin{itemize}
+  \item $a_\mu (X)$ è praticamente la probabilità che una reazione $R_\mu$
+  avverrà dopo un intervallo di tempo lungo $\tau$
+  \item $e^{-a_0(X)\tau}$ è praticamente la probabilità che non avverrà nessuna
+  reazione dopo un intervallo di tempo lungo $\tau$, avendo che tale
+  probabilità decresce esponenzialmente nel tempo
+\end{itemize}
+Si ha quindi che si ottiene praticamente una possibile soluzione della
+\textit{CME}. Dal punto di vista grafico potremmo ottenere, sempre dal paper di
+Gillespie del 1976, un grafico tipo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.3]{img/gill3.jpg}
+\end{figure}
+L'area sotto ogni curva rappresenta la probabilità che la reazione si verifichi
+nell'istante temporale successivo.  
+L'area ombreggiata in centro, uguale a $P(\tau,\mu|X,t)$, è la probabilità
+che, all'istante $t$, la reazione successiva in $\mathcal{V}$ avvenga nel tempo
+infinitesimo $\dd{\tau}$ e sarà una reazione di tipo $R_\mu$. Si noti quindi che
+tale probabilità dipende da tutte le altre probabilità relativamente rispettive
+tutte le altre reazioni del sistema. Si noti inoltre che l'area sottesa alle
+curve del grafico, intesa come somma delle stesse in un certo intervallo di
+tempo, ovvero il rispettivo integrale da 0 a $+\infty$, è pari a 1, 
+avendo quindi la non indipendenza delle varie funzioni.\\
+Si è quindi arrivati alla formula che è alla base dell'\textit{approccio di
+  simulazione stocastico}, avendo che:
+\begin{itemize}
+  \item $\tau$ è una variabile casuale esponenziale con media (ma anche
+  deviazione standard) pari a $\frac{1}{a_0(X)}$
+  \item $\mu$ è una variabile intera causale statisticamente indipendente con
+  \textit{point probability} pari a $\frac{a_\mu(X)}{a_0(X)}$
+\end{itemize}
+Esistono quindi vari modi per generare questi due valori rispetto alle loro due
+distribuzioni di probabilità. Fatta questa premessa possiamo riscrivere
+l'equazione come:
+\[P(\tau,\mu|X,t)=P_1(\tau)P_2(\mu)\]
+Avendo:
+\begin{itemize}
+  \item $P_1(\tau)=a_0 (X)e^{-a_0(X)\tau}$
+  \item $P_2(\mu)=\frac{a_\mu(X)}{a_0(X)}$
+\end{itemize}
+Resta solo quindi capire come determinare $\tau$ e $\mu$.\\
+Si inizia con il determinare $\tau$, generando in primis un numero pseudocasuale
+$r_1$ a partire da una distribuzione uniforme sull'intervallo $[0,1)$. A questo
+punto si ha che (capendo anche perché $r_1$ non può essere pari a 1):
+\[\tau=\frac{1}{a_0(X)}\ln\frac{1}{r_1}\]
+Avendo quindi che $\tau$ è inversamente proporzionale ad $a_0(X)$, avendo quindi
+che all'aumentare di $a_0(X)$ si avranno step temporali $\tau$ più piccoli e
+quindi un maggior tempo macchina per l'intera simulazione. Per questo motivo,
+per evitare questo costo macchina, solitamente si fanno simulazioni stocastiche
+in presenza di sistemi con poche quantità di tutte le specie del sistema, che è
+anche la situazione in cui si ha comunque maggior \textit{rumore biologico}.\\
+Si determina infine $\mu$, anche in questo caso generando in primis un numero
+pseudocasuale $r_2$ a partire da una distribuzione uniforme sull'intervallo
+$[0,1)$. Si ha quindi che $\mu$ è quell'intero tale per cui:
+\[\sum_{j=1,\ldots\mu-1}a_j(X)\leq r_2a_0(X)\leq\sum_{j=1,\ldots\mu}a_j(X)\]
+In altri termini si prende ogni valore di $a_\mu(X)$ e lo si divide per
+$a_0(X)$ e, mantenendo per praticità l'ordine delle reazioni (ma non è l'unica
+soluzione), si determina il sotto-intervallo tra 0 a 1 che rappresenta la
+probabilità che ciascuna reazione ha di accadere. Praticamente si fa una
+\textit{normalizzazione}. Ad esempio, avendo tre reazioni, se 
+$\frac{a_1{X}}{a_0(X)}=0.7$, $\frac{a_2{X}}{a_0(X)}=0.2$ e
+$\frac{a_3{X}}{a_0(X)}=0.1$ si avrebbe che se $r_1$ è un valore in $[0, 0.7)$
+allora si sceglierà la reazione 1, in $[0.7,0.9)$ la 2 o altrimenti la
+3. Si noti come non per forza sarà la più probabile la reazione che si andrà a
+scegliere. Infatti si ha che la probabilità che venga scelta $R_\mu$ è
+proporzionale ad $a_\mu(X)=c_\mu h_\mu(t)$, avendo che che questa probabilità è
+proporzionale alla \textit{costante stocastica cinetica} moltiplicata per il
+numero di molecole reagenti attualmente presenti nel sistema, comportando che il
+tempo di esecuzione della simulazione sarà maggiore se il sistema contiene un
+numero elevato di molecole.\\
+Concludendo possiamo quindi dire che $\tau$ serve ad aggiornare il valore del
+tempo $t$ mentre $\mu$ a scegliere con quale reazione, e nel dettaglio quindi
+con quale \textit{state-change vector}, aggiornare lo stato del sistema $X$. 
+\subsubsection{Algoritmo di Gillespie}
+Si è quindi arrivati a descrivere il vero e proprio \textbf{algoritmo di
+  Gillespie}, o meglio il \textbf{Stochastic Simulation Algorithm
+  (\textit{SSA})}, proposto appunto da Gillespie nel 1976.\\
+\textit{SSA} è un \textit{algoritmo iterativo} che consente di simulare
+l'evoluzione temporale di un dato modello di reazione, generando realizzazioni
+della corrispondente \textit{CME}, a partire da una condizione iniziale. Tale
+algoritmo si fonda su un \textit{processo Markoviano}, avendo che il sistema
+procede di fatto applicano una reazione per volta e come output produce
+l'insieme dei vari stati del sistema, quindi, isolando una determinata specie 
+(quindi studiando la quantità della stessa in ogni stato prodotto in output), è
+possibile studiarne l'evoluzione durante la simulazione, ovvero la sua
+traiettoria. Il flowchart dell'algoritimo è visualizzabile in figura
+\ref{fig:gillflow}.
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{img/flowgill.pdf}
+  \caption{Flowchart di \textit{SSA}, con specificati gli input e i possibili
+    casi di uscita dall'iterazione.}
+  \label{fig:gillflow}
+\end{figure}
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update
 % LocalWords:  multipartiti fosforilata ligando regolatoria transmembrana
-% LocalWords:  degradatori sampling bistabilità
+% LocalWords:  degradatori sampling bistabilità formalizzabile

@@ -13,6 +13,7 @@
 \usepackage{engrec}
 \usepackage{rotating}
 \usepackage{verbatim}
+\usepackage{multicol}
 \usepackage[safe,extra]{tipa}
 % \usepackage{showkeys}
 \usepackage{multirow}
@@ -5164,6 +5165,442 @@ traiettoria. Il flowchart dell'algoritimo è visualizzabile in figura
     casi di uscita dall'iterazione.}
   \label{fig:gillflow}
 \end{figure}
+\section{Parameter Estimation}
+\textit{L'intera sezione riguarda la lezione tenuta dal professor Nobile.}\\
+Come si è visto, parlando soprattutto di modelli meccanicistici, il ruolo dei
+parametri è fondamentale. Alcuni esempi di parametri dei modelli, come visto, si
+ritrovano nelle \textit{concentrazioni/numero di molecole} nello stato iniziale
+o nelle costanti per i \textit{kinetic rate}. In generale il nostro modello è
+quindi formato, in modo astratto:
+\begin{itemize}
+  \item da un \textbf{input}, ovvero, ad esempio, lo \textit{stato iniziale} e
+  un vettore di parametri per il modello, denotato con $\vartheta$
+  \item dal \textbf{simulatore del modello}, che possiamo pensare come una
+  \textit{black box}
+  \item dall'\textbf{output}, ad esempio il \textit{comportamento simulato del
+    sistema} 
+\end{itemize}
+Per capire al meglio l'importanza dei parametri si vede un esempio.
+\begin{esempio}
+  Si considera il modello del \textbf{Brusellator}, che consta di sei specie
+  (più tecnicamente quelle che si ottengono al variare del coefficiente
+  stechiometrico):
+  \begin{enumerate}
+    \item $A$, con una quantità iniziale di 200 molecole. Tale quantità è
+    fissata
+    \item $X$, con una quantità iniziale di 200 molecole
+    \item $B$, con una quantità iniziale di 600 molecole. Tale quantità è
+    fissata
+    \item $Y$, con una quantità iniziale di 300 molecole
+    \item $D$, con quantità iniziale nulla
+    \item $E$, con quantità iniziale nulla
+  \end{enumerate}
+  e di 4 reazioni:
+  \[R_1:A\stackrel{c_1}{\rightharpoondown}X\qquad
+    R_2:2X + Y\stackrel{c_2}{\rightharpoondown}3X\] 
+  \[R_3:B+X\stackrel{c_3}{\rightharpoondown}Y + D\qquad
+    R_4:X\stackrel{c_4}{\rightharpoondown}E\] 
+  Si ottengono quindi vari risultati al variare dei valori delle costanti
+  cinetiche, risultati anche molto diversi tra loro:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.35]{img/bru.jpg}
+  \end{figure}
+  Avendo nel primo caso delle ampie oscillazioni, nel secondo oscillazioni con
+  frequenza maggiore e nel terzo addirittura bi-stabilità.
+\end{esempio}
+Si nota quindi come scegliere tali parametri sia essenziale ma essi sono
+parametri che assumono valori in $\mathbb{R}$ quindi, qualsiasi sia il parametro
+e qualsiasi sia il range di valori assumibili, si hanno infiniti valori
+possibili (essendo $\mathbb{R}$ \textbf{denso}). Risulta quindi chiaro come
+esplorare tutte le possibili combinazioni di parametri non sia possibile ma
+servano delle strategie per esplorare lo \textit{spazio delle possibili
+  parametrizzazioni}. \\
+In primis bisogna fare alcune considerazioni:
+\begin{itemize}
+  \item normalmente i parametri, come quelli cinetici, non possono essere
+  misurati direttamente in \textit{wet-lab}
+  \item alcuni parametri possono essere calcolati in modo indiretto dai dati
+  sperimentali, ad esempio studiando le \textit{time-series} di quantità
+  molecolari 
+\end{itemize}
+In questo contesto quindi si definisce il \textbf{problema del Parameter
+  Estimation (\textit{PE})}, che è appunto la ricerca del \textit{vettore dei
+  parametri} $\vartheta$ \textit{in silico}, di cui si segnala un interessante
+paper di Moles et al.\footnote{Moles, Carmen G., Pedro Mendes, and Julio
+  R. Banga. "Parameter estimation in biochemical pathways: a comparison of
+  global optimization methods." Genome research 13.11 (2003): 2467-2474.}. Con
+la \textit{PE} si hanno comunque alcune assunzioni per quanto si andrà a
+trattare in questa sezione:
+\begin{itemize}
+  \item \textit{la struttura del modello è conosciuta} mentre il problema di
+  stimare sia le reazioni che i loro parametri rientra nel campo del
+  \textbf{reverse engineering}
+  \item \textit{lo stato iniziale del sistema, quindi concentrazioni/numero di
+    molecole, è conosciuto} anche se volendo anche tali parametri,
+  potenzialmente sconosciuti, sono stimabili
+  ma questo campo non verrà trattato in questa sezione
+\end{itemize}
+Si ha quindi, con $R$ insieme delle reazioni, un potenziale algoritmo naive per
+la \textit{PE}, al fine di fare 
+un confronto coi dati ottenuti, che saranno i dati target sperimentali $T$, in
+\textit{wet-lab}: 
+\begin{enumerate}
+  \item si sceglie un vettore di parametri cinetici casuale 
+  $\vartheta \in\mathbb{R}^{|R|}$
+  \item si usa $\vartheta$ per effettuare la simulazione, che sia deterministica
+  o stocastica
+  \item si genera una dinamica $S_\vartheta$ dalla simulazione da confrontare
+  con $T$
+  \item se $S_\vartheta$ differisce da $T$ si migliora $\vartheta$ e si
+  ricomincia dallo step 2)
+  \item si restituisce la parametrizzazione $\vartheta$
+\end{enumerate}
+Ci sono però vari passi da chiarire:
+\begin{itemize}
+  \item come si comparano $S_\vartheta$ e $T$?
+  \item come si migliora $\vartheta$?
+  \item come si genera $\vartheta$ avendo che farlo in modo completamente
+  causale non è sicuramente ottimale?
+\end{itemize}
+\subsection{Fitness Function}
+Al fine di poter comparare le dinamiche simulate con quella target attesa viene
+usata la cosiddetta \textit{fitness function}, definita, dato un vettore di
+parametri $\vartheta$, come:
+\[f(\vartheta):\mathbb{R}^{|R|}\to\mathbb{R}^{+}\]
+Tale funzione quindi compara le dinamiche simulate $S_\vartheta$ e il target $T$
+per quantificare la qualità del fit. Nella sua forma naive si ha che:
+\[f(\vartheta)=\norm{T-S_\vartheta}\]
+avendo che quindi il risultato ottimale sarebbe $f(\vartheta =0)$. D'altro canto
+questa è una definizione assolutamente generale, avendo che le simulazioni e il
+target possono essere potenzialmente qualsiasi cosa (\textit{time-series,
+  istogrammi per la fluorescenza delle cellule, etc$\ldots$}), le simulazioni
+possono essere stocastiche o deterministiche, ogni \textit{misura di distanza}
+può essere usata come fitness etc$\ldots$\\
+La definizione quindi della \textit{funzione di fitness} è una ``questione
+delicata''. Si hanno quindi varie funzioni, ad esempio si ha la variante naive
+per il confronto di due time-series:
+\[f^{-1}(\vartheta)=\frac{1}{TN}\sum_{t=1}^T\sum_{n=1}^N|T^n(t)-S_\vartheta^n(t)|\]
+Avendo però che, all'aumentare della quantità di molecole delle specie, si
+rischiano grossi errori, che non dovrebbero essere trascurabili.\\
+Oppure funzioni più elaborate come la \textbf{Mean Absolute Percentage Error
+  (\textit{MAPE})}, che in pratica sfrutta ogni volta l'errore percentuale
+(anche se non può essere usata se $T^n(t)\to 0$):
+\[f^{-2}(\vartheta)=\frac{1}{TN}\sum_{t=1}^T\sum_{n=1}^N\left|
+    \frac{T^n(t)-S_\vartheta^n(t)}{T^n(t)}\right|\] 
+Dove, in entrambe, avendo qui che \textit{valore=numero di specie}:
+\begin{itemize}
+  \item $T^n(t)$ denota il valore del target per la specie $n$ al tempo $t$
+  \item $S_\vartheta^n(t)$ denota il valore della simulazione, con parametri
+  iniziali $\vartheta$, per la specie $n$ al tempo $t$
+\end{itemize}
+Si nota che \textit{MAPE} riduce riduce l'impatto sul valore di fitness finale
+delle specie con un numero elevato di molecole ma, come anticipato, si rompe
+quando un bersaglio tende ad avere zero molecole.\\
+Fatte queste premesse si può quindi ridurre il \textit{problema PE} al problema
+di 
+determinare la soluzione ottima, che viene denotata con $o$, nello spazio
+$\mathcal{S}$ di tutte le possibili soluzioni (che per noi sono
+parametrizzazioni cinetiche). Tale soluzioni ottima è quindi quella con il
+valore di fitness più piccolo possibile, avendo, formalmente, che:
+\[f(o)\leq f(\vartheta),\,\,\forall\vartheta\in \mathcal{S}\]
+Ovvero una soluzione che non può essere ulteriormente migliorata rispetto alla
+funzione fitness. Ne segue che il \textit{problema PE} viene riformulato come un
+problema di ottimizzazione, in particolare di minimizzazione. Concettualmente
+bisogna mettere quindid ei vincoli alle possibili soluzioni. L'obiettivo è
+minimizzare la distanza tra il target e la dinamica simulata, sfruttando molti
+dati per l'ottenimento del risultato. Infatti, avendo magari pochi dati, che
+idealmente possiamo pensare nel caso più semplice come punti su un piano
+cartesiano, si rischia di modellare un risultato completamente irrealistico
+rispetto alla realtà (ad esempio con tre punti penso di avere un comportamento
+lineare ma già con cinque scopro che è oscillatorio).
+Un altro problema da considerare è quello dell'\textbf{overfitting}, in quanto
+l'uso di troppi dati rischia di portare anche a modellare il \textit{rumore},
+rendendo più complesso lo studio. Purtroppo comunque, parlando del target,
+solitamente il \textit{wet-lab} produce pochissimi time-points, nell'ordine di
+cinque o sei, nella maggior parte dei casi. Inoltre spesso sono i momenti
+iniziali, difficili da misurare con frequenza, ad essere rilevanti in quanto
+dopo poco si rischia già di avere uno steady state.
+\subsection{Gradient Descent}
+Ipotizziamo di avere una semplice funzione $f:\mathbb{R}\to\mathbb{R}$ che
+plottiamo sul piano cartesiano. In ogni punto, per virtualmente scegliere in che
+direzione andare 
+per cercare il minimo, possiamo usare le \textit{derivate}, in quanto ci dicono
+la \textit{pendenza} della funzione in quel punto. Il problema in questo caso
+diventa quindi trovare il punto in cui si ha derivata nulla, avendo quindi che
+ci si trova in un minimo (si noti che non si può qui distinguere se sia un
+\textit{minimo locale} o un \textit{minimo globale}).\\
+Estendendo il discorso a più
+dimensioni, avendo nel nostro caso un vettore di parametri, abbiamo il concetto
+di \textbf{gradiente}, avendo che il 
+\textit{gradiente} in un punto è un vettore ci fornisce le stesse informazioni
+delle derivata riguardo al pendenza della funzione, ma nel caso
+multidimensionale. Infatti è un vettore che punta nella direzione della salita
+più ripida e quindi basta seguire il \textit{gradiente inverso} per cercare il
+minimo, avendo anche qui che on si può qui distinguere se sia un
+\textit{minimo locale} o un \textit{minimo globale}. Formalmente il gradiente
+definisce no \textit{spazio 
+  vettoriale} e, ad esempio per due dimensioni, si ha che:
+\[\nabla f(x,y)=\frac{\partial f}{\dd{x}}i+\frac{\partial f}{\dd{y}}j\]
+Si ha quindi l'algoritmo deterministico detto \textbf{gradient descent
+  (\textit{GD}) algorithm}, che parte con la scelta casuale di una soluzione iniziale nello
+spazio delle soluzione $\mathcal{S}$ e calcolandone il gradiente. A questo punto
+si compie un \textit{passo} nella direzione opposta a quella puntata dal
+gradiente, 
+muovendosi quindi verso un minimo. Si itera fino a quando il gradiente è zero,
+cioè, non c'è direzione che migliori ulteriormente la funzione fitness. In
+pratica quindi si sta esplorando la superficie multidimensionale definita dalla
+\textit{funzione di fitness}, superficie che viene detta \textbf{fitness
+  landscape} e quindi \textit{GD} altro non è che un algoritmo deterministico
+che si muove verso il basso in tale superficie, rischiando però di restare
+``intrappolato'' in un minimo locale.\\ 
+Una variante adattiva, che gestisce in modo adattivo la lunghezza dei
+\textit{passi} è l'\textbf{algoritmo di Levenberg-Marquardt
+  (\textit{LM})}\footnote{Marquardt, 
+  Donald W. "An algorithm for least-squares estimation of nonlinear parameters."
+  Journal of the society for Industrial and Applied Mathematics 11.2 (1963):
+  431-441.} ma anche in questo caso non si evita il problema dei minimi
+locali.\\
+Tale problema può essere mitigato usando un \textit{approccio multi-start},
+ovvero banalmente ripetendo l'algoritmo con una scelta causale iniziale diversa,
+questo per molte volte. La probabilità di convergere alla stessa soluzione, che
+magari è un minimo locale, viene quindi ridotta ma non si sta davvero risolvendo
+il problema. Il punto cruciale è che \textit{GD} (ma anche \textit{LM}) è un
+algoritmo strettamente deterministico, funzionando bene solo con \textit{fitness
+  landscape unimodali}, quindi con un solo punto di minimo, che nel dettaglio è
+quello globale non avendo minimi locali. \\
+Si vedrà a breve quindi come la soluzione sia quella di  ``far sbagliare''
+volontariamente l'algoritmo.
+\subsection{Simulated Annealing}
+Una soluzione è quella di usare una \textbf{meta-euristica stocastica per
+  ottimizzazione globale}, come l'algoritmo detto \textbf{Simulated Annealing
+  (\textit{SA})}\footnote{Kirkpatrick, Scott, C. Daniel Gelatt Jr, and Mario
+  P. Vecchi. "Optimization by simulated annealing." science 220.4598 (1983):
+  671-680.}, stimando quindi l'ottimo globale evitando quelli locali.\\ 
+Questo metodo prende spunto dal mondo metallurgico, dove per eliminare
+difetti causati da ordini dei reticoli cristallini che vengono a mancare si pro-
+cede con la loro parziale rifusione, l’\textit{annealing} appunto, seguita da
+una procedura di raffreddamento molto lenta. Continuando l’analogia della
+metallurgica si ha:
+\begin{itemize}
+  \item l’ottimo globale corrisponde al metallo con struttura cristallina
+  senza difetti
+  \item gli ottimi locali corrispondono al metallo con struttura cristallina
+  con presenza di difetti reticolari
+  \item la procedura algoritmica per trovare il minimo/massimo globale,
+  sfuggendo 
+  ai minimi/massimi locali locali, corrisponde al processo di lento
+  raffreddamento 
+  ed eventuale riscaldamento 
+\end{itemize}
+Dal punto di vista algoritmico abbiamo una soluzione simile a \textit{GD} ma con
+la possibilità di prendere direzioni errate.\\
+Il procedimento dell'algoritimo è il seguente:
+\begin{enumerate}
+  \item si genera una soluzione iniziale $\vartheta$
+  \item si inizializza un parametro, che per analogia viene detto
+  \textit{temperatura}, $T\in \mathbb{R}^{+}$
+  \item si genera una soluzione vicina a $\vartheta$, chiamata $\vartheta_{new}$
+  \item se, con $f$ \textit{funzione di fitting}, $f(\vartheta_{new})$ è miglior
+  e di $f(\vartheta)$ allora $\vartheta \gets \vartheta_{new}$. In caso
+  contrario posso comunque accettare il nuovo candidato con una certa
+  probabilità:
+  \[P(accept\,\, \vartheta_{new}|\,\,f(\vartheta)\mbox{ is better than
+    }f(\vartheta_{new}))=e^{-\frac{|f(\vartheta)-f(\vartheta_{new}|)}{T}}\] 
+  \item si aggiorna $T$ e si itera dallo step 3) fino a che i criteri di stop
+  non sono soddisfatti
+  \item si ritorna $\vartheta$ come soluzione ottima
+\end{enumerate}
+\subsection{Meta-Euristiche Population-Based}
+Si è visto come \textit{GD} e \textit{SA}, nel caso semplice, si basino sul
+miglioramento iterativo di una singola scelta iniziale di soluzione per
+$\vartheta$. \\
+In generale esistono due classi di algoritmi ispirati alla biologia basate su
+popolazioni di soluzioni candidate, largamente impiegate per la stima dei
+parametri:
+\begin{enumerate}
+  \item \textbf{evolutionay computation}\footnote{De Jong, K. (2016,
+    July). Evolutionary computation: a unified approach. In Proceedings of the
+    2016 on Genetic and Evolutionary Computation Conference Companion
+    (pp. 185-199).}, che sono algoritmi basati su processi 
+  darwiniani (selezione, crossover, mutazioni etc$\ldots$), tra cui:
+  \begin{itemize}
+    \item algoritmi genetici
+    \item strategie d'evoluzione
+    \item evoluzione differenziale
+  \end{itemize}
+  \item \textbf{swarm intelligence}\footnote{Eberhart, R. C., Shi, Y., \&
+    Kennedy, J. (2001). Swarm intelligence. Elsevier.}, con algoritmi che
+  sfruttano i comportamenti emergenti di gruppi di agenti (come pesci, uccelli,
+  api etc$\ldots$), tra cui:
+  \begin{itemize}
+    \item ant colony optimization
+    \item bat algorithm
+    \item particle swarm optimization (\textit{PSO})
+  \end{itemize}
+\end{enumerate}
+Interessante è un paper di Dr\"{a}ger\footnote{Dr\"{a}ger, A., Kronfeld, M.,
+  Ziller, 
+  M. J., Supper, J., Planatscher, H., Magnus, J. B., ... \& Zell,
+  A. (2009). Modeling metabolic networks in C. glutamicum: a comparison of rate
+  laws in combination with various parameter optimization strategies. BMC
+  Systems Biology, 3(1), 1-24.}, dove si confrontano vari algoritmi: 
+\begin{multicols}{2}
+  \footnotesize
+  \begin{itemize}
+    \item Gradient Descent (GD) 
+    \item Hill Climbing (HC)
+    \item Simulated Annealing (SA)
+    \item Genetic Algorithms (GA)
+    \item Differential Evolution (DE)
+    \item Evolution Strategy (ES)
+    \item Covariance Matrix Adaptation Evolution
+    \item Strategy (CMA-ES)
+    \item Particle Swarm Optimization (PSO)
+    \item Tribes
+  \end{itemize}
+\end{multicols}
+Ottenendo i seguenti plot per la \textit{miglior fitness media}:
+\begin{figure}[H]
+  \centering
+  \includegraphics[width = \textwidth]{img/me.jpg}
+\end{figure}
+Notando come \textit{PSO} sia miglior algoritmi, sul comportamento medio, con
+anche la minor varianza
+\subsection{Particle Swarm Optimization}
+\textbf{Particle Swarm Optimization (\textit{PSO})}\footnote{Kennedy, J., \&
+  Eberhart, R. (1995, November). Particle swarm optimization. In Proceedings of
+  ICNN'95-international conference on neural networks (Vol. 4,
+  pp. 1942-1948). IEEE.} è una meta-euristica 
+stocastica bio-ispirata basata sul comportamento emergente di pesci e uccelli.\\
+In questo metodo le \textit{particelle} rappresentano le soluzioni candidate,
+quindi i \textit{vettori coi parametri cinetici}. In pratica le
+\textit{particelle} rappresentano l'intera parametrizzazione del modello. Si ha
+quindi che le particelle si muovono all'interno di uno spazio con $D$
+dimensioni, che rappresenta lo spazio di ricerca, e cooperano al fine di
+identificare e convergere alla soluzione ottima. Inoltre la particelle $i$-esima
+è caratterizzata da tre vettori:
+\begin{enumerate}
+  \item $\mathbf{x}_i(t)\in\mathbb{R}^D$ che rappresenta la \textit{posizione}
+  della particella  
+  $i$-esima nello spazio di ricerca all'iterazione $t$
+  \item $\mathbf{v}_i(t)\in\mathbb{R}^D$ che rappresenta la \textit{velocità}
+  della particella $i$-esima all'iterazione $t$
+  \item $\mathbf{b}_i(t)\in\mathbb{R}^D$ che è la \textit{miglior posizione},
+  stimata tramite la \textit{funzione di fitness}, visitata dalla particella
+  $i$-esima fino all'iterazione $T$
+\end{enumerate}
+Nel dettaglio la velocità è usata per aggiornare la posizione delle particelle:
+\[\mathbf{x}_i(t+1)=\mathbf{x}_i(t)+\mathbf{v}_i(t)\]
+Inoltre si hanno due valori per possono variare le velocità:
+\begin{enumerate}
+  \item la \textbf{social attraction}, denotato con $\mathbf{g}$, ovvero
+  l'attrazione verso la miglior 
+  posizione trovata dallo \textit{swarn/sciame} di particelle. Tale valore viene
+  modulato tramite il cosiddetto \textbf{fattore sociale}, denotato con
+  $c_{soc}$. In pratica modula l'esplorazione locale (???)
+  \item la \textbf{cognitive attraction}, denotato con $\mathbf{b}_i$, ovvero
+  l'attrazione verso la miglior posizione trovata dalla particella
+  $i$-esimae. Tale valore viene 
+  modulato tramite il cosiddetto \textbf{fattore cognitivo}, denotato con
+  $c_{cog}$. In pratica modula l'esplorazione globale (???)
+\end{enumerate}
+Inoltre il movimento subisce anche l'effetto di un fattore d'\textbf{inerzia},
+pesato da un fattore $w$, avendo:
+\[inertia = w\cdot \mathbf{v}_i(t)\]
+Approssimativamente si ottiene, per il calcolo di $\mathbf{v}_i(t+1)$, che
+solitamente è in un intervallo di bound $[\mathbf{v}_{min}, \mathbf{v}_{max}]$:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.9]{img/pso.pdf}
+\end{figure}
+Non appena tutte le posizioni vengono aggiornate, i valori di fitness di tutte
+le particelle vengono aggiornati e queste informazioni vengono utilizzate per
+aggiornare (se necessario) entrambi i $\mathbf{b}_i$ e $\mathbf{g}$. Si ottiene
+quindi il flowchart visibile in figura \ref{fig:pso}.
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.9]{img/pso2.pdf}
+  \caption{Flowchart del funzionamento di \textit{PSO}.}
+  \label{fig:pso}
+\end{figure}
+\textit{PSO} inoltre richiede da parte dell'utente l'input di diversi
+\textit{settings}, per il \textit{tuning} dell'algoritimo stesso, i cosidetti \textbf{iper-parametri}:
+\begin{itemize}
+  \item il già citato \textit{social factor} $c_{soc}\in\mathbb{R}^{+}$
+  \item il già citato \textit{cognitive factor} $c_{cog}\in\mathbb{R}^{+}$
+  \item il già citato peso dell'inerzia $w\in\mathbb{R}^{+}$ che bilancia le
+  impostazioni di cui sopra. L'inerzia bassa aiuta la ricerca locale, l'inerzia
+  alta aiuta la ricerca globale 
+  \item la grandezza dello sciame $N$
+  \item l'intervallo della velocità $[\mathbf{v}_{min}, \mathbf{v}_{max}]$
+  \item una strategia per la gestione delle particelle che escono dallo spazio
+  di ricerca\footnote{Xu, F., Zhang, Y., Hong, W., Wu, K., \& Cui,
+    T. J. (2003). Finite-difference frequency-domain algorithm for modeling
+    guided-wave properties of substrate integrated waveguide. IEEE Transactions
+    on Microwave Theory and Techniques, 51(11), 2221-2227.} 
+  \item un algoritmo per la distribuzione iniziale delle particelle nello spazio
+  di ricerca\footnote{Cazzaniga, P., Nobile, M. S., \& Besozzi, D. (2015,
+    August). The impact of particles initialization in PSO: parameter estimation
+    as a case in point. In 2015 IEEE Conference on Computational Intelligence in
+    Bioinformatics and Computational Biology (CIBCB) (pp. 1-8). IEEE.} 
+\end{itemize}
+È quindi ovvio come tali parametri siano difficili da scegliere e abbiano un
+fortissimo impatto al punto di vista sia dei risultati che
+dell'ottimizzazione. Tale lavoro non può essere svolto da chiunque. Basti
+pensare comunque che già solo $N=50$ con 1000 iterazioni comporti davvero tante
+simulazioni ad ogni \textit{passo}.\\
+Dal punto di vista degli \textit{per-parametri} si segnala quindi il paper di
+Nobile et al.\footnote{Nobile, M. S., Cazzaniga, P., Besozzi, D., Colombo, R.,
+  Mauri, G., \& Pasi, G. (2018). Fuzzy Self-Tuning PSO: A settings-free
+  algorithm 
+  for global optimization. Swarm and evolutionary computation, 39, 70-85.} dove
+si propone un algoritmo di \textit{self-tuning} basato su \textit{logica fuzzy},
+detto \textbf{Fuzzy Self-Tuning PSO (\textit{FST-PSO})}. In pratica con l'uso
+della logica fuzzy, tramite 15 semplici regole, si da alle particelle ``un po'
+di intelligenza in più'', 
+calcolando con \textit{FST-PSO} l'inerzia, i due fattori e il range di velocità
+\textit{n real-time}. Ogni particella adatta i suoi iper-parametri basandosi su
+due informazioni:
+\begin{enumerate}
+  \item il\textit{ miglioramento normalizzato di fitness} rispetto
+  all'iterazione precedente, denotato con $\Phi$
+  \item la distanza dalla soluzione globale migliore, denotata con $\delta$
+\end{enumerate}
+Tale algoritmo risulta essere la miglior soluzione in ottica \textit{PE}.\\
+Un'applicazione pratica di \textit{FST-PSO} è stata fatta, in collaborazione con
+l'\textit{Istituto di Oncologia Europeo (IEO)}, in merito alla \textbf{leucemia
+  mieloide acuta/Acute Myeloid Leukemia (\textit{AML})}\footnote{Nobile, M. S.,
+  Vlachou, T., Spolaor, S., Cazzaniga, P., Mauri, G., Pelicci, P. G., \&
+  Besozzi, 
+  D. (2019, July). ProCell: Investigating cell proliferation with swarm
+  intelligence. In 2019 IEEE Conference on Computational Intelligence in
+  Bioinformatics and Computational Biology (CIBCB) (pp. 1-8). IEEE.}. Lo scopo
+dello studio 
+erano le \textit{ricadute} dell'\textit{AML}, studiando cellule umane di
+\textit{AML} xenotrapiantate nei topi e ontrassegnate con proteine fluorescenti
+verdi per mezzo di lentivirus. Infine per raccogliere istogrammi di fluorescenza
+si è usata la citometria a flusso, a $t=0, t=10$ e $t=21$ giorni (appunto come
+anticipato pochi time-points). Si è quindi studiata la
+\textit{self-proliferation} studiando la distribuzione delle fluorescenze
+ottenute sperimentalmente (si noti che per ottenere i dati sperimentali bisogna
+uccidere il topo). Si hanno alcune assunzioni:
+\begin{itemize}
+  \item \textit{GFP} si lega all'istone \textit{H2B}: il livello di fluorescenza
+  si dimezza ad 
+  ogni divisione cellulare 
+  \item i topi sono immunocompromessi: nessuna risposta immunitaria da
+  linfociti, cellule NK, etc$\ldots$
+  \item livello di fluorescenza basale: se la fluorescenza scende al di sotto di
+  una soglia diventa \textit{GFP-negativa}
+\end{itemize}
+Per questa analisi si è quindi creato un nuovo framework di modellazione
+stocastica  per
+studiare la proliferazione cellulare chiamato \textbf{ProCell}.\\
+La simulazione richiede alcune informazioni preliminari:
+\begin{itemize}
+  \item 
+\end{itemize}
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update

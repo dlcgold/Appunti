@@ -5229,7 +5229,8 @@ In questo contesto quindi si definisce il \textbf{problema del Parameter
   parametri} $\vartheta$ \textit{in silico}, di cui si segnala un interessante
 paper di Moles et al.\footnote{Moles, Carmen G., Pedro Mendes, and Julio
   R. Banga. "Parameter estimation in biochemical pathways: a comparison of
-  global optimization methods." Genome research 13.11 (2003): 2467-2474.}. Con
+  global optimization methods." Genome research 13.11 (2003): 2467-2474.}. Si
+noti che il \textit{problema PE} è un \textbf{problema NP-hard}. Con
 la \textit{PE} si hanno comunque alcune assunzioni per quanto si andrà a
 trattare in questa sezione:
 \begin{itemize}
@@ -5570,7 +5571,8 @@ due informazioni:
 Tale algoritmo risulta essere la miglior soluzione in ottica \textit{PE}.\\
 Un'applicazione pratica di \textit{FST-PSO} è stata fatta, in collaborazione con
 l'\textit{Istituto di Oncologia Europeo (IEO)}, in merito alla \textbf{leucemia
-  mieloide acuta/Acute Myeloid Leukemia (\textit{AML})}\footnote{Nobile, M. S.,
+  mieloide acuta/Acute Myeloid Leukemia (\textit{AML})}, tramite un framework di
+simulazione chiamato \textbf{ProCell}\footnote{Nobile, M. S.,
   Vlachou, T., Spolaor, S., Cazzaniga, P., Mauri, G., Pelicci, P. G., \&
   Besozzi, 
   D. (2019, July). ProCell: Investigating cell proliferation with swarm
@@ -5596,13 +5598,153 @@ uccidere il topo). Si hanno alcune assunzioni:
 \end{itemize}
 Per questa analisi si è quindi creato un nuovo framework di modellazione
 stocastica  per
-studiare la proliferazione cellulare chiamato \textbf{ProCell}.\\
-La simulazione richiede alcune informazioni preliminari:
+studiare la proliferazione cellulare chiamato appunto \textbf{ProCell}.\\
+La simulazione richiede diversi parametri:
 \begin{itemize}
-  \item 
+  \item il \textit{numero delle sotto-popolazioni} e il \textit{rapporto}
+  (rispetto al totale ???) 
+  \item la \textit{media} e la \textit{deviazione standard} della divisione
+  cellulare per ogni sotto-popolazione
+  \item \textit{soglia di GPF-positivity}
+  \item \textit{tempo di simulazione}, in ore
 \end{itemize}
+Si ha quindi una simulazione stocastica dove:
+\begin{itemize}
+  \item si mantiene uno \textit{stack} di cellule, avendo che le nuove cellule
+  generate 
+  da eventi di divisione randomici vengono aggiunte allo \textit{stack}
+  \item le cellule \textit{GFP-negative} sono rimosse dallo \textit{stack}
+  \item l'algoritmo restituisce lo \textit{stack} di cellule fluorescenti a
+  $t=t_{max}$ 
+\end{itemize}
+Nel design di questo modello si sono dovute fronteggiare varie problematiche,
+tra cui l'assenza della maggior parte delle informazioni biologiche, tra cui i
+tempi di divisione stessi. In pratica nessuno dei parametri era misurabile con
+esperimenti in \textit{wet-lab}. In output si hanno infine degli istogrammi che 
+dipendono fortemente dalla parametrizzazione del modello, avendo quindi
+necessità di un buon metodo per la \textit{PE}. Nel dettaglio si è quindi usato
+\textit{FST-PSO} per lo sviluppo di un sistema di \textit{PE} completamente
+automatizzato, usando come \textit{fitness function} la \textbf{distanza di
+  Hellinger} tra l'istogramma simulato $\hat{H}_j^\vartheta$, ottenuto tramite
+divisione in sotto-intervalli (i cosiddetti \textit{bin}), normalizzato e creato
+con la parametrizzazione $\vartheta$, e l'istogramma sperimentale target
+$\hat{T}_j$. Formalmente si aveva quindi, con $N$ numero delle sotto-popolazioni
+(???): 
+\[f(\vartheta)=\frac{1}{\sqrt{2}}\sqrt{\sum_{j=1}^N
+    \left(\sqrt{\hat{H}_j^\vartheta}-\sqrt{\hat{T}_j}\right)^{2}}\]
+Questo è per di più un esempio pratico per vedere come non siano solo i
+parametri cinetici quelli che si possono stimare con un algoritmo di
+\textit{PE}.\\
+Sono stati quindi testati quattro modelli per lo studio della \textit{AML}:
+\begin{enumerate}
+  \item la \textit{proliferazione semplice}
+  \item la \textit{proliferazione semplice} e le \textit{celle quiescenti}, che
+  sono quelle che non vengono uccise dalla chemioterapia. Questo era il
+  sospetto dello \textit{IEO}
+  \item la \textit{proliferazione lenta}, la \textit{proliferazione veloce} e le
+  \textit{celle quiescenti}
+  \item la \textit{proliferazione lenta} e la \textit{proliferazione veloce},
+  avendo avuto il sospetto che fossero le prime quelle a non sopravvivere alla
+  chemioterapia e non le \textit{cellule quiescenti}
+\end{enumerate}
+I risultati delle simulazioni hanno mostrato come il terzo modello spieghi
+effettivamente le osservazioni sperimentali dei dati ottenuti tramite le
+fluorescenze, avendo la minor \textit{distanza di Hellinger} tra i modelli
+testati e avendo che anche una simulazione con validazione a $t=21$ giorni abbia
+un buon fit coi dati sperimentali.
+\begin{shaded}
+  \noindent
+  Si segnalano i paper dello studio, con i dettagli degli algoritmi e dei
+  risultati: 
+  \begin{itemize}
+    \item \textit{Nobile, M. S., Nisoli, E., Vlachou, T., Spolaor, S.,
+      Cazzaniga, 
+      P., Mauri, G., ... \& Besozzi, D. (2020). cuProCell: GPU-accelerated
+      analysis 
+      of cell proliferation with flow cytometry data. IEEE Journal of Biomedical
+      and Health Informatics, 24(11), 3173-3181.} 
+    \item \textit{Nobile, M. S., Vlachou, T., Spolaor, S., Cazzaniga, P., Mauri,
+      G., Pelicci, P. G., \& Besozzi, D. (2019, July). ProCell: Investigating
+      cell 
+      proliferation with swarm intelligence. In 2019 IEEE Conference on
+      Computational Intelligence in Bioinformatics and Computational Biology
+      (CIBCB) (pp. 1-8). IEEE.} (\textbf{premiato con il ``best paper award''})
+    \item \textit{Nobile, M. S., Vlachou, T., Spolaor, S., Bossi, D., Cazzaniga,
+      P., Lanfrancone, L., ... \& Besozzi, D. (2019). Modeling cell
+      proliferation 
+      in human acute myeloid leukemia xenografts. Bioinformatics, 35(18),
+      3378-3386. }
+  \end{itemize}
+\end{shaded}
+\subsection{Dilation Function}
+Si ricorda che, in determinati casi, l'uso della \textit{distribuzione uniforme
+  logaritmica} possa fornire risultati migliori qualora si necessiti di un dato
+campionato in un intervallo prossimo allo 0 (tipico se si parla di costanti
+cinetiche), avendo che usando una normale 
+\textit{distribuzione uniforme} non si ottiene realmente l'intero range di
+valori in modo uniforme (avendo che si campiona meno avvicinandosi a 0). \\
+Il team formato dalla professoressa Besozzi, dal prof Nobile e dai loro colleghi
+hanno 
+quindi cercato un metodo per ottimizzare al meglio la scelta dei parametri
+cinetici, avendo che essi sono spesso compattati in un intervallo iniziale sulla
+funzione ottenuta avendo sulle $x$ i valori dei parametri e sulle $y$ i valori
+del \textit{fitness value} ottenibile con quella parametrizzazione, che poi
+tende ad andare in uno steady-state. L'idea è quindi quella di 
+``stretchare'' i valori sull'asse delle $x$ cambiandone letteralmente la
+semantica. Infatti si ha che i parametri cinetici ottimali sono spesso molto
+piccoli e nascosti negli ordini di grandezza più bassi. Con le \textbf{dilation
+  functions}, proposte dal prof Nobile et al. \footnote{Nobile, M. S.,
+  Cazzaniga, P., \& Ashlock, D. A. (2019,
+  June). Dilation functions in global optimization. In 2019 IEEE Congress on
+  Evolutionary Computation (CEC) (pp. 2300-2307). IEEE.} si ha quindi un mapping
+dei valori cinetici durante la fase di 
+ottimizzazione, letteralmente \textit{dilatando} alcune regioni dello spazio di
+ricerca, avendo come obiettivo di selezionare quelle regioni che contengono le
+soluzioni ottimali e di semplificare la fase di ottimizzazione. Si ottiene
+quindi un \textbf{dilated fitness landscape}. Si è permesso
+quindi di trovare anche quei valori, molto 
+piccoli, che solitamente sono difficili da trovare usando un'euristica di
+ottimizzazione. Dilatando gli ordini di grandezza più bassi e comprimendo il
+valori cinetici elevati, si può infatti rivelare la regione ottimale. Grazie a
+questo metodo si sono migliorate le perfomance di praticamente tutti gli
+algoritmi di \textit{PE}.
+\subsection{surF}
+Il \textit{dilated fitness landscape} può comunque essere molto ``ruvido'' a
+causa dell'uso di algoritmi di simulazione stocastici che permettono appunto di
+simulare anche il \textit{rumore}. Nel contesto della \textit{PE} tale rumore
+però non sempre risulta essere un vantaggio. Nel 2020 Manzoni, la professoressa
+Besozzi, il prof Nobile et al\footnote{Manzoni, L., Papetti, D. M., Cazzaniga,
+  P., Spolaor, S., Mauri, G., Besozzi, D., \& Nobile, M. S. (2020). Surfing on
+  fitness landscapes: A boost on optimization by Fourier surrogate
+  modeling. Entropy, 22(3), 285.} proposero \textbf{Surrogate Fourier modeling
+  of fitness landscapes (\textit{surF})}. Si ha che \textit{surF} esegue un
+campionamento casuale del \textit{fitness landscape} e quindi sfrutta la
+\textbf{trasformata 
+di Fourier discreta (\textit{DFT})} per calcolarne gli spettri
+multidimensionali. Filtrando i componenti ad alta frequenza ed eseguendo la
+\textit{DFT inversa}, \textit{surF} produce una versione \textit{liscia} del
+\textit{fitness landscape}, senza appunto la rappresentazione \textit{ruvida}
+data dal \textit{rumore}. Infatti la \textit{DFT} converte una sequenza finita
+di campioni equi-distanziati di una funzione, che in questo caso è la
+\textit{fitness function}, in una sequenza di campioni equi-distanti della
+\textit{trasformata di Fourier a tempo discreto}, che è una funzione di
+frequenza a valori complessi. Si ha quindi il passaggio dai campioni alle
+frequenze. Inoltre la \textit{DFT} è invertibile, permettendo quindi anche il
+viceversa. Rimuovendo le componenti ad alta frequenza dello \textit{spettro di
+  Fourier} si può quindi rimuovere il rumore dal segnale e utilizzare la
+\textit{DFT inversa} per ottenere una versione più \textit{liscia} della
+funzione originale. \\
+La \textit{DFT} può essere generalizzata a $N$ dimensioni ma necessita di
+campioni 
+equi-distanti, avendo che il numero di campioni necessari esplode in modo
+esponenziale. Questo problema può comunque essere mitigato mediante
+campionamento e interpolazione casuali. Si ha del resto che \textit{surF} è
+limitato in termini dimensionali (al più circa $N=30$, \textit{dato da verifica,
+la professoressa non era certa}) anche se si stanno svolgendo studi in
+merito. Nonostante ciò \textit{surF} permette di semplificare notevolmente i
+metodi di \textit{PE}.
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update
 % LocalWords:  multipartiti fosforilata ligando regolatoria transmembrana
-% LocalWords:  degradatori sampling bistabilità formalizzabile
+% LocalWords:  degradatori sampling bistabilità formalizzabile perfomance

@@ -20,6 +20,7 @@
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{fontspec}
+\usepackage{scrextend}
 \usepackage{enumerate}
 \usepackage{physics}
 \usepackage{braket}
@@ -5743,8 +5744,358 @@ limitato in termini dimensionali (al più circa $N=30$, \textit{dato da verifica
 la professoressa non era certa}) anche se si stanno svolgendo studi in
 merito. Nonostante ciò \textit{surF} permette di semplificare notevolmente i
 metodi di \textit{PE}.
+\chapter{Rule-Based Modelling}
+Si presenta ora il \textbf{rule-based modelling} che è una tecnica modellistica
+a tratti simile al \textbf{reaction-based modelling}, anche se molto più
+verboso, con la differenza che 
+vengono usati in presenza di realtà biologiche che prevedono potenzialmente un
+numero molto grande (o addirittura non finito) di reazioni, come
+\textit{signaling, trasduction cascade, risposta immune, polimerizzazioni
+  etc}$\ldots$\\
+Tali modelli sono quindi \textit{modelli meccanicistici}.\\
+Un altro dei motivi chiave per cui si usa questo tipo di modellazione, al posto
+di quello meccanicistico basato su reazioni, è per
+gestire la cosiddetta \textbf{modularità}. Infatti le \textit{biomolecole},
+specialmente le \textit{proteine}, possono avere multiple funzioni, come di
+\textit{chinasi} o \textit{binding}. Le
+\textit{proteine} sono spesso organizzate in modo ``modulare'', avendo i
+cosiddetti \textit{protein domains}. Quindi la \textit{modularità} (che è
+presente anche in altri fenomeni biologici come la \textit{sugar chain}) è una
+funzionalità chiave per comprendere il funzionamento delle proteine, in quanto
+sfruttano la modularità per “localizzare” alcune funzioni all'interno della loro
+struttura 3D. Tra i \textit{protein domains} abbiamo:
+\begin{multicols}{2}
+  \begin{itemize}
+    \item enzimi
+    \item proteine per il docking
+    \item fattori di trascrizione
+    \item proteine adattatrici (\textit{adaptors})
+    \item proteine citoscheletriche
+    \item fattori di inibizione
+  \end{itemize}
+\end{multicols}
+\noindent
+Bisogna inoltre notare come di vari \textit{protein domains} condividano
+strutture, funzioni, storia evolutiva e sequenze amminoacidiche.\\
+I siti di legame proteico (\textit{protein binding sites}) e le modifiche
+post-trasduzionali possono essere in stati diversi in due copie della stessa
+proteina. D'altro canto descrivere lo stato generale di una proteina potrebbe
+richiedere l'enumerazione di diversi siti di legame e modifica. Tale numero
+quindi cresce molto velocemente, in modo proporzionale sia al numero di siti
+disponibili che del loro stato.\\
+Vediamo un esempio\footnote{Creamer, Matthew S., et al. "Specification,
+  annotation, visualization and simulation of a large rule-based model for ERBB
+  receptor signaling." BMC systems biology 6.1 (2012): 1-14.}. 
+\begin{esempio}
+  Si pensi all'esempio di \textit{EGFR}, qui rappresentato:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.3]{img/egfr.jpg}
+  \end{figure}
+  Il \textit{recettore EGFR} può \textit{dimerizzare}, ovvero si ha  una
+  reazione chimica che coinvolge due entità molecolari identiche (monomeri) per
+  la formazione di una singola entità molecolare, con altre proteine della
+  stessa specie e presenta diversi siti di fosforilazione. \\
+  Si ha quindi che:
+  \begin{itemize}
+    \item \textit{EGFR monomero} prevede: $2\cdot 8\cdot 6\cdot 8\cdot 12\cdot
+    6\cdot 6=331776$ stati/specie 
+    \item \textit{EGFR Erb83 eterodimerizzazione} prevede: $3.8\times 10^9$
+    stati/specie
+    \item \textit{EGFR dimerizzazione} prevede: $3.8\times 10^{12}$
+    stati/specie
+  \end{itemize}
+  Già il primo caso è ingestibile dal punto di vista computazionale tramite un
+  modello \textit{reaction-based}, avendo una specie univoca per ogni stato
+  possibile dal punto di vista dei \textit{binding}. Si arriverebbe circa a
+  $10^{10}$ specie, con le quantità iniziali, e con un numero quasi sicuramente
+  maggiore di reazioni, con i vari \textit{kinetic rate}. 
+\end{esempio}
+I sistemi \textit{reaction-based} considerano le specie \textit{in massa/bulk},
+studiando contemporaneamente più reazioni e non tenendo traccia esplicita dello
+stato di una singola molecola, quindi è impossibile creare un modello in quanto
+richiederebbe troppo sforzo umano e tempo macchina. Quindi si ha bisogno di un
+approccio di modellazione che sia più vicino alle caratteristiche strutturali
+delle biomolecole avendo quindi i modelli \textbf{rule-based} che si pongono ad
+un livello di astrazione intermedio tra i modelli \textit{reaction-based}, più
+astratti, e i modelli basati sulla \textit{dinamica molecolare}, meno
+astratti.\\
+Questo tipo di modellazione è quindi è un formalismo di modellazione che
+affronta la rappresentazione di \textit{sistemi biologici combinatorialmente
+  complessi}, avendo l'idea di base è quella di specificare le
+\textit{interazioni proteina-proteina} come \textbf{regole} che servono come
+\textit{generatori di reazioni chimiche e specie}. Le \textit{regole} possono
+essere viste come una definizione di una \textit{classe di reazioni},
+praticamente come una \textit{reazione generalizzata} e specifica le
+caratteristiche delle proteine che sono richieste per una particolare
+interazione o che sono influenzate dalla stessa.\\
+Nel tempo si sono sviluppati vari tool per i modelli \textit{rule-based} tra
+cui:
+\begin{itemize}
+  \item \textit{BioNetGen}, probabilmente il più usato e che verrà introdotto
+  nel capitolo 
+  \item \textit{Kappa}, uno dei più complessi in quanto studiato per un uso da
+  parte di matematici più che da biologi/biotecnologi
+  \item \textit{MØD}
+\end{itemize}
+\section{Regole in BioNetGen}
+Come introdotto nel capitolo si parlerà di \textbf{BioNetGen} quindi è bene
+vedere la sintassi di tale sistema. La prima cosa da vedere è quindi come
+modellare una \textit{specie}, che viene modellata come un \textit{oggetto
+  strutturato}, ad esempio:
+\[EGFR(l,d,y1\sim 0\sim P, y2\sim 0\sim P, y3\sim 0\sim P)\]
+Dove:
+\begin{itemize}
+  \item $EGFR$ è il nome della molecola
+  \item $l,d,y1,y2.y3$ sono i siti molecolari, che vengono separati da ``,''
+  \item $\sim 0\sim P$ sono i possibili stati di un sito, avendo in questo caso
+  che $0$ sta corrisponde al fatto che il sito sia \textit{non fosforilato}
+  mentre $P$ che il sito sia \textit{fosforilato}
+\end{itemize}
+In questo caso quindi si ha che la molecola $EGFR$ ha due siti di binding ($l$ e
+$d$) e 3 siti di fosforilazione ($y1$, $y2$ e $y3$).\\
+Si ha poi che le \textit{regole} definiscono le interazioni tra molecole e
+comprendono:
+\begin{itemize}
+  \item un pattern per riconoscere i reagenti a seconda dei veri siti di binding
+  \item un mapping tra i reagenti e i prodotti
+  \item una costante cinetica per ogni verso del mapping
+\end{itemize}
+Si vede un semplice esempio, con una reazione reversibile (quindi con due
+costanti cinetiche):
+\[EGR(r)+EGFR(l) <-> EGF(r!1).EGFR(l!1)\quad k1,k2\]
+Dove:
+\begin{itemize}
+  \item $EGR(r)+EGFR(l)$ sono i reagenti con specificati i siti di legame
+  necessari ($r$ e $l$)
+  \item $EGF(r!1).EGFR(l!1)$ è il prodotto, avendo che con $.$ si specifica il
+  complesso. Con la sintassi $!<label>$ si specifica il \textit{legame} tra le
+  molecole, avendo 
+  che si usa la label condivisa, in questo caso $1$, per specificare tra quali
+  siti è 
+  avvenuto il legame 
+\end{itemize}
+Nell'esempio si ha quindi che $EGF$ si lega al suo recettore per mezzo del suo
+sito di legame ($l$), con costante cinetica $k1$, e viene rilasciato dal suo
+recettore con costante cinetica $k2$. \\
+D'altro canto potrei avere non solo la produzioni di complessi ma anche eventi
+di fosforilazione, come ad esempio:
+\[EGFR(y1\sim 0) + kinase()\,\, -> EGFR(y1\sim P) + kinase()\quad k3\]
+Dove $EGFR$ è \textit{fosforilato}, in un sito $y1$ disponibile, da una chinasi,
+con costante cinetica $k3$.\\
+In pratica le \textit{regole} identificano le specie che hanno le
+caratteristiche necessarie per subire la trasformazione da reagenti a prodotti,
+facendo quindi una sorta di \textbf{pattern matching}. Da una \textit{regola} si
+ha quindi la generazione di più possibili reazioni, tutte con la stessa costante
+cinetica, derivanti dalla \textit{regola} stessa. La generazione di reazioni da
+una regola è informalmente spiegata con il ``motto'': \textit{don't write don't
+  care!}, avendo che gli elementi non menzionati nella regola possono essere in
+qualsiasi stato, pertanto, una \textit{regola} può generare reazioni che
+coinvolgono 
+molte diverse ``specie''. Nell'ultima regola, per $EGFR$, ad esempio, si è
+specificato 
+solo lo stato di $y1$, gli altri 4 stati (se si riprende il primo esempio della
+sezione) possono essere, per assunzione, in qualsiasi stato. Quindi potrei avere
+molte specie che potrebbero partecipare alla reazione, ad esempio:
+\begin{itemize}
+  \item $EGFR(d!1).EGFR(d!1)$
+  \item $EGFR(y1\sim 0)$
+  \item $EGFR(y2\sim P, y3\sim P)$
+\end{itemize}
+In quanto tutte hanno il sito $l$ libero.\\
+Si noti che se modellassi ogni volta esplicitamente lo stato di tutti siti
+otterrei un modello \textit{reaction-based} quindi si specificano solo gli stati
+necessari, imponendo di fatto una sorta di ``vicolo'' alle reazioni generabili,
+e si lascia che sia il sistema a generare le reazioni.  \\
+Per convenzione, le interazioni rappresentate in una regola sono considerate
+indipendenti dal contesto molecolare (i siti di legame etc$\ldots$) che non è
+esplicitamente indicato nella regola stessa. Il fatto che tutte le reazioni
+generate da una regola condividano la stessa costante cinetica è un'assunzione
+che riflette l'organizzazione strutturale delle proteine, in cui le funzioni
+differenti sono isolate in domini differenti. Inoltre la generazione delle
+reazioni, che avviene a seconda dello stato corrente grazie all'uso del
+\textit{pattern matching} sulle regole, segue la \textit{cinetica mass-action}
+anche se i vari sistemi sopra 
+citati, tra cui \textit{BioNetGen}, supportino anche altre leggi cinetiche.
+\section{Simulazioni}
+Anche in questo caso, prima di effettuare una \textit{simulazione}, bisogna
+specificare lo stato iniziale, come numero di molecole o concentrazione (a
+seconda della tipologia di simulazione che si vuole come nei modelli
+\textit{reaction-based}) di ogni singola molecola (e di ogni possibile
+combinazione di binding site iniziale ???). \\
+Si può già ora intuire come esista una \textit{relazione 1:1} tra i modelli
+\textit{rule-based} e \textit{reaction-based} ma si hanno modelli
+\textit{rule-based} non modellabili come \textit{reaction-based} in quanto
+esistono regole che generano \textit{reazioni infinite}, come nel caso delle
+\textit{polimerizzazioni}, in quanto si costruisce una catena di
+\textit{polimeri} di lunghezza arbitraria (che nei \textit{reaction-based}
+dovrebbe essere fissata a priori). Infatti ci sono molte reti di reazione
+biochimica in natura che sono potenzialmente non finite, tra cui:
+\begin{itemize}
+  \item allungamenti della catena polimerica
+  \item N-glicosilazione delle proteine
+  \item polimerizzazione di actina e microtubuli
+  \item sintesi delle sequenze nucleotidiche
+\end{itemize}
+Per le simulazioni si hanno quindi due approcci:
+\begin{enumerate}
+  \item l'\textbf{approccio network-based}, detto anche \textbf{generate-first}
+  o \textbf{approccio indiretto}, dove si ha la generazione delle reazioni prima
+  della simulazione. In questo caso, infatti, la rete di specie e reazioni viene
+  generata prima della simulazione, attraverso l'applicazione iterativa delle
+  regole fino a quando non viene soddisfatta un criterio di stop
+  arbitrario, specificato a priori, o si ha che non vengono più generate nuove
+  reazioni. In pratica questo approccio genera un modello
+  \textit{reaction-based}, che può essere simulato con uno qualsiasi dei
+  algoritmi di simulazione già noti, ovvero \textit{algoritmi di integrazione,
+    SSA, $\tau$-leaping, etc$\ldots$}  
+  \item l'\textbf{approccio network-free}, detto anche \textbf{on-the-fly} o
+  \textbf{approccio diretto}, dove si ha la generazione delle reazioni durante
+  la simulazione stessa. \textbf{Questa strategia è necessaria in presenza di
+    regole che 
+    possono generare infinite reazioni}, in quanto l'approccio
+  \textit{network-based} non è applicabile in tali casi. In generale in questo
+  caso la rete di specie e reazioni viene generata durante la simulazione. A
+  partire da una condizione iniziale, la rete viene generata quando nuove specie
+  diventano disponibili e quindi si ``perde'' il supporto agli algoritmi visti
+  per i modelli \textit{reaction-based}, che si è visto sono da usare per
+  l'\textit{approccio network-based} ma si hanno algoritmi specifici come
+  \textbf{NFsim (\textit{Network-free
+      simulator})}\footnote{\label{nfsim}Sneddon, M., Faeder, 
+    J. \& Emonet, T. Efficient modeling, simulation and coarse-graining of
+    biological complexity with NFsim. Nat Methods 8, 177–183
+    (2011). https://doi.org/10.1038/nmeth.1546}. \textit{NFsim} è una 
+  versione \textit{rule-based} e generalizzata dell'\textit{algoritmo SSA} e ne
+  produce la stessa dinamica. L'algoritmo, che in input prende il numero di
+  molecole per ogni specie essendo una simulazione stocastica, si compone di
+  cinque step: 
+  \begin{enumerate}
+    \item calcolare le \textit{propensity function} per ogni regola, dati gli
+    attuali stati molecolari 
+    \item campionare il tempo d'attesa per la prossima reazione, come in
+    \textit{SSA}
+    \item selezionare la prossima regola (e non la prossima reazione come in
+    \textit{SSA}) 
+    \item selezionare le molecole reagenti come indicato dalla regola scelta
+    \item aggiornare lo stato del sistema e il tempo
+  \end{enumerate}
+\end{enumerate}
+Si ha quindi il seguente schema riassuntivo:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 1]{img/rulesimu.pdf}
+\end{figure}
+Riassumendo l'\textit{approccio network-free} viene usato per reti grandi e non
+limitate, per complessi proteici con numerosi siti di modifica, processi di
+polimerizzazione etc\ldots\\
+Del resto anche se la generazione della rete di reazioni è fattibile e limitata,
+la generazione di grandi reti (con magari componenti con tanti siti di binding)
+è computazionalmente pesante, sia in tempo che  
+in memoria, al punto che nel tempo in cui si genera la rete per l'approccio
+\textit{network-based}, dovendo poi seguire la vera e propria simulazione, si è
+quasi conclusa la simulazione con l'approccio \textit{network-free}, che, dal
+punto di vista temporale, cresce in modo lineare all'aumentare dei siti (mentre
+l'altro approccio cresce in modo esponenziale). Si noti
+infine che se il numero di specie e reazioni cresce in modo esponenziale
+all'aumentare dei siti il numero di regole cresce in modo lineare (???). Il
+tutto è visualizzabile in figura \ref{fig:nfsim}\footref{nfsim}.
+\begin{figure}
+  \centering
+  \includegraphics[width = \textwidth]{img/nfsim.jpg}
+  \caption{Grafici per confrontare i due approcci per modelli
+    \textit{rule-based}.}
+  \label{fig:nfsim}
+\end{figure}
+\section{Software}
+Si sono già introdotti alcuni tool. Approfondendo si ha che \textit{BioNetGen}
+funziona in combinazione a \textit{RuleBender} e si ha che esiste \textit{PySB
+  (Python bindings for BioNetGen)}. Inoltre si ha il supporto aggiuntivo di
+altri software, per stima di parametri, visualizzazione etc$\ldots$, tra cui:
+\begin{multicols}{2}
+  \begin{itemize}
+    \item \textit{PySB-INDRA}
+    \item \textit{BioNetFit}
+    \item \textit{SBML Multi}
+    \item \textit{VirtualCell}
+    \item \textit{Srsim}
+    \item \textit{BioUML}
+    \item \textit{Parts}\&\textit{Pools}
+  \end{itemize}
+\end{multicols}
+Come esempio vediamo il modello per il \textit{repressilator} in
+\textit{RuleBender}, il cui codice è presente alla listing \ref{lst:rulebender}
+e la visualizzazione alle figure \ref{fig:ruleb1} e \ref{fig:ruleb2}.
+\begin{listing}
+  \tiny
+  \caption{Codice per il repressilator in rulebender}
+  \inputminted{octave}{code/repr.bngl}
+  \label{lst:rulebender}
+\end{listing}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/ruleb1.jpg}
+  \caption{\textit{Contact map} del \textit{repressilator} prodotta con
+    \textit{RuleBender}. Si noti la modellazione dei vari siti di binding.}
+  \label{fig:ruleb1}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.4]{img/rulb2.jpg}
+  \caption{Output della simulazione del \textit{repressilator} prodotta con
+    \textit{RuleBender}}
+  \label{fig:ruleb2}
+\end{figure}
+\chapter{Constraint-Based Modelling}
+% mancano primi 15m fino a slide 5
+Serve un modello computazionale per studiare il metabolismo sia per predizione
+che per il fatto che al momento non si ha una tecnica di \textit{wet-lab} per
+misurare i \textit{flussi metabolici}, quindi il rateo di una reazione per unità
+di tempo, in modo efficiente con alta produzione di
+data. Formalmente:
+\[flux=rate_{forward \,\,\,reaction}-rate_{backward\,\,\, reaction}\]
+In \textit{wet-lab} possono però studiare le concentrazioni all'interno
+del metabolismo.\\
+Si ha inoltre che variazioni a livello dei metaboliti non si riflettono
+linearmente in variazioni sui flussi metabolici. Anche per questo servono tali
+modelli.\\
+In tali modelli si assume di lavorare in \textit{steady-state} ma si ha comunque
+un \textit{modello dinamico}. La filosofia dietro questi modelli è quella di
+escludere tutto ciò che non è possibile, restringendo il campo di ricerca a
+fenotipi possibili. Le prime cose che si escludono sono tutte le reazioni che
+non soddisfano l'\textit{assunzione di steady state}, avendo quindi che la
+concertazione dei metaboliti è costante, avendo bilanciati, all'interno della
+cellula, produzione e consumi degli stessi. La giustificazione dietro questa
+assunzione è che il metabolismo è molto più veloce degli altri processi
+cellulari, come la \textit{gene expression}, e su lunghe run temporali non si
+hanno metaboliti che si accumulano o si consumano totalmente. Questa ipotesi ci
+porta quindi al primo vincolo: \textbf{mass balance}.\\
+Altri vincoli sono relativi a:
+\begin{itemize}
+  \item \textit{vincoli genetici}, ad esempio se un gene viene espresso
+  \item \textit{vincoli ambientali}, ad esempio sui nutrienti
+  \item \textit{vincoli termodinamici}, ad esempio reazioni irreversibili
+  \item \textit{vincoli sui flussi ammessi e sulla loro capacità}, basati su
+  evidenze sperimentali
+  \item \textit{altri vincoli}, dettati dalle varie omiche
+  (\textit{trascrittomica, proteomica e metabolomica}), che si usano anche per
+  ridurre il numero di stati raggiungibili
+\end{itemize}
+\section{Flux Balance Analysis}
+Il metodo più utilizzato parlando di \textit{constraint-based models} è la
+\textbf{flux balance analysis (\textit{FBA})}, usata principalmente per
+l'\textit{ingegnerizzazione metabolica}, che assume ottimalità rispetto
+alle funzioni metaboliche. La pipeline prevede:
+\begin{enumerate}
+  \item ricostruzione della rete metabolica
+  \item simulazione della rete
+  \item validazione della rete
+  \item tuning della rete
+  \item esperimenti \textit{in silico}
+\end{enumerate}
+I tre step centrali sono iterati fino al raggiungimento di risultati validi.\\
 \end{document}
 
 % LocalWords:  rewiring trascrizionali regolatorie degree distribution update
 % LocalWords:  multipartiti fosforilata ligando regolatoria transmembrana
 % LocalWords:  degradatori sampling bistabilità formalizzabile perfomance
+% LocalWords:  ottimalità fosforilato

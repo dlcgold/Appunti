@@ -22,6 +22,7 @@
 \usepackage{fontspec}
 \usepackage{scrextend}
 \usepackage{enumerate}
+\usepackage{tabulary}
 \usepackage{physics}
 \usepackage{braket}
 \usepackage{mhchem}
@@ -5166,6 +5167,246 @@ traiettoria. Il flowchart dell'algoritimo è visualizzabile in figura
     casi di uscita dall'iterazione.}
   \label{fig:gillflow}
 \end{figure}
+L'\textit{algoritmo SSA} ha comunque dei limiti, così come ovviamente risolvere
+sistemi di \textit{EDO}. Nel dettaglio \textit{SSA} deve ricalcolare ad ogni
+step le \textit{propensity function} e inoltre si ha l'assunzione di lavorare in
+un ambiente \textit{well-stirred}. Parlando di \textit{propensity functions} si
+ha che sono utilizzate per valutare la reazione successiva $R_\mu$ e il tempo
+$\tau$ prima che la reazione si verifichi quindi:
+\begin{itemize}
+  \item minore è $\tau$ e maggiore è il tempo di simulazione
+  \item le \textit{propensity functions} sono proporzionali al prodotto del
+  numero di molecole reagenti e quindi \textit{SSA} è rallentato in sistemi
+  caratterizzati da un elevato numero di molecole
+\end{itemize}
+Una prima soluzione è data dal fatto che si potrebbe calcolare le
+\textit{propensity functions} solo in presenza di reagenti la cui quantità è
+mutata rispetto allo step precedente, infatti nel caso contrario la
+\textit{propensity function} non cambia quindi è inutile sprecare tempo per
+computarla nuovamente.
+\section{Deterministico VS Stocastico}
+Risulta comodo questo punto un confronto diretto tra le \textit{simulazioni
+  deterministiche} e le \textit{simulazioni stocastiche}.
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabulary}{\linewidth}{p{5em}|p{13em}|p{14em}}
+    \textit{Categoria} & \textbf{\textit{S. stocastiche}}
+    & \textbf{\textit{S. deterministiche}}\\
+    \hline
+    \textit{\textbf{Tempo di simulazione}}
+    & \textit{lento}, in quanto le reazioni
+    sono scelte casualmente e applicate una dopo
+    l'altra
+    & \textit{veloce}, in quanto vengono integrate le equazioni differenziali
+    simultaneamente (ottenendo il comportamento medio)\\
+    \hline
+    \textit{\textbf{Intervalli temporale}}
+    & Il tempo, $\tau$ tra due reazioni è scelto
+    in modo casuale
+    & Lo step di integrazione, $\Delta t$, è fisso per tutta l'esecuzione ed è
+    un parametro
+    dell'algoritmo. Con soluzioni adattive potrebbe cambiare durante
+    l'esecuzione  \\
+    \hline
+    \textit{\textbf{``Unità di misura'' delle molecole}}
+    & lo stato del sistema è caratterizzato da quantità molecolari discrete,
+    quindi tramite numeri in $\mathbb{N}$
+    & lo stato del sistema rappresenta la media di quantità molecolari, quindi
+    tramite le concentrazioni che sono numeri in $\mathbb{R}$\\
+    \hline
+    \textit{\textbf{Rumore biologico}}
+    & Si considerano gli effetti del rumore biologico
+    & Non si considerano gli effetti del rumore biologico\\
+    \hline
+    \textit{\textbf{Outpu}t}
+    & Data una certa condizione iniziale si generano output qualitativamente
+    diversi, essendo stocastici, per ogni simulazione
+    & Data una certa condizione iniziale si genera sempre lo stesso output,
+    essendo deterministico, per ogni simulazione  \\
+    \hline
+    \textit{Algoritmi}
+    & \textit{SSA, $\tau$-leaping, \ldots} & \textit{Eulero, Runge-Lutta,
+      LSODA, \ldots} 
+  \end{tabulary}
+\end{table}
+\section{Altri Algoritmi}
+In questo capitolo si sono approfonditi solo alcuni alcuni dei principali
+algoritmi deterministici e stocastici per effettuare simulazioni su modelli
+biologici. Nel dettaglio, con \textit{SSA} e con gli algoritmi di integrazione
+numerica di \textit{sistemi di EDO}, abbiamo approfondito i ``casi
+limite'', dal punto di vista dell'\textbf{accuratezza della simulazione} e del
+\textbf{costo computazionale}. Infatti possiamo cedere come in questo grafico ci
+siano molti  
+altri algoritmi, che si approfondiranno brevemente (anche spiegando le sigle),
+che si piazzano nel mezzo: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 1]{img/algo.pdf}
+\end{figure}
+Lo stesso discorso si può verificare in quest'altro grafico
+\footnote{Radhakrishnan, Krishnan et al. “Quantitative understanding of cell
+  signaling: the importance of membrane organization.” Current opinion in
+  biotechnology vol. 21,5 (2010): 677-82. doi:10.1016/j.copbio.2010.08.006} dove
+ci si basa sull'\textbf{eterogeneità spaziale} (avendo che \textit{well-mixed}
+corrisponde all'assunzione di \textit{well-stirred}):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.15]{img/algo2.jpg}
+\end{figure}
+Mentre un criterio per scegliere cosa usare viene fornito da Gillespie stesso
+\footnote{Gillespie, D. T. (2007). Stochastic simulation of chemical
+  kinetics. Annu. Rev. Phys. Chem., 58, 35-55.} (con \textit{RRE} si intende
+\textit{reaction-rate equation}, che sono le simulazioni deterministiche su
+\textit{sistemi di EDO}):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale = 0.2]{img/algo3.jpg}
+\end{figure}
+\subsection{$\tau$-leaping}
+Il primo algoritmo che si introduce brevemente è il \textbf{$\tau$-leaping}, che
+è una sorta di ottimizzazione di \textit{SSA} in quanto, nel tempo $\tau$ si
+simulano contemporaneamente più reazioni. Nel dettaglio, rispetto a
+\textit{SSA}, si procede con intervalli di tempo $\tau$ più lunghi, e si
+approssima il numero di occorrenze di ogni reazione $R_\mu$ in $(t, t+\tau)$ con
+un \textbf{processo Poissoniano} $\mathcal{P}(a_\mu(X)\cdot \tau)$, avendo media
+e varianza uguali a $a_\mu(X)\cdot \tau$. Per far ciò si deve garantire la
+cosiddetta \textbf{condizione di leap}, ovvero: \textit{si richiede che $\tau$
+  sia piccolo abbastanza in modo che il cambiamento di stato in $(t, t+\tau)$
+  sia così poco significante che nessuna \textit{propensity function} subisca un
+  forte cambiamento (in termini di valori macroscopici non infinitesimali) nel
+  suo valore}. \\
+Si ottiene quindi un algoritmo più performante di \textit{SSA} ma meno accurato,
+in quanto si simulano contemporaneamente reazioni che soddisfano la
+\textit{condizione di leap}. Si hanno anche altri svantaggi:
+\begin{itemize}
+  \item le reazioni ``veloci'' invalidano facilmente la \textit{condizione di
+    leap}
+  \item la generazione di \textit{numeri di Poisson} è computazionalmente
+  costosa
+  \item si possono raggiungere stati non validi e non sensati, addirittura stati
+  con concentrazioni per le molecole negative. Si hanno comunque soluzioni a
+  questo problema
+\end{itemize}
+\subsection{Equazioni Differenziali Stocastiche}
+Un'altra soluzione è quella di risolvere le \textbf{equazioni differenziali
+  stocastiche (\textit{stochastic differential equation, SDEs})}, che sono delle
+\textit{EDO} estese con termini stocastici legati al \textit{rumore
+  biologico}. Sono ad un livello intermedio tra gli algoritmi di simulazione
+deterministici e algoritmi di simulazione stocastica, essendo più veloci ma meno
+accurati di questi ultimi. Adottano comunque step di integrazione fissi, al più
+di algoritmi adattivi.\\
+Le equazioni più comuni sono le \textbf{Chemical Langevin Equations
+  (\textit{CLEs})}, in cui il numero di esecuzioni di una reazione è
+approssimato da una distribuzione normale:
+\[X(t+\tau)=X(t)+\sum_{\mu=1}^Mv_{mu}\mathcal{N}(a_\mu(X)\cdot \tau,
+  a_\mu(X)\cdot \tau)\]
+Si noti che le \textit{CLE} possono dare  risultati sbagliati quando una specie
+chimica è caratterizzata da poche molecole.
+\subsection{Metodi Ibridi}
+La soluzione perfettamente intermedia tra il caso deterministico e quello
+stocastico si ha con i \textbf{metodi ibridi}, che sono un modo per affrontare i
+sistemi biochimici caratterizzati da scale multiple.\\
+L'insieme delle reazioni è suddiviso, \textit{partizionato}, in più
+\textit{regimi}, in base alle 
+caratteristiche delle reazioni (alte concentrazioni di reagenti,
+alta velocità cinetica, etc \ldots) e differenti partizioni sono assegnate a
+diversi algoritmi di simulazione (ad esempio le reazioni veloci si possono
+risolvere in modo deterministico mentre quelle lente in modo stocastico).\\
+Anche qui si hanno però dei problemi:
+\begin{itemize}
+  \item regimi diversi potrebbero utilizzare diverse unità (come usare le
+  concentrazioni nelle simulazioni deterministiche e il numero di molecole in
+  quelle stocastiche, avere parametri stocastici e parametri cinetici
+  etc$\ldots$). È necessaria quindi la conversione automatica delle unità
+  \item i modelli deterministici solitamente usano step fissi, $\Delta t$,
+  mentre quelli stocastici step temporali randomici, $\tau$. I due regimi
+  devono quindi essere armonizzati in qualche modo avendo per di pià che però
+  $\Delta t$, se fissato all'inizio, è conosciuto mentre $\tau$ no
+\end{itemize}
+La questione del \textit{partizionamento} può essere approfondito, avendo che
+esso può essere \textbf{statico}, quindi deciso a priori, o \textbf{dinamico},
+quindi deciso ogni volta durante la simulazione. Si noti che il partizionamento
+dinamico è computazionalmente costoso ma può gestire sistemi le cui specie
+chimiche sono caratterizzate da ampi cambiamenti di quantità molecolare,
+causando reazioni per cambiare regime.\\
+Si segnala il \textbf{Partitioned Leaping Algorithm (\textit{PLA}}, di Harris e
+Clancy\footnote{Harris, Leonard A., and Paulette Clancy. "A “partitioned
+  leaping” approach for multiscale modeling of chemical reaction dynamics." The
+  Journal of chemical physics 125.14 (2006): 144107.} che usa quattro algoritmi
+per quattro scale diverse, sfruttando un partizionamento dinamico basato sulle
+\textit{propensity functions}:
+\[
+  \begin{cases}
+    a\mu\cdot\tau \lesssim 1&\mbox{ SSA}\\
+    a_\mu\cdot\tau > 1 \land  a_\mu\cdot\tau \not\gg 1 &\mbox{ $\tau$-leaping}\\
+    a\mu\cdot\tau\gg 1\land \sqrt{a_\mu\cdot \tau}\not\gg 1 &\mbox{ SDE}\\
+    \sqrt{a_\mu\cdot \tau}\gg 1  &\mbox{ EDO}\\
+  \end{cases}
+\]
+\subsection{Modelli spaziali}
+Finora, abbiamo assunto che il sistema fosse \textit{well-stirred}, avendo che le
+specie chimiche sono uniformemente distribuiti all'interno del volume di
+reazione. Questo non è sempre vero, infatti, oltre agli compartimenti cellulari,
+alcune molecole possono essere localizzate nella cellula (recettori
+di membrana, buffering locale, etc$\ldots$). Si vuole quindi estendere il
+modello con le \textit{reazioni di diffusione}. Si ottengono così i
+\textbf{modelli spaziali}, anche 3D, che però sono estremante costosi dal punto
+di vista 
+computazionale e quindi vanno usati solo in casi estremamente specifici.\\
+Si hanno tre approcci principali:
+\begin{enumerate}
+  \item quelli basati sulle \textbf{equazioni differenziali parziali}
+  (\textit{non introdotte in questo corso})
+  \item quelli \textbf{particles-based}. Tali approcci trattano ogni particella
+  in modo esplicito:
+  \begin{itemize}
+    \item ogni particella è considerata come un punto nello spazio euclideo
+    \item si tiene traccia delle posizioni delle particelle e del
+    \textit{movimento stocastico browniano}, che è il moto disordinato di
+    particelle sufficientemente piccole (aventi diametro dell'ordine del
+    micrometro) da essere sottoposte a una forza di gravità trascurabile,
+    presenti in fluidi o sospensioni fluide o gassose (ad esempio il fumo), e
+    osservabile al microscopio (tale fenomeno fu scoperto agli inizi
+    dell'Ottocento dal botanico scozzese Robert Brown, e modellizzato nel
+    1905 dal fisico teorico tedesco Albert Einstein)
+    \item si ha una reazione quando due particelle collidono
+    \item si ha che il movimento può essere ostruito da corpi solidi per
+    simulare scomparti affollati
+  \end{itemize}
+  Un software per tali simulazioni è \textbf{Smoldyn}\footnote{Andrews, Steven
+    S., and Dennis Bray. "Stochastic simulation of chemical reactions with
+    spatial resolution and single molecule detail." Physical biology 1.3 (2004):
+    137.}\footnote{Steven S Andrews, Smoldyn: particle-based simulation with
+    rule-based modeling, improved molecular interaction and a library interface,
+    Bioinformatics, Volume 33, Issue 5, 1 March 2017, Pages 710–717,
+    https://doi.org/10.1093/bioinformatics/btw700} \\ 
+  Come introdotto tali modelli sono onerosi dal punto di vista computazionale in
+  quanto ogni particella è modellata esplicitamente e le collisioni
+  particella-particella devono essere calcolate 
+  \item quelli \textbf{subvolumes-based}. Tali approcci il volume di simulazione
+  in sottovolumi minori. Infatti:
+  \begin{itemize}
+    \item viene tracciato il numero di molecole in ogni sottovolume
+    invece della posizione specifica di ogni molecola
+    \item si assume che i sottovolumi siano abbastanza piccoli da essere
+    \textit{well-stirred}, in modo che ogni sottovolume può essere simulato
+    utilizzando metodi classici (deterministici, stocastici, ibridi etc$\ldots$)
+    \item si aggiungono \textit{reazioni di diffusione} per spostare le
+    particelle da un 
+    sottovolume ai sottovolumi vicini 
+  \end{itemize}
+  Un software per tali simulazioni è \textbf{Next Subvolume Method
+    (\textit{NSM})}\footnote{Elf, Johan, and Måns Ehrenberg. "Spontaneous
+    separation of bi-stable biochemical systems into spatial domains of opposite
+    phases." Systems biology 1.2 (2004): 230-236.}  \\
+  Si hanno vari problemi però, tra cui il fatto che presunti eventi di
+  reazione/diffusione nei sottovolumi sono ordinati secondo i loro valori $\tau$
+  e quindi evento con il più piccolo $\tau$ è selezionato e al massimo due
+  sottovolumi vengono aggiornati durante ogni step, per evitare stati non
+  validi. Inoltre anche questi modelli sono molto onerosi dal punto di vista
+  spaziale. 
+\end{enumerate}
 \section{Parameter Estimation}
 \textit{L'intera sezione riguarda la lezione tenuta dal professor Nobile.}\\
 Come si è visto, parlando soprattutto di modelli meccanicistici, il ruolo dei

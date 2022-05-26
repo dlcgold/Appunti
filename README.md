@@ -11,26 +11,34 @@
 Appunti dei corsi della facoltà di **Informatica** all'_Università degli Studi di Milano - Bicocca_ (**unimib**).
 
 ### Download
+
 Scarica gli appunti con `git` o [cliccando qui](https://github.com/dlcgold/Appunti/archive/master.zip).
+
 ```shell
 git clone https://github.com/dlcgold/Appunti
 ```
+
 ### Compilazione
+
 Dato che alcuni `.tex` usano package particolari per disegni, automi etc... per ottenere il `.pdf` usare:
+
 ```shell
 xelatex -synctex=1 -interaction=nonstopmode --shell-escape file.tex
 ```
 
 ### Stato del completamento
+
 Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in fase di stesura.
 
 ##### I anno Triennale
+
 - [x] Algebra Lineare e Geometria
 - [x] Algoritmi e Strutture Dati
 - [x] Analisi Matematica
 - [x] Fondamenti dell'Informatica (di [Marco](https://github.com/bigboss98/))
 
 ##### II anno Triennale
+
 - [ ] Metodi Algebrici per l'Informatica
 - [x] Linguaggi di Programmazione
 - [x] Linguaggi e Computabilità
@@ -38,14 +46,15 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Reti e Sistemi Operativi (solo formulario)
 - [ ] Sistemi Distribuiti
 
-
 ##### III anno Triennale
+
 - [x] Analisi e Progetto di Algoritmi (obbligatorio)
 - [ ] Elementi di Bioinformatica
 - [x] Ricerca Operativa e Pianificazione delle Risorse (obbligatorio) (con assignment)
 - [x] Metodi Formali
 
 ##### I anno Magistrale
+
 - [x] Architetture Dati (obbligatorio)
 - [ ] Bioinformatica (bozza)
 - [x] Machine Learning (obbligatorio)
@@ -56,14 +65,15 @@ Alcuni degli appunti presenti sono solo parzialmente completi e sono tuttora in 
 - [x] Teoria dell'informazione e Crittografia
 
 ##### II anno Magistrale
+
 - [x] Fondamenti Logico Matematici dell'Informatica
 - [x] Data and Computational Biology (RC1)
-- [ ] Data Science Lab in Biosciences
-- [ ] Computational Systems Biology 
-- [ ] Laboratorio di Progettazione
+- [x] Computational Systems Biology (RC1)
 
 ### Altro
+
 Suggeriamo queste repository open (triennale):
+
 - [Informazioni Generali sulla Laurea Triennale](https://github.com/dlcgold/LaureaTriennale-Bicocca) 
 - [Altri appunti sui corsi (Ilaria)](https://github.com/IlariaB/class-notes)
 - [Altri appunti sui corsi (Sofia)](https://github.com/amarusofia/Appunti-universitari)
@@ -71,15 +81,17 @@ Suggeriamo queste repository open (triennale):
 - [Altri appunti sui corsi (Marco)](https://github.com/bigboss98/appunti)
 - [Repo con le esercitazioni di R di Probabilità e Statistica (in corso)](https://github.com/dlcgold/Lab-R)
 
-
 ### Disclaimer
+
 La maggior parte di questi appunti sono stati presi durante le lezioni.  
 Per quanto sia stata fatta una revisione, è probabile che possano contenere errori, sia di tipo grammaticale (tanti) che di vero e proprio contenuto.  
 Qualora li trovaste siete invitati a [comunicarlo](https://github.com/dlcgold/Appunti/issues/new) o effettuare una [PR](https://github.com/dlcgold/Appunti/pulls).
 
 ### Contributi
+
 Contributi di ogni tipo sono ben accetti. 
 Tutte le persone che hanno pubblicamente contribuito alla stesura di questi appunti sono elencate [qui](https://github.com/dlcgold/Appunti/graphs/contributors) e direttamente all'interno degli stessi.
 
 ### License
+
 These codes are licensed by [ENERGY_DRINK-WARE](https://github.com/dlcgold/energy_drink-license) license.
